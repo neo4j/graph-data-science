@@ -76,7 +76,7 @@ final class HugeAtomicLongArrayTest {
     @Test
     void testConstructor2() {
         long[] a = {17L, 3L, -42L, 99L, -7L};
-        testArray(a.length, LongPageFiller.of(4, i -> a[(int) i]), aa -> {
+        testArray(a.length, LongPageCreator.of(4, i -> a[(int) i]), aa -> {
             assertEquals(a.length, aa.size());
             for (int i = 0; i < a.length; i++) {
                 assertEquals(a[i], aa.get(i));
@@ -324,7 +324,7 @@ final class HugeAtomicLongArrayTest {
         }
     }
 
-    private void testArray(int size, LongPageFiller pageFiller, Consumer<HugeAtomicLongArray> block) {
+    private void testArray(int size, LongPageCreator pageFiller, Consumer<HugeAtomicLongArray> block) {
         if (bool()) {
             block.accept(singleArray(size, pageFiller));
             block.accept(pagedArray(size, pageFiller));
@@ -335,18 +335,18 @@ final class HugeAtomicLongArrayTest {
     }
 
     private HugeAtomicLongArray singleArray(final int size) {
-        return HugeAtomicLongArray.newSingleArray(size, LongPageFiller.passThrough(), AllocationTracker.EMPTY);
+        return HugeAtomicLongArray.newSingleArray(size, LongPageCreator.passThrough(1), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicLongArray singleArray(final int size, final LongPageFiller pageFiller) {
+    private HugeAtomicLongArray singleArray(final int size, final LongPageCreator pageFiller) {
         return HugeAtomicLongArray.newSingleArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     private HugeAtomicLongArray pagedArray(final int size) {
-        return HugeAtomicLongArray.newPagedArray(size, LongPageFiller.passThrough(), AllocationTracker.EMPTY);
+        return HugeAtomicLongArray.newPagedArray(size, LongPageCreator.passThrough(1), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicLongArray pagedArray(final int size, final LongPageFiller pageFiller) {
+    private HugeAtomicLongArray pagedArray(final int size, final LongPageCreator pageFiller) {
         return HugeAtomicLongArray.newPagedArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 

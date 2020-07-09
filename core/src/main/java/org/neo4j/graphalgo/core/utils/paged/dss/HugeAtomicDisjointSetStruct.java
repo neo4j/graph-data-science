@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.LongPageFiller;
+import org.neo4j.graphalgo.core.utils.paged.LongPageCreator;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -83,7 +83,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
     private final AtomicLong maxCommunityId;
 
     public HugeAtomicDisjointSetStruct(long capacity, AllocationTracker tracker, int concurrency) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageFiller.identity(concurrency), tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), tracker);
         this.communities = null;
         this.maxCommunityId = null;
     }
@@ -94,10 +94,10 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         AllocationTracker tracker,
         int concurrency
     ) {
-        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageFiller.identity(concurrency), tracker);
+        this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency), tracker);
         this.communities = HugeAtomicLongArray.newArray(
             capacity,
-            LongPageFiller.of(concurrency, nodeId -> {
+            LongPageCreator.of(concurrency, nodeId -> {
                 double communityIdValue = communityMapping.nodeProperty(nodeId, Double.NaN);
                 return Double.isNaN(communityIdValue) ? -1L : (long) communityIdValue;
             }),
