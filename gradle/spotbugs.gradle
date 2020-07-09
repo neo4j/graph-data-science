@@ -17,8 +17,8 @@ allprojects { proj ->
         }
 
         proj.tasks.withType(SpotBugsTask) {
+            def taskName = it.name
             it.reports {
-                def taskName = it.name;
                 html {
                     // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
                     enabled = true
