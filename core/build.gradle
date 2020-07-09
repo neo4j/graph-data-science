@@ -18,8 +18,9 @@ dependencies {
         project(':annotations'),
         project(':cypher-printer'),
         project(':neo4j-kernel-adapter'),
-        [ group: 'com.carrotsearch',   name: 'hppc',      version: ver.'hppc' ],
-        [ group: 'org.openjdk.jol',    name: 'jol-core',  version: ver.'jol'  ],
+        [ group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram' ],
+        [ group: 'com.carrotsearch', name: 'hppc',         version: ver.'hppc' ],
+        [ group: 'org.openjdk.jol',  name: 'jol-core',     version: ver.'jol'  ],
     )
 
     testImplementation project(':test-utils')

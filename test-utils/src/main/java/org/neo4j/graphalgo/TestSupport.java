@@ -233,7 +233,7 @@ public final class TestSupport {
     }
 
     public static <K, V> Matcher<Map<K, ? extends V>> mapEquals(Map<K, V> expected) {
-        return new BaseMatcher<Map<K, ? extends V>>() {
+        return new BaseMatcher<>() {
             @Override
             public boolean matches(Object actual) {
                 if (!(actual instanceof Map)) {
