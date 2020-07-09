@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -125,6 +126,16 @@ public final class TestGraph implements Graph {
     @Override
     public int degree(long nodeId) {
         return adjacencyList.get(nodeId).degree();
+    }
+
+    @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        var bitset = BitSet.newInstance();
+        forEachRelationship(nodeId, (source, target) -> {
+            bitset.set(target);
+            return true;
+        });
+        return Math.toIntExact(bitset.cardinality());
     }
 
     @Override

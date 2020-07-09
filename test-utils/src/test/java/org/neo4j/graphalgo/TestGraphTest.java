@@ -43,6 +43,16 @@ import static org.neo4j.graphalgo.TestGraph.Builder.fromGdl;
 class TestGraphTest {
 
     @Test
+    void testParallelFreeDegree() {
+        Graph graph = fromGdl("(a)-->(b), (a)-->(b)");
+
+        assertEquals(2, graph.degree(0));
+        assertEquals(1, graph.degreeWithoutParallelRelationships(0));
+        assertEquals(0, graph.degree(1));
+        assertEquals(0, graph.degreeWithoutParallelRelationships(1));
+    }
+
+    @Test
     void testConsecutiveIdSpaceForGDLGraph() {
         GDLHandler gdlHandler = new GDLHandler.Builder()
                 .buildFromString("(a)-->(b),(b)-->(c),(c)-->(a)," +
