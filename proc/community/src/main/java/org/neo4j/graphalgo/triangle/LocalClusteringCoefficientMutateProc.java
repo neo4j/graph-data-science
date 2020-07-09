@@ -84,6 +84,7 @@ public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalCluste
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientMutateConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
+        warnOnGraphWithParallelRelationships(graphCreateConfig, config);
     }
 
     @Override

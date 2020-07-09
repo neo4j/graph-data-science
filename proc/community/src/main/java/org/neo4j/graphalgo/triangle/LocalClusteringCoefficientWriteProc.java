@@ -85,6 +85,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientWriteConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
+        warnOnGraphWithParallelRelationships(graphCreateConfig, config);
     }
 
     @Override
