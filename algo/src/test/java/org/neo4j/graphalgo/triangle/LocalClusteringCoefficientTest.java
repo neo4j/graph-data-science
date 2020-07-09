@@ -164,17 +164,105 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
     }
 
     @Test
-    void selfLoop2() {
-        // a self loop adds two to the degree
+    void triangleWithSelfLoop() {
+        // a self loop adds one to the degree
         runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
 
         LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
 
-        assertEquals(13.0 / 18, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(7.0 / 9, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(3, result.localClusteringCoefficients().size());
-        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(0));
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(0));
         assertEquals(1.0, result.localClusteringCoefficients().get(1));
         assertEquals(1.0, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void triangleWithParallelRelationship() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)"
+        );
+
+        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+
+        assertEquals(1.0, result.averageClusteringCoefficient());
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localClusteringCoefficients().get(0));
+        assertEquals(1, result.localClusteringCoefficients().get(1));
+        assertEquals(1, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void triangleWithTwoParallelRelationships() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)"
+        );
+
+        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+
+        assertEquals(1.0, result.averageClusteringCoefficient());
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localClusteringCoefficients().get(0));
+        assertEquals(1, result.localClusteringCoefficients().get(1));
+        assertEquals(1, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void parallelTriangles() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)"
+        );
+
+        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+
+        assertEquals(1.0, result.averageClusteringCoefficient());
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localClusteringCoefficients().get(0));
+        assertEquals(1, result.localClusteringCoefficients().get(1));
+        assertEquals(1, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void parallelTrianglesWithExtraParallelRelationship() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)"
+        );
+
+        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+
+        assertEquals(1.0, result.averageClusteringCoefficient());
+        assertEquals(3, result.localClusteringCoefficients().size());
+        assertEquals(1, result.localClusteringCoefficients().get(0));
+        assertEquals(1, result.localClusteringCoefficients().get(1));
+        assertEquals(1, result.localClusteringCoefficients().get(2));
+    }
+
+    @Test
+    void triangleWithParallelRelationshipAndExtraNode() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)" +
+            ",(d)-[:T]->(a)"
+        );
+
+        LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
+
+        assertEquals(4, result.localClusteringCoefficients().size());
+        assertEquals(7.0 / 12, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(0), 1e-10); // a
+        assertEquals(1, result.localClusteringCoefficients().get(1)); // b
+        assertEquals(1, result.localClusteringCoefficients().get(2)); // c
+        assertEquals(0, result.localClusteringCoefficients().get(3)); // d
     }
 
     @Test
@@ -190,10 +278,10 @@ class LocalClusteringCoefficientTest extends AlgoTestBase {
 
         LocalClusteringCoefficient.Result result = projectWithoutSeedAndCompute();
 
-        assertEquals(23.0 / 90, result.averageClusteringCoefficient(), 1e-10);
+        assertEquals(4.0 / 15, result.averageClusteringCoefficient(), 1e-10);
         assertEquals(15, result.localClusteringCoefficients().size());
         assertEquals(1, result.localClusteringCoefficients().get(0)); // a
-        assertEquals(1.0 / 6, result.localClusteringCoefficients().get(1)); // b
+        assertEquals(1.0 / 3, result.localClusteringCoefficients().get(1)); // b
         assertEquals(1.0 / 3, result.localClusteringCoefficients().get(2)); // c
         assertEquals(1.0 / 3, result.localClusteringCoefficients().get(3)); // d
         assertEquals(1.0 / 3, result.localClusteringCoefficients().get(4)); // e
