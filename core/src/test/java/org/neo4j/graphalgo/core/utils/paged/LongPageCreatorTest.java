@@ -28,8 +28,8 @@ class LongPageCreatorTest {
 
     @Test
     void fillsPages() {
-        var numPages = 3;
-        var lastPageSize = 4;
+        int numPages = 3;
+        int lastPageSize = 4;
 
         long[][] pages = new long[numPages][];
 

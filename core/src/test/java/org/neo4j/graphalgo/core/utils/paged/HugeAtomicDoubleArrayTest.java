@@ -76,7 +76,7 @@ final class HugeAtomicDoubleArrayTest {
     @Test
     void testConstructor2() {
         double[] a = {17.0D, 3.0D, -42.0D, 99.0D, -7.0D};
-        PageFiller pageFiller = PageFiller.longToDouble(4, i -> a[(int) i]);
+        LongPageCreator pageFiller = LongPageCreator.of(4, i -> Double.doubleToLongBits(a[(int) i]));
         testArray(a.length, pageFiller, aa -> {
             assertEquals(a.length, aa.size());
             for (int i = 0; i < a.length; i++) {
@@ -340,7 +340,7 @@ final class HugeAtomicDoubleArrayTest {
         }
     }
 
-    private void testArray(int size, PageFiller pageFiller, Consumer<HugeAtomicDoubleArray> block) {
+    private void testArray(int size, LongPageCreator pageFiller, Consumer<HugeAtomicDoubleArray> block) {
         if (bool()) {
             block.accept(singleArray(size, pageFiller));
             block.accept(pagedArray(size, pageFiller));
@@ -351,18 +351,18 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArray.newSingleArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newSingleArray(size, LongPageCreator.passThrough(1), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicDoubleArray singleArray(final int size, final PageFiller pageFiller) {
+    private HugeAtomicDoubleArray singleArray(final int size, final LongPageCreator pageFiller) {
         return HugeAtomicDoubleArray.newSingleArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArray.newPagedArray(size, PageFiller.passThrough(), AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.newPagedArray(size, LongPageCreator.passThrough(1), AllocationTracker.EMPTY);
     }
 
-    private HugeAtomicDoubleArray pagedArray(final int size, final PageFiller pageFiller) {
+    private HugeAtomicDoubleArray pagedArray(final int size, final LongPageCreator pageFiller) {
         return HugeAtomicDoubleArray.newPagedArray(size, pageFiller, AllocationTracker.EMPTY);
     }
 
