@@ -153,7 +153,6 @@ class IntersectingTriangleCountTest {
 
     @Test
     void selfLoop2() {
-        // a self loop adds two to the degree
         var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
         TriangleCountResult result = compute(graph);
@@ -171,6 +170,24 @@ class IntersectingTriangleCountTest {
             "CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ", (a)-[:T]->(b)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+    }
+
+    @Test
+    void parallelTriangles() {
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)",
             UNDIRECTED
         );
 
