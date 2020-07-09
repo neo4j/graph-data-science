@@ -11,26 +11,22 @@ allprojects { proj ->
             // When  `ignoreFailures=false` the build will be failing on spotbugs errors
             ignoreFailures = true
             showStackTraces = false
-            showProgress = true
+            showProgress = false
 
             excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
         }
 
         proj.tasks.withType(SpotBugsTask) {
-            tasks.check.dependsOn it
-
-            def taskName = it.name;
-            def fileName = "${proj.name}-${taskName}"
             it.reports {
                 html {
                     // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
                     enabled = false
                     stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
-                    destination = file("${spotbugsReportsDir}/html/${fileName}.html")
+                    destination = file("${spotbugsReportsDir}/html/${it.name}/${proj.name}.html")
                 }
                 xml {
                     enabled = true
-                    destination = file("${spotbugsReportsDir}/xml/${fileName}.xml")
+                    destination = file("${spotbugsReportsDir}/xml/${it.name}/${proj.name}.xml")
                 }
             }
         }
