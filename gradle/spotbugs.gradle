@@ -18,15 +18,16 @@ allprojects { proj ->
 
         proj.tasks.withType(SpotBugsTask) {
             it.reports {
+                def taskName = it.name;
                 html {
                     // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
-                    enabled = false
+                    enabled = true
                     stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
-                    destination = file("${spotbugsReportsDir}/html/${it.name}/${proj.name}.html")
+                    destination = file("${spotbugsReportsDir}/html/${taskName}/${proj.name}.html")
                 }
                 xml {
-                    enabled = true
-                    destination = file("${spotbugsReportsDir}/xml/${it.name}/${proj.name}.xml")
+                    enabled = false
+                    destination = file("${spotbugsReportsDir}/xml/${taskName}/${proj.name}.xml")
                 }
             }
         }
