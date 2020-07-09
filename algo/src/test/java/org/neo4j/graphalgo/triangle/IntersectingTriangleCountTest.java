@@ -142,7 +142,6 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
 
     @Test
     void selfLoop2() {
-        // a self loop adds two to the degree
         runQuery("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)");
 
         TriangleCountResult result = projectAndCompute();
@@ -160,6 +159,23 @@ class IntersectingTriangleCountTest extends AlgoTestBase {
             "CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ", (a)-[:T]->(b)"
+        );
+
+        TriangleCountResult result = projectAndCompute();
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+    }
+
+    @Test
+    void parallelTriangles() {
+        runQuery(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)"
         );
 
         TriangleCountResult result = projectAndCompute();
