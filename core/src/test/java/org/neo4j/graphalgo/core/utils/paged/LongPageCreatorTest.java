@@ -22,24 +22,32 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 
-class DoublePageFillerTest {
-
-    @Test
-    void fillsAnArray() {
-        double[] array = {1.3, 3.7, 0.0, 4.2};
-
-        DoublePageFiller.of(1, (d) -> 1.0).accept(array);
-
-        double[] expected = {1.0, 1.0, 1.0, 1.0};
-        assertArrayEquals(expected, array);
-    }
+class LongPageCreatorTest {
 
     @Test
-    void doesNotFillAnything() {
-        double[] array = {1.3, 3.7, 0.0, 4.2};
+    void fillsPages() {
+        var numPages = 3;
+        var lastPageSize = 4;
 
-        DoublePageFiller.passThrough().accept(array);
-        assertArrayEquals(array, array);
+        long[][] pages = new long[numPages][];
+
+        LongPageCreator.of(1, (d) -> d).fill(pages, lastPageSize);
+
+        for (int pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+            long[] page = pages[pageIndex];
+
+            if(pageIndex < numPages - 1) {
+                assertEquals(PAGE_SIZE, page.length);
+            } else {
+                assertEquals(lastPageSize, page.length);
+            }
+
+            for (int indexInPage = 0; indexInPage < page.length; indexInPage++) {
+                long value = page[indexInPage];
+                assertEquals(indexInPage + (pageIndex * PAGE_SIZE), value);
+            }
+        }
     }
 }

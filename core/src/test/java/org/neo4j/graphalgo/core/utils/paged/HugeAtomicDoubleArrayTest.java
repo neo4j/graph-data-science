@@ -313,11 +313,11 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     private HugeAtomicDoubleArray singleArray(final int size) {
-        return HugeAtomicDoubleArray.newSingleArray(size, DoublePageFiller.passThrough());
+        return HugeAtomicDoubleArray.newSingleArray(size, DoublePageCreator.passThrough(1));
     }
 
     private HugeAtomicDoubleArray pagedArray(final int size) {
-        return HugeAtomicDoubleArray.newPagedArray(size, DoublePageFiller.passThrough());
+        return HugeAtomicDoubleArray.newPagedArray(size, DoublePageCreator.passThrough(1));
     }
 
     /**
