@@ -192,12 +192,12 @@ public abstract class HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
-        private static HugeAtomicLongArray of(long size, LongPageCreator pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageCreator pageCreator, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             tracker.add(sizeOfLongArray(intSize));
             long[] page = new long[intSize];
-            pageFiller.fillPage(page, 0);
+            pageCreator.fillPage(page, 0);
             return new SingleHugeAtomicLongArray(intSize, page);
         }
 
@@ -257,12 +257,12 @@ public abstract class HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
-        private static HugeAtomicLongArray of(long size, LongPageCreator pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageCreator pageCreator, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
             final int lastPageSize = exclusiveIndexOfPage(size);
 
             long[][] pages = new long[numPages][];
-            pageFiller.fill(pages, lastPageSize);
+            pageCreator.fill(pages, lastPageSize);
 
             long memoryUsed = memoryUsageOfData(size);
             tracker.add(memoryUsed);
