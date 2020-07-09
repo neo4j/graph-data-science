@@ -38,7 +38,7 @@ public class GraphListProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphInfo> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
+    public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
         Stream<Map.Entry<GraphCreateConfig, GraphStore>> graphEntries = GraphStoreCatalog
             .getGraphStores(username(), namedDatabaseId())
             .entrySet()
@@ -54,21 +54,10 @@ public class GraphListProc extends CatalogProc {
         return graphEntries.map(e -> {
             GraphCreateConfig graphCreateConfig = e.getKey();
             GraphStore graphStore = e.getValue();
-            return new GraphInfo(
+            return GraphInfoWithHistogram.of(
                 graphCreateConfig,
                 graphStore,
-                computeHistogram(),
-                (degreeDistribution) -> GraphStoreCatalog.setDegreeDistribution(
-                    username(),
-                    namedDatabaseId(),
-                    graphCreateConfig.graphName(),
-                    degreeDistribution
-                ),
-                () -> GraphStoreCatalog.getDegreeDistribution(
-                    username(),
-                    namedDatabaseId(),
-                    graphCreateConfig.graphName()
-                )
+                namedDatabaseId()
             );
         });
     }

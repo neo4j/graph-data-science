@@ -35,16 +35,13 @@ public class GraphDropProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphInfoWithoutDegreeDistribution> drop(@Name(value = "graphName") String graphName) {
+    public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
         validateGraphName(graphName);
 
-        AtomicReference<GraphInfoWithoutDegreeDistribution> result = new AtomicReference<>();
-        GraphStoreCatalog.remove(username(), namedDatabaseId(), graphName, (graphStoreWithConfig) -> {
-            result.set(new GraphInfoWithoutDegreeDistribution(
-                graphStoreWithConfig.config(),
-                graphStoreWithConfig.graphStore()
-            ));
-        });
+        AtomicReference<GraphInfo> result = new AtomicReference<>();
+        GraphStoreCatalog.remove(username(), namedDatabaseId(), graphName, (graphStoreWithConfig) ->
+            result.set(GraphInfo.of(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore()))
+        );
 
         return Stream.of(result.get());
     }
