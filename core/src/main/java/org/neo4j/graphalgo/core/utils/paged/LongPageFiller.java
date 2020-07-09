@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.function.ObjLongConsumer;
 import java.util.stream.IntStream;
@@ -43,11 +44,9 @@ public class LongPageFiller implements Consumer<long[]>, ObjLongConsumer<long[]>
 
     @Override
     public void accept(long[] page, long offset) {
-        parallelStreamConsume(
-            IntStream.range(0, page.length),
-            concurrency,
-            stream -> stream.forEach(i -> page[i] = gen.applyAsLong(i + offset))
-        );
+        for (var i = 0; i < page.length; i++) {
+          page[i] = gen.applyAsLong(i + offset);
+        }
     }
 
     public static LongPageFiller of(int concurrency, LongUnaryOperator gen) {

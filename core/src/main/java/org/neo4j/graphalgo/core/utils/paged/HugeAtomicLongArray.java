@@ -20,14 +20,18 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.function.IntToLongFunction;
+import java.util.function.IntUnaryOperator;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -264,11 +268,16 @@ public abstract class HugeAtomicLongArray {
             final int lastPageSize = exclusiveIndexOfPage(size);
 
             long[][] pages = new long[numPages][];
-            for (int i = 0; i < lastPage; i++) {
-                pages[i] = new long[PAGE_SIZE];
-                long base = ((long) i) << PAGE_SHIFT;
-                pageFiller.accept(pages[i], base);
-            }
+            parallelStreamConsume(
+                IntStream.range(0, lastPage),
+                16,
+                stream -> stream.forEach(pageIndex -> {
+                    var page = new long[PAGE_SIZE];
+                    pages[pageIndex] = page;
+                    pageFiller.accept(page);
+                })
+            );
+
             pages[lastPage] = new long[lastPageSize];
             long base = ((long) lastPage) << PAGE_SHIFT;
             pageFiller.accept(pages[lastPage], base);
