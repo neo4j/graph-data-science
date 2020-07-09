@@ -146,6 +146,12 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
         }
     }
 
+    @Override
+    @Configuration.Ignore
+    default void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
     static GraphCreateFromStoreConfig emptyWithName(String userName, String graphName) {
         NodeProjections nodeProjections = NodeProjections.all();
         RelationshipProjections relationshipProjections = RelationshipProjections.all();

@@ -83,6 +83,9 @@ public interface GraphCreateConfig extends BaseConfig {
         ConcurrencyConfig.validateConcurrency(readConcurrency(), READ_CONCURRENCY_KEY);
     }
 
+    @Configuration.Ignore
+    void accept(Visitor visitor);
+
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
             NODE_PROJECTION_KEY,
@@ -96,5 +99,13 @@ public interface GraphCreateConfig extends BaseConfig {
         } else {
             return GraphCreateFromCypherConfig.fromProcedureConfig(username, config);
         }
+    }
+
+    interface Visitor {
+        default void visit(GraphCreateFromStoreConfig storeConfig) {}
+
+        default void visit(GraphCreateFromCypherConfig cypherConfig) {}
+
+        default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
 }

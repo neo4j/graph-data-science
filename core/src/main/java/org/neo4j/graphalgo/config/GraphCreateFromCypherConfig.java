@@ -82,6 +82,12 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
         return true;
     }
 
+    @Override
+    @Configuration.Ignore
+    default void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
     static GraphCreateFromCypherConfig of(
         String userName,
         String graphName,

@@ -116,7 +116,13 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
     default GraphStoreFactory.Supplier graphStoreFactory() {
         // TODO: maybe we could introduce a RandomGraphFactory
         throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
-    };
+    }
+
+    @Override
+    @Configuration.Ignore
+    default void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
 
     static RandomGraphGeneratorConfig of(
         String username,

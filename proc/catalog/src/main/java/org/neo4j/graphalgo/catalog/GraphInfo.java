@@ -79,48 +79,50 @@ public class GraphInfo {
         var graphName = graphCreateConfig.graphName();
         var creationTime = graphCreateConfig.creationTime();
 
-        String nodeQuery;
-        String relationshipQuery;
-        Map<String, Object> nodeProjection;
-        Map<String, Object> relationshipProjection;
-
-        if (graphCreateConfig instanceof GraphCreateFromCypherConfig) {
-            GraphCreateFromCypherConfig cypherConfig = (GraphCreateFromCypherConfig) graphCreateConfig;
-            nodeQuery = cypherConfig.nodeQuery();
-            relationshipQuery = cypherConfig.relationshipQuery();
-            nodeProjection = null;
-            relationshipProjection = null;
-        } else if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
-            RandomGraphGeneratorConfig randomGraphConfig = (RandomGraphGeneratorConfig) graphCreateConfig;
-            nodeProjection = randomGraphConfig.nodeProjections().toObject();
-            relationshipProjection = randomGraphConfig.relationshipProjections().toObject();
-            nodeQuery = null;
-            relationshipQuery = null;
-        } else {
-            GraphCreateFromStoreConfig fromStoreConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-            nodeProjection = fromStoreConfig.nodeProjections().toObject();
-            relationshipProjection = fromStoreConfig.relationshipProjections().toObject();
-            nodeQuery = null;
-            relationshipQuery = null;
-        }
-
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+
+        var configVisitor = new Visitor();
+        graphCreateConfig.accept(configVisitor);
 
         return new GraphInfo(
             graphName,
             graphStore.databaseId().name(),
             memoryUsage,
             sizeInBytes,
-            nodeProjection,
-            relationshipProjection,
-            nodeQuery,
-            relationshipQuery,
+            configVisitor.nodeProjection,
+            configVisitor.relationshipProjection,
+            configVisitor.nodeQuery,
+            configVisitor.relationshipQuery,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             creationTime,
             graphStore.modificationTime(),
             graphStore.schema().toMap()
         );
+    }
+
+    static final class Visitor implements GraphCreateConfig.Visitor {
+
+        String nodeQuery, relationshipQuery = null;
+        Map<String, Object> nodeProjection, relationshipProjection = null;
+
+        @Override
+        public void visit(GraphCreateFromStoreConfig storeConfig) {
+            nodeProjection = storeConfig.nodeProjections().toObject();
+            relationshipProjection = storeConfig.relationshipProjections().toObject();
+        }
+
+        @Override
+        public void visit(GraphCreateFromCypherConfig cypherConfig) {
+            nodeQuery = cypherConfig.nodeQuery();
+            relationshipQuery = cypherConfig.relationshipQuery();
+        }
+
+        @Override
+        public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
+            nodeProjection = randomGraphConfig.nodeProjections().toObject();
+            relationshipProjection = randomGraphConfig.relationshipProjections().toObject();
+        }
     }
 }

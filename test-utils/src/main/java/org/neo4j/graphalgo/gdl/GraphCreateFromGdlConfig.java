@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.gdl;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -39,5 +40,18 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return loaderContext -> GdlFactory.of(this, loaderContext.api().databaseId());
+    }
+
+    @Override
+    @Configuration.Ignore
+    default void accept(GraphCreateConfig.Visitor visitor) {
+        if (visitor instanceof Visitor) {
+            ((Visitor) visitor).visit(this);
+        }
+        throw new IllegalArgumentException("Expected Visitor of type " + Visitor.class.getName());
+    }
+
+    interface Visitor extends GraphCreateConfig.Visitor {
+        default void visit(GraphCreateFromGdlConfig gdlConfig) {};
     }
 }
