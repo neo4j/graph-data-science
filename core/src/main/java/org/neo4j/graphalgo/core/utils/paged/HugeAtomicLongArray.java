@@ -27,7 +27,9 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import java.util.Arrays;
 import java.util.function.IntToLongFunction;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -134,7 +136,7 @@ public abstract class HugeAtomicLongArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicLongArray newArray(long size, AllocationTracker tracker) {
-        return newArray(size, PageFiller.passThrough(), tracker);
+        return newArray(size, LongPageFiller.passThrough(), tracker);
     }
 
     /**
@@ -142,7 +144,7 @@ public abstract class HugeAtomicLongArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
      */
-    public static HugeAtomicLongArray newArray(long size, PageFiller pageFiller, AllocationTracker tracker) {
+    public static HugeAtomicLongArray newArray(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
             return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
         }
@@ -164,12 +166,12 @@ public abstract class HugeAtomicLongArray {
     }
 
     /* test-only */
-    static HugeAtomicLongArray newPagedArray(long size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicLongArray newPagedArray(long size, final LongPageFiller pageFiller, AllocationTracker tracker) {
         return PagedHugeAtomicLongArray.of(size, pageFiller, tracker);
     }
 
     /* test-only */
-    static HugeAtomicLongArray newSingleArray(int size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicLongArray newSingleArray(int size, final LongPageFiller pageFiller, AllocationTracker tracker) {
         return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
     }
 
@@ -212,7 +214,7 @@ public abstract class HugeAtomicLongArray {
 
     private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
-        private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             tracker.add(sizeOfLongArray(intSize));
@@ -289,17 +291,22 @@ public abstract class HugeAtomicLongArray {
     private static final class PagedHugeAtomicLongArray extends HugeAtomicLongArray {
 
 
-        private static HugeAtomicLongArray of(long size, PageFiller pageFiller, AllocationTracker tracker) {
+        private static HugeAtomicLongArray of(long size, LongPageFiller pageFiller, AllocationTracker tracker) {
             int numPages = numberOfPages(size);
             int lastPage = numPages - 1;
             final int lastPageSize = exclusiveIndexOfPage(size);
 
             long[][] pages = new long[numPages][];
-            for (int i = 0; i < lastPage; i++) {
-                pages[i] = new long[PAGE_SIZE];
-                long base = ((long) i) << PAGE_SHIFT;
-                pageFiller.accept(pages[i], base);
-            }
+            parallelStreamConsume(
+                IntStream.range(0, lastPage),
+                16,
+                stream -> stream.forEach(pageIndex -> {
+                    long[] page = new long[PAGE_SIZE];
+                    pages[pageIndex] = page;
+                    pageFiller.accept(page);
+                })
+            );
+
             pages[lastPage] = new long[lastPageSize];
             long base = ((long) lastPage) << PAGE_SHIFT;
             pageFiller.accept(pages[lastPage], base);
