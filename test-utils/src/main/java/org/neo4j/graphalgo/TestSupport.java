@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.extension.GdlSupportExtension;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -129,7 +130,7 @@ public final class TestSupport {
             .orientation(orientation)
             .build();
 
-        var gdlFactory = GdlFactory.of(config);
+        var gdlFactory = GdlFactory.of(config, GdlSupportExtension.DATABASE_ID);
 
         return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
     }

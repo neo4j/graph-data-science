@@ -153,7 +153,7 @@ public abstract class AlgoBaseProc<
 
             GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
                 username(),
-                namedDatabaseId(),
+                databaseId(),
                 graphName
             );
             GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
@@ -240,7 +240,7 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphStoreCatalog.get(username(), namedDatabaseId(), maybeGraphName.get());
+            graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);

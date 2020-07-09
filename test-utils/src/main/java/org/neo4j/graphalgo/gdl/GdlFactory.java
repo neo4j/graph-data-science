@@ -40,7 +40,9 @@ import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.extension.GdlSupportExtension;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -58,20 +60,28 @@ import java.util.stream.Collectors;
 public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
+    private final NamedDatabaseId databaseId;
 
     public static GdlFactory of(String gdlGraph) {
-        return of(AuthSubject.ANONYMOUS.username(), "graph", gdlGraph);
+        return of(gdlGraph, GdlSupportExtension.DATABASE_ID);
     }
 
-    public static GdlFactory of(String username, String graphName, String gdlGraph) {
-        return of(ImmutableGraphCreateFromGdlConfig.builder()
-            .username(username)
-            .graphName(graphName)
-            .gdlGraph(gdlGraph)
-            .build());
+    public static GdlFactory of(String gdlGraph, NamedDatabaseId namedDatabaseId) {
+        return of(AuthSubject.ANONYMOUS.username(), namedDatabaseId, "graph", gdlGraph);
     }
 
-    public static GdlFactory of(GraphCreateFromGdlConfig config) {
+    public static GdlFactory of(String username, NamedDatabaseId namedDatabaseId, String graphName, String gdlGraph) {
+        return of(
+            ImmutableGraphCreateFromGdlConfig.builder()
+                .username(username)
+                .graphName(graphName)
+                .gdlGraph(gdlGraph)
+                .build(),
+            namedDatabaseId
+        );
+    }
+
+    public static GdlFactory of(GraphCreateFromGdlConfig config, NamedDatabaseId databaseId) {
         var gdlHandler = new GDLHandler.Builder()
             .setDefaultVertexLabel(NodeLabel.ALL_NODES.name)
             .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
@@ -79,16 +89,18 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
 
         var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
 
-        return new GdlFactory(gdlHandler, config, graphDimensions);
+        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId);
     }
 
     private GdlFactory(
         GDLHandler gdlHandler,
         GraphCreateFromGdlConfig graphCreateConfig,
-        GraphDimensions graphDimensions
+        GraphDimensions graphDimensions,
+        NamedDatabaseId databaseId
     ) {
         super(graphCreateConfig, NO_API_CONTEXT, graphDimensions);
         this.gdlHandler = gdlHandler;
+        this.databaseId = databaseId;
     }
 
     public long nodeId(String variable) {
@@ -121,6 +133,7 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
                 entry -> Map.of(entry.getValue().getOne().get(), entry.getValue().getTwo().properties().get())
             ));
         var graphStore = CSRGraphStore.of(
+            databaseId,
             nodes.idMap(),
             nodes.properties(),
             topologies,

@@ -223,7 +223,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                namedDatabaseId(),
                 graphStore
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
@@ -288,7 +287,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         applyOnProcedure((proc) -> {
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();

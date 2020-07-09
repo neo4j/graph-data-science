@@ -49,7 +49,7 @@ import static org.mockito.internal.util.reflection.FieldSetter.setField;
 
 public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallback {
 
-    public static final NamedDatabaseId NAMED_DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
+    public static final NamedDatabaseId DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
 
     @Override
     public void beforeEach(ExtensionContext context) {
@@ -151,14 +151,14 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .orientation(gdlGraphSetup.orientation())
             .build();
 
-        GdlFactory gdlFactory = GdlFactory.of(createConfig);
+        GdlFactory gdlFactory = GdlFactory.of(createConfig, DATABASE_ID);
         GraphStore graphStore = gdlFactory.build().graphStore();
         Graph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 
         if (gdlGraphSetup.addToCatalog()) {
-            GraphStoreCatalog.set(createConfig, NAMED_DATABASE_ID, graphStore);
+            GraphStoreCatalog.set(createConfig, graphStore);
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {

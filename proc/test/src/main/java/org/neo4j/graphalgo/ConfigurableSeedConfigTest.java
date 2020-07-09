@@ -106,7 +106,7 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
 
-            GraphStoreCatalog.set(graphCreateConfig, namedDatabaseId(), graphStore);
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
                 seedPropertyKeyOverride(),
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"

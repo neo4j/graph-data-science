@@ -70,7 +70,7 @@ public abstract class BaseProc {
         return transaction.subjectOrAnonymous().username();
     }
 
-    protected NamedDatabaseId namedDatabaseId() {
+    protected NamedDatabaseId databaseId() {
         return api.databaseId();
     }
 
@@ -117,7 +117,7 @@ public abstract class BaseProc {
 
     protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphStoreCatalog.exists(username, namedDatabaseId(), graphName)) {
+        if (GraphStoreCatalog.exists(username, databaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
                 graphName
@@ -157,10 +157,10 @@ public abstract class BaseProc {
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
         if (minBytesProcedure > freeMemory) {
             String template = "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).";
-            if (GraphStoreCatalog.graphStoresCount(namedDatabaseId()) > 0) {
+            if (GraphStoreCatalog.graphStoresCount() > 0) {
                 template += formatWithLocale(
-                    " Note: you have %s graphs currently loaded into memory.",
-                    GraphStoreCatalog.graphStoresCount(namedDatabaseId())
+                    " Note: there are %s graphs currently loaded into memory.",
+                    GraphStoreCatalog.graphStoresCount()
                 );
             }
             throw new IllegalStateException(formatWithLocale(

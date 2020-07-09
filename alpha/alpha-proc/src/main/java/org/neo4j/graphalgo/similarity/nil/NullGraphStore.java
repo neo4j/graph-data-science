@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -42,12 +43,23 @@ import java.util.Set;
  */
 public class NullGraphStore implements GraphStore {
 
+    private final NamedDatabaseId databaseId;
+
     static class NullGraphException extends UnsupportedOperationException {
 
         NullGraphException() {
             super("This algorithm does not support operating on named graphs. " +
                   "Please report this stacktrace to https://github.com/neo4j/graph-data-science");
         }
+    }
+
+    public NullGraphStore(NamedDatabaseId databaseId) {
+        this.databaseId = databaseId;
+    }
+
+    @Override
+    public NamedDatabaseId databaseId() {
+        return databaseId;
     }
 
     @Override

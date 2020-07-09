@@ -146,7 +146,7 @@ abstract class SimilarityProc
                 AllocationTracker tracker,
                 Log log
             ) {
-                GraphStoreCatalog.remove(username(), namedDatabaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+                GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
                 return newAlgo(config);
             }
         };
@@ -182,8 +182,7 @@ abstract class SimilarityProc
                     NodeProjections.ALL,
                     RelationshipProjections.ALL
                 ),
-                namedDatabaseId(),
-                new NullGraphStore()
+                new NullGraphStore(databaseId())
             );
         }
         // And finally we call super in named graph mode

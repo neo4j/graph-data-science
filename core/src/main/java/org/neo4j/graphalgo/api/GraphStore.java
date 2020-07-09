@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -42,6 +43,8 @@ public interface GraphStore {
     enum PropertyState {
         PERSISTENT, TRANSIENT
     }
+
+    NamedDatabaseId databaseId();
 
     GraphStoreSchema schema();
 

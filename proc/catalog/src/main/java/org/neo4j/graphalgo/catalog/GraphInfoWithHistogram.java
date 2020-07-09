@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +37,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
     ) {
         super(
             graphInfo.graphName,
+            graphInfo.database,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
             graphInfo.nodeProjection,
@@ -53,12 +53,12 @@ public class GraphInfoWithHistogram extends GraphInfo {
         this.degreeDistribution = degreeDistribution;
     }
 
-    static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore, NamedDatabaseId namedDatabaseId) {
+    static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
         var graphInfo = GraphInfo.of(graphCreateConfig, graphStore);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
             graphCreateConfig.username(),
-            namedDatabaseId,
+            graphStore.databaseId(),
             graphCreateConfig.graphName()
         );
 
@@ -67,7 +67,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
             // Cache the computed degree distribution in the Catalog
             GraphStoreCatalog.setDegreeDistribution(
                 graphCreateConfig.username(),
-                namedDatabaseId,
+                graphStore.databaseId(),
                 graphCreateConfig.graphName(),
                 newHistogram
             );

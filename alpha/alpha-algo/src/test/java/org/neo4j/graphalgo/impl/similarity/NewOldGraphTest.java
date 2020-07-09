@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlSupportExtension;
 import org.roaringbitmap.RoaringBitmap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,7 +49,7 @@ class NewOldGraphTest {
         importer.addRelationshipFromOriginalId(0, 3);
 
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
 
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(3, newNeighbors.length);
@@ -65,7 +66,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
         long[] newNeighbors = graph.findNewNeighbors(0).toArray();
         assertEquals(2, newNeighbors.length);
         assertThat(ArrayUtils.toObject(newNeighbors), arrayContainingInAnyOrder(2L, 3L));
@@ -81,7 +82,7 @@ class NewOldGraphTest {
         RoaringBitmap[] visitedRelationships = initializeRoaringBitmaps(5);
         visitedRelationships[0].add(1);
 
-        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
+        NewOldGraph graph = new NewOldGraph(importer.buildGraphStore(GdlSupportExtension.DATABASE_ID, ID_MAP, CONCURRENCY, TRACKER).getUnion(), visitedRelationships);
         long[] oldNeighbors = graph.findOldNeighbors(0).toArray();
         assertEquals(1, oldNeighbors.length);
         assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));

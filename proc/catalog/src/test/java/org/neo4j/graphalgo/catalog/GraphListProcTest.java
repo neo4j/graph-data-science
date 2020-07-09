@@ -86,6 +86,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
                 "graphName", name,
+                "database", "neo4j",
                 "nodeProjection", map(
                     "A", map(
                         "label", "A",
@@ -165,6 +166,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
                 "graphName", name,
+                "database", "neo4j",
                 "nodeProjection", map(
                     "10_Nodes", map(
                         "label", "10_Nodes",
@@ -236,6 +238,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
                 "graphName", name,
+                "database", "neo4j",
                 "nodeProjection", null,
                 "relationshipProjection", null,
                 "schema", map(

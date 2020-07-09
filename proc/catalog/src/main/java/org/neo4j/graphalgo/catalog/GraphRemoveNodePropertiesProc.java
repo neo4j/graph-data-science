@@ -60,7 +60,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = GraphStoreCatalog.get(username(), namedDatabaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
         config.validate(graphStore);
         // removing
         long propertiesRemoved = runWithExceptionLogging(

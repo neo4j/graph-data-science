@@ -89,7 +89,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .build()
             .graphStore();
 
-        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), namedDatabaseId(), initialGraphStore);
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
 
         var mutateQuery = GdsCypher
             .call()

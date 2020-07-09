@@ -32,6 +32,7 @@ import java.util.Map;
 public class GraphInfo {
 
     public final String graphName;
+    public final String database;
     public final String memoryUsage;
     public final long sizeInBytes;
     public final Map<String, Object> nodeProjection;
@@ -46,6 +47,7 @@ public class GraphInfo {
 
     GraphInfo(
         String graphName,
+        String database,
         String memoryUsage,
         long sizeInBytes,
         Map<String, Object> nodeProjection,
@@ -59,6 +61,7 @@ public class GraphInfo {
         Map<String, Object> schema
     ) {
         this.graphName = graphName;
+        this.database = database;
         this.memoryUsage = memoryUsage;
         this.sizeInBytes = sizeInBytes;
         this.nodeProjection = nodeProjection;
@@ -101,26 +104,23 @@ public class GraphInfo {
             relationshipQuery = null;
         }
 
-        var modificationTime = graphStore.modificationTime();
-        var nodeCount = graphStore.nodeCount();
-        var relationshipCount = graphStore.relationshipCount();
-        var schema = graphStore.schema().toMap();
         var sizeInBytes = MemoryUsage.sizeOf(graphStore);
         var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
 
         return new GraphInfo(
             graphName,
+            graphStore.databaseId().name(),
             memoryUsage,
             sizeInBytes,
             nodeProjection,
             relationshipProjection,
             nodeQuery,
             relationshipQuery,
-            nodeCount,
-            relationshipCount,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
             creationTime,
-            modificationTime,
-            schema
+            graphStore.modificationTime(),
+            graphStore.schema().toMap()
         );
     }
 }

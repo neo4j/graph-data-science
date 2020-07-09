@@ -75,7 +75,6 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;
@@ -124,7 +123,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
 
         String graphName = "myGraph";
         var createConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
-        GraphStoreCatalog.set(createConfig, namedDatabaseId(), graphStore);
+        GraphStoreCatalog.set(createConfig, graphStore);
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -167,7 +166,6 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             );
             GraphStoreCatalog.set(
                 graphCreateConfig,
-                namedDatabaseId(),
                 graphLoader(graphCreateConfig).graphStore()
             );
             return loadedGraphName;

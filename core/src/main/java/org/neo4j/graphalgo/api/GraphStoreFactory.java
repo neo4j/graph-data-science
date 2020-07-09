@@ -127,6 +127,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         });
 
         return CSRGraphStore.of(
+            loadingContext.api().databaseId(),
             idsAndProperties.idMap(),
             idsAndProperties.properties(),
             relationships,

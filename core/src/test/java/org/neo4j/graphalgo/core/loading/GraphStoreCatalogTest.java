@@ -35,7 +35,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.extension.GdlSupportExtension.NAMED_DATABASE_ID;
+import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 
 @GdlExtension
 class GraphStoreCatalogTest {
@@ -52,48 +52,48 @@ class GraphStoreCatalogTest {
 
     @Test
     void set() {
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME));
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
     void get() {
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME);
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME);
         assertEquals(graphStore, graphStoreWithConfig.graphStore());
         assertEquals(CONFIG, graphStoreWithConfig.config());
     }
 
     @Test
     void remove() {
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME));
-        GraphStoreCatalog.remove(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME));
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
     void graphStoresCount() {
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(NAMED_DATABASE_ID));
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(NAMED_DATABASE_ID));
-        GraphStoreCatalog.remove(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(NAMED_DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
     }
 
     @Test
     void removeAllLoadedGraphs() {
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(NAMED_DATABASE_ID));
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
         GraphStoreCatalog.removeAllLoadedGraphs();
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(NAMED_DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
     }
 
     @Test
     void getUnion() {
-        GraphStoreCatalog.set(CONFIG, NAMED_DATABASE_ID, graphStore);
-        var actual = GraphStoreCatalog.getUnion(USER_NAME, NAMED_DATABASE_ID, GRAPH_NAME).get();
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        var actual = GraphStoreCatalog.getUnion(USER_NAME, DATABASE_ID, GRAPH_NAME).get();
         TestSupport.assertGraphEquals(graphStore.getUnion(), actual);
     }
 
@@ -105,11 +105,11 @@ class GraphStoreCatalogTest {
         NamedDatabaseId namedDatabaseId0 = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
         NamedDatabaseId namedDatabaseId1 = DatabaseIdFactory.from("DB_1", UUID.fromString("0-0-0-0-1"));
 
-        GraphStore graphStore0 = GdlFactory.of("()-->()").build().graphStore();
-        GraphStore graphStore1 = GdlFactory.of("()-->()-->()").build().graphStore();
+        GraphStore graphStore0 = GdlFactory.of("()-->()", namedDatabaseId0).build().graphStore();
+        GraphStore graphStore1 = GdlFactory.of("()-->()-->()", namedDatabaseId1).build().graphStore();
 
-        GraphStoreCatalog.set(config0, namedDatabaseId0, graphStore0);
-        GraphStoreCatalog.set(config1, namedDatabaseId1, graphStore1);
+        GraphStoreCatalog.set(config0, graphStore0);
+        GraphStoreCatalog.set(config1, graphStore1);
 
         assertTrue(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId0, "graph0"));
         assertFalse(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId0, "graph1"));

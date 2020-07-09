@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -66,6 +67,8 @@ public final class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
+    private final NamedDatabaseId databaseId;
+
     private final IdMap nodes;
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
@@ -81,6 +84,7 @@ public final class CSRGraphStore implements GraphStore {
     private ZonedDateTime modificationTime;
 
     public static GraphStore of(
+        NamedDatabaseId databaseId,
         IdMap nodes,
         Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
@@ -109,6 +113,7 @@ public final class CSRGraphStore implements GraphStore {
         });
 
         return new CSRGraphStore(
+            databaseId,
             nodes,
             nodePropertyStores,
             relationships,
@@ -119,6 +124,7 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     public static GraphStore of(
+        NamedDatabaseId databaseId,
         HugeGraph graph,
         String relationshipType,
         Optional<String> relationshipProperty,
@@ -146,10 +152,11 @@ public final class CSRGraphStore implements GraphStore {
             );
         }
 
-        return CSRGraphStore.of(graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+        return CSRGraphStore.of(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
     }
 
     private CSRGraphStore(
+        NamedDatabaseId databaseId,
         IdMap nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
@@ -157,6 +164,7 @@ public final class CSRGraphStore implements GraphStore {
         int concurrency,
         AllocationTracker tracker
     ) {
+        this.databaseId = databaseId;
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
         this.relationships = relationships;
@@ -165,6 +173,11 @@ public final class CSRGraphStore implements GraphStore {
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
         this.tracker = tracker;
+    }
+
+    @Override
+    public NamedDatabaseId databaseId() {
+        return databaseId;
     }
 
     @Override

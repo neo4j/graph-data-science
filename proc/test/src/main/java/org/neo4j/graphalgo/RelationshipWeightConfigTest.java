@@ -169,7 +169,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
 
-            GraphStoreCatalog.set(graphCreateConfig, namedDatabaseId(), graphStore);
+            GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(
                 "relationshipWeightProperty",
@@ -213,7 +213,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 .build()
             ).build();
 
-        GraphStoreCatalog.set(graphLoader.createConfig(), namedDatabaseId(), graphLoader.graphStore());
+        GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
 
         applyOnProcedure((proc) -> {
 
@@ -375,7 +375,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
 
         GraphStore graphStore = graphLoader(db, graphCreateConfig).graphStore();
 
-        GraphStoreCatalog.set(graphCreateConfig, namedDatabaseId(), graphStore);
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
     }
 
     default CypherMapWrapper createMinimalConfigWithFilteredNodes(CypherMapWrapper config) {

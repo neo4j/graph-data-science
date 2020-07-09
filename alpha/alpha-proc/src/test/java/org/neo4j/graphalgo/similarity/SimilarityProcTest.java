@@ -119,7 +119,7 @@ public abstract class SimilarityProcTest<
     @Test
     void throwsOnExplicitGraph() {
         GraphStoreCatalog.set(
-            emptyWithNameNative(getUsername(), "foo"), db.databaseId(), new NullGraphStore()
+            emptyWithNameNative(getUsername(), "foo"), new NullGraphStore(db.databaseId())
         );
         applyOnProcedure(proc -> {
             getProcMethods(proc).forEach(method -> {
