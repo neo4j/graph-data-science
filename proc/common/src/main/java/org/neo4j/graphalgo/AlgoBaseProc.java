@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -348,6 +349,22 @@ public abstract class AlgoBaseProc<
                         entry.getValue().orientation()
                     ));
                 });
+        }
+    }
+
+    protected void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, CONFIG config) {
+        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
+            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
+            storeConfig.relationshipProjections().projections().entrySet().stream()
+                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
+                                 config.relationshipTypes().contains(entry.getKey().name()))
+                .filter(entry -> entry.getValue().aggregation() != Aggregation.NONE || entry.getValue().properties().mappings().stream().anyMatch(m -> m.aggregation() != Aggregation.NONE))
+                .forEach(entry -> log.warn(
+                    "Procedure runs optimal with relationship aggregation." +
+                    " Projection for `%s` does not aggregate relationships." +
+                    " You might experience a slowdown in the procedure execution.",
+                    entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
+                ));
         }
     }
 
