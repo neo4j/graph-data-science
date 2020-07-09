@@ -102,6 +102,11 @@ public final class TestGraph implements Graph {
     }
 
     @Override
+    public boolean isGuaranteedParallelFree() {
+        return false;
+    }
+
+    @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
     }

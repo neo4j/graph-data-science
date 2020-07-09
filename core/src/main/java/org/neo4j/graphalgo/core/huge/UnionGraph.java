@@ -197,4 +197,12 @@ public final class UnionGraph implements Graph {
     public boolean isUndirected() {
         return first.isUndirected();
     }
+
+    @Override
+    public boolean isGuaranteedParallelFree() {
+        // we need to run a check across all relationships between the sub-graphs of the union
+        // maybe we'll do that later; for now union never guarantees parallel-free
+        return false;
+    }
+
 }

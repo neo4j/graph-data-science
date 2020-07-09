@@ -146,6 +146,7 @@ public final class HugeGraphUtil {
         private final Orientation orientation;
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
+        private final Aggregation aggregation;
 
         private long importedRelationships = 0;
 
@@ -161,6 +162,7 @@ public final class HugeGraphUtil {
             this.loadRelationshipProperty = loadRelationshipProperty;
             this.executorService = executorService;
             this.idMapping = idMapping;
+            this.aggregation = aggregation;
 
             ImportSizing importSizing = ImportSizing.of(1, idMapping.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -246,6 +248,7 @@ public final class HugeGraphUtil {
             return HugeGraph.Relationships.of(
                 importedRelationships,
                 orientation,
+                !Aggregation.equivalentToNone(aggregation),
                 relationshipsBuilder.adjacencyList(),
                 relationshipsBuilder.globalAdjacencyOffsets(),
                 loadRelationshipProperty ? relationshipsBuilder.properties() : null,

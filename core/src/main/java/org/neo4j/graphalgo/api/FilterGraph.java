@@ -154,4 +154,11 @@ public abstract class FilterGraph implements Graph {
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return graph.relationshipProperty(sourceNodeId, targetNodeId);
     }
+
+    @Override
+    public boolean isGuaranteedParallelFree() {
+        // by filtering out elements the guarantee could become fulfilled, but we don't know
+        // it would never go from fulfilled to not fulfilled however, so this is safe
+        return graph.isGuaranteedParallelFree();
+    }
 }
