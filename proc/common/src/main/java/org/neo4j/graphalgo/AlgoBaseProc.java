@@ -358,7 +358,7 @@ public abstract class AlgoBaseProc<
             storeConfig.relationshipProjections().projections().entrySet().stream()
                 .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
                                  config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> entry.getValue().aggregation() != Aggregation.NONE || entry.getValue().properties().mappings().stream().anyMatch(m -> m.aggregation() != Aggregation.NONE))
+                .filter(entry -> !entry.getValue().isGuaranteedParallelFree())
                 .forEach(entry -> log.warn(
                     "Procedure runs optimal with relationship aggregation." +
                     " Projection for `%s` does not aggregate relationships." +

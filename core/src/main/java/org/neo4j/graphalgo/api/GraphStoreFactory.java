@@ -107,7 +107,8 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
                     adjacencyList,
                     adjacencyOffsets,
                     relationshipCount,
-                    projection.orientation()
+                    projection.orientation(),
+                    projection.isGuaranteedParallelFree()
                 )
             );
 
@@ -122,6 +123,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
                             relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),
                             relationshipCount,
                             projection.orientation(),
+                            projection.isGuaranteedParallelFree(),
                             propertyIndexAndMapping.getTwo().defaultValue()
                         )
                     ));
