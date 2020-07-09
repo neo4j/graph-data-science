@@ -64,6 +64,11 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public boolean isGuaranteedParallelFree() {
+        return true;
+    }
+
+    @Override
     public boolean hasRelationshipProperty() {
         return false;
     }

@@ -195,4 +195,11 @@ public abstract class FilterGraph implements Graph {
     public void releaseProperties() {
         graph.releaseProperties();
     }
+
+    @Override
+    public boolean isGuaranteedParallelFree() {
+        // by filtering out elements the guarantee could become fulfilled, but we don't know
+        // it would never go from fulfilled to not fulfilled however, so this is safe
+        return graph.isGuaranteedParallelFree();
+    }
 }

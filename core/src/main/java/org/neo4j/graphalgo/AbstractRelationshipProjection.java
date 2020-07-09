@@ -109,6 +109,17 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).orientation(orientation).build();
     }
 
+    public static RelationshipProjection of(String type, Aggregation aggregation) {
+        return RelationshipProjection.builder().type(type).aggregation(aggregation).build();
+    }
+
+    public boolean isGuaranteedParallelFree() {
+        return !Aggregation.equivalentToNone(aggregation()) && properties()
+            .mappings()
+            .stream()
+            .noneMatch(m -> Aggregation.equivalentToNone(m.aggregation()));
+    }
+
     @Override
     boolean includeAggregation() {
         return true;

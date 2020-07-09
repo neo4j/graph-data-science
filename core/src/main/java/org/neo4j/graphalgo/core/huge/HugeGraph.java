@@ -106,6 +106,7 @@ public class HugeGraph implements Graph {
     private boolean canRelease = true;
 
     private final boolean hasRelationshipProperty;
+    private final boolean isGuaranteedParallelFree;
 
     public static HugeGraph create(
         IdMap nodes,
@@ -125,6 +126,7 @@ public class HugeGraph implements Graph {
             maybeProperties.map(Relationships.Properties::list).map(castOrThrow(TransientAdjacencyList.class)).orElse(null),
             maybeProperties.map(Relationships.Properties::offsets).map(castOrThrow(TransientAdjacencyOffsets.class)).orElse(null),
             topology.orientation(),
+            topology.isGuaranteedParallelFree(),
             tracker
         );
     }
@@ -140,9 +142,11 @@ public class HugeGraph implements Graph {
         @Nullable TransientAdjacencyList properties,
         @Nullable TransientAdjacencyOffsets propertyOffsets,
         Orientation orientation,
+        boolean isGuaranteedParallelFree,
         AllocationTracker tracker
     ) {
         this.idMapping = idMapping;
+        this.isGuaranteedParallelFree = isGuaranteedParallelFree;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
@@ -306,6 +310,7 @@ public class HugeGraph implements Graph {
             properties,
             propertyOffsets,
             orientation,
+            isGuaranteedParallelFree,
             tracker
         );
     }
@@ -416,6 +421,11 @@ public class HugeGraph implements Graph {
         return orientation == Orientation.UNDIRECTED;
     }
 
+    @Override
+    public boolean isGuaranteedParallelFree() {
+        return isGuaranteedParallelFree;
+    }
+
     public Orientation orientation() {
         return orientation;
     }
@@ -424,6 +434,7 @@ public class HugeGraph implements Graph {
         return Relationships.of(
             relationshipCount,
             orientation,
+            isGuaranteedParallelFree(),
             adjacencyList,
             adjacencyOffsets,
             properties,

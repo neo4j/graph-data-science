@@ -168,6 +168,7 @@ class GraphStoreTest extends BaseTest {
         Relationships relationships = Relationships.of(
             0L,
             Orientation.NATURAL,
+            false,
             new TransientAdjacencyList(new byte[0][0]),
             TransientAdjacencyOffsets.of(new long[0]),
             null,

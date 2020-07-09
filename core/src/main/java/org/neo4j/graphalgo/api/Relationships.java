@@ -35,13 +35,20 @@ public interface Relationships {
     static Relationships of(
         long relationshipCount,
         Orientation orientation,
+        boolean isGuaranteedParallelFree,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets,
         double defaultPropertyValue
     ) {
-        Topology topology = ImmutableTopology.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+        Topology topology = ImmutableTopology.of(
+            adjacencyList,
+            adjacencyOffsets,
+            relationshipCount,
+            orientation,
+            isGuaranteedParallelFree
+        );
 
         Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
             ? Optional.of(ImmutableProperties.of(
@@ -49,6 +56,7 @@ public interface Relationships {
                 propertyOffsets,
                 relationshipCount,
                 orientation,
+                isGuaranteedParallelFree,
                 defaultPropertyValue
             )) : Optional.empty();
 
@@ -64,6 +72,8 @@ public interface Relationships {
         long elementCount();
 
         Orientation orientation();
+
+        boolean isGuaranteedParallelFree();
     }
 
     @ValueClass
