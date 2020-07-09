@@ -55,6 +55,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +65,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.DEFAULT_CONCURRENCY;
