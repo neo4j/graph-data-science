@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.extension;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -43,6 +44,16 @@ public class TestGraph extends FilterGraph {
 
     public long toMappedNodeId(String variable) {
         return graph.toMappedNodeId(idFunction.of(variable));
+    }
+
+    @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        var bitset = BitSet.newInstance();
+        forEachRelationship(nodeId, (source, target) -> {
+            bitset.set(target);
+            return true;
+        });
+        return Math.toIntExact(bitset.cardinality());
     }
 
     @Override

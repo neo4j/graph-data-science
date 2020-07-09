@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
  * A->B; A->C; B->C;
  *
  *
- * OutD:   InD: BothD:
+ *      OutD:   InD: UndirectedD:
  * A:     2      0      2
  * B:     1      1      2
  * C:     0      2      2
@@ -50,7 +50,7 @@ class DegreesTest extends AlgoTestBase {
         "CREATE" +
         "  (a:Node {name:'a'})" +
         ", (b:Node {name:'b'})" +
-        ", (c:Node {name:'c'})" + // shuffled
+        ", (c:Node {name:'c'})" +
         ", (a)-[:TYPE]->(b)" +
         ", (a)-[:TYPE]->(c)" +
         ", (b)-[:TYPE]->(c)";
@@ -59,7 +59,7 @@ class DegreesTest extends AlgoTestBase {
         "CREATE" +
         "  (a:Node {name:'a'})" +
         ", (b:Node {name:'b'})" +
-        ", (c:Node {name:'c'})" + // shuffled
+        ", (c:Node {name:'c'})" +
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(a)" +
         ", (a)-[:TYPE]->(c)" +
@@ -78,6 +78,30 @@ class DegreesTest extends AlgoTestBase {
         ", (a)-[:TYPE]->(a)";
 
     private Graph graph;
+
+    @Test
+    void testDegreeWithParallelRelationships() {
+        setup(BI_DIRECTIONAL, Orientation.UNDIRECTED);
+
+        assertEquals(4, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("a")));
+        assertEquals(4, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("b")));
+        assertEquals(4, graph.degree(nodeId("c")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("c")));
+    }
+
+    @Test
+    void testDegreeWithParallelRelationshipsUnionGraph() {
+        setup(BI_DIRECTIONAL, null);
+
+        assertEquals(4, graph.degree(nodeId("a")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("a")));
+        assertEquals(4, graph.degree(nodeId("b")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("b")));
+        assertEquals(4, graph.degree(nodeId("c")));
+        assertEquals(2, graph.degreeWithoutParallelRelationships(nodeId("c")));
+    }
 
     @Test
     void testUnidirectionalNatural() {

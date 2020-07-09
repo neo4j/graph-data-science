@@ -77,6 +77,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        return graph.degreeWithoutParallelRelationships(nodeId);
+    }
+
+    @Override
     public NodeMapping nodeMapping() {
         return graph.nodeMapping();
     }
