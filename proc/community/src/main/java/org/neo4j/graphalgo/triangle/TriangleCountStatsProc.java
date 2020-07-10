@@ -117,7 +117,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         @Override
         public StatsResult build() {
             return new StatsResult(
-                triangleCount,
+                globalTriangleCount,
                 nodeCount,
                 createMillis,
                 computeMillis,

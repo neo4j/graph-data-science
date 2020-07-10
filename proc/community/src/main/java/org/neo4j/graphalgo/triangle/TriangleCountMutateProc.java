@@ -104,7 +104,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
         public long mutateMillis;
 
         public MutateResult(
-            long triangleCount,
+            long globalTriangleCount,
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
@@ -113,7 +113,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
             Map<String, Object> configuration
         ) {
             super(
-                triangleCount,
+                globalTriangleCount,
                 nodeCount,
                 createMillis,
                 computeMillis,
@@ -129,7 +129,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
         @Override
         public MutateResult build() {
             return new MutateResult(
-                triangleCount,
+                globalTriangleCount,
                 nodeCount,
                 nodePropertiesWritten,
                 createMillis,
