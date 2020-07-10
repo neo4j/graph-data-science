@@ -103,7 +103,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         public long writeMillis;
 
         public WriteResult(
-            long triangleCount,
+            long globalTriangleCount,
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
@@ -112,7 +112,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
             Map<String, Object> configuration
         ) {
             super(
-                triangleCount,
+                globalTriangleCount,
                 nodeCount,
                 createMillis,
                 computeMillis,
@@ -129,7 +129,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         @Override
         public WriteResult build() {
             return new WriteResult(
-                triangleCount,
+                globalTriangleCount,
                 nodeCount,
                 nodePropertiesWritten,
                 createMillis,

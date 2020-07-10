@@ -44,15 +44,15 @@ final class TriangleCountCompanion {
         AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult
     ) {
         var result = Optional.ofNullable(computeResult.result()).orElse(EmptyResult.EMPTY_RESULT);
-        return procResultBuilder.withTriangleCount(result.globalTriangles());
+        return procResultBuilder.withGlobalTriangleCount(result.globalTriangles());
     }
 
     abstract static class TriangleCountResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
 
-        long triangleCount = 0;
+        long globalTriangleCount = 0;
 
-        TriangleCountResultBuilder<PROC_RESULT> withTriangleCount(long triangleCount) {
-            this.triangleCount = triangleCount;
+        TriangleCountResultBuilder<PROC_RESULT> withGlobalTriangleCount(long globalTriangleCount) {
+            this.globalTriangleCount = globalTriangleCount;
             return this;
         }
 
