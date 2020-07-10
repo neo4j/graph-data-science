@@ -108,20 +108,20 @@ public class HugeAtomicDoubleArray {
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicDoubleArray newArray(long size, AllocationTracker tracker) {
-        return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, PageFiller.passThrough(), tracker));
+        return newArray(size, LongPageCreator.passThrough(1), tracker);
     }
 
-    public static HugeAtomicDoubleArray newArray(long size, PageFiller pageFiller, AllocationTracker tracker) {
+    public static HugeAtomicDoubleArray newArray(long size, LongPageCreator pageFiller, AllocationTracker tracker) {
         return new HugeAtomicDoubleArray(HugeAtomicLongArray.newArray(size, pageFiller, tracker));
     }
 
     /* test-only */
-    static HugeAtomicDoubleArray newPagedArray(long size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicDoubleArray newPagedArray(long size, final LongPageCreator pageFiller, AllocationTracker tracker) {
         return new HugeAtomicDoubleArray(HugeAtomicLongArray.newPagedArray(size, pageFiller, tracker));
     }
 
     /* test-only */
-    static HugeAtomicDoubleArray newSingleArray(int size, final PageFiller pageFiller, AllocationTracker tracker) {
+    static HugeAtomicDoubleArray newSingleArray(int size, final LongPageCreator pageFiller, AllocationTracker tracker) {
         return new HugeAtomicDoubleArray(HugeAtomicLongArray.newSingleArray(size, pageFiller, tracker));
     }
 
