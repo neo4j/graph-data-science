@@ -265,7 +265,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, LongPageCreator.of(concurrency, ignore -> Double.doubleToLongBits(0)), tracker);
+        communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, LongPageCreator.passThrough(1), tracker);
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {
