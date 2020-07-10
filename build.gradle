@@ -11,6 +11,8 @@ ext {
     distributionDir = "$buildDir/distributions"
     distributionLicenseFile = file('LICENSE.txt')
     publicDir = "${project.rootDir}"
+
+    checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
 }
 
 apply from: 'gradle/version.gradle'
