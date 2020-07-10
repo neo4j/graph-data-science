@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
@@ -80,14 +81,23 @@ public class PositiveSampleProducer {
 
     private void nextWalk() {
         walkIndex++;
-        while (walkIndex <= batchEnd && walks.get(walkIndex).length < 2) {
+
+        if (walkIndex >= walks.size()) {
+            return;
+        }
+        long[] walk = filter(walks.get(walkIndex));
+
+        while (walkIndex <= batchEnd && walk.length < 2) {
             walkIndex++;
+            if (walkIndex < walks.size()) {
+                walk = filter(walks.get(walkIndex));
+            }
             progressLogger.logProgress();
         }
 
         if (walkIndex < walks.size()) {
             progressLogger.logProgress();
-            this.currentWalk = walks.get(walkIndex);
+            this.currentWalk = walk;
             centerWordIndex = -1;
             nextCenterWord();
         }
@@ -95,9 +105,6 @@ public class PositiveSampleProducer {
 
     private void nextCenterWord() {
         centerWordIndex++;
-        while(centerWordIndex < currentWalk.length && !shouldPickNode(currentWalk[centerWordIndex])) {
-            centerWordIndex++;
-        }
 
         if (centerWordIndex < currentWalk.length) {
             currentCenterWord = currentWalk[centerWordIndex];
@@ -117,6 +124,10 @@ public class PositiveSampleProducer {
         if(contextWordIndex >= Math.min(centerWordIndex + postfixWindowSize + 1, currentWalk.length)) {
             nextCenterWord();
         }
+    }
+
+    private long[] filter(long[] walk) {
+        return Arrays.stream(walk).filter(this::shouldPickNode).toArray();
     }
 
     private boolean shouldPickNode(long nodeId) {
