@@ -52,13 +52,27 @@ task versionsJson {
             [(it.neo4j): it]
         }
 
-        def shouldUpdateVersion = project.version.toString().matches("^(\\d+\\.){2}\\d+\$")
+        def neo4jVersions
+        if (project.hasProperty('neo4jVersions')) {
+            neo4jVersions = project.property('neo4jVersions').split(',')
+        } else {
+            neo4jVersions = [ver.neo4j]
+        }
+
+        def gdsVersion = project.hasProperty('gdsVersion') ? project.property('gdsVersion') : project.version
+        def shouldUpdateVersion = gdsVersion.toString().matches("^(\\d+\\.){2}\\d+\$")
         if (shouldUpdateVersion) {
-            indexedVersionsJson[ver.neo4j] = [
-                    'neo4j': ver.neo4j,
-                    'version': project.version,
-                    'jar': "$bucketUrl/${shadowJar.archiveName}",
-            ]
+            shadowJar.version = gdsVersion
+            neo4jVersions.flatten().forEach { version ->
+                indexedVersionsJson[version] = [
+                        'neo4j'  : version,
+                        'version': gdsVersion,
+                        'jar'    : "$bucketUrl/${shadowJar.archiveName}",
+                ]
+            }
+
+            // Restore shadowJar version
+            shadowJar.version = project.version
         }
         outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
     }
