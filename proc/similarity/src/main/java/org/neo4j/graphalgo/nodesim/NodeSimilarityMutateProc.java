@@ -106,43 +106,45 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     public Stream<MutateResult> mutate(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
     ) {
-        NodeSimilarityMutateConfig config = computationResult.config();
+        return runWithExceptionLogging("Graph mutation failed", () -> {
+            NodeSimilarityMutateConfig config = computationResult.config();
 
-        if (computationResult.isGraphEmpty()) {
-            return Stream.of(
-                new MutateResult(
-                    computationResult.createMillis(),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    Collections.emptyMap(),
-                    config.toMap()
-                )
-            );
-        }
-
-        NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder =
-            NodeSimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
-
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            Relationships resultRelationships = getRelationships(
-                computationResult,
-                computationResult.result().graphResult(),
-                resultBuilder
-            );
-
-            computationResult
-                .graphStore()
-                .addRelationshipType(
-                    RelationshipType.of(config.mutateRelationshipType()),
-                    Optional.of(config.mutateProperty()),
-                    Optional.of(NumberType.FLOATING_POINT),
-                    resultRelationships
+            if (computationResult.isGraphEmpty()) {
+                return Stream.of(
+                    new MutateResult(
+                        computationResult.createMillis(),
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        Collections.emptyMap(),
+                        config.toMap()
+                    )
                 );
-        }
-        return Stream.of(resultBuilder.build());
+            }
+
+            NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder =
+                NodeSimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
+
+            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+                Relationships resultRelationships = getRelationships(
+                    computationResult,
+                    computationResult.result().graphResult(),
+                    resultBuilder
+                );
+
+                computationResult
+                    .graphStore()
+                    .addRelationshipType(
+                        RelationshipType.of(config.mutateRelationshipType()),
+                        Optional.of(config.mutateProperty()),
+                        Optional.of(NumberType.FLOATING_POINT),
+                        resultRelationships
+                    );
+            }
+            return Stream.of(resultBuilder.build());
+        });
     }
 
     private Relationships getRelationships(
