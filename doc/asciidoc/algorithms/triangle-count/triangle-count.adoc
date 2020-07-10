@@ -96,7 +96,7 @@ CALL gds.triangleCount.stats(
   configuration: Map
 )
 YIELD
-  triangleCount: Integer,
+  globalTriangleCount: Integer,
   nodeCount: Integer,
   createMillis: Integer,
   computeMillis: Integer,
@@ -112,12 +112,12 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| triangleCount | Integer | Total number of triangles in the graph.
-| nodeCount     | Integer | Number of nodes in the graph.
-| createMillis  | Integer | Milliseconds for creating the graph.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| configuration | Map     | The configuration used for running the algorithm.
+| Name                | Type    | Description
+| globalTriangleCount | Integer | Total number of triangles in the graph.
+| nodeCount           | Integer | Number of nodes in the graph.
+| createMillis        | Integer | Milliseconds for creating the graph.
+| computeMillis       | Integer | Milliseconds for running the algorithm.
+| configuration       | Map     | The configuration used for running the algorithm.
 |===
 
 
@@ -132,7 +132,7 @@ CALL gds.triangleCount.mutate(
   configuration: Map
 )
 YIELD
-  triangleCount: Integer,
+  globalTriangleCount: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
   createMillis: Integer,
@@ -150,14 +150,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| triangleCount         | Integer | Total number of triangles in the graph.
-| nodeCount             | Integer | Number of nodes in the graph.
-| nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
-| createMillis          | Integer | Milliseconds for creating the graph.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
-| configuration         | Map     | The configuration used for running the algorithm.
+| Name                        | Type    | Description
+| globalTriangleCount         | Integer | Total number of triangles in the graph.
+| nodeCount                   | Integer | Number of nodes in the graph.
+| nodePropertiesWritten       | Integer | Number of properties added to the in-memory graph.
+| createMillis                | Integer | Milliseconds for creating the graph.
+| computeMillis               | Integer | Milliseconds for running the algorithm.
+| mutateMillis                | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration               | Map     | The configuration used for running the algorithm.
 |===
 
 
@@ -172,7 +172,7 @@ CALL gds.triangleCount.write(
   configuration: Map
 )
 YIELD
-  triangleCount: Integer,
+  globalTriangleCount: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
   createMillis: Integer,
@@ -190,14 +190,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| triangleCount         | Integer | Total number of triangles in the graph.
-| nodeCount             | Integer | Number of nodes in the graph.
-| nodePropertiesWritten | Integer | Number of properties written to Neo4j.
-| createMillis          | Integer | Milliseconds for creating the graph.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| writeMillis           | Integer | Milliseconds for writing results back to Neo4j.
-| configuration         | Map     | The configuration used for running the algorithm.
+| Name                        | Type    | Description
+| globalTriangleCount         | Integer | Total number of triangles in the graph.
+| nodeCount                   | Integer | Number of nodes in the graph.
+| nodePropertiesWritten       | Integer | Number of properties written to Neo4j.
+| createMillis                | Integer | Milliseconds for creating the graph.
+| computeMillis               | Integer | Milliseconds for running the algorithm.
+| writeMillis                 | Integer | Milliseconds for writing results back to Neo4j.
+| configuration               | Map     | The configuration used for running the algorithm.
 |===
 
 
@@ -213,7 +213,7 @@ CALL gds.triangleCount.write(
   configuration: Map
 )
 YIELD
-  triangleCount: Integer,
+  globalTriangleCount: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
   createMillis: Integer,
