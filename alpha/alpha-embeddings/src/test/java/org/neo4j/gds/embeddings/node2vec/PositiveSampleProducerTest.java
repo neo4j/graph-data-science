@@ -170,7 +170,7 @@ class PositiveSampleProducerTest {
     }
 
     @Test
-    void voidShouldProducePairsWithBounds() {
+    void shouldProducePairsWithBounds() {
         HugeObjectArray<long[]> walks = HugeObjectArray.of(
             new long[]{0, 1, 2},
             new long[]{3, 4, 5},
@@ -203,6 +203,57 @@ class PositiveSampleProducerTest {
                 Pair.of(4L, 3L),
                 Pair.of(4L, 5L),
                 Pair.of(5L, 4L)
+            ),
+            actualPairs
+        );
+    }
+
+    @Test
+    void shouldRemoveDownsampledWordFromWalk() {
+        HugeObjectArray<long[]> walks = HugeObjectArray.of(
+            new long[]{0, 1},       // 1 is downsampled, and the walk is then too short and will be ignored
+            new long[]{0, 1, 2},    // 1 is downsampled, the remaining walk is (0,2)
+            new long[]{3, 4, 5, 6}, // 5 is downsampled, the remaining walk is (3,4,6)
+            new long[]{3, 4, 5}     // 5 is downsampled, the remaining walk is (3,4)
+        );
+
+        HugeDoubleArray centerNodeProbabilities = HugeDoubleArray.of(
+            1.0,
+            0.0,
+            1.0,
+            1.0,
+            1.0,
+            0.0,
+            1.0
+        );
+
+        Collection<Pair<Long, Long>> actualPairs = new ArrayList<>();
+        PositiveSampleProducer producer = new PositiveSampleProducer(
+            walks,
+            centerNodeProbabilities,
+            0,
+            3,
+            3,
+            TestProgressLogger.NULL_LOGGER
+        );
+
+        while (producer.hasNext()) {
+            producer.next(buffer);
+            actualPairs.add(Pair.of(buffer[0], buffer[1]));
+        }
+
+        assertEquals(
+            List.of(
+                Pair.of(0L, 2L),
+                Pair.of(2L, 0L),
+
+                Pair.of(3L, 4L),
+                Pair.of(4L, 3L),
+                Pair.of(4L, 6L),
+                Pair.of(6L, 4L),
+
+                Pair.of(3L, 4L),
+                Pair.of(4L, 3L)
             ),
             actualPairs
         );
