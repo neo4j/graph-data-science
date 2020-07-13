@@ -13,10 +13,6 @@ This topic includes:
 
 * <<algorithms-triangle-count-intro, Introduction>>
 * <<algorithms-triangle-count-syntax, Syntax>>
-** <<algorithms-triangle-count-syntax-stream, Stream>>
-** <<algorithms-triangle-count-syntax-stats, Stats>>
-** <<algorithms-triangle-count-syntax-mutate, Mutate>>
-** <<algorithms-triangle-count-syntax-write, Write>>
 ** <<algorithms-triangle-count-syntax-anonymous, Anonymous graphs>>
 ** <<algorithms-triangle-count-syntax-triangles-listing, Triangles Listing>>
 * <<algorithms-triangle-count-examples, Examples>>
@@ -55,9 +51,12 @@ include::../shared/syntax-intro-named-graph.adoc[]
 WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Triangle Count algorithm.
 
 
-[[algorithms-triangle-count-syntax-stream]]
-=== Stream
+.Triangle Count syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run Triangle Count in stream mode on a named graph:
 [source, cypher]
 ----
@@ -83,12 +82,11 @@ include::specific-configuration.adoc[]
 | nodeId        | Integer   | Node ID.
 | triangleCount | Integer   | Number of triangles the node is part of. Is `-1` if the node has been excluded from computation using the `maxDegree` configuration parameter.
 |===
+======
 
-
-[[algorithms-triangle-count-syntax-stats]]
-=== Stats
-
-.Run Triangle Count in stream mode on a named graph:
+[.include-with-stats]
+======
+.Run Triangle Count in stats mode on a named graph:
 [source, cypher]
 ----
 CALL gds.triangleCount.stats(
@@ -119,11 +117,10 @@ include::specific-configuration.adoc[]
 | computeMillis       | Integer | Milliseconds for running the algorithm.
 | configuration       | Map     | The configuration used for running the algorithm.
 |===
+======
 
-
-[[algorithms-triangle-count-syntax-mutate]]
-=== Mutate
-
+[.include-with-mutate]
+======
 .Run Triangle Count in mutate mode on a named graph:
 [source, cypher]
 ----
@@ -159,11 +156,10 @@ include::specific-configuration.adoc[]
 | mutateMillis                | Integer | Milliseconds for adding properties to the in-memory graph.
 | configuration               | Map     | The configuration used for running the algorithm.
 |===
+======
 
-
-[[algorithms-triangle-count-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run Triangle Count in write mode on a named graph:
 [source, cypher]
 ----
@@ -199,6 +195,8 @@ include::specific-configuration.adoc[]
 | writeMillis                 | Integer | Milliseconds for writing results back to Neo4j.
 | configuration               | Map     | The configuration used for running the algorithm.
 |===
+======
+====
 
 
 [[algorithms-triangle-count-syntax-anonymous]]
@@ -226,7 +224,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-triangle-count-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-triangle-count-syntax, write mode syntax above>>.
 
 
 [[algorithms-triangle-count-syntax-triangles-listing]]
@@ -384,7 +382,7 @@ Since the 'Alice' node only `KNOWS` one other node, it can not be part of any tr
 === Stats
 
 :stats-details: The summary result contains the global triangle count, which is the total number of triangles in the entire graph.
-:stats-syntax: algorithms-triangle-count-syntax-stats
+:stats-syntax: algorithms-triangle-count-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
