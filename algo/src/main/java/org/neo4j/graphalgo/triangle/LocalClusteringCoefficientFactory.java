@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
-public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> extends AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
+public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> implements AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
 
     @Override
     public LocalClusteringCoefficient build(

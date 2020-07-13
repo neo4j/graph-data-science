@@ -40,7 +40,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
-public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends AlgorithmFactory<Louvain, CONFIG> {
+public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements AlgorithmFactory<Louvain, CONFIG> {
 
     @Override
     public Louvain build(

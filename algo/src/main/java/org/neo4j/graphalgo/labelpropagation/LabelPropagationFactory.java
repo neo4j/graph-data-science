@@ -35,7 +35,7 @@ import org.neo4j.logging.Log;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends AlgorithmFactory<LabelPropagation, CONFIG> {
+public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> implements AlgorithmFactory<LabelPropagation, CONFIG> {
 
     @Override
     public LabelPropagation build(

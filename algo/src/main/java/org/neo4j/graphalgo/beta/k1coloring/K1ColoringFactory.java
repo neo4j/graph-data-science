@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
-public class K1ColoringFactory<T extends K1ColoringConfig> extends AlgorithmFactory<K1Coloring, T> {
+public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmFactory<K1Coloring, T> {
 
     @Override
     public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {

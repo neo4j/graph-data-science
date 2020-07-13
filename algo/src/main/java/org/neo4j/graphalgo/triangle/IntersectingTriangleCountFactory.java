@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.logging.Log;
 
-public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
+public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> implements AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     @Override
     public IntersectingTriangleCount build(

@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
-public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends AlgorithmFactory<ModularityOptimization, T> {
+public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> implements AlgorithmFactory<ModularityOptimization, T> {
 
     public static final MemoryEstimation MEMORY_ESTIMATION =
         MemoryEstimations.builder(ModularityOptimization.class)

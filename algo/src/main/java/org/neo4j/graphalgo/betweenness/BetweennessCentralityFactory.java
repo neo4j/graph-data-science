@@ -34,7 +34,7 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends AlgorithmFactory<BetweennessCentrality, CONFIG> {
+public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> implements AlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
     public BetweennessCentrality build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {

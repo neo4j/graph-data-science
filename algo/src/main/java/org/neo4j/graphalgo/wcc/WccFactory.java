@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
-public class WccFactory<CONFIG extends WccBaseConfig> extends AlgorithmFactory<Wcc, CONFIG> {
+public class WccFactory<CONFIG extends WccBaseConfig> implements AlgorithmFactory<Wcc, CONFIG> {
 
     @Override
     public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {

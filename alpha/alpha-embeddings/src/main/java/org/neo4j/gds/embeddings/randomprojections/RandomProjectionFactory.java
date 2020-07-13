@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> extends AlgorithmFactory<RandomProjection, CONFIG> {
+public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> implements AlgorithmFactory<RandomProjection, CONFIG> {
 
     @Override
     public RandomProjection build(

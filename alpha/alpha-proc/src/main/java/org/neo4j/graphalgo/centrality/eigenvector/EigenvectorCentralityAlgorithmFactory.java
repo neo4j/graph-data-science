@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
 
-class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
+class EigenvectorCentralityAlgorithmFactory implements AlphaAlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
 
     @Override
     public PageRank build(

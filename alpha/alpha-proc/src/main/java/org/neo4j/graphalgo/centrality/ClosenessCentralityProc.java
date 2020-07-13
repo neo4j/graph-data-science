@@ -143,21 +143,12 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
 
     @Override
     protected AlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public MSClosenessCentrality buildAlphaAlgo(
-                Graph graph,
-                ClosenessCentralityConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                return new MSClosenessCentrality(
-                    graph,
-                    tracker,
-                    configuration.concurrency(),
-                    Pools.DEFAULT, configuration.improved()
-                );
-            }
-        };
+        return (AlphaAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig>) (graph, configuration, tracker, log) ->
+            new MSClosenessCentrality(
+                graph,
+                tracker,
+                configuration.concurrency(),
+                Pools.DEFAULT, configuration.improved()
+            );
     }
 }

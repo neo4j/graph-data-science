@@ -27,17 +27,17 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
-public abstract class AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
+public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
     @Override
-    public ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+    default ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log);
         return algo.withProgressLogger(new ProgressLoggerAdapter(log, algo.getClass().getSimpleName()));
     }
 
-    public abstract ALGO buildAlphaAlgo(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log);
+    ALGO buildAlphaAlgo(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log);
 
     @Override
-    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+    default MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();
     }
 }
