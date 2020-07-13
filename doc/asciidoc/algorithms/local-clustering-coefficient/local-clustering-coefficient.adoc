@@ -13,10 +13,6 @@ This topic includes:
 
 * <<algorithms-local-clustering-coefficient-intro, Introduction>>
 * <<algorithms-local-clustering-coefficient-syntax, Syntax>>
-** <<algorithms-local-clustering-coefficient-syntax-stream, Stream>>
-** <<algorithms-local-clustering-coefficient-syntax-stats, Stats>>
-** <<algorithms-local-clustering-coefficient-syntax-mutate, Mutate>>
-** <<algorithms-local-clustering-coefficient-syntax-write, Write>>
 ** <<algorithms-local-clustering-coefficient-syntax-anonymous, Anonymous Graphs>>
 * <<algorithms-local-clustering-coefficient-examples, Examples>>
 ** <<algorithms-local-clustering-coefficient-examples-memory-estimation, Memory Estimation>>
@@ -52,9 +48,12 @@ For more information, see https://en.wikipedia.org/wiki/Clustering_coefficient[C
 include::../shared/syntax-intro-named-graph.adoc[]
 
 
-[[algorithms-local-clustering-coefficient-syntax-stream]]
-=== Stream
+.Local Clustering Coefficient syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run Local Clustering Coefficient in stream mode on a named graph:
 [source, cypher]
 ----
@@ -80,11 +79,10 @@ include::specific-configuration.adoc[]
 | nodeId                     | Integer   | Node ID.
 | localClusteringCoefficient | Double    | The local clustering coefficient for the node.
 |===
+======
 
-
-[[algorithms-local-clustering-coefficient-syntax-stats]]
-=== Stats
-
+[.include-with-stats]
+======
 .Run Local Clustering Coefficient in stats mode on a named graph:
 [source, cypher]
 ----
@@ -116,11 +114,10 @@ include::specific-configuration.adoc[]
 | computeMillis                | Integer | Milliseconds for running the algorithm.
 | configuration                | Map     | The configuration used for running the algorithm.
 |===
+======
 
-
-[[algorithms-local-clustering-coefficient-syntax-mutate]]
-=== Mutate
-
+[.include-with-mutate]
+======
 .Run Local Clustering Coefficient in mutate mode on a named graph:
 [source, cypher]
 ----
@@ -156,11 +153,10 @@ include::specific-configuration.adoc[]
 | mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
+======
 
-
-[[algorithms-local-clustering-coefficient-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run Local Clustering Coefficient in write mode on a named graph:
 [source, cypher]
 ----
@@ -196,6 +192,9 @@ include::specific-configuration.adoc[]
 | writeMillis                   | Integer | Milliseconds for writing results back to Neo4j.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
+======
+
+====
 
 
 [[algorithms-local-clustering-coefficient-syntax-anonymous]]
@@ -223,7 +222,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-local-clustering-coefficient-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-local-clustering-coefficient-syntax, write mode syntax above>>.
 
 
 [[algorithms-local-clustering-coefficient-examples]]
@@ -352,7 +351,7 @@ This can be verified in the <<algorithms-local-clustering-coefficient-examples-g
 === Stats
 
 :stats-details: The summary result contains the avearage clustering coefficient of the graph, which is the normalised sum over all local clustering coefficients.
-:stats-syntax: algorithms-local-clustering-coefficient-syntax-stats
+:stats-syntax: algorithms-local-clustering-coefficient-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
