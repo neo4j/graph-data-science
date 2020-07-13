@@ -213,14 +213,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public long nodePropertyCount() {
-        // TODO: This is not the correct value. We would need to look into the bitsets in order to retrieve the correct value.
-        return nodeProperties.values().stream()
-                   .mapToLong(nodePropertyStore -> nodePropertyStore.keySet().size())
-                   .sum() * nodeCount();
-    }
-
-    @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return labels
             .stream()

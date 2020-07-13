@@ -60,8 +60,6 @@ public interface GraphStore {
 
     Map<NodeLabel, Set<String>> nodePropertyKeys();
 
-    long nodePropertyCount();
-
     boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey);
 
     default Collection<String> nodePropertyKeys(Collection<NodeLabel> labels) {

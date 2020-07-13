@@ -98,11 +98,6 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public long nodePropertyCount() {
-        return 0;
-    }
-
-    @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return false;
     }
