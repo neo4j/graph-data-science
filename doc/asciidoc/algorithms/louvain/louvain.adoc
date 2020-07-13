@@ -13,10 +13,6 @@ This topic includes:
 
 * <<algorithms-louvain-intro, Introduction>>
 * <<algorithms-louvain-syntax, Syntax>>
-** <<algorithms-louvain-syntax-stream, Stream>>
-** <<algorithms-louvain-syntax-stats, Stats>>
-** <<algorithms-louvain-syntax-mutate, Mutate>>
-** <<algorithms-louvain-syntax-write, Write>>
 ** <<algorithms-louvain-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-louvain-examples, Examples>>
 ** <<algorithms-louvain-examples-memory-estimation, Memory Estimation>>
@@ -54,9 +50,12 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
-[[algorithms-louvain-syntax-stream]]
-=== Stream mode
+.Louvain syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run Louvain in stream mode on a named graph.
 [source, cypher]
 ----
@@ -84,11 +83,11 @@ include::specific-configuration.adoc[]
 | communityId               | Integer   | The community ID of the final level.
 | intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
+======
 
 
-[[algorithms-louvain-syntax-stats]]
-=== Stats mode
-
+[.include-with-stats]
+======
 .Run Louvain in stats mode on a named graph.
 [source, cypher]
 ----
@@ -128,11 +127,10 @@ include::specific-configuration.adoc[]
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
+======
 
-
-[[algorithms-louvain-syntax-mutate]]
-=== Mutate mode
-
+[.include-with-mutate]
+======
 .Run Louvain in mutate mode on a named graph.
 [source, cypher]
 ----
@@ -174,12 +172,12 @@ include::specific-configuration.adoc[]
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-louvain-syntax-write]]
-=== Write mode
-
-.Run Louvain in write mode on a graph stored in the catalog.
+[.include-with-write]
+======
+.Run Louvain in write mode on a named graph.
 [source, cypher]
 ----
 CALL gds.louvain.write(
@@ -222,6 +220,9 @@ include::specific-configuration.adoc[]
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
+======
+
+====
 
 
 [[algorithms-louvain-syntax-anonymous]]
@@ -249,7 +250,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-louvain-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-louvain-syntax, write mode syntax above>>.
 
 [[algorithms-louvain-examples]]
 == Examples
@@ -371,7 +372,7 @@ Because we did not set the value of `includeIntermediateCommunities` to `true`, 
 [[algorithms-louvain-examples-stats]]
 === Stats
 
-:stats-syntax: algorithms-louvain-syntax-stats
+:stats-syntax: algorithms-louvain-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
