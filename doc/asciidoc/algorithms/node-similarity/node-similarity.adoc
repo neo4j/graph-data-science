@@ -14,10 +14,6 @@ This topic includes:
 
 * <<algorithms-node-similarity-intro, Introduction>>
 * <<algorithms-node-similarity-syntax, Syntax>>
-** <<algorithms-node-similarity-syntax-stream, Stream>>
-** <<algorithms-node-similarity-syntax-stats, Stats>>
-** <<algorithms-node-similarity-syntax-mutate, Mutate>>
-** <<algorithms-node-similarity-syntax-write, Write>>
 ** <<algorithms-node-similarity-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-node-similarity-examples, Examples>>
 ** <<algorithms-node-similarity-examples-memory-estimation, Memory Estimation>>
@@ -78,9 +74,12 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
-[[algorithms-node-similarity-syntax-stream]]
-=== Stream mode
+.Node Similarity syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run Node Similarity in stream mode on a named graph.
 [source, cypher]
 ----
@@ -108,10 +107,10 @@ include::specific-configuration.adoc[]
 | node2      | Integer | Node ID of the second node.
 | similarity | Float   | Similarity score for the two nodes.
 |===
+======
 
-[[algorithms-node-similarity-syntax-stats]]
-=== Stats
-
+[.include-with-stats]
+======
 .Run Node Similarity in stats mode on a named graph.
 [source, cypher]
 ----
@@ -146,10 +145,10 @@ include::specific-configuration.adoc[]
 | similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
 | configuration                 | Map       | The configuration used for running the algorithm.
 |===
+======
 
-[[algorithms-node-similarity-syntax-mutate]]
-=== Mutate
-
+[.include-with-mutate]
+======
 .Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
@@ -187,10 +186,10 @@ include::specific-configuration.adoc[]
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
+======
 
-[[algorithms-node-similarity-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run Node Similarity in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
@@ -228,6 +227,9 @@ include::specific-configuration.adoc[]
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
+======
+====
+
 
 [[algorithms-node-similarity-syntax-anonymous]]
 === Anonymous graphs
@@ -255,7 +257,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-node-similarity-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-node-similarity-syntax, write mode syntax above>>.
 
 
 [[algorithms-node-similarity-examples]]
@@ -392,7 +394,7 @@ Because of that the result set contains the top 10 similarity scores for each no
 [[algorithms-node-similarity-examples-stats]]
 === Stats
 
-:stats-syntax: algorithms-node-similarity-syntax-stats
+:stats-syntax: algorithms-node-similarity-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
