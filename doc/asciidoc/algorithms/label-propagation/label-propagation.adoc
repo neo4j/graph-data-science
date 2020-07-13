@@ -13,10 +13,6 @@ This topic includes:
 
 * <<algorithms-label-propagation-intro, Introduction>>
 * <<algorithms-label-propagation-syntax, Syntax>>
-** <<algorithms-label-propagation-syntax-stream, Stream>>
-** <<algorithms-label-propagation-syntax-stats, Stats>>
-** <<algorithms-label-propagation-syntax-mutate, Mutate>>
-** <<algorithms-label-propagation-syntax-write, Write>>
 ** <<algorithms-label-propagation-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-label-propagation-examples, Examples>>
 ** <<algorithms-label-propagation-examples-memory-estimation, Memory Estimation>>
@@ -76,11 +72,12 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
+.Label Propagation syntax per mode
+[.tabbed-example]
+====
 
-[[algorithms-label-propagation-syntax-stream]]
-=== Stream
-
-The following will run the algorithm and stream back results:
+[.include-with-stream]
+======
 
 .Run Label Propagation in stream mode on a named graph.
 [source,cypher]
@@ -108,9 +105,10 @@ include::specific-configuration.adoc[]
 | communityId | Integer | Community ID.
 |===
 
+======
 
-[[algorithms-label-propagation-syntax-stats]]
-=== Stats
+[.include-with-stats]
+======
 
 .Run Label Propagation in stats mode on a named graph.
 [source, cypher]
@@ -151,8 +149,10 @@ include::specific-configuration.adoc[]
 |===
 
 
-[[algorithms-label-propagation-syntax-mutate]]
-=== Mutate
+======
+
+[.include-with-mutate]
+======
 
 .Run Label Propagation in mutate mode on a named graph.
 [source, cypher]
@@ -196,9 +196,10 @@ include::specific-configuration.adoc[]
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
+======
 
-[[algorithms-label-propagation-syntax-write]]
-=== Write
+[.include-with-write]
+======
 
 .Run Label Propagation in write mode on a named graph.
 [source, cypher]
@@ -242,13 +243,18 @@ include::specific-configuration.adoc[]
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
+======
+
+====
+
+
 
 [[algorithms-label-propagation-syntax-anonymous]]
 === Anonymous graphs
 
 include::../shared/syntax-anonymous-graphs.adoc[]
 
-.Run PageRank in write mode on an anonymous graph:
+.Run Label Propagation in write mode on an anonymous graph:
 [source, cypher]
 ----
 CALL gds.labelPropagation.write(
@@ -271,7 +277,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-label-propagation-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-label-propagation-syntax, write mode syntax above>>.
 
 
 [[algorithms-label-propagation-examples]]
@@ -394,7 +400,7 @@ The `weighted` option will be demonstrated in <<algorithms-label-propagation-exa
 [[algorithms-label-propagation-examples-stats]]
 === Stats
 
-:stats-syntax: algorithms-label-propagation-syntax-stats
+:stats-syntax: algorithms-label-propagation-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
