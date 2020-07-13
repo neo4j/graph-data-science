@@ -321,19 +321,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public long relationshipPropertyCount() {
-        return relationshipProperties
-            .values()
-            .stream()
-            .flatMapToLong(relationshipPropertyStore -> relationshipPropertyStore
-                .values()
-                .stream()
-                .map(RelationshipProperty::values)
-                .mapToLong(Relationships.Properties::elementCount))
-            .sum();
-    }
-
-    @Override
     public Set<String> relationshipPropertyKeys() {
         return relationshipProperties
             .values()

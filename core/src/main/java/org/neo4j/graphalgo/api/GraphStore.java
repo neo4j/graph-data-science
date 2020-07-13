@@ -120,8 +120,6 @@ public interface GraphStore {
 
     NumberType relationshipPropertyType(String propertyKey);
 
-    long relationshipPropertyCount();
-
     Set<String> relationshipPropertyKeys();
 
     Set<String> relationshipPropertyKeys(RelationshipType relationshipType);

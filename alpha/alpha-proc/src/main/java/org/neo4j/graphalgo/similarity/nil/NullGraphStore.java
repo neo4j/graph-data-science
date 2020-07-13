@@ -164,11 +164,6 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public long relationshipPropertyCount() {
-        return 0;
-    }
-
-    @Override
     public Set<String> relationshipPropertyKeys() {
         return Set.of();
     }

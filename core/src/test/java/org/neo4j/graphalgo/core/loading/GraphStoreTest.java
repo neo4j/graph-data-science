@@ -220,14 +220,12 @@ class GraphStoreTest extends BaseTest {
             .graphStore();
 
         assertThat(graphStore.relationshipCount(), equalTo(4L));
-        assertThat(graphStore.relationshipPropertyCount(), equalTo(7L));
 
         DeletionResult deletionResult = graphStore.deleteRelationships(RelationshipType.of("LER"));
 
         assertEquals(new HashSet<>(singletonList(RelationshipType.of("REL"))), graphStore.relationshipTypes());
         assertFalse(graphStore.hasRelationshipType(RelationshipType.of("LER")));
         assertEquals(1, graphStore.relationshipCount());
-        assertEquals(1, graphStore.relationshipPropertyCount());
 
         assertEquals(3, deletionResult.deletedRelationships());
         assertThat(deletionResult.deletedProperties(), mapEquals(map("p", 3L, "q", 3L)));
