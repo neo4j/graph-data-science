@@ -13,10 +13,6 @@ This topic includes:
 
 * <<algorithms-wcc-intro, Introduction>>
 * <<algorithms-wcc-syntax, Syntax>>
-** <<algorithms-wcc-syntax-stream, Stream>>
-** <<algorithms-wcc-syntax-stats, Stats>>
-** <<algorithms-wcc-syntax-mutate, Mutate>>
-** <<algorithms-wcc-syntax-write, Write>>
 ** <<algorithms-wcc-syntax-anonymous-graphs, Anonymous graphs>>
 * <<algorithms-wcc-examples, Examples>>
 ** <<algorithms-wcc-examples-memory-estimation, Memory Estimation>>
@@ -55,9 +51,12 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 include::../shared/syntax-intro-named-graph.adoc[]
 
 
-[[algorithms-wcc-syntax-stream]]
-=== Stream
+.WCC syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run WCC in stream mode on a named graph.
 [source, cypher]
 ----
@@ -83,11 +82,11 @@ include::specific-configuration.adoc[]
 | nodeId      | Integer | Node ID.
 | componentId | Integer | Component ID.
 |===
+======
 
 
-[[algorithms-wcc-syntax-stats]]
-=== Stats
-
+[.include-with-stats]
+======
 .Run WCC in stats mode on a named graph.
 [source, cypher]
 ----
@@ -121,11 +120,11 @@ include::specific-configuration.adoc[]
 | componentDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-wcc-syntax-mutate]]
-=== Mutate
-
+[.include-with-mutate]
+======
 .Run WCC in mutate mode on a named graph.
 [source, cypher]
 ----
@@ -165,11 +164,11 @@ include::specific-configuration.adoc[]
 | componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-wcc-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run WCC in write mode on a named graph.
 [source, cypher]
 ----
@@ -209,6 +208,8 @@ include::specific-configuration.adoc[]
 | componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
+======
+====
 
 
 [[algorithms-wcc-syntax-anonymous-graphs]]
@@ -238,7 +239,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-wcc-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-wcc-syntax, write mode syntax above>>.
 
 
 [[algorithms-wcc-examples]]
@@ -352,7 +353,7 @@ The `weighted` option will be demonstrated in <<algorithms-wcc-examples-weighted
 [[algorithms-wcc-examples-stats]]
 === Stats
 
-:stats-syntax: algorithms-wcc-syntax-stats
+:stats-syntax: algorithms-wcc-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
