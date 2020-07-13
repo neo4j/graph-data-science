@@ -45,70 +45,12 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 == Syntax
 
 
-[[algorithms-k1coloring-syntax-write]]
-=== Write mode
+.K-1 Coloring syntax per mode
+[.tabbed-example]
+====
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
-[source, cypher]
-----
-CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
-YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
-----
-
-include::../common-configuration/common-parameters.adoc[]
-
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                   | Type    | Default                | Optional | Description
-| nodeProjection         | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
-| relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
-| concurrency            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
-| readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| maxIterations          | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| writeProperty          | String  | n/a                    | no       | The node property this procedure writes the color to.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name          | Type    | Description
-| nodeCount     | Integer | The number of nodes considered.
-| ranIterations | Integer | The actual number of iterations the algorithm ran.
-| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
-| colorCount    | Integer | The number of colors used.
-| write         | Boolean | Specifies if the result was written back as a node property.
-| createMillis  | Integer | Milliseconds for loading data.
-| computeMillis | Integer | Milliseconds for running the algorithm.
-| writeMillis   | Integer | Milliseconds for writing result data back to Neo4j.
-| configuration | Map     | The configuration used for running the algorithm.
-|===
-
-
-=== Mutate mode
-
-.Run K1-Coloring in mutate mode on a graph stored in the catalog.
-[source, cypher]
-----
-CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
-YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
-----
-
-The configuration for the `mutate` mode is similar to the `write` mode.
-Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
-Also, specifying `writeConcurrency` is not possible in `mutate` mode.
-
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
-----
-CALL gds.beta.k1coloring.mutate('myGraph', { mutateProperty: 'color' })
-----
-
-
-=== Stream mode
-[[algorithms-k1coloring-syntax-stream]]
-
+[.include-with-stream]
+======
 .The following describes the API for running the algorithm and stream results:
 [source, cypher]
 ----
@@ -145,9 +87,9 @@ YIELD nodeId, color
 | color         | Integer | The color of the Node
 |===
 
-[[algorithms-k1coloring-syntax-stats]]
-=== Stats mode
-
+======
+[.include-with-stats]
+======
 .The following describes the API for running the algorithm and returning the computation statistics:
 [source, cypher]
 ----
@@ -190,6 +132,73 @@ include::../common-configuration/common-parameters.adoc[]
 | computeMillis | Integer | Milliseconds for running the algorithm.
 | configuration | Map     | The configuration used for running the algorithm.
 |===
+======
+
+
+[.include-with-mutate]
+======
+.The following describes the API for running the algorithm and mutating the in-memory graph:
+[source, cypher]
+----
+CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
+YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
+----
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.beta.k1coloring.mutate('myGraph', { mutateProperty: 'color' })
+----
+======
+
+
+[.include-with-write]
+======
+.The following describes the API for running the algorithm and writing results back to Neo4j:
+[source, cypher]
+----
+CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
+YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
+----
+
+include::../common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                   | Type    | Default                | Optional | Description
+| nodeProjection         | String  | null                   | yes      | The projection of nodes to use when creating the implicit graph.
+| relationshipProjection | String  | null                   | yes      | The projection of relationships to use when creating the implicit graph.
+| concurrency            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see <<system-requirements-cpu>>.
+| readConcurrency        | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency       | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| maxIterations          | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| writeProperty          | String  | n/a                    | no       | The node property this procedure writes the color to.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| nodeCount     | Integer | The number of nodes considered.
+| ranIterations | Integer | The actual number of iterations the algorithm ran.
+| didConverge   | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount    | Integer | The number of colors used.
+| write         | Boolean | Specifies if the result was written back as a node property.
+| createMillis  | Integer | Milliseconds for loading data.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| writeMillis   | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration | Map     | The configuration used for running the algorithm.
+|===
+======
+
+
+====
+
 
 [[algorithms-k1coloring-examples]]
 == Examples
