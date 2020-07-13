@@ -32,11 +32,13 @@ import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -45,6 +47,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest implements
@@ -185,4 +188,22 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
             );
         });
     }
+
+    @Test
+    void testLogWarningForRelationshipWeightPropertyWithoutThreshold() {
+        CypherMapWrapper userInput = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(
+            MapUtil.map("relationshipWeightProperty", "cost")
+        )));
+        var testLog = new TestLog();
+        var graph = fromGdl("(a)");
+
+        applyOnProcedure(proc -> {
+            WccBaseConfig config = proc.newConfig(Optional.empty(), userInput);
+            WccProc.algorithmFactory().build(graph, config, AllocationTracker.EMPTY, testLog);
+        });
+        String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
+        String actual = testLog.getMessages("warn").get(0);
+        assertEquals(expected, actual);
+    }
+
 }

@@ -39,6 +39,10 @@ public class WccFactory<CONFIG extends WccBaseConfig> implements AlgorithmFactor
             configuration.concurrency()
         );
 
+        if (configuration.relationshipWeightProperty() != null && configuration.threshold() == 0) {
+            log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
+        }
+
         return new Wcc(
             graph,
             Pools.DEFAULT,
