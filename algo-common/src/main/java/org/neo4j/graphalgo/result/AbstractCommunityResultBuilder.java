@@ -115,7 +115,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
         Histogram histogram = new Histogram(5);
         long communityCount = 0;
-        for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
+        for (long communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
             long communitySize = componentSizes.get(communityId);
             if (communitySize > 0) {
                 communityCount++;

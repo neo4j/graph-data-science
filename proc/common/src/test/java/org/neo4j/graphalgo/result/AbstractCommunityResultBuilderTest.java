@@ -31,6 +31,7 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
+import java.util.function.LongUnaryOperator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -175,6 +176,27 @@ final class AbstractCommunityResultBuilderTest {
         assertEquals(4.0, histogram.getValueAtPercentile(100D), 0.01);
     }
 
+    @Test
+    void buildCommunityHistogramWithHugeCommunityCount() {
+        AbstractCommunityResultBuilder<Void> builder = builder(
+            procedureCallContext("communityCount", "communityDistribution"),
+            (maybeCommunityCount, maybeHistogram) -> {
+                assertTrue(maybeCommunityCount.isPresent());
+                assertTrue(maybeHistogram.isPresent());
+
+                long communityCount = maybeCommunityCount.orElse(-1);
+                Histogram histogram = maybeHistogram.get();
+
+                assertEquals(2L, communityCount, "should build 2 communities");
+                assertEquals(2L, histogram.getCountAtValue(1L), "should build 2 communities with 1 member");
+            });
+
+        LongUnaryOperator communityFunction = n -> n % 2 == 0 ? 0 : ((long) Integer.MAX_VALUE) + 2;
+        builder
+            .withCommunityFunction(communityFunction)
+            .withNodeCount(2)
+            .build();
+    }
 
     private AbstractCommunityResultBuilder<Void> builder(
         ProcedureCallContext context,
