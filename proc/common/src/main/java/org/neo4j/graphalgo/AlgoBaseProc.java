@@ -121,12 +121,12 @@ public abstract class AlgoBaseProc<
         final AllocationTracker tracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return algorithmFactory(config)
+        return algorithmFactory()
             .build(graph, config, tracker, log)
             .withTerminationFlag(terminationFlag);
     }
 
-    protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory(CONFIG config);
+    protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
 
     protected MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
         MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
@@ -181,7 +181,7 @@ public abstract class AlgoBaseProc<
             }
         }
 
-        estimationBuilder.add("algorithm", algorithmFactory(config).memoryEstimation(config));
+        estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
 
         MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);

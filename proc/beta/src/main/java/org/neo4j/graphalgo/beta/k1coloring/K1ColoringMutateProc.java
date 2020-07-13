@@ -71,7 +71,7 @@ public class K1ColoringMutateProc extends MutateProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected AlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory(K1ColoringMutateConfig config) {
+    protected AlgorithmFactory<K1Coloring, K1ColoringMutateConfig> algorithmFactory() {
         return new K1ColoringFactory<>();
     }
 

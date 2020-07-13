@@ -76,9 +76,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory(
-        LabelPropagationStatsConfig config
-    ) {
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationStatsConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

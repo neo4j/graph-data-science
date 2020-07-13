@@ -86,7 +86,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory(GraphSageStreamConfig config) {
+    protected AlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 

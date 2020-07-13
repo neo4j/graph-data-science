@@ -74,7 +74,7 @@ public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutat
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory(LouvainMutateConfig config) {
+    protected AlgorithmFactory<Louvain, LouvainMutateConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

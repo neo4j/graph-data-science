@@ -74,9 +74,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory(
-        LocalClusteringCoefficientStreamConfig config
-    ) {
+    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStreamConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

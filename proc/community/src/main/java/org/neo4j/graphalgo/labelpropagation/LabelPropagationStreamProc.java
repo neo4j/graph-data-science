@@ -73,9 +73,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory(
-        LabelPropagationStreamConfig config
-    ) {
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationStreamConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

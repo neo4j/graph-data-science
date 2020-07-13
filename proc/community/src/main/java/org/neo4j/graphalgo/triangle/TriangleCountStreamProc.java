@@ -100,9 +100,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory(
-        TriangleCountStreamConfig config
-    ) {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountStreamConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

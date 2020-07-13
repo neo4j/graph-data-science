@@ -82,9 +82,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionStreamConfig> algorithmFactory(
-        RandomProjectionStreamConfig config
-    ) {
+    protected AlgorithmFactory<RandomProjection, RandomProjectionStreamConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 

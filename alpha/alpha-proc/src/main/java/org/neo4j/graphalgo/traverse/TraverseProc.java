@@ -83,26 +83,31 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
     }
 
     @Override
-    protected AlgorithmFactory<Traverse, TraverseConfig> algorithmFactory(TraverseConfig config) {
-        return new AlphaAlgorithmFactory<Traverse, TraverseConfig>() {
+    protected AlgorithmFactory<Traverse, TraverseConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
-            public Traverse buildAlphaAlgo(Graph graph, TraverseConfig configuration, AllocationTracker tracker, Log log) {
+            public Traverse buildAlphaAlgo(
+                Graph graph,
+                TraverseConfig configuration,
+                AllocationTracker tracker,
+                Log log
+            ) {
                 Traverse.ExitPredicate exitFunction;
                 Traverse.Aggregator aggregatorFunction;
                 // target node given; terminate if target is reached
-                if (!config.targetNodes().isEmpty()) {
-                    List<Long> mappedTargets = config.targetNodes().stream()
+                if (!configuration.targetNodes().isEmpty()) {
+                    List<Long> mappedTargets = configuration.targetNodes().stream()
                         .map(graph::toMappedNodeId)
                         .collect(Collectors.toList());
                     exitFunction = (s, t, w) -> mappedTargets.contains(t) ? Traverse.ExitPredicate.Result.BREAK : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> .0;
                     // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
-                } else if (config.maxDepth() != -1) {
-                    exitFunction = (s, t, w) -> w >  config.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
+                } else if (configuration.maxDepth() != -1) {
+                    exitFunction = (s, t, w) -> w > configuration.maxDepth() ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> w + 1.;
                     // maxCost & weightProperty given; aggregate nodes with lower cost then maxCost
-                } else if (config.relationshipWeightProperty() != null && !Double.isNaN(config.maxCost())) {
-                    double maxCost = config.maxCost();
+                } else if (configuration.relationshipWeightProperty() != null && !Double.isNaN(configuration.maxCost())) {
+                    double maxCost = configuration.maxCost();
                     exitFunction = (s, t, w) -> w > maxCost ? Traverse.ExitPredicate.Result.CONTINUE : Traverse.ExitPredicate.Result.FOLLOW;
                     aggregatorFunction = (s, t, w) -> w + graph.relationshipProperty(s, t, 0.0D);
                     // do complete BFS until all nodes have been visited
@@ -111,12 +116,12 @@ public class TraverseProc extends AlgoBaseProc<Traverse, Traverse, TraverseConfi
                     aggregatorFunction = (s, t, w) -> .0;
                 }
 
-                validateStartNode(config.startNode(), graph);
-                config.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
+                validateStartNode(configuration.startNode(), graph);
+                configuration.targetNodes().stream().forEach(neoId -> validateEndNode(neoId, graph));
 
                 return isBfs
-                    ? Traverse.bfs(graph, config.startNode(), exitFunction, aggregatorFunction)
-                    : Traverse.dfs(graph, config.startNode(), exitFunction, aggregatorFunction);
+                    ? Traverse.bfs(graph, configuration.startNode(), exitFunction, aggregatorFunction)
+                    : Traverse.dfs(graph, configuration.startNode(), exitFunction, aggregatorFunction);
             }
         };
     }

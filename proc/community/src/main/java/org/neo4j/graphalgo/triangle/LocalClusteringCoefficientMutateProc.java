@@ -75,9 +75,7 @@ public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalCluste
     }
 
     @Override
-    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig> algorithmFactory(
-        LocalClusteringCoefficientMutateConfig config
-    ) {
+    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientMutateConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

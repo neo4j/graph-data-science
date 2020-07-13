@@ -152,7 +152,7 @@ final class PageRankTest {
         var config = defaultConfigBuilder().build();
         var nodeCount = 100_000;
         assertMemoryEstimation(
-            () -> new PageRankFactory<>(PageRankAlgorithmType.NON_WEIGHTED).memoryEstimation(config),
+            () -> new PageRankFactory<>().memoryEstimation(config),
             nodeCount,
             concurrency,
             expectedMinBytes,

@@ -86,9 +86,7 @@ public class ModularityOptimizationMutateProc extends MutateProc<ModularityOptim
     }
 
     @Override
-    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory(
-        ModularityOptimizationMutateConfig config
-    ) {
+    protected AlgorithmFactory<ModularityOptimization, ModularityOptimizationMutateConfig> algorithmFactory() {
         return new ModularityOptimizationFactory<>();
     }
 

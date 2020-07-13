@@ -75,9 +75,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory(
-        BetweennessCentralityWriteConfig config
-    ) {
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityWriteConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

@@ -79,7 +79,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory(LouvainStatsConfig config) {
+    protected AlgorithmFactory<Louvain, LouvainStatsConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

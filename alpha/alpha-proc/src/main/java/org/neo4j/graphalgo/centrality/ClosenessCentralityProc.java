@@ -142,10 +142,8 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
     }
 
     @Override
-    protected AlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory(
-        ClosenessCentralityConfig config
-    ) {
-        return new AlphaAlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig>() {
+    protected AlgorithmFactory<MSClosenessCentrality, ClosenessCentralityConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public MSClosenessCentrality buildAlphaAlgo(
                 Graph graph,

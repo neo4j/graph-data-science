@@ -88,30 +88,38 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
     }
 
     @Override
-    protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory(RandomWalkConfig config) {
-        return new AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>() {
+    protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
-            public RandomWalk buildAlphaAlgo(Graph graph, RandomWalkConfig configuration, AllocationTracker tracker, Log log) {
-                Number returnParam = config.returnKey();
-                Number inOut = config.inOut();
+            public RandomWalk buildAlphaAlgo(
+                Graph graph,
+                RandomWalkConfig configuration,
+                AllocationTracker tracker,
+                Log log
+            ) {
+                Number returnParam = configuration.returnKey();
+                Number inOut = configuration.inOut();
 
-                RandomWalk.NextNodeStrategy strategy = config.mode().equalsIgnoreCase("random") ?
+                RandomWalk.NextNodeStrategy strategy = configuration.mode().equalsIgnoreCase("random") ?
                     new RandomWalk.RandomNextNodeStrategy(graph, graph) :
                     new RandomWalk.Node2VecStrategy(graph, graph, returnParam.doubleValue(), inOut.doubleValue());
 
-                int limit = (config.walks() == -1)
+                int limit = (configuration.walks() == -1)
                     ? Math.toIntExact(graph.nodeCount())
-                    : Math.toIntExact(config.walks());
+                    : Math.toIntExact(configuration.walks());
 
                 PrimitiveIterator.OfInt idStream = parallelStream(
                     IntStream.range(0, limit).unordered(),
-                    config.concurrency(),
-                    stream -> stream.flatMap((s) -> idStream(config.start(), graph, limit)).limit(limit).iterator()
+                    configuration.concurrency(),
+                    stream -> stream
+                        .flatMap((s) -> idStream(configuration.start(), graph, limit))
+                        .limit(limit)
+                        .iterator()
                 );
 
                 return new RandomWalk(
                     graph,
-                    (int) config.steps(),
+                    (int) configuration.steps(),
                     strategy,
                     configuration.concurrency(),
                     limit,

@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.helpers.collection.MapUtil;
@@ -42,13 +40,6 @@ final class PageRankProc {
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private PageRankProc() {}
-
-    static <CONFIG extends PageRankBaseConfig> AlgorithmFactory<PageRank, CONFIG> algorithmFactory(CONFIG config) {
-        if (config.relationshipWeightProperty() == null) {
-            return new PageRankFactory<>();
-        }
-        return new PageRankFactory<>(PageRankAlgorithmType.WEIGHTED);
-    }
 
     static <PROC_RESULT, CONFIG extends PageRankBaseConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
         PageRankResultBuilder<PROC_RESULT> procResultBuilder,
@@ -70,8 +61,6 @@ final class PageRankProc {
 
         private final boolean buildHistogram;
 
-        private final AllocationTracker tracker;
-
         protected long ranIterations;
 
         protected boolean didConverge;
@@ -82,14 +71,10 @@ final class PageRankProc {
 
         LongToDoubleFunction centralityFunction = null;
 
-        protected PageRankResultBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
+        protected PageRankResultBuilder(ProcedureCallContext callContext) {
             this.buildHistogram = callContext
                 .outputFields()
                 .anyMatch(s -> s.equalsIgnoreCase("centralityDistribution"));
-            this.tracker = tracker;
         }
 
         protected abstract PROC_RESULT buildResult();

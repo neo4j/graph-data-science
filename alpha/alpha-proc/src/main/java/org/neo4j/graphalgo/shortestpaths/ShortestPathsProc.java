@@ -117,8 +117,8 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
     }
 
     @Override
-    protected AlgorithmFactory<ShortestPaths, ShortestPathsConfig> algorithmFactory(ShortestPathsConfig config) {
-        return new AlphaAlgorithmFactory<ShortestPaths, ShortestPathsConfig>() {
+    protected AlgorithmFactory<ShortestPaths, ShortestPathsConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public ShortestPaths buildAlphaAlgo(
                 Graph graph,
@@ -127,7 +127,7 @@ public class ShortestPathsProc extends AlgoBaseProc<ShortestPaths, ShortestPaths
                 Log log
             ) {
                 validateStartNode(configuration.startNode(), graph);
-                return new ShortestPaths(graph, config.startNode());
+                return new ShortestPaths(graph, configuration.startNode());
             }
         };
     }

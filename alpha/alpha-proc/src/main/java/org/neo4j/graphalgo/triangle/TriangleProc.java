@@ -79,8 +79,8 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     }
 
     @Override
-    protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory(TriangleCountBaseConfig config) {
-        return new AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>() {
+    protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public TriangleStream buildAlphaAlgo(
                 Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log

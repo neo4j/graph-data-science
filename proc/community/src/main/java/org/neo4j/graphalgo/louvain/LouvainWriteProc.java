@@ -87,7 +87,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected AlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory(LouvainWriteConfig config) {
+    protected AlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
         return new LouvainFactory<>();
     }
 

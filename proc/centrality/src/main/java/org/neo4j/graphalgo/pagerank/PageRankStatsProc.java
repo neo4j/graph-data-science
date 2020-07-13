@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -63,7 +62,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computeResult) {
-        return PageRankProc.resultBuilder(new StatsResult.Builder(callContext, computeResult.tracker()), computeResult);
+        return PageRankProc.resultBuilder(new StatsResult.Builder(callContext), computeResult);
     }
 
     @Override
@@ -77,8 +76,8 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankStatsConfig> algorithmFactory(PageRankStatsConfig config) {
-        return PageRankProc.algorithmFactory(config);
+    protected AlgorithmFactory<PageRank, PageRankStatsConfig> algorithmFactory() {
+        return new PageRankFactory<>();
     }
 
     public static final class StatsResult {
@@ -111,14 +110,8 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
         static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context) {
+                super(context);
             }
 
             @Override

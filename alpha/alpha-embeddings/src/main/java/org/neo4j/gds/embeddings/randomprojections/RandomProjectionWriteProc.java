@@ -61,7 +61,7 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionWriteConfig> algorithmFactory(RandomProjectionWriteConfig config) {
+    protected AlgorithmFactory<RandomProjection, RandomProjectionWriteConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 

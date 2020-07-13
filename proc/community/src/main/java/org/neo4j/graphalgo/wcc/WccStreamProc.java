@@ -77,7 +77,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory(WccStreamConfig config) {
+    protected AlgorithmFactory<Wcc, WccStreamConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

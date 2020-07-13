@@ -110,7 +110,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
 
 
     @Override
-    protected AlgorithmFactory<PageRank, EigenvectorCentralityConfig> algorithmFactory(EigenvectorCentralityConfig config) {
+    protected AlgorithmFactory<PageRank, EigenvectorCentralityConfig> algorithmFactory() {
         return new EigenvectorCentralityAlgorithmFactory();
     }
 

@@ -90,9 +90,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory(
-        LocalClusteringCoefficientStatsConfig config
-    ) {
+    protected AlgorithmFactory<LocalClusteringCoefficient, LocalClusteringCoefficientStatsConfig> algorithmFactory() {
         return new LocalClusteringCoefficientFactory<>();
     }
 

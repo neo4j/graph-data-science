@@ -31,16 +31,6 @@ import org.neo4j.logging.Log;
 
 public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends AlgorithmFactory<PageRank, CONFIG> {
 
-    private final PageRankAlgorithmType algorithmType;
-
-    public PageRankFactory() {
-        this(PageRankAlgorithmType.NON_WEIGHTED);
-    }
-
-    public PageRankFactory(PageRankAlgorithmType algorithmType) {
-        this.algorithmType = algorithmType;
-    }
-
     @Override
     public PageRank build(
         Graph graph,
@@ -55,7 +45,7 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
             configuration.concurrency()
         );
 
-        return algorithmType.create(
+        return algorithmType(configuration).create(
             graph,
             configuration.sourceNodeIds(),
             configuration,
@@ -74,8 +64,14 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends Algorith
                 .perThread("starts[]", MemoryUsage::sizeOfLongArray)
                 .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
                 .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                .perThread("ComputeStep", algorithmType.memoryEstimation())
+                .perThread("ComputeStep", algorithmType(config).memoryEstimation())
                 .build()))
             .build();
+    }
+
+    private PageRankAlgorithmType algorithmType(PageRankBaseConfig configuration) {
+        return configuration.relationshipWeightProperty() == null
+            ? PageRankAlgorithmType.NON_WEIGHTED
+            : PageRankAlgorithmType.WEIGHTED;
     }
 }

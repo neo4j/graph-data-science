@@ -77,7 +77,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory(WccWriteConfig config) {
+    protected AlgorithmFactory<Wcc, WccWriteConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

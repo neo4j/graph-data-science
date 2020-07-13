@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -74,8 +73,8 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankMutateConfig> algorithmFactory(PageRankMutateConfig config) {
-        return PageRankProc.algorithmFactory(config);
+    protected AlgorithmFactory<PageRank, PageRankMutateConfig> algorithmFactory() {
+        return new PageRankFactory<>();
     }
 
     @Override
@@ -85,7 +84,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
-        return PageRankProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.tracker()), computeResult);
+        return PageRankProc.resultBuilder(new MutateResult.Builder(callContext), computeResult);
     }
 
     public static final class MutateResult {
@@ -124,14 +123,8 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
 
         static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context) {
+                super(context);
             }
 
             @Override

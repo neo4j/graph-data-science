@@ -144,8 +144,8 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
     }
 
     @Override
-    protected AlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory(SccConfig config) {
-        return new AlphaAlgorithmFactory<SccAlgorithm, SccConfig>() {
+    protected AlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public SccAlgorithm buildAlphaAlgo(
                 Graph graph, SccConfig configuration, AllocationTracker tracker, Log log

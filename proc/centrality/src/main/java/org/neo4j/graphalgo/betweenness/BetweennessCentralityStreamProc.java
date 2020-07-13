@@ -88,9 +88,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory(
-        BetweennessCentralityStreamConfig config
-    ) {
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStreamConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 }

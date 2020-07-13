@@ -81,20 +81,20 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory(Node2VecStreamConfig config) {
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            0, //dummy value, gets overridden
-            "Node2Vec",
-            config.concurrency()
-        );
+    protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
             public Node2Vec build(
                 Graph graph, Node2VecStreamConfig configuration, AllocationTracker tracker, Log log
             ) {
+                var progressLogger = new BatchingProgressLogger(
+                    log,
+                    0, //dummy value, gets overridden
+                    "Node2Vec",
+                    configuration.concurrency()
+                );
                 validateConfig(configuration, graph);
-                return new Node2Vec(graph, config, progressLogger, tracker);
+                return new Node2Vec(graph, configuration, progressLogger, tracker);
             }
 
             @Override

@@ -80,8 +80,8 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
     }
 
     @Override
-    protected AlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory(TestConfig config) {
-        return new AlgorithmFactory<TestAlgorithm, TestConfig>() {
+    protected AlgorithmFactory<TestAlgorithm, TestConfig> algorithmFactory() {
+        return new AlgorithmFactory<>() {
             @Override
             public TestAlgorithm build(
                 Graph graph, TestConfig configuration, AllocationTracker tracker, Log log

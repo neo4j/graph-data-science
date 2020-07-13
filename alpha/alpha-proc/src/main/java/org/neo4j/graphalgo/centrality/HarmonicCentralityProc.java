@@ -145,7 +145,7 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
     }
 
     @Override
-    protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory(HarmonicCentralityConfig config) {
+    protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
         return new AlphaAlgorithmFactory<>() {
             @Override
             public HarmonicCentrality buildAlphaAlgo(

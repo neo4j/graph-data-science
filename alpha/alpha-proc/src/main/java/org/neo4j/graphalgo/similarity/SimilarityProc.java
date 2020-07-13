@@ -137,7 +137,7 @@ abstract class SimilarityProc
     abstract ALGO newAlgo(CONFIG config);
 
     @Override
-    protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory(CONFIG config) {
+    protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
         return new AlphaAlgorithmFactory<>() {
             @Override
             public ALGO buildAlphaAlgo(
@@ -147,7 +147,7 @@ abstract class SimilarityProc
                 Log log
             ) {
                 GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
-                return newAlgo(config);
+                return newAlgo(configuration);
             }
         };
     }

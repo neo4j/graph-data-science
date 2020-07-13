@@ -77,8 +77,8 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, Centralit
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory(PageRankStreamConfig config) {
-        return PageRankProc.algorithmFactory(config);
+    protected AlgorithmFactory<PageRank, PageRankStreamConfig> algorithmFactory() {
+        return new PageRankFactory<>();
     }
 
     @Override

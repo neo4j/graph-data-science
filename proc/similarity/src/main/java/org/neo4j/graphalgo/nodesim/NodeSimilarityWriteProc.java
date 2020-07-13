@@ -76,7 +76,7 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityWriteConfig> algorithmFactory(NodeSimilarityWriteConfig config) {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityWriteConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

@@ -127,8 +127,8 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, ArticleRankConfig> algorithmFactory(ArticleRankConfig config) {
-        return new AlphaAlgorithmFactory<PageRank, ArticleRankConfig>() {
+    protected AlgorithmFactory<PageRank, ArticleRankConfig> algorithmFactory() {
+        return new AlphaAlgorithmFactory<>() {
             @Override
             public PageRank build(
                 Graph graph, ArticleRankConfig configuration, AllocationTracker tracker, Log log

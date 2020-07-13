@@ -80,9 +80,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory(
-        TriangleCountMutateConfig config
-    ) {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountMutateConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

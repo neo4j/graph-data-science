@@ -70,20 +70,20 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory(Node2VecWriteConfig config) {
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            0, //dummy value, gets overridden
-            "Node2Vec",
-            config.concurrency()
-        );
+    protected AlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
             public Node2Vec build(
                 Graph graph, Node2VecWriteConfig configuration, AllocationTracker tracker, Log log
             ) {
+                var progressLogger = new BatchingProgressLogger(
+                    log,
+                    0, //dummy value, gets overridden
+                    "Node2Vec",
+                    configuration.concurrency()
+                );
                 validateConfig(configuration, graph);
-                return new Node2Vec(graph, config, progressLogger, tracker);
+                return new Node2Vec(graph, configuration, progressLogger, tracker);
             }
 
             @Override

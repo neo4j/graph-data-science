@@ -81,9 +81,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory(
-        TriangleCountWriteConfig config
-    ) {
+    protected AlgorithmFactory<IntersectingTriangleCount, TriangleCountWriteConfig> algorithmFactory() {
         return new IntersectingTriangleCountFactory<>();
     }
 

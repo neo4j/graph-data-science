@@ -74,9 +74,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory(
-        BetweennessCentralityStatsConfig config
-    ) {
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityStatsConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 

@@ -84,9 +84,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     }
 
     @Override
-    protected AlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory(
-        LabelPropagationWriteConfig config
-    ) {
+    protected AlgorithmFactory<LabelPropagation, LabelPropagationWriteConfig> algorithmFactory() {
         return new LabelPropagationFactory<>();
     }
 

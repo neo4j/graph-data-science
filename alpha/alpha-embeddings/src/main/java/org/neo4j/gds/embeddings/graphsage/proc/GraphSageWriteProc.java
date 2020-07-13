@@ -60,7 +60,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory(GraphSageWriteConfig config) {
+    protected AlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 

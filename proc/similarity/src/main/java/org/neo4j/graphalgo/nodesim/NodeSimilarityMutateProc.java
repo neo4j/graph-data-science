@@ -82,9 +82,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory(
-        NodeSimilarityMutateConfig config
-    ) {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityMutateConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

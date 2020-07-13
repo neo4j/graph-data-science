@@ -82,7 +82,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     }
 
     @Override
-    protected AlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory(WccStatsConfig config) {
+    protected AlgorithmFactory<Wcc, WccStatsConfig> algorithmFactory() {
         return WccProc.algorithmFactory();
     }
 

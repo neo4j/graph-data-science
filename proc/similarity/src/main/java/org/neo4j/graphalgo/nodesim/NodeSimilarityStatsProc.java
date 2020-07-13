@@ -70,7 +70,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityStatsConfig> algorithmFactory(NodeSimilarityStatsConfig config) {
+    protected AlgorithmFactory<NodeSimilarity, NodeSimilarityStatsConfig> algorithmFactory() {
         return new NodeSimilarityFactory<>();
     }
 

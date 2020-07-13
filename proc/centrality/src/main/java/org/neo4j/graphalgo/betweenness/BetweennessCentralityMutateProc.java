@@ -75,9 +75,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
     }
 
     @Override
-    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory(
-        BetweennessCentralityMutateConfig config
-    ) {
+    protected AlgorithmFactory<BetweennessCentrality, BetweennessCentralityMutateConfig> algorithmFactory() {
         return BetweennessCentralityProc.algorithmFactory();
     }
 
