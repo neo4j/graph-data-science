@@ -37,10 +37,68 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-modularity-optimization-syntax]]
 == Syntax
 
+.Modularity Optimization syntax per mode
+[.tabbed-example]
+====
 
-=== Write mode
+[.include-with-stream]
+======
+.Run Modularity Optimization in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
+YIELD nodeId, communityId
+----
 
-.The following describes the API for running the algorithm and writing results back to Neo4j:
+include::../common-configuration/common-parameters.adoc[]
+
+include::../common-configuration/common-configuration.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                       | Type    | Default                | Optional | Description
+| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
+| tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
+| consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID
+| communityId | Integer | Community ID
+|===
+======
+
+
+[.include-with-mutate]
+======
+.Run Modularity Optimization in mutate mode on a named graph.
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
+YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
+----
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.The following will run the algorithm and store the results in `myGraph`:
+[source, cypher]
+----
+CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modularity' })
+----
+======
+
+
+[.include-with-write]
+======
+.Run Modularity Optimization in write mode on a named graph.
 [source, cypher]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
@@ -79,59 +137,8 @@ include::../common-configuration/common-configuration.adoc[]
 | communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
-
-
-=== Mutate mode
-
-.Run Modularity Optimization in mutate mode on a graph stored in the catalog.
-[source, cypher]
-----
-CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
-----
-
-The configuration for the `mutate` mode is similar to the `write` mode.
-Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
-Also, specifying `writeConcurrency` is not possible in `mutate` mode.
-
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
-----
-CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modularity' })
-----
-
-
-=== Stream mode
-
-.The following will run the algorithm and stream back results:
-[source, cypher]
-----
-CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodeId, communityId
-----
-
-include::../common-configuration/common-parameters.adoc[]
-
-include::../common-configuration/common-configuration.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                       | Type    | Default                | Optional | Description
-| maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
-| tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
-| seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
-| consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
-|===
-
-.Results
-[opts="header"]
-|===
-| Name        | Type    | Description
-| nodeId      | Integer | Node ID
-| communityId | Integer | Community ID
-|===
+======
+====
 
 
 [[algorithms-modularity-optimization-examples]]
