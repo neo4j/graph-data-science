@@ -22,10 +22,12 @@ For more information on this algorithm, see:
 [[algorithms-embeddings-node2vec-syntax]]
 == Syntax
 
+.Node2Vec syntax per mode
+[.tabbed-example]
+====
 
-[[algorithms-embeddings-node2vec-syntax-stream]]
-=== Stream mode
-
+[.include-with-stream]
+======
 .Run Node2Vec in stream mode on a named graph.
 [source, cypher]
 ----
@@ -51,12 +53,10 @@ include::specific-configuration.adoc[]
 | nodeId | Integer     | The Neo4j node ID.
 | embedding | List<Float> | The computed node embedding.
 |===
+======
 
-
-
-[[algorithms-embeddings-node2vec-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run Node2Vec in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
@@ -91,6 +91,8 @@ include::specific-configuration.adoc[]
 | writeMillis        | Integer | Milliseconds for writing result data back to Neo4j.
 | configuration      | Map     | The configuration used for running the algorithm.
 |===
+======
+====
 
 
 
@@ -118,7 +120,7 @@ include::../common-configuration/common-configuration-anonymous-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-embeddings-node2vec-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-node2vec-syntax, write mode syntax above>>.
 
 
 
