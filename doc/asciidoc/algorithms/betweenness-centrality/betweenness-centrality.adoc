@@ -14,10 +14,6 @@ This topic includes:
 * <<algorithms-betweenness-centrality-intro, Introduction>>
 * <<algorithms-betweenness-centrality-considerations, Considerations and sampling>>
 * <<algorithms-betweenness-centrality-syntax, Syntax>>
-** <<algorithms-betweenness-centrality-syntax-stream, Stream>>
-** <<algorithms-betweenness-centrality-syntax-stats, Stats>>
-** <<algorithms-betweenness-centrality-syntax-mutate, Mutate>>
-** <<algorithms-betweenness-centrality-syntax-write, Write>>
 ** <<algorithms-betweenness-centrality-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-betweenness-centrality-examples, Examples>>
 ** <<algorithms-betweenness-centrality-examples-memory-estimation, Memory Estimation>>
@@ -87,9 +83,12 @@ The idea behind this strategy is that such nodes are likely to lie on many short
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
-[[algorithms-betweenness-centrality-syntax-stream]]
-=== Stream
+.Betweenness Centrality syntax per mode
+[.tabbed-example]
+====
 
+[.include-with-stream]
+======
 .Run Betweenness Centrality in stream mode on a named graph.
 [source, cypher]
 ----
@@ -115,11 +114,11 @@ include::specific-configuration.adoc[]
 | nodeId | Integer | Node ID.
 | score  | Float   | Betweenness Centrality score.
 |===
+======
 
 
-[[algorithms-betweenness-centrality-syntax-stats]]
-=== Stats
-
+[.include-with-stats]
+======
 .Run Betweenness Centrality in stats mode on a named graph.
 [source, cypher]
 ----
@@ -155,12 +154,12 @@ include::specific-configuration.adoc[]
 | postProcessingMillis | Integer | Milliseconds for computing the statistics.
 | configuration        | Map     | Configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-betweenness-centrality-syntax-mutate]]
-=== Mutate
-
-.Run Betweenness Centrality in mutate mode on a graph stored in the catalog.
+[.include-with-mutate]
+======
+.Run Betweenness Centrality in mutate mode on a named graph.
 [source, cypher]
 ----
 CALL gds.betweenness.mutate(
@@ -199,11 +198,11 @@ include::specific-configuration.adoc[]
 | nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
 | configuration         | Map     | Configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-betweenness-centrality-syntax-write]]
-=== Write
-
+[.include-with-write]
+======
 .Run Betweenness Centrality in write mode on a named graph.
 [source, cypher]
 ----
@@ -245,6 +244,11 @@ include::specific-configuration.adoc[]
 |===
 
 
+======
+
+====
+
+
 [[algorithms-betweenness-centrality-syntax-anonymous]]
 === Anonymous graphs
 
@@ -271,7 +275,8 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-betweenness-centrality-syntax-write, specified above>>.
+
+The results are the same as for running write mode with a named graph, see the <<algorithms-betweenness-centrality-syntax, write mode syntax above>>.
 
 
 [[algorithms-betweenness-centrality-examples]]
@@ -411,7 +416,7 @@ Conversely, there are no shortest paths that pass through either of the nodes 'A
 === Stats
 
 :stats-details: In particular, Betweenness Centrality returns the minimum, maximum and sum of all centrality scores.
-:stats-syntax: algorithms-betweenness-centrality-syntax-stats
+:stats-syntax: algorithms-betweenness-centrality-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
