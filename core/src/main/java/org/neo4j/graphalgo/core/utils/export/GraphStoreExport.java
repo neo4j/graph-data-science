@@ -27,6 +27,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -79,8 +80,8 @@ public class GraphStoreExport {
         this.config = config;
     }
 
-    public void run() {
-        run(false);
+    public ImportedProperties run() {
+        return run(false);
     }
 
     /**
@@ -93,7 +94,7 @@ public class GraphStoreExport {
         run(true);
     }
 
-    private void run(boolean defaultSettingsSuitableForTests) {
+    private ImportedProperties run(boolean defaultSettingsSuitableForTests) {
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
         var databaseConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, neo4jHome.toPath());
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
@@ -109,9 +110,11 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
+            var nodeStore = NodeStore.of(graphStore);
+            var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
             Input input = Neo4jProxy.batchInputFrom(new GraphStoreInput(
-                NodeStore.of(graphStore),
-                RelationshipStore.of(graphStore, config.defaultRelationshipType()),
+                nodeStore,
+                relationshipStore,
                 config.batchSize()
             ));
 
@@ -141,11 +144,17 @@ public class GraphStoreExport {
                 Collector.EMPTY
             );
             importer.doImport(input);
+
+            long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
+            long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
+            return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             lifeSupport.shutdown();
         }
+
+        return null;
     }
 
     @NotNull
@@ -166,6 +175,13 @@ public class GraphStoreExport {
                 return false;
             }
         };
+    }
+
+    @ValueClass
+    public interface ImportedProperties {
+
+        long nodePropertyCount();
+        long relationshipPropertyCount();
     }
 
     static class NodeStore {
@@ -251,7 +267,7 @@ public class GraphStoreExport {
                 });
             }
 
-            if (graphStore.nodePropertyCount() == 0) {
+            if (graphStore.nodePropertyKeys().isEmpty()) {
                 nodeProperties = null;
             } else {
                 nodeProperties = graphStore.nodePropertyKeys().entrySet().stream().collect(Collectors.toMap(
@@ -263,11 +279,11 @@ public class GraphStoreExport {
                 ));
             }
             return new NodeStore(
-                graphStore.nodeCount(),
-                labelCounts,
-                nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
-                nodeProperties
-            );
+                    graphStore.nodeCount(),
+                    labelCounts,
+                    nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
+                    nodeProperties
+                );
         }
     }
 
