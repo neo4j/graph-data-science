@@ -14,10 +14,6 @@ This topic includes:
 * <<algorithms-page-rank-intro, Introduction>>
 * <<algorithms-page-rank-considerations, Considerations>>
 * <<algorithms-page-rank-syntax, Syntax>>
-** <<algorithms-page-rank-syntax-stream, Stream>>
-** <<algorithms-page-rank-syntax-stats, Stats>>
-** <<algorithms-page-rank-syntax-mutate, Mutate>>
-** <<algorithms-page-rank-syntax-write, Write>>
 * <<algorithms-page-rank-examples, Examples>>
 ** <<algorithms-page-rank-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-page-rank-examples-stream, Stream>>
@@ -81,8 +77,12 @@ It can be interpreted as a probability of a web surfer to sometimes jump to a ra
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
-[[algorithms-page-rank-syntax-stream]]
-=== Stream
+.PageRank syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-stream]
+======
 
 .Run PageRank in stream mode on a named graph.
 [source, cypher]
@@ -110,9 +110,10 @@ include::specific-configuration.adoc[]
 | score   | Float   | PageRank score
 |===
 
+======
 
-[[algorithms-page-rank-syntax-stats]]
-=== Stats
+[.include-with-stats]
+======
 
 .Run PageRank in stats mode on a named graph.
 [source, cypher]
@@ -150,11 +151,12 @@ include::specific-configuration.adoc[]
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 
+======
 
-[[algorithms-page-rank-syntax-mutate]]
-=== Mutate
+[.include-with-mutate]
+======
 
-.Run PageRank in mutate mode on a graph stored in the catalog.
+.Run PageRank in mutate mode on a named graph.
 [source, cypher]
 ----
 CALL gds.pageRank.mutate(
@@ -194,9 +196,10 @@ include::specific-configuration.adoc[]
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 
+======
 
-[[algorithms-page-rank-syntax-write]]
-=== Write
+[.include-with-write]
+======
 
 .Run PageRank in write mode on a named graph.
 [source, cypher]
@@ -238,6 +241,11 @@ include::specific-configuration.adoc[]
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 
+======
+
+====
+
+
 [[algorithms-page-rank-syntax-anonymous]]
 === Anonymous graphs
 
@@ -264,7 +272,7 @@ include::../common-configuration/common-write-configuration-anonymous-graph.adoc
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, <<algorithms-page-rank-syntax-write, specified above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
 
 
 [[algorithms-page-rank-examples]]
@@ -393,7 +401,7 @@ NOTE: We are using `stream` mode to illustrate running the algorithm as `weighte
 === Stats
 
 :stats-details: For example PageRank stats returns centrality histogram which can be used to monitor the distribution of PageRank score values across all computed nodes.
-:stats-syntax: algorithms-page-rank-syntax-stats
+:stats-syntax: algorithms-page-rank-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
