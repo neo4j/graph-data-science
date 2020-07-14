@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.triangle;
 
-import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -32,8 +31,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
@@ -59,8 +56,6 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
     private final TriangleCountBaseConfig config;
     private ExecutorService executorService;
     private final AtomicLong queue;
-    // TODO: don't allow this to be merged
-    private final Set<Triple<Long, Long, Long>> triangles = new HashSet<>();
 
     // results
     private final HugeAtomicLongArray triangleCounts;
@@ -146,17 +141,12 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
         @Override
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
-            // this will make tests pass but is a horrible solution for scale
-            // TODO: replace this with a better idea, perhaps modify how #intersection works? I dunno
-            if (triangles.add(Triple.of(nodeA, nodeB, nodeC))) {
-
-                // only use this triangle where the id's are in order, not the other 5
-                if (nodeA < nodeB) { //  && nodeB < nodeC
-                    triangleCounts.update(nodeA, (previous) -> previous + 1);
-                    triangleCounts.update(nodeB, (previous) -> previous + 1);
-                    triangleCounts.update(nodeC, (previous) -> previous + 1);
-                    globalTriangleCounter.increment();
-                }
+            // only use this triangle where the id's are in order, not the other 5
+            if (nodeA < nodeB) { //  && nodeB < nodeC
+                triangleCounts.update(nodeA, (previous) -> previous + 1);
+                triangleCounts.update(nodeB, (previous) -> previous + 1);
+                triangleCounts.update(nodeC, (previous) -> previous + 1);
+                globalTriangleCounter.increment();
             }
         }
     }
