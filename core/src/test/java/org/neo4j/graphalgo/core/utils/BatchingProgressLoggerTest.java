@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.core.utils;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -79,8 +82,7 @@ class BatchingProgressLoggerTest {
         );
 
         for (int i = 0; i < taskVolume; i += progressStep) {
-            int currentProgress = i;
-            logger.logProgress(progressStep, () -> String.valueOf(currentProgress));
+            logger.logProgress(progressStep);
         }
 
         var threadName = Thread.currentThread().getName();
@@ -100,4 +102,32 @@ class BatchingProgressLoggerTest {
         var messages = log.getMessages("info");
         assertEquals(expectedMessages, messages);
     }
+
+    @Test
+    void shouldLogEveryPercentageOnlyOnce() {
+        var log = new TestLog();
+        var logger = new BatchingProgressLogger(log, 400, "Test", 4);
+
+        var tasks = IntStream
+            .range(0, 4)
+            .mapToObj(i -> {
+                Runnable runnable = () -> IntStream.range(0, 100).forEach(ignore -> {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    logger.logProgress();
+                });
+                return runnable;
+            }).collect(Collectors.toList());
+
+        ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
+
+        var loggedPercentages = log.getMessages(TestLog.INFO);
+        assertEquals(101, loggedPercentages.size());
+        assertEquals(101, new HashSet<>(loggedPercentages).size());
+    }
+
+
 }
