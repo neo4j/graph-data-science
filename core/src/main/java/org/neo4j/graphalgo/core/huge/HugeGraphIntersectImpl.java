@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.LongPredicate;
@@ -72,9 +71,11 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
         AdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
         long nodeIdC, currentA, s, t;
-        boolean hasNext = true;
 
-        while (hasNext) {
+        long lastNodeB;
+        long lastNodeC;
+        while (mainDecompressingCursor.hasNextVLong()) {
+            lastNodeC = -1;
             if (degreeFilter.test(nodeIdB)) {
                 decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
                 nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
@@ -82,8 +83,9 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                     decompressingCursorA.copyFrom(mainDecompressingCursor);
                     currentA = decompressingCursorA.advance(nodeIdC);
 
-                    if (currentA == nodeIdC) {
+                    if (currentA == nodeIdC && nodeIdC > lastNodeC) {
                         consumer.accept(nodeIdA, nodeIdB, nodeIdC);
+                        lastNodeC = nodeIdC;
                     }
 
                     if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
@@ -97,14 +99,16 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                     while (lead.hasNextVLong() && follow.hasNextVLong()) {
                         s = lead.nextVLong();
                         t = follow.advance(s);
-                        if (t == s) {
+                        if (t == s && t > lastNodeC) {
                             consumer.accept(nodeIdA, nodeIdB, s);
+                            lastNodeC = t;
                         }
                     }
                 }
             }
 
-            if (hasNext = mainDecompressingCursor.hasNextVLong()) {
+            lastNodeB = nodeIdB;
+            while (mainDecompressingCursor.hasNextVLong() && nodeIdB == lastNodeB) {
                 nodeIdB = mainDecompressingCursor.nextVLong();
             }
         }
@@ -128,13 +132,5 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
             return empty;
         }
         return array.decompressingCursor(reuse, offset);
-    }
-
-    private void consumeNodes(
-            long startNode,
-            AdjacencyList.DecompressingCursor decompressingCursor,
-            RelationshipConsumer consumer) {
-        //noinspection StatementWithEmptyBody
-        while (decompressingCursor.hasNextVLong() && consumer.accept(startNode, decompressingCursor.nextVLong())) ;
     }
 }
