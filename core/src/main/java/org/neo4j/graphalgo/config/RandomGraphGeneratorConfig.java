@@ -120,8 +120,8 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
 
     @Override
     @Configuration.Ignore
-    default void accept(Visitor visitor) {
-        visitor.visit(this);
+    default <R> R accept(Cases<R> visitor) {
+        return visitor.random(this);
     }
 
     static RandomGraphGeneratorConfig of(

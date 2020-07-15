@@ -84,7 +84,7 @@ public interface GraphCreateConfig extends BaseConfig {
     }
 
     @Configuration.Ignore
-    void accept(Visitor visitor);
+    <R> R accept(Cases<R> visitor);
 
     static GraphCreateConfig createImplicit(String username, CypherMapWrapper config) {
         CypherMapWrapper.PairResult result = config.verifyMutuallyExclusivePairs(
@@ -101,7 +101,34 @@ public interface GraphCreateConfig extends BaseConfig {
         }
     }
 
-    interface Visitor {
+    interface Cases<R> {
+        R store(GraphCreateFromStoreConfig storeConfig);
+
+        R cypher(GraphCreateFromCypherConfig cypherConfig);
+
+        R random(RandomGraphGeneratorConfig randomGraphConfig);
+    }
+
+    interface Visitor extends Cases<Void> {
+
+        @Override
+        default Void store(GraphCreateFromStoreConfig storeConfig) {
+            visit(storeConfig);
+            return null;
+        };
+
+        @Override
+        default Void cypher(GraphCreateFromCypherConfig cypherConfig) {
+            visit(cypherConfig);
+            return null;
+        };
+
+        @Override
+        default Void random(RandomGraphGeneratorConfig randomGraphConfig) {
+            visit(randomGraphConfig);
+            return null;
+        };
+
         default void visit(GraphCreateFromStoreConfig storeConfig) {}
 
         default void visit(GraphCreateFromCypherConfig cypherConfig) {}
@@ -109,13 +136,25 @@ public interface GraphCreateConfig extends BaseConfig {
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
 
-    interface Rewriter extends Visitor {
+    interface Rewriter extends Cases<GraphCreateConfig> {
 
-        GraphCreateConfig rewrittenConfig();
+        @Override
+        default GraphCreateConfig store(GraphCreateFromStoreConfig storeConfig) {
+            return storeConfig;
+        }
+
+        @Override
+        default GraphCreateConfig cypher(GraphCreateFromCypherConfig cypherConfig) {
+            return cypherConfig;
+        }
+
+        @Override
+        default GraphCreateConfig random(RandomGraphGeneratorConfig randomGraphConfig) {
+            return randomGraphConfig;
+        }
 
         default GraphCreateConfig apply(GraphCreateConfig config) {
-            config.accept(this);
-            return rewrittenConfig();
+            return config.accept(this);
         }
     }
 }

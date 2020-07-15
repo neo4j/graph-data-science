@@ -148,8 +148,8 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
 
     @Override
     @Configuration.Ignore
-    default void accept(Visitor visitor) {
-        visitor.visit(this);
+    default <R> R accept(Cases<R> visitor) {
+        return visitor.store(this);
     }
 
     static GraphCreateFromStoreConfig emptyWithName(String userName, String graphName) {

@@ -44,14 +44,15 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
 
     @Override
     @Configuration.Ignore
-    default void accept(GraphCreateConfig.Visitor visitor) {
-        if (visitor instanceof Visitor) {
-            ((Visitor) visitor).visit(this);
+    default <R> R accept(GraphCreateConfig.Cases<R> cases) {
+        if (cases instanceof Cases) {
+            return ((Cases<R>) cases).gdl(this);
         }
-        throw new IllegalArgumentException("Expected Visitor of type " + Visitor.class.getName());
+        throw new IllegalArgumentException("Expected Visitor of type " + Cases.class.getName());
     }
 
-    interface Visitor extends GraphCreateConfig.Visitor {
-        default void visit(GraphCreateFromGdlConfig gdlConfig) {};
+    interface Cases<R> extends GraphCreateConfig.Cases<R> {
+
+        R gdl(GraphCreateFromGdlConfig gdlConfig);
     }
 }

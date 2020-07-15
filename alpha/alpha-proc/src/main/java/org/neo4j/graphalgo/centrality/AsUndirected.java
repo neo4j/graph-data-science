@@ -25,32 +25,23 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 
-public final class AsUndirected implements GraphCreateConfig.Rewriter {
+public enum AsUndirected implements GraphCreateConfig.Rewriter {
 
-    private GraphCreateConfig undirectedConfig;
-
-    private AsUndirected(GraphCreateConfig originalConfig) {
-        this.undirectedConfig = originalConfig;
-    }
+    INSTANCE;
 
     static GraphCreateConfig rewrite(GraphCreateConfig config) {
-        return new AsUndirected(config).apply(config);
+        return INSTANCE.apply(config);
     }
 
     @Override
-    public void visit(GraphCreateFromStoreConfig storeConfig) {
+    public GraphCreateConfig store(GraphCreateFromStoreConfig storeConfig) {
         RelationshipProjections.Builder builder = RelationshipProjections.builder();
         storeConfig.relationshipProjections().projections().forEach(
             (id, projection) -> builder.putProjection(id, projection.withOrientation(Orientation.UNDIRECTED))
         );
-        undirectedConfig = ImmutableGraphCreateFromStoreConfig.builder()
+        return ImmutableGraphCreateFromStoreConfig.builder()
             .from(storeConfig)
             .relationshipProjections(builder.build())
             .build();
-    }
-
-    @Override
-    public GraphCreateConfig rewrittenConfig() {
-        return undirectedConfig;
     }
 }

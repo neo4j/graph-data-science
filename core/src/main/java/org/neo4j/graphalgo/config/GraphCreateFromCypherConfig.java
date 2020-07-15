@@ -84,8 +84,8 @@ public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 
     @Override
     @Configuration.Ignore
-    default void accept(Visitor visitor) {
-        visitor.visit(this);
+    default <R> R accept(Cases<R> visitor) {
+        return visitor.cypher(this);
     }
 
     static GraphCreateFromCypherConfig of(
