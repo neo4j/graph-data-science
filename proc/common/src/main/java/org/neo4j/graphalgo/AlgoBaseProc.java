@@ -366,43 +366,6 @@ public abstract class AlgoBaseProc<
         }
     }
 
-    /**
-     * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
-     * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
-     * config, only those relationship projections are considered in the validation.
-     */
-    protected void validateOrientationCombinations(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
-        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
-            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-            var filteredProjections = storeConfig
-                .relationshipProjections()
-                .projections()
-                .entrySet()
-                .stream()
-                .filter(entry -> algorithmConfig.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                 algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
-                .collect(toList());
-
-            boolean allUndirected = filteredProjections
-                .stream()
-                .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
-
-            boolean anyUndirected = filteredProjections
-                .stream()
-                .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
-
-            if (anyUndirected && !allUndirected) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
-                    StringJoining.join(filteredProjections
-                        .stream()
-                        .map(entry -> formatWithLocale("%s (%s)", entry.getKey().name, entry.getValue().orientation()))
-                        .sorted())
-                ));
-            }
-        }
-    }
-
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
         Map<String, Object> configuration
