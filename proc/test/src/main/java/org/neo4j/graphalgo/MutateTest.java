@@ -32,7 +32,9 @@ import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.values.storable.NumberType;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -107,6 +110,22 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
             .values()
             .stream()
             .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()) == mutatePropertyType());
+    }
+
+    @Test
+    default void testExceptionLogging() {
+
+        List<TestLog> log = new ArrayList<>(1);
+        assertThrows(
+            NullPointerException.class,
+            () -> applyOnProcedure(procedure -> {
+                var computationResult = mock(AlgoBaseProc.ComputationResult.class);
+                log.add(0, ((TestLog) procedure.log));
+                ((MutateProc) procedure).mutate(computationResult);
+            })
+        );
+
+        assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
     }
 
     @Test
