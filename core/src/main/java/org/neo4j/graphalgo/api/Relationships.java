@@ -35,7 +35,7 @@ public interface Relationships {
     static Relationships of(
         long relationshipCount,
         Orientation orientation,
-        boolean isGuaranteedParallelFree,
+        boolean isMultiGraph,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         @Nullable AdjacencyList properties,
@@ -47,7 +47,7 @@ public interface Relationships {
             adjacencyOffsets,
             relationshipCount,
             orientation,
-            isGuaranteedParallelFree
+            isMultiGraph
         );
 
         Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
@@ -56,7 +56,7 @@ public interface Relationships {
                 propertyOffsets,
                 relationshipCount,
                 orientation,
-                isGuaranteedParallelFree,
+                isMultiGraph,
                 defaultPropertyValue
             )) : Optional.empty();
 
@@ -73,7 +73,7 @@ public interface Relationships {
 
         Orientation orientation();
 
-        boolean isGuaranteedParallelFree();
+        boolean isMultiGraph();
     }
 
     @ValueClass

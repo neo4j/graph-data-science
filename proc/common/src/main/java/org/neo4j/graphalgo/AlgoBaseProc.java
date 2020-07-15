@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -365,7 +364,7 @@ public abstract class AlgoBaseProc<
             storeConfig.relationshipProjections().projections().entrySet().stream()
                 .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
                                  config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> !entry.getValue().isGuaranteedParallelFree())
+                .filter(entry -> !entry.getValue().isMultiGraph())
                 .forEach(entry -> log.warn(
                     "Procedure runs optimal with relationship aggregation." +
                     " Projection for `%s` does not aggregate relationships." +

@@ -198,7 +198,7 @@ final class HugeGraphLoadingTest extends BaseTest {
     }
 
     @Test
-    void canIdentifyParallelFreeGuarantee() {
+    void canIdentifyMultigraph() {
         runQuery("CREATE (a)-[:TYPE {t: 1}]->(b), (a)-[:TYPE {t: 2}]->(b), (a)-[:TYPE2]->(b)");
 
         GraphStore graphStore = new StoreLoaderBuilder()
@@ -234,21 +234,21 @@ final class HugeGraphLoadingTest extends BaseTest {
             .graphStore();
 
         // using single rel type with aggregation guarantees no parallels
-        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_SINGLE")).isGuaranteedParallelFree());
-        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_PROP_SINGLE")).isGuaranteedParallelFree());
+        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_SINGLE")).isMultiGraph());
+        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_PROP_SINGLE")).isMultiGraph());
 
         // using a NONE may have a parallel (indeed has in this test)
-        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_NONE")).isGuaranteedParallelFree());
-        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_PROP_NONE")).isGuaranteedParallelFree());
+        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_NONE")).isMultiGraph());
+        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_PROP_NONE")).isMultiGraph());
 
         // using multiple rel types does not guarantee, even if they are all aggregated
         // if union graph improves, these conditions could change
-        assertFalse(graphStore.getUnion().isGuaranteedParallelFree());
-        assertFalse(graphStore
+        assertTrue(graphStore.getUnion().isMultiGraph());
+        assertTrue(graphStore
             .getGraph(RelationshipType.of("TYPE_SINGLE"), RelationshipType.of("TYPE2"))
-            .isGuaranteedParallelFree());
-        assertFalse(graphStore
+            .isMultiGraph());
+        assertTrue(graphStore
             .getGraph(RelationshipType.of("TYPE_SINGLE"), RelationshipType.of("TYPE_PROP_SINGLE"))
-            .isGuaranteedParallelFree());
+            .isMultiGraph());
     }
 }

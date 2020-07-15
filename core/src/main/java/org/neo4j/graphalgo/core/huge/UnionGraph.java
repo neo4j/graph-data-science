@@ -149,7 +149,7 @@ public final class UnionGraph implements Graph {
 
     @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
-        if (isGuaranteedParallelFree()) {
+        if (!isMultiGraph()) {
             return degree(nodeId);
         }
         var degreeCounter = new ParallelRelationshipDegreeCounter();
@@ -219,10 +219,10 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public boolean isGuaranteedParallelFree() {
+    public boolean isMultiGraph() {
         // we need to run a check across all relationships between the sub-graphs of the union
         // maybe we'll do that later; for now union never guarantees parallel-free
-        return false;
+        return true;
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {

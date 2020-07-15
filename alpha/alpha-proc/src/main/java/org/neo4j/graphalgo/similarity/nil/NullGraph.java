@@ -64,8 +64,8 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public boolean isGuaranteedParallelFree() {
-        return true;
+    public boolean isMultiGraph() {
+        return false;
     }
 
     @Override
