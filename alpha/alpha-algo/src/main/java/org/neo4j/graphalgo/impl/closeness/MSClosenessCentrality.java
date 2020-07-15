@@ -135,9 +135,10 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
             return 0.;
         }
         if (wassermanFaust) {
-            return (componentSize / ((double) farness)) * ((componentSize - 1.) / (nodeCount - 1.));
+            return (componentSize / ((double) farness)) * ((componentSize) / (nodeCount - 1.));
+        } else {
+            return componentSize / ((double) farness);
         }
-        return componentSize / ((double) farness);
     }
 
     /**
