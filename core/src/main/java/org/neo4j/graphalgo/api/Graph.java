@@ -71,7 +71,7 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
      * If this returns {@code false} it still may be parallel-free, but we do not know.
      * @return {@code true} iff the graph has maximum one relationship between each pair of nodes.
      */
-    boolean isGuaranteedParallelFree();
+    boolean isMultiGraph();
 
     boolean hasRelationshipProperty();
 

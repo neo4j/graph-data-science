@@ -103,7 +103,7 @@ public final class TestGraph implements Graph {
     }
 
     @Override
-    public boolean isGuaranteedParallelFree() {
+    public boolean isMultiGraph() {
         return false;
     }
 

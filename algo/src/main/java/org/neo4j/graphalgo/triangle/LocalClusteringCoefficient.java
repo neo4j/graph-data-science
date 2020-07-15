@@ -90,9 +90,9 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             double localClusteringCoefficient = calculateCoefficient(
                 propertyValueFunction.apply(nodeId),
-                graph.isGuaranteedParallelFree() ?
-                    graph.degree(nodeId) :
-                    graph.concurrentCopy().degreeWithoutParallelRelationships(nodeId)
+                graph.isMultiGraph() ?
+                    graph.concurrentCopy().degreeWithoutParallelRelationships(nodeId) :
+                    graph.degree(nodeId)
             );
             localClusteringCoefficients.set(nodeId, localClusteringCoefficient);
             localClusteringCoefficientSum.add(localClusteringCoefficient);

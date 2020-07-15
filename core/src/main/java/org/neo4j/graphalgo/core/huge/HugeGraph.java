@@ -99,7 +99,7 @@ public class HugeGraph implements Graph {
     private boolean canRelease = true;
 
     private final boolean hasRelationshipProperty;
-    private final boolean isGuaranteedParallelFree;
+    private final boolean isMultiGraph;
 
     public static HugeGraph create(
         IdMap nodes,
@@ -119,7 +119,7 @@ public class HugeGraph implements Graph {
             maybePropertyCSR.map(PropertyCSR::list).orElse(null),
             maybePropertyCSR.map(PropertyCSR::offsets).orElse(null),
             topologyCSR.orientation(),
-            topologyCSR.isGuaranteedParallelFree(),
+            topologyCSR.isMultiGraph(),
             tracker
         );
     }
@@ -135,11 +135,11 @@ public class HugeGraph implements Graph {
         @Nullable AdjacencyList properties,
         @Nullable AdjacencyOffsets propertyOffsets,
         Orientation orientation,
-        boolean isGuaranteedParallelFree,
+        boolean isMultiGraph,
         AllocationTracker tracker
     ) {
         this.idMapping = idMapping;
-        this.isGuaranteedParallelFree = isGuaranteedParallelFree;
+        this.isMultiGraph = isMultiGraph;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
         this.relationshipCount = relationshipCount;
@@ -267,7 +267,7 @@ public class HugeGraph implements Graph {
 
     @Override
     public int degreeWithoutParallelRelationships(long nodeId) {
-        if (isGuaranteedParallelFree()) {
+        if (!isMultiGraph()) {
             return degree(nodeId);
         }
         var degreeCounter = new ParallelRelationshipsDegreeCounter();
@@ -303,7 +303,7 @@ public class HugeGraph implements Graph {
             properties,
             propertyOffsets,
             orientation,
-            isGuaranteedParallelFree,
+            isMultiGraph,
             tracker
         );
     }
@@ -409,8 +409,8 @@ public class HugeGraph implements Graph {
     }
 
     @Override
-    public boolean isGuaranteedParallelFree() {
-        return isGuaranteedParallelFree;
+    public boolean isMultiGraph() {
+        return isMultiGraph;
     }
 
     public Orientation orientation() {
@@ -421,7 +421,7 @@ public class HugeGraph implements Graph {
         return Relationships.of(
             relationshipCount,
             orientation,
-            isGuaranteedParallelFree(),
+            isMultiGraph(),
             adjacencyList,
             adjacencyOffsets,
             properties,
@@ -536,7 +536,7 @@ public class HugeGraph implements Graph {
         static Relationships of(
             long relationshipCount,
             Orientation orientation,
-            boolean isGuaranteedParallelFree,
+            boolean isMultiGraph,
             AdjacencyList adjacencyList,
             AdjacencyOffsets adjacencyOffsets,
             @Nullable AdjacencyList properties,
@@ -548,7 +548,7 @@ public class HugeGraph implements Graph {
                 adjacencyOffsets,
                 relationshipCount,
                 orientation,
-                isGuaranteedParallelFree
+                isMultiGraph
             );
 
             Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
@@ -557,7 +557,7 @@ public class HugeGraph implements Graph {
                     propertyOffsets,
                     relationshipCount,
                     orientation,
-                    isGuaranteedParallelFree,
+                    isMultiGraph,
                     defaultPropertyValue
                 )) : Optional.empty();
 
@@ -575,7 +575,7 @@ public class HugeGraph implements Graph {
 
         Orientation orientation();
 
-        boolean isGuaranteedParallelFree();
+        boolean isMultiGraph();
     }
 
     @ValueClass
