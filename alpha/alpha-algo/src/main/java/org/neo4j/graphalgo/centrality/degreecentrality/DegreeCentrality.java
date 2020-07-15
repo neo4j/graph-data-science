@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.degree;
+package org.neo4j.graphalgo.centrality.degreecentrality;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -66,9 +67,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         for (int i = 0; i < taskCount; i++) {
             starts[i] = startNode;
             if (weighted) {
-                tasks.add(new WeightedDegreeTask(starts[i], partitions[i]));
+                tasks.add(new WeightedDegreeTask(graph.concurrentCopy(), starts[i], partitions[i]));
             } else {
-                tasks.add(new DegreeTask(starts[i], partitions[i]));
+                tasks.add(new DegreeTask(graph, starts[i], partitions[i]));
             }
             startNode += batchSize;
         }
@@ -96,11 +97,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     private class DegreeTask implements Runnable {
+        private final Graph graph;
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
 
-        DegreeTask(long start, double[] partition) {
+        DegreeTask(Graph graph, long start, double[] partition) {
+            this.graph = graph;
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
@@ -116,11 +119,17 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     private class WeightedDegreeTask implements Runnable {
+        private final RelationshipIterator relationshipIterator;
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
 
-        WeightedDegreeTask(long start, double[] partition) {
+        WeightedDegreeTask(
+            RelationshipIterator relationshipIterator,
+            long start,
+            double[] partition
+        ) {
+            this.relationshipIterator = relationshipIterator;
             this.startNodeId = start;
             this.partition = partition;
             this.endNodeId = Math.min(start + partition.length, nodeCount);
@@ -130,7 +139,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         public void run() {
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 int index = Math.toIntExact(nodeId - startNodeId);
-                graph.forEachRelationship(nodeId, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
+                relationshipIterator.forEachRelationship(nodeId, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
                     if (weight > 0) {
                         partition[index] += weight;
                     }
