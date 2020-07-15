@@ -108,7 +108,7 @@ After creating the graphs in the catalog, we can refer to them in algorithms by 
 .Run Page Rank on one of our created graphs:
 [source,cypher]
 ----
-CALL gds.algo.pageRank.stream('my-native-graph') YIELD nodeId, score;
+CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
 
 [[catalog-graph-list]]
