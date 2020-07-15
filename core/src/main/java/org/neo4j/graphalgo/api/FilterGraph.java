@@ -202,9 +202,9 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public boolean isGuaranteedParallelFree() {
+    public boolean isMultiGraph() {
         // by filtering out elements the guarantee could become fulfilled, but we don't know
         // it would never go from fulfilled to not fulfilled however, so this is safe
-        return graph.isGuaranteedParallelFree();
+        return graph.isMultiGraph();
     }
 }

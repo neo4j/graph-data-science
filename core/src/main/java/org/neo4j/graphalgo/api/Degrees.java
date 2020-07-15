@@ -31,7 +31,7 @@ public interface Degrees {
      * <p></p>
      * This is not thread-safe, so if this is called concurrently please use {@link RelationshipIterator#concurrentCopy()}.
      *
-     * @see Graph#isGuaranteedParallelFree()
+     * @see Graph#isMultiGraph()
      */
     int degreeWithoutParallelRelationships(long nodeId);
 }

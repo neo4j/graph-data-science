@@ -113,11 +113,12 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).aggregation(aggregation).build();
     }
 
-    public boolean isGuaranteedParallelFree() {
-        return !Aggregation.equivalentToNone(aggregation()) || (!properties().isEmpty() && properties()
+    public boolean isMultiGraph() {
+        boolean somePropertyIsNotAggregated = properties()
             .mappings()
             .stream()
-            .noneMatch(m -> Aggregation.equivalentToNone(m.aggregation())));
+            .anyMatch(m -> Aggregation.equivalentToNone(m.aggregation()));
+        return Aggregation.equivalentToNone(aggregation()) && (properties().isEmpty() || somePropertyIsNotAggregated);
     }
 
     @Override
