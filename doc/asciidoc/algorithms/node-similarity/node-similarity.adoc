@@ -42,7 +42,11 @@ image::jaccard.png[role="middle"]
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
-The Node Similarity algorithm compares all nodes from the first node set with each other based on their relationships to nodes in the second set.
+
+The Node Similarity algorithm compares each node that has outgoing relationships with each other such node.
+For every node n, we collect the outgoing neighborhood N(n) of that node, that is, all nodes m such that there is a relationship from n to m.
+For each pair n, m, the algorithm computes a similarity for that pair which is the Jaccard similarity of N(n) and N(m).
+
 The complexity of this comparison grows quadratically with the number of nodes to compare.
 The algorithm reduces the complexity by ignoring disconnected nodes.
 
@@ -391,6 +395,11 @@ We use default values for the procedure configuration parameter.
 TopK is set to 10, topN is set to 0.
 Because of that the result set contains the top 10 similarity scores for each node.
 
+[NOTE]
+====
+If we would like to compare instead the Instruments to each other in terms of a reverse relationship `HAS_FAN` we would then load the graph with `REVERSE` orientation.
+This would return similarities for pairs of Instruments and not compute any similarities between Persons.
+====
 [[algorithms-node-similarity-examples-stats]]
 === Stats
 
