@@ -27,13 +27,11 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.RandomWalk;
 import org.neo4j.graphalgo.impl.walking.RandomWalkConfig;
 import org.neo4j.graphalgo.impl.walking.WalkPath;
 import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -89,44 +87,36 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
 
     @Override
     protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public RandomWalk buildAlphaAlgo(
-                Graph graph,
-                RandomWalkConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                Number returnParam = configuration.returnKey();
-                Number inOut = configuration.inOut();
+        return (AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>) (graph, configuration, tracker, log) -> {
+            Number returnParam = configuration.returnKey();
+            Number inOut = configuration.inOut();
 
-                RandomWalk.NextNodeStrategy strategy = configuration.mode().equalsIgnoreCase("random") ?
-                    new RandomWalk.RandomNextNodeStrategy(graph, graph) :
-                    new RandomWalk.Node2VecStrategy(graph, graph, returnParam.doubleValue(), inOut.doubleValue());
+            RandomWalk.NextNodeStrategy strategy = configuration.mode().equalsIgnoreCase("random") ?
+                new RandomWalk.RandomNextNodeStrategy(graph, graph) :
+                new RandomWalk.Node2VecStrategy(graph, graph, returnParam.doubleValue(), inOut.doubleValue());
 
-                int limit = (configuration.walks() == -1)
-                    ? Math.toIntExact(graph.nodeCount())
-                    : Math.toIntExact(configuration.walks());
+            int limit = (configuration.walks() == -1)
+                ? Math.toIntExact(graph.nodeCount())
+                : Math.toIntExact(configuration.walks());
 
-                PrimitiveIterator.OfInt idStream = parallelStream(
-                    IntStream.range(0, limit).unordered(),
-                    configuration.concurrency(),
-                    stream -> stream
-                        .flatMap((s) -> idStream(configuration.start(), graph, limit))
-                        .limit(limit)
-                        .iterator()
-                );
+            PrimitiveIterator.OfInt idStream = parallelStream(
+                IntStream.range(0, limit).unordered(),
+                configuration.concurrency(),
+                stream -> stream
+                    .flatMap((s) -> idStream(configuration.start(), graph, limit))
+                    .limit(limit)
+                    .iterator()
+            );
 
-                return new RandomWalk(
-                    graph,
-                    (int) configuration.steps(),
-                    strategy,
-                    configuration.concurrency(),
-                    limit,
-                    idStream
-                )
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            }
+            return new RandomWalk(
+                graph,
+                (int) configuration.steps(),
+                strategy,
+                configuration.concurrency(),
+                limit,
+                idStream
+            )
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
         };
     }
 

@@ -131,18 +131,10 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
 
     @Override
     protected AlgorithmFactory<ShortestPathDijkstra, DijkstraConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public ShortestPathDijkstra buildAlphaAlgo(
-                Graph graph,
-                DijkstraConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                validateStartNode(configuration.startNode(), graph);
-                validateEndNode(configuration.endNode(), graph);
-                return new ShortestPathDijkstra(graph, configuration);
-            }
+        return (AlphaAlgorithmFactory<ShortestPathDijkstra, DijkstraConfig>) (graph, configuration, tracker, log) -> {
+            validateStartNode(configuration.startNode(), graph);
+            validateEndNode(configuration.endNode(), graph);
+            return new ShortestPathDijkstra(graph, configuration);
         };
     }
 

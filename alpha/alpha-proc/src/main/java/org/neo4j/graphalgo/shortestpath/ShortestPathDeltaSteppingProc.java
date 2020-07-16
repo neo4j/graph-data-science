@@ -132,21 +132,13 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
 
     @Override
     protected AlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public ShortestPathDeltaStepping buildAlphaAlgo(
-                Graph graph,
-                ShortestPathDeltaSteppingConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                validateStartNode(configuration.startNode(), graph);
-                return new ShortestPathDeltaStepping(
-                    graph,
-                    configuration.startNode(),
-                    configuration.delta()
-                );
-            }
+        return (AlphaAlgorithmFactory<ShortestPathDeltaStepping, ShortestPathDeltaSteppingConfig>) (graph, configuration, tracker, log) -> {
+            validateStartNode(configuration.startNode(), graph);
+            return new ShortestPathDeltaStepping(
+                graph,
+                configuration.startNode(),
+                configuration.delta()
+            );
         };
     }
 }

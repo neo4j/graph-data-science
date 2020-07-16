@@ -131,17 +131,9 @@ public class SpanningTreeProc extends AlgoBaseProc<Prim, SpanningTree, SpanningT
 
     @Override
     protected AlgorithmFactory<Prim, SpanningTreeConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public Prim buildAlphaAlgo(
-                Graph graph,
-                SpanningTreeConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                validateStartNode(configuration.startNodeId(), graph);
-                return new Prim(graph, graph, minMax, configuration.startNodeId());
-            }
+        return (AlphaAlgorithmFactory<Prim, SpanningTreeConfig>) (graph, configuration, tracker, log) -> {
+            validateStartNode(configuration.startNodeId(), graph);
+            return new Prim(graph, graph, minMax, configuration.startNodeId());
         };
     }
 }

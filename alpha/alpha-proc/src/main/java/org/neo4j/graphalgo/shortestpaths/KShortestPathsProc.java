@@ -193,24 +193,16 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
 
     @Override
     protected AlgorithmFactory<YensKShortestPaths, YensKShortestPathsConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public YensKShortestPaths buildAlphaAlgo(
-                Graph graph,
-                YensKShortestPathsConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                validateStartNode(configuration.startNode(), graph);
-                validateEndNode(configuration.endNode(), graph);
-                return new YensKShortestPaths(
-                    graph,
-                    configuration.startNode(),
-                    configuration.endNode(),
-                    configuration.k(),
-                    configuration.maxDepth()
-                );
-            }
+        return (AlphaAlgorithmFactory<YensKShortestPaths, YensKShortestPathsConfig>) (graph, configuration, tracker, log) -> {
+            validateStartNode(configuration.startNode(), graph);
+            validateEndNode(configuration.endNode(), graph);
+            return new YensKShortestPaths(
+                graph,
+                configuration.startNode(),
+                configuration.endNode(),
+                configuration.k(),
+                configuration.maxDepth()
+            );
         };
     }
 

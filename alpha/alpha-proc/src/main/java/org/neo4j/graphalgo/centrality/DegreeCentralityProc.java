@@ -125,22 +125,13 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
 
     @Override
     protected AlgorithmFactory<DegreeCentrality, DegreeCentralityConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public DegreeCentrality buildAlphaAlgo(
-                Graph graph,
-                DegreeCentralityConfig configuration,
-                AllocationTracker tracker,
-                Log log
-            ) {
-                return new DegreeCentrality(
-                    graph,
-                    Pools.DEFAULT,
-                    configuration.concurrency(),
-                    configuration.isWeighted(),
-                    tracker
-                );
-            }
-        };
+        return (AlphaAlgorithmFactory<DegreeCentrality, DegreeCentralityConfig>) (graph, configuration, tracker, log) ->
+            new DegreeCentrality(
+                graph,
+                Pools.DEFAULT,
+                configuration.concurrency(),
+                configuration.isWeighted(),
+                tracker
+            );
     }
 }

@@ -145,15 +145,9 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
     @Override
     protected AlgorithmFactory<SccAlgorithm, SccConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public SccAlgorithm buildAlphaAlgo(
-                Graph graph, SccConfig configuration, AllocationTracker tracker, Log log
-            ) {
-                return new SccAlgorithm(graph, tracker)
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            }
-        };
+        return (AlphaAlgorithmFactory<SccAlgorithm, SccConfig>) (graph, configuration, tracker, log) ->
+            new SccAlgorithm(graph, tracker)
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
     }
 
     public static class SccResult {

@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.logging.Log;
 
-public class PageRankFactory<CONFIG extends PageRankBaseConfig> extends AlgorithmFactory<PageRank, CONFIG> {
+public class PageRankFactory<CONFIG extends PageRankBaseConfig> implements AlgorithmFactory<PageRank, CONFIG> {
 
     @Override
     public PageRank build(

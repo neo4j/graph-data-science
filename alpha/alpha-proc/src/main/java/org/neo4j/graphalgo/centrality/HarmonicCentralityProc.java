@@ -24,21 +24,18 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.graphalgo.impl.harmonic.HarmonicCentrality;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -146,19 +143,13 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
 
     @Override
     protected AlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public HarmonicCentrality buildAlphaAlgo(
-                Graph graph, HarmonicCentralityConfig configuration, AllocationTracker tracker, Log log
-            ) {
-                return new HarmonicCentrality(
-                    graph,
-                    tracker,
-                    configuration.concurrency(),
-                    Pools.DEFAULT
-                );
-            }
-        };
+        return (AlphaAlgorithmFactory<HarmonicCentrality, HarmonicCentralityConfig>) (graph, configuration, tracker, log) ->
+            new HarmonicCentrality(
+                graph,
+                tracker,
+                configuration.concurrency(),
+                Pools.DEFAULT
+            );
     }
 
     public static final class StreamResult {

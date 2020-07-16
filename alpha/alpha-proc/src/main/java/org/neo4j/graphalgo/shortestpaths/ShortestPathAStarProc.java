@@ -79,21 +79,16 @@ public class ShortestPathAStarProc extends AlgoBaseProc<ShortestPathAStar, Short
 
     @Override
     protected AlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public ShortestPathAStar buildAlphaAlgo(
-                Graph graph, ShortestPathAStarConfig configuration, AllocationTracker tracker, Log log
-            ) {
-                validateStartNode(configuration.startNodeId(), graph);
-                validateEndNode(configuration.endNodeId(), graph);
-                return new ShortestPathAStar(
-                    graph,
-                    configuration.startNodeId(),
-                    configuration.endNodeId(),
-                    graph.nodeProperties(configuration.propertyKeyLat()),
-                    graph.nodeProperties(configuration.propertyKeyLon())
-                );
-            }
+        return (AlphaAlgorithmFactory<ShortestPathAStar, ShortestPathAStarConfig>) (graph, configuration, tracker, log) -> {
+            validateStartNode(configuration.startNodeId(), graph);
+            validateEndNode(configuration.endNodeId(), graph);
+            return new ShortestPathAStar(
+                graph,
+                configuration.startNodeId(),
+                configuration.endNodeId(),
+                graph.nodeProperties(configuration.propertyKeyLat()),
+                graph.nodeProperties(configuration.propertyKeyLon())
+            );
         };
     }
 }

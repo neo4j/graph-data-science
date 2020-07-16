@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
+@FunctionalInterface
 public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
     @Override
     default ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {

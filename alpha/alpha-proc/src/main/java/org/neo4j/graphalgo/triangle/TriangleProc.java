@@ -27,9 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.triangle.TriangleStream;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -80,14 +78,8 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
 
     @Override
     protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
-        return new AlphaAlgorithmFactory<>() {
-            @Override
-            public TriangleStream buildAlphaAlgo(
-                Graph graph, TriangleCountBaseConfig configuration, AllocationTracker tracker, Log log
-            ) {
-                return new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
-                    .withTerminationFlag(TerminationFlag.wrap(transaction));
-            }
-        };
+        return (AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>) (graph, configuration, tracker, log) ->
+            new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
+                .withTerminationFlag(TerminationFlag.wrap(transaction));
     }
 }
