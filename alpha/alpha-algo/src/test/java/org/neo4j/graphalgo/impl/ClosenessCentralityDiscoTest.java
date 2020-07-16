@@ -84,7 +84,7 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
         algo.resultStream()
             .forEach(r -> mock.accept(r.centrality));
 
-        verify(mock, times(3)).accept(eq(0.25, 0.01));
-        verify(mock, times(2)).accept(eq(0.0, 0.01));
+        verify(mock, times(3)).accept(eq(0.5, 0.01));
+        verify(mock, times(2)).accept(eq(0.25, 0.01));
     }
 }
