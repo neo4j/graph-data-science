@@ -53,16 +53,6 @@ final class AdjacencyCompression {
         return data.length = applyDelta(data.longs, data.length, aggregation);
     }
 
-    //@formatter:off
-    static int writeBigEndianInt(byte[] out, int offset, int value) {
-        out[    offset] = (byte) (value >>> 24);
-        out[1 + offset] = (byte) (value >>> 16);
-        out[2 + offset] = (byte) (value >>> 8);
-        out[3 + offset] = (byte) (value);
-        return 4 + offset;
-    }
-    //@formatter:on
-
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
     static int applyDeltaEncoding(LongsRef data, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
         int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
@@ -99,12 +89,11 @@ final class AdjacencyCompression {
     }
 
     //@formatter:off
-    static int writeDegree(byte[] out, int offset, int degree) {
+    static void writeDegree(byte[] out, int offset, int degree) {
         out[    offset] = (byte) (degree);
         out[1 + offset] = (byte) (degree >>> 8);
         out[2 + offset] = (byte) (degree >>> 16);
         out[3 + offset] = (byte) (degree >>> 24);
-        return 4 + offset;
     }
     //@formatter:on
 

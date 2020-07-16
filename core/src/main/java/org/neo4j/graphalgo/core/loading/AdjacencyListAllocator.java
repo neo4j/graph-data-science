@@ -25,7 +25,5 @@ public interface AdjacencyListAllocator {
 
     AdjacencyListPageSlice allocate(int size);
 
-    long insert(byte[] bytes, int arrayOffset, int length);
-
     void close();
 }

@@ -196,14 +196,6 @@ final class TransientAdjacencyListBuilder implements AdjacencyListBuilder {
         }
 
         @Override
-        public long insert(byte[] bytes, int arrayOffset, int length) {
-            allocate(length);
-            System.arraycopy(bytes, arrayOffset, page, offset, length);
-            offset += length;
-            return address;
-        }
-
-        @Override
         public void close() {
         }
 

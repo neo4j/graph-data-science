@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
@@ -55,7 +54,7 @@ public class AdjacencyBuilderBaseTest extends BaseTest {
             new LongAdder(),
             new int[0],
             new double[0],
-            new Aggregation[0]
+            new Aggregation[]{Aggregation.NONE}
         );
         long nodeCount = 6;
         DirectIdMapping idMapping = new DirectIdMapping(nodeCount);
@@ -71,31 +70,32 @@ public class AdjacencyBuilderBaseTest extends BaseTest {
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
-        Collection<Runnable> runnables = adjacencyBuilder.flushTasks();
-        for (var runnable : runnables) {
-            runnable.run();
-        }
+        adjacencyBuilder.flushTasks().forEach(Runnable::run);
+
         AdjacencyList adjacencyList = globalBuilder.adjacencyList();
         AdjacencyOffsets adjacencyOffsets = globalBuilder.globalAdjacencyOffsets();
 
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long offset = adjacencyOffsets.get(nodeId);
-            var cursor = adjacencyList.decompressingCursor(offset);
-            try {
-                while (cursor.hasNextVLong()) {
-                    long target = cursor.nextVLong();
-                    assertEquals(relationships.remove(nodeId), target);
-                }
-            } finally {
-                if (cursor instanceof AutoCloseable) {
-                    ((AutoCloseable) cursor).close();
+        try {
+            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+                long offset = adjacencyOffsets.get(nodeId);
+                var cursor = adjacencyList.decompressingCursor(offset);
+                try {
+                    while (cursor.hasNextVLong()) {
+                        long target = cursor.nextVLong();
+                        assertEquals(relationships.remove(nodeId), target);
+                    }
+                } finally {
+                    if (cursor instanceof AutoCloseable) {
+                        ((AutoCloseable) cursor).close();
+                    }
                 }
             }
+
+            assertTrue(relationships.isEmpty());
+
+        } finally {
+            adjacencyList.release();
+            adjacencyOffsets.release();
         }
-
-        assertTrue(relationships.isEmpty());
-
-        adjacencyList.release();
-        adjacencyOffsets.release();
     }
 }

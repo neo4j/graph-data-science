@@ -27,8 +27,6 @@ import java.nio.ByteOrder;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.loading.AdjacencyCompression.writeDegree;
-
 class ThreadLocalRelationshipsBuilder {
 
     private final ReentrantLock lock;
@@ -106,11 +104,8 @@ class ThreadLocalRelationshipsBuilder {
         AdjacencyCompression.copyFrom(buffer, array);
 
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
-        int offset = 0;
-        offset = AdjacencyCompression.writeBigEndianInt(storage, offset, degree);
-        int requiredBytes = VarLongEncoding.encodeVLongs(buffer.longs, buffer.length, storage, offset);
-
-        long address = adjacencyAllocator.insert(storage, 0, requiredBytes);
+        int requiredBytes = AdjacencyCompression.compress(buffer, storage);
+        long address = copyIds(storage, requiredBytes, degree);
         adjacencyOffsets[localId] = address;
         array.release();
         return degree;
@@ -126,7 +121,6 @@ class ThreadLocalRelationshipsBuilder {
         AdjacencyCompression.copyFrom(buffer, array);
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, weights, aggregations, noAggregation);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
-
         adjacencyOffsets[localId] = copyIds(storage, requiredBytes, degree);
         copyProperties(weights, degree, localId, propertyOffsets);
 
@@ -137,10 +131,8 @@ class ThreadLocalRelationshipsBuilder {
     private long copyIds(byte[] targets, int requiredBytes, int degree) {
         // sizeOf(degree) + compression bytes
         var slice = adjacencyAllocator.allocate(Integer.BYTES + requiredBytes);
-        int offset = slice.offset();
-        offset = writeDegree(slice.page(), offset, degree);
-        System.arraycopy(targets, 0, slice.page(), offset, requiredBytes);
-        slice.bytesWritten(requiredBytes);
+        slice.writeInt(degree);
+        slice.insert(targets, 0, requiredBytes);
         return slice.address();
     }
 
@@ -156,8 +148,8 @@ class ThreadLocalRelationshipsBuilder {
     private long copyProperties(long[] properties, int degree, AdjacencyListAllocator propertiesAllocator) {
         int requiredBytes = degree * Long.BYTES;
         var slice = propertiesAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
+        slice.writeInt(degree);
         int offset = slice.offset();
-        offset = writeDegree(slice.page(), offset, degree);
         ByteBuffer
             .wrap(slice.page(), offset, requiredBytes)
             .order(ByteOrder.LITTLE_ENDIAN)
