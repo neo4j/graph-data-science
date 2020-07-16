@@ -35,9 +35,9 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -318,6 +319,31 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
+                });
+        });
+    }
+
+    @Test
+    default void testNonConsecutiveIds() {
+        Random random = new Random();
+
+        runQuery(graphDb(),
+            "UNWIND range(1, $upperBound) AS s " +
+            "CREATE (:Node {id: s})",
+            Map.of("upperBound", random.nextInt(250)));
+
+        emptyDb();
+
+        runQuery(graphDb(),
+            "UNWIND range(1, $upperBound) AS s " +
+            "CREATE (:Node {id: s})",
+            Map.of("upperBound", random.nextInt(250)));
+
+        applyOnProcedure((proc) -> {
+            getWriteAndStreamProcedures(proc)
+                .forEach(method -> {
+                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+                    assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
                 });
         });
     }
