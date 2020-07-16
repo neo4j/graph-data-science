@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientStreamProc
@@ -90,7 +91,7 @@ public class LocalClusteringCoefficientStreamProc
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
-        warnOnGraphWithParallelRelationships(graphCreateConfig, config);
+        warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
     }
 
     @Override
