@@ -169,9 +169,17 @@ public class PregelExample {
             .isAsynchronous(true)
             .build();
 
+        // generate a random graph with 100 nodes and average degree 10
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build()
+            .generate();
+
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-            // generate a random graph with 100 nodes and average degree 10
-            RandomGraphGenerator.generate(100, 10),
+            graph,
             config,
             new ConnectedComponentsPregel(),
             batchSize,

@@ -150,14 +150,14 @@ class GraphGenerateProcTest extends BaseProcTest {
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertEquals(relationshipDistribution, generator.getRelationshipDistribution());
-        assertFalse(generator.getMaybePropertyProducer().isPresent());
+        assertFalse(generator.getMaybeRelationshipPropertyProducer().isPresent());
     }
 
     @ParameterizedTest
     @MethodSource("relationshipPropertyProducers")
     void shouldGenerateGraphWithRelationshipProperty(
         Map<String, Object> config,
-        RelationshipPropertyProducer propertyProducer
+        PropertyProducer propertyProducer
     ) {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
@@ -167,8 +167,8 @@ class GraphGenerateProcTest extends BaseProcTest {
         GraphGenerateProc proc = new GraphGenerateProc();
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
-        assertTrue(generator.getMaybePropertyProducer().isPresent());
-        RelationshipPropertyProducer actuallPropertyProducer = generator.getMaybePropertyProducer().get();
+        assertTrue(generator.getMaybeRelationshipPropertyProducer().isPresent());
+        PropertyProducer actuallPropertyProducer = generator.getMaybeRelationshipPropertyProducer().get();
 
         assertEquals(propertyProducer, actuallPropertyProducer);
     }
@@ -215,7 +215,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertEquals(generator.getRelationshipDistribution(), RelationshipDistribution.UNIFORM);
-        assertFalse(generator.getMaybePropertyProducer().isPresent());
+        assertFalse(generator.getMaybeRelationshipPropertyProducer().isPresent());
     }
 
     @Test
@@ -242,7 +242,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_VALUE_KEY, 42.0D);
         producers.add(Arguments.of(
             paramsMap,
-            new RelationshipPropertyProducer.Fixed("fixed", 42)
+            new PropertyProducer.Fixed("fixed", 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -252,7 +252,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D);
         producers.add(Arguments.of(
             paramsMap,
-            new RelationshipPropertyProducer.Random("random", 21, 42)
+            new PropertyProducer.Random("random", 21, 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -261,7 +261,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             paramsMap,
-            new RelationshipPropertyProducer.Random("random", 0, 1)
+            new PropertyProducer.Random("random", 0, 1)
         ));
 
         return producers.stream();

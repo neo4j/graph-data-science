@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class RandomGraphGeneratorTest {
 
     @Test
@@ -39,13 +42,12 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.UNIFORM,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         Assertions.assertEquals(graph.nodeCount(), nbrNodes);
@@ -69,13 +71,12 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10000;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.POWER_LAW,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         Assertions.assertEquals(graph.nodeCount(), nbrNodes);
@@ -88,14 +89,15 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
         AllowSelfLoops allowSelfLoops = AllowSelfLoops.NO;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.POWER_LAW,
-            null,
-            Optional.empty(),
-            Aggregation.NONE, Orientation.UNDIRECTED, allowSelfLoops, AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .aggregation(Aggregation.NONE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(allowSelfLoops)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
@@ -111,13 +113,12 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 1000;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.RANDOM,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         Assertions.assertEquals(graph.nodeCount(), nbrNodes);
@@ -144,13 +145,13 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.UNIFORM,
-            Optional.of(RelationshipPropertyProducer.fixed("prop", 42D)),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .relationshipPropertyProducer(PropertyProducer.fixed("property", 42D))
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
@@ -167,23 +168,41 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10;
         long avgDeg = 5L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.UNIFORM,
-            Optional.of(RelationshipPropertyProducer.random("prop", -10, 10)),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .relationshipPropertyProducer(PropertyProducer.random("prop", -10, 10))
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
-                Assertions.assertTrue(p >= -10);
-                Assertions.assertTrue(p <= 10);
+                assertTrue(p >= -10);
+                assertTrue(p <= 10);
                 return true;
             });
             return true;
         });
+    }
+
+    @Test
+    void shouldGenerateNodeProperties() {
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .nodePropertyProducer(PropertyProducer.random("foo", 0, 1))
+            .build()
+            .generate();
+
+        NodeProperties nodeProperties = graph.nodeProperties("foo");
+        for (int nodeId = 0; nodeId < 10; nodeId++) {
+            double value = nodeProperties.nodeProperty(nodeId, -1);
+            assertTrue(0 <= value && value <= 1);
+        }
     }
 
     @Test
@@ -192,23 +211,21 @@ class RandomGraphGeneratorTest {
         long avgDeg = 5L;
         long seed = 1337L;
 
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.UNIFORM,
-            seed,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(seed)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
 
-        RandomGraphGenerator otherRandomGenerator = new RandomGraphGenerator(
-            nbrNodes,
-            avgDeg,
-            RelationshipDistribution.UNIFORM,
-            seed,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator otherRandomGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nbrNodes)
+            .averageDegree(avgDeg)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(seed)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
 
         HugeGraph graph1 = randomGraphGenerator.generate();
         HugeGraph graph2 = otherRandomGenerator.generate();

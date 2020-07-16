@@ -22,14 +22,17 @@ package org.neo4j.graphalgo.beta.generator;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
@@ -44,43 +47,24 @@ public final class RandomGraphGenerator {
     private final Aggregation aggregation;
     private final Orientation orientation;
     private final AllowSelfLoops allowSelfLoops;
-    private final Optional<RelationshipPropertyProducer> maybePropertyProducer;
-
-    public static Graph generate(int nodeCount, int averageDegree) {
-        return generate(nodeCount, averageDegree, RelationshipDistribution.POWER_LAW);
-    }
-
-    public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution) {
-        return generate(nodeCount, averageDegree, distribution, null);
-    }
-
-    public static Graph generate(int nodeCount, int averageDegree, RelationshipDistribution distribution, @Nullable Long seed) {
-        return new RandomGraphGenerator(
-            nodeCount,
-            averageDegree,
-            distribution,
-            seed,
-            Optional.empty(),
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            AllowSelfLoops.NO,
-            AllocationTracker.EMPTY
-        ).generate();
-    }
+    private final Optional<PropertyProducer> maybeRelationshipPropertyProducer;
+    private final Optional<PropertyProducer> maybeNodePropertyProducer;
 
     public RandomGraphGenerator(
         long nodeCount,
         long averageDegree,
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
-        Optional<RelationshipPropertyProducer> maybePropertyProducer,
+        Optional<PropertyProducer> maybeNodePropertyProducer,
+        Optional<PropertyProducer> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Orientation orientation,
         AllowSelfLoops allowSelfLoops,
         AllocationTracker allocationTracker
     ) {
         this.relationshipDistribution = relationshipDistribution;
-        this.maybePropertyProducer = maybePropertyProducer;
+        this.maybeNodePropertyProducer = maybeNodePropertyProducer;
+        this.maybeRelationshipPropertyProducer = maybeRelationshipPropertyProducer;
         this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
         this.averageDegree = averageDegree;
@@ -95,30 +79,8 @@ public final class RandomGraphGenerator {
         }
     }
 
-    public RandomGraphGenerator(
-        long nodeCount,
-        long averageDegree,
-        RelationshipDistribution relationshipDistribution,
-        Long seed,
-        Optional<RelationshipPropertyProducer> maybePropertyProducer,
-        AllocationTracker allocationTracker
-    ) {
-        this(nodeCount, averageDegree, relationshipDistribution, seed, maybePropertyProducer,
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            AllowSelfLoops.NO,
-            allocationTracker
-        );
-    }
-
-    public RandomGraphGenerator(
-        long nodeCount,
-        long averageDegree,
-        RelationshipDistribution relationshipDistribution,
-        Optional<RelationshipPropertyProducer> maybePropertyProducer,
-        AllocationTracker allocationTracker
-    ) {
-        this(nodeCount, averageDegree, relationshipDistribution, null, maybePropertyProducer, allocationTracker);
+    public static RandomGraphGeneratorBuilder builder() {
+        return new RandomGraphGeneratorBuilder();
     }
 
     public HugeGraph generate() {
@@ -134,26 +96,48 @@ public final class RandomGraphGenerator {
         HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             idMap,
             orientation,
-            maybePropertyProducer.isPresent(),
+            maybeRelationshipPropertyProducer.isPresent(),
             aggregation,
             Pools.DEFAULT,
             allocationTracker
         );
 
         generateRelationships(relationshipsBuilder);
-        return HugeGraphUtil.create(
-            idMap,
-            relationshipsBuilder.build(),
-            allocationTracker
-        );
+        if (maybeNodePropertyProducer.isPresent()) {
+            NodeProperties nodeProperties = generateNodeProperties();
+            String propertyName = maybeNodePropertyProducer.get().getPropertyName();
+            return HugeGraphUtil.create(
+                idMap,
+                Map.of(propertyName, nodeProperties),
+                relationshipsBuilder.build(),
+                allocationTracker
+            );
+        } else {
+            return HugeGraphUtil.create(
+                idMap,
+                relationshipsBuilder.build(),
+                allocationTracker
+            );
+        }
+    }
+
+    private NodeProperties generateNodeProperties() {
+        PropertyProducer nodePropertyProducer = maybeNodePropertyProducer.get();
+        NodePropertiesBuilder builder = NodePropertiesBuilder.of(nodeCount, allocationTracker, 0D);
+
+        for (long i = 0; i < nodeCount; i++) {
+            builder.set(i, nodePropertyProducer.getPropertyValue(random));
+        }
+
+        return builder.build();
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
         return relationshipDistribution;
     }
 
-    public Optional<RelationshipPropertyProducer> getMaybePropertyProducer() {
-        return maybePropertyProducer;
+    public Optional<PropertyProducer> getMaybeRelationshipPropertyProducer() {
+        return maybeRelationshipPropertyProducer;
     }
 
     private void generateNodes(HugeGraphUtil.IdMapBuilder idMapBuilder) {
@@ -169,14 +153,14 @@ public final class RandomGraphGenerator {
             averageDegree,
             random
         );
-        RelationshipPropertyProducer relationshipPropertyProducer = maybePropertyProducer.orElse(new EmptyRelationshipPropertyProducer());
+        PropertyProducer relationshipPropertyProducer = maybeRelationshipPropertyProducer.orElse(new EmptyPropertyProducer());
 
         long degree, targetId;
         double property;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             degree = degreeProducer.applyAsLong(nodeId);
-
+            
             for (int j = 0; j < degree; j++) {
                 if (allowSelfLoops.value()) {
                     targetId = relationshipProducer.applyAsLong(nodeId);
@@ -184,20 +168,22 @@ public final class RandomGraphGenerator {
                     while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}
                 }
                 assert (targetId < nodeCount);
-                property = relationshipPropertyProducer.getPropertyValue(nodeId, targetId, random);
+                property = relationshipPropertyProducer.getPropertyValue(random);
                 relationshipsImporter.addFromInternal(nodeId, targetId, property);
             }
         }
     }
 
-    static class EmptyRelationshipPropertyProducer implements RelationshipPropertyProducer {
+
+
+    static class EmptyPropertyProducer implements PropertyProducer {
         @Override
         public String getPropertyName() {
             return null;
         }
 
         @Override
-        public double getPropertyValue(long source, long target, java.util.Random random) {
+        public double getPropertyValue(java.util.Random random) {
             return 0;
         }
     }

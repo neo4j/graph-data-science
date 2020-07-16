@@ -91,8 +91,8 @@ public final class GraphGenerateProc extends BaseProc {
             HugeGraph graph = generator.generate();
 
             Optional<String> relationshipProperty = Optional.of(generator
-                .getMaybePropertyProducer()
-                .map(RelationshipPropertyProducer::getPropertyName)
+                .getMaybeRelationshipPropertyProducer()
+                .map(PropertyProducer::getPropertyName)
                 .orElse("PROPERTY"));
 
             GraphStore graphStore = CSRGraphStore.of(
@@ -113,17 +113,26 @@ public final class GraphGenerateProc extends BaseProc {
     }
 
     RandomGraphGenerator initializeGraphGenerator(long nodeCount, long averageDegree, RandomGraphGeneratorConfig config) {
-        return new RandomGraphGenerator(
-            nodeCount,
-            averageDegree,
-            config.relationshipDistribution(),
-            config.relationshipSeed(),
-            getRelationshipPropertyProducer(config.relationshipProperty()),
-            config.aggregation(), config.orientation(), AllowSelfLoops.of(config.allowSelfLoops()), AllocationTracker.EMPTY
-        );
+        RandomGraphGeneratorBuilder builder = RandomGraphGenerator.builder()
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
+            .relationshipDistribution(config.relationshipDistribution())
+            .aggregation(config.aggregation())
+            .orientation(config.orientation())
+            .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()))
+            .allocationTracker(AllocationTracker.EMPTY);
+       if (config.relationshipSeed() != null) {
+           builder.seed(config.relationshipSeed());
+       }
+
+        Optional<PropertyProducer> maybeProducer = getRelationshipPropertyProducer(config.relationshipProperty());
+        if (maybeProducer.isPresent()) {
+            builder.relationshipPropertyProducer(maybeProducer.get());
+        }
+        return builder.build();
     }
 
-    private Optional<RelationshipPropertyProducer> getRelationshipPropertyProducer(Map<String, Object> configMap) {
+    private Optional<PropertyProducer> getRelationshipPropertyProducer(Map<String, Object> configMap) {
         if (configMap.isEmpty()) {
             return Optional.empty();
         }
@@ -132,17 +141,17 @@ public final class GraphGenerateProc extends BaseProc {
         String propertyName = config.requireString(RELATIONSHIP_PROPERTY_NAME_KEY);
         String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
 
-        RelationshipPropertyProducer propertyProducer;
+        PropertyProducer propertyProducer;
         switch (generatorString.toLowerCase(Locale.ENGLISH)) {
             case "random":
                 double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
                 double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
-                propertyProducer = RelationshipPropertyProducer.random(propertyName, min, max);
+                propertyProducer = PropertyProducer.random(propertyName, min, max);
                 break;
 
             case "fixed":
                 double value = config.requireDouble(RELATIONSHIP_PROPERTY_VALUE_KEY);
-                propertyProducer = RelationshipPropertyProducer.fixed(propertyName, value);
+                propertyProducer = PropertyProducer.fixed(propertyName, value);
                 break;
 
             default:

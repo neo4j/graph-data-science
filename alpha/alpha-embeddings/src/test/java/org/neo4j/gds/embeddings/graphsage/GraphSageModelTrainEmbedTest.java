@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -102,17 +103,16 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
     }
 
     private void createRandomGraph(int nodeCount, int averageDegree) {
-        RandomGraphGenerator randomGraphGenerator = new RandomGraphGenerator(
-            nodeCount,
-            averageDegree,
-            RelationshipDistribution.POWER_LAW,
-            123L,
-            Optional.empty(),
-            Aggregation.SINGLE,
-            Orientation.UNDIRECTED,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
         graph = randomGraphGenerator.generate();
     }
 

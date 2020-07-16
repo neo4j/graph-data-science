@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -75,7 +76,13 @@ class SelectionStrategyTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 4, 42, 1337, 99_999, 100_000})
     void selectSamplingSizeMultiThreaded(long samplingSize) {
-        var graph = RandomGraphGenerator.generate(100_000, 10, RelationshipDistribution.RANDOM);
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build()
+            .generate();
         SelectionStrategy selectionStrategy = new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L));
         selectionStrategy.init(graph, Pools.DEFAULT, 4);
         assertEquals(samplingSize, samplingSize(graph.nodeCount(), selectionStrategy));

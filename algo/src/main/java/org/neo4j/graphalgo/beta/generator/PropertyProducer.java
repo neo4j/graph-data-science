@@ -21,21 +21,21 @@ package org.neo4j.graphalgo.beta.generator;
 
 import java.util.Objects;
 
-public interface RelationshipPropertyProducer {
+public interface PropertyProducer {
 
-    static RelationshipPropertyProducer fixed(String propertyName, double value) {
+    static PropertyProducer fixed(String propertyName, double value) {
         return new Fixed(propertyName, value);
     }
 
-    static RelationshipPropertyProducer random(String propertyName, double min, double max) {
+    static PropertyProducer random(String propertyName, double min, double max) {
         return new Random(propertyName, min, max);
     }
 
     String getPropertyName();
 
-    double getPropertyValue(long source, long target, java.util.Random random);
+    double getPropertyValue(java.util.Random random);
 
-    class Fixed implements RelationshipPropertyProducer {
+    class Fixed implements PropertyProducer {
         private final String propertyName;
         private final double value;
 
@@ -49,7 +49,7 @@ public interface RelationshipPropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(long source, long target, java.util.Random random) {
+        public double getPropertyValue(java.util.Random random) {
             return value;
         }
 
@@ -76,7 +76,7 @@ public interface RelationshipPropertyProducer {
         }
     }
 
-    class Random implements RelationshipPropertyProducer {
+    class Random implements PropertyProducer {
         private final String propertyName;
         private final double min;
         private final double max;
@@ -97,7 +97,7 @@ public interface RelationshipPropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(long source, long target, java.util.Random random) {
+        public double getPropertyValue(java.util.Random random) {
             return min + (random.nextDouble() * (max - min));
         }
 

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -92,23 +93,24 @@ class K1ColoringTest {
     void testParallelK1Coloring() {
         long seed = 42L;
 
-        RandomGraphGenerator outGenerator = new RandomGraphGenerator(
-            100_000,
-            5,
-            RelationshipDistribution.POWER_LAW,
-            seed,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator outGenerator = RandomGraphGenerator.builder()
+            .nodeCount(100_000)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(seed)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
 
-        RandomGraphGenerator inGenerator = new RandomGraphGenerator(
-            100_000,
-            5,
-            RelationshipDistribution.POWER_LAW,
-            seed,
-            Optional.empty(),
-            Aggregation.NONE, Orientation.REVERSE, AllowSelfLoops.NO, AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator inGenerator = RandomGraphGenerator.builder()
+            .nodeCount(100_000)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(seed)
+            .aggregation(Aggregation.NONE)
+            .orientation(Orientation.REVERSE)
+            .allowSelfLoops(AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
 
         var naturalGraph = outGenerator.generate();
         var reverseGraph = inGenerator.generate();
@@ -169,13 +171,12 @@ class K1ColoringTest {
 
     @Test
     void everyNodeShouldHaveBeenColored() {
-        RandomGraphGenerator generator = new RandomGraphGenerator(
-            100_000,
-            10,
-            RelationshipDistribution.UNIFORM,
-            Optional.empty(),
-            AllocationTracker.EMPTY
-        );
+        RandomGraphGenerator generator = RandomGraphGenerator.builder()
+            .nodeCount(100_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build();
 
         Graph graph = generator.generate();
 
@@ -196,12 +197,14 @@ class K1ColoringTest {
 
     @Test
     void shouldLogProgress(){
-        var graph = RandomGraphGenerator.generate(
-            100,
-            10,
-            RelationshipDistribution.UNIFORM,
-            42L
-        );
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .seed(42L)
+            .build()
+            .generate();
 
         var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8);
 
