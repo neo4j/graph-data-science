@@ -102,7 +102,6 @@ class ThreadLocalRelationshipsBuilder {
     ) {
         byte[] storage = array.storage();
         AdjacencyCompression.copyFrom(buffer, array);
-
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
         long address = copyIds(storage, requiredBytes, degree);

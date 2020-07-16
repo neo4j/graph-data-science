@@ -37,10 +37,9 @@ final class SingleTypeRelationshipImporter {
     private final RelationshipsBatchBuffer buffer;
 
     private SingleTypeRelationshipImporter(
-        RelationshipImporter.Imports imports,
-        RelationshipImporter.PropertyReader propertyReader,
-        RelationshipsBatchBuffer buffer
-    ) {
+            RelationshipImporter.Imports imports,
+            RelationshipImporter.PropertyReader propertyReader,
+            RelationshipsBatchBuffer buffer) {
         this.imports = imports;
         this.propertyReader = propertyReader;
         this.buffer = buffer;
@@ -110,11 +109,7 @@ final class SingleTypeRelationshipImporter {
                 return importer.flushTasks().stream();
             }
 
-            SingleTypeRelationshipImporter withBuffer(
-                IdMapping idMap,
-                int bulkSize,
-                RelationshipImporter.PropertyReader propertyReader
-            ) {
+            SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, RelationshipImporter.PropertyReader propertyReader) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
                     idMap,
                     typeId,

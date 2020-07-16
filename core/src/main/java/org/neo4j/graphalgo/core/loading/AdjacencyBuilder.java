@@ -52,7 +52,7 @@ final class AdjacencyBuilder {
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] globalAdjacencyOffsets = new long[numPages][];
 
-        long[][][] globalWeightOffsets = new long[propertyKeyIds.length][numPages][];
+        long[][][] globalPropertiesOffsets = new long[propertyKeyIds.length][numPages][];
 
         boolean atLeastOnePropertyToLoad = Arrays
             .stream(propertyKeyIds)
@@ -64,7 +64,7 @@ final class AdjacencyBuilder {
             compressedAdjacencyLists,
             buffers,
             globalAdjacencyOffsets,
-            globalWeightOffsets,
+            globalPropertiesOffsets,
             pageSize,
             relationshipCounter,
             propertyKeyIds,
@@ -213,6 +213,7 @@ final class AdjacencyBuilder {
             relationshipCounter.add(importedRelationships);
         });
         var tasks = new ArrayList<>(Arrays.asList(runnables));
+        // Final task to make sure that all property builders are flushed as well.
         tasks.add(unchecked(this.globalBuilder::flush));
         return tasks;
     }

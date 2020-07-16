@@ -49,13 +49,13 @@ public class RelationshipsBuilder {
         AdjacencyOffsetsFactory offsetsFactory
     ) {
         this.projection = projection;
-        adjacencyListBuilder = listBuilderFactory.newAdjacencyListBuilder();
+        this.adjacencyListBuilder = listBuilderFactory.newAdjacencyListBuilder();
         this.offsetsFactory = offsetsFactory;
 
         if (projection.properties().isEmpty()) {
-            propertyBuilders = EMPTY_PROPERTY_BUILDERS;
+            this.propertyBuilders = EMPTY_PROPERTY_BUILDERS;
         } else {
-            propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
+            this.propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
             Arrays.setAll(propertyBuilders, i -> listBuilderFactory.newAdjacencyListBuilder());
         }
     }
