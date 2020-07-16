@@ -19,13 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+@FunctionalInterface
+public interface AdjacencyListBuilderFactory {
 
-public interface AdjacencyListBuilder {
-
-    AdjacencyListAllocator newAllocator();
-
-    AdjacencyList build();
-
-    void flush();
+    AdjacencyListBuilder newAdjacencyListBuilder();
 }

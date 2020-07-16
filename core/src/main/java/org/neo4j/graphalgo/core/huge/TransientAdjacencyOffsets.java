@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.loading.AdjacencyOffsetsFactory;
 import org.neo4j.graphalgo.core.loading.ImportSizing;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -30,11 +31,10 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
 
-    public static TransientAdjacencyOffsets of(long[][] pages, int pageSize) {
-        if (pages.length == 1) {
-            return new SinglePageOffsets(pages[0]);
-        }
-        return new PagedOffsets(pages, pageSize);
+    public static AdjacencyOffsetsFactory forPageSize(int pageSize) {
+        return pages -> pages.length == 1
+            ? new SinglePageOffsets(pages[0])
+            : new PagedOffsets(pages, pageSize);
     }
 
     static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {

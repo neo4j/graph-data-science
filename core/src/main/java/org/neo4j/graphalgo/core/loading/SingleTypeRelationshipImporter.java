@@ -37,9 +37,10 @@ final class SingleTypeRelationshipImporter {
     private final RelationshipsBatchBuffer buffer;
 
     private SingleTypeRelationshipImporter(
-            RelationshipImporter.Imports imports,
-            RelationshipImporter.PropertyReader propertyReader,
-            RelationshipsBatchBuffer buffer) {
+        RelationshipImporter.Imports imports,
+        RelationshipImporter.PropertyReader propertyReader,
+        RelationshipsBatchBuffer buffer
+    ) {
         this.imports = imports;
         this.propertyReader = propertyReader;
         this.buffer = buffer;
@@ -60,12 +61,13 @@ final class SingleTypeRelationshipImporter {
         private final RelationshipImporter importer;
         private final LongAdder relationshipCounter;
         private final int typeId;
-        private boolean validateRelationships;
-        private boolean loadProperties;
+        private final boolean validateRelationships;
+        private final boolean loadProperties;
 
         Builder(
             RelationshipType relationshipType,
             RelationshipProjection projection,
+            boolean loadProperties,
             int typeToken,
             RelationshipImporter importer,
             LongAdder relationshipCounter,
@@ -76,7 +78,7 @@ final class SingleTypeRelationshipImporter {
             this.typeId = typeToken;
             this.importer = importer;
             this.relationshipCounter = relationshipCounter;
-            this.loadProperties = projection.properties().hasMappings();
+            this.loadProperties = loadProperties && projection.properties().hasMappings();
             this.validateRelationships = validateRelationships;
         }
 
@@ -108,8 +110,17 @@ final class SingleTypeRelationshipImporter {
                 return importer.flushTasks().stream();
             }
 
-            SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, RelationshipImporter.PropertyReader propertyReader) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, typeId, bulkSize, validateRelationships);
+            SingleTypeRelationshipImporter withBuffer(
+                IdMapping idMap,
+                int bulkSize,
+                RelationshipImporter.PropertyReader propertyReader
+            ) {
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
+                    idMap,
+                    typeId,
+                    bulkSize,
+                    validateRelationships
+                );
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
 
@@ -121,8 +132,15 @@ final class SingleTypeRelationshipImporter {
                 PageCursorTracer cursorTracer,
                 MemoryTracker memoryTracker
             ) {
-                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(idMap, typeId, bulkSize, validateRelationships);
-                RelationshipImporter.PropertyReader propertyReader = importer.storeBackedPropertiesReader(cursors, read, cursorTracer, memoryTracker);
+                RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
+                    idMap,
+                    typeId,
+                    bulkSize,
+                    validateRelationships
+                );
+                RelationshipImporter.PropertyReader propertyReader = loadProperties
+                    ? importer.storeBackedPropertiesReader(cursors, read, cursorTracer, memoryTracker)
+                    : (batch, batchLength, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
                 return new SingleTypeRelationshipImporter(imports, propertyReader, buffer);
             }
         }

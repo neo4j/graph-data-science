@@ -19,13 +19,25 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+public interface AdjacencyListPageSlice {
 
-public interface AdjacencyListBuilder {
+    /**
+     * Global address of the {@link #offset} in this {@link #page}.
+     */
+    long address();
 
-    AdjacencyListAllocator newAllocator();
+    /**
+     * The current page. Only writes starting at {@link #offset} are safe.
+     */
+    byte[] page();
 
-    AdjacencyList build();
+    /**
+     * Start offset for safe writes into the {@link #page}.
+     */
+    int offset();
 
-    void flush();
+    /**
+     * Notify that this many bytes have been written to the {@link #page}.
+     */
+    void bytesWritten(int numberOfBytes);
 }

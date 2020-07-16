@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -203,7 +204,8 @@ public final class HugeGraphUtil {
 
             this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
                 projectionBuilder.build(),
-                tracker
+                TransientAdjacencyListBuilder.builderFactory(tracker),
+                TransientAdjacencyOffsets.forPageSize(pageSize)
             );
 
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(

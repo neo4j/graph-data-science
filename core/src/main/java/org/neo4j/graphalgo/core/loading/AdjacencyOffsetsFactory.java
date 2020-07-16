@@ -19,13 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public interface AdjacencyListBuilder {
+@FunctionalInterface
+public interface AdjacencyOffsetsFactory {
 
-    AdjacencyListAllocator newAllocator();
-
-    AdjacencyList build();
-
-    void flush();
+    AdjacencyOffsets newOffsets(long[][] pages);
 }

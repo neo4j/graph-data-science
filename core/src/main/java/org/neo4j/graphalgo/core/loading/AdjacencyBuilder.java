@@ -20,58 +20,45 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.LongsRef;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.unchecked;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public abstract class AdjacencyBuilder {
+final class AdjacencyBuilder {
 
-    abstract void addAll(
-            long[] batch,
-            long[] targets,
-            long[][] propertyValues,
-            int[] offsets,
-            int length,
-            AllocationTracker tracker);
-
-    abstract Collection<Runnable> flushTasks();
-
-    public static AdjacencyBuilder compressing(
-            RelationshipsBuilder globalBuilder,
-            int numPages,
-            int pageSize,
-            AllocationTracker tracker,
-            LongAdder relationshipCounter,
-            int[] propertyKeyIds,
-            double[] defaultValues,
-            Aggregation[] aggregations
+    static AdjacencyBuilder compressing(
+        @NotNull RelationshipsBuilder globalBuilder,
+        int numPages,
+        int pageSize,
+        AllocationTracker tracker,
+        LongAdder relationshipCounter,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        Aggregation[] aggregations
     ) {
-        if (globalBuilder == null) {
-            return NoAdjacency.INSTANCE;
-        }
         tracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
         final CompressedLongArray[][] compressedAdjacencyLists = new CompressedLongArray[numPages][];
         LongsRef[] buffers = new LongsRef[numPages];
         long[][] globalAdjacencyOffsets = new long[numPages][];
 
-        long[][][] globalWeightOffsets = new long[propertyKeyIds.length][][];
-        Arrays.setAll(globalWeightOffsets, i -> new long[numPages][]);
+        long[][][] globalWeightOffsets = new long[propertyKeyIds.length][numPages][];
 
         boolean atLeastOnePropertyToLoad = Arrays
-                .stream(propertyKeyIds)
-                .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
+            .stream(propertyKeyIds)
+            .anyMatch(keyId -> keyId != NO_SUCH_PROPERTY_KEY);
 
-        CompressingPagedAdjacency compressingPagedAdjacency = new CompressingPagedAdjacency(
+        var compressingPagedAdjacency = new AdjacencyBuilder(
             globalBuilder,
             localBuilders,
             compressedAdjacencyLists,
@@ -92,240 +79,187 @@ public abstract class AdjacencyBuilder {
         return compressingPagedAdjacency;
     }
 
-    abstract int[] getPropertyKeyIds();
+    private final RelationshipsBuilder globalBuilder;
+    private final ThreadLocalRelationshipsBuilder[] localBuilders;
+    private final CompressedLongArray[][] compressedAdjacencyLists;
+    private final LongsRef[] buffers;
+    private final long[][] globalAdjacencyOffsets;
+    private final long[][][] globalPropertiesOffsets;
+    private final int pageSize;
+    private final int pageShift;
+    private final long pageMask;
+    private final long sizeOfLongPage;
+    private final long sizeOfObjectPage;
+    private final LongAdder relationshipCounter;
+    private final int[] propertyKeyIds;
+    private final double[] defaultValues;
+    private final Aggregation[] aggregations;
+    private final boolean atLeastOnePropertyToLoad;
 
-    abstract double[] getDefaultValues();
+    private AdjacencyBuilder(
+        RelationshipsBuilder globalBuilder,
+        ThreadLocalRelationshipsBuilder[] localBuilders,
+        CompressedLongArray[][] compressedAdjacencyLists,
+        LongsRef[] buffers,
+        long[][] globalAdjacencyOffsets,
+        long[][][] globalPropertiesOffsets,
+        int pageSize,
+        LongAdder relationshipCounter,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        Aggregation[] aggregations,
+        boolean atLeastOnePropertyToLoad
+    ) {
+        this.globalBuilder = globalBuilder;
+        this.localBuilders = localBuilders;
+        this.compressedAdjacencyLists = compressedAdjacencyLists;
+        this.buffers = buffers;
+        this.globalAdjacencyOffsets = globalAdjacencyOffsets;
+        this.globalPropertiesOffsets = globalPropertiesOffsets;
+        this.pageSize = pageSize;
+        this.pageShift = Integer.numberOfTrailingZeros(pageSize);
+        this.pageMask = pageSize - 1;
+        this.sizeOfLongPage = sizeOfLongArray(pageSize);
+        this.sizeOfObjectPage = sizeOfObjectArray(pageSize);
+        this.relationshipCounter = relationshipCounter;
+        this.propertyKeyIds = propertyKeyIds;
+        this.defaultValues = defaultValues;
+        this.aggregations = aggregations;
+        this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
+    }
 
-    abstract Aggregation[] getAggregations();
+    void addAll(
+        long[] batch,
+        long[] targets,
+        long[][] propertyValues,
+        int[] offsets,
+        int length,
+        AllocationTracker tracker
+    ) {
+        int pageShift = this.pageShift;
+        long pageMask = this.pageMask;
 
-    abstract boolean atLeastOnePropertyToLoad();
+        ThreadLocalRelationshipsBuilder builder = null;
+        int lastPageIndex = -1;
+        int endOffset, startOffset = 0;
+        try {
+            for (int i = 0; i < length; ++i) {
+                endOffset = offsets[i];
 
-    private static final class CompressingPagedAdjacency extends AdjacencyBuilder {
+                // if there are no rels for this node, just go to next
+                if (endOffset <= startOffset) {
+                    continue;
+                }
 
-        private final RelationshipsBuilder globalBuilder;
-        private final ThreadLocalRelationshipsBuilder[] localBuilders;
-        private final CompressedLongArray[][] compressedAdjacencyLists;
-        private final LongsRef[] buffers;
-        private final long[][] globalAdjacencyOffsets;
-        private final long[][][] globalWeightOffsets;
-        private final int pageSize;
-        private final int pageShift;
-        private final long pageMask;
-        private final long sizeOfLongPage;
-        private final long sizeOfObjectPage;
-        private final LongAdder relationshipCounter;
-        private final int[] propertyKeyIds;
-        private final double[] defaultValues;
-        private final Aggregation[] aggregations;
-        private final boolean atLeastOnePropertyToLoad;
+                long source = batch[startOffset << 2];
+                int pageIndex = (int) (source >>> pageShift);
 
-        private CompressingPagedAdjacency(
-            RelationshipsBuilder globalBuilder,
-            ThreadLocalRelationshipsBuilder[] localBuilders,
-            CompressedLongArray[][] compressedAdjacencyLists,
-            LongsRef[] buffers,
-            long[][] globalAdjacencyOffsets,
-            long[][][] globalWeightOffsets,
-            int pageSize,
-            LongAdder relationshipCounter,
-            int[] propertyKeyIds,
-            double[] defaultValues,
-            Aggregation[] aggregations,
-            boolean atLeastOnePropertyToLoad
-        ) {
-            this.globalBuilder = globalBuilder;
-            this.localBuilders = localBuilders;
-            this.compressedAdjacencyLists = compressedAdjacencyLists;
-            this.buffers = buffers;
-            this.globalAdjacencyOffsets = globalAdjacencyOffsets;
-            this.globalWeightOffsets = globalWeightOffsets;
-            this.pageSize = pageSize;
-            this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-            this.pageMask = pageSize - 1;
-            this.sizeOfLongPage = sizeOfLongArray(pageSize);
-            this.sizeOfObjectPage = sizeOfObjectArray(pageSize);
-            this.relationshipCounter = relationshipCounter;
-            this.propertyKeyIds = propertyKeyIds;
-            this.defaultValues = defaultValues;
-            this.aggregations = aggregations;
-            this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
-        }
+                if (pageIndex > lastPageIndex) {
+                    // switch to the builder for this page
+                    if (builder != null) {
+                        builder.unlock();
+                    }
+                    builder = localBuilders[pageIndex];
+                    builder.lock();
+                    lastPageIndex = pageIndex;
+                }
 
-        void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
-            tracker.add(sizeOfObjectPage);
-            tracker.add(sizeOfObjectPage);
-            tracker.add(sizeOfLongPage);
-            compressedAdjacencyLists[pageIndex] = new CompressedLongArray[pageSize];
-            buffers[pageIndex] = new LongsRef();
-            long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
+                int localId = (int) (source & pageMask);
 
-            long[][] localWeightOffsets = new long[globalWeightOffsets.length][];
-            for (int i = 0; i < globalWeightOffsets.length; i++) {
-                localWeightOffsets[i] = globalWeightOffsets[i][pageIndex] = new long[pageSize];
+                CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
+                if (compressedTargets == null) {
+                    compressedTargets = new CompressedLongArray(
+                        tracker,
+                        propertyValues == null ? 0 : propertyValues.length
+                    );
+                    this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
+                }
+
+                if (propertyValues == null) {
+                    compressedTargets.add(targets, startOffset, endOffset);
+                } else {
+                    compressedTargets.add(targets, propertyValues, startOffset, endOffset);
+                }
+
+                startOffset = endOffset;
             }
-
-            localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
-                localAdjacencyOffsets,
-                localWeightOffsets,
-                aggregations
-            );
-            localBuilders[pageIndex].prepare();
-        }
-
-        void finishPreparation() {
-            globalBuilder.setGlobalAdjacencyOffsets(TransientAdjacencyOffsets.of(globalAdjacencyOffsets, pageSize));
-            TransientAdjacencyOffsets[] globalWeights = new TransientAdjacencyOffsets[globalWeightOffsets.length];
-            Arrays.setAll(globalWeights, i -> {
-                long[][] globalWeightOffset = globalWeightOffsets[i];
-                if (globalWeightOffset != null) {
-                    return TransientAdjacencyOffsets.of(globalWeightOffset, pageSize);
-                }
-                return null;
-            });
-            globalBuilder.setGlobalPropertyOffsets(globalWeights);
-        }
-
-        @Override
-        void addAll(
-                long[] batch,
-                long[] targets,
-                long[][] propertyValues,
-                int[] offsets,
-                int length,
-                AllocationTracker tracker) {
-            int pageShift = this.pageShift;
-            long pageMask = this.pageMask;
-
-            ThreadLocalRelationshipsBuilder builder = null;
-            int lastPageIndex = -1;
-            int endOffset, startOffset = 0;
-            try {
-                for (int i = 0; i < length; ++i) {
-                    endOffset = offsets[i];
-
-                    // if there are no rels for this node, just go to next
-                    if (endOffset <= startOffset) {
-                        continue;
-                    }
-
-                    long source = batch[startOffset << 2];
-                    int pageIndex = (int) (source >>> pageShift);
-
-                    if (pageIndex > lastPageIndex) {
-                        // switch to the builder for this page
-                        if (builder != null) {
-                            builder.unlock();
-                        }
-                        builder = localBuilders[pageIndex];
-                        builder.lock();
-                        lastPageIndex = pageIndex;
-                    }
-
-                    int localId = (int) (source & pageMask);
-
-                    CompressedLongArray compressedTargets = this.compressedAdjacencyLists[pageIndex][localId];
-                    if (compressedTargets == null) {
-                        compressedTargets = new CompressedLongArray(tracker, propertyValues == null ? 0 : propertyValues.length);
-                        this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
-                    }
-
-                    if (propertyValues == null) {
-                        compressedTargets.add(targets, startOffset, endOffset);
-                    } else {
-                        compressedTargets.add(targets, propertyValues, startOffset, endOffset);
-                    }
-
-                    startOffset = endOffset;
-                }
-            } finally {
-                if (builder != null && builder.isLockedByCurrentThread()) {
-                    builder.unlock();
-                }
+        } finally {
+            if (builder != null && builder.isLockedByCurrentThread()) {
+                builder.unlock();
             }
-        }
-
-        @Override
-        Collection<Runnable> flushTasks() {
-            Runnable[] runnables = new Runnable[localBuilders.length];
-            Arrays.setAll(runnables, index -> () -> {
-                ThreadLocalRelationshipsBuilder builder = localBuilders[index];
-                CompressedLongArray[] allTargets = compressedAdjacencyLists[index];
-                LongsRef buffer = buffers[index];
-                long importedRelationships = 0L;
-                for (int localId = 0; localId < allTargets.length; ++localId) {
-                    CompressedLongArray compressedAdjacencyList = allTargets[localId];
-                    if (compressedAdjacencyList != null) {
-                        importedRelationships += builder.applyVariableDeltaEncoding(
-                                compressedAdjacencyList,
-                                buffer,
-                                localId);
-
-                        allTargets[localId] = null;
-                    }
-                }
-                relationshipCounter.add(importedRelationships);
-            });
-            return Arrays.asList(runnables);
-        }
-
-        @Override
-        int[] getPropertyKeyIds() {
-            return propertyKeyIds;
-        }
-
-        @Override
-        double[] getDefaultValues() {
-            return defaultValues;
-        }
-
-        @Override
-        Aggregation[] getAggregations() {
-            return aggregations;
-        }
-
-        @Override
-        boolean atLeastOnePropertyToLoad() {
-            return atLeastOnePropertyToLoad;
         }
     }
 
-    private static final class NoAdjacency extends AdjacencyBuilder {
+    Collection<Runnable> flushTasks() {
+        Runnable[] runnables = new Runnable[localBuilders.length];
+        Arrays.setAll(runnables, index -> () -> {
+            ThreadLocalRelationshipsBuilder builder = localBuilders[index];
+            CompressedLongArray[] allTargets = compressedAdjacencyLists[index];
+            LongsRef buffer = buffers[index];
+            long importedRelationships = 0L;
+            for (int localId = 0; localId < allTargets.length; ++localId) {
+                CompressedLongArray compressedAdjacencyList = allTargets[localId];
+                if (compressedAdjacencyList != null) {
+                    importedRelationships += builder.applyVariableDeltaEncoding(
+                        compressedAdjacencyList,
+                        buffer,
+                        localId
+                    );
 
-        private static final AdjacencyBuilder INSTANCE = new NoAdjacency();
+                    allTargets[localId] = null;
+                }
+            }
+            builder.release();
+            relationshipCounter.add(importedRelationships);
+        });
+        var tasks = new ArrayList<>(Arrays.asList(runnables));
+        tasks.add(unchecked(this.globalBuilder::flush));
+        return tasks;
+    }
 
-        @Override
-        void addAll(
-                long[] batch,
-                long[] targets,
-                long[][] propertyValues,
-                int[] offsets,
-                int length,
-                AllocationTracker tracker) {
+    int[] getPropertyKeyIds() {
+        return propertyKeyIds;
+    }
+
+    double[] getDefaultValues() {
+        return defaultValues;
+    }
+
+    Aggregation[] getAggregations() {
+        return aggregations;
+    }
+
+    boolean atLeastOnePropertyToLoad() {
+        return atLeastOnePropertyToLoad;
+    }
+
+    boolean supportsProperties() {
+        return this.globalBuilder.supportsProperties();
+    }
+
+    private void addAdjacencyImporter(AllocationTracker tracker, int pageIndex) {
+        tracker.add(sizeOfObjectPage);
+        tracker.add(sizeOfObjectPage);
+        tracker.add(sizeOfLongPage);
+        compressedAdjacencyLists[pageIndex] = new CompressedLongArray[pageSize];
+        buffers[pageIndex] = new LongsRef();
+        long[] localAdjacencyOffsets = globalAdjacencyOffsets[pageIndex] = new long[pageSize];
+
+        long[][] localPropertiesOffsets = new long[globalPropertiesOffsets.length][];
+        for (int i = 0; i < globalPropertiesOffsets.length; i++) {
+            localPropertiesOffsets[i] = globalPropertiesOffsets[i][pageIndex] = new long[pageSize];
         }
 
-        @Override
-        Collection<Runnable> flushTasks() {
-            return Collections.emptyList();
-        }
+        localBuilders[pageIndex] = globalBuilder.threadLocalRelationshipsBuilder(
+            localAdjacencyOffsets,
+            localPropertiesOffsets,
+            aggregations
+        );
+        localBuilders[pageIndex].prepare();
+    }
 
-        @Override
-        int[] getPropertyKeyIds() {
-            return new int[0];
-        }
-
-        @Override
-        double[] getDefaultValues() {
-            return new double[0];
-        }
-
-        @Override
-        Aggregation[] getAggregations() {
-            return new Aggregation[0];
-        }
-
-        @Override
-        boolean atLeastOnePropertyToLoad() {
-            return false;
-        }
+    private void finishPreparation() {
+        globalBuilder.setGlobalAdjacencyOffsets(globalAdjacencyOffsets);
+        globalBuilder.setGlobalPropertyOffsets(globalPropertiesOffsets);
     }
 }

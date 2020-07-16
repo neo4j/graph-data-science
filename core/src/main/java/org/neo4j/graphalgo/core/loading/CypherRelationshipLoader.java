@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -253,7 +254,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .properties(propertyMappings)
                 .build();
 
-            RelationshipsBuilder builder = new RelationshipsBuilder(projection, loadingContext.tracker());
+            RelationshipsBuilder builder = new RelationshipsBuilder(
+                projection,
+                TransientAdjacencyListBuilder.builderFactory(loadingContext.tracker()),
+                TransientAdjacencyOffsets.forPageSize(pageSize)
+            );
 
             allBuilders.put(relationshipType, builder);
 
@@ -299,6 +304,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             return new SingleTypeRelationshipImporter.Builder(
                 relationshipType,
                 relationshipProjection,
+                adjacencyBuilder.supportsProperties(),
                 NO_SUCH_RELATIONSHIP_TYPE,
                 relationshipImporter,
                 relationshipCounter,

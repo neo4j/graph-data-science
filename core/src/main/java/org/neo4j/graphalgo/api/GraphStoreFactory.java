@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
@@ -92,8 +90,8 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
-            TransientAdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
-            TransientAdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
+            AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
+            AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
             long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipType, 0L);
 
             RelationshipProjection projection = relationshipsBuilder.projection();

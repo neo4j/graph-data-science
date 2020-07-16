@@ -206,7 +206,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
             return value;
         }
 
-        public Cursor init(long fromIndex) {
+        Cursor init(long fromIndex) {
             this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             this.offset = indexInPage(fromIndex, PAGE_MASK);
             this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);

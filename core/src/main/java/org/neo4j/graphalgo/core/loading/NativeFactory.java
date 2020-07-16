@@ -168,6 +168,7 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
         IdsAndProperties idsAndProperties,
         int concurrency
     ) {
+        var pageSize = ImportSizing.of(concurrency, dimensions.nodeCount()).pageSize();
         Map<RelationshipType, RelationshipsBuilder> allBuilders = graphCreateConfig
             .relationshipProjections()
             .projections()
@@ -175,7 +176,11 @@ public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreC
             .stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                projectionEntry -> new RelationshipsBuilder(projectionEntry.getValue(), tracker)
+                projectionEntry -> new RelationshipsBuilder(
+                    projectionEntry.getValue(),
+                    TransientAdjacencyListBuilder.builderFactory(tracker),
+                    TransientAdjacencyOffsets.forPageSize(pageSize)
+                )
             ));
 
         ObjectLongMap<RelationshipType> relationshipCounts = new ScanningRelationshipsImporter(

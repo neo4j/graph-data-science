@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+public interface AdjacencyListAllocator {
 
-public interface AdjacencyListBuilder {
+    void prepare();
 
-    AdjacencyListAllocator newAllocator();
+    AdjacencyListPageSlice allocate(int size);
 
-    AdjacencyList build();
+    long insert(byte[] bytes, int arrayOffset, int length);
 
-    void flush();
+    void close();
 }

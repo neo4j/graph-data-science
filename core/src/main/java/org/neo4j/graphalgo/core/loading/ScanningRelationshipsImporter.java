@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 
-final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
+public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
 
     private final GraphCreateConfig graphCreateConfig;
     private final GraphLoaderContext loadingContext;
@@ -48,7 +49,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
-    ScanningRelationshipsImporter(
+    public ScanningRelationshipsImporter(
         GraphCreateConfig graphCreateConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
@@ -81,7 +82,6 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
 
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
-
 
         List<SingleTypeRelationshipImporter.Builder> importerBuilders = allBuilders
                 .entrySet()
@@ -117,7 +117,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
             int numberOfPages,
             RelationshipType relationshipType,
             RelationshipProjection projection,
-            RelationshipsBuilder relationshipsBuilder
+            @NotNull RelationshipsBuilder relationshipsBuilder
     ) {
         List<PropertyMapping> propertyMappings = projection.properties().mappings();
         int[] propertyKeyIds = propertyMappings
@@ -151,6 +151,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         return new SingleTypeRelationshipImporter.Builder(
             relationshipType,
             projection,
+            adjacencyBuilder.supportsProperties(),
             typeId,
             importer,
             relationshipCounter,

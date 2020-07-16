@@ -19,13 +19,17 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
-public interface AdjacencyListBuilder {
+class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
 
-    AdjacencyListAllocator newAllocator();
-
-    AdjacencyList build();
-
-    void flush();
+    @Test
+    void test() throws Exception {
+        testAdjacencyList(
+            TransientAdjacencyListBuilder.builderFactory(AllocationTracker.EMPTY),
+            TransientAdjacencyOffsets.forPageSize(8)
+        );
+    }
 }

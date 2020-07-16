@@ -17,15 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
+@FunctionalInterface
+public interface CheckedRunnable<E extends Exception> extends Runnable {
 
-public interface AdjacencyListBuilder {
+    static <E extends Exception> CheckedRunnable<E> runnable(CheckedRunnable<E> runnable) {
+        return runnable;
+    }
 
-    AdjacencyListAllocator newAllocator();
+    @Override
+    default void run() {
+        try {
+            checkedRun();
+        } catch (Exception e) {
+            ExceptionUtil.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
 
-    AdjacencyList build();
-
-    void flush();
+    void checkedRun() throws E;
 }
+

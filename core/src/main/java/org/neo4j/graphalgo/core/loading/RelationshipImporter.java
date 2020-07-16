@@ -79,7 +79,7 @@ class RelationshipImporter {
     }
 
     private long importUndirectedWithProperties(RelationshipsBatchBuffer buffer, PropertyReader reader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortBySource();
         long[][] outProperties = reader.readProperty(
             batch,
@@ -110,7 +110,7 @@ class RelationshipImporter {
     }
 
     private long importNaturalWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortBySource();
         long[][] outProperties = propertyReader.readProperty(
             batch,
@@ -130,7 +130,7 @@ class RelationshipImporter {
     }
 
     private long importReverseWithProperties(RelationshipsBatchBuffer buffer, PropertyReader propertyReader) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
         long[] batch = buffer.sortByTarget();
         long[][] inProperties = propertyReader.readProperty(
             batch,
@@ -207,7 +207,7 @@ class RelationshipImporter {
     }
 
 
-    public static PropertyReader preLoadedPropertyReader() {
+    static PropertyReader preLoadedPropertyReader() {
         return (batch, batchLength, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
             long[] properties = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
@@ -225,7 +225,7 @@ class RelationshipImporter {
         AdjacencyBuilder adjacency,
         AllocationTracker tracker
     ) {
-        int batchLength = buffer.length;
+        int batchLength = buffer.length();
 
         int[] offsets = buffer.spareInts();
         long[] targets = buffer.spareLongs();
