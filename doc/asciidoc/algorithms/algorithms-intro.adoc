@@ -30,6 +30,7 @@ This chapter is divided into the following sections:
 * <<algorithms-similarity>>
 * <<algorithms-path-finding>>
 * <<algorithms-linkprediction>>
+* <<node-embeddings>>
 * <<algorithms-auxiliary>>
 * <<algorithms-pregel-api>>
 
