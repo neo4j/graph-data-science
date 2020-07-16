@@ -28,7 +28,7 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
         this.buffers = buffers;
     }
 
-    static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
+    public static RecordsBatchBuffer<RelationshipReference> of(RelationshipsBatchBuffer... buffers) {
         if (buffers.length == 1) {
             return buffers[0];
         }

@@ -34,9 +34,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-final class RelationshipsScanner extends StatementAction implements RecordScanner {
+public final class RelationshipsScanner extends StatementAction implements RecordScanner {
 
-    static InternalImporter.CreateScanner of(
+    public static InternalImporter.CreateScanner of(
         GraphLoaderContext loadingContext,
         ProgressLogger progressLogger,
         IdMapping idMap,

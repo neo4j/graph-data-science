@@ -36,4 +36,6 @@ public interface AdjacencyList {
      * Get a new cursor initialised on the given offset
      */
     AdjacencyCursor decompressingCursor(long offset);
+
+    long release();
 }

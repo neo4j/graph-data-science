@@ -141,6 +141,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
                 indexInPage(index, PAGE_MASK));
     }
 
+    @Override
     public long release() {
         if (pages == null) {
             return 0L;

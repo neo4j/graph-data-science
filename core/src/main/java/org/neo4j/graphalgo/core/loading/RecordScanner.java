@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-interface RecordScanner extends Runnable {
+public interface RecordScanner extends Runnable {
     long recordsImported();
     long propertiesImported();
 }

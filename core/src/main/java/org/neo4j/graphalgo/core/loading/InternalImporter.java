@@ -34,7 +34,7 @@ public final class InternalImporter {
         Collection<Runnable> flushTasks();
     }
 
-    static CreateScanner createEmptyScanner() {
+    public static CreateScanner createEmptyScanner() {
         return NoRecordsScanner.INSTANCE;
     }
 

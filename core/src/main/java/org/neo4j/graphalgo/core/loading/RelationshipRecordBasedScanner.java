@@ -28,9 +28,9 @@ import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-final class RelationshipRecordBasedScanner extends AbstractRecordBasedScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
+public final class RelationshipRecordBasedScanner extends AbstractRecordBasedScanner<RelationshipReference, RelationshipRecord, RelationshipStore> {
 
-    static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipRecordBasedScanner::new;
+    public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipRecordBasedScanner::new;
 
     private RelationshipRecordBasedScanner(int prefetchSize, SecureTransaction transaction) {
         super(prefetchSize, transaction);
