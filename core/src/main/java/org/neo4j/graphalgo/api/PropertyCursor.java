@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface PropertyCursor {
+public interface PropertyCursor extends AutoCloseable {
 
     /**
      * Return true iff there is at least one more target to decode.
@@ -32,4 +32,7 @@ public interface PropertyCursor {
      * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
      */
     long nextLong();
+
+    @Override
+    void close();
 }

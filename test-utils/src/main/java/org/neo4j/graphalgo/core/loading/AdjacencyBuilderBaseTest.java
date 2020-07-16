@@ -19,11 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -35,12 +32,12 @@ import java.util.concurrent.atomic.LongAdder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class AdjacencyBuilderBaseTest extends BaseTest {
+public class AdjacencyBuilderBaseTest {
 
     protected void testAdjacencyList(
         AdjacencyListBuilderFactory listBuilderFactory,
         AdjacencyOffsetsFactory offsetsFactory
-    ) throws Exception {
+    ) {
         RelationshipsBuilder globalBuilder = new RelationshipsBuilder(
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             listBuilderFactory,
@@ -72,30 +69,20 @@ public class AdjacencyBuilderBaseTest extends BaseTest {
 
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
-        AdjacencyList adjacencyList = globalBuilder.adjacencyList();
-        AdjacencyOffsets adjacencyOffsets = globalBuilder.globalAdjacencyOffsets();
-
-        try {
+        try (
+            var adjacencyOffsets = globalBuilder.globalAdjacencyOffsets();
+            var adjacencyList = globalBuilder.adjacencyList()
+        ) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
                 long offset = adjacencyOffsets.get(nodeId);
-                var cursor = adjacencyList.decompressingCursor(offset);
-                try {
+                try (var cursor = adjacencyList.decompressingCursor(offset)) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
                         assertEquals(relationships.remove(nodeId), target);
                     }
-                } finally {
-                    if (cursor instanceof AutoCloseable) {
-                        ((AutoCloseable) cursor).close();
-                    }
                 }
             }
-
             assertTrue(relationships.isEmpty());
-
-        } finally {
-            adjacencyList.release();
-            adjacencyOffsets.release();
         }
     }
 }

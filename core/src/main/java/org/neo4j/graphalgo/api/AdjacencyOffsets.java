@@ -19,9 +19,10 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface AdjacencyOffsets {
+public interface AdjacencyOffsets extends AutoCloseable {
 
     long get(long index);
 
-    long release();
+    @Override
+    void close();
 }

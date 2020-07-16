@@ -142,12 +142,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public long release() {
-        if (pages == null) {
-            return 0L;
-        }
+    public void close() {
         pages = null;
-        return allocatedMemory;
     }
 
     // Cursors
@@ -178,8 +174,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
         static final Cursor EMPTY = new Cursor(new byte[0][]);
 
-        // TODO: free
-        private final byte[][] pages;
+        private byte[][] pages;
 
         private byte[] currentPage;
         private int degree;
@@ -214,12 +209,16 @@ public final class TransientAdjacencyList implements AdjacencyList {
             this.limit = offset + degree * Long.BYTES;
             return this;
         }
+
+        @Override
+        public void close() {
+            pages = null;
+        }
     }
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {
 
         static final long NOT_FOUND = -1;
-        // TODO: free
         private byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
 
@@ -298,6 +297,11 @@ public final class TransientAdjacencyList implements AdjacencyList {
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
             this.currentTarget += this.value;
             return value;
+        }
+
+        @Override
+        public void close() {
+            pages = null;
         }
     }
 }

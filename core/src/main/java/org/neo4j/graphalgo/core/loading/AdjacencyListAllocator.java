@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public interface AdjacencyListAllocator {
+public interface AdjacencyListAllocator extends AutoCloseable {
 
     void prepare();
 
     AdjacencyListPageSlice allocate(int size);
 
+    @Override
     void close();
 }

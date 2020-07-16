@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import java.util.Arrays;
 import java.util.function.Predicate;
 
+import static java.util.Objects.requireNonNull;
+
 public class RelationshipsBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
@@ -36,7 +38,9 @@ public class RelationshipsBuilder {
     private final AdjacencyListBuilder adjacencyListBuilder;
     private final AdjacencyOffsetsFactory offsetsFactory;
     private final AdjacencyListBuilder[] propertyBuilders;
+    private long[][] globalAdjacencyOffsetsPages;
     private AdjacencyOffsets globalAdjacencyOffsets;
+    private long[][][] globalPropertyOffsetsPages;
     private AdjacencyOffsets[] globalPropertyOffsets;
 
     public RelationshipsBuilder(
@@ -73,16 +77,11 @@ public class RelationshipsBuilder {
     }
 
     final void setGlobalAdjacencyOffsets(long[][] pages) {
-        this.globalAdjacencyOffsets = offsetsFactory.newOffsets(pages);
+        this.globalAdjacencyOffsetsPages = pages;
     }
 
     final void setGlobalPropertyOffsets(long[][][] allPages) {
-        this.globalPropertyOffsets = new AdjacencyOffsets[allPages.length];
-        Arrays.setAll(globalPropertyOffsets, i -> {
-            var pages = allPages[i];
-            // TODO: the nested null check is for graphs that don't support properties (i.e. Geri)
-            return pages != null && containsNonNull(pages) ? offsetsFactory.newOffsets(pages) : null;
-        });
+        globalPropertyOffsetsPages = allPages;
     }
 
     private boolean containsNonNull(long[][] pages) {
@@ -99,6 +98,9 @@ public class RelationshipsBuilder {
     }
 
     public AdjacencyOffsets globalAdjacencyOffsets() {
+        if (globalAdjacencyOffsets == null) {
+            globalAdjacencyOffsets = offsetsFactory.newOffsets(requireNonNull(globalAdjacencyOffsetsPages));
+        }
         return globalAdjacencyOffsets;
     }
 
@@ -117,10 +119,18 @@ public class RelationshipsBuilder {
 
     // TODO: This returns only the first of possibly multiple properties
     AdjacencyOffsets globalPropertyOffsets() {
-        return globalPropertyOffsets[0];
+        return globalPropertyOffsets(0);
     }
 
     public AdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
+        if (globalPropertyOffsets == null) {
+            globalPropertyOffsets = new AdjacencyOffsets[requireNonNull(globalPropertyOffsetsPages).length];
+            Arrays.setAll(globalPropertyOffsets, i -> {
+                var pages = globalPropertyOffsetsPages[i];
+                // TODO: the nested null check is for graphs that don't support properties (i.e. Geri)
+                return pages != null && containsNonNull(pages) ? offsetsFactory.newOffsets(pages) : null;
+            });
+        }
         return globalPropertyOffsets[propertyIndex];
     }
 

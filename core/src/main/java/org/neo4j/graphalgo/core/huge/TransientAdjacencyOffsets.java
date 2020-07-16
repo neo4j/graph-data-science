@@ -91,16 +91,8 @@ public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
         }
 
         @Override
-        public long release() {
-            if (pages != null) {
-                long memoryUsed = sizeOfObjectArray(pages.length);
-                for (long[] page : pages) {
-                    memoryUsed += sizeOfLongArray(page.length);
-                }
-                pages = null;
-                return memoryUsed;
-            }
-            return 0L;
+        public void close() {
+            pages = null;
         }
     }
 
@@ -124,13 +116,8 @@ public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
         }
 
         @Override
-        public long release() {
-            if (page != null) {
-                long memoryUsed = sizeOfLongArray(page.length);
-                page = null;
-                return memoryUsed;
-            }
-            return 0L;
+        public void close() {
+            page = null;
         }
     }
 }

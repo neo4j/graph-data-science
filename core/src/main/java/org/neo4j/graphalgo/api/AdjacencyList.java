@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface AdjacencyList {
+public interface AdjacencyList extends AutoCloseable {
 
     int degree(long nodeId);
 
@@ -37,5 +37,6 @@ public interface AdjacencyList {
      */
     AdjacencyCursor decompressingCursor(long offset);
 
-    long release();
+    @Override
+    void close();
 }

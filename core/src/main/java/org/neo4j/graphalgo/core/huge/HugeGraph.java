@@ -385,12 +385,18 @@ public class HugeGraph implements Graph {
         if (!canRelease) return;
 
         if (adjacencyList != null) {
-            tracker.remove(adjacencyList.release());
-            tracker.remove(adjacencyOffsets.release());
+            adjacencyList.close();
             adjacencyList = null;
-            properties = null;
+            adjacencyOffsets.close();
             adjacencyOffsets = null;
-            propertyOffsets = null;
+            if (properties != null) {
+                properties.close();
+                properties = null;
+            }
+            if (propertyOffsets != null) {
+                propertyOffsets.close();
+                propertyOffsets = null;
+            }
         }
         emptyCursor = null;
         cursorCache = null;
