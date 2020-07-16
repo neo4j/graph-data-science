@@ -139,7 +139,7 @@ public final class CompressedLongArray {
         return weights;
     }
 
-    boolean hasWeights() {
+    public boolean hasWeights() {
         return weights != null && !(weights.length == 0);
     }
 
