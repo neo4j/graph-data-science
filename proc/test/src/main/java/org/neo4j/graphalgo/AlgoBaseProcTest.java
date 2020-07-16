@@ -327,17 +327,9 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testNonConsecutiveIds() {
         Random random = new Random();
 
-        runQuery(graphDb(),
-            "UNWIND range(1, $upperBound) AS s " +
-            "CREATE (:Node {id: s})",
-            Map.of("upperBound", random.nextInt(250)));
-
+        randomGraph(random.nextInt(250));
         emptyDb();
-
-        runQuery(graphDb(),
-            "UNWIND range(1, $upperBound) AS s " +
-            "CREATE (:Node {id: s})",
-            Map.of("upperBound", random.nextInt(250)));
+        randomGraph(random.nextInt(250));
 
         applyOnProcedure((proc) -> {
             getWriteAndStreamProcedures(proc)
@@ -346,6 +338,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
                 });
         });
+    }
+
+    private void randomGraph(int size) {
+        runQuery(graphDb(),"UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ", Map.of("size", size));
+        String statement =
+            "MATCH (p:Person) WITH collect(p) as people " +
+            "MATCH (i:Item) WITH people, collect(i) as items " +
+            "UNWIND range(1,$size) as _ " +
+            "WITH people[toInteger(rand()*size(people))] as p, items[toInteger(rand()*size(items))] as i " +
+            "MERGE (p)-[likes:LIKES]->(i)";
+        runQuery(graphDb(), statement, Map.of("size", size));
     }
 
     @Test
