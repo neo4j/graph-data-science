@@ -356,7 +356,7 @@ public abstract class AlgoBaseProc<
             storeConfig.relationshipProjections().projections().entrySet().stream()
                 .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
                                  config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> !entry.getValue().isMultiGraph())
+                .filter(entry -> entry.getValue().isMultiGraph())
                 .forEach(entry -> log.warn(
                     "Procedure runs optimal with relationship aggregation." +
                     " Projection for `%s` does not aggregate relationships." +

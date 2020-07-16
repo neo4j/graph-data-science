@@ -104,7 +104,7 @@ public final class TestGraph implements Graph {
 
     @Override
     public boolean isMultiGraph() {
-        return false;
+        return true;
     }
 
     @Override

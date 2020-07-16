@@ -39,6 +39,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
@@ -148,7 +149,14 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     @Test
     void warnOnNoneAggregatedGraph() {
         var graphName = "nonagg";
-        runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", graphName));
+        runQuery("CALL gds.graph.create(" +
+                 " $graphName," +
+                 " '*', {" +
+                 "    ALL: {" +
+                 "        type: '*'," +
+                 "        orientation: 'UNDIRECTED'" +
+                 "    }" +
+                 " })", Map.of("graphName", graphName));
 
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty());
 
@@ -160,18 +168,17 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
                 .filter(procMethod -> !getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(noneEstimateMethod -> {
                     try {
-                        noneEstimateMethod.invoke(proc, "g", config.toMap());
+                        noneEstimateMethod.invoke(proc, "nonagg", config.toMap());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
                 });
         });
 
-        testLog.containsMessage(
-            "warn",
-            "Procedure runs optimal with relationship aggregation. " +
-            "Projection for `*` does not aggregate relationships. " +
-            "You might experience a slowdown in the procedure execution."
-        );
+        String expected = "Procedure runs optimal with relationship aggregation. " +
+                          "Projection for `ALL` does not aggregate relationships. " +
+                          "You might experience a slowdown in the procedure execution.";
+        String actual = testLog.getMessages("warn").get(0);
+        assertEquals(expected, actual);
     }
 }
