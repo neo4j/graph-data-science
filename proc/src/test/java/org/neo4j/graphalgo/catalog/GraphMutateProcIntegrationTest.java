@@ -22,6 +22,10 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.Graph;
@@ -32,7 +36,11 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -106,7 +114,8 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             WccMutateProc.class,
             LabelPropagationMutateProc.class,
             LouvainMutateProc.class,
-            NodeSimilarityMutateProc.class
+            NodeSimilarityMutateProc.class,
+            GraphSageStreamProc.class
         );
 
         runQuery(GdsCypher
@@ -171,6 +180,25 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(nodeSimilarityQuery);
 
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
+
+        int embeddingSize = 64;
+        String graphSageQuery = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH)
+            .algo("gds.alpha.graphSage")
+            .streamMode()
+            .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
+            .addParameter("embeddingSize", embeddingSize)
+            .yields();
+        runQueryWithRowConsumer(graphSageQuery, r -> {
+            List<Object> embeddings = (ArrayList<Object>) r.get("embeddings");
+            assertTrue(embeddings.size() == embeddingSize);
+            double[] vals = new double[embeddingSize];
+            for (int i = 0; i < embeddingSize; i++) {
+                vals[i] = (double)embeddings.get(i);
+            }
+            assertTrue(L2Norm.l2(new Tensor(vals, Dimensions.vector(embeddingSize))) != 0D);
+        });
 
         // write new properties and relationships to Neo
         String writeNodePropertiesQuery = formatWithLocale(
