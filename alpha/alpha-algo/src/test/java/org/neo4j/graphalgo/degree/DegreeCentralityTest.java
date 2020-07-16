@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
@@ -29,15 +30,23 @@ import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.beta.generator.RelationshipPropertyProducer;
+import org.neo4j.graphalgo.centrality.degreecentrality.DegreeCentrality;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,6 +126,43 @@ final class DegreeCentralityTest extends AlgoTestBase {
     @AfterEach
     void shutdownGraphDb() {
         db.shutdown();
+    }
+
+
+    @Test
+    void shouldRunConcurrently() {
+        int nodeCount = 20002;
+        int averageDegree = 2;
+        HugeGraph graph = new RandomGraphGenerator(
+            nodeCount,
+            averageDegree,
+            RelationshipDistribution.POWER_LAW,
+            0L,
+            Optional.of(RelationshipPropertyProducer.random("similarity", 0, 1)),
+            Aggregation.NONE,
+            Orientation.NATURAL,
+            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
+            AllocationTracker.EMPTY
+        ).generate();
+
+        DegreeCentrality degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            2,
+            true,
+            AllocationTracker.EMPTY
+        );
+
+        DegreeCentrality centrality = degreeCentrality.compute();
+        HugeDoubleArray centralityResult = centrality.result().array();
+
+        double sum = 0;
+        for (double v : centralityResult.toArray()) {
+            sum += v;
+        }
+
+        double expected = nodeCount * averageDegree * 0.5;
+        assertEquals(expected, sum, expected * 0.1);
     }
 
     @AllGraphTypesTest
