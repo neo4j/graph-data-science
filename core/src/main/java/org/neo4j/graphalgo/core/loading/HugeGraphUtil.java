@@ -273,7 +273,7 @@ public final class HugeGraphUtil {
             return Relationships.of(
                 importedRelationships,
                 orientation,
-                !Aggregation.equivalentToNone(aggregation),
+                Aggregation.equivalentToNone(aggregation),
                 relationshipsBuilder.adjacencyList(),
                 relationshipsBuilder.globalAdjacencyOffsets(),
                 loadRelationshipProperty ? relationshipsBuilder.properties() : null,
