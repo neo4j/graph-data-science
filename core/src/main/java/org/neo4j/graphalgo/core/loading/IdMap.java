@@ -221,47 +221,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         }
     }
 
-    public static final class IdIterable implements PrimitiveLongIterable {
-        private final long start;
-        private final long length;
-
-        public IdIterable(long start, long length) {
-            this.start = start;
-            this.length = length;
-        }
-
-        @Override
-        public PrimitiveLongIterator iterator() {
-            return new IdIterator(start, length);
-        }
-    }
-
-    public static final class IdIterator implements PrimitiveLongIterator {
-
-        private long current;
-        private long limit; // exclusive upper bound
-
-        public IdIterator(long length) {
-            this.current = 0;
-            this.limit = length;
-        }
-
-        private IdIterator(long start, long length) {
-            this.current = start;
-            this.limit = start + length;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return current < limit;
-        }
-
-        @Override
-        public long next() {
-            return current++;
-        }
-    }
-
     private static class FilteredIdMap extends IdMap {
 
         FilteredIdMap(

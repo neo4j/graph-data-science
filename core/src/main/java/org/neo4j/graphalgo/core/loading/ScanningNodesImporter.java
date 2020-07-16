@@ -112,7 +112,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             scanner,
             dimensions.nodeLabelTokens(),
             progressLogger,
-            new NodeImporter(
+            new HugeNodeImporter(
                 idMapBuilder,
                 nodeLabelBitSetMapping,
                 labelTokenNodeLabelMapping

@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 
-final class AdjacencyCompression {
+public final class AdjacencyCompression {
 
     private static long[] growWithDestroy(long[] values, int newLength) {
         if (values.length < newLength) {
@@ -48,7 +48,7 @@ final class AdjacencyCompression {
         into.length = array.uncompress(into.longs);
     }
 
-    static int applyDeltaEncoding(LongsRef data, Aggregation aggregation) {
+    public static int applyDeltaEncoding(LongsRef data, Aggregation aggregation) {
         Arrays.sort(data.longs, 0, data.length);
         return data.length = applyDelta(data.longs, data.length, aggregation);
     }

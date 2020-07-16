@@ -41,7 +41,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         StoreScanner<NodeReference> scanner,
         LongSet labels,
         ProgressLogger progressLogger,
-        AbstractNodeImporter importer,
+        NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
         TerminationFlag terminationFlag
     ) {
@@ -60,7 +60,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
         private final ProgressLogger progressLogger;
-        private final AbstractNodeImporter importer;
+        private final NodeImporter importer;
         private final NativeNodePropertyImporter nodePropertyImporter;
         private final TerminationFlag terminationFlag;
 
@@ -69,7 +69,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
             StoreScanner<NodeReference> scanner,
             LongSet labels,
             ProgressLogger progressLogger,
-            AbstractNodeImporter importer,
+            NodeImporter importer,
             @Nullable NativeNodePropertyImporter nodePropertyImporter,
             TerminationFlag terminationFlag
         ) {
@@ -108,7 +108,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     private final LongSet labels;
     private final int scannerIndex;
     private final ProgressLogger progressLogger;
-    private final AbstractNodeImporter importer;
+    private final NodeImporter importer;
     private final NativeNodePropertyImporter nodePropertyImporter;
     private long propertiesImported;
     private long nodesImported;
@@ -120,7 +120,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         LongSet labels,
         int threadIndex,
         ProgressLogger progressLogger,
-        AbstractNodeImporter importer,
+        NodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter
     ) {
         super(tx);

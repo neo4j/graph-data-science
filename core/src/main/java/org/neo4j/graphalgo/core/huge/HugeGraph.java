@@ -478,7 +478,7 @@ public class HugeGraph implements Graph {
         private long count;
         public long target = TARGET_NOT_FOUND;
 
-        GetTargetConsumer(long count) {
+        public GetTargetConsumer(long count) {
             this.count = count;
         }
 
@@ -492,11 +492,11 @@ public class HugeGraph implements Graph {
         }
     }
 
-    private static class ExistsConsumer implements RelationshipConsumer {
+    public static class ExistsConsumer implements RelationshipConsumer {
         private final long targetNodeId;
-        private boolean found = false;
+        public boolean found = false;
 
-        ExistsConsumer(long targetNodeId) {
+        public ExistsConsumer(long targetNodeId) {
             this.targetNodeId = targetNodeId;
         }
 
