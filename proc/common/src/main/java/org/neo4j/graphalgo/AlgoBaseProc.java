@@ -358,22 +358,6 @@ public abstract class AlgoBaseProc<
         });
     }
 
-    protected void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        if (graphCreateConfig instanceof GraphCreateFromStoreConfig) {
-            GraphCreateFromStoreConfig storeConfig = (GraphCreateFromStoreConfig) graphCreateConfig;
-            storeConfig.relationshipProjections().projections().entrySet().stream()
-                .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                 config.relationshipTypes().contains(entry.getKey().name()))
-                .filter(entry -> entry.getValue().isMultiGraph())
-                .forEach(entry -> log.warn(
-                    "Procedure runs optimal with relationship aggregation." +
-                    " Projection for `%s` does not aggregate relationships." +
-                    " You might experience a slowdown in the procedure execution.",
-                    entry.getKey().equals(RelationshipType.ALL_RELATIONSHIPS) ? "*" : entry.getKey().name
-                ));
-        }
-    }
-
     /**
      * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
      * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
