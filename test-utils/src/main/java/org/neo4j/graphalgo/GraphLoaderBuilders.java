@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
-final class GraphLoaderBuilders {
+public final class GraphLoaderBuilders {
 
     private GraphLoaderBuilders() { }
 
@@ -154,7 +154,7 @@ final class GraphLoaderBuilders {
     }
 
     @NotNull
-    private static GraphLoader createGraphLoader(
+    public static GraphLoader createGraphLoader(
         GraphDatabaseAPI api,
         Optional<SecurityContext> securityContext,
         Optional<ExecutorService> executorService,

@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_Q
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
-final class GraphCreateConfigBuilders {
+public final class GraphCreateConfigBuilders {
 
     private GraphCreateConfigBuilders() { }
 
@@ -50,7 +50,7 @@ final class GraphCreateConfigBuilders {
      * Factory method that defines the generation of {@link StoreConfigBuilder}.
      */
     @Builder.Factory
-    static GraphCreateFromStoreConfig storeConfig(
+    public static GraphCreateFromStoreConfig storeConfig(
         Optional<String> userName,
         Optional<String> graphName,
         List<String> nodeLabels,
@@ -128,7 +128,7 @@ final class GraphCreateConfigBuilders {
      * Factory method that defines the generation of {@link CypherConfigBuilder}.
      */
     @Builder.Factory
-    static GraphCreateFromCypherConfig cypherConfig(
+    public static GraphCreateFromCypherConfig cypherConfig(
         Optional<String> userName,
         Optional<String> graphName,
         Optional<String> nodeQuery,
@@ -147,13 +147,5 @@ final class GraphCreateConfigBuilders {
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))
             .build();
-    }
-
-    enum AnyLabel {
-        PROJECTION, LOAD
-    }
-
-    enum AnyRelationshipType {
-        PROJECTION, LOAD
     }
 }
