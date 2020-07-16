@@ -36,7 +36,7 @@ public class Sigmoid extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable contextParent, ComputationContext ctx) {
         return ctx.gradient(this).elementwiseProduct(ctx.data(this).map(value -> value * (1 - value)));
     }
 

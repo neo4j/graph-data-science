@@ -38,8 +38,8 @@ public class Relu extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return ctx.data(parent).map(value -> value > 0 ? 1 : ALPHA);
+    public Tensor gradient(Variable contextParent, ComputationContext ctx) {
+        return ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
     }
 
     @Override

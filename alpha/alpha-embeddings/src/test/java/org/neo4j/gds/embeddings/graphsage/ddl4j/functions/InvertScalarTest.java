@@ -20,10 +20,10 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,8 +31,8 @@ public class InvertScalarTest extends GraphSageBaseTest implements FiniteDiffere
 
     @Test
     void testApply() {
-        AbstractVariable variable = new Weights(Tensor.scalar(5D));
-        InvertScalar invertScalar = new InvertScalar(variable);
+        Variable variable = new Weights(Tensor.scalar(5D));
+        Variable invertScalar = new InvertScalar(variable);
 
         assertEquals(0.2, ctx.forward(invertScalar).dataAt(0));
     }

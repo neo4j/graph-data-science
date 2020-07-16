@@ -22,9 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j;
 public interface Variable {
     Tensor apply(ComputationContext ctx);
 
-    // Do not use directly. Use ComputationContext instead.
     <T extends Variable> Tensor gradient(T parent, ComputationContext ctx);
-
 
     default boolean requireGradient() {
         return false;
