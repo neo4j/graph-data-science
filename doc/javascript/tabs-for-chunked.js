@@ -1,20 +1,21 @@
 function tabTheSource($content) {
-    var LANGUAGES = {
+    var SESSION_STORAGE_KEY = 'active_procedure_mode';
+    var MODES = {
         'mutate': 'Mutate mode',
         'stats': 'Stats mode',
         'stream': 'Stream mode',
         'write': 'Write mode'
     };
-    updateSelectedLanguageFromQueryParams(LANGUAGES);
+    updateSelectedModeFromQueryParams(MODES, SESSION_STORAGE_KEY);
 
-    var storedLanguage = getCodeExampleLanguage();
+    var storedMode = getStoredActiveProcedureMode(SESSION_STORAGE_KEY);
 
     var $UL = $('<ul class="nav nav-tabs" role="tablist"/>');
     var $LI = $('<li role="presentation"/>');
     var $A = $('<a role="tab" data-toggle="tab" style="text-decoration:none;"/>');
     var $WRAPPER = $('<div class="tab-content content"/>');
     var snippets = [];
-    var languageEventElements = {};
+    var modeEventElement = {};
 
     var focusSelectedExample = function(e) {
         var target = $(e.target);
@@ -23,45 +24,45 @@ function tabTheSource($content) {
             var newTop = target.offset().top - beforeTop;
             $('html,body').scrollTop(newTop);
         }, 1);
-    }
+    };
 
     var selectTab = function (e) {
-        var language = $(e.target).data('lang');
-        var $elements = languageEventElements[language];
+        var mode = $(e.target).data('lang');
+        var $elements = modeEventElement[mode];
         for (var j = 0; j < $elements.length; j++) {
             $elements[j].tab('show');
         }
         if (storageAvailable('sessionStorage')) {
-            sessionStorage.setItem('code_example_language', language);
+            sessionStorage.setItem(SESSION_STORAGE_KEY, mode);
         }
-    }
+    };
 
     $('div.tabbed-example', $content).each(function () {
         var $exampleBlock = $(this);
         var title = $exampleBlock.children('div.example-title', this).first().text();
-        var languages = [];
-        var $languageBlocks = {};
+        var modes = [];
+        var $modeBlocks = {};
         $(this).children('div.tabbed-example-contents').children('div.listingblock,div.informalexample[class*="include-with"]').each(function () {
             var $this = $(this);
-            var language = undefined;
+            var mode = undefined;
             if ($this.hasClass('listingblock')) {
-                language = $('code', this).data('lang');
+                mode = $('code', this).data('lang');
             } else {
-                for (var key in LANGUAGES) {
+                for (var key in MODES) {
                     if ($this.hasClass('include-with-' + key)) {
-                        language = key;
+                        mode = key;
                         break;
                     }
                 }
             }
-            languages.push(language);
-            $languageBlocks[language] = $(this);
+            modes.push(mode);
+            $modeBlocks[mode] = $(this);
         });
-        if (languages.length > 1) {
+        if (modes.length > 1) {
             snippets.push({
                 '$exampleBlock': $exampleBlock,
-                'languages': languages,
-                '$languageBlocks': $languageBlocks
+                'modes': modes,
+                '$modeBlocks': $modeBlocks
             });
         }
     });
@@ -69,38 +70,38 @@ function tabTheSource($content) {
     var idNum = 0;
     for (var ix = 0; ix < snippets.length; ix++) {
         var snippet = snippets[ix];
-        var languages = snippet.languages;
-        var $languageBlocks = snippet.$languageBlocks;
+        var modes = snippet.modes;
+        var $modeBlocks = snippet.$modeBlocks;
         var $exampleBlock = snippet.$exampleBlock;
         var idBase = 'tabbed-example-' + idNum++;
         var $wrapper = $WRAPPER.clone();
         var $ul = $UL.clone();
 
-        for (var i = 0; i < languages.length; i++) {
-            var language = languages[i];
-            var $content = $($languageBlocks[language]);
+        for (var i = 0; i < modes.length; i++) {
+            var mode = modes[i];
+            var $content = $($modeBlocks[mode]);
             var id;
             if ($content.attr('id')) {
                 id = $content.attr('id');
             } else {
-                id = idBase + '-' + language;
+                id = idBase + '-' + mode;
                 $content.attr('id', id);
             }
             $content.addClass('tab-pane').css('position', 'relative');
             var $li = $LI.clone();
             var $a = $A.clone();
 
-            $a.attr('href', '#' + id).text(LANGUAGES[language]).data('lang', language).on('shown.bs.tab', selectTab).on('click', focusSelectedExample);
+            $a.attr('href', '#' + id).text(MODES[mode]).data('lang', mode).on('shown.bs.tab', selectTab).on('click', focusSelectedExample);
 
-            if (language in languageEventElements) {
-                languageEventElements[language].push($a);
+            if (mode in modeEventElement) {
+                modeEventElement[mode].push($a);
             } else {
-                languageEventElements[language] = [$a];
+                modeEventElement[mode] = [$a];
             }
             $wrapper.append($content);
 
-            if (storedLanguage) {
-                if (language === storedLanguage) {
+            if (storedMode) {
+                if (mode === storedMode) {
                     $li.addClass('active');
                     $content.addClass('active');
                 }
@@ -130,17 +131,17 @@ function storageAvailable(type) {
     }
 }
 
-function getCodeExampleLanguage() {
-    return storageAvailable('sessionStorage') ? sessionStorage.getItem('code_example_language') || false : false;
+function getStoredActiveProcedureMode(storageKey) {
+    return storageAvailable('sessionStorage') ? sessionStorage.getItem(storageKey) || false : false;
 }
 
-function updateSelectedLanguageFromQueryParams(availableLanguages) {
-    var languageFromParams = getQueryParamsFromUrl()["language"];
+function updateSelectedModeFromQueryParams(availableModes, storageKey) {
+    var modeFromParams = getQueryParamsFromUrl()["mode"];
 
-    if (languageFromParams && storageAvailable("sessionStorage")) {
-        sessionStorage.setItem("code_example_language", languageFromParams);
+    if (modeFromParams && storageAvailable("sessionStorage")) {
+        sessionStorage.setItem(storageKey, modeFromParams);
     } else {
-        sessionStorage.setItem("code_example_language", Object.keys(availableLanguages)[0]);
+        sessionStorage.setItem(storageKey, Object.keys(availableModes)[0]);
     }
 }
 
@@ -148,6 +149,7 @@ function getQueryParamsFromUrl() {
     var vars = [];
     var hash = [];
     var hashes = window.location.href
+      .split("#")[0]
       .slice(window.location.href.indexOf("?") + 1)
       .split("&");
     for (var i = 0; i < hashes.length; i++) {
