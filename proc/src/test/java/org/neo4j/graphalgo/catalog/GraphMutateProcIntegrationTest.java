@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
@@ -36,11 +35,11 @@ import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -190,14 +189,15 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
             .addParameter("embeddingSize", embeddingSize)
             .yields();
-        runQueryWithRowConsumer(graphSageQuery, r -> {
-            List<Object> embeddings = (ArrayList<Object>) r.get("embeddings");
-            assertTrue(embeddings.size() == embeddingSize);
-            double[] vals = new double[embeddingSize];
-            for (int i = 0; i < embeddingSize; i++) {
-                vals[i] = (double)embeddings.get(i);
-            }
-            assertTrue(L2Norm.l2(new Tensor(vals, Dimensions.vector(embeddingSize))) != 0D);
+
+        runQueryWithRowConsumer(graphSageQuery, row -> {
+            Collection<Double> embeddings = (Collection<Double>) row.get("embeddings");
+            assertEquals(embeddings.size(), embeddingSize);
+
+            double[] values = embeddings.stream()
+                .mapToDouble(Double::doubleValue)
+                .toArray();
+            assertNotEquals(0D, L2Norm.l2(Tensor.vector(values)));
         });
 
         // write new properties and relationships to Neo

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
@@ -31,12 +30,11 @@ import org.neo4j.gds.embeddings.randomprojections.RandomProjectionWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class EmbeddingsIntegrationTest extends BaseProcTest {
 
@@ -56,7 +54,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         ", (j:Node { nodeId: 9 })" +
         ", (k:Node { nodeId: 10 })" +
         ", (l:Node { nodeId: 11 })" +
-        ", (a)-[:TYPE {p: 10}]->(b)" +
+        ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(c)" +
         ", (c)-[:TYPE]->(d)" +
         ", (d)-[:TYPE]->(e)" +
@@ -93,7 +91,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
     @Test
     void runPipeline() {
-        // run algorithms in mutate mode
+        // run algorithms in write mode
 
         int node2vecEmbeddingSize = 3;
         String node2vecQuery = GdsCypher
@@ -113,7 +111,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .explicitCreation(TEST_GRAPH)
             .algo("gds.alpha.randomProjection")
             .writeMode()
-            .addParameter("embeddingSize", node2vecEmbeddingSize)
+            .addParameter("embeddingSize", rpEmbeddingSize)
             .addParameter("maxIterations", 2)
             .addParameter("iterationWeights", List.of(1D, 1D))
             .addParameter("writeProperty", "rp")
@@ -129,6 +127,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .yields();
         runQuery(newCreateQuery);
 
+        // run GraphSage in stream mode
         int embeddingSize = 64;
         String graphSageQuery = GdsCypher
             .call()
@@ -138,14 +137,15 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .addParameter("nodePropertyNames", List.of("rp0", "rp1", "rp2", "node2vec0", "node2vec1", "node2vec2"))
             .addParameter("embeddingSize", embeddingSize)
             .yields();
-        runQueryWithRowConsumer(graphSageQuery, r -> {
-            List<Object> embeddings = (ArrayList<Object>) r.get("embeddings");
-            assertTrue(embeddings.size() == embeddingSize);
-            double[] vals = new double[embeddingSize];
-            for (int i = 0; i < embeddingSize; i++) {
-                vals[i] = (double)embeddings.get(i);
-            }
-            assertTrue(L2Norm.l2(new Tensor(vals, Dimensions.vector(embeddingSize))) != 0D);
+
+        runQueryWithRowConsumer(graphSageQuery, row -> {
+            Collection<Double> embeddings = (Collection<Double>) row.get("embeddings");
+            assertEquals(embeddings.size(), embeddingSize);
+
+            double[] values = embeddings.stream()
+                .mapToDouble(Double::doubleValue)
+                .toArray();
+            assertNotEquals(0D, L2Norm.l2(Tensor.vector(values)));
         });
     }
 }
