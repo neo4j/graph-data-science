@@ -73,10 +73,11 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     }
 
     @Override
-    InternalImporter.CreateScanner creator(
-            final long nodeCount,
-            final ImportSizing sizing,
-            final StoreScanner<RelationshipReference> scanner) {
+    public InternalImporter.CreateScanner creator(
+        final long nodeCount,
+        final ImportSizing sizing,
+        final StoreScanner<RelationshipReference> scanner
+    ) {
 
         int pageSize = sizing.pageSize();
         int numberOfPages = sizing.numberOfPages();
@@ -158,7 +159,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
     }
 
     @Override
-    ObjectLongMap<RelationshipType> build() {
+    public ObjectLongMap<RelationshipType> build() {
         ObjectLongMap<RelationshipType> relationshipCounters = new ObjectLongHashMap<>(allRelationshipCounters.size());
         allRelationshipCounters.forEach((relationshipType, counter) -> relationshipCounters.put(relationshipType, counter.sum()));
         return relationshipCounters;

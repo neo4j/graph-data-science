@@ -86,15 +86,15 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         }
     }
 
-    long[] properties() {
+    public long[] properties() {
         return this.properties;
     }
 
-    boolean hasLabelInformation() {
+    public boolean hasLabelInformation() {
         return hasLabelInformation;
     }
 
-    long[][] labelIds() {
+    public long[][] labelIds() {
         return this.labelIds;
     }
 }

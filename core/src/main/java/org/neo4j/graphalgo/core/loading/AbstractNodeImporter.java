@@ -19,42 +19,19 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.loading.StoreScanner.RecordConsumer;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.memory.MemoryTracker;
 
-abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference> {
-
-    static final int DEFAULT_BUFFER_SIZE = 100_000;
-
-    final long[] buffer;
-    int length;
-
-    RecordsBatchBuffer(int capacity) {
-        this.buffer = new long[capacity];
-    }
-
-    boolean scan(StoreScanner.ScanCursor<Reference> cursor) {
-        reset();
-        return cursor.bulkNext(this);
-    }
-
-    public int length() {
-        return length;
-    }
-
-    int capacity() {
-        return buffer.length;
-    }
-
-    public boolean isFull() {
-        return length >= buffer.length;
-    }
-
-    public void reset() {
-        this.length = 0;
-    }
-
-    public long[] batch() {
-        return buffer;
-    }
-
+public interface AbstractNodeImporter {
+    long importNodes(
+        NodesBatchBuffer buffer,
+        Read read,
+        CursorFactory cursors,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker,
+        @Nullable NativeNodePropertyImporter propertyImporter
+    );
 }

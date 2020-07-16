@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
-public class NodeImporter {
+public class NodeImporter implements AbstractNodeImporter {
 
     interface PropertyReader {
         int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
@@ -61,7 +61,8 @@ public class NodeImporter {
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
     }
 
-    long importNodes(
+    @Override
+    public long importNodes(
         NodesBatchBuffer buffer,
         Read read,
         CursorFactory cursors,

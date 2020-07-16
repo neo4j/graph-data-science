@@ -26,9 +26,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 
-final class InternalImporter {
+public final class InternalImporter {
 
-    interface CreateScanner {
+    public interface CreateScanner {
         RecordScanner create(int index);
 
         Collection<Runnable> flushTasks();

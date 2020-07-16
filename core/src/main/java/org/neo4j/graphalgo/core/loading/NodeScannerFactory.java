@@ -23,11 +23,11 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
-final class NodeScannerFactory {
+public final class NodeScannerFactory {
 
     private NodeScannerFactory() {}
 
-    static StoreScanner.Factory<NodeReference> create(int[] labelIds) {
+    public static StoreScanner.Factory<NodeReference> create(int[] labelIds) {
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL)) {
             return NodeCursorBasedScanner::new;
         } else if (labelIds.length == 1) {

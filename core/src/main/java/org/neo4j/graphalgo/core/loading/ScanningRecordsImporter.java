@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.neo4j.graphalgo.core.loading.AbstractRecordBasedScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
-abstract class ScanningRecordsImporter<Record, T> {
+public abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
@@ -46,18 +46,18 @@ abstract class ScanningRecordsImporter<Record, T> {
         "useKernelCursors",
         USE_KERNEL_CURSORS_DEFAULT_SETTING
     );
-    static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
+    protected static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;
     private final ExecutorService threadPool;
 
-    final SecureTransaction transaction;
-    final GraphDimensions dimensions;
-    final AllocationTracker tracker;
-    final int concurrency;
+    protected final SecureTransaction transaction;
+    protected final GraphDimensions dimensions;
+    protected final AllocationTracker tracker;
+    protected final int concurrency;
 
-    ScanningRecordsImporter(
+    public ScanningRecordsImporter(
         StoreScanner.Factory<Record> factory,
         String label,
         GraphLoaderContext loadingContext,
@@ -73,7 +73,7 @@ abstract class ScanningRecordsImporter<Record, T> {
         this.concurrency = concurrency;
     }
 
-    final T call(Log log) {
+    public final T call(Log log) {
         long nodeCount = dimensions.nodeCount();
         final ImportSizing sizing = ImportSizing.of(concurrency, nodeCount);
         int numberOfThreads = sizing.numberOfThreads();
@@ -117,11 +117,11 @@ abstract class ScanningRecordsImporter<Record, T> {
         return build();
     }
 
-    abstract InternalImporter.CreateScanner creator(
-            long nodeCount,
-            ImportSizing sizing,
-            StoreScanner<Record> scanner
+    public abstract InternalImporter.CreateScanner creator(
+        long nodeCount,
+        ImportSizing sizing,
+        StoreScanner<Record> scanner
     );
 
-    abstract T build();
+    public abstract T build();
 }

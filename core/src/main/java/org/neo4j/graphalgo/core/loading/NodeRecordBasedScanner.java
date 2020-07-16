@@ -28,9 +28,9 @@ import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-final class NodeRecordBasedScanner extends AbstractRecordBasedScanner<NodeReference, NodeRecord, NodeStore> {
+public final class NodeRecordBasedScanner extends AbstractRecordBasedScanner<NodeReference, NodeRecord, NodeStore> {
 
-    static final StoreScanner.Factory<NodeReference> FACTORY = NodeRecordBasedScanner::new;
+    public static final StoreScanner.Factory<NodeReference> FACTORY = NodeRecordBasedScanner::new;
 
     private NodeRecordBasedScanner(int prefetchSize, SecureTransaction transaction) {
         super(prefetchSize, transaction);

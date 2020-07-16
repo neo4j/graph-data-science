@@ -34,16 +34,17 @@ import org.neo4j.kernel.api.KernelTransaction;
 import java.util.Collection;
 import java.util.Collections;
 
-final class NodesScanner extends StatementAction implements RecordScanner {
+public final class NodesScanner extends StatementAction implements RecordScanner {
 
-    static InternalImporter.CreateScanner of(
+    public static InternalImporter.CreateScanner of(
         SecureTransaction tx,
         StoreScanner<NodeReference> scanner,
         LongSet labels,
         ProgressLogger progressLogger,
-        NodeImporter importer,
+        AbstractNodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
-        TerminationFlag terminationFlag) {
+        TerminationFlag terminationFlag
+    ) {
         return new NodesScanner.Creator(
                 tx,
                 scanner,
@@ -59,7 +60,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
         private final ProgressLogger progressLogger;
-        private final NodeImporter importer;
+        private final AbstractNodeImporter importer;
         private final NativeNodePropertyImporter nodePropertyImporter;
         private final TerminationFlag terminationFlag;
 
@@ -68,7 +69,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
             StoreScanner<NodeReference> scanner,
             LongSet labels,
             ProgressLogger progressLogger,
-            NodeImporter importer,
+            AbstractNodeImporter importer,
             @Nullable NativeNodePropertyImporter nodePropertyImporter,
             TerminationFlag terminationFlag
         ) {
@@ -107,7 +108,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
     private final LongSet labels;
     private final int scannerIndex;
     private final ProgressLogger progressLogger;
-    private final NodeImporter importer;
+    private final AbstractNodeImporter importer;
     private final NativeNodePropertyImporter nodePropertyImporter;
     private long propertiesImported;
     private long nodesImported;
@@ -119,7 +120,7 @@ final class NodesScanner extends StatementAction implements RecordScanner {
         LongSet labels,
         int threadIndex,
         ProgressLogger progressLogger,
-        NodeImporter importer,
+        AbstractNodeImporter importer,
         @Nullable NativeNodePropertyImporter nodePropertyImporter
     ) {
         super(tx);

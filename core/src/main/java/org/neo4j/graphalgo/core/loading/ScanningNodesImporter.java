@@ -92,7 +92,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     }
 
     @Override
-    InternalImporter.CreateScanner creator(
+    public InternalImporter.CreateScanner creator(
         long nodeCount,
         ImportSizing sizing,
         StoreScanner<NodeReference> scanner
@@ -123,7 +123,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     }
 
     @Override
-    IdsAndProperties build() {
+    public IdsAndProperties build() {
         IdMap hugeIdMap = IdMapBuilder.build(
             idMapBuilder,
             nodeLabelBitSetMapping,
