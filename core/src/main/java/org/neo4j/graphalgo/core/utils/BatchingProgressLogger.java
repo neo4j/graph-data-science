@@ -36,7 +36,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     private final String task;
     private final LongAdder progressCounter;
     private final ThreadLocal<MutableLong> callCounter;
-    private final AtomicInteger lastPercentageLogged;
+    private final AtomicInteger globalPercentage;
 
     private static long calculateBatchSize(long taskVolume, int concurrency) {
         // target 100 logs per full run (every 1 percent)
@@ -61,7 +61,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         this.progressCounter = new LongAdder();
         this.callCounter = ThreadLocal.withInitial(MutableLong::new);
         this.concurrency = concurrency;
-        lastPercentageLogged = new AtomicInteger(-1);
+        globalPercentage = new AtomicInteger(-1);
     }
 
     @Override
@@ -89,14 +89,14 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     private void doLogPercentage(Supplier<String> msgFactory) {
         String message = msgFactory != ProgressLogger.NO_MESSAGE ? msgFactory.get() : null;
-        int percent = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
+        int nextPercentage = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
 
-        var lastLogged = lastPercentageLogged.get();
-        if (lastLogged < percent && lastPercentageLogged.compareAndSet(lastLogged, percent)) {
+        var previousPercentage = globalPercentage.get();
+        if (previousPercentage < nextPercentage && globalPercentage.compareAndSet(previousPercentage, nextPercentage)) {
             if (message == null || message.isEmpty()) {
-                log.info("[%s] %s %d%%", Thread.currentThread().getName(), task, percent);
+                log.info("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage);
             } else {
-                log.info("[%s] %s %d%% %s", Thread.currentThread().getName(), task, percent, message);
+                log.info("[%s] %s %d%% %s", Thread.currentThread().getName(), task, nextPercentage, message);
             }
         }
 
@@ -112,7 +112,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         this.taskVolume = newTaskVolume;
         this.batchSize = calculateBatchSize(newTaskVolume, concurrency);
         progressCounter.reset();
-        lastPercentageLogged.set(-1);
+        globalPercentage.set(-1);
     }
 
     @Override
