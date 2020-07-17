@@ -69,6 +69,16 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public CompositeAdjacencyList adjacencyList() {
+        return new CompositeAdjacencyList(graphs.stream().map(Graph::adjacencyList).collect(Collectors.toList()));
+    }
+
+    @Override
+    public CompositeAdjacencyOffsets adjacencyOffsets() {
+        return new CompositeAdjacencyOffsets(graphs.stream().map(Graph::adjacencyOffsets).collect(Collectors.toList()));
+    }
+
+    @Override
     public long relationshipCount() {
         return graphs.stream().mapToLong(Graph::relationshipCount).sum();
     }

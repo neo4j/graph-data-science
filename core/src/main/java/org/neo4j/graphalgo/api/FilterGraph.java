@@ -87,6 +87,16 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public AdjacencyList adjacencyList() {
+        return graph.adjacencyList();
+    }
+
+    @Override
+    public AdjacencyOffsets adjacencyOffsets() {
+        return graph.adjacencyOffsets();
+    }
+
+    @Override
     public long toMappedNodeId(long nodeId) {
         return graph.toMappedNodeId(nodeId);
     }
