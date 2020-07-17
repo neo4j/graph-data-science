@@ -24,13 +24,16 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import java.util.Map;
 
 class PregelGenerator {
 
@@ -67,15 +70,41 @@ class PregelGenerator {
 
         // add proc stream method
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("stream");
-        // add description
-        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
         // add procedure annotation
         methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
             .addMember("name", "$S", pregelSpec.procedureName())
+            .addMember("mode", "$T.READ", Mode.class)
             .build()
         );
+        // add description
+        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+
+        //   // user-defined procedure name
+        //    @Procedure(value = "gds.pregel.cc.stream", mode = Mode.READ)
+        //    // user-defined procedure description
+        //    @Description("Computed connected components")
+        //    public Stream<ConnectectedComponentsStreamProc.StreamResult> stream(
+        //        @Name(value = "graphName") Object graphNameOrConfig,
+        //        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        //    ) {
+        //        return stream(compute(graphNameOrConfig, configuration));
+        //    }
+
         var method = methodBuilder
             .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "graphName")
+                    .build())
+                .build())
+            .addParameter(ParameterSpec
+                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "configuration")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "configuration")
+                    .addMember("defaultValue", "$S", "{}")
+                    .build())
+                .build())
+            .addStatement("// return stream(compute(graphNameOrConfig, configuration))")
             .build();
 
         return typeSpecBuilder

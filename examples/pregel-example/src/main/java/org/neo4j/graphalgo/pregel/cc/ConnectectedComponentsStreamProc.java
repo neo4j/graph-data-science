@@ -45,9 +45,7 @@ public class ConnectectedComponentsStreamProc extends StreamProc<
     ConnectectedComponentsStreamProc.StreamResult,
     ConnectedComponentsConfig> {
 
-    // user-defined procedure name
     @Procedure(value = "gds.pregel.cc.stream", mode = Mode.READ)
-    // user-defined procedure description
     @Description("Computed connected components")
     public Stream<ConnectectedComponentsStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
