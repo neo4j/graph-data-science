@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.api.AdjacencyOffsets;
 public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.DecompressingCursor> {
 
     private final TransientAdjacencyList adjacency;
+    private final AdjacencyOffsets offsets;
 
     HugeGraphIntersect(final TransientAdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         super(
-            offsets,
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
@@ -35,6 +35,7 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.De
             maxDegree
         );
         this.adjacency = adjacency;
+        this.offsets = offsets;
     }
 
     @Override
@@ -57,13 +58,13 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.De
     @Override
     public TransientAdjacencyList.DecompressingCursor cursor(
         long node,
-        TransientAdjacencyList.DecompressingCursor reuse,
-        AdjacencyOffsets offsets) {
+        TransientAdjacencyList.DecompressingCursor reuse
+    ) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return adjacency.decompressingCursor(reuse, offset);
+        return TransientAdjacencyList.decompressingCursor(reuse, offset);
     }
 
     @Override

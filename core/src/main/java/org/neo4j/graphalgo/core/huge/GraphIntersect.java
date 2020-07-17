@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
@@ -34,7 +33,6 @@ import java.util.function.LongPredicate;
 
 abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
-    protected AdjacencyOffsets offsets;
     protected CURSOR empty;
     private CURSOR cache;
     private CURSOR cacheA;
@@ -42,15 +40,12 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
     private final LongPredicate degreeFilter;
 
     GraphIntersect(
-        AdjacencyOffsets offsets,
         CURSOR cache,
         CURSOR cacheA,
         CURSOR cacheB,
         CURSOR empty,
         long maxDegree
     ) {
-        assert offsets != null;
-        this.offsets = offsets;
         this.cache = cache;
         this.cacheA = cacheA;
         this.cacheB = cacheB;
@@ -67,7 +62,7 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
             return;
         }
 
-        CURSOR mainDecompressingCursor = cursor(nodeIdA, cache, offsets);
+        CURSOR mainDecompressingCursor = cursor(nodeIdA, cache);
         long nodeIdB = skipUntil(mainDecompressingCursor, nodeIdA);
         if (nodeIdB <= nodeIdA) {
             return;
@@ -81,7 +76,7 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
             if (degreeFilter.test(nodeIdB)) {
-                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets);
+                decompressingCursorB = cursor(nodeIdB, decompressingCursorB);
                 nodeIdC = skipUntil(decompressingCursorB, nodeIdB);
                 if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
                     copyFrom(mainDecompressingCursor, decompressingCursorA);
@@ -124,10 +119,7 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
 
     abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
 
-    abstract CURSOR cursor(
-        long node,
-        CURSOR reuse,
-        AdjacencyOffsets offsets);
+    abstract CURSOR cursor(long node, CURSOR reuse);
 
     abstract int degree(long node);
 }

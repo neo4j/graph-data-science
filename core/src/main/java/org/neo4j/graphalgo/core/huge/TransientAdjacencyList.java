@@ -166,7 +166,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
     /**
      * Initialise the given cursor with the given offset
      */
-    DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
+    static DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
         return reuse.init(offset);
     }
 
