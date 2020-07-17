@@ -27,7 +27,7 @@ import static org.neo4j.graphalgo.core.huge.VarLongDecoding.decodeDeltaVLongs;
 
 final class AdjacencyDecompressingReader {
 
-    private static final int CHUNK_SIZE = 64;
+    static final int CHUNK_SIZE = 64;
 
     private final long[] block;
     private int pos;

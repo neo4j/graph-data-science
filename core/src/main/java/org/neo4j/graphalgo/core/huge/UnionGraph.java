@@ -176,7 +176,7 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        throw new UnsupportedOperationException("#intersection is not supported for multiple relationship types");
+        return new UnionGraphIntersect(adjacencyList(), adjacencyOffsets(), maxDegree);
     }
 
     /**
