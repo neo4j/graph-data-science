@@ -73,15 +73,12 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
     }
 
     private ProcessResult process(Element element) {
-        if (!pregelValidation.validate(element)) {
+        var maybePregelSpec = pregelValidation.validate(element);
+
+        if (maybePregelSpec.isEmpty()) {
             return ProcessResult.INVALID;
         }
-
-        var generatedProcedure = pregelGenerator.process(element);
-
-        if (generatedProcedure == null) {
-            return ProcessResult.INVALID;
-        }
+        var generatedProcedure = pregelGenerator.process(maybePregelSpec.get());
 
         try {
             generatedProcedure.writeTo(filer);

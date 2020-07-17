@@ -43,9 +43,7 @@ public final class PregelProcessor extends BasicAnnotationProcessor {
         );
 
         var pregelGeneration = new PregelGenerator(
-            processingEnv.getMessager(),
             processingEnv.getElementUtils(),
-            processingEnv.getTypeUtils(),
             getSupportedSourceVersion()
         );
 
