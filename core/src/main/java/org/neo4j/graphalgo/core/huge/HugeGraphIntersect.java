@@ -21,11 +21,12 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList, TransientAdjacencyList.DecompressingCursor> {
+public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.DecompressingCursor> {
+
+    private final TransientAdjacencyList adjacency;
 
     HugeGraphIntersect(final TransientAdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         super(
-            adjacency,
             offsets,
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
@@ -33,6 +34,7 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList, T
             adjacency.rawDecompressingCursor(),
             maxDegree
         );
+        this.adjacency = adjacency;
     }
 
     @Override
@@ -56,13 +58,20 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList, T
     public TransientAdjacencyList.DecompressingCursor cursor(
         long node,
         TransientAdjacencyList.DecompressingCursor reuse,
-        AdjacencyOffsets offsets,
-        TransientAdjacencyList array) {
+        AdjacencyOffsets offsets) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return array.decompressingCursor(reuse, offset);
+        return adjacency.decompressingCursor(reuse, offset);
     }
 
+    @Override
+    int degree(long node) {
+        long offset = offsets.get(node);
+        if (offset == 0L) {
+            return 0;
+        }
+        return adjacency.degree(offset);
+    }
 }

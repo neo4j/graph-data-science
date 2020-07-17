@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
@@ -33,10 +32,9 @@ import java.util.function.LongPredicate;
  * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
-abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
+abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
-    private ADJACENCY adjacency;
-    private AdjacencyOffsets offsets;
+    protected AdjacencyOffsets offsets;
     protected CURSOR empty;
     private CURSOR cache;
     private CURSOR cacheA;
@@ -44,7 +42,6 @@ abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends Ad
     private final LongPredicate degreeFilter;
 
     GraphIntersect(
-        ADJACENCY adjacency,
         AdjacencyOffsets offsets,
         CURSOR cache,
         CURSOR cacheA,
@@ -52,9 +49,7 @@ abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends Ad
         CURSOR empty,
         long maxDegree
     ) {
-        assert adjacency != null;
         assert offsets != null;
-        this.adjacency = adjacency;
         this.offsets = offsets;
         this.cache = cache;
         this.cacheA = cacheA;
@@ -72,7 +67,7 @@ abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends Ad
             return;
         }
 
-        CURSOR mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
+        CURSOR mainDecompressingCursor = cursor(nodeIdA, cache, offsets);
         long nodeIdB = skipUntil(mainDecompressingCursor, nodeIdA);
         if (nodeIdB <= nodeIdA) {
             return;
@@ -86,7 +81,7 @@ abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends Ad
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
             if (degreeFilter.test(nodeIdB)) {
-                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
+                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets);
                 nodeIdC = skipUntil(decompressingCursorB, nodeIdB);
                 if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
                     copyFrom(mainDecompressingCursor, decompressingCursorA);
@@ -132,14 +127,7 @@ abstract class GraphIntersect<ADJACENCY extends AdjacencyList, CURSOR extends Ad
     abstract CURSOR cursor(
         long node,
         CURSOR reuse,
-        AdjacencyOffsets offsets,
-        ADJACENCY array);
+        AdjacencyOffsets offsets);
 
-    private int degree(long node) {
-        long offset = offsets.get(node);
-        if (offset == 0L) {
-            return 0;
-        }
-        return adjacency.degree(offset);
-    }
+    abstract int degree(long node);
 }
