@@ -223,7 +223,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
         private final AdjacencyDecompressingReader decompress;
 
         private int maxTargets;
-        private int currentTarget;
+        private int currentPosition;
 
         private DecompressingCursor(byte[][] pages) {
             this.pages = pages;
@@ -234,7 +234,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
             maxTargets = decompress.reset(
                 pages[pageIndex(fromIndex, PAGE_SHIFT)],
                 indexInPage(fromIndex, PAGE_MASK));
-            currentTarget = 0;
+            currentPosition = 0;
             return this;
         }
 
@@ -243,7 +243,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
          */
         void copyFrom(DecompressingCursor other) {
             decompress.copyFrom(other.decompress);
-            currentTarget = other.currentTarget;
+            currentPosition = other.currentPosition;
             maxTargets = other.maxTargets;
         }
 
@@ -254,19 +254,25 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
         @Override
         public int remaining() {
-            return maxTargets - currentTarget;
+            return maxTargets - currentPosition;
         }
 
         @Override
         public boolean hasNextVLong() {
-            return currentTarget < maxTargets;
+            return currentPosition < maxTargets;
         }
 
         @Override
         public long nextVLong() {
-            int current = currentTarget++;
+            int current = currentPosition++;
             int remaining = maxTargets - current;
             return decompress.next(remaining);
+        }
+
+        @Override
+        public long peekVLong() {
+            int remaining = maxTargets - currentPosition;
+            return decompress.peek(remaining);
         }
 
         /**
@@ -278,7 +284,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
          */
         long skipUntil(long target) {
             long value = decompress.skipUntil(target, remaining(), this);
-            this.currentTarget += this.value;
+            this.currentPosition += this.value;
             return value;
         }
 
@@ -295,7 +301,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
                 return NOT_FOUND;
             }
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
-            this.currentTarget += this.value;
+            this.currentPosition += this.value;
             return value;
         }
 

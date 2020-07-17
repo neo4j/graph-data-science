@@ -34,8 +34,11 @@ final class AdjacencyDecompressingReader {
     private byte[] array;
     private int offset;
 
+    private boolean blockAlreadyDecoded;
+
     AdjacencyDecompressingReader() {
         this.block = new long[CHUNK_SIZE];
+        this.blockAlreadyDecoded = false;
     }
 
     //@formatter:off
@@ -83,10 +86,24 @@ final class AdjacencyDecompressingReader {
         return readNextBlock(remaining);
     }
 
+    long peek(int remaining) {
+        int pos = this.pos + 1;
+        if (pos < CHUNK_SIZE) {
+            return block[pos];
+        }
+        long targetNode = readNextBlock(remaining);
+        blockAlreadyDecoded = true;
+        return targetNode;
+    }
+
     private long readNextBlock(int remaining) {
-        pos = 1;
-        offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
-        return block[0];
+        if (!blockAlreadyDecoded) {
+            pos = 1;
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
+            return block[0];
+        }
+        blockAlreadyDecoded = false;
+        return block[pos];
     }
 
     long skipUntil(long target, int remaining, MutableIntValue consumed) {

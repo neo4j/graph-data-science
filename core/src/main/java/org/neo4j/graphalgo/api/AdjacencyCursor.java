@@ -39,6 +39,11 @@ public interface AdjacencyCursor extends AutoCloseable {
     long nextVLong();
 
     /**
+     * @return The last decoded target id
+     */
+    long peekVLong();
+
+    /**
      * Return how many targets are still left to be decoded.
      */
     int remaining();
