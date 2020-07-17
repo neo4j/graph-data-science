@@ -6,8 +6,11 @@ The library consists of a number of graph algorithms, exposed as procedures and 
 
 == Downloading and installing releases
 
-If you want to download and run the Graph Data Science library, please download the JAR from our releases page and place it in the `plugins` directory of your Neo4j database.
+The latest releases of the Graph Data Science library can always be found at the https://neo4j.com/download-center/[Neo4j Download Center] or the releases page.
+To install the plugin in Neo4j place the downloaded JAR file it in the `plugins` directory of your Neo4j database and restart the database.
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
+
+If you are using Neo4j Desktop you can simply add the Graph Data Science library on the plugins page of your project.
 
 .Compatibility matrix
 |===
@@ -47,13 +50,12 @@ To run all tests you can simply run `./gradlew check`
 
 Packaging the library::
 To package the library you can run `./gradlew packaging:shadowJar`.
-This will create the bundeled jar at `packaging/build/libs/neo4j-graph-data-science-VERSION-standalone.jar`.
+This will create the bundled JAR at `packaging/build/libs/neo4j-graph-data-science-VERSION-standalone.jar`.
 
 Preview of the Documentation::
 To generate a preview you can run `./gradlew doc:preview`.
 This will build the documentation and make it available under `http://localhost:8001/`.
 When you are done run `./gradlew doc:stopPreview` to stop the web server.
-
 
 == Contributing
 
