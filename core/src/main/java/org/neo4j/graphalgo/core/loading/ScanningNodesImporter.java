@@ -167,7 +167,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                     mappingAndIndex.property(),
                     mappingAndIndex.index(),
                     hugeIdMap,
-                    concurrency,
                     progressLogger,
                     terminationFlag,
                     tracker

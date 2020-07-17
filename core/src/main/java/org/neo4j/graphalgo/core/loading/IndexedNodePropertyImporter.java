@@ -24,10 +24,11 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -36,11 +37,11 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private final NodeLabel nodeLabel;
     private final PropertyMapping mapping;
     private final IndexDescriptor index;
-    private final int propertyId;
     private final IdMapping idMap;
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
-    private final NodePropertiesBuilder propertiesBuilder;
+    private final int propertyId;
+    private final NodePropertiesFromStoreBuilder propertiesBuilder;
     private long imported;
     private long logged;
 
@@ -50,7 +51,6 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         PropertyMapping mapping,
         IndexDescriptor index,
         IdMapping idMap,
-        int concurrency,
         ProgressLogger progressLogger,
         TerminationFlag terminationFlag,
         AllocationTracker tracker
@@ -59,17 +59,14 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         this.nodeLabel = nodeLabel;
         this.mapping = mapping;
         this.index = index;
-        propertyId = index.schema().getPropertyId();
         this.idMap = idMap;
         this.progressLogger = progressLogger;
         this.terminationFlag = terminationFlag;
-        propertiesBuilder = NodePropertiesBuilder.of(
+        this.propertyId = index.schema().getPropertyId();
+        this.propertiesBuilder = NodePropertiesFromStoreBuilder.of(
             idMap.nodeCount(),
             tracker,
-            mapping.defaultValue(),
-            propertyId,
-            mapping.propertyKey(),
-            concurrency
+            mapping.defaultValue()
         );
     }
 
@@ -92,9 +89,8 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                         var propertyKey = indexCursor.propertyKey(i);
                         if (propertyId == propertyKey) {
                             var propertyValue = indexCursor.propertyValue(i);
-                            var value = ReadHelper.extractValue(propertyValue, mapping.defaultValue());
                             var nodeId = idMap.toMappedNodeId(node);
-                            propertiesBuilder.set(nodeId, value);
+                            propertiesBuilder.set(nodeId, propertyValue);
                             imported += 1;
                             if ((imported & 0x1_FFFFL) == 0L) {
                                 progressLogger.logProgress(imported - logged);
