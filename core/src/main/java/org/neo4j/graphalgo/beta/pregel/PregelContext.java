@@ -33,6 +33,10 @@ public final class PregelContext {
             : computeStep::sendWeightedMessages;
     }
 
+    public PregelConfig getConfig() {
+        return config;
+    }
+
     public void voteToHalt(long nodeId) {
         computeStep.voteToHalt(nodeId);
     }
