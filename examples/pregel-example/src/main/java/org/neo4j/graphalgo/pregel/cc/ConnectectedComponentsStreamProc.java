@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pregel.cc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -42,12 +43,12 @@ import java.util.stream.Stream;
 public class ConnectectedComponentsStreamProc extends StreamProc<
     ConnectedComponentsAlgorithm,
     HugeDoubleArray,
-    ConnectectedComponentsStreamProc.StreamResult,
+    PregelResult,
     ConnectedComponentsConfig> {
 
     @Procedure(value = "gds.pregel.cc.stream", mode = Mode.READ)
     @Description("Computed connected components")
-    public Stream<ConnectectedComponentsStreamProc.StreamResult> stream(
+    public Stream<PregelResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -55,8 +56,8 @@ public class ConnectectedComponentsStreamProc extends StreamProc<
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
-        return new StreamResult(originalNodeId, value);
+    protected PregelResult streamResult(long originalNodeId, double value) {
+        return new PregelResult(originalNodeId, value);
     }
 
     @Override
@@ -87,16 +88,5 @@ public class ConnectectedComponentsStreamProc extends StreamProc<
                 return MemoryEstimations.empty();
             }
         };
-    }
-
-    public static final class StreamResult {
-
-        public final long nodeId;
-        public final double value;
-
-        public StreamResult(long nodeId, double value) {
-            this.nodeId = nodeId;
-            this.value = value;
-        }
     }
 }

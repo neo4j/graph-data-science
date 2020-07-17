@@ -26,14 +26,21 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import java.util.Map;
+import java.util.stream.Stream;
 
 class PregelGenerator {
 
@@ -56,9 +63,24 @@ class PregelGenerator {
     }
 
     private TypeSpec generateTypeSpec(PregelValidation.Spec pregelSpec) {
+        TypeName configTypeName = pregelSpec.configName()
+            .accept(new SimpleAnnotationValueVisitor9<TypeName, Void>() {
+                @Override
+                public TypeName visitType(TypeMirror t, Void aVoid) {
+                    return TypeName.get(t);
+                }
+            }, null);
+
         var typeSpecBuilder = TypeSpec
             .classBuilder(ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "StreamProc"))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .superclass(ParameterizedTypeName.get(
+                ClassName.get(StreamProc.class),
+                ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "Algorithm"),
+                ClassName.get(HugeDoubleArray.class),
+                ClassName.get(PregelResult.class),
+                configTypeName
+            ))
             .addOriginatingElement(pregelSpec.element());
 
         // produces @Generated meta info
@@ -79,17 +101,6 @@ class PregelGenerator {
         // add description
         pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
 
-        //   // user-defined procedure name
-        //    @Procedure(value = "gds.pregel.cc.stream", mode = Mode.READ)
-        //    // user-defined procedure description
-        //    @Description("Computed connected components")
-        //    public Stream<ConnectectedComponentsStreamProc.StreamResult> stream(
-        //        @Name(value = "graphName") Object graphNameOrConfig,
-        //        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-        //    ) {
-        //        return stream(compute(graphNameOrConfig, configuration));
-        //    }
-
         var method = methodBuilder
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
@@ -104,7 +115,8 @@ class PregelGenerator {
                     .addMember("defaultValue", "$S", "{}")
                     .build())
                 .build())
-            .addStatement("// return stream(compute(graphNameOrConfig, configuration))")
+            .addStatement("return stream(compute(graphNameOrConfig, configuration))")
+            .returns(ParameterizedTypeName.get(Stream.class, PregelResult.class))
             .build();
 
         return typeSpecBuilder
