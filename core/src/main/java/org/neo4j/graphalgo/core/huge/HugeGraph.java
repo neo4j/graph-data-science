@@ -327,7 +327,7 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        return new HugeGraphIntersectImpl(adjacencyList, adjacencyOffsets, maxDegree);
+        return new HugeGraphIntersect(adjacencyList, adjacencyOffsets, maxDegree);
     }
 
     /**
