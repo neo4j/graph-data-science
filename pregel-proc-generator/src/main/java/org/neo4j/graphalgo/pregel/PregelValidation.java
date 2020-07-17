@@ -108,12 +108,13 @@ final class PregelValidation {
             return Optional.empty();
         }
 
+        var computationName = pregelElement.getSimpleName().toString();
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var configName = maybeConfigName.get();
         var procedureName = maybeProcedure.get().value();
         var maybeDescription = Optional.ofNullable(MoreElements.getAnnotationMirror(pregelElement, Description.class).orNull());
 
-        return Optional.of(ImmutableSpec.of(pregelElement, rootPackage, configName, procedureName, maybeDescription));
+        return Optional.of(ImmutableSpec.of(pregelElement, computationName, rootPackage, configName, procedureName, maybeDescription));
     }
 
     private Optional<AnnotationValue> getAnnotationValueFromAlternatives(AnnotationMirror annotationMirror, String elementName1, String elementName2) {
@@ -139,6 +140,8 @@ final class PregelValidation {
     @ValueClass
     interface Spec {
         Element element();
+
+        String computationName();
 
         String rootPackage();
 

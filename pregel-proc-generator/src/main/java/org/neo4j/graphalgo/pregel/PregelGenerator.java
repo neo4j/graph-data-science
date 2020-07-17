@@ -30,6 +30,8 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 class PregelGenerator {
 
     private final Elements elementUtils;
@@ -52,7 +54,7 @@ class PregelGenerator {
 
     private TypeSpec generateTypeSpec(PregelValidation.Spec pregelSpec) {
         var typeSpecBuilder = TypeSpec
-            .classBuilder(ClassName.get(pregelSpec.rootPackage(), "Foo"))
+            .classBuilder(ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "StreamProc"))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .addOriginatingElement(pregelSpec.element());
 

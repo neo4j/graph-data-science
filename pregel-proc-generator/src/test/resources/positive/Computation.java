@@ -31,9 +31,9 @@ import java.util.Queue;
 
 // user-defined
 @Pregel(PregelConfig.class)
-@Procedure("gds.pregel.cc")
-@Description("Connected Components")
-public class Bar implements PregelComputation {
+@Procedure("gds.pregel.fancy")
+@Description("My fancy computation")
+public class Computation implements PregelComputation {
 
     @Override
     public void compute(PregelContext context, final long nodeId, Queue<Double> messages) {

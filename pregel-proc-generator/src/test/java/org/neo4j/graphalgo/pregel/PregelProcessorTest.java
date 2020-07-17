@@ -23,7 +23,6 @@ import com.google.common.io.Resources;
 import com.google.testing.compile.CompilationRule;
 import com.google.testing.compile.CompileTester;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,7 +57,7 @@ class PregelProcessorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "Bar"
+        "Computation"
     })
     void positiveTest(String className) {
         assertAbout(javaSource())
