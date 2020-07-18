@@ -39,6 +39,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleAnnotationValueVisitor9;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -52,9 +53,13 @@ class PregelGenerator {
         this.sourceVersion = sourceVersion;
     }
 
-    JavaFile process(PregelValidation.Spec pregelSpec) {
-        TypeSpec typeSpec = generateTypeSpec(pregelSpec);
+    List<JavaFile> process(PregelValidation.Spec pregelSpec) {
+        return List.of(
+            fileOf(pregelSpec, procedureTypeSpec(pregelSpec))
+        );
+    }
 
+    private JavaFile fileOf(PregelValidation.Spec pregelSpec, TypeSpec typeSpec) {
         return JavaFile
             .builder(pregelSpec.rootPackage(), typeSpec)
             .indent("    ")
@@ -62,14 +67,8 @@ class PregelGenerator {
             .build();
     }
 
-    private TypeSpec generateTypeSpec(PregelValidation.Spec pregelSpec) {
-        TypeName configTypeName = pregelSpec.configName()
-            .accept(new SimpleAnnotationValueVisitor9<TypeName, Void>() {
-                @Override
-                public TypeName visitType(TypeMirror t, Void aVoid) {
-                    return TypeName.get(t);
-                }
-            }, null);
+    private TypeSpec procedureTypeSpec(PregelValidation.Spec pregelSpec) {
+        TypeName configTypeName = configTypeName(pregelSpec);
 
         var typeSpecBuilder = TypeSpec
             .classBuilder(ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "StreamProc"))
@@ -122,5 +121,15 @@ class PregelGenerator {
         return typeSpecBuilder
             .addMethod(method)
             .build();
+    }
+
+    private TypeName configTypeName(PregelValidation.Spec pregelSpec) {
+        return pregelSpec.configName()
+                .accept(new SimpleAnnotationValueVisitor9<TypeName, Void>() {
+                    @Override
+                    public TypeName visitType(TypeMirror t, Void aVoid) {
+                        return TypeName.get(t);
+                    }
+                }, null);
     }
 }

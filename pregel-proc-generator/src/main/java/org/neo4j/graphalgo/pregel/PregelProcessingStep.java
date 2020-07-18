@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pregel;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
+import com.squareup.javapoet.JavaFile;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 
 import javax.annotation.processing.Filer;
@@ -30,6 +31,7 @@ import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Set;
 
 public final class PregelProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
@@ -78,10 +80,17 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
         if (maybePregelSpec.isEmpty()) {
             return ProcessResult.INVALID;
         }
-        var generatedProcedure = pregelGenerator.process(maybePregelSpec.get());
 
+        var files = pregelGenerator.process(maybePregelSpec.get());
+
+        return writeFilesForElement(element, files);
+    }
+
+    private ProcessResult writeFilesForElement(Element element, List<JavaFile> files) {
         try {
-            generatedProcedure.writeTo(filer);
+            for (JavaFile file : files) {
+                file.writeTo(filer);
+            }
             return ProcessResult.PROCESSED;
         } catch (IOException e) {
             messager.printMessage(
