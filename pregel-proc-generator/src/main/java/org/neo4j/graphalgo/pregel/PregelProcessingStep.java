@@ -81,12 +81,12 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
             return ProcessResult.INVALID;
         }
 
-        var files = pregelGenerator.process(maybePregelSpec.get());
+        var files = pregelGenerator.generate(maybePregelSpec.get());
 
-        return writeFilesForElement(element, files);
+        return writeFiles(element, files);
     }
 
-    private ProcessResult writeFilesForElement(Element element, List<JavaFile> files) {
+    private ProcessResult writeFiles(Element element, List<JavaFile> files) {
         try {
             for (JavaFile file : files) {
                 file.writeTo(filer);
