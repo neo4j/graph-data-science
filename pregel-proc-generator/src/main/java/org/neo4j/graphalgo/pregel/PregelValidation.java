@@ -45,11 +45,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class PregelValidation {
 
+    private static final String PREGEL_ANNOTATION_VALUE = "value";
+    private static final String PREGEL_ANNOTATION_CONFIG_CLASS = "configClass";
+
     private final Messager messager;
     private final Types typeUtils;
     private final Elements elementUtils;
 
-    // the interface
+    // Represents the PregelComputation interface
     private final TypeMirror pregelComputation;
 
     PregelValidation(Messager messager, Elements elementUtils, Types typeUtils) {
@@ -60,15 +63,52 @@ final class PregelValidation {
     }
 
     Optional<Spec> validate(Element pregelElement) {
-        if (pregelElement.getKind() != ElementKind.CLASS) {
+        var pregelAnnotationMirror = MoreElements.getAnnotationMirror(pregelElement, Pregel.class).get();
+        var maybeConfigName = getAnnotationValueFromAlternatives(
+            pregelAnnotationMirror,
+            PREGEL_ANNOTATION_VALUE,
+            PREGEL_ANNOTATION_CONFIG_CLASS
+        );
+        var maybeProcedure = Optional.ofNullable(pregelElement.getAnnotation(Procedure.class));
+
+        if (
+            !isClass(pregelElement) ||
+            !isPregelComputation(pregelElement) ||
+            !hasDistinctConfig(maybeConfigName, pregelElement, pregelAnnotationMirror) ||
+            !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
+        ) {
+            return Optional.empty();
+        }
+
+        var computationName = pregelElement.getSimpleName().toString();
+        var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
+        var maybeDescription = Optional.ofNullable(MoreElements
+            .getAnnotationMirror(pregelElement, Description.class)
+            .orNull());
+
+        return Optional.of(ImmutableSpec.of(
+            pregelElement,
+            computationName,
+            rootPackage,
+            maybeConfigName.get(),
+            maybeProcedure.get().value(),
+            maybeDescription
+        ));
+    }
+
+    private boolean isClass(Element pregelElement) {
+        boolean isClass = pregelElement.getKind() == ElementKind.CLASS;
+        if (!isClass) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "The annotated configuration must be a class.",
                 pregelElement
             );
-            return Optional.empty();
         }
+        return isClass;
+    }
 
+    private boolean isPregelComputation(Element pregelElement) {
         var pregelTypeElement = MoreElements.asType(pregelElement);
         // TODO: this check needs to bubble up the inheritance tree
         var isPregelComputation = pregelTypeElement
@@ -81,12 +121,16 @@ final class PregelValidation {
                 "Class must inherit %s",
                 MoreTypes.asTypeElement(pregelComputation).getSimpleName()
             ), pregelTypeElement);
-            return Optional.empty();
         }
 
-        var pregelAnnotationMirror = MoreElements.getAnnotationMirror(pregelElement, Pregel.class).get();
-        var maybeConfigName = getAnnotationValueFromAlternatives(pregelAnnotationMirror, "value", "configClass");
+        return isPregelComputation;
+    }
 
+    private boolean hasDistinctConfig(
+        Optional<AnnotationValue> maybeConfigName,
+        Element pregelElement,
+        AnnotationMirror pregelAnnotationMirror
+    ) {
         if (maybeConfigName.isEmpty()) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
@@ -94,38 +138,46 @@ final class PregelValidation {
                 pregelElement,
                 pregelAnnotationMirror
             );
-            return Optional.empty();
+            return false;
         }
+        return true;
+    }
 
-        var maybeProcedure = Optional.ofNullable(pregelElement.getAnnotation(Procedure.class));
-        if (maybeProcedure.isEmpty()) {
+    private boolean hasProcedureAnnotation(
+        Optional<Procedure> maybeProcedure,
+        Element pregelElement,
+        AnnotationMirror pregelAnnotationMirror
+    ) {
+        return maybeProcedure.map(x -> true).orElseGet(() -> {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "Procedure annotation must be present.",
                 pregelElement,
                 pregelAnnotationMirror
             );
-            return Optional.empty();
-        }
-
-        var computationName = pregelElement.getSimpleName().toString();
-        var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
-        var configName = maybeConfigName.get();
-        var procedureName = maybeProcedure.get().value();
-        var maybeDescription = Optional.ofNullable(MoreElements.getAnnotationMirror(pregelElement, Description.class).orNull());
-
-        return Optional.of(ImmutableSpec.of(pregelElement, computationName, rootPackage, configName, procedureName, maybeDescription));
+            return false;
+        });
     }
 
-    private Optional<AnnotationValue> getAnnotationValueFromAlternatives(AnnotationMirror annotationMirror, String elementName1, String elementName2) {
+    private Optional<AnnotationValue> getAnnotationValueFromAlternatives(
+        AnnotationMirror annotationMirror,
+        String elementName1,
+        String elementName2
+    ) {
         var declaredValues = annotationMirror.getElementValues().entrySet().stream()
-            .filter(entry -> entry.getKey().getSimpleName().contentEquals(elementName1) || entry.getKey().getSimpleName().contentEquals(elementName2))
+            .filter(entry -> entry.getKey().getSimpleName().contentEquals(elementName1) || entry
+                .getKey()
+                .getSimpleName()
+                .contentEquals(elementName2))
             .map(Map.Entry::getValue)
             .collect(Collectors.toList());
 
         // get default value for elementName1
         if (declaredValues.isEmpty()) {
-            for (var method : ElementFilter.methodsIn(annotationMirror.getAnnotationType().asElement().getEnclosedElements())) {
+            for (var method : ElementFilter.methodsIn(annotationMirror
+                .getAnnotationType()
+                .asElement()
+                .getEnclosedElements())) {
                 if (method.getSimpleName().contentEquals(elementName1)) {
                     return Optional.ofNullable(method.getDefaultValue());
                 }
