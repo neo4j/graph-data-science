@@ -26,8 +26,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -36,6 +39,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 class ProcedureGenerator extends PregelGenerator {
@@ -46,13 +50,15 @@ class ProcedureGenerator extends PregelGenerator {
 
     TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
         TypeName configTypeName = configTypeName(pregelSpec);
+        ClassName procedureClassName = className(pregelSpec, PROCEDURE_SUFFIX);
+        ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
-            .classBuilder(ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "StreamProc"))
+            .classBuilder(procedureClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(StreamProc.class),
-                ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + "Algorithm"),
+                algorithmClassName,
                 ClassName.get(HugeDoubleArray.class),
                 ClassName.get(PregelResult.class),
                 configTypeName
@@ -62,6 +68,9 @@ class ProcedureGenerator extends PregelGenerator {
         addGeneratedAnnotation(typeSpecBuilder);
 
         typeSpecBuilder.addMethod(streamMethod(pregelSpec));
+        typeSpecBuilder.addMethod(streamResultMethod());
+        typeSpecBuilder.addMethod(newConfigMethod(pregelSpec));
+        typeSpecBuilder.addMethod(algorithmFactoryMethod(pregelSpec, algorithmClassName));
 
         return typeSpecBuilder.build();
     }
@@ -96,4 +105,44 @@ class ProcedureGenerator extends PregelGenerator {
             .returns(ParameterizedTypeName.get(Stream.class, PregelResult.class))
             .build();
     }
+
+    private MethodSpec streamResultMethod() {
+        return MethodSpec.methodBuilder("streamResult")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .returns(PregelResult.class)
+            .addParameter(long.class, "originalNodeId")
+            .addParameter(double.class, "value")
+            .addStatement("return new PregelResult(originalNodeId, value)")
+            .build();
+    }
+
+    private MethodSpec newConfigMethod(PregelValidation.Spec pregelSpec) {
+        return MethodSpec.methodBuilder("newConfig")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .addParameter(String.class, "username")
+            .addParameter(ParameterizedTypeName.get(Optional.class, String.class), "graphName")
+            .addParameter(ParameterizedTypeName.get(Optional.class, GraphCreateConfig.class), "maybeImplicitCreate")
+            .addParameter(CypherMapWrapper.class, "config")
+            .returns(configTypeName(pregelSpec))
+            // TODO: create config statement
+            .addStatement("return null")
+            .build();
+    }
+
+    private MethodSpec algorithmFactoryMethod(PregelValidation.Spec pregelSpec, ClassName algorithmClassName) {
+        return MethodSpec.methodBuilder("algorithmFactory")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .returns(ParameterizedTypeName.get(
+                ClassName.get(AlgorithmFactory.class),
+                algorithmClassName,
+                configTypeName(pregelSpec)
+            ))
+            // TODO instantiate factory
+            .addStatement("return null")
+            .build();
+    }
+
 }

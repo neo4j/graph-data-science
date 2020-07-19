@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pregel;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -33,6 +34,9 @@ import java.util.List;
 import java.util.Optional;
 
 class PregelGenerator {
+
+    static final String PROCEDURE_SUFFIX = "Proc";
+    static final String ALGORITHM_SUFFIX = "Algorithm";
 
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
@@ -69,6 +73,10 @@ class PregelGenerator {
                         return TypeName.get(t);
                     }
                 }, null);
+    }
+
+    ClassName className(PregelValidation.Spec pregelSpec, String suffix) {
+        return ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + suffix);
     }
 
     private JavaFile fileOf(PregelValidation.Spec pregelSpec, TypeSpec typeSpec) {

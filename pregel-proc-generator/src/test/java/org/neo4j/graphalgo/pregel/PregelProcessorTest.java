@@ -65,7 +65,10 @@ class PregelProcessorTest {
             .processedWith(new PregelProcessor())
             .compilesWithoutError()
             .and()
-            .generatesSources(loadExpectedFile(String.format(Locale.ENGLISH, "expected/%s.java", className)));
+            .generatesSources(
+                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sProc.java", className)),
+                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sAlgorithm.java", className))
+            );
     }
 
 //    @Test
@@ -187,7 +190,6 @@ class PregelProcessorTest {
     private JavaFileObject loadExpectedFile(String resourceName) {
         try {
             Iterable<String> sourceLines = Resources.readLines(Resources.getResource(resourceName), UTF_8);
-            sourceLines = replaceGeneratedImport(sourceLines, isCompilingOnJdk8());
             String binaryName = resourceName
                 .replace('/', '.')
                 .replace(".java", "");
@@ -195,64 +197,6 @@ class PregelProcessorTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    private boolean isCompilingOnJdk8() {
-        return SourceVersion.latestSupported().compareTo(SourceVersion.RELEASE_8) == 0;
-    }
-
-    private static Iterable<String> replaceGeneratedImport(Iterable<String> sourceLines, boolean compilesOnJdk8) {
-        int currentLine = 0;
-        int firstImportLine = Integer.MAX_VALUE;
-        int lastImportLine = Integer.MIN_VALUE;
-        // find the longest block at the top of the file,
-        // that consists of consecutive import statements
-        // that aren't a static import
-        for (String line : sourceLines) {
-            if (line.startsWith("import ") && !line.startsWith("import static ")) {
-                firstImportLine = Math.min(firstImportLine, currentLine);
-                // last line should be exclusive, so we increment by one
-                lastImportLine = Math.max(lastImportLine, currentLine + 1);
-            }
-            currentLine++;
-        }
-
-        // there are no imports to consider, just return the input
-        if (lastImportLine == Integer.MAX_VALUE) {
-            return sourceLines;
-        }
-
-        // we have an import block. We need to sort it to make the import order
-        // not important for the test assertions
-        // on JDK 8 we also need to replace the import for the @Generated annotation
-
-        Collection<String> resultingLines = new ArrayList<>();
-        List<String> importLines = new ArrayList<>();
-        currentLine = 0;
-        for (String line : sourceLines) {
-            if (currentLine >= firstImportLine && currentLine < lastImportLine) {
-                // we need to replace the generated annotation as it moved
-                // to a different module in jdk9+
-                if (
-                    line.startsWith("import javax.annotation.processing.Generated;")
-                    && compilesOnJdk8
-                ) {
-                    line = "import javax.annotation.Generated;";
-                }
-                importLines.add(line);
-            } else {
-                if (currentLine == lastImportLine) {
-                    // sort all imports we collected to remove the difference between
-                    // the two java generated annotations
-                    importLines.sort(String.CASE_INSENSITIVE_ORDER);
-                    resultingLines.addAll(importLines);
-                }
-                resultingLines.add(line);
-            }
-            currentLine++;
-        }
-
-        return resultingLines;
     }
 
     private static ErrorCheck e(String error, int line, int column) {

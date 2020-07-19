@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.pregel;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -37,11 +36,7 @@ class AlgorithmGenerator extends PregelGenerator {
     }
 
     TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
-        TypeName configTypeName = configTypeName(pregelSpec);
-        ClassName algorithmClassName = ClassName.get(
-            pregelSpec.rootPackage(),
-            pregelSpec.computationName() + "Algorithm"
-        );
+        ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
             .classBuilder(algorithmClassName)
