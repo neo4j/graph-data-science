@@ -28,6 +28,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -41,21 +42,30 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 class PregelGenerator {
 
     private final Elements elementUtils;
     private final SourceVersion sourceVersion;
+    // produces @Generated meta info
+    private final Optional<AnnotationSpec> generatedAnnotationSpec;
 
     PregelGenerator(Elements elementUtils, SourceVersion sourceVersion) {
         this.elementUtils = elementUtils;
         this.sourceVersion = sourceVersion;
+        this.generatedAnnotationSpec = GeneratedAnnotationSpecs.generatedAnnotationSpec(
+            elementUtils,
+            sourceVersion,
+            PregelProcessor.class
+        );
     }
 
     List<JavaFile> process(PregelValidation.Spec pregelSpec) {
         return List.of(
-            fileOf(pregelSpec, procedureTypeSpec(pregelSpec))
+            fileOf(pregelSpec, procedureTypeSpec(pregelSpec)),
+            fileOf(pregelSpec, algorithmTypeSpec(pregelSpec))
         );
     }
 
@@ -83,11 +93,7 @@ class PregelGenerator {
             .addOriginatingElement(pregelSpec.element());
 
         // produces @Generated meta info
-        GeneratedAnnotationSpecs.generatedAnnotationSpec(
-            elementUtils,
-            sourceVersion,
-            PregelProcessor.class
-        ).ifPresent(typeSpecBuilder::addAnnotation);
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
 
         // add proc stream method
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("stream");
@@ -121,6 +127,67 @@ class PregelGenerator {
         return typeSpecBuilder
             .addMethod(method)
             .build();
+    }
+
+    private TypeSpec algorithmTypeSpec(PregelValidation.Spec pregelSpec) {
+        TypeName configTypeName = configTypeName(pregelSpec);
+        ClassName algorithmClassName = ClassName.get(
+            pregelSpec.rootPackage(),
+            pregelSpec.computationName() + "Algorithm"
+        );
+
+        var typeSpecBuilder = TypeSpec
+            .classBuilder(algorithmClassName)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .superclass(ParameterizedTypeName.get(
+                ClassName.get(Algorithm.class),
+                algorithmClassName,
+                ClassName.get(HugeDoubleArray.class)
+            ))
+            .addOriginatingElement(pregelSpec.element());
+
+        // produces @Generated meta info
+        generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
+
+        // @Override
+        //    public HugeDoubleArray compute() {
+        //        return pregelJob.run(maxIterations);
+        //    }
+
+        typeSpecBuilder.addMethod(MethodSpec.methodBuilder("compute")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(HugeDoubleArray.class)
+            .addStatement("return null")
+            .build()
+        );
+
+        //
+        //    @Override
+        //    public ConnectedComponentsAlgorithm me() {
+        //        return this;
+        //    }
+
+        typeSpecBuilder.addMethod(MethodSpec.methodBuilder("me")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .returns(algorithmClassName)
+            .addStatement("return this")
+            .build()
+        );
+
+        //
+        //    @Override
+        //    public void release() {
+        //    }
+
+        typeSpecBuilder.addMethod(MethodSpec.methodBuilder("release")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PUBLIC)
+            .build()
+        );
+
+        return typeSpecBuilder.build();
     }
 
     private TypeName configTypeName(PregelValidation.Spec pregelSpec) {
