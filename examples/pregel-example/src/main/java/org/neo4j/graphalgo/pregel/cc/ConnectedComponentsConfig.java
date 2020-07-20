@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-// user defined
 @ValueClass
 @Configuration("ConnectedComponentsConfigImpl")
 @SuppressWarnings("immutables:subtype")

@@ -27,7 +27,6 @@ import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
-// user-defined
 @Pregel(ConnectedComponentsConfig.class)
 @Procedure("gds.pregel.cc")
 @Description("Connected Components")
