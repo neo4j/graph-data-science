@@ -76,6 +76,7 @@ final class PregelValidation {
             !isPregelComputation(pregelElement) ||
             !hasDistinctConfig(maybeConfigName, pregelElement, pregelAnnotationMirror) ||
             !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
+            // TODO: validate that config has a factory method with correct signature
         ) {
             return Optional.empty();
         }

@@ -28,10 +28,15 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 
@@ -126,12 +131,39 @@ class ProcedureGenerator extends PregelGenerator {
             .addParameter(ParameterizedTypeName.get(Optional.class, GraphCreateConfig.class), "maybeImplicitCreate")
             .addParameter(CypherMapWrapper.class, "config")
             .returns(configTypeName(pregelSpec))
-            // TODO: create config statement
-            .addStatement("return null")
+            .addStatement("return $T.of(username, graphName, maybeImplicitCreate, config)", configTypeName(pregelSpec))
             .build();
     }
 
     private MethodSpec algorithmFactoryMethod(PregelValidation.Spec pregelSpec, ClassName algorithmClassName) {
+        TypeSpec anonymousFactoryType = TypeSpec.anonymousClassBuilder("")
+            .addSuperinterface(ParameterizedTypeName.get(
+                ClassName.get(AlgorithmFactory.class),
+                algorithmClassName,
+                configTypeName(pregelSpec)
+            ))
+            .addMethod(MethodSpec.methodBuilder("build")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(Graph.class, "graph")
+                .addParameter(configTypeName(pregelSpec), "configuration")
+                .addParameter(AllocationTracker.class, "tracker")
+                .addParameter(Log.class, "log")
+                .returns(algorithmClassName)
+                .addStatement("return null")
+//                .addStatement("return new $T(graph, configuration, tracker, log)", algorithmClassName)
+                .build()
+            )
+            .addMethod(MethodSpec.methodBuilder("memoryEstimation")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(MemoryEstimation.class)
+                .addParameter(configTypeName(pregelSpec), "configuration")
+                .addStatement("return $T.empty()", MemoryEstimations.class)
+                .build()
+            )
+            .build();
+
         return MethodSpec.methodBuilder("algorithmFactory")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
@@ -140,8 +172,7 @@ class ProcedureGenerator extends PregelGenerator {
                 algorithmClassName,
                 configTypeName(pregelSpec)
             ))
-            // TODO instantiate factory
-            .addStatement("return null")
+            .addStatement("return $L", anonymousFactoryType)
             .build();
     }
 

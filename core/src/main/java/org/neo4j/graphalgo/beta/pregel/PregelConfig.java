@@ -24,9 +24,13 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 @ValueClass
 @Configuration("PregelConfigImpl")
@@ -41,5 +45,14 @@ public interface PregelConfig extends AlgoBaseConfig, RelationshipWeightConfig, 
     @Value.Default
     default boolean isAsynchronous() {
         return false;
+    }
+
+    static PregelConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new PregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }
