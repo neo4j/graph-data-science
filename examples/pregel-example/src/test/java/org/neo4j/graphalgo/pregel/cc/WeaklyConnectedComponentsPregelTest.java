@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.examples;
+package org.neo4j.graphalgo.pregel.cc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -35,46 +35,69 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.HashMap;
 
-@GdlExtension
-class StronglyConnectedComponentsPregelTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 
-    @GdlGraph
+@GdlExtension
+class WeaklyConnectedComponentsPregelTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String TEST_GRAPH =
-            "CREATE" +
-            "  (a:Node)" +
-            ", (b:Node)" +
-            ", (c:Node)" +
-            ", (d:Node)" +
-            ", (e:Node)" +
-            ", (f:Node)" +
-            ", (g:Node)" +
-            ", (h:Node)" +
-            ", (i:Node)" +
-            // {J}
-            ", (j:Node { id: 9 })" +
-            // {A, B, C, D}
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (d)-[:TYPE]->(a)" +
-            // {E, F, G}
-            ", (e)-[:TYPE]->(f)" +
-            ", (f)-[:TYPE]->(g)" +
-            ", (g)-[:TYPE]->(e)" +
-            // {H, I}
-            ", (i)-[:TYPE]->(h)" +
-            ", (h)-[:TYPE]->(i)";
+        "CREATE" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        // {J}
+        ", (j:Node { id: 9 })" +
+        // {A, B, C, D}
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(a)" +
+        // {E, F, G}
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(g)" +
+        ", (g)-[:TYPE]->(e)" +
+        // {H, I}
+        ", (i)-[:TYPE]->(h)" +
+        ", (h)-[:TYPE]->(i)";
 
     @Inject
     private TestGraph graph;
 
     @Test
-    void runSCC() {
+    void shouldFailWithConcurrency10() {
+        int maxIterations = 10;
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            PregelConfig config = ImmutablePregelConfig.builder()
+                .isAsynchronous(true)
+                .concurrency(10)
+                .maxIterations(maxIterations)
+                .build();
+        });
+
+        assertThat(illegalArgumentException, containsMessage("The configured `concurrency` value is too high"));
+    }
+
+    @Test
+    void runWCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
             .isAsynchronous(true)
+            .concurrency(2)
+            .maxIterations(maxIterations)
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
