@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.pregel.cc.ConnectedComponentsPregel;
 
 public class PregelConnectedComponentsDocExample {
     @Test

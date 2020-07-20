@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pregel.cc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
@@ -34,10 +35,14 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.HashMap;
 
-@GdlExtension
-class StronglyConnectedComponentsPregelTest {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 
-    @GdlGraph
+@GdlExtension
+class ConnectedComponentsPregelAlgoTest {
+
+    @GdlGraph(graphNamePrefix = "directed")
     private static final String TEST_GRAPH =
             "CREATE" +
             "  (a:Node)" +
@@ -64,21 +69,26 @@ class StronglyConnectedComponentsPregelTest {
             ", (i)-[:TYPE]->(h)" +
             ", (h)-[:TYPE]->(i)";
 
+    @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
+    private static final String TEST_GRAPH_UNDIRECTED = TEST_GRAPH;
+
     @Inject
-    private TestGraph graph;
+    private TestGraph directedGraph;
+
+    @Inject
+    private TestGraph undirectedGraph;
 
     @Test
-    void runSCC() {
+    void directedSCC() {
         int batchSize = 10;
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
-            .isAsynchronous(true)
+        ConnectedComponentsConfig config = ImmutableConnectedComponentsConfig.builder()
             .maxIterations(maxIterations)
             .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
-            graph,
+            directedGraph,
             config,
             new ConnectedComponentsPregel(),
             batchSize,
@@ -100,6 +110,57 @@ class StronglyConnectedComponentsPregelTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
+        TestSupport.assertLongValues(directedGraph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
+    }
+
+    @Test
+    void undirectedWCC() {
+        int batchSize = 10;
+        int maxIterations = 10;
+
+        PregelConfig config = ImmutablePregelConfig.builder()
+            .isAsynchronous(true)
+            .concurrency(2)
+            .maxIterations(maxIterations)
+            .build();
+
+        Pregel pregelJob = Pregel.withDefaultNodeValues(
+            undirectedGraph,
+            config,
+            new ConnectedComponentsPregel(),
+            batchSize,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+
+        var expected = new HashMap<String, Long>();
+        expected.put("a", 0L);
+        expected.put("b", 0L);
+        expected.put("c", 0L);
+        expected.put("d", 0L);
+        expected.put("e", 4L);
+        expected.put("f", 4L);
+        expected.put("g", 4L);
+        expected.put("h", 7L);
+        expected.put("i", 7L);
+        expected.put("j", 9L);
+
+        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
+    }
+
+    @Test
+    void shouldFailWithConcurrency10() {
+        int maxIterations = 10;
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            PregelConfig config = ImmutableConnectedComponentsConfig.builder()
+                .concurrency(10)
+                .maxIterations(maxIterations)
+                .build();
+        });
+
+        assertThat(illegalArgumentException, containsMessage("The configured `concurrency` value is too high"));
     }
 }

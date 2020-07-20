@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.pregel.cc;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -31,7 +31,13 @@ import java.util.Optional;
 @ValueClass
 @Configuration("ConnectedComponentsConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface ConnectedComponentsConfig extends AlgoBaseConfig, PregelConfig {
+public interface ConnectedComponentsConfig extends PregelConfig {
+
+    @Value.Default
+    @Override
+    default boolean isAsynchronous() {
+        return true;
+    }
 
     static ConnectedComponentsConfig of(
         String username,
