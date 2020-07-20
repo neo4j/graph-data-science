@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pregel;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
+import com.squareup.javapoet.ClassName;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
@@ -203,6 +204,10 @@ final class PregelValidation {
         String procedureName();
 
         Optional<AnnotationMirror> description();
+
+        default ClassName className() {
+            return ClassName.get(rootPackage(), computationName());
+        }
     }
 
 }

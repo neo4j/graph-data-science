@@ -20,15 +20,25 @@
 package org.neo4j.graphalgo.pregel;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.logging.Log;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
+import java.util.List;
+import java.util.Map;
 
 class AlgorithmGenerator extends PregelGenerator {
     AlgorithmGenerator(Elements elementUtils, SourceVersion sourceVersion) {
@@ -50,6 +60,8 @@ class AlgorithmGenerator extends PregelGenerator {
 
         addGeneratedAnnotation(typeSpecBuilder);
 
+        typeSpecBuilder.addFields(fields());
+        typeSpecBuilder.addMethod(constructor(pregelSpec));
         typeSpecBuilder.addMethod(computeMethod());
         typeSpecBuilder.addMethod(meMethod(algorithmClassName));
         typeSpecBuilder.addMethod(releaseMethod());
@@ -57,13 +69,47 @@ class AlgorithmGenerator extends PregelGenerator {
         return typeSpecBuilder.build();
     }
 
+    private Iterable<FieldSpec> fields() {
+        return List.of(
+            FieldSpec.builder(org.neo4j.graphalgo.beta.pregel.Pregel.class, "pregelJob", Modifier.PRIVATE, Modifier.FINAL).build(),
+            FieldSpec.builder(int.class, "maxIterations", Modifier.PRIVATE, Modifier.FINAL).build()
+        );
+    }
+
+    private MethodSpec constructor(PregelValidation.Spec pregelSpec) {
+        return MethodSpec.constructorBuilder()
+            .addParameter(Graph.class, "graph")
+            .addParameter(configTypeName(pregelSpec), "configuration")
+            .addParameter(AllocationTracker.class, "tracker")
+            .addParameter(Log.class, "log")
+            .addStatement("this.maxIterations = configuration.maxIterations()")
+            .addStatement(
+                CodeBlock.builder().addNamed(
+                    "this.pregelJob = $pregel:T.withDefaultNodeValues(" +
+                    "graph, " +
+                    "configuration, " +
+                    "new $computation:T()," +
+                    "(int) $parallelUtil:T.adjustedBatchSize(graph.nodeCount(), configuration.concurrency())," +
+                    "$pools:T.DEFAULT," +
+                    "tracker" +
+                    ")",
+                    Map.of(
+                        "pregel", Pregel.class,
+                        "computation", pregelSpec.className(),
+                        "parallelUtil", ParallelUtil.class,
+                        "pools", Pools.class
+                    )
+                ).build()
+            )
+            .build();
+    }
+
     private MethodSpec computeMethod() {
         return MethodSpec.methodBuilder("compute")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(HugeDoubleArray.class)
-            // TODO return pregelJob.run(maxIterations);
-            .addStatement("return null")
+            .addStatement("return pregelJob.run(maxIterations)")
             .build();
     }
 

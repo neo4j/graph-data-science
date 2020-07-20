@@ -26,6 +26,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
@@ -36,6 +37,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -76,6 +78,7 @@ class ProcedureGenerator extends PregelGenerator {
         typeSpecBuilder.addMethod(streamResultMethod());
         typeSpecBuilder.addMethod(newConfigMethod(pregelSpec));
         typeSpecBuilder.addMethod(algorithmFactoryMethod(pregelSpec, algorithmClassName));
+        typeSpecBuilder.addMethod(propertyTranslator(pregelSpec, algorithmClassName));
 
         return typeSpecBuilder.build();
     }
@@ -150,8 +153,7 @@ class ProcedureGenerator extends PregelGenerator {
                 .addParameter(AllocationTracker.class, "tracker")
                 .addParameter(Log.class, "log")
                 .returns(algorithmClassName)
-                .addStatement("return null")
-//                .addStatement("return new $T(graph, configuration, tracker, log)", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, tracker, log)", algorithmClassName)
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("memoryEstimation")
@@ -173,6 +175,22 @@ class ProcedureGenerator extends PregelGenerator {
                 configTypeName(pregelSpec)
             ))
             .addStatement("return $L", anonymousFactoryType)
+            .build();
+    }
+
+    private MethodSpec propertyTranslator(PregelValidation.Spec pregelSpec, ClassName algorithmClassName) {
+        return MethodSpec.methodBuilder("nodePropertyTranslator")
+            .addAnnotation(Override.class)
+            .addModifiers(Modifier.PROTECTED)
+            .returns(ParameterizedTypeName.get(PropertyTranslator.class, HugeDoubleArray.class))
+            .addParameter(ParameterizedTypeName.get(
+                ClassName.get(AlgoBaseProc.ComputationResult.class),
+                algorithmClassName,
+                ClassName.get(HugeDoubleArray.class),
+                configTypeName(pregelSpec)
+                ), "computationResult"
+            )
+            .addStatement("return $T.Translator.INSTANCE", HugeDoubleArray.class)
             .build();
     }
 
