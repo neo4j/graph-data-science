@@ -15,17 +15,14 @@ import org.neo4j.logging.Log;
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, HugeDoubleArray> {
     private final Pregel pregelJob;
 
-    private final int maxIterations;
-
     ComputationAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker,
                          Log log) {
-        this.maxIterations = configuration.maxIterations();
         this.pregelJob = Pregel.withDefaultNodeValues(graph, configuration, new Computation(),(int) ParallelUtil.adjustedBatchSize(graph.nodeCount(), configuration.concurrency()),Pools.DEFAULT,tracker);
     }
 
     @Override
     public HugeDoubleArray compute() {
-        return pregelJob.run(maxIterations);
+        return pregelJob.run();
     }
 
     @Override

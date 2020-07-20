@@ -82,6 +82,7 @@ class PageRankPregelTest {
         float dampingFactor = 0.85f;
 
         PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
             .initialNodeValue(1.0 / graph.nodeCount())
             .isAsynchronous(false)
             .build();
@@ -95,7 +96,7 @@ class PageRankPregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
 
         var expected = new HashMap<String, Double>();
         expected.put("a", 0.0276D);

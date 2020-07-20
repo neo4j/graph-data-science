@@ -70,7 +70,9 @@ class LabelPropagationPregelTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder().build();
+        PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
+            .build();
 
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             graph,
@@ -81,7 +83,7 @@ class LabelPropagationPregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
 
         assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
             "nAlice", 0L,
@@ -99,6 +101,7 @@ class LabelPropagationPregelTest {
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
             .relationshipWeightProperty("weight")
             .build();
 
@@ -118,7 +121,7 @@ class LabelPropagationPregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
 
         assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
             "nAlice", 0L,

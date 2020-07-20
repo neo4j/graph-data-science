@@ -139,7 +139,7 @@ public final class Pregel {
         this.messageQueues = initLinkedQueues(graph, tracker);
     }
 
-    public HugeDoubleArray run(final int maxIterations) {
+    public HugeDoubleArray run() {
         iterations = 0;
         boolean canHalt = false;
         // Tracks if a node received messages in the previous iteration
@@ -154,7 +154,7 @@ public final class Pregel {
                 batchSize,
                 (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
 
-        while (iterations < maxIterations && !canHalt) {
+        while (iterations < config.maxIterations() && !canHalt) {
             int iteration = iterations++;
 
             final List<ComputeStep> computeSteps = runComputeSteps(nodeBatches, iteration, receiverBits, voteBits);

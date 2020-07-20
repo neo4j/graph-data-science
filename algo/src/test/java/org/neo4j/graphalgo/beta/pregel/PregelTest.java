@@ -62,24 +62,24 @@ class PregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(2);
+        HugeDoubleArray nodeValues = pregelJob.run();
         assertArrayEquals(expected, nodeValues.toArray());
     }
 
     static Stream<Arguments> configAndResult() {
         return Stream.of(
             Arguments.of(
-                ImmutablePregelConfig.builder().build(),
+                ImmutablePregelConfig.builder().maxIterations(2).build(),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
             )

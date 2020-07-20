@@ -72,6 +72,7 @@ class SingleSourceShortestPathPregelTest {
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
             .isAsynchronous(true)
             .build();
 
@@ -84,7 +85,7 @@ class SingleSourceShortestPathPregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
 
         assertLongValues(graph, nodeId -> (long) nodeValues.get(nodeId), Map.of(
                 "a", 0L,

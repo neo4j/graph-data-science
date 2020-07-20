@@ -60,7 +60,7 @@ class AlgorithmGenerator extends PregelGenerator {
 
         addGeneratedAnnotation(typeSpecBuilder);
 
-        typeSpecBuilder.addFields(fields());
+        typeSpecBuilder.addField(pregelJobField());
         typeSpecBuilder.addMethod(constructor(pregelSpec));
         typeSpecBuilder.addMethod(computeMethod());
         typeSpecBuilder.addMethod(meMethod(algorithmClassName));
@@ -69,11 +69,10 @@ class AlgorithmGenerator extends PregelGenerator {
         return typeSpecBuilder.build();
     }
 
-    private Iterable<FieldSpec> fields() {
-        return List.of(
-            FieldSpec.builder(org.neo4j.graphalgo.beta.pregel.Pregel.class, "pregelJob", Modifier.PRIVATE, Modifier.FINAL).build(),
-            FieldSpec.builder(int.class, "maxIterations", Modifier.PRIVATE, Modifier.FINAL).build()
-        );
+    private FieldSpec pregelJobField() {
+        return FieldSpec
+            .builder(org.neo4j.graphalgo.beta.pregel.Pregel.class, "pregelJob", Modifier.PRIVATE, Modifier.FINAL)
+            .build();
     }
 
     private MethodSpec constructor(PregelValidation.Spec pregelSpec) {
@@ -82,7 +81,6 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(configTypeName(pregelSpec), "configuration")
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
-            .addStatement("this.maxIterations = configuration.maxIterations()")
             .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.withDefaultNodeValues(" +
@@ -109,7 +107,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .returns(HugeDoubleArray.class)
-            .addStatement("return pregelJob.run(maxIterations)")
+            .addStatement("return pregelJob.run()")
             .build();
     }
 

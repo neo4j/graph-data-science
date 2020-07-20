@@ -36,6 +36,7 @@ public class PregelConnectedComponentsDocExample {
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
             .isAsynchronous(true)
             .build();
 
@@ -48,7 +49,7 @@ public class PregelConnectedComponentsDocExample {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
         System.out.println(nodeValues.toString());
     }
 }
