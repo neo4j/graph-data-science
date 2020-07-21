@@ -43,14 +43,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
-public final class Pregel {
+public final class Pregel<CONFIG extends PregelConfig> {
 
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
 
-    private final PregelConfig config;
+    private final CONFIG config;
 
-    private final PregelComputation computation;
+    private final PregelComputation<CONFIG> computation;
 
     private final Graph graph;
 
@@ -64,10 +64,10 @@ public final class Pregel {
 
     private int iterations;
 
-    public static Pregel withDefaultNodeValues(
+    public static <CONFIG extends PregelConfig> Pregel<CONFIG> withDefaultNodeValues(
             final Graph graph,
-            final PregelConfig config,
-            final PregelComputation computation,
+            final CONFIG config,
+            final PregelComputation<CONFIG> computation,
             final int batchSize,
             final ExecutorService executor,
             final AllocationTracker tracker) {
@@ -81,7 +81,7 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, defaultNodeValue))
         );
 
-        return new Pregel(
+        return new Pregel<>(
                 graph,
                 config,
                 computation,
@@ -92,10 +92,10 @@ public final class Pregel {
         );
     }
 
-    public static Pregel withInitialNodeValues(
+    public static <CONFIG extends PregelConfig> Pregel<CONFIG> withInitialNodeValues(
             final Graph graph,
-            final PregelConfig config,
-            final PregelComputation computation,
+            final CONFIG config,
+            final PregelComputation<CONFIG> computation,
             final NodeProperties initialNodeValues,
             final int batchSize,
             final ExecutorService executor,
@@ -109,7 +109,7 @@ public final class Pregel {
                 nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
         );
 
-        return new Pregel(
+        return new Pregel<>(
                 graph,
                 config,
                 computation,
@@ -122,8 +122,8 @@ public final class Pregel {
 
     private Pregel(
             final Graph graph,
-            final PregelConfig config,
-            final PregelComputation computation,
+            final CONFIG config,
+            final PregelComputation<CONFIG> computation,
             final HugeDoubleArray initialNodeValues,
             final int batchSize,
             final ExecutorService executor,
@@ -157,7 +157,7 @@ public final class Pregel {
         while (iterations < config.maxIterations() && !canHalt) {
             int iteration = iterations++;
 
-            final List<ComputeStep> computeSteps = runComputeSteps(nodeBatches, iteration, receiverBits, voteBits);
+            final List<ComputeStep<CONFIG>> computeSteps = runComputeSteps(nodeBatches, iteration, receiverBits, voteBits);
 
             receiverBits = unionBitSets(computeSteps, ComputeStep::getSenders);
             voteBits = unionBitSets(computeSteps, ComputeStep::getVotes);
@@ -174,7 +174,7 @@ public final class Pregel {
         return iterations;
     }
 
-    private BitSet unionBitSets(Collection<ComputeStep> computeSteps, Function<ComputeStep, BitSet> fn) {
+    private BitSet unionBitSets(Collection<ComputeStep<CONFIG>> computeSteps, Function<ComputeStep<CONFIG>, BitSet> fn) {
         return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
                 stream.map(fn).reduce((bitSet1, bitSet2) -> {
                     bitSet1.union(bitSet2);
@@ -182,13 +182,13 @@ public final class Pregel {
                 }).orElseGet(BitSet::new));
     }
 
-    private List<ComputeStep> runComputeSteps(
+    private List<ComputeStep<CONFIG>> runComputeSteps(
             Collection<PrimitiveLongIterable> nodeBatches,
             final int iteration,
             BitSet messageBits,
             BitSet voteToHaltBits) {
 
-        final List<ComputeStep> tasks = new ArrayList<>(nodeBatches.size());
+        final List<ComputeStep<CONFIG>> tasks = new ArrayList<>(nodeBatches.size());
 
         if (!config.isAsynchronous()) {
             // Synchronization barrier:
@@ -206,21 +206,22 @@ public final class Pregel {
             }
         }
 
-        Collection<ComputeStep> computeSteps = LazyMappingCollection.of(
+        Collection<ComputeStep<CONFIG>> computeSteps = LazyMappingCollection.of(
                 nodeBatches,
                 nodeBatch -> {
-                    ComputeStep task = new ComputeStep(
-                            computation,
-                            config,
-                            graph.nodeCount(),
-                            iteration,
-                            nodeBatch,
-                            graph,
-                            nodeValues,
-                            messageBits,
-                            voteToHaltBits,
-                            messageQueues,
-                            graph);
+                    ComputeStep<CONFIG> task = new ComputeStep<>(
+                        computation,
+                        config,
+                        graph.nodeCount(),
+                        iteration,
+                        nodeBatch,
+                        graph,
+                        nodeValues,
+                        messageBits,
+                        voteToHaltBits,
+                        messageQueues,
+                        graph
+                    );
                     tasks.add(task);
                     return task;
                 });
@@ -247,11 +248,11 @@ public final class Pregel {
         return messageQueues;
     }
 
-    public static final class ComputeStep implements Runnable {
+    public static final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
 
         private final int iteration;
-        private final PregelComputation computation;
-        private final PregelContext pregelContext;
+        private final PregelComputation<CONFIG> computation;
+        private final PregelContext<CONFIG> pregelContext;
         private final BitSet senderBits;
         private final BitSet receiverBits;
         private final BitSet voteBits;
@@ -262,8 +263,8 @@ public final class Pregel {
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
-                final PregelComputation computation,
-                final PregelConfig config,
+                final PregelComputation<CONFIG> computation,
+                final CONFIG config,
                 final long globalNodeCount,
                 final int iteration,
                 final PrimitiveLongIterable nodeBatch,
@@ -283,7 +284,7 @@ public final class Pregel {
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
-            this.pregelContext = new PregelContext(this, config);
+            this.pregelContext = new PregelContext<>(this, config);
         }
 
         @Override
