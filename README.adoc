@@ -19,7 +19,7 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 |GDS 1.2.x
 |Neo4j 4.0.0 – 4.0.4
 
-|GDS 1.2.2
+|GDS 1.2.3
 |Neo4j 4.0.0 - 4.0.6
 
 .2+<.^|GDS 1.3.x
