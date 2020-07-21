@@ -36,7 +36,7 @@ import java.util.Map;
 import static org.neo4j.graphalgo.TestSupport.assertLongValues;
 
 @GdlExtension
-class SingleSourceShortestPathPregelTest {
+class SingleSourceShortestPathPregelAlgoTest {
 
     @GdlGraph
     private static final String TEST_GRAPH =
@@ -71,15 +71,16 @@ class SingleSourceShortestPathPregelTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutableSingleSourceShortestPathPregelConfig.builder()
             .maxIterations(maxIterations)
             .isAsynchronous(true)
+            .startNode(0)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
-            new SingleSourceShortestPathPregel(0),
+            new SingleSourceShortestPathPregel(),
             batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY

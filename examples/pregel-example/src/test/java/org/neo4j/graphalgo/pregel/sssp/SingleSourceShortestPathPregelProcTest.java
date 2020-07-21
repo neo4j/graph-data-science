@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel.lp;
+package org.neo4j.graphalgo.pregel.sssp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,41 +31,47 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
-class LabelPropagationPregelProcTest extends BaseProcTest {
+class SingleSourceShortestPathPregelProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH =
         "CREATE" +
-        "  (nAlice:User)" +
-        ", (nBridget:User)" +
-        ", (nCharles:User)" +
-        ", (nDoug:User)" +
-        ", (nMark:User)" +
-        ", (nMichael:User)" +
-        ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nBridget)" +
-        ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nCharles)" +
-        ", (nMark)-[:FOLLOW    {weight: 1.0}]->(nDoug)" +
-        ", (nBridget)-[:FOLLOW {weight: 1.0}]->(nMichael)" +
-        ", (nDoug)-[:FOLLOW    {weight: 2.0}]->(nMark)" +
-        ", (nMichael)-[:FOLLOW {weight: 1.0}]->(nAlice)" +
-        ", (nAlice)-[:FOLLOW   {weight: 1.0}]->(nMichael)" +
-        ", (nBridget)-[:FOLLOW {weight: 1.0}]->(nAlice)" +
-        ", (nMichael)-[:FOLLOW {weight: 1.0}]->(nBridget)" +
-        ", (nCharles)-[:FOLLOW {weight: 1.0}]->(nDoug)";
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        // {J}
+        ", (j:Node)" +
+        // {A, B, C, D}
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (a)-[:TYPE]->(c)" +
+        // {E, F, G}
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(g)" +
+        // {H, I}
+        ", (i)-[:TYPE]->(h)";
 
     @BeforeEach
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(LabelPropagationPregelProc.class);
+        registerProcedures(SingleSourceShortestPathPregelProc.class);
     }
 
     @Test
     void stream() {
         var query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("example", "pregel", "lp")
+            .algo("example", "pregel", "sssp")
             .streamMode()
             .addParameter("maxIterations", 10)
+            .addParameter("startNode", 0)
             .yields("nodeId", "value");
 
         HashMap<Long, Long> actual = new HashMap<>();
@@ -75,11 +81,15 @@ class LabelPropagationPregelProcTest extends BaseProcTest {
 
         var expected = Map.of(
             0L, 0L,
-            1L, 0L,
-            2L, 0L,
-            3L, 4L,
-            4L, 3L,
-            5L, 0L
+            1L, 1L,
+            2L, 1L,
+            3L, 2L,
+            4L, Long.MAX_VALUE,
+            5L, Long.MAX_VALUE,
+            6L, Long.MAX_VALUE,
+            7L, Long.MAX_VALUE,
+            8L, Long.MAX_VALUE,
+            9L, Long.MAX_VALUE
         );
 
         assertThat(expected, mapEquals(actual));
