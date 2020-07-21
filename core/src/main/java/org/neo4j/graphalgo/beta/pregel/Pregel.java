@@ -217,6 +217,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                         computation,
                         config,
                         graph.nodeCount(),
+                        graph.relationshipCount(),
                         iteration,
                         nodeBatch,
                         graph,
@@ -255,6 +256,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
 
         private final int iteration;
+        private final long nodeCount;
+        private final long relationshipCount;
         private final PregelComputation<CONFIG> computation;
         private final PregelContext<CONFIG> pregelContext;
         private final BitSet senderBits;
@@ -269,7 +272,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private ComputeStep(
                 final PregelComputation<CONFIG> computation,
                 final CONFIG config,
-                final long globalNodeCount,
+                final long nodeCount,
+                final long relationshipCount,
                 final int iteration,
                 final PrimitiveLongIterable nodeBatch,
                 final Degrees degrees,
@@ -279,8 +283,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 final HugeObjectArray<? extends Queue<Double>> messageQueues,
                 final RelationshipIterator relationshipIterator) {
             this.iteration = iteration;
+            this.nodeCount = nodeCount;
+            this.relationshipCount = relationshipCount;
             this.computation = computation;
-            this.senderBits = new BitSet(globalNodeCount);
+            this.senderBits = new BitSet(nodeCount);
             this.receiverBits = receiverBits;
             this.voteBits = voteBits;
             this.nodeBatch = nodeBatch;
@@ -315,6 +321,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         public int getIteration() {
             return iteration;
+        }
+
+        long getNodeCount() {
+            return nodeCount;
+        }
+
+        long getRelationshipCount() {
+            return relationshipCount;
         }
 
         int getDegree(final long nodeId) {

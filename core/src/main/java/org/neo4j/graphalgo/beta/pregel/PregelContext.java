@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.api.Graph;
+
 public final class PregelContext<CONFIG extends PregelConfig> {
 
     private final Pregel.ComputeStep<CONFIG> computeStep;
@@ -59,6 +61,14 @@ public final class PregelContext<CONFIG extends PregelConfig> {
 
     public void sendMessages(long nodeId, double message) {
         sendMessageFunction.sendMessage(nodeId, message);
+    }
+
+    public long getNodeCount() {
+        return computeStep.getNodeCount();
+    }
+
+    public long getRelationshipCount() {
+        return computeStep.getRelationshipCount();
     }
 
     public int getDegree(long nodeId) {
