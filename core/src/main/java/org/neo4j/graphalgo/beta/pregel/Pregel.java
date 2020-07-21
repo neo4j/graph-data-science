@@ -174,6 +174,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return iterations;
     }
 
+    public void release() {
+        messageQueues.release();
+    }
+
     private BitSet unionBitSets(Collection<ComputeStep<CONFIG>> computeSteps, Function<ComputeStep<CONFIG>, BitSet> fn) {
         return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
                 stream.map(fn).reduce((bitSet1, bitSet2) -> {

@@ -114,6 +114,7 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("release")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
+            .addStatement("pregelJob.release()")
             .build();
     }
 

@@ -32,5 +32,6 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
 
     @Override
     public void release() {
+        pregelJob.release();
     }
 }
