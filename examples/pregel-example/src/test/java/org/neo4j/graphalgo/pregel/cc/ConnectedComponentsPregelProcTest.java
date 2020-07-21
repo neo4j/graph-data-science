@@ -69,7 +69,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     void stream() {
         var query = GdsCypher.call()
             .loadEverything()
-            .algo("gds", "pregel", "cc")
+            .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
             .yields("nodeId", "value");

@@ -28,7 +28,7 @@ import org.neo4j.procedure.Description;
 import java.util.Queue;
 
 @Pregel
-@Procedure("gds.pregel.cc.stream")
+@Procedure("example.pregel.cc.stream")
 @Description("Connected Components")
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
