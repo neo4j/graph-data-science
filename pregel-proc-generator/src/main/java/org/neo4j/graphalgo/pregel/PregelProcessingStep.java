@@ -95,7 +95,7 @@ public final class PregelProcessingStep implements BasicAnnotationProcessor.Proc
         } catch (IOException e) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "Could not write config file: " + e.getMessage(),
+                "Could not write Pregel java file: " + e.getMessage(),
                 element
             );
             return ProcessResult.RETRY;

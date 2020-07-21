@@ -163,10 +163,6 @@ final class PregelValidation {
         String procedureName();
 
         Optional<AnnotationMirror> description();
-
-        default ClassName className() {
-            return ClassName.get(rootPackage(), computationName());
-        }
     }
 
 }

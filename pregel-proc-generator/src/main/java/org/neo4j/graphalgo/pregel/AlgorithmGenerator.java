@@ -92,7 +92,7 @@ class AlgorithmGenerator extends PregelGenerator {
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
-                        "computation", pregelSpec.className(),
+                        "computation", className(pregelSpec, ""),
                         "parallelUtil", ParallelUtil.class,
                         "pools", Pools.class
                     )
