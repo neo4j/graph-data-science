@@ -20,11 +20,12 @@
 package org.neo4j.graphalgo.pregel.pr;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-public class PageRankPregel implements PregelComputation {
+public class PageRankPregel implements PregelComputation<PregelConfig> {
 
     private final long nodeCount;
     private final double jumpProbability;
@@ -37,7 +38,7 @@ public class PageRankPregel implements PregelComputation {
     }
 
     @Override
-    public void compute(PregelContext pregel, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<PregelConfig> pregel, final long nodeId, Queue<Double> messages) {
         double newRank = pregel.getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks

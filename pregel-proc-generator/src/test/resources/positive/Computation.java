@@ -29,14 +29,13 @@ import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
-// user-defined
-@Pregel(PregelConfig.class)
-@Procedure("gds.pregel.fancy")
-@Description("My fancy computation")
-public class Computation implements PregelComputation {
+@Pregel
+@Procedure("gds.pregel.test")
+@Description("Test computation description")
+public class Computation implements PregelComputation<PregelConfig> {
 
     @Override
-    public void compute(PregelContext context, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 }

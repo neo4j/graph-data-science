@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public final class PregelContext {
+public final class PregelContext<C extends PregelConfig> {
 
     private final Pregel.ComputeStep computeStep;
-    private final PregelConfig config;
+    private final C config;
     private final SendMessageFunction sendMessageFunction;
 
-    PregelContext(Pregel.ComputeStep computeStep, PregelConfig config) {
+    PregelContext(Pregel.ComputeStep computeStep, C config) {
         this.computeStep = computeStep;
         this.config = config;
         this.sendMessageFunction = config.relationshipWeightProperty() == null
@@ -33,7 +33,7 @@ public final class PregelContext {
             : computeStep::sendWeightedMessages;
     }
 
-    public PregelConfig getConfig() {
+    public C getConfig() {
         return config;
     }
 

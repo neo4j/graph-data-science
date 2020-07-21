@@ -52,7 +52,7 @@ class PregelTest {
 
     @ParameterizedTest
     @MethodSource("configAndResult")
-    void sendsMessages(PregelConfig config, PregelComputation computation, double[] expected) {
+    <C extends PregelConfig> void sendsMessages(PregelConfig config, PregelComputation<C> computation, double[] expected) {
         Pregel pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
@@ -86,10 +86,10 @@ class PregelTest {
         );
     }
 
-    public static class TestPregelComputation implements PregelComputation {
+    public static class TestPregelComputation implements PregelComputation<PregelConfig> {
 
         @Override
-        public void compute(PregelContext pregel, long nodeId, Queue<Double> messages) {
+        public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
             if (pregel.isInitialSuperStep()) {
                 pregel.setNodeValue(nodeId, 0.0);
                 pregel.sendMessages(nodeId, 1.0);

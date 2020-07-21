@@ -20,11 +20,12 @@
 package org.neo4j.graphalgo.pregel.sssp;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Queue;
 
-public class SingleSourceShortestPathPregel implements PregelComputation {
+public class SingleSourceShortestPathPregel implements PregelComputation<PregelConfig> {
 
     private final long startNode;
 
@@ -33,7 +34,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation {
     }
 
     @Override
-    public void compute(PregelContext pregel, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperStep()) {
             if (nodeId == startNode) {
                 pregel.setNodeValue(nodeId, 0);

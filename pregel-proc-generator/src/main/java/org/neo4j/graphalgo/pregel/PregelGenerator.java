@@ -23,13 +23,10 @@ import com.google.auto.common.GeneratedAnnotationSpecs;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.SourceVersion;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.SimpleAnnotationValueVisitor9;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,16 +60,6 @@ class PregelGenerator {
     // produces @Generated meta info
     void addGeneratedAnnotation(TypeSpec.Builder typeSpecBuilder) {
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
-    }
-
-    TypeName configTypeName(PregelValidation.Spec pregelSpec) {
-        return pregelSpec.configName()
-                .accept(new SimpleAnnotationValueVisitor9<TypeName, Void>() {
-                    @Override
-                    public TypeName visitType(TypeMirror t, Void aVoid) {
-                        return TypeName.get(t);
-                    }
-                }, null);
     }
 
     ClassName className(PregelValidation.Spec pregelSpec, String suffix) {

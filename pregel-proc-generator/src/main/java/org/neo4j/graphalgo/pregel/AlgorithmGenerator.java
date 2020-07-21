@@ -37,7 +37,6 @@ import org.neo4j.logging.Log;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.List;
 import java.util.Map;
 
 class AlgorithmGenerator extends PregelGenerator {
@@ -78,7 +77,7 @@ class AlgorithmGenerator extends PregelGenerator {
     private MethodSpec constructor(PregelValidation.Spec pregelSpec) {
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
-            .addParameter(configTypeName(pregelSpec), "configuration")
+            .addParameter(pregelSpec.configTypeName(), "configuration")
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
             .addStatement(

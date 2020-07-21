@@ -27,13 +27,13 @@ import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
-@Pregel(ConnectedComponentsConfig.class)
+@Pregel
 @Procedure("gds.pregel.cc.stream")
 @Description("Connected Components")
-public class ConnectedComponentsPregel implements PregelComputation {
+public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
     @Override
-    public void compute(PregelContext context, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<ConnectedComponentsConfig> context, final long nodeId, Queue<Double> messages) {
         double oldComponentId = context.getNodeValue(nodeId);
         double newComponentId = oldComponentId;
         if (context.isInitialSuperStep()) {

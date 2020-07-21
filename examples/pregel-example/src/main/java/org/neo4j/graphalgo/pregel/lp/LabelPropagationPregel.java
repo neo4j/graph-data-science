@@ -20,18 +20,19 @@
 package org.neo4j.graphalgo.pregel.lp;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 
 import java.util.Arrays;
 import java.util.Queue;
 
 /**
- * Basic implementation potentially suffering from osciallating vertex states due to synchronous computation.
+ * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
  */
-public class LabelPropagationPregel implements PregelComputation {
+public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
     @Override
-    public void compute(PregelContext pregel, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperStep()) {
             pregel.setNodeValue(nodeId, nodeId);
             pregel.sendMessages(nodeId, nodeId);

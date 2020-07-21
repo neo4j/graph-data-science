@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.beta.pregel;
 import java.util.Queue;
 
 @FunctionalInterface
-public interface PregelComputation {
+public interface PregelComputation<C extends PregelConfig> {
 
-    void compute(PregelContext context, long nodeId, Queue<Double> messages);
+    void compute(PregelContext<C> context, long nodeId, Queue<Double> messages);
 
     default double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
         return nodeValue;

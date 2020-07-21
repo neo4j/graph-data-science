@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pregel;
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
@@ -30,24 +31,18 @@ import org.neo4j.procedure.Description;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class PregelValidation {
-
-    private static final String PREGEL_ANNOTATION_VALUE = "value";
-    private static final String PREGEL_ANNOTATION_CONFIG_CLASS = "configClass";
 
     private final Messager messager;
     private final Types typeUtils;
@@ -60,22 +55,18 @@ final class PregelValidation {
         this.messager = messager;
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
-        this.pregelComputation = elementUtils.getTypeElement(PregelComputation.class.getName()).asType();
+        this.pregelComputation = typeUtils.getDeclaredType(
+            elementUtils.getTypeElement(PregelComputation.class.getName())
+        );
     }
 
     Optional<Spec> validate(Element pregelElement) {
         var pregelAnnotationMirror = MoreElements.getAnnotationMirror(pregelElement, Pregel.class).get();
-        var maybeConfigName = getAnnotationValueFromAlternatives(
-            pregelAnnotationMirror,
-            PREGEL_ANNOTATION_VALUE,
-            PREGEL_ANNOTATION_CONFIG_CLASS
-        );
         var maybeProcedure = Optional.ofNullable(pregelElement.getAnnotation(Procedure.class));
 
         if (
             !isClass(pregelElement) ||
             !isPregelComputation(pregelElement) ||
-            !hasDistinctConfig(maybeConfigName, pregelElement, pregelAnnotationMirror) ||
             !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
             // TODO: validate that config has a factory method with correct signature
         ) {
@@ -83,6 +74,7 @@ final class PregelValidation {
         }
 
         var computationName = pregelElement.getSimpleName().toString();
+        var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var maybeDescription = Optional.ofNullable(MoreElements
             .getAnnotationMirror(pregelElement, Description.class)
@@ -92,7 +84,7 @@ final class PregelValidation {
             pregelElement,
             computationName,
             rootPackage,
-            maybeConfigName.get(),
+            configTypeName,
             maybeProcedure.get().value(),
             maybeDescription
         ));
@@ -110,13 +102,18 @@ final class PregelValidation {
         return isClass;
     }
 
+    private Optional<DeclaredType> pregelComputation(Element pregelElement) {
+        // TODO: this check needs to bubble up the inheritance tree
+        return MoreElements.asType(pregelElement).getInterfaces().stream()
+            .map(MoreTypes::asDeclared)
+            .filter(declaredType -> typeUtils.isSubtype(declaredType, pregelComputation))
+            .findFirst();
+    }
+
     private boolean isPregelComputation(Element pregelElement) {
         var pregelTypeElement = MoreElements.asType(pregelElement);
-        // TODO: this check needs to bubble up the inheritance tree
-        var isPregelComputation = pregelTypeElement
-            .getInterfaces()
-            .stream()
-            .anyMatch(tm -> typeUtils.isSameType(tm, pregelComputation));
+        var maybeInterface = pregelComputation(pregelElement);
+        boolean isPregelComputation = maybeInterface.isPresent();
 
         if (!isPregelComputation) {
             messager.printMessage(Diagnostic.Kind.ERROR, formatWithLocale(
@@ -124,25 +121,16 @@ final class PregelValidation {
                 MoreTypes.asTypeElement(pregelComputation).getSimpleName()
             ), pregelTypeElement);
         }
-
         return isPregelComputation;
     }
 
-    private boolean hasDistinctConfig(
-        Optional<AnnotationValue> maybeConfigName,
-        Element pregelElement,
-        AnnotationMirror pregelAnnotationMirror
-    ) {
-        if (maybeConfigName.isEmpty()) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "Only one of `value` or `configClass` may be set.",
-                pregelElement,
-                pregelAnnotationMirror
-            );
-            return false;
-        }
-        return true;
+    private TypeMirror config(Element pregelElement) {
+        var maybeInterface = pregelComputation(pregelElement);
+        return maybeInterface.get()
+            .getTypeArguments()
+            .stream()
+            .findFirst()
+            .get();
     }
 
     private boolean hasProcedureAnnotation(
@@ -161,36 +149,6 @@ final class PregelValidation {
         });
     }
 
-    private Optional<AnnotationValue> getAnnotationValueFromAlternatives(
-        AnnotationMirror annotationMirror,
-        String elementName1,
-        String elementName2
-    ) {
-        var declaredValues = annotationMirror.getElementValues().entrySet().stream()
-            .filter(entry -> entry.getKey().getSimpleName().contentEquals(elementName1) || entry
-                .getKey()
-                .getSimpleName()
-                .contentEquals(elementName2))
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toList());
-
-        // get default value for elementName1
-        if (declaredValues.isEmpty()) {
-            for (var method : ElementFilter.methodsIn(annotationMirror
-                .getAnnotationType()
-                .asElement()
-                .getEnclosedElements())) {
-                if (method.getSimpleName().contentEquals(elementName1)) {
-                    return Optional.ofNullable(method.getDefaultValue());
-                }
-            }
-        }
-
-        return declaredValues.size() == 1
-            ? Optional.of(declaredValues.get(0))
-            : Optional.empty();
-    }
-
     @ValueClass
     interface Spec {
         Element element();
@@ -199,7 +157,7 @@ final class PregelValidation {
 
         String rootPackage();
 
-        AnnotationValue configName();
+        TypeName configTypeName();
 
         String procedureName();
 

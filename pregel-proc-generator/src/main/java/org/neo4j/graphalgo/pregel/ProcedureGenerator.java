@@ -56,7 +56,7 @@ class ProcedureGenerator extends PregelGenerator {
     }
 
     TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
-        TypeName configTypeName = configTypeName(pregelSpec);
+        TypeName configTypeName = pregelSpec.configTypeName();
         ClassName procedureClassName = className(pregelSpec, PROCEDURE_SUFFIX);
         ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
@@ -133,8 +133,8 @@ class ProcedureGenerator extends PregelGenerator {
             .addParameter(ParameterizedTypeName.get(Optional.class, String.class), "graphName")
             .addParameter(ParameterizedTypeName.get(Optional.class, GraphCreateConfig.class), "maybeImplicitCreate")
             .addParameter(CypherMapWrapper.class, "config")
-            .returns(configTypeName(pregelSpec))
-            .addStatement("return $T.of(username, graphName, maybeImplicitCreate, config)", configTypeName(pregelSpec))
+            .returns(pregelSpec.configTypeName())
+            .addStatement("return $T.of(username, graphName, maybeImplicitCreate, config)", pregelSpec.configTypeName())
             .build();
     }
 
@@ -143,13 +143,13 @@ class ProcedureGenerator extends PregelGenerator {
             .addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(AlgorithmFactory.class),
                 algorithmClassName,
-                configTypeName(pregelSpec)
+                pregelSpec.configTypeName()
             ))
             .addMethod(MethodSpec.methodBuilder("build")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Graph.class, "graph")
-                .addParameter(configTypeName(pregelSpec), "configuration")
+                .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addParameter(AllocationTracker.class, "tracker")
                 .addParameter(Log.class, "log")
                 .returns(algorithmClassName)
@@ -160,7 +160,7 @@ class ProcedureGenerator extends PregelGenerator {
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(MemoryEstimation.class)
-                .addParameter(configTypeName(pregelSpec), "configuration")
+                .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addStatement("return $T.empty()", MemoryEstimations.class)
                 .build()
             )
@@ -172,7 +172,7 @@ class ProcedureGenerator extends PregelGenerator {
             .returns(ParameterizedTypeName.get(
                 ClassName.get(AlgorithmFactory.class),
                 algorithmClassName,
-                configTypeName(pregelSpec)
+                pregelSpec.configTypeName()
             ))
             .addStatement("return $L", anonymousFactoryType)
             .build();
@@ -187,7 +187,7 @@ class ProcedureGenerator extends PregelGenerator {
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 algorithmClassName,
                 ClassName.get(HugeDoubleArray.class),
-                configTypeName(pregelSpec)
+                pregelSpec.configTypeName()
                 ), "computationResult"
             )
             .addStatement("return $T.Translator.INSTANCE", HugeDoubleArray.class)

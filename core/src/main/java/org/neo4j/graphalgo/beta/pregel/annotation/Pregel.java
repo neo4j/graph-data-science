@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel.annotation;
 
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,9 +26,4 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface Pregel {
-
-    Class<? extends PregelConfig> value() default PregelConfig.class;
-
-    Class<? extends PregelConfig> configClass() default PregelConfig.class;
-}
+public @interface Pregel {}

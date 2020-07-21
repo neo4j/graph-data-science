@@ -26,10 +26,10 @@ import org.neo4j.procedure.Procedure;
 @Generated("org.neo4j.graphalgo.pregel.PregelProcessor")
 public final class ComputationProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
     @Procedure(
-            name = "gds.pregel.fancy",
+            name = "gds.pregel.test",
             mode = Mode.READ
     )
-    @Description("My fancy computation")
+    @Description("Test computation description")
     public Stream<PregelResult> stream(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stream(compute(graphNameOrConfig, configuration));
