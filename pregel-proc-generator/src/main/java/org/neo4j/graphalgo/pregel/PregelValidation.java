@@ -95,7 +95,7 @@ final class PregelValidation {
         if (!isClass) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "The annotated configuration must be a class.",
+                "The annotated Pregel computation must be a class.",
                 pregelElement
             );
         }
@@ -116,10 +116,11 @@ final class PregelValidation {
         boolean isPregelComputation = maybeInterface.isPresent();
 
         if (!isPregelComputation) {
-            messager.printMessage(Diagnostic.Kind.ERROR, formatWithLocale(
-                "Class must inherit %s",
-                MoreTypes.asTypeElement(pregelComputation).getSimpleName()
-            ), pregelTypeElement);
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "The annotated Pregel computation must implement the PregelComputation interface.",
+                pregelTypeElement
+            );
         }
         return isPregelComputation;
     }
@@ -141,7 +142,7 @@ final class PregelValidation {
         return maybeProcedure.map(x -> true).orElseGet(() -> {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "Procedure annotation must be present.",
+                "The annotated Pregel computation must be annotated with the @Procedure annotation.",
                 pregelElement,
                 pregelAnnotationMirror
             );
