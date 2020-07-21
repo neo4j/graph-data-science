@@ -83,22 +83,24 @@ final class AdjacencyDecompressingReader {
         if (pos < CHUNK_SIZE) {
             return block[pos];
         }
-        return readNextBlock(remaining);
+        long targetNode = readNextBlock(remaining);
+        this.pos = 1;
+        return targetNode;
     }
 
     long peek(int remaining) {
-        int pos = this.pos + 1;
+        int pos = this.pos;
         if (pos < CHUNK_SIZE) {
             return block[pos];
         }
         long targetNode = readNextBlock(remaining);
         blockAlreadyDecoded = true;
+        this.pos = 0;
         return targetNode;
     }
 
     private long readNextBlock(int remaining) {
         if (!blockAlreadyDecoded) {
-            pos = 1;
             offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
             return block[0];
         }
