@@ -55,8 +55,8 @@ final class PregelValidation {
         this.messager = messager;
         this.typeUtils = typeUtils;
         this.elementUtils = elementUtils;
-        this.pregelComputation = typeUtils.getDeclaredType(
-            elementUtils.getTypeElement(PregelComputation.class.getName())
+        this.pregelComputation = MoreTypes.asDeclared(
+            typeUtils.erasure(elementUtils.getTypeElement(PregelComputation.class.getName()).asType())
         );
     }
 
