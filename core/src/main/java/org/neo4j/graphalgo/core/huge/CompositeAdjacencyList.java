@@ -21,17 +21,21 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
     private final List<AdjacencyList> adjacencyLists;
+    private final List<AdjacencyOffsets> adjacencyOffsets;
 
-    public CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
+    public CompositeAdjacencyList(List<AdjacencyList> adjacencyLists, List<AdjacencyOffsets> adjacencyOffsets) {
         this.adjacencyLists = adjacencyLists;
+        this.adjacencyOffsets = adjacencyOffsets;
     }
 
     public List<AdjacencyList> adjacencyLists() {
@@ -58,11 +62,13 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public CompositeAdjacencyCursor decompressingCursor(long offset) {
-        List<AdjacencyCursor> adjacencyCursors = adjacencyLists
-            .stream()
-            .map(list -> list.decompressingCursor(offset))
-            .collect(Collectors.toList());
+    public CompositeAdjacencyCursor decompressingCursor(long nodeId) {
+        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        for (int i = 0; i < adjacencyLists.size(); i++) {
+            var offset = adjacencyOffsets.get(i).get(nodeId);
+            var adjacencyList = adjacencyLists.get(i);
+            adjacencyCursors.add(i, adjacencyList.decompressingCursor(offset));
+        }
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 

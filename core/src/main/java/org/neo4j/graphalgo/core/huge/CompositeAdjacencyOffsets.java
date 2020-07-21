@@ -37,7 +37,7 @@ public class CompositeAdjacencyOffsets implements AdjacencyOffsets {
 
     @Override
     public long get(long index) {
-        return 0;
+        return index;
     }
 
     @Override

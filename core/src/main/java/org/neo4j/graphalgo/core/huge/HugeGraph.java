@@ -373,7 +373,7 @@ public class HugeGraph implements CSRGraph {
         if (offset == 0L) {
             return emptyCursor;
         }
-        return adjacencyList.decompressingCursor(cursorCache, offset);
+        return TransientAdjacencyList.decompressingCursor(cursorCache, offset);
 
     }
 

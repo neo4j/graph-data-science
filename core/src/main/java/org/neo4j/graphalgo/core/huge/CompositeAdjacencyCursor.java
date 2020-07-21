@@ -68,7 +68,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public boolean hasNextVLong() {
-        return cursorQueue.isEmpty();
+        return !cursorQueue.isEmpty();
     }
 
     @Override

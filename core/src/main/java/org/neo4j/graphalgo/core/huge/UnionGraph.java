@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -66,16 +67,6 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public NodeMapping nodeMapping() {
         return first.nodeMapping();
-    }
-
-    @Override
-    public CompositeAdjacencyList adjacencyList() {
-        return new CompositeAdjacencyList(graphs.stream().map(Graph::adjacencyList).collect(Collectors.toList()));
-    }
-
-    @Override
-    public CompositeAdjacencyOffsets adjacencyOffsets() {
-        return new CompositeAdjacencyOffsets(graphs.stream().map(Graph::adjacencyOffsets).collect(Collectors.toList()));
     }
 
     @Override
