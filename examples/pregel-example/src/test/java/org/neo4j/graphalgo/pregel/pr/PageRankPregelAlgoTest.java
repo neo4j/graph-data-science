@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo.pregel.pr;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -36,7 +34,7 @@ import java.util.HashMap;
 import static org.neo4j.graphalgo.TestSupport.assertDoubleValues;
 
 @GdlExtension
-class PageRankPregelTest {
+class PageRankPregelAlgoTest {
 
     // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
     @GdlGraph
@@ -80,16 +78,16 @@ class PageRankPregelTest {
         int maxIterations = 10;
         float dampingFactor = 0.85f;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutablePageRankPregelConfig.builder()
             .maxIterations(maxIterations)
-            .initialNodeValue(1.0 / graph.nodeCount())
+            .dampingFactor(dampingFactor)
             .isAsynchronous(false)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
-            new PageRankPregel(graph.nodeCount(), dampingFactor),
+            new PageRankPregel(),
             batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
