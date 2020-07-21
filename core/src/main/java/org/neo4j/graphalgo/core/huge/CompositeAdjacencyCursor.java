@@ -91,6 +91,11 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors.stream().mapToInt(AdjacencyCursor::remaining).sum();
     }
 
+    @Override
+    public void close() {
+        cursors.forEach(AdjacencyCursor::close);
+    }
+
     long skipUntil(long target) {
         cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
         for (var cursor : cursors) {

@@ -65,4 +65,9 @@ public class CompositeAdjacencyList implements AdjacencyList {
             .collect(Collectors.toList());
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
+
+    @Override
+    public void close() {
+        adjacencyLists.forEach(AdjacencyList::close);
+    }
 }

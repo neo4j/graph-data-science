@@ -41,7 +41,7 @@ public class CompositeAdjacencyOffsets implements AdjacencyOffsets {
     }
 
     @Override
-    public long release() {
-        return 0;
+    public void close() {
+        adjacencyOffsets.forEach(AdjacencyOffsets::close);
     }
 }
