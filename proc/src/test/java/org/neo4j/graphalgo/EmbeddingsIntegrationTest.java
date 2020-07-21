@@ -121,8 +121,19 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         String newCreateQuery = GdsCypher
             .call()
-            .withNodeLabel("MATCH (n) RETURN id(n) AS id, n.rp[0] AS rp0, n.rp[1] AS rp1, n.rp[2] AS rp2, n.node2vec[0] AS node2vec0, n.node2vec[1] AS node2vec1, n.node2vec[2] AS node2vec2")
-            .withRelationshipType("MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target")
+            .withNodeLabel("MATCH (n) " +
+                           "RETURN " +
+                           "  id(n) AS id, " +
+                           "  n.rp[0] AS rp0," +
+                           "  n.rp[1] AS rp1," +
+                           "  n.rp[2] AS rp2," +
+                           "  n.node2vec[0] AS node2vec0," +
+                           "  n.node2vec[1] AS node2vec1," +
+                           "  n.node2vec[2] AS node2vec2")
+            .withRelationshipType("MATCH (n)-->(m) " +
+                                  "RETURN" +
+                                  "  id(n) AS source," +
+                                  "  id(m) AS target")
             .graphCreateCypher("newGraph")
             .yields();
         runQuery(newCreateQuery);
