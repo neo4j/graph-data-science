@@ -52,6 +52,15 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors;
     }
 
+    void copyFrom(CompositeAdjacencyCursor other) {
+        List<AdjacencyCursor> otherCursors = other.cursors();
+        for (int i = 0; i < cursors.size(); i++) {
+            var cursor = (TransientAdjacencyList.DecompressingCursor) cursors.get(i);
+            var otherCursor = (TransientAdjacencyList.DecompressingCursor) otherCursors.get(i);
+            cursor.copyFrom(otherCursor);
+        }
+    }
+
     @Override
     public int size() {
         return cursors.stream().mapToInt(AdjacencyCursor::size).sum();
@@ -79,7 +88,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public int remaining() {
-        return 0;
+        return cursors.stream().mapToInt(AdjacencyCursor::remaining).sum();
     }
 
     long skipUntil(long target) {

@@ -47,14 +47,14 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
 
     @Override
     long advance(CompositeAdjacencyCursor cursor, long nodeId) {
-        return 0;
+        return cursor.advance(nodeId);
     }
 
     @Override
     void copyFrom(
         CompositeAdjacencyCursor sourceCursor, CompositeAdjacencyCursor targetCursor
     ) {
-
+        targetCursor.copyFrom(sourceCursor);
     }
 
     @Override
