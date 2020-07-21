@@ -24,11 +24,10 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.examples.ConnectedComponentsPregel;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.pregel.cc.ConnectedComponentsPregel;
 
 public class PregelConnectedComponentsDocExample {
     @Test
@@ -37,6 +36,7 @@ public class PregelConnectedComponentsDocExample {
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
+            .maxIterations(maxIterations)
             .isAsynchronous(true)
             .build();
 
@@ -49,7 +49,7 @@ public class PregelConnectedComponentsDocExample {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
+        HugeDoubleArray nodeValues = pregelJob.run();
         System.out.println(nodeValues.toString());
     }
 }
