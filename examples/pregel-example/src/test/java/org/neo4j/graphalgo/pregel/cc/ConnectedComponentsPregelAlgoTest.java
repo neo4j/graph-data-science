@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -154,12 +153,12 @@ class ConnectedComponentsPregelAlgoTest {
         int maxIterations = 10;
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
-            PregelConfig config = ImmutableConnectedComponentsConfig.builder()
+            ImmutableConnectedComponentsConfig.builder()
                 .concurrency(10)
                 .maxIterations(maxIterations)
                 .build();
         });
 
-        assertThat(illegalArgumentException, containsMessage("The configured `concurrency` value is too high"));
+        assertThat(illegalArgumentException, containsMessage("The configured `writeConcurrency` value is too high"));
     }
 }

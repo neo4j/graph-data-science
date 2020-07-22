@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -34,7 +35,7 @@ import java.util.Optional;
 import java.util.Queue;
 
 @Pregel
-@Procedure("example.pregel.pr.stream")
+@Procedure(name = "example.pregel.pr.stream", modes = {Mode.STREAM})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override

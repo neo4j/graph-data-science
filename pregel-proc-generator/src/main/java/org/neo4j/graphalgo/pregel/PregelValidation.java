@@ -73,7 +73,6 @@ final class PregelValidation {
             !isPregelComputation(pregelElement) ||
             !configHasFactoryMethod(pregelElement) ||
             !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
-            // TODO: validate that config has a factory method with correct signature
         ) {
             return Optional.empty();
         }
@@ -90,7 +89,7 @@ final class PregelValidation {
             computationName,
             rootPackage,
             configTypeName,
-            maybeProcedure.get().value(),
+            maybeProcedure.get().name(),
             maybeDescription
         ));
     }

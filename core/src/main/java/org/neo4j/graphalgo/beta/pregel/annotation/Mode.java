@@ -19,27 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.pregel.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
-
-    /**
-     * The namespace and name for the procedure, as a period-separated
-     * string. For instance {@code myprocedures.myprocedure}.
-     *
-     * @return the namespace and procedure name.
-     */
-    String name();
-
-    /**
-     * The procedure modes to generate.
-     *
-     * @return procedure modes
-     */
-    Mode[] modes() default {Mode.STREAM, Mode.WRITE, Mode.MUTATE, Mode.STATS};
+public enum Mode {
+    STREAM,
+    WRITE,
+    MUTATE,
+    STATS
 }

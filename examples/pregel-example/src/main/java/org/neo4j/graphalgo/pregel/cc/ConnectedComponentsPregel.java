@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pregel.cc;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.procedure.Description;
@@ -28,7 +29,7 @@ import org.neo4j.procedure.Description;
 import java.util.Queue;
 
 @Pregel
-@Procedure("example.pregel.cc.stream")
+@Procedure(name = "example.pregel.cc.stream", modes = {Mode.STREAM})
 @Description("Connected Components")
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -36,7 +37,7 @@ import java.util.Queue;
 import static org.neo4j.graphalgo.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
 @Pregel
-@Procedure("example.pregel.sssp.stream")
+@Procedure(name = "example.pregel.sssp.stream", modes = {Mode.STREAM})
 public class SingleSourceShortestPathPregel implements PregelComputation<SingleSourceShortestPathPregelConfig> {
 
     @Override
