@@ -27,7 +27,7 @@ public class CompositeAdjacencyOffsets implements AdjacencyOffsets {
 
     private final List<AdjacencyOffsets> adjacencyOffsets;
 
-    public CompositeAdjacencyOffsets(List<AdjacencyOffsets> adjacencyOffsets) {
+    CompositeAdjacencyOffsets(List<AdjacencyOffsets> adjacencyOffsets) {
         this.adjacencyOffsets = adjacencyOffsets;
     }
 
@@ -37,6 +37,8 @@ public class CompositeAdjacencyOffsets implements AdjacencyOffsets {
 
     @Override
     public long get(long index) {
+        // this should always be delegated to the wrapped adjacency offsets
+        // as offsets for a specific node id might differ
         return index;
     }
 

@@ -275,6 +275,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
             return decompress.peek(remaining);
         }
 
+        // TODO: I think this documentation if either out of date or misleading.
+        //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
         /**
          * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
          * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an

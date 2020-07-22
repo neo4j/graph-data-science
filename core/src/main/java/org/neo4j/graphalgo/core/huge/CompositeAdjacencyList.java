@@ -33,12 +33,12 @@ public class CompositeAdjacencyList implements AdjacencyList {
     private final List<AdjacencyList> adjacencyLists;
     private final List<AdjacencyOffsets> adjacencyOffsets;
 
-    public CompositeAdjacencyList(List<AdjacencyList> adjacencyLists, List<AdjacencyOffsets> adjacencyOffsets) {
+    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists, List<AdjacencyOffsets> adjacencyOffsets) {
         this.adjacencyLists = adjacencyLists;
         this.adjacencyOffsets = adjacencyOffsets;
     }
 
-    public List<AdjacencyList> adjacencyLists() {
+    List<AdjacencyList> adjacencyLists() {
         return adjacencyLists;
     }
 
