@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LocalClusteringCoefficientStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LocalClusteringCoefficientStreamConfig extends LocalClusteringCoefficientBaseConfig {
 

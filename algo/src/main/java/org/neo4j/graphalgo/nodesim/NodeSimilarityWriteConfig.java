@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("NodeSimilarityWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 

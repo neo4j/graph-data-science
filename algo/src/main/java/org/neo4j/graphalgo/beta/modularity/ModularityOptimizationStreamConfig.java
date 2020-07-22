@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Optional;
 
-@Configuration("ModularityOptimizationStreamConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationStreamConfig extends ModularityOptimizationConfig {

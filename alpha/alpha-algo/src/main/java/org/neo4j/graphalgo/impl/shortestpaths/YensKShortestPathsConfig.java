@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphdb.Node;
 
 @ValueClass
-@Configuration("YensKShortestPathsConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface YensKShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 

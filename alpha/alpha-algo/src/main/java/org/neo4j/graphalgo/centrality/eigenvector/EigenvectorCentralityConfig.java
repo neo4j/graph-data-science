@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.pagerank.PageRankBaseConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("EigenvectorCentralityConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface EigenvectorCentralityConfig extends PageRankBaseConfig, WritePropertyConfig {
 

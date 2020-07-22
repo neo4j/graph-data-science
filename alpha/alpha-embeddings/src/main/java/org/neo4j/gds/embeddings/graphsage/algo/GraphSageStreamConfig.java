@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("GraphSageStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageStreamConfig extends GraphSageBaseConfig {
 

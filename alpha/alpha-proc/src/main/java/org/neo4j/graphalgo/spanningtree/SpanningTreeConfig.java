@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Optional;
 
-@Configuration("SpanningTreeConfigImpl")
+@Configuration
 public interface SpanningTreeConfig extends SpanningTreeBaseConfig
 {
     String WRITE_RELATIONSHIP_TYPE = "MST";

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("GraphWriteNodePropertiesConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphWriteNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 

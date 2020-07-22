@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
-@Configuration("CosineConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface CosineConfig extends SimilarityConfig {
     @Value.Derived

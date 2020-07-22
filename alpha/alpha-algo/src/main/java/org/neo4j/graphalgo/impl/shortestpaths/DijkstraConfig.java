@@ -32,7 +32,7 @@ import org.neo4j.graphdb.Node;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("DijkstraConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface DijkstraConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 

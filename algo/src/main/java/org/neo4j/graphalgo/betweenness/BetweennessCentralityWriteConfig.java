@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("BetweennessCentralityWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface BetweennessCentralityWriteConfig extends BetweennessCentralityBaseConfig, WritePropertyConfig {
 

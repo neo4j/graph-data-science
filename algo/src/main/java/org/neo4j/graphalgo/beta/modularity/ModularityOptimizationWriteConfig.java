@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 import java.util.Optional;
 
-@Configuration("ModularityOptimizationWriteConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface ModularityOptimizationWriteConfig extends ModularityOptimizationConfig, WritePropertyConfig {

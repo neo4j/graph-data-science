@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("GraphSageWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageWriteConfig extends GraphSageBaseConfig, WritePropertyConfig {
 

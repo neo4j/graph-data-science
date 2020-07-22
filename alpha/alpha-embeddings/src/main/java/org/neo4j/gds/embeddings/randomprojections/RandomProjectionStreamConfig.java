@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("RandomProjectionStreamConfigImpl")
+@Configuration
 public interface RandomProjectionStreamConfig extends RandomProjectionBaseConfig {
 
     static RandomProjectionStreamConfig of(

@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-@Configuration("GraphCreateFromCypherConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromCypherConfig extends GraphCreateConfig {
 

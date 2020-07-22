@@ -32,7 +32,7 @@ import org.neo4j.graphdb.Node;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("ShortestPathDeltaSteppingConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ShortestPathDeltaSteppingConfig extends BaseConfig, RelationshipWeightConfig, WritePropertyConfig {
 

@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 @ValueClass
-@Configuration("GraphStoreExportConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreExportConfig extends BaseConfig {
 

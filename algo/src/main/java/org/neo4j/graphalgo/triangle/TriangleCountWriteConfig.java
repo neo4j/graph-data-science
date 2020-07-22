@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TriangleCountWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountWriteConfig extends TriangleCountBaseConfig, WritePropertyConfig {
 

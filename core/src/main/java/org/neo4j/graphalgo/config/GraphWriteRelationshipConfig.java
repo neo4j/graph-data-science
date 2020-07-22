@@ -33,7 +33,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
-@Configuration("GraphWriteRelationshipConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphWriteRelationshipConfig extends WriteConfig {
 

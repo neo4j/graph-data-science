@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 
-@Configuration("DegreeCentralityConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {

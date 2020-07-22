@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("WccStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface WccStreamConfig extends WccBaseConfig {
 

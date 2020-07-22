@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("Node2VecStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface Node2VecStreamConfig extends Node2VecBaseConfig, AlgoBaseConfig {
 

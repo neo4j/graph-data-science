@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 
 import java.util.Optional;
 
-@Configuration("K1ColoringStreamConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface K1ColoringStreamConfig extends K1ColoringConfig {

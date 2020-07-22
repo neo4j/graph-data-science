@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("AllShortestPathsConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 

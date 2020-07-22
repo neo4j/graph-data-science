@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-@Configuration("GraphCreateFromStoreConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
 

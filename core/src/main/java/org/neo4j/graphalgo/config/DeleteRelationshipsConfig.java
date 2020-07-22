@@ -29,7 +29,7 @@ import java.util.Set;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-@Configuration("DeleteRelationshipsConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface DeleteRelationshipsConfig {
 

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("PageRankWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface PageRankWriteConfig extends PageRankBaseConfig, WritePropertyConfig {
 

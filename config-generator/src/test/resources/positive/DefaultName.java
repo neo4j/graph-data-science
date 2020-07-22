@@ -17,27 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.betweenness;
+package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+import java.util.Collection;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface BetweennessCentralityMutateConfig extends BetweennessCentralityBaseConfig, MutatePropertyConfig {
-
-    static BetweennessCentralityMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> implicitCreateConfig,
-        CypherMapWrapper config
-    ) {
-        return new BetweennessCentralityMutateConfigImpl(graphName, implicitCreateConfig, username, config);
-    }
+public interface DefaultName {
 }

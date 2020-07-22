@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TriangleCountBaseConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 

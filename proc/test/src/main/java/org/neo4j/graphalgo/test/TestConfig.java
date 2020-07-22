@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TestStatsConfigImpl")
+@Configuration
 public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig {
 
     @Value.Default
@@ -45,6 +45,6 @@ public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyCo
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new TestStatsConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return new TestConfigImpl(graphName, maybeImplicitCreate, username, config);
     }
 }

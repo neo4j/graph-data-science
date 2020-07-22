@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@Configuration("K1ColoringPregelConfigImpl")
+@Configuration
 interface K1ColoringPregelConfig extends AlgoBaseConfig, IterationsConfig {
     int DEFAULT_ITERATIONS = 10;
 

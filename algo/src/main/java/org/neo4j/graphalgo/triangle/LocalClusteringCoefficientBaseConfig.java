@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LocalClusteringCoefficientBaseConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, ConfigurableSeedConfig {
 

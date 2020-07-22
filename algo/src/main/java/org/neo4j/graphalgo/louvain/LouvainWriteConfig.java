@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LouvainWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConfig {
 

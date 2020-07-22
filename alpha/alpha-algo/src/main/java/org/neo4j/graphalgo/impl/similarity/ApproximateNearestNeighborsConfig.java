@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-@Configuration("ApproximateNearestNeighborsConfigImpl")
+@Configuration
 @SuppressWarnings({"immutables:subtype", "immutables:from"})
 public interface ApproximateNearestNeighborsConfig extends SimilarityConfig, IterationsConfig {
 

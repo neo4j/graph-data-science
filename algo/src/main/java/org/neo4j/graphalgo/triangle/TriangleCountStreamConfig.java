@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("TriangleCountStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface TriangleCountStreamConfig extends TriangleCountBaseConfig {
 

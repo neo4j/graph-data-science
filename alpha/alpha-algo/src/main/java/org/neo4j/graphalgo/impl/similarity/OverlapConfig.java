@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-@Configuration("OverlapConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface OverlapConfig extends SimilarityConfig {
 

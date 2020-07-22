@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("HarmonicCentralityConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface HarmonicCentralityConfig extends
     AlgoBaseConfig,

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("GraphRemoveNodePropertiesConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphRemoveNodePropertiesConfig extends GraphExportNodePropertiesConfig {
 

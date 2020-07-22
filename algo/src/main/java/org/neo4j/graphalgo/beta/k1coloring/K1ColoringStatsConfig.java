@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@Configuration("K1ColoringStatsConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface K1ColoringStatsConfig extends K1ColoringConfig {

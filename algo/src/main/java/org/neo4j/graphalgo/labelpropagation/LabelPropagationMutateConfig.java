@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LabelPropagationMutateConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LabelPropagationMutateConfig extends LabelPropagationBaseConfig, MutatePropertyConfig {
 

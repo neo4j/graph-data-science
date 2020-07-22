@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("ClosenessCentralityConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ClosenessCentralityConfig extends
     AlgoBaseConfig,

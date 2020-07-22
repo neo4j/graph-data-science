@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 import java.util.Optional;
 
-@Configuration("K1ColoringWriteConfigImpl")
+@Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface K1ColoringWriteConfig extends K1ColoringConfig, WritePropertyConfig {

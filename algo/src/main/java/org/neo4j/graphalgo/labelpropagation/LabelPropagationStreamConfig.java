@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LabelPropagationStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig {
 

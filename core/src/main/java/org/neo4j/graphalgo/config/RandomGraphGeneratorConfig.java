@@ -40,7 +40,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @ValueClass
-@Configuration("RandomGraphGeneratorConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
 

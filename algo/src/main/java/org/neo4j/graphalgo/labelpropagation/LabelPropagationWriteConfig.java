@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("LabelPropagationWriteConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface LabelPropagationWriteConfig extends LabelPropagationBaseConfig, WritePropertyConfig {
 

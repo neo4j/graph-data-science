@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("RandomProjectionWriteConfigImpl")
+@Configuration
 public interface RandomProjectionWriteConfig extends RandomProjectionBaseConfig, WritePropertyConfig {
 
     static RandomProjectionWriteConfig of(

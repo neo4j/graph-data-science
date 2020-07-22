@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.pagerank.PageRankWriteConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("ArticleRankConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ArticleRankConfig extends PageRankWriteConfig {
 

@@ -31,9 +31,21 @@ import java.lang.annotation.Target;
 public @interface Configuration {
 
     /**
-     * Name of the generated class
+     * Name of the generated class.
+     *
+     * If not manually set, the value is set to the
+     * annotation class name with an "Impl" suffix:
+     *
+     * <pre>
+     * &#64Configuration
+     * interface Foo { }
+     *
+     * &#64Generated
+     * public class FooImpl { }
+     * </pre>
+     *
      */
-    String value();
+    String value() default "";
 
     @Documented
     @Target(ElementType.METHOD)

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("WccStatsConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface WccStatsConfig extends WccBaseConfig {
 

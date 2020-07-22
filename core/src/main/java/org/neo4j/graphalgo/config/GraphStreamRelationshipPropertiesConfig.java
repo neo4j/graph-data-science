@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 @ValueClass
-@Configuration("GraphStreamRelationshipPropertiesConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
 

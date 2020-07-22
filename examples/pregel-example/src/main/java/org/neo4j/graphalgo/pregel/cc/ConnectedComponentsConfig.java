@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("ConnectedComponentsConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface ConnectedComponentsConfig extends PregelConfig {
 

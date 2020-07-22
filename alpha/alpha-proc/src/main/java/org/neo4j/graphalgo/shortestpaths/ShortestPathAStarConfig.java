@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Node;
 
 import java.util.Optional;
 
-@Configuration("ShortestPathAStarConfigImpl")
+@Configuration
 public interface ShortestPathAStarConfig extends
     AlgoBaseConfig,
     RelationshipWeightConfig

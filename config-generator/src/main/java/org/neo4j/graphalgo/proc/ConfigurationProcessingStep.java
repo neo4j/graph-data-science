@@ -23,6 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.JavaFile;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.Configuration;
 
 import javax.annotation.processing.Filer;
@@ -37,6 +38,7 @@ import java.util.Set;
 public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
 
     private static final Class<Configuration> ANNOTATION_CLASS = Configuration.class;
+    private static final String CONFIG_CLASS_SUFFIX = "Impl";
 
     private final Messager messager;
     private final Filer filer;
@@ -83,8 +85,10 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             return ProcessResult.INVALID;
         }
         ConfigParser.Spec configSpec = configParser.process(element.asType());
-        Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
-        JavaFile generatedConfig = generateConfiguration.generateConfig(configSpec, configuration.value());
+        JavaFile generatedConfig = generateConfiguration.generateConfig(
+            configSpec,
+            configClassName(element, configSpec)
+        );
 
         try {
             generatedConfig.writeTo(filer);
@@ -97,6 +101,14 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
             );
             return ProcessResult.RETRY;
         }
+    }
+
+    @NotNull
+    private String configClassName(Element element, ConfigParser.Spec configSpec) {
+        Configuration configuration = element.getAnnotation(ANNOTATION_CLASS);
+        return configuration.value().isBlank()
+            ? configSpec.root().getSimpleName() + CONFIG_CLASS_SUFFIX
+            : configuration.value();
     }
 
     enum ProcessResult {

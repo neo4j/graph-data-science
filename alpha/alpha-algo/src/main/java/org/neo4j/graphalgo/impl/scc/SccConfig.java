@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("SccConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface SccConfig extends AlgoBaseConfig, WritePropertyConfig {
 

@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.lang.model.SourceVersion;
@@ -77,12 +78,26 @@ class ConfigurationProcessorTest {
         "RangeValidation"
     })
     void positiveTest(String className) {
+        assertContentEquals(className);
+    }
+
+    @ParameterizedTest
+    @CsvSource("DefaultName, DefaultNameImpl")
+    void positiveTestWithSuffix(String className, String expectedClassName) {
+        assertContentEquals(className, expectedClassName);
+    }
+
+    private void assertContentEquals(String className) {
+        assertContentEquals(className, className);
+    }
+
+    private void assertContentEquals(String className, String expectedClassName) {
         assertAbout(javaSource())
             .that(forResource(String.format("positive/%s.java", className)))
             .processedWith(new ConfigurationProcessor())
             .compilesWithoutError()
             .and()
-            .generatesSources(loadExpectedFile(String.format(Locale.ENGLISH, "expected/%s.java", className)));
+            .generatesSources(loadExpectedFile(String.format(Locale.ENGLISH, "expected/%s.java", expectedClassName)));
     }
 
     @Test

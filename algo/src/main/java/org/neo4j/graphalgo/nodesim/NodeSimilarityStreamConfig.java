@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("NodeSimilarityStreamConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityStreamConfig extends NodeSimilarityBaseConfig {
 

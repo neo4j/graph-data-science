@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("PregelConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
 public interface PregelConfig extends AlgoBaseConfig, RelationshipWeightConfig, IterationsConfig, SeedConfig, ConcurrencyConfig {
 
