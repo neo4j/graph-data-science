@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.core.huge.AdjacencyDecompressingReader.CHUNK_SIZE;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
@@ -55,6 +56,22 @@ class TransientAdjacencyListTest {
         while(adjacencyCursor.hasNextVLong()) {
             assertEquals(adjacencyCursor.peekVLong(), adjacencyCursor.nextVLong());
         }
+    }
+
+    @Test
+    void shouldSkipUntilLargerValue() {
+        TransientAdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 1, 2});
+        assertEquals(2, adjacencyCursor.skipUntil(1));
+        assertFalse(adjacencyCursor.hasNextVLong());
+    }
+
+    @Test
+    void shouldAdvanceUntilEqualValue() {
+        TransientAdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 1, 2});
+        assertEquals(1, adjacencyCursor.advance(1));
+        assertEquals(1, adjacencyCursor.nextVLong());
+        assertEquals(2, adjacencyCursor.nextVLong());
+        assertFalse(adjacencyCursor.hasNextVLong());
     }
 
     @Test
@@ -197,7 +214,8 @@ class TransientAdjacencyListTest {
         assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 
-    private AdjacencyCursor adjacencyCursorFromTargets(long[] targets) {
+    // TODO: consider using the adjacency list of a loaded graph instead
+    private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
         AdjacencyListBuilder adjacencyListBuilder = TransientAdjacencyListBuilder
             .builderFactory(AllocationTracker.EMPTY)
             .newAdjacencyListBuilder();
@@ -219,6 +237,6 @@ class TransientAdjacencyListTest {
 
         array.release();
         AdjacencyList adjacencyList = adjacencyListBuilder.build();
-        return adjacencyList.decompressingCursor(offset);
+        return (TransientAdjacencyList.DecompressingCursor) adjacencyList.decompressingCursor(offset);
     }
 }

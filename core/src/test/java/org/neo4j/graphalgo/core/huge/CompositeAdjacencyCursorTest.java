@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.Graph;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompositeAdjacencyCursorTest extends BaseTest {
@@ -37,29 +39,46 @@ class CompositeAdjacencyCursorTest extends BaseTest {
         ", (c)" +
         ", (a)-[:REL1]->(b)" +
         ", (a)-[:REL1]->(c)" +
-        ", (a)-[:REL2]->(b)";
+        ", (a)-[:REL2]->(b)" +
+        ", (a)-[:REL2]->(a)";
+
+    Graph graph;
 
     @BeforeEach
     void setup() {
         runQuery(DB_CYPHER);
-    }
 
-    @Test
-    void shouldIterateInOrder() {
-        Graph graph = new StoreLoaderBuilder()
+        graph = new StoreLoaderBuilder()
             .api(db)
             .addRelationshipType("REL1")
             .addRelationshipType("REL2")
             .build()
             .graph();
+    }
 
-        assertTrue(graph instanceof UnionGraph);
-
+    @Test
+    void shouldIterateInOrder() {
         AdjacencyCursor adjacencyCursor = graph.adjacencyList().decompressingCursor(0);
 
         long lastNodeId = 0;
         while (adjacencyCursor.hasNextVLong()) {
             assertTrue(lastNodeId <= adjacencyCursor.nextVLong());
         }
+    }
+
+    @Test
+    void shouldSkipUntilLargerValue() {
+        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
+        assertEquals(2, adjacencyCursor.skipUntil(1));
+        assertFalse(adjacencyCursor.hasNextVLong());
+    }
+
+    @Test
+    void shouldAdvanceUntilEqualValue() {
+        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
+        assertEquals(1, adjacencyCursor.advance(1));
+        assertEquals(1, adjacencyCursor.nextVLong());
+        assertEquals(2, adjacencyCursor.nextVLong());
+        assertFalse(adjacencyCursor.hasNextVLong());
     }
 }
