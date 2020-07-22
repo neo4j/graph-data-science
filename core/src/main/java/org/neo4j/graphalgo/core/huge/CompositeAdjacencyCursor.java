@@ -101,13 +101,15 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         for (var cursor : cursors) {
             // an implementation aware cursor would probably be much faster and could skip while block
             // see AdjacencyDecompressingReader#skipUntil
-            while (cursor.hasNextVLong() || cursor.peekVLong() > target) {
+            while (cursor.hasNextVLong() && cursor.peekVLong() <= target) {
                 cursor.nextVLong();
             }
-            cursorQueue.add(cursor);
+            if (cursor.hasNextVLong()) {
+                cursorQueue.add(cursor);
+            }
         }
 
-        return peekVLong();
+        return cursorQueue.isEmpty() ? NOT_FOUND : nextVLong();
     }
 
     long advance(long target) {
@@ -115,7 +117,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         for (var cursor : cursors) {
             // an implementation aware cursor would probably be much faster and could skip while block
             // see AdjacencyDecompressingReader#skipUntil
-            while (cursor.hasNextVLong() || cursor.peekVLong() >= target) {
+            while (cursor.hasNextVLong() && cursor.peekVLong() < target) {
                 cursor.nextVLong();
             }
             if (cursor.remaining() >= 0) {
@@ -123,6 +125,6 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
             }
         }
 
-        return cursorQueue.isEmpty() ? NOT_FOUND : peekVLong();
+        return cursorQueue.isEmpty() ? NOT_FOUND : nextVLong();
     }
 }
