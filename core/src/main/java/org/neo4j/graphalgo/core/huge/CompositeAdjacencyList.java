@@ -44,12 +44,23 @@ public class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public int degree(long nodeId) {
-        return adjacencyLists.stream().mapToInt(list -> list.degree(nodeId)).sum();
+        long degree = 0L;
+        for (int i = 0; i < adjacencyLists.size(); i++) {
+            long offset = adjacencyOffsets.get(i).get(nodeId);
+            if (offset != 0) {
+                degree += adjacencyLists.get(i).degree(offset);
+            }
+        }
+        try {
+            return Math.toIntExact(degree);
+        } catch(ArithmeticException e) {
+            return Integer.MAX_VALUE;
+        }
     }
 
     @Override
     public PropertyCursor cursor(long offset) {
-        return null;
+        throw new UnsupportedOperationException("CompositeAdjacencyList#cursor is not supported");
     }
 
     @Override

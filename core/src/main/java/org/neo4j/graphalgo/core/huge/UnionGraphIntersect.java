@@ -81,7 +81,7 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
     }
 
     @Override
-    int degree(long node) {
-        return 0; //TODO: implement
+    int degree(long nodeId) {
+        return compositeAdjacencyList.degree(nodeId);
     }
 }
