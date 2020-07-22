@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.pregel;
 
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.procedure.Description;
 
 @Pregel
-@Procedure("gds.pregel.test")
+@Procedure(name = "gds.pregel.test", modes = {Mode.STREAM})
 @Description("Test computation description")
 public class BaseClassIsNotAPregelComputation implements Runnable {
 

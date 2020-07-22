@@ -56,7 +56,7 @@ class LabelPropagationPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(LabelPropagationPregelProc.class);
+        registerProcedures(LabelPropagationPregelStreamProc.class);
     }
 
     @Test

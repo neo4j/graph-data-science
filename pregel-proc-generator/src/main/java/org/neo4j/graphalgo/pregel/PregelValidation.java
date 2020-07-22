@@ -24,6 +24,7 @@ import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -78,6 +79,7 @@ final class PregelValidation {
         }
 
         var computationName = pregelElement.getSimpleName().toString();
+        var procedure = maybeProcedure.get();
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var maybeDescription = Optional.ofNullable(MoreElements
@@ -89,7 +91,8 @@ final class PregelValidation {
             computationName,
             rootPackage,
             configTypeName,
-            maybeProcedure.get().name(),
+            procedure.name(),
+            procedure.modes(),
             maybeDescription
         ));
     }
@@ -208,6 +211,8 @@ final class PregelValidation {
         TypeName configTypeName();
 
         String procedureName();
+
+        Mode[] procedureModes();
 
         Optional<AnnotationMirror> description();
     }

@@ -24,7 +24,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.pregel.PregelProcessor")
-public final class ComputationProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
+public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
     @Procedure(
             name = "gds.pregel.test",
             mode = Mode.READ

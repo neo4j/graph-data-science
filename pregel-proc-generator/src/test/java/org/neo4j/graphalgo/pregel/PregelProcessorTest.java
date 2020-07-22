@@ -63,7 +63,7 @@ class PregelProcessorTest {
             .compilesWithoutError()
             .and()
             .generatesSources(
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sProc.java", className)),
+                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStreamProc.java", className)),
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sAlgorithm.java", className))
             );
     }
@@ -74,7 +74,7 @@ class PregelProcessorTest {
             "BaseClassIsNotAClass",
             e(
                 "The annotated Pregel computation must be a class.",
-                35,
+                36,
                 8
             )
         );
@@ -86,7 +86,7 @@ class PregelProcessorTest {
             "BaseClassIsNotAPregelComputation",
             e(
                 "The annotated Pregel computation must implement the PregelComputation interface.",
-                29,
+                30,
                 8
             )
         );
@@ -119,7 +119,7 @@ class PregelProcessorTest {
                 "org.neo4j.graphalgo.core.CypherMapWrapper userConfig" +
                 ")' " +
                 "in ConfigurationHasNoFactoryMethod.ComputationConfig.",
-                32,
+                33,
                 8
             )
         );

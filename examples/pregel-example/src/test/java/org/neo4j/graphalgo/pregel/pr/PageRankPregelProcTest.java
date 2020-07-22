@@ -63,7 +63,7 @@ class PageRankPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(PageRankPregelProc.class);
+        registerProcedures(PageRankPregelStreamProc.class);
     }
 
     @Test

@@ -62,7 +62,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(ConnectedComponentsPregelProc.class);
+        registerProcedures(ConnectedComponentsPregelStreamProc.class);
     }
 
     @Test

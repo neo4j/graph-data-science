@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.pregel;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -39,90 +36,70 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-class ProcedureGenerator extends PregelGenerator {
+abstract class ProcedureGenerator extends PregelGenerator {
 
     ProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
         super(elementUtils, sourceVersion);
     }
 
+    static TypeSpec forMode(
+        org.neo4j.graphalgo.beta.pregel.annotation.Mode mode,
+        Elements elementUtils,
+        SourceVersion sourceVersion,
+        PregelValidation.Spec pregelSpec
+    ) {
+        switch (mode) {
+            case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec);
+            case WRITE:
+            case MUTATE:
+            case STATS:
+            default: throw new IllegalArgumentException("Unsupported Mode " + mode);
+        }
+    }
+
+    abstract String procClassInfix();
+
+    abstract Class<?> procBaseClass();
+
+    abstract Class<?> procResultClass();
+
+    abstract MethodSpec procMethod(PregelValidation.Spec pregelSpec);
+
+    abstract MethodSpec procResultMethod(PregelValidation.Spec pregelSpec);
+
     TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
-        TypeName configTypeName = pregelSpec.configTypeName();
-        ClassName procedureClassName = className(pregelSpec, PROCEDURE_SUFFIX);
-        ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
+        var configTypeName = pregelSpec.configTypeName();
+        var procedureClassName = className(pregelSpec, procClassInfix() + PROCEDURE_SUFFIX);
+        var algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
             .classBuilder(procedureClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
-                ClassName.get(StreamProc.class),
+                ClassName.get(procBaseClass()),
                 algorithmClassName,
                 ClassName.get(HugeDoubleArray.class),
-                ClassName.get(PregelResult.class),
+                ClassName.get(procResultClass()),
                 configTypeName
             ))
             .addOriginatingElement(pregelSpec.element());
 
         addGeneratedAnnotation(typeSpecBuilder);
 
-        typeSpecBuilder.addMethod(streamMethod(pregelSpec));
-        typeSpecBuilder.addMethod(streamResultMethod());
+        typeSpecBuilder.addMethod(procMethod(pregelSpec));
+        typeSpecBuilder.addMethod(procResultMethod(pregelSpec));
+
         typeSpecBuilder.addMethod(newConfigMethod(pregelSpec));
         typeSpecBuilder.addMethod(algorithmFactoryMethod(pregelSpec, algorithmClassName));
         typeSpecBuilder.addMethod(propertyTranslator(pregelSpec, algorithmClassName));
 
         return typeSpecBuilder.build();
-    }
-
-    private MethodSpec streamMethod(PregelValidation.Spec pregelSpec) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("stream");
-
-        // add procedure annotation
-        methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-            .addMember("name", "$S", pregelSpec.procedureName())
-            .addMember("mode", "$T.READ", Mode.class)
-            .build()
-        );
-        // add description
-        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
-
-        return methodBuilder
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "graphName")
-                    .build())
-                .build())
-            .addParameter(ParameterSpec
-                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "configuration")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "configuration")
-                    .addMember("defaultValue", "$S", "{}")
-                    .build())
-                .build())
-            .addStatement("return stream(compute(graphNameOrConfig, configuration))")
-            .returns(ParameterizedTypeName.get(Stream.class, PregelResult.class))
-            .build();
-    }
-
-    private MethodSpec streamResultMethod() {
-        return MethodSpec.methodBuilder("streamResult")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PROTECTED)
-            .returns(PregelResult.class)
-            .addParameter(long.class, "originalNodeId")
-            .addParameter(double.class, "value")
-            .addStatement("return new PregelResult(originalNodeId, value)")
-            .build();
     }
 
     private MethodSpec newConfigMethod(PregelValidation.Spec pregelSpec) {

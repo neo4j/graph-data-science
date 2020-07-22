@@ -27,8 +27,10 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 class PregelGenerator {
 
@@ -51,10 +53,14 @@ class PregelGenerator {
     }
 
     List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
-        return List.of(
-            fileOf(pregelSpec, new ProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec)),
-            fileOf(pregelSpec, new AlgorithmGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec))
-        );
+
+        var procedureTypeSpecs = Arrays.stream(pregelSpec.procedureModes())
+            .map(mode -> ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec))
+            .map(typeSpec -> fileOf(pregelSpec, typeSpec))
+            .collect(Collectors.toList());
+
+        procedureTypeSpecs.add(fileOf(pregelSpec, new AlgorithmGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec)));
+        return procedureTypeSpecs;
     }
 
     // produces @Generated meta info
