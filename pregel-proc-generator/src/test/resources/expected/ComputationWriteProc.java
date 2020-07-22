@@ -6,10 +6,10 @@ import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.beta.pregel.PregelWriteResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -17,6 +17,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -24,20 +25,21 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
+public final class ComputationWriteProc extends WriteProc<ComputationAlgorithm, HugeDoubleArray, PregelWriteResult, PregelConfig> {
     @Procedure(
-            name = "gds.pregel.test.stream",
-            mode = Mode.READ
+            name = "gds.pregel.test.write",
+            mode = Mode.WRITE
     )
     @Description("Test computation description")
-    public Stream<PregelResult> stream(@Name("graphName") Object graphNameOrConfig,
+    public Stream<PregelWriteResult> write(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
-        return stream(compute(graphNameOrConfig, configuration));
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Override
-    protected PregelResult streamResult(long originalNodeId, double value) {
-        return new PregelResult(originalNodeId, value);
+    protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, HugeDoubleArray, PregelConfig> computeResult) {
+        return new PregelWriteResult.Builder();
     }
 
     @Override

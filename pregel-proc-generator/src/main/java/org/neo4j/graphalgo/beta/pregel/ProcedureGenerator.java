@@ -54,7 +54,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     ) {
         switch (mode) {
             case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec);
-            case WRITE:
+            case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec);
             case MUTATE:
             case STATS:
             default: throw new IllegalArgumentException("Unsupported Mode " + mode);

@@ -64,6 +64,7 @@ class PregelProcessorTest {
             .and()
             .generatesSources(
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStreamProc.java", className)),
+                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sWriteProc.java", className)),
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sAlgorithm.java", className))
             );
     }

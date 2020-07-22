@@ -62,7 +62,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(ConnectedComponentsPregelStreamProc.class);
+        registerProcedures(ConnectedComponentsPregelStreamProc.class, ConnectedComponentsPregelWriteProc.class);
     }
 
     @Test
@@ -95,5 +95,37 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         assertThat(expected, mapEquals(actual));
     }
 
+    @Test
+    void write() {
+        var query = GdsCypher.call()
+            .loadEverything()
+            .algo("example", "pregel", "cc")
+            .writeMode()
+            .addParameter("maxIterations", 10)
+            .addParameter("writeProperty", "value")
+            .yields();
+
+        runQuery(query);
+
+        HashMap<Long, Double> actual = new HashMap<>();
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value AS value", r -> {
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+        });
+
+        var expected = Map.of(
+            0L, 0D,
+            1L, 0D,
+            2L, 0D,
+            3L, 0D,
+            4L, 4D,
+            5L, 4D,
+            6L, 4D,
+            7L, 7D,
+            8L, 7D,
+            9L, 9D
+        );
+
+        assertThat(expected, mapEquals(actual));
+    }
 
 }

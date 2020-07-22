@@ -37,7 +37,7 @@ import java.util.Queue;
 import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
 @Pregel
-@Procedure(name = "example.pregel.sssp.stream", modes = {Mode.STREAM})
+@Procedure(name = "example.pregel.sssp", modes = {Mode.STREAM})
 public class SingleSourceShortestPathPregel implements PregelComputation<SingleSourceShortestPathPregelConfig> {
 
     @Override

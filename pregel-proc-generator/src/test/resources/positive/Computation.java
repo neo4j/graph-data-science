@@ -31,7 +31,7 @@ import org.neo4j.procedure.Description;
 import java.util.Queue;
 
 @Pregel
-@Procedure(name = "gds.pregel.test", modes = {Mode.STREAM})
+@Procedure(name = "gds.pregel.test", modes = {Mode.STREAM, Mode.WRITE})
 @Description("Test computation description")
 public class Computation implements PregelComputation<PregelConfig> {
 

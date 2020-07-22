@@ -33,7 +33,7 @@ import java.util.Queue;
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
  */
 @Pregel
-@Procedure(name = "example.pregel.lp.stream", modes = {Mode.STREAM})
+@Procedure(name = "example.pregel.lp", modes = {Mode.STREAM})
 public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
     @Override

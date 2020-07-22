@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.Queue;
 
 @Pregel
-@Procedure(name = "example.pregel.pr.stream", modes = {Mode.STREAM})
+@Procedure(name = "example.pregel.pr", modes = {Mode.STREAM})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override

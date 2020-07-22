@@ -29,7 +29,7 @@ import org.neo4j.procedure.Description;
 import java.util.Queue;
 
 @Pregel
-@Procedure(name = "example.pregel.cc.stream", modes = {Mode.STREAM})
+@Procedure(name = "example.pregel.cc", modes = {Mode.STREAM, Mode.WRITE})
 @Description("Connected Components")
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 

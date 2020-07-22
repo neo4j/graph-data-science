@@ -20,10 +20,14 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 
@@ -33,35 +37,35 @@ import javax.lang.model.util.Elements;
 import java.util.Map;
 import java.util.stream.Stream;
 
-class StreamProcedureGenerator extends ProcedureGenerator {
+class WriteProcedureGenerator extends ProcedureGenerator {
 
-    StreamProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
+    WriteProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
         super(elementUtils, sourceVersion);
     }
 
     @Override
     String procClassInfix() {
-        return "Stream";
+        return "Write";
     }
 
     @Override
     Class<?> procBaseClass() {
-        return StreamProc.class;
+        return WriteProc.class;
     }
 
     @Override
     Class<?> procResultClass() {
-        return PregelResult.class;
+        return PregelWriteResult.class;
     }
 
     @Override
     MethodSpec procMethod(PregelValidation.Spec pregelSpec) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("stream");
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("write");
 
         // add procedure annotation
         methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
             .addMember("name", "$S", pregelSpec.procedureName() + "." + procClassInfix().toLowerCase())
-            .addMember("mode", "$T.READ", Mode.class)
+            .addMember("mode", "$T.WRITE", Mode.class)
             .build()
         );
         // add description
@@ -81,20 +85,24 @@ class StreamProcedureGenerator extends ProcedureGenerator {
                     .addMember("defaultValue", "$S", "{}")
                     .build())
                 .build())
-            .addStatement("return stream(compute(graphNameOrConfig, configuration))")
-            .returns(ParameterizedTypeName.get(Stream.class, PregelResult.class))
+            .addStatement("return write(compute(graphNameOrConfig, configuration))")
+            .returns(ParameterizedTypeName.get(Stream.class, PregelWriteResult.class))
             .build();
     }
 
     @Override
     MethodSpec procResultMethod(PregelValidation.Spec pregelSpec) {
-        return MethodSpec.methodBuilder("streamResult")
+        return MethodSpec.methodBuilder("resultBuilder")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
-            .returns(PregelResult.class)
-            .addParameter(long.class, "originalNodeId")
-            .addParameter(double.class, "value")
-            .addStatement("return new PregelResult(originalNodeId, value)")
+            .returns(ParameterizedTypeName.get(AbstractResultBuilder.class, PregelWriteResult.class))
+            .addParameter(ParameterizedTypeName.get(
+                ClassName.get(AlgoBaseProc.ComputationResult.class),
+                className(pregelSpec, ALGORITHM_SUFFIX),
+                ClassName.get(HugeDoubleArray.class),
+                pregelSpec.configTypeName()
+            ), "computeResult")
+            .addStatement("return new $T()", PregelWriteResult.Builder.class)
             .build();
     }
 }
