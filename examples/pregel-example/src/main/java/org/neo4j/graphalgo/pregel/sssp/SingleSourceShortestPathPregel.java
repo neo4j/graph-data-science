@@ -19,24 +19,30 @@
  */
 package org.neo4j.graphalgo.pregel.sssp;
 
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
+import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Optional;
 import java.util.Queue;
 
-public class SingleSourceShortestPathPregel implements PregelComputation<PregelConfig> {
+import static org.neo4j.graphalgo.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
-    private final long startNode;
-
-    public SingleSourceShortestPathPregel(long startNode) {
-        this.startNode = startNode;
-    }
+@Pregel
+@Procedure("example.pregel.sssp.stream")
+public class SingleSourceShortestPathPregel implements PregelComputation<SingleSourceShortestPathPregelConfig> {
 
     @Override
-    public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<SingleSourceShortestPathPregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperStep()) {
-            if (nodeId == startNode) {
+            if (nodeId == pregel.getConfig().startNode()) {
                 pregel.setNodeValue(nodeId, 0);
                 pregel.sendMessages(nodeId, 1);
             } else {
@@ -65,5 +71,22 @@ public class SingleSourceShortestPathPregel implements PregelComputation<PregelC
             pregel.voteToHalt(nodeId);
         }
 
+    }
+
+    @ValueClass
+    @Configuration("SingleSourceShortestPathPregelConfigImpl")
+    @SuppressWarnings("immutables:subtype")
+    interface SingleSourceShortestPathPregelConfig extends PregelConfig {
+        @Value
+        long startNode();
+
+        static SingleSourceShortestPathPregelConfig of(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper userInput
+        ) {
+            return new SingleSourceShortestPathPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        }
     }
 }

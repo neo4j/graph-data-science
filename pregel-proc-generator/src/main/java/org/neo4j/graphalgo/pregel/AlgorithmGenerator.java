@@ -92,7 +92,7 @@ class AlgorithmGenerator extends PregelGenerator {
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
-                        "computation", pregelSpec.className(),
+                        "computation", className(pregelSpec, ""),
                         "parallelUtil", ParallelUtil.class,
                         "pools", Pools.class
                     )
@@ -114,6 +114,7 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("release")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
+            .addStatement("pregelJob.release()")
             .build();
     }
 

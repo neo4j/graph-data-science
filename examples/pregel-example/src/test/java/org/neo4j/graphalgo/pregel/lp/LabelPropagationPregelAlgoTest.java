@@ -37,7 +37,7 @@ import java.util.Map;
 import static org.neo4j.graphalgo.TestSupport.assertLongValues;
 
 @GdlExtension
-class LabelPropagationPregelTest {
+class LabelPropagationPregelAlgoTest {
 
     // https://neo4j.com/blog/graph-algorithms-neo4j-label-propagation/
     //
@@ -69,11 +69,11 @@ class LabelPropagationPregelTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutablePregelConfig.builder()
             .maxIterations(maxIterations)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
             new LabelPropagationPregel(),

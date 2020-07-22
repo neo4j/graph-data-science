@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel.pr;
+package org.neo4j.graphalgo.pregel.sssp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
@@ -31,14 +31,13 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.HashMap;
+import java.util.Map;
 
-import static org.neo4j.graphalgo.TestSupport.assertDoubleValues;
+import static org.neo4j.graphalgo.TestSupport.assertLongValues;
 
 @GdlExtension
-class PageRankPregelTest {
+class SingleSourceShortestPathPregelAlgoTest {
 
-    // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
     @GdlGraph
     private static final String TEST_GRAPH =
             "CREATE" +
@@ -51,45 +50,37 @@ class PageRankPregelTest {
             ", (g:Node)" +
             ", (h:Node)" +
             ", (i:Node)" +
+            // {J}
             ", (j:Node)" +
-            ", (k:Node)" +
-            ", (b)-[:REL]->(c)" +
-            ", (c)-[:REL]->(b)" +
-            ", (d)-[:REL]->(a)" +
-            ", (d)-[:REL]->(b)" +
-            ", (e)-[:REL]->(b)" +
-            ", (e)-[:REL]->(d)" +
-            ", (e)-[:REL]->(f)" +
-            ", (f)-[:REL]->(b)" +
-            ", (f)-[:REL]->(e)" +
-            ", (g)-[:REL]->(b)" +
-            ", (g)-[:REL]->(e)" +
-            ", (h)-[:REL]->(b)" +
-            ", (h)-[:REL]->(e)" +
-            ", (i)-[:REL]->(b)" +
-            ", (i)-[:REL]->(e)" +
-            ", (j)-[:REL]->(e)" +
-            ", (k)-[:REL]->(e)";
+            // {A, B, C, D}
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (a)-[:TYPE]->(c)" +
+            // {E, F, G}
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(g)" +
+            // {H, I}
+            ", (i)-[:TYPE]->(h)";
 
     @Inject
     private TestGraph graph;
 
     @Test
-    void runPR() {
+    void runSSSP() {
         int batchSize = 10;
         int maxIterations = 10;
-        float dampingFactor = 0.85f;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutableSingleSourceShortestPathPregelConfig.builder()
             .maxIterations(maxIterations)
-            .initialNodeValue(1.0 / graph.nodeCount())
-            .isAsynchronous(false)
+            .isAsynchronous(true)
+            .startNode(0)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
-            new PageRankPregel(graph.nodeCount(), dampingFactor),
+            new SingleSourceShortestPathPregel(),
             batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
@@ -97,19 +88,17 @@ class PageRankPregelTest {
 
         HugeDoubleArray nodeValues = pregelJob.run();
 
-        var expected = new HashMap<String, Double>();
-        expected.put("a", 0.0276D);
-        expected.put("b", 0.3483D);
-        expected.put("c", 0.2650D);
-        expected.put("d", 0.0330D);
-        expected.put("e", 0.0682D);
-        expected.put("f", 0.0330D);
-        expected.put("g", 0.0136D);
-        expected.put("h", 0.0136D);
-        expected.put("i", 0.0136D);
-        expected.put("j", 0.0136D);
-        expected.put("k", 0.0136D);
-
-        assertDoubleValues(graph, nodeValues::get, expected, 1E-3);
+        assertLongValues(graph, nodeId -> (long) nodeValues.get(nodeId), Map.of(
+                "a", 0L,
+                "b", 1L,
+                "c", 1L,
+                "d", 2L,
+                "e", Long.MAX_VALUE,
+                "f", Long.MAX_VALUE,
+                "g", Long.MAX_VALUE,
+                "h", Long.MAX_VALUE,
+                "i", Long.MAX_VALUE,
+                "j", Long.MAX_VALUE
+        ));
     }
 }

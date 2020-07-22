@@ -19,26 +19,30 @@
  */
 package org.neo4j.graphalgo.pregel.pr;
 
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
+import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Optional;
 import java.util.Queue;
 
-public class PageRankPregel implements PregelComputation<PregelConfig> {
-
-    private final long nodeCount;
-    private final double jumpProbability;
-    private final double dampingFactor;
-
-    public PageRankPregel(long nodeCount, final double dampingFactor) {
-        this.nodeCount = nodeCount;
-        this.jumpProbability = 1.0 - dampingFactor;
-        this.dampingFactor = dampingFactor;
-    }
+@Pregel
+@Procedure("example.pregel.pr.stream")
+public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override
-    public void compute(PregelContext<PregelConfig> pregel, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, final long nodeId, Queue<Double> messages) {
+        if (pregel.isInitialSuperStep()) {
+            pregel.setNodeValue(nodeId, 1.0 / pregel.getNodeCount());
+        }
+
         double newRank = pregel.getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks
@@ -50,11 +54,34 @@ public class PageRankPregel implements PregelComputation<PregelConfig> {
                     sum += nextMessage;
                 }
             }
-            newRank = (jumpProbability / nodeCount) + dampingFactor * sum;
+
+            var dampingFactor = pregel.getConfig().dampingFactor();
+            var jumpProbability = 1 - dampingFactor;
+
+            newRank = (jumpProbability / pregel.getNodeCount()) + dampingFactor * sum;
         }
 
         // send new rank to neighbors
         pregel.setNodeValue(nodeId, newRank);
         pregel.sendMessages(nodeId, newRank / pregel.getDegree(nodeId));
+    }
+
+    @ValueClass
+    @Configuration("PageRankPregelConfigImpl")
+    @SuppressWarnings("immutables:subtype")
+    interface PageRankPregelConfig extends PregelConfig {
+        @Value.Default
+        default double dampingFactor() {
+            return 0.85;
+        }
+
+        static PageRankPregelConfig of(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper userInput
+        ) {
+            return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        }
     }
 }

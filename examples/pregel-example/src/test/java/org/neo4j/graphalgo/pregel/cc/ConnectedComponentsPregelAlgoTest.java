@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.pregel.cc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -83,11 +82,11 @@ class ConnectedComponentsPregelAlgoTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        ConnectedComponentsConfig config = ImmutableConnectedComponentsConfig.builder()
+        var config = ImmutableConnectedComponentsConfig.builder()
             .maxIterations(maxIterations)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             directedGraph,
             config,
             new ConnectedComponentsPregel(),
@@ -118,13 +117,13 @@ class ConnectedComponentsPregelAlgoTest {
         int batchSize = 10;
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutableConnectedComponentsConfig.builder()
             .isAsynchronous(true)
             .concurrency(2)
             .maxIterations(maxIterations)
             .build();
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.withDefaultNodeValues(
             undirectedGraph,
             config,
             new ConnectedComponentsPregel(),

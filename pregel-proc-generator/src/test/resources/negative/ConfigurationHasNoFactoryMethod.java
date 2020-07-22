@@ -17,22 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.annotation;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
+import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.procedure.Description;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Queue;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
+@Pregel
+@Procedure("gds.pregel.test")
+@Description("Test computation description")
+public class ConfigurationHasNoFactoryMethod implements PregelComputation<ConfigurationHasNoFactoryMethod.ComputationConfig> {
 
-    /**
-     * The namespace and name for the procedure, as a period-separated
-     * string. For instance {@code myprocedures.myprocedure}.
-     *
-     * @return the namespace and procedure name.
-     */
-    String value();
+    @Override
+    public void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+
+    }
+
+    interface ComputationConfig extends PregelConfig {
+
+    }
 }

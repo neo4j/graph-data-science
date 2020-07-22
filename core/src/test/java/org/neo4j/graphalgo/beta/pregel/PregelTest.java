@@ -52,8 +52,8 @@ class PregelTest {
 
     @ParameterizedTest
     @MethodSource("configAndResult")
-    <C extends PregelConfig> void sendsMessages(PregelConfig config, PregelComputation<C> computation, double[] expected) {
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+    <C extends PregelConfig> void sendsMessages(C config, PregelComputation<C> computation, double[] expected) {
+        Pregel<C> pregelJob = Pregel.withDefaultNodeValues(
             graph,
             config,
             computation,
