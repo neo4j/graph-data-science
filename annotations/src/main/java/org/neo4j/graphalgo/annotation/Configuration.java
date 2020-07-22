@@ -37,10 +37,10 @@ public @interface Configuration {
      * annotation class name with an "Impl" suffix:
      *
      * <pre>
-     * &#64Configuration
+     * &#64;Configuration
      * interface Foo { }
      *
-     * &#64Generated
+     * &#64;Generated
      * public class FooImpl { }
      * </pre>
      *
