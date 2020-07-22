@@ -2,8 +2,6 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Config Generator'
 
-import org.gradle.internal.jvm.Jvm
-
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
@@ -18,10 +16,6 @@ dependencies {
     implementation             group: 'com.squareup',             name: 'javapoet',           version: ver.'javapoet'
     implementation             group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    def toolsJar = Jvm.current().getToolsJar()
-    if (toolsJar != null) {
-        testImplementation files(toolsJar)
-    }
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
     testImplementation dep.junit5migration
