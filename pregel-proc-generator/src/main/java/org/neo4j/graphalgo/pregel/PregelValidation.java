@@ -21,20 +21,24 @@ package org.neo4j.graphalgo.pregel;
 
 import com.google.auto.common.MoreElements;
 import com.google.auto.common.MoreTypes;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
@@ -67,6 +71,7 @@ final class PregelValidation {
         if (
             !isClass(pregelElement) ||
             !isPregelComputation(pregelElement) ||
+            !configHasFactoryMethod(pregelElement) ||
             !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
             // TODO: validate that config has a factory method with correct signature
         ) {
@@ -123,6 +128,49 @@ final class PregelValidation {
             );
         }
         return isPregelComputation;
+    }
+
+    private boolean configHasFactoryMethod(Element pregelElement) {
+        var config = config(pregelElement);
+
+        var stringType = elementUtils.getTypeElement(String.class.getName()).asType();
+        var cypherMapWrapperType = elementUtils.getTypeElement(CypherMapWrapper.class.getName()).asType();
+        var graphCreateConfigType = elementUtils.getTypeElement(GraphCreateConfig.class.getName()).asType();
+        var optionalType = elementUtils.getTypeElement(Optional.class.getTypeName());
+        var graphNameType = typeUtils.getDeclaredType(optionalType, stringType);
+        var implicitCreateType = typeUtils.getDeclaredType(optionalType, graphCreateConfigType);
+
+        var configElement = typeUtils.asElement(config);
+        var maybeHasFactoryMethod = ElementFilter.methodsIn(configElement.getEnclosedElements()).stream()
+            .filter(method -> method.getModifiers().contains(Modifier.STATIC))
+            .filter(method -> method.getSimpleName().contentEquals("of"))
+            .filter(method -> method.getParameters().size() == 4)
+            .filter(method -> typeUtils.isSameType(method.getReturnType(), config))
+            .map(ExecutableElement::getParameters)
+            .anyMatch(parameters ->
+                typeUtils.isSameType(stringType, parameters.get(0).asType()) &&
+                typeUtils.isSameType(graphNameType, parameters.get(1).asType()) &&
+                typeUtils.isSameType(implicitCreateType, parameters.get(2).asType()) &&
+                typeUtils.isSameType(cypherMapWrapperType, parameters.get(3).asType())
+            );
+
+        if (!maybeHasFactoryMethod) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                formatWithLocale(
+                    "Missing method 'static %s of(%s username, %s graphName, %s maybeImplicitCreate, %s userConfig)' in %s.",
+                    configElement,
+                    stringType,
+                    graphNameType,
+                    implicitCreateType,
+                    cypherMapWrapperType,
+                    configElement
+                ),
+                MoreElements.asType(pregelElement)
+            );
+        }
+
+        return maybeHasFactoryMethod;
     }
 
     private TypeMirror config(Element pregelElement) {

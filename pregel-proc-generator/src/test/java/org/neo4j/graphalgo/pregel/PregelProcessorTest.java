@@ -104,6 +104,27 @@ class PregelProcessorTest {
         );
     }
 
+    @Test
+    void configurationMustHaveStaticFactoryMethod() {
+        runNegativeTest(
+            "ConfigurationHasNoFactoryMethod",
+            e(
+                "Missing method " +
+                "'static ConfigurationHasNoFactoryMethod.ComputationConfig " +
+                "of" +
+                "(" +
+                "java.lang.String username, " +
+                "java.util.Optional<java.lang.String> graphName, " +
+                "java.util.Optional<org.neo4j.graphalgo.config.GraphCreateConfig> maybeImplicitCreate, " +
+                "org.neo4j.graphalgo.core.CypherMapWrapper userConfig" +
+                ")' " +
+                "in ConfigurationHasNoFactoryMethod.ComputationConfig.",
+                32,
+                8
+            )
+        );
+    }
+
     private void runNegativeTest(String className, ErrorCheck... expectations) {
         JavaFileObject file = forResource(String.format(Locale.ENGLISH, "negative/%s.java", className));
 
