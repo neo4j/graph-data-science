@@ -31,17 +31,7 @@ public final class ConfigurationProcessor extends BasicAnnotationProcessor {
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        SourceVersion sourceVersion = SourceVersion.latestSupported();
-        // We don't require jdk11, but if we're on it or on a later one
-        // support the jdk11 release
-        if (sourceVersion.ordinal() > 11) {
-            return SourceVersion.values()[11];
-        }
-        // Require at least jdk8
-        if (sourceVersion.ordinal() < 8) {
-            return SourceVersion.RELEASE_8;
-        }
-        return sourceVersion;
+        return SourceVersion.RELEASE_11;
     }
 
     @Override
