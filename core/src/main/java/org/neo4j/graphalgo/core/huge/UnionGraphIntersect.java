@@ -23,14 +23,12 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 
 import java.util.ArrayList;
 
-public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
+class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final CompositeAdjacencyList compositeAdjacencyList;
-    private final CompositeAdjacencyOffsets compositeAdjacencyOffsets;
 
     UnionGraphIntersect(
         CompositeAdjacencyList compositeAdjacencyList,
-        CompositeAdjacencyOffsets compositeAdjacencyOffsets,
         long maxDegree
     ) {
         super(
@@ -41,7 +39,6 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
             maxDegree
         );
         this.compositeAdjacencyList = compositeAdjacencyList;
-        this.compositeAdjacencyOffsets = compositeAdjacencyOffsets;
     }
 
     @Override
@@ -63,20 +60,14 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
 
     @Override
     CompositeAdjacencyCursor cursor(long nodeId, CompositeAdjacencyCursor reuse) {
-        var adjacencyLists = compositeAdjacencyList.adjacencyLists();
-        var adjacencyOffsets = compositeAdjacencyOffsets.adjacencyOffsets();
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.adjacencyLists().size());
         var cursors = reuse.cursors();
         var emptyCursors = empty.cursors();
 
-        for (int i = 0; i < adjacencyLists.size(); i++) {
-            var offset = adjacencyOffsets.get(i).get(nodeId);
-            if (offset == 0) {
-                adjacencyCursors.add(i, emptyCursors.get(i));
-            } else {
-                adjacencyCursors.add(i, TransientAdjacencyList.decompressingCursor((TransientAdjacencyList.DecompressingCursor) cursors.get(i), offset));
-            }
-        }
+        compositeAdjacencyList.forEachOffset(nodeId, ((index, offset, hasAdjacency) -> adjacencyCursors.add(index, hasAdjacency
+            ? TransientAdjacencyList.decompressingCursor((TransientAdjacencyList.DecompressingCursor) cursors.get(index), offset)
+            : emptyCursors.get(index)
+        )));
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 

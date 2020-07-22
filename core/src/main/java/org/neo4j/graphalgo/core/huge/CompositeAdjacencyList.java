@@ -75,16 +75,29 @@ public class CompositeAdjacencyList implements AdjacencyList {
     @Override
     public CompositeAdjacencyCursor decompressingCursor(long nodeId) {
         var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
-        for (int i = 0; i < adjacencyLists.size(); i++) {
-            var offset = adjacencyOffsets.get(i).get(nodeId);
-            var adjacencyList = adjacencyLists.get(i);
-            adjacencyCursors.add(i, adjacencyList.decompressingCursor(offset));
-        }
+        forEachOffset(nodeId, (index, offset, hasAdjacency) -> {
+            adjacencyCursors.add(index, hasAdjacency
+                ? adjacencyLists.get(index).decompressingCursor(offset)
+                : adjacencyLists.get(index).rawDecompressingCursor()
+            );
+        });
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 
     @Override
     public void close() {
         adjacencyLists.forEach(AdjacencyList::close);
+    }
+
+    void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
+        for (int i = 0; i < adjacencyLists.size(); i++) {
+            long offset = adjacencyOffsets.get(i).get(nodeId);
+            func.apply(i, offset, offset != 0);
+        }
+    }
+
+    @FunctionalInterface
+    interface CompositeIndexedOffsetOperator {
+        void apply(int index, long offset, boolean hasAdjacency);
     }
 }

@@ -167,7 +167,7 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        return new UnionGraphIntersect(adjacencyList(), adjacencyOffsets(), maxDegree);
+        return new UnionGraphIntersect(adjacencyList(), maxDegree);
     }
 
     /**
