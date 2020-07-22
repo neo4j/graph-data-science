@@ -29,13 +29,11 @@ import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.pregel.pr.PageRankPregel;
-import org.neo4j.graphalgo.pregel.pr.PageRankPregelConfigImpl;
 
 import java.util.Optional;
 import java.util.Queue;
 
-import static org.neo4j.graphalgo.pregel.sssp.SingleSourceShortestPathPregel.*;
+import static org.neo4j.graphalgo.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
 @Pregel
 @Procedure("example.pregel.sssp.stream")
