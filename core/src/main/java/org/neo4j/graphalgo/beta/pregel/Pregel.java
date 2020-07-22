@@ -214,13 +214,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 nodeBatches,
                 nodeBatch -> {
                     ComputeStep<CONFIG> task = new ComputeStep<>(
+                        graph,
                         computation,
                         config,
-                        graph.nodeCount(),
-                        graph.relationshipCount(),
                         iteration,
                         nodeBatch,
-                        graph,
                         nodeValues,
                         messageBits,
                         voteToHaltBits,
@@ -270,27 +268,26 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final RelationshipIterator relationshipIterator;
 
         private ComputeStep(
-                final PregelComputation<CONFIG> computation,
-                final CONFIG config,
-                final long nodeCount,
-                final long relationshipCount,
-                final int iteration,
-                final PrimitiveLongIterable nodeBatch,
-                final Degrees degrees,
-                final HugeDoubleArray nodeValues,
-                final BitSet receiverBits,
-                final BitSet voteBits,
-                final HugeObjectArray<? extends Queue<Double>> messageQueues,
-                final RelationshipIterator relationshipIterator) {
+            Graph graph,
+            PregelComputation<CONFIG> computation,
+            CONFIG config,
+            int iteration,
+            PrimitiveLongIterable nodeBatch,
+            HugeDoubleArray nodeValues,
+            BitSet receiverBits,
+            BitSet voteBits,
+            HugeObjectArray<? extends Queue<Double>> messageQueues,
+            RelationshipIterator relationshipIterator
+        ) {
             this.iteration = iteration;
-            this.nodeCount = nodeCount;
-            this.relationshipCount = relationshipCount;
+            this.nodeCount = graph.nodeCount();
+            this.relationshipCount = graph.relationshipCount();
             this.computation = computation;
             this.senderBits = new BitSet(nodeCount);
             this.receiverBits = receiverBits;
             this.voteBits = voteBits;
             this.nodeBatch = nodeBatch;
-            this.degrees = degrees;
+            this.degrees = graph;
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
