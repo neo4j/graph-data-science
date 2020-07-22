@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.OnlyUndirectedTest;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -51,9 +51,9 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     String dbCypher() {
         return "CREATE " +
-               "(a:A)-[:T]->(b:A), " +
-               "(b)-[:T]->(c:A), " +
-               "(c)-[:T]->(a)";
+               "(a:A)-[:T1]->(b:A), " +
+               "(b)-[:T2]->(c:A), " +
+               "(c)-[:T2]->(a)";
     }
 
     @BeforeEach
@@ -68,7 +68,8 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         );
 
         runQuery(dbCypher());
-        runQuery("CALL gds.graph.create('g', 'A', {T: {orientation: 'UNDIRECTED'}})");
+        runQuery("CALL gds.graph.create('g', 'A', {ALL: { type: '*', orientation: 'UNDIRECTED'}})");
+        runQuery("CALL gds.graph.create('gMulti', 'A', {T1: {type: 'T1', orientation: 'UNDIRECTED'}, T2: {type: 'T2', orientation: 'UNDIRECTED'}})");
     }
 
     @AfterEach
