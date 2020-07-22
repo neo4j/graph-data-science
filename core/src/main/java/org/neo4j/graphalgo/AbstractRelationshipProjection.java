@@ -109,6 +109,18 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
         return RelationshipProjection.builder().type(type).orientation(orientation).build();
     }
 
+    public static RelationshipProjection of(String type, Aggregation aggregation) {
+        return RelationshipProjection.builder().type(type).aggregation(aggregation).build();
+    }
+
+    public boolean isMultiGraph() {
+        boolean somePropertyIsNotAggregated = properties()
+            .mappings()
+            .stream()
+            .anyMatch(m -> Aggregation.equivalentToNone(m.aggregation()));
+        return Aggregation.equivalentToNone(aggregation()) && (properties().isEmpty() || somePropertyIsNotAggregated);
+    }
+
     @Override
     boolean includeAggregation() {
         return true;

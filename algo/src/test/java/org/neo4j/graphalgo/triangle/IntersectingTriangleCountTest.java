@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -151,8 +153,43 @@ class IntersectingTriangleCountTest {
 
     @Test
     void selfLoop2() {
-        // a self loop adds two to the degree
         var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+    }
+
+    @Test
+    void parallelRelationships() {
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ", (a)-[:T]->(b)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(3, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+    }
+
+    @Test
+    void parallelTriangles() {
+        var graph = fromGdl(
+            "CREATE" +
+            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)",
+            UNDIRECTED
+        );
 
         TriangleCountResult result = compute(graph);
 
