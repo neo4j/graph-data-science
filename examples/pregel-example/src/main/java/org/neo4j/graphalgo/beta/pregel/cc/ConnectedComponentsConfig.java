@@ -19,23 +19,32 @@
  */
 package org.neo4j.graphalgo.beta.pregel.cc;
 
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
-import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
-import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
-import org.neo4j.procedure.Description;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Optional;
 
-import java.util.Queue;
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface ConnectedComponentsConfig extends PregelConfig {
 
-@Pregel
-@Procedure(name = "gds.pregel.test", modes = {Mode.STREAM})
-@Description("Test computation description")
-public interface BaseClassIsNotAClass extends PregelComputation<PregelConfig> {
+    @Value.Default
     @Override
-    default void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    default boolean isAsynchronous() {
+        return true;
+    }
 
+    static ConnectedComponentsConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new ConnectedComponentsConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }

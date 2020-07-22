@@ -1,4 +1,4 @@
-package org.neo4j.graphalgo.pregel.cc;
+package org.neo4j.graphalgo.beta.pregel.cc;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +23,7 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-@Generated("org.neo4j.graphalgo.pregel.PregelProcessor")
+@Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
     @Procedure(
             name = "gds.pregel.test",

@@ -1,4 +1,4 @@
-package org.neo4j.graphalgo.pregel.cc;
+package org.neo4j.graphalgo.beta.pregel.cc;
 
 import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.Algorithm;
@@ -11,7 +11,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
-@Generated("org.neo4j.graphalgo.pregel.PregelProcessor")
+@Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, HugeDoubleArray> {
     private final Pregel pregelJob;
 
