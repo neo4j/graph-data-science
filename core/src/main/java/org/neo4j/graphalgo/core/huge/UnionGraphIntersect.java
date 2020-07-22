@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+
+import java.util.ArrayList;
+
 public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final CompositeAdjacencyList compositeAdjacencyList;
@@ -58,25 +62,26 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
     }
 
     @Override
-    CompositeAdjacencyCursor cursor(long node, CompositeAdjacencyCursor reuse) {
-        var innerCursors = reuse.cursors();
+    CompositeAdjacencyCursor cursor(long nodeId, CompositeAdjacencyCursor reuse) {
+        var adjacencyLists = compositeAdjacencyList.adjacencyLists();
+        var adjacencyOffsets = compositeAdjacencyOffsets.adjacencyOffsets();
+        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        var cursors = reuse.cursors();
+        var emptyCursors = empty.cursors();
 
-        var innerOffsets = compositeAdjacencyOffsets.adjacencyOffsets();
-
-        for (int i = 0; i < innerOffsets.size(); i++) {
-            long offset = innerOffsets.get(i).get(node);
-            if (offset == 0L) {
-                innerCursors.set(i, empty.cursors().get(i));
+        for (int i = 0; i < adjacencyLists.size(); i++) {
+            var offset = adjacencyOffsets.get(i).get(nodeId);
+            if (offset == 0) {
+                adjacencyCursors.add(i, emptyCursors.get(i));
             } else {
-                TransientAdjacencyList.decompressingCursor(
-                    (TransientAdjacencyList.DecompressingCursor) innerCursors.get(i), offset);
+                adjacencyCursors.add(i, TransientAdjacencyList.decompressingCursor((TransientAdjacencyList.DecompressingCursor) cursors.get(i), offset));
             }
         }
-        return reuse;
+        return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 
     @Override
     int degree(long node) {
-        return 0;
+        return 0; //TODO: implement
     }
 }
