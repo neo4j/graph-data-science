@@ -81,4 +81,10 @@ class CompositeAdjacencyCursorTest extends BaseTest {
         assertEquals(2, adjacencyCursor.nextVLong());
         assertFalse(adjacencyCursor.hasNextVLong());
     }
+
+    @Test
+    void shouldNotReturnLastValueWhenAdvanceExhaustsCursor() {
+        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
+        assertEquals(2, adjacencyCursor.advance(2));
+    }
 }

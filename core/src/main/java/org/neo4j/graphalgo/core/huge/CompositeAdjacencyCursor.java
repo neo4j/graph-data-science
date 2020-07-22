@@ -120,7 +120,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
             while (cursor.hasNextVLong() && cursor.peekVLong() < target) {
                 cursor.nextVLong();
             }
-            if (cursor.remaining() >= 0) {
+            if (cursor.hasNextVLong()) {
                 cursorQueue.add(cursor);
             }
         }
