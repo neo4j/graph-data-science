@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.ImmutableTopology;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -33,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -167,7 +168,7 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        return new UnionGraphIntersect(adjacencyList(), maxDegree);
+        return new UnionGraphIntersect((CompositeAdjacencyList) relationshipTopology().list(), maxDegree);
     }
 
     /**
@@ -229,9 +230,23 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Relationships relationships() {
-        // this will be resolve in PR #1440
-        throw new UnsupportedOperationException("UnionGraph#relationships is not supported");
+    public Relationships.Topology relationshipTopology() {
+        var adjacencyLists = graphs
+            .stream()
+            .map(graph -> graph.relationshipTopology().list())
+            .collect(Collectors.toList());
+        var adjacencyOffsets = graphs
+            .stream()
+            .map(graph -> graph.relationshipTopology().offsets())
+            .collect(Collectors.toList());
+
+        return ImmutableTopology.builder()
+            .offsets(new CompositeAdjacencyOffsets(adjacencyOffsets))
+            .list(new CompositeAdjacencyList(adjacencyLists, adjacencyOffsets))
+            .orientation(Orientation.NATURAL)
+            .elementCount(relationshipCount())
+            .isMultiGraph(true)
+            .build();
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {

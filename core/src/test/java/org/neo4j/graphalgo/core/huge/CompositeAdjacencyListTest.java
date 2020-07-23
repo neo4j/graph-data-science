@@ -23,7 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.CSRGraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,23 +38,25 @@ class CompositeAdjacencyListTest extends BaseTest {
         ", (a)-[:T1]->(b)" +
         ", (a)-[:T2]->(c)";
 
-    Graph graph;
+    AdjacencyList adjacencyList;
 
     @BeforeEach
     void setup() {
         runQuery(DB_CYPHER);
-        graph = new StoreLoaderBuilder()
+        var graph = new StoreLoaderBuilder()
             .api(db)
             .addRelationshipType("T1")
             .addRelationshipType("T2")
             .build()
             .graph();
+
+        adjacencyList = ((CSRGraph) graph).relationshipTopology().list();
     }
 
     @Test
     void shouldComputeCorrectDegree() {
-        assertTrue(graph.adjacencyList() instanceof CompositeAdjacencyList);
-        assertEquals(2, graph.adjacencyList().degree(0));
-        assertEquals(0, graph.adjacencyList().degree(1));
+        assertTrue(adjacencyList instanceof CompositeAdjacencyList);
+        assertEquals(2, adjacencyList.degree(0));
+        assertEquals(0, adjacencyList.degree(1));
     }
 }

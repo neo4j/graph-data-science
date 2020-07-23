@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.api;
 
 public interface CSRGraph extends Graph {
 
-    Relationships relationships();
+    Relationships.Topology relationshipTopology();
 
     @Override
     CSRGraph concurrentCopy();

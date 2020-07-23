@@ -450,6 +450,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public Relationships.Topology relationshipTopology() {
+        return relationships().topology();
+    }
+
+    @Override
     public boolean hasRelationshipProperty() {
         return hasRelationshipProperty;
     }

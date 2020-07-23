@@ -34,7 +34,7 @@ public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
     }
 
     @Override
-    public Relationships relationships() {
-        return graph.relationships();
+    public Relationships.Topology relationshipTopology() {
+        return graph.relationshipTopology();
     }
 }

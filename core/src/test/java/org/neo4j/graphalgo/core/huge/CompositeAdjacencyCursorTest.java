@@ -23,8 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.CSRGraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -42,23 +41,24 @@ class CompositeAdjacencyCursorTest extends BaseTest {
         ", (a)-[:REL2]->(b)" +
         ", (a)-[:REL2]->(a)";
 
-    Graph graph;
+    private CompositeAdjacencyCursor adjacencyCursor;
 
     @BeforeEach
     void setup() {
         runQuery(DB_CYPHER);
 
-        graph = new StoreLoaderBuilder()
+        CSRGraph graph = (CSRGraph) new StoreLoaderBuilder()
             .api(db)
             .addRelationshipType("REL1")
             .addRelationshipType("REL2")
             .build()
             .graph();
+
+        adjacencyCursor = (CompositeAdjacencyCursor) graph.relationshipTopology().list().decompressingCursor(0);
     }
 
     @Test
     void shouldIterateInOrder() {
-        AdjacencyCursor adjacencyCursor = graph.adjacencyList().decompressingCursor(0);
 
         long lastNodeId = 0;
         while (adjacencyCursor.hasNextVLong()) {
@@ -68,14 +68,12 @@ class CompositeAdjacencyCursorTest extends BaseTest {
 
     @Test
     void shouldSkipUntilLargerValue() {
-        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
         assertEquals(2, adjacencyCursor.skipUntil(1));
         assertFalse(adjacencyCursor.hasNextVLong());
     }
 
     @Test
     void shouldAdvanceUntilEqualValue() {
-        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
         assertEquals(1, adjacencyCursor.advance(1));
         assertEquals(1, adjacencyCursor.nextVLong());
         assertEquals(2, adjacencyCursor.nextVLong());
@@ -84,7 +82,6 @@ class CompositeAdjacencyCursorTest extends BaseTest {
 
     @Test
     void shouldNotReturnLastValueWhenAdvanceExhaustsCursor() {
-        CompositeAdjacencyCursor adjacencyCursor = (CompositeAdjacencyCursor) graph.adjacencyList().decompressingCursor(0);
         assertEquals(2, adjacencyCursor.advance(2));
     }
 }

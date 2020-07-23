@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.ImmutableTopology;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -168,19 +169,18 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public Relationships relationships() {
-        Relationships.Topology topology = graph.relationships().topology();
-        Optional<Relationships.Properties> properties = graph.relationships().properties();
-        return Relationships.of(
-            graph.relationshipCount(),
-            topology.orientation(),
-            isMultiGraph(),
-            topology.list(),
-            new TransientFilteredAdjacencyOffsets(filteredIdMap, topology.offsets()),
-            properties.map(Relationships.Properties::list).orElse(null),
-            properties.map(p -> new TransientFilteredAdjacencyOffsets(filteredIdMap, p.offsets())).orElse(null),
-            properties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN)
+    public Relationships.Topology relationshipTopology() {
+        Relationships.Topology topology = graph.relationshipTopology();
+
+        TransientFilteredAdjacencyOffsets offsets = new TransientFilteredAdjacencyOffsets(
+            filteredIdMap,
+            topology.offsets()
         );
+
+        return ImmutableTopology.builder()
+            .from(topology)
+            .offsets(offsets)
+            .build();
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
