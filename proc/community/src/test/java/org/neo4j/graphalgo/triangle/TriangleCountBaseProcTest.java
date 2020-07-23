@@ -51,9 +51,9 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
     String dbCypher() {
         return "CREATE " +
-               "(a:A)-[:T1]->(b:A), " +
-               "(b)-[:T2]->(c:A), " +
-               "(c)-[:T2]->(a)";
+               "(a:A)-[:T]->(b:A), " +
+               "(b)-[:T]->(c:A), " +
+               "(c)-[:T]->(a)";
     }
 
     @BeforeEach
@@ -69,7 +69,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
 
         runQuery(dbCypher());
         runQuery("CALL gds.graph.create('g', 'A', {ALL: { type: '*', orientation: 'UNDIRECTED'}})");
-        runQuery("CALL gds.graph.create('gMulti', 'A', {T1: {type: 'T1', orientation: 'UNDIRECTED'}, T2: {type: 'T2', orientation: 'UNDIRECTED'}})");
     }
 
     @AfterEach

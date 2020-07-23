@@ -45,20 +45,6 @@ class TriangleCountStreamProcTest extends TriangleCountBaseProcTest<TriangleCoun
         assertEquals(3, rowCount.get());
     }
 
-    @Test
-    void testStreamingOnUnionGraph() {
-        var query = "CALL gds.triangleCount.stream('gMulti')";
-
-        var rowCount = new AtomicInteger();
-
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(1L, row.getNumber("triangleCount"));
-            rowCount.incrementAndGet();
-        });
-
-        assertEquals(3, rowCount.get());
-    }
-
     @Override
     public Class<? extends AlgoBaseProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStreamConfig>> getProcedureClazz() {
         return TriangleCountStreamProc.class;
