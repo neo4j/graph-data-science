@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
 class ConnectedComponentsPregelProcTest extends BaseProcTest {
@@ -69,7 +70,8 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             GraphStreamNodePropertiesProc.class,
             ConnectedComponentsPregelStreamProc.class,
             ConnectedComponentsPregelWriteProc.class,
-            ConnectedComponentsPregelMutateProc.class
+            ConnectedComponentsPregelMutateProc.class,
+            ConnectedComponentsPregelStatsProc.class
         );
     }
 
@@ -181,6 +183,27 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         );
 
         assertThat(expected, mapEquals(actual));
+    }
+
+    @Test
+    void stats() {
+        var query = GdsCypher.call()
+            .loadEverything()
+            .algo("example", "pregel", "cc")
+            .statsMode()
+            .addParameter("maxIterations", 10)
+            .yields(
+                "createMillis",
+                "computeMillis"
+            );
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+            }
+        );
     }
 
 }
