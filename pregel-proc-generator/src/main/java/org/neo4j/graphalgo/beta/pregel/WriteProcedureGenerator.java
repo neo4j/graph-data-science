@@ -19,33 +19,37 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.Map;
-import java.util.stream.Stream;
 
 class WriteProcedureGenerator extends ProcedureGenerator {
 
-    WriteProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
-        super(elementUtils, sourceVersion);
+    WriteProcedureGenerator(
+        Elements elementUtils,
+        SourceVersion sourceVersion,
+        PregelValidation.Spec pregelSpec
+    ) {
+        super(elementUtils, sourceVersion, pregelSpec);
     }
 
     @Override
-    String procClassInfix() {
-        return "Write";
+    Mode procMode() {
+        return Mode.WRITE;
+    }
+
+    @Override
+    org.neo4j.procedure.Mode procExecMode() {
+        return org.neo4j.procedure.Mode.WRITE;
     }
 
     @Override
@@ -59,39 +63,7 @@ class WriteProcedureGenerator extends ProcedureGenerator {
     }
 
     @Override
-    MethodSpec procMethod(PregelValidation.Spec pregelSpec) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("write");
-
-        // add procedure annotation
-        methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-            .addMember("name", "$S", pregelSpec.procedureName() + "." + procClassInfix().toLowerCase())
-            .addMember("mode", "$T.WRITE", Mode.class)
-            .build()
-        );
-        // add description
-        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
-
-        return methodBuilder
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "graphName")
-                    .build())
-                .build())
-            .addParameter(ParameterSpec
-                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "configuration")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "configuration")
-                    .addMember("defaultValue", "$S", "{}")
-                    .build())
-                .build())
-            .addStatement("return write(compute(graphNameOrConfig, configuration))")
-            .returns(ParameterizedTypeName.get(Stream.class, PregelWriteResult.class))
-            .build();
-    }
-
-    @Override
-    MethodSpec procResultMethod(PregelValidation.Spec pregelSpec) {
+    MethodSpec procResultMethod() {
         return MethodSpec.methodBuilder("resultBuilder")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)

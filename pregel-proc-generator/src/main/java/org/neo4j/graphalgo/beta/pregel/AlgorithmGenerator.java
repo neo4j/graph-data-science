@@ -39,11 +39,14 @@ import javax.lang.model.util.Elements;
 import java.util.Map;
 
 class AlgorithmGenerator extends PregelGenerator {
-    AlgorithmGenerator(Elements elementUtils, SourceVersion sourceVersion) {
+    private final PregelValidation.Spec pregelSpec;
+
+    AlgorithmGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
         super(elementUtils, sourceVersion);
+        this.pregelSpec = pregelSpec;
     }
 
-    TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
+    TypeSpec typeSpec() {
         ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
@@ -59,7 +62,7 @@ class AlgorithmGenerator extends PregelGenerator {
         addGeneratedAnnotation(typeSpecBuilder);
 
         typeSpecBuilder.addField(pregelJobField());
-        typeSpecBuilder.addMethod(constructor(pregelSpec));
+        typeSpecBuilder.addMethod(constructor());
         typeSpecBuilder.addMethod(computeMethod());
         typeSpecBuilder.addMethod(meMethod(algorithmClassName));
         typeSpecBuilder.addMethod(releaseMethod());
@@ -73,7 +76,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .build();
     }
 
-    private MethodSpec constructor(PregelValidation.Spec pregelSpec) {
+    private MethodSpec constructor() {
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
             .addParameter(pregelSpec.configTypeName(), "configuration")

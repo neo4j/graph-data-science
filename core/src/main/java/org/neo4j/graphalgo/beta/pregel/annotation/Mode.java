@@ -19,9 +19,19 @@
  */
 package org.neo4j.graphalgo.beta.pregel.annotation;
 
+import java.util.Locale;
+
 public enum Mode {
     STREAM,
     WRITE,
     MUTATE,
-    STATS
+    STATS;
+
+    public String camelCase() {
+        return this.name().substring(0, 1).toUpperCase() + this.name().toLowerCase(Locale.ENGLISH).substring(1);
+    }
+
+    public String lowerCase() {
+        return this.name().toLowerCase(Locale.ENGLISH);
+    }
 }

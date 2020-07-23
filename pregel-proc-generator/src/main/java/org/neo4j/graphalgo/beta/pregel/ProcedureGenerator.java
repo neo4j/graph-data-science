@@ -19,13 +19,16 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -34,16 +37,22 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 abstract class ProcedureGenerator extends PregelGenerator {
 
-    ProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
+    final PregelValidation.Spec pregelSpec;
+
+    ProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
         super(elementUtils, sourceVersion);
+        this.pregelSpec = pregelSpec;
     }
 
     static TypeSpec forMode(
@@ -53,27 +62,27 @@ abstract class ProcedureGenerator extends PregelGenerator {
         PregelValidation.Spec pregelSpec
     ) {
         switch (mode) {
-            case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec);
-            case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec);
+            case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
+            case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
             case MUTATE:
             case STATS:
             default: throw new IllegalArgumentException("Unsupported Mode " + mode);
         }
     }
 
-    abstract String procClassInfix();
+    abstract Mode procMode();
+
+    abstract org.neo4j.procedure.Mode procExecMode();
 
     abstract Class<?> procBaseClass();
 
     abstract Class<?> procResultClass();
 
-    abstract MethodSpec procMethod(PregelValidation.Spec pregelSpec);
+    abstract MethodSpec procResultMethod();
 
-    abstract MethodSpec procResultMethod(PregelValidation.Spec pregelSpec);
-
-    TypeSpec typeSpec(PregelValidation.Spec pregelSpec) {
+    TypeSpec typeSpec() {
         var configTypeName = pregelSpec.configTypeName();
-        var procedureClassName = className(pregelSpec, procClassInfix() + PROCEDURE_SUFFIX);
+        var procedureClassName = className(pregelSpec, procMode().camelCase() + PROCEDURE_SUFFIX);
         var algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
@@ -90,17 +99,48 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
         addGeneratedAnnotation(typeSpecBuilder);
 
-        typeSpecBuilder.addMethod(procMethod(pregelSpec));
-        typeSpecBuilder.addMethod(procResultMethod(pregelSpec));
+        typeSpecBuilder.addMethod(procMethod());
+        typeSpecBuilder.addMethod(procResultMethod());
 
-        typeSpecBuilder.addMethod(newConfigMethod(pregelSpec));
-        typeSpecBuilder.addMethod(algorithmFactoryMethod(pregelSpec, algorithmClassName));
-        typeSpecBuilder.addMethod(propertyTranslator(pregelSpec, algorithmClassName));
+        typeSpecBuilder.addMethod(newConfigMethod());
+        typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
+        typeSpecBuilder.addMethod(propertyTranslator(algorithmClassName));
 
         return typeSpecBuilder.build();
     }
 
-    private MethodSpec newConfigMethod(PregelValidation.Spec pregelSpec) {
+    private MethodSpec procMethod() {
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(procMode().lowerCase());
+
+        // add procedure annotation
+        methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
+            .addMember("name", "$S", pregelSpec.procedureName() + "." + procMode().lowerCase())
+            .addMember("mode", "$T.$L", org.neo4j.procedure.Mode.class, procExecMode())
+            .build()
+        );
+        // add description
+        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+
+        return methodBuilder
+            .addModifiers(Modifier.PUBLIC)
+            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "graphName")
+                    .build())
+                .build())
+            .addParameter(ParameterSpec
+                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "configuration")
+                .addAnnotation(AnnotationSpec.builder(Name.class)
+                    .addMember("value", "$S", "configuration")
+                    .addMember("defaultValue", "$S", "{}")
+                    .build())
+                .build())
+            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procMode().lowerCase())
+            .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
+            .build();
+    }
+
+    private MethodSpec newConfigMethod() {
         return MethodSpec.methodBuilder("newConfig")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
@@ -113,7 +153,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .build();
     }
 
-    private MethodSpec algorithmFactoryMethod(PregelValidation.Spec pregelSpec, ClassName algorithmClassName) {
+    private MethodSpec algorithmFactoryMethod(ClassName algorithmClassName) {
         TypeSpec anonymousFactoryType = TypeSpec.anonymousClassBuilder("")
             .addSuperinterface(ParameterizedTypeName.get(
                 ClassName.get(AlgorithmFactory.class),
@@ -153,7 +193,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .build();
     }
 
-    private MethodSpec propertyTranslator(PregelValidation.Spec pregelSpec, ClassName algorithmClassName) {
+    private MethodSpec propertyTranslator(ClassName algorithmClassName) {
         return MethodSpec.methodBuilder("nodePropertyTranslator")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)

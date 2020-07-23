@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import com.google.auto.common.GeneratedAnnotationSpecs;
+import com.google.common.collect.Streams;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class PregelGenerator {
 
@@ -53,14 +55,14 @@ class PregelGenerator {
     }
 
     List<JavaFile> generate(PregelValidation.Spec pregelSpec) {
-
-        var procedureTypeSpecs = Arrays.stream(pregelSpec.procedureModes())
-            .map(mode -> ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec))
+        return Streams.concat(
+            Stream.of(new AlgorithmGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec()),
+            Arrays
+                .stream(pregelSpec.procedureModes())
+                .map(mode -> ProcedureGenerator.forMode(mode, elementUtils, sourceVersion, pregelSpec))
+        )
             .map(typeSpec -> fileOf(pregelSpec, typeSpec))
             .collect(Collectors.toList());
-
-        procedureTypeSpecs.add(fileOf(pregelSpec, new AlgorithmGenerator(elementUtils, sourceVersion).typeSpec(pregelSpec)));
-        return procedureTypeSpecs;
     }
 
     // produces @Generated meta info

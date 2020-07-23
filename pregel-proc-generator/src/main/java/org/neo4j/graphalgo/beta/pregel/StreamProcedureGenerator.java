@@ -19,29 +19,30 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.procedure.Mode;
-import org.neo4j.procedure.Name;
+import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.Map;
-import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.beta.pregel.annotation.Mode.STREAM;
 
 class StreamProcedureGenerator extends ProcedureGenerator {
 
-    StreamProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion) {
-        super(elementUtils, sourceVersion);
+    StreamProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
+        super(elementUtils, sourceVersion, pregelSpec);
     }
 
     @Override
-    String procClassInfix() {
-        return "Stream";
+    Mode procMode() {
+        return STREAM;
+    }
+
+    @Override
+    org.neo4j.procedure.Mode procExecMode() {
+        return org.neo4j.procedure.Mode.READ;
     }
 
     @Override
@@ -55,39 +56,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
     }
 
     @Override
-    MethodSpec procMethod(PregelValidation.Spec pregelSpec) {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("stream");
-
-        // add procedure annotation
-        methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-            .addMember("name", "$S", pregelSpec.procedureName() + "." + procClassInfix().toLowerCase())
-            .addMember("mode", "$T.READ", Mode.class)
-            .build()
-        );
-        // add description
-        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
-
-        return methodBuilder
-            .addModifiers(Modifier.PUBLIC)
-            .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "graphName")
-                    .build())
-                .build())
-            .addParameter(ParameterSpec
-                .builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "configuration")
-                .addAnnotation(AnnotationSpec.builder(Name.class)
-                    .addMember("value", "$S", "configuration")
-                    .addMember("defaultValue", "$S", "{}")
-                    .build())
-                .build())
-            .addStatement("return stream(compute(graphNameOrConfig, configuration))")
-            .returns(ParameterizedTypeName.get(Stream.class, PregelResult.class))
-            .build();
-    }
-
-    @Override
-    MethodSpec procResultMethod(PregelValidation.Spec pregelSpec) {
+    MethodSpec procResultMethod() {
         return MethodSpec.methodBuilder("streamResult")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
