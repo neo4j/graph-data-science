@@ -175,6 +175,8 @@ public class HugeGraph implements CSRGraph {
         return idMapping;
     }
 
+    public Map<String, NodeProperties> nodeProperties() { return nodeProperties; }
+
     @Override
     public long relationshipCount() {
         return relationshipCount;
