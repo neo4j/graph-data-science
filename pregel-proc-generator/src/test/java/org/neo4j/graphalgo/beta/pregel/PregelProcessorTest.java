@@ -66,6 +66,7 @@ class PregelProcessorTest {
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStreamProc.java", className)),
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sWriteProc.java", className)),
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sMutateProc.java", className)),
+                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStatsProc.java", className)),
                 loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sAlgorithm.java", className))
             );
     }

@@ -65,8 +65,8 @@ abstract class ProcedureGenerator extends PregelGenerator {
             case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
             case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
             case MUTATE: return new MutateProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
-            case STATS:
-            default: throw new IllegalArgumentException("Unsupported Mode " + mode);
+            case STATS: return new StatsProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
+            default: throw new IllegalArgumentException("Unsupported procedure mode: " + mode);
         }
     }
 
