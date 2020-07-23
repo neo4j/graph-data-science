@@ -26,8 +26,10 @@ import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
@@ -152,8 +154,8 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .build();
 
         GdlFactory gdlFactory = GdlFactory.of(createConfig, DATABASE_ID);
-        GraphStore graphStore = gdlFactory.build().graphStore();
-        Graph graph = graphStore.getUnion();
+        CSRGraphStore graphStore = gdlFactory.build().graphStore();
+        CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 

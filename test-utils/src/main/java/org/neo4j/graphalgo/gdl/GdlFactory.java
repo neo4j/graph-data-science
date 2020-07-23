@@ -57,7 +57,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig> {
+public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
     private final NamedDatabaseId databaseId;
@@ -118,7 +118,7 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
     }
 
     @Override
-    public ImportResult build() {
+    public ImportResult<CSRGraphStore> build() {
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
         var topologies = relationships.entrySet().stream()
@@ -132,7 +132,7 @@ public final class GdlFactory extends GraphStoreFactory<GraphCreateFromGdlConfig
                 Map.Entry::getKey,
                 entry -> Map.of(entry.getValue().getOne().get(), entry.getValue().getTwo().properties().get())
             ));
-        var graphStore = CSRGraphStore.of(
+        CSRGraphStore graphStore = CSRGraphStore.of(
             databaseId,
             nodes.idMap(),
             nodes.properties(),

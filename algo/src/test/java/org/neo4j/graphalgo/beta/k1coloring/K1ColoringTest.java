@@ -110,9 +110,9 @@ class K1ColoringTest {
             Aggregation.NONE, Orientation.REVERSE, AllowSelfLoops.NO, AllocationTracker.EMPTY
         );
 
-        Graph naturalGraph = outGenerator.generate();
-        Graph reverseGraph = inGenerator.generate();
-        Graph graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
+        var naturalGraph = outGenerator.generate();
+        var reverseGraph = inGenerator.generate();
+        var graph = UnionGraph.of(Arrays.asList(naturalGraph, reverseGraph));
 
         K1Coloring k1Coloring = new K1Coloring(
             graph,

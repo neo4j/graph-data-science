@@ -20,15 +20,16 @@
 package org.neo4j.graphalgo.extension;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.api.FilterGraph;
+import org.neo4j.graphalgo.api.CSRFilterGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 
-public class TestGraph extends FilterGraph {
+public class TestGraph extends CSRFilterGraph {
 
     private final IdFunction idFunction;
     private final String name;
 
-    public TestGraph(Graph graph, IdFunction idFunction, String name) {
+    public TestGraph(CSRGraph graph, IdFunction idFunction, String name) {
         super(graph);
         this.name = name;
         this.idFunction = idFunction;
@@ -57,7 +58,7 @@ public class TestGraph extends FilterGraph {
     }
 
     @Override
-    public Graph concurrentCopy() {
+    public CSRGraph concurrentCopy() {
         return new TestGraph(graph.concurrentCopy(), idFunction, name);
     }
 

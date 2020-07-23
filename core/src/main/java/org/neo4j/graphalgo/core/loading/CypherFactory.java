@@ -55,7 +55,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public class CypherFactory extends GraphStoreFactory<GraphCreateFromCypherConfig> {
+public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromCypherConfig> {
 
     private final GraphCreateFromCypherConfig cypherConfig;
     private EstimationResult nodeEstimation;

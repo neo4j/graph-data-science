@@ -135,7 +135,7 @@ public abstract class AlgoBaseProc<
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-            GraphStoreFactory<?> graphStoreFactory = loader.graphStoreFactory();
+            GraphStoreFactory<?, ?> graphStoreFactory = loader.graphStoreFactory();
             estimateDimensions = graphStoreFactory.estimationDimensions();
 
             if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {

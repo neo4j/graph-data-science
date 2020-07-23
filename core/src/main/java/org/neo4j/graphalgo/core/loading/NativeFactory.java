@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class NativeFactory extends GraphStoreFactory<GraphCreateFromStoreConfig> {
+public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromStoreConfig> {
 
     private final GraphCreateFromStoreConfig storeConfig;
 
