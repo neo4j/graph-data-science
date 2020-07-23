@@ -22,6 +22,7 @@ package positive;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -36,18 +37,26 @@ public final class NullableParametersConfig implements NullableParameters {
 
     private int extraValue;
 
-    public NullableParametersConfig(@NotNull String referenceTypesDefaultToNotNull,
-                                    @NotNull String referenceTypesCanBeMarkedAsNotNull,
-                                    @Nullable String referenceTypesCanBeMarkedAsNullable,
-                                    @NotNull CypherMapWrapper config) {
+    public NullableParametersConfig(
+        @NotNull String referenceTypesDefaultToNotNull,
+        @NotNull String referenceTypesCanBeMarkedAsNotNull,
+        @Nullable String referenceTypesCanBeMarkedAsNullable,
+        @NotNull CypherMapWrapper config
+    ) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull("referenceTypesDefaultToNotNull", referenceTypesDefaultToNotNull);
+            this.referenceTypesDefaultToNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesDefaultToNotNull",
+                referenceTypesDefaultToNotNull
+            );
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull("referenceTypesCanBeMarkedAsNotNull", referenceTypesCanBeMarkedAsNotNull);
+            this.referenceTypesCanBeMarkedAsNotNull = CypherMapWrapper.failOnNull(
+                "referenceTypesCanBeMarkedAsNotNull",
+                referenceTypesCanBeMarkedAsNotNull
+            );
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -61,11 +70,17 @@ public final class NullableParametersConfig implements NullableParameters {
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
-        if(!errors.isEmpty()) {
-            if(errors.size() == 1) {
+        if (!errors.isEmpty()) {
+            if (errors.size() == 1) {
                 throw errors.get(0);
             } else {
-                String combinedErrorMsg = errors.stream().map(IllegalArgumentException::getMessage).collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t", "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t", ""));
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
                 IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
                 errors.forEach(error -> combinedError.addSuppressed(error));
                 throw combinedError;

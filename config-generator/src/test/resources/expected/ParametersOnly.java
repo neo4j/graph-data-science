@@ -34,11 +34,17 @@ public final class ParametersOnlyConfig implements ParametersOnly {
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
-        if(!errors.isEmpty()) {
-            if(errors.size() == 1) {
+        if (!errors.isEmpty()) {
+            if (errors.size() == 1) {
                 throw errors.get(0);
             } else {
-                String combinedErrorMsg = errors.stream().map(IllegalArgumentException::getMessage).collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t", "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t", ""));
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
                 IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
                 errors.forEach(error -> combinedError.addSuppressed(error));
                 throw combinedError;

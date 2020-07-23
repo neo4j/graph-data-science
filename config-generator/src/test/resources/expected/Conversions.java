@@ -22,6 +22,7 @@ package positive;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -53,15 +54,24 @@ public final class ConversionsConfig implements Conversions.MyConversion {
             errors.add(e);
         }
         try {
-            this.referenceTypeAsResult = CypherMapWrapper.failOnNull("referenceTypeAsResult", Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult")));
+            this.referenceTypeAsResult = CypherMapWrapper.failOnNull(
+                "referenceTypeAsResult",
+                Conversions.MyConversion.add42(config.requireString("referenceTypeAsResult"))
+            );
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
-        if(!errors.isEmpty()) {
-            if(errors.size() == 1) {
+        if (!errors.isEmpty()) {
+            if (errors.size() == 1) {
                 throw errors.get(0);
             } else {
-                String combinedErrorMsg = errors.stream().map(IllegalArgumentException::getMessage).collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t", "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t", ""));
+                String combinedErrorMsg = errors
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
                 IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
                 errors.forEach(error -> combinedError.addSuppressed(error));
                 throw combinedError;
