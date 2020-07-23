@@ -9,7 +9,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.beta.pregel.PregelStreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -24,20 +24,20 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelResult, PregelConfig> {
+public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, HugeDoubleArray, PregelStreamResult, PregelConfig> {
     @Procedure(
             name = "gds.pregel.test.stream",
             mode = Mode.READ
     )
     @Description("Test computation description")
-    public Stream<PregelResult> stream(@Name("graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+    public Stream<PregelStreamResult> stream(@Name("graphName") Object graphNameOrConfig,
+                                             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stream(compute(graphNameOrConfig, configuration));
     }
 
     @Override
-    protected PregelResult streamResult(long originalNodeId, double value) {
-        return new PregelResult(originalNodeId, value);
+    protected PregelStreamResult streamResult(long originalNodeId, double value) {
+        return new PregelStreamResult(originalNodeId, value);
     }
 
     @Override

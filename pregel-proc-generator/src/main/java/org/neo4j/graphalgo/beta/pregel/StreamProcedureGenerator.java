@@ -52,7 +52,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
     @Override
     Class<?> procResultClass() {
-        return PregelResult.class;
+        return PregelStreamResult.class;
     }
 
     @Override
@@ -60,10 +60,10 @@ class StreamProcedureGenerator extends ProcedureGenerator {
         return MethodSpec.methodBuilder("streamResult")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
-            .returns(PregelResult.class)
+            .returns(procResultClass())
             .addParameter(long.class, "originalNodeId")
             .addParameter(double.class, "value")
-            .addStatement("return new PregelResult(originalNodeId, value)")
+            .addStatement("return new $T(originalNodeId, value)", procResultClass())
             .build();
     }
 }

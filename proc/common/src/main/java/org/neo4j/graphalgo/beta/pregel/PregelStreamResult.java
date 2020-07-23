@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public class PregelResult {
+public class PregelStreamResult {
     public final long nodeId;
     public final double value;
 
-    public PregelResult(long nodeId, double value) {
+    public PregelStreamResult(long nodeId, double value) {
         this.nodeId = nodeId;
         this.value = value;
     }
