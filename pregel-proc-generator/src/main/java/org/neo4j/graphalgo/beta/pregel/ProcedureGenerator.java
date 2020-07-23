@@ -56,7 +56,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     static TypeSpec forMode(
-        org.neo4j.graphalgo.beta.pregel.annotation.Mode mode,
+        Mode mode,
         Elements elementUtils,
         SourceVersion sourceVersion,
         PregelValidation.Spec pregelSpec
@@ -64,7 +64,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         switch (mode) {
             case STREAM: return new StreamProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
             case WRITE: return new WriteProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
-            case MUTATE:
+            case MUTATE: return new MutateProcedureGenerator(elementUtils, sourceVersion, pregelSpec).typeSpec();
             case STATS:
             default: throw new IllegalArgumentException("Unsupported Mode " + mode);
         }

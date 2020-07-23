@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,7 +64,13 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(ConnectedComponentsPregelStreamProc.class, ConnectedComponentsPregelWriteProc.class);
+        registerProcedures(
+            GraphCreateProc.class,
+            GraphStreamNodePropertiesProc.class,
+            ConnectedComponentsPregelStreamProc.class,
+            ConnectedComponentsPregelWriteProc.class,
+            ConnectedComponentsPregelMutateProc.class
+        );
     }
 
     @Test
@@ -109,6 +117,53 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value AS value", r -> {
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+        });
+
+        var expected = Map.of(
+            0L, 0D,
+            1L, 0D,
+            2L, 0D,
+            3L, 0D,
+            4L, 4D,
+            5L, 4D,
+            6L, 4D,
+            7L, 7D,
+            8L, 7D,
+            9L, 9D
+        );
+
+        assertThat(expected, mapEquals(actual));
+    }
+
+    @Test
+    void mutate() {
+        var graphName = "myGraph";
+
+        var createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(createQuery);
+
+        var mutateQuery = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("example", "pregel", "cc")
+            .mutateMode()
+            .addParameter("maxIterations", 10)
+            .addParameter("mutateProperty", "value")
+            .yields();
+
+        runQuery(mutateQuery);
+
+        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value') " +
+                          "YIELD nodeId, propertyValue " +
+                          "RETURN nodeId, propertyValue AS value";
+
+        HashMap<Long, Double> actual = new HashMap<>();
+        runQueryWithRowConsumer(streamQuery, r -> {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 

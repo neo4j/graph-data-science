@@ -62,19 +62,23 @@ class WriteProcedureGenerator extends ProcedureGenerator {
         return PregelWriteResult.class;
     }
 
+    Class<?> procResultBuilderClass() {
+        return PregelWriteResult.Builder.class;
+    }
+
     @Override
     MethodSpec procResultMethod() {
         return MethodSpec.methodBuilder("resultBuilder")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
-            .returns(ParameterizedTypeName.get(AbstractResultBuilder.class, PregelWriteResult.class))
+            .returns(ParameterizedTypeName.get(AbstractResultBuilder.class, procResultClass()))
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 className(pregelSpec, ALGORITHM_SUFFIX),
                 ClassName.get(HugeDoubleArray.class),
                 pregelSpec.configTypeName()
             ), "computeResult")
-            .addStatement("return new $T()", PregelWriteResult.Builder.class)
+            .addStatement("return new $T()", procResultBuilderClass())
             .build();
     }
 }

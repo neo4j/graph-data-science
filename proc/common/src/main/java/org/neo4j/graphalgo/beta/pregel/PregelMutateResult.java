@@ -21,33 +21,33 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-public final class PregelWriteResult {
+public final class PregelMutateResult {
     public final long nodePropertiesWritten;
     public final long createMillis;
     public final long computeMillis;
-    public final long writeMillis;
+    public final long mutateMillis;
 
-    private PregelWriteResult(
+    private PregelMutateResult(
         long nodePropertiesWritten,
         long createMillis,
         long computeMillis,
-        long writeMillis
+        long mutateMillis
     ) {
         this.nodePropertiesWritten = nodePropertiesWritten;
         this.createMillis = createMillis;
         this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
+        this.mutateMillis = mutateMillis;
     }
 
-    public static class Builder extends AbstractResultBuilder<PregelWriteResult> {
+    public static class Builder extends AbstractResultBuilder<PregelMutateResult> {
 
         @Override
-        public PregelWriteResult build() {
-            return new PregelWriteResult(
+        public PregelMutateResult build() {
+            return new PregelMutateResult(
                 nodePropertiesWritten,
                 createMillis,
                 computeMillis,
-                writeMillis
+                mutateMillis
             );
         }
     }
