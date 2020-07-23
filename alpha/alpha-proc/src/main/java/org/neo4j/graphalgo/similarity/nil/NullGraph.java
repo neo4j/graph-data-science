@@ -20,8 +20,6 @@
 package org.neo4j.graphalgo.similarity.nil;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -105,16 +103,6 @@ public class NullGraph implements Graph {
 
     @Override
     public NodeMapping nodeMapping() {
-        throw new NullGraphStore.NullGraphException();
-    }
-
-    @Override
-    public AdjacencyList adjacencyList() {
-        throw new NullGraphStore.NullGraphException();
-    }
-
-    @Override
-    public AdjacencyOffsets adjacencyOffsets() {
         throw new NullGraphStore.NullGraphException();
     }
 

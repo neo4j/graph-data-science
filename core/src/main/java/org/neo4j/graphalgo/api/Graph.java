@@ -83,10 +83,6 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     RelationshipIntersect intersection(long maxDegree);
 
-    AdjacencyList adjacencyList();
-
-    AdjacencyOffsets adjacencyOffsets();
-
     @Override
     Graph concurrentCopy();
 }

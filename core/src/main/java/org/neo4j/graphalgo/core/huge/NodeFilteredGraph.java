@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
 

@@ -436,7 +436,6 @@ public class HugeGraph implements CSRGraph {
         return isMultiGraph;
     }
 
-    @Override
     public Relationships relationships() {
         return Relationships.of(
             relationshipCount,
