@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import javax.tools.JavaFileObject;
@@ -77,10 +76,9 @@ class ConfigurationProcessorTest {
         assertContentEquals(className);
     }
 
-    @ParameterizedTest
-    @CsvSource("DefaultName, DefaultNameImpl")
-    void positiveTestWithSuffix(String className, String expectedClassName) {
-        assertContentEquals(className, expectedClassName);
+    @Test
+    void positiveTestDefaultName() {
+        assertContentEquals("DefaultName", "DefaultNameImpl");
     }
 
     private void assertContentEquals(String className) {
