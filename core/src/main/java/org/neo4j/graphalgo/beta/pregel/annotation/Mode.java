@@ -28,7 +28,8 @@ public enum Mode {
     STATS;
 
     public String camelCase() {
-        return this.name().substring(0, 1).toUpperCase() + this.name().toLowerCase(Locale.ENGLISH).substring(1);
+        return this.name().substring(0, 1).toUpperCase(Locale.ENGLISH) +
+               this.name().toLowerCase(Locale.ENGLISH).substring(1);
     }
 
     public String lowerCase() {
