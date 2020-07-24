@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.IntersectionConsumer;
+import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.LongPredicate;

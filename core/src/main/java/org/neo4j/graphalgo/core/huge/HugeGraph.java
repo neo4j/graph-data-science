@@ -122,7 +122,7 @@ public class HugeGraph implements Graph {
             maybePropertyCSR.map(PropertyCSR::list).orElse(null),
             maybePropertyCSR.map(PropertyCSR::offsets).orElse(null),
             topologyCSR.orientation(),
-            topology.isMultiGraph(),
+            topologyCSR.isMultiGraph(),
             tracker
         );
     }
@@ -531,13 +531,20 @@ public class HugeGraph implements Graph {
         static Relationships of(
             long relationshipCount,
             Orientation orientation,
+            boolean isMultiGraph,
             AdjacencyList adjacencyList,
             AdjacencyOffsets adjacencyOffsets,
             @Nullable AdjacencyList properties,
             @Nullable AdjacencyOffsets propertyOffsets,
             double defaultPropertyValue
         ) {
-            TopologyCSR topologyCSR = ImmutableTopologyCSR.of(adjacencyList, adjacencyOffsets, relationshipCount, orientation);
+            TopologyCSR topologyCSR = ImmutableTopologyCSR.of(
+                adjacencyList,
+                adjacencyOffsets,
+                relationshipCount,
+                orientation,
+                isMultiGraph
+            );
 
             Optional<PropertyCSR> maybePropertyCSR = properties != null && propertyOffsets != null
                 ? Optional.of(ImmutablePropertyCSR.of(
@@ -545,6 +552,7 @@ public class HugeGraph implements Graph {
                     propertyOffsets,
                     relationshipCount,
                     orientation,
+                    isMultiGraph,
                     defaultPropertyValue
                 )) : Optional.empty();
 
@@ -561,6 +569,8 @@ public class HugeGraph implements Graph {
         long elementCount();
 
         Orientation orientation();
+
+        boolean isMultiGraph();
     }
 
     @ValueClass
