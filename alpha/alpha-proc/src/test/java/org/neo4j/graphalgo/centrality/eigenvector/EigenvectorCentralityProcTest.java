@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -36,8 +35,10 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.SpanningTreeProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -67,8 +68,9 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
         super.configuration(builder);
         ClassLoader classLoader = SpanningTreeProcTest.class.getClassLoader();
         String root = new File(classLoader.getResource("got/got-s1-nodes.csv").getFile()).getParent();
-        Path fileRoot = (((SettingImpl<Path>) GraphDatabaseSettings.load_csv_file_url_root)).parse(root);
-        builder.setConfig(GraphDatabaseSettings.load_csv_file_url_root, fileRoot);
+        Setting<Path> setting = Settings.loadCsvFileUrlRoot();
+        Path fileRoot = (((SettingImpl<Path>) setting)).parse(root);
+        builder.setConfig(setting, fileRoot);
     }
 
     @BeforeEach

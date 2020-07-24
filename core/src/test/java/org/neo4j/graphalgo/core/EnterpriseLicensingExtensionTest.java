@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -34,7 +33,7 @@ class EnterpriseLicensingExtensionTest {
             .addExtension(new EnterpriseLicensingExtension())
             .impermanent()
             .build()
-            .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
+            .database(Settings.defaultDatabaseName());
 
         assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
         assertTrue(GdsEdition.instance().isOnCommunityEdition());
@@ -47,7 +46,7 @@ class EnterpriseLicensingExtensionTest {
             .setConfig(Settings.enterpriseLicensed(), true)
             .impermanent()
             .build()
-            .database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
+            .database(Settings.defaultDatabaseName());
 
         assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
         assertFalse(GdsEdition.instance().isOnCommunityEdition());

@@ -24,14 +24,26 @@ import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
+import org.neo4j.configuration.helpers.SocketAddress;
 import org.neo4j.graphalgo.compat.EnterpriseLicensingSettings;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.util.List;
 
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class Settings {
+
+    public static Setting<Boolean> authEnabled() {
+        return GraphDatabaseSettings.auth_enabled;
+    }
+
+    public static String defaultDatabaseName() {
+        return GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
+    }
 
     public static Setting<Boolean> enterpriseLicensed() {
         return EnterpriseLicensingSettings.enterpriseLicensed;
@@ -41,12 +53,24 @@ public final class Settings {
         return BoltConnector.enabled;
     }
 
+    public static Setting<SocketAddress> boltListenAddress() {
+        return BoltConnector.listen_address;
+    }
+
     public static Setting<Boolean> httpEnabled() {
         return HttpConnector.enabled;
     }
 
     public static Setting<Boolean> httpsEnabled() {
         return HttpsConnector.enabled;
+    }
+
+    public static Setting<ZoneId> dbTemporalTimezone() {
+        return GraphDatabaseSettings.db_temporal_timezone;
+    }
+
+    public static Setting<Path> neo4jHome() {
+        return GraphDatabaseSettings.neo4j_home;
     }
 
     public static Setting<Boolean> udc() {
@@ -63,6 +87,26 @@ public final class Settings {
 
     public static Setting<Path> storeInternalLogPath() {
         return GraphDatabaseSettings.store_internal_log_path;
+    }
+
+    public static Setting<Boolean> onlineBackupEnabled() {
+        return Neo4jProxy.onlineBackupEnabled();
+    }
+
+    public static Setting<List<String>> procedureUnrestricted() {
+        return GraphDatabaseSettings.procedure_unrestricted;
+    }
+
+    public static Setting<Boolean> failOnMissingFiles() {
+        return GraphDatabaseSettings.fail_on_missing_files;
+    }
+
+    public static Setting<String> additionalJvm() {
+        return Neo4jProxy.additionalJvm();
+    }
+
+    public static Setting<Path> loadCsvFileUrlRoot() {
+        return GraphDatabaseSettings.load_csv_file_url_root;
     }
 
     private Settings() {

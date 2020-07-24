@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -96,7 +95,7 @@ public class GraphStoreExport {
 
     private ImportedProperties run(boolean defaultSettingsSuitableForTests) {
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
-        var databaseConfig = Config.defaults(GraphDatabaseSettings.neo4j_home, neo4jHome.toPath());
+        var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome.toPath());
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
         var importConfig = getImportConfig(defaultSettingsSuitableForTests);
 

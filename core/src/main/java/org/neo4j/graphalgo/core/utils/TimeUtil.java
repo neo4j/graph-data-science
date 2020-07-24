@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.core.Settings;
 
 import java.time.Clock;
 import java.time.ZoneId;
@@ -29,7 +29,7 @@ import java.time.ZonedDateTime;
 public final class TimeUtil {
 
     public static ZonedDateTime now() {
-        var zoneId = Config.EMPTY.get(GraphDatabaseSettings.db_temporal_timezone);
+        var zoneId = Config.EMPTY.get(Settings.dbTemporalTimezone());
         return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
 }
