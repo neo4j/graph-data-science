@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.compat;
 
-import com.carrotsearch.hppc.LongArrayList;
+import org.eclipse.collections.impl.list.mutable.primitive.LongArrayList;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.DefaultCloseListenable;
@@ -32,7 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class CompositeNodeCursor extends DefaultCloseListenable implements Cursor {
+public abstract class CompositeNodeCursor extends DefaultCloseListenable implements Cursor {
 
     private final PriorityQueue<NodeLabelIndexCursor> cursorQueue;
     private boolean repopulateCursorQueue;
@@ -58,11 +58,12 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements Curso
         }
     }
 
-    @Nullable NodeLabelIndexCursor getCursor(int index) {
+    @Nullable
+    public NodeLabelIndexCursor getCursor(int index) {
         return cursors.get(index);
     }
 
-    void removeCursor(int index) {
+    public void removeCursor(int index) {
         var cursor = cursors.get(index);
         if (cursor != null) {
             cursor.close();
@@ -70,11 +71,11 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements Curso
         }
     }
 
-    long[] currentLabels() {
+    public long[] currentLabels() {
         return this.currentLabels.toArray();
     }
 
-    long nodeReference() {
+    public long nodeReference() {
         return current.nodeReference();
     }
 
@@ -135,8 +136,7 @@ public class CompositeNodeCursor extends DefaultCloseListenable implements Curso
         });
     }
 
-    @Override
-    public void close() {
+    public void closeCursor() {
         if (this.isClosed()) {
             return;
         }

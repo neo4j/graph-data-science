@@ -80,6 +80,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.function.ToIntFunction;
 
 public final class Neo4jProxy40 implements Neo4jProxyApi {
@@ -181,6 +182,11 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         dataRead.nodeLabelScan(label, cursor);
+    }
+
+    @Override
+    public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        return new CompositeNodeCursor40(cursors, labelIds);
     }
 
     @Override

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -51,7 +52,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanne
             .stream(labelIds)
             .mapToObj(i -> Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer()))
             .collect(Collectors.toList());
-        return new CompositeNodeCursor(cursors, labelIds);
+        return Neo4jProxy.compositeNodeCursor(cursors, labelIds);
     }
 
     @Override

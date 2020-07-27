@@ -90,6 +90,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Neo4jProxy42 implements Neo4jProxyApi {
 
@@ -180,6 +181,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+    }
+
+    @Override
+    public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        return new CompositeNodeCursor42(cursors, labelIds);
     }
 
     @Override

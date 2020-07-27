@@ -71,6 +71,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ServiceLoader;
 
 public final class Neo4jProxy {
@@ -169,6 +170,10 @@ public final class Neo4jProxy {
 
     public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         IMPL.nodeLabelScan(dataRead, label, cursor);
+    }
+
+    public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        return IMPL.compositeNodeCursor(cursors, labelIds);
     }
 
     public static OffHeapLongArray newOffHeapLongArray(long length, long defaultValue, long base) {
