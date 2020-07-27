@@ -20,23 +20,38 @@
 package org.neo4j.graphalgo.beta.pregel.cc;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.procedure.Description;
 
-
 import java.util.Queue;
 
 @Pregel
-@Procedure(name = "gds.pregel.test", modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS})
-@Description("Test computation description")
-public class Computation implements PregelComputation<PregelConfig> {
+@Procedure(name = "example.pregel.cc", modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS})
+@Description("Connected Components")
+public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
     @Override
-    public void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<ConnectedComponentsConfig> context, final long nodeId, Queue<Double> messages) {
+        double oldComponentId = context.getNodeValue(nodeId);
+        double newComponentId = oldComponentId;
+        if (context.isInitialSuperStep()) {
+            // In the first round, every node uses its own id as the component id
+            newComponentId = nodeId;
+        } else if (messages != null && !messages.isEmpty()){
+                Double nextComponentId;
+                while ((nextComponentId = messages.poll()) != null) {
+                    if (nextComponentId.longValue() < newComponentId) {
+                        newComponentId = nextComponentId.longValue();
+                    }
+                }
+        }
 
+        if (newComponentId != oldComponentId) {
+            context.setNodeValue(nodeId, newComponentId);
+            context.sendMessages(nodeId, newComponentId);
+        }
     }
 }

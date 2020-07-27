@@ -17,29 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.annotation;
+package org.neo4j.graphalgo.beta.pregel;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
+public final class PregelStatsResult {
+    public final long createMillis;
+    public final long computeMillis;
 
-    /**
-     * The namespace and name for the procedure, as a period-separated
-     * string. For instance {@code myprocedures.myprocedure}.
-     *
-     * @return the namespace and procedure name.
-     */
-    String name();
+    private PregelStatsResult(
+        long createMillis,
+        long computeMillis
+    ) {
+        this.createMillis = createMillis;
+        this.computeMillis = computeMillis;
+    }
 
-    /**
-     * The procedure modes to generate.
-     *
-     * @return procedure modes
-     */
-    GDSMode[] modes() default {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS};
+    public static class Builder extends AbstractResultBuilder<PregelStatsResult> {
+
+        @Override
+        public PregelStatsResult build() {
+            return new PregelStatsResult(createMillis, computeMillis);
+        }
+    }
 }

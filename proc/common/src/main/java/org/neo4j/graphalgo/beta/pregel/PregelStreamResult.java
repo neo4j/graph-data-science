@@ -17,29 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.annotation;
+package org.neo4j.graphalgo.beta.pregel;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public class PregelStreamResult {
+    public final long nodeId;
+    public final double value;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
-
-    /**
-     * The namespace and name for the procedure, as a period-separated
-     * string. For instance {@code myprocedures.myprocedure}.
-     *
-     * @return the namespace and procedure name.
-     */
-    String name();
-
-    /**
-     * The procedure modes to generate.
-     *
-     * @return procedure modes
-     */
-    GDSMode[] modes() default {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS};
+    public PregelStreamResult(long nodeId, double value) {
+        this.nodeId = nodeId;
+        this.value = value;
+    }
 }

@@ -19,27 +19,20 @@
  */
 package org.neo4j.graphalgo.beta.pregel.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Locale;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
+public enum GDSMode {
+    STREAM,
+    WRITE,
+    MUTATE,
+    STATS;
 
-    /**
-     * The namespace and name for the procedure, as a period-separated
-     * string. For instance {@code myprocedures.myprocedure}.
-     *
-     * @return the namespace and procedure name.
-     */
-    String name();
+    public String camelCase() {
+        return this.name().substring(0, 1).toUpperCase(Locale.ENGLISH) +
+               this.name().toLowerCase(Locale.ENGLISH).substring(1);
+    }
 
-    /**
-     * The procedure modes to generate.
-     *
-     * @return procedure modes
-     */
-    GDSMode[] modes() default {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS};
+    public String lowerCase() {
+        return this.name().toLowerCase(Locale.ENGLISH);
+    }
 }

@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.pregel;
+package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 import org.neo4j.procedure.Description;
 
 @Pregel
-@Procedure("gds.pregel.test")
+@Procedure(name = "gds.pregel.test", modes = {GDSMode.STREAM})
 @Description("Test computation description")
 public class BaseClassIsNotAPregelComputation implements Runnable {
 
