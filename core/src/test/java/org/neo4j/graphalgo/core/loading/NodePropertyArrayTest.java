@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.OptionalLong;
@@ -36,6 +37,7 @@ final class NodePropertyArrayTest {
     void emptyProperties() {
         var properties = NodePropertiesBuilder.of(
             100_000,
+            ValueType.LONG,
             AllocationTracker.EMPTY,
             -1
         ).build();
@@ -47,7 +49,7 @@ final class NodePropertyArrayTest {
 
     @Test
     void returnsValuesThatHaveBeenSet() {
-        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, 1.0));
+        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, 1.0));
 
         assertEquals(1.0, properties.nodeProperty(1));
         assertEquals(1.0, properties.nodeProperty(1, 42.0));
@@ -58,7 +60,7 @@ final class NodePropertyArrayTest {
         var expectedImplicitDefault = 42.0;
         var expectedExplicitDefault = 1337.0;
 
-        var properties = NodePropertiesBuilder.of(2L, expectedImplicitDefault, b -> {});
+        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, expectedImplicitDefault, b -> {});
 
         assertEquals(expectedImplicitDefault, properties.nodeProperty(2));
         assertEquals(expectedExplicitDefault, properties.nodeProperty(2, expectedExplicitDefault));
@@ -66,7 +68,7 @@ final class NodePropertyArrayTest {
 
     @Test
     void returnNaNIfItWasSet() {
-        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, Double.NaN));
+        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, Double.NaN));
 
         assertEquals(42.0, properties.nodeProperty(0));
         assertEquals(Double.NaN, properties.nodeProperty(1));
@@ -74,7 +76,7 @@ final class NodePropertyArrayTest {
 
     @Test
     void trackMaxValue() {
-        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 0.0, b -> {
             b.set(0, 42.0);
             b.set(1, 21.0);
         });
@@ -85,7 +87,7 @@ final class NodePropertyArrayTest {
 
     @Test
     void hasSize() {
-        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 0.0, b -> {
             b.set(0, 42.0);
             b.set(1, 21.0);
         });
@@ -96,7 +98,7 @@ final class NodePropertyArrayTest {
     void threadSafety() throws InterruptedException {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
-        var builder = NodePropertiesBuilder.of(nodeSize, AllocationTracker.EMPTY, Double.NaN);
+        var builder = NodePropertiesBuilder.of(nodeSize, ValueType.DOUBLE, AllocationTracker.EMPTY, Double.NaN);
 
         var phaser = new Phaser(3);
         pool.execute(() -> {

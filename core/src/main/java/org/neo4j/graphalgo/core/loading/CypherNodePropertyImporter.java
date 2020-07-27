@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
 import java.util.Collection;
@@ -72,7 +73,7 @@ public class CypherNodePropertyImporter {
                 propertyBuilders.computeIfAbsent(
                     property,
                     (ignore) -> NodePropertiesBuilder.of(
-                        nodeCount, AllocationTracker.EMPTY, NO_PROPERTY_VALUE
+                        nodeCount, ValueType.DOUBLE, AllocationTracker.EMPTY, NO_PROPERTY_VALUE
                     )
                 );
             }

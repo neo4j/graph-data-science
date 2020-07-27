@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphExportNodePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphStreamNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.List;
@@ -112,11 +112,11 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
                 var label = subGraph.nodeLabels(nodeId).iterator().next();
 
                 return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
-                    NumberType valueType = graphStore.nodePropertyType(label, propertyKeyAndValues.getKey());
+                    ValueType valueType = graphStore.nodePropertyType(label, propertyKeyAndValues.getKey());
 
                     double doubleValue = propertyKeyAndValues.getValue().nodeProperty(nodeId);
                     Number numberValue;
-                    if (valueType == NumberType.FLOATING_POINT) {
+                    if (valueType == ValueType.DOUBLE) {
                         numberValue = doubleValue;
                     }
                     else {

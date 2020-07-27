@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Map;
@@ -49,8 +49,8 @@ class LocalClusteringCoefficientMutateProcTest
     }
 
     @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.FLOATING_POINT;
+    public ValueType mutatePropertyType() {
+        return ValueType.DOUBLE;
     }
 
     @Override

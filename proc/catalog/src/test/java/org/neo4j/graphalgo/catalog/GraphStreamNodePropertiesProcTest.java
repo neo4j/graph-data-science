@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.values.storable.NumberType;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -191,8 +190,8 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.streamNodeProperties(" +
@@ -297,8 +296,8 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
         NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
-        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
-        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", NumberType.INTEGRAL, identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("A"), "newNodeProp3", identityProperties);
+        graphStore.addNodeProperty(NodeLabel.of("B"), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
             "CALL gds.graph.streamNodeProperty(" +

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api.schema;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.values.storable.NumberType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @ValueClass
 public interface RelationshipSchema {
-    Map<RelationshipType, Map<String, NumberType>> properties();
+    Map<RelationshipType, Map<String, ValueType>> properties();
 
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
@@ -42,12 +42,12 @@ public interface RelationshipSchema {
                 .stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    innerEntry -> GraphStoreSchema.fromNumberType(innerEntry.getValue()))
+                    innerEntry -> GraphStoreSchema.forValueType(innerEntry.getValue()))
                 )
         ));
     }
 
-    static RelationshipSchema of(Map<RelationshipType, Map<String, NumberType>> properties) {
+    static RelationshipSchema of(Map<RelationshipType, Map<String, ValueType>> properties) {
         return RelationshipSchema.builder().properties(properties).build();
     }
 
@@ -58,7 +58,7 @@ public interface RelationshipSchema {
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public void addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, NumberType relationshipProperty) {
+        public void addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, ValueType relationshipProperty) {
             this.properties
                 .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);

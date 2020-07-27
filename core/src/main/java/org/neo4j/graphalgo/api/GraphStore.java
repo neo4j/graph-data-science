@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -76,7 +77,7 @@ public interface GraphStore {
         return result;
     }
 
-    NumberType nodePropertyType(NodeLabel label, String propertyKey);
+    ValueType nodePropertyType(NodeLabel label, String propertyKey);
 
     PropertyState nodePropertyState(String propertyKey);
 
@@ -87,7 +88,6 @@ public interface GraphStore {
     void addNodeProperty(
         NodeLabel nodeLabel,
         String propertyKey,
-        NumberType propertyType,
         NodeProperties propertyValues
     );
 

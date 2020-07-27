@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -33,7 +33,7 @@ public interface PropertyTranslator<T> {
 
     Value toProperty(int propertyId, T data, long nodeId);
 
-    NumberType numberType();
+    ValueType valueType();
 
     double toDouble(final T data, final long nodeId);
 
@@ -41,8 +41,8 @@ public interface PropertyTranslator<T> {
         double toDouble(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.FLOATING_POINT;
+        default ValueType valueType() {
+            return ValueType.DOUBLE;
         }
 
         @Override
@@ -62,8 +62,8 @@ public interface PropertyTranslator<T> {
         int toInt(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.INTEGRAL;
+        default ValueType valueType() {
+            return ValueType.LONG;
         }
 
         @Override
@@ -85,8 +85,8 @@ public interface PropertyTranslator<T> {
         long toLong(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.INTEGRAL;
+        default ValueType valueType() {
+            return ValueType.LONG;
         }
 
         @Override
@@ -108,8 +108,8 @@ public interface PropertyTranslator<T> {
         long[] toLongArray(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.NO_NUMBER;
+        default ValueType valueType() {
+            return ValueType.LONG_ARRAY;
         }
 
         @Override
@@ -131,8 +131,8 @@ public interface PropertyTranslator<T> {
         double[] toDoubleArray(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.NO_NUMBER;
+        default ValueType valueType() {
+            return ValueType.DOUBLE_ARRAY;
         }
 
         @Override
@@ -154,8 +154,8 @@ public interface PropertyTranslator<T> {
         float[] toFloatArray(final T data, final long nodeId);
 
         @Override
-        default NumberType numberType() {
-            return NumberType.NO_NUMBER;
+        default ValueType valueType() {
+            return ValueType.DOUBLE_ARRAY;
         }
 
         @Override
@@ -205,8 +205,8 @@ public interface PropertyTranslator<T> {
         }
 
         @Override
-        public NumberType numberType() {
-            return NumberType.INTEGRAL;
+        public ValueType valueType() {
+            return ValueType.LONG;
         }
 
         @Override

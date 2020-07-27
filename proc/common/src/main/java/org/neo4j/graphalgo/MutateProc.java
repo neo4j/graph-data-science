@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -66,6 +67,7 @@ public abstract class MutateProc<
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         PropertyTranslator<ALGO_RESULT> resultPropertyTranslator = nodePropertyTranslator(computationResult);
+
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             log.debug("Updating in-memory graph store");
@@ -78,7 +80,6 @@ public abstract class MutateProc<
                 graphStore.addNodeProperty(
                     label,
                     mutatePropertyConfig.mutateProperty(),
-                    resultPropertyTranslator.numberType(),
                     nodeProperties(resultPropertyTranslator, computationResult.result(), graph)
                 );
             }
@@ -95,10 +96,15 @@ public abstract class MutateProc<
         if (graph instanceof NodeFilteredGraph) {
             return new NodeProperties() {
                 @Override
-                public double nodeProperty(long nodeId) {
+                public double getDouble(long nodeId) {
                     return !graph.contains(nodeId) ?
                         PropertyMapping.DEFAULT_FALLBACK_VALUE :
                         resultPropertyTranslator.toDouble(result, ((NodeFilteredGraph) graph).getMappedNodeId(nodeId));
+                }
+
+                @Override
+                public ValueType getType() {
+                    return resultPropertyTranslator.valueType();
                 }
 
                 @Override
@@ -109,8 +115,13 @@ public abstract class MutateProc<
         } else {
             return new NodeProperties() {
                 @Override
-                public double nodeProperty(long nodeId) {
+                public double getDouble(long nodeId) {
                     return resultPropertyTranslator.toDouble(result, nodeId);
+                }
+
+                @Override
+                public ValueType getType() {
+                    return resultPropertyTranslator.valueType();
                 }
 
                 @Override

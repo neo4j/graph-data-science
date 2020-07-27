@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -103,8 +104,8 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public NumberType nodePropertyType(NodeLabel label, String propertyKey) {
-        return NumberType.NO_NUMBER;
+    public ValueType nodePropertyType(NodeLabel label, String propertyKey) {
+        return ValueType.UNKNOWN;
     }
 
     @Override
@@ -126,7 +127,6 @@ public class NullGraphStore implements GraphStore {
     public void addNodeProperty(
         NodeLabel nodeLabel,
         String propertyKey,
-        NumberType propertyType,
         NodeProperties propertyValues
     ) {}
 

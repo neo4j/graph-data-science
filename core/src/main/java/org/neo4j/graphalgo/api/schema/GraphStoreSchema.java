@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.values.storable.NumberType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 
@@ -47,14 +47,7 @@ public interface GraphStoreSchema {
             .build();
     }
 
-    static String fromNumberType(NumberType nt) {
-        switch (nt) {
-            case INTEGRAL:
-                return "Integer";
-            case FLOATING_POINT:
-                return "Float";
-            default:
-                return null;
-        }
+    static String forValueType(ValueType vt) {
+        return vt.cypherName();
     }
 }

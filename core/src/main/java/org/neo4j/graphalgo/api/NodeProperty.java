@@ -19,8 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.values.storable.NumberType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 @ValueClass
 public
@@ -28,13 +29,16 @@ interface NodeProperty {
 
     String key();
 
-    NumberType type();
-
     GraphStore.PropertyState state();
 
     NodeProperties values();
 
-    static NodeProperty of(String key, NumberType type, GraphStore.PropertyState origin, NodeProperties values) {
-        return ImmutableNodeProperty.of(key, type, origin, values);
+    @Configuration.Ignore
+    default ValueType type() {
+        return values().getType();
+    };
+
+    static NodeProperty of(String key, GraphStore.PropertyState origin, NodeProperties values) {
+        return ImmutableNodeProperty.of(key, origin, values);
     }
 }

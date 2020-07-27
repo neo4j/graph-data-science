@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -206,7 +207,7 @@ public final class NativeNodePropertyImporter {
                     builders.putIfAbsent(nodeLabel, new HashMap<>());
                     for (PropertyMapping propertyMapping : propertyMappings) {
                         NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                            nodeCount, tracker, propertyMapping.defaultValue()
+                            nodeCount, ValueType.DOUBLE, tracker, propertyMapping.defaultValue()
                         );
                         builders.get(nodeLabel).put(propertyMapping, builder);
                     }
