@@ -27,12 +27,12 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.compat.OutputStreamLogBuilder;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 
@@ -150,7 +150,7 @@ class GraphSageModelTest implements FiniteDifferenceTest {
 
     @Test
     void compareSingleAndMiniBatch() {
-        Log log = FormattedLog.withLogLevel(Level.DEBUG).toOutputStream(System.out);
+        Log log = new OutputStreamLogBuilder(System.out).level(Level.DEBUG).build();
 
         GraphSageModel miniBatchModel = new GraphSageModel(CONCURRENCY, 5, List.of(mockLayer1, mockLayer2), log);
         GraphSageModel singleBatchModel =

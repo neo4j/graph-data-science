@@ -56,7 +56,6 @@ public class TestLog extends AbstractLog {
         return new ArrayList<>(messages.getOrDefault(level, new ConcurrentLinkedQueue<>()));
     }
 
-
     public void printMessages() {
         System.out.println("TestLog Messages: " + messages);
     }
@@ -84,6 +83,66 @@ public class TestLog extends AbstractLog {
     @Override
     public Logger errorLogger() {
         return new TestLogger(ERROR, messages);
+    }
+
+    @Override
+    public void debug(String message) {
+        debugLogger().log(message);
+    }
+
+    @Override
+    public void debug(String message, Throwable throwable) {
+        debugLogger().log(message, throwable);
+    }
+
+    @Override
+    public void debug(String format, Object... arguments) {
+        debugLogger().log(format, arguments);
+    }
+
+    @Override
+    public void info(String message) {
+        infoLogger().log(message);
+    }
+
+    @Override
+    public void info(String message, Throwable throwable) {
+        infoLogger().log(message, throwable);
+    }
+
+    @Override
+    public void info(String format, Object... arguments) {
+        infoLogger().log(format, arguments);
+    }
+
+    @Override
+    public void warn(String message) {
+        warnLogger().log(message);
+    }
+
+    @Override
+    public void warn(String message, Throwable throwable) {
+        warnLogger().log(message, throwable);
+    }
+
+    @Override
+    public void warn(String format, Object... arguments) {
+        warnLogger().log(format, arguments);
+    }
+
+    @Override
+    public void error(String message) {
+        errorLogger().log(message);
+    }
+
+    @Override
+    public void error(String message, Throwable throwable) {
+        errorLogger().log(message, throwable);
+    }
+
+    @Override
+    public void error(String format, Object... arguments) {
+        errorLogger().log(format, arguments);
     }
 
     @Override
@@ -122,7 +181,10 @@ public class TestLog extends AbstractLog {
         }
 
         private void logMessage(String message) {
-            ConcurrentLinkedQueue<String> messageList = messages.computeIfAbsent(level, (ignore) -> new ConcurrentLinkedQueue<>());
+            ConcurrentLinkedQueue<String> messageList = messages.computeIfAbsent(
+                level,
+                (ignore) -> new ConcurrentLinkedQueue<>()
+            );
             messageList.add(message);
         }
     }

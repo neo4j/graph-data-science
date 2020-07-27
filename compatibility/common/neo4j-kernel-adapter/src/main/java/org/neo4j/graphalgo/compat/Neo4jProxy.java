@@ -65,9 +65,12 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ServiceLoader;
 
 public final class Neo4jProxy {
@@ -234,8 +237,24 @@ public final class Neo4jProxy {
         return IMPL.queryText(query);
     }
 
-    public static Log testLogger(Level logLevel, String category, Writer writer) {
-        return IMPL.testLogger(logLevel, category, writer);
+    public static Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        PrintWriter writer
+    ) {
+        return IMPL.logger(level, zoneId, dateTimeFormatter, category, writer);
+    }
+
+    public static Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        OutputStream outputStream
+    ) {
+        return IMPL.logger(level, zoneId, dateTimeFormatter, category, outputStream);
     }
 
     public static Setting<Boolean> onlineBackupEnabled() {

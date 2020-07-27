@@ -73,11 +73,13 @@ import org.neo4j.values.storable.Value;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.function.ToIntFunction;
 
 public final class Neo4jProxy40 implements Neo4jProxyApi {
@@ -255,15 +257,35 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public Log testLogger(
-        Level logLevel,
+    public Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
         String category,
-        Writer writer
+        PrintWriter writer
     ) {
         return FormattedLog
-            .withLogLevel(logLevel)
+            .withLogLevel(level)
+            .withZoneId(zoneId)
+            .withDateTimeFormatter(dateTimeFormatter)
             .withCategory(category)
-            .toPrintWriter(new PrintWriter(writer));
+            .toPrintWriter(() -> writer);
+    }
+
+    @Override
+    public Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        OutputStream outputStream
+    ) {
+        return FormattedLog
+            .withLogLevel(level)
+            .withZoneId(zoneId)
+            .withDateTimeFormatter(dateTimeFormatter)
+            .withCategory(category)
+            .toOutputStream(() -> outputStream);
     }
 
     @Override

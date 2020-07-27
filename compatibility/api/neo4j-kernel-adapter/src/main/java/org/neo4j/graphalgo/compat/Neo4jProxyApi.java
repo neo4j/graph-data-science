@@ -65,9 +65,14 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -160,7 +165,21 @@ public interface Neo4jProxyApi {
 
     String queryText(ExecutingQuery query);
 
-    Log testLogger(Level logLevel, String category, Writer writer);
+    Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        PrintWriter writer
+    );
+
+    Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        OutputStream outputStream
+    );
 
     Setting<Boolean> onlineBackupEnabled();
 

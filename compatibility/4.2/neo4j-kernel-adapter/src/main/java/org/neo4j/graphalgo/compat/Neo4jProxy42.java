@@ -69,6 +69,7 @@ import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.LogTimeZone;
 import org.neo4j.logging.NullLogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.SimpleLogService;
@@ -80,11 +81,15 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 public final class Neo4jProxy42 implements Neo4jProxyApi {
 
@@ -258,13 +263,37 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     }
 
     @Override
-    public Log testLogger(
-        Level logLevel,
+    public Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
         String category,
-        Writer writer
+        PrintWriter writer
     ) {
         var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
-        return new Log4jLogProvider(outStream, logLevel).getLog(category);
+        return this.logger(level, zoneId, dateTimeFormatter, category, outStream);
+    }
+
+    @Override
+    public Log logger(
+        Level level,
+        ZoneId zoneId,
+        DateTimeFormatter dateTimeFormatter,
+        String category,
+        OutputStream outputStream
+    ) {
+        var logTimeZone = Arrays
+            .stream(LogTimeZone.values())
+            .filter(tz -> tz.getZoneId().equals(zoneId))
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("Can only log in UTC or " + LogTimeZone.SYSTEM.getZoneId()));
+        var context = LogConfig
+            .createBuilder(outputStream, level)
+            .withCategory(category != null)
+            .withTimezone(logTimeZone)
+            .build();
+
+        return new Log4jLogProvider(context).getLog(category != null ? category : "");
     }
 
     @Override
