@@ -121,7 +121,7 @@ public class GraphStoreExport {
                 config.batchSize()
             ));
 
-            var metaDataPath = databaseLayout.metadataStore().toPath();
+            var metaDataPath = Neo4jProxy.metadataStore(databaseLayout);
             var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
             if (dbExists) {
                 throw new IllegalArgumentException(formatWithLocale(

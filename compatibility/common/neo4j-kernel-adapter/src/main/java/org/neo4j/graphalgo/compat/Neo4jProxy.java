@@ -188,6 +188,10 @@ public final class Neo4jProxy {
         return IMPL.logProviderForStoreAndRegister(storeLogPath, fs, lifeSupport);
     }
 
+    public static Path metadataStore(DatabaseLayout databaseLayout) {
+        return IMPL.metadataStore(databaseLayout);
+    }
+
     public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,

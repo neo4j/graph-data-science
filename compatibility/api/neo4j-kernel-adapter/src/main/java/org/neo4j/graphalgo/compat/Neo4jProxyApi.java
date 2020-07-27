@@ -137,6 +137,8 @@ public interface Neo4jProxyApi {
         LifeSupport lifeSupport
     ) throws IOException;
 
+    Path metadataStore(DatabaseLayout databaseLayout);
+
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
