@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.MutateProc;
-import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
+import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.util.Elements;
@@ -36,8 +36,8 @@ class MutateProcedureGenerator extends WriteProcedureGenerator {
     }
 
     @Override
-    Mode procMode() {
-        return Mode.MUTATE;
+    GDSMode procGdsMode() {
+        return GDSMode.MUTATE;
     }
 
     @Override

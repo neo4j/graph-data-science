@@ -28,7 +28,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
+import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 
 import javax.lang.model.SourceVersion;
@@ -56,7 +57,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     static TypeSpec forMode(
-        Mode mode,
+        GDSMode mode,
         Elements elementUtils,
         SourceVersion sourceVersion,
         PregelValidation.Spec pregelSpec
@@ -70,9 +71,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
         }
     }
 
-    abstract Mode procMode();
+    abstract GDSMode procGdsMode();
 
-    abstract org.neo4j.procedure.Mode procExecMode();
+    abstract Mode procExecMode();
 
     abstract Class<?> procBaseClass();
 
@@ -82,7 +83,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     TypeSpec typeSpec() {
         var configTypeName = pregelSpec.configTypeName();
-        var procedureClassName = className(pregelSpec, procMode().camelCase() + PROCEDURE_SUFFIX);
+        var procedureClassName = className(pregelSpec, procGdsMode().camelCase() + PROCEDURE_SUFFIX);
         var algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
@@ -110,11 +111,11 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procMethod() {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(procMode().lowerCase());
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(procGdsMode().lowerCase());
 
         // add procedure annotation
         methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-            .addMember("name", "$S", pregelSpec.procedureName() + "." + procMode().lowerCase())
+            .addMember("name", "$S", pregelSpec.procedureName() + "." + procGdsMode().lowerCase())
             .addMember("mode", "$T.$L", org.neo4j.procedure.Mode.class, procExecMode())
             .build()
         );
@@ -135,7 +136,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                     .addMember("defaultValue", "$S", "{}")
                     .build())
                 .build())
-            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procMode().lowerCase())
+            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procGdsMode().lowerCase())
             .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
             .build();
     }

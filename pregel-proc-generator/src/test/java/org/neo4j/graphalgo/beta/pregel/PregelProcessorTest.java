@@ -42,6 +42,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.condition.JRE.JAVA_12;
 import static org.junit.jupiter.api.condition.JRE.JAVA_13;
 import static org.junit.jupiter.api.condition.JRE.JAVA_14;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 // Need to disable this for Java versions > 11
 // the dependency to com.google.testing.compile:compile-testing has not been updated since May 2019
@@ -63,11 +64,11 @@ class PregelProcessorTest {
             .compilesWithoutError()
             .and()
             .generatesSources(
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStreamProc.java", className)),
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sWriteProc.java", className)),
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sMutateProc.java", className)),
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sStatsProc.java", className)),
-                loadExpectedFile(String.format(Locale.ENGLISH, "expected/%sAlgorithm.java", className))
+                loadExpectedFile(formatWithLocale("expected/%sStreamProc.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sWriteProc.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sMutateProc.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sStatsProc.java", className)),
+                loadExpectedFile(formatWithLocale("expected/%sAlgorithm.java", className))
             );
     }
 

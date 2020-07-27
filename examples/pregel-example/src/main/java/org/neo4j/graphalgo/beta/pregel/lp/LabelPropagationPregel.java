@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.lp;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
-import org.neo4j.graphalgo.beta.pregel.annotation.Mode;
+import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
 import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
 
@@ -33,7 +33,7 @@ import java.util.Queue;
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
  */
 @Pregel
-@Procedure(name = "example.pregel.lp", modes = {Mode.STREAM})
+@Procedure(name = "example.pregel.lp", modes = {GDSMode.STREAM})
 public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
     @Override

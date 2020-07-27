@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.annotation;
 
 import java.util.Locale;
 
-public enum Mode {
+public enum GDSMode {
     STREAM,
     WRITE,
     MUTATE,

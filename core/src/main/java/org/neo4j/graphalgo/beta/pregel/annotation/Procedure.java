@@ -41,5 +41,5 @@ public @interface Procedure {
      *
      * @return procedure modes
      */
-    Mode[] modes() default {Mode.STREAM, Mode.WRITE, Mode.MUTATE, Mode.STATS};
+    GDSMode[] modes() default {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS};
 }
