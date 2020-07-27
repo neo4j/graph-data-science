@@ -17,30 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core;
+package org.neo4j.graphalgo.api.nodeproperties;
 
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
-public class IdentityProperties implements NodeProperties {
-    private final long expectedPropertyCount;
+@FunctionalInterface
+public interface LongNodeProperties extends NodeProperties {
 
-    public IdentityProperties(long expectedPropertyCount) {
-        this.expectedPropertyCount = expectedPropertyCount;
+    @Override
+    long getLong(long nodeId);
+
+    @Override
+    default Object getObject(long nodeId, Object defaultValue) {
+        return getLong(nodeId, (Long) defaultValue);
     }
 
     @Override
-    public double getDouble(long nodeId) {
-        return nodeId;
-    }
+    default Value getValue(long nodeId) {
+        return Values.longValue(getLong(nodeId));
+    };
 
     @Override
-    public ValueType getType() {
+    default ValueType getType() {
         return ValueType.LONG;
-    }
+    };
 
     @Override
-    public long size() {
-        return expectedPropertyCount;
-    }
+    default double getDouble(long nodeId) {
+        return getLong(nodeId);
+    };
 }

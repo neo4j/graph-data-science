@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
@@ -47,13 +48,16 @@ public final class NodePropertyArray implements NodeProperties {
     private final OptionalLong maxValue;
     private final long size;
     private final HugeSparseLongArray properties;
+    private final ValueType valueType;
 
     NodePropertyArray(
+        ValueType valueType,
         double defaultValue,
         OptionalLong maxValue,
         long size,
         HugeSparseLongArray properties
     ) {
+        this.valueType = valueType;
         this.defaultValue = defaultValue;
         this.maxValue = maxValue;
         this.size = size;
@@ -61,16 +65,21 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     @Override
-    public double nodeProperty(long nodeId) {
-        return nodeProperty(nodeId, defaultValue);
+    public double getDouble(long nodeId) {
+        return getDouble(nodeId, defaultValue);
     }
 
     @Override
-    public double nodeProperty(long nodeId, double defaultValue) {
+    public double getDouble(long nodeId, double defaultValue) {
         var bits = properties.get(nodeId);
         // -1 is represented as NaN, but it's a different NaN than NaN,
         // so we can differentiate between explicit NaN and a missing value
         return bits == -1 ? defaultValue : Double.longBitsToDouble(bits);
+    }
+
+    @Override
+    public ValueType getType() {
+        return valueType;
     }
 
     @Override

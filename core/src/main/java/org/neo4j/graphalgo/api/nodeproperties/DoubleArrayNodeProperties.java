@@ -17,30 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core;
+package org.neo4j.graphalgo.api.nodeproperties;
 
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
-public class IdentityProperties implements NodeProperties {
-    private final long expectedPropertyCount;
+@FunctionalInterface
+public interface DoubleArrayNodeProperties extends NodeProperties {
 
-    public IdentityProperties(long expectedPropertyCount) {
-        this.expectedPropertyCount = expectedPropertyCount;
+    @Override
+    double[] getDoubleArray(long nodeId);
+
+    @Override
+    default Object getObject(long nodeId, Object defaultValue) {
+        return getDoubleArray(nodeId, (double[]) defaultValue);
     }
 
     @Override
-    public double getDouble(long nodeId) {
-        return nodeId;
-    }
+    default Value getValue(long nodeId) {
+        var value = getDoubleArray(nodeId);
+        return value == null ? null : Values.doubleArray(value);
+    };
 
     @Override
-    public ValueType getType() {
-        return ValueType.LONG;
-    }
+    default ValueType getType() {
+        return ValueType.DOUBLE_ARRAY;
+    };
 
     @Override
-    public long size() {
-        return expectedPropertyCount;
-    }
+    default double getDouble(long nodeId) {
+        throw new UnsupportedOperationException("double is not supported");
+    };
 }

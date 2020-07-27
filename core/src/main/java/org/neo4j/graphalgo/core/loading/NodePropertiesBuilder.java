@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
@@ -32,6 +33,7 @@ import java.util.function.Consumer;
 public final class NodePropertiesBuilder {
 
     private final double defaultValue;
+    private final ValueType valueType;
     private final HugeSparseLongArray.Builder valuesBuilder;
     private final LongAdder size;
 
@@ -54,18 +56,19 @@ public final class NodePropertiesBuilder {
     @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
     private volatile long maxValue;
 
-    public static NodePropertiesBuilder of(long nodeSize, AllocationTracker tracker, double defaultValue) {
-        return new NodePropertiesBuilder(defaultValue, nodeSize, tracker);
+    public static NodePropertiesBuilder of(long nodeSize, ValueType valueType, AllocationTracker tracker, double defaultValue) {
+        return new NodePropertiesBuilder(valueType, defaultValue, nodeSize, tracker);
     }
 
     @TestOnly
-    static NodePropertyArray of(long size, double defaultValue, Consumer<NodePropertiesBuilder> buildBlock) {
-        var builder = of(size, AllocationTracker.EMPTY, defaultValue);
+    static NodePropertyArray of(long size, ValueType valueType, double defaultValue, Consumer<NodePropertiesBuilder> buildBlock) {
+        var builder = of(size, valueType, AllocationTracker.EMPTY, defaultValue);
         buildBlock.accept(builder);
         return builder.build();
     }
 
-    private NodePropertiesBuilder(double defaultValue, long nodeSize, AllocationTracker tracker) {
+    private NodePropertiesBuilder(ValueType valueType, double defaultValue, long nodeSize, AllocationTracker tracker) {
+        this.valueType = valueType;
         this.defaultValue = defaultValue;
         this.valuesBuilder = HugeSparseLongArray.Builder.create(nodeSize, tracker);
         this.size = new LongAdder();
@@ -82,6 +85,7 @@ public final class NodePropertiesBuilder {
         var size = this.size.sum();
         var maxValue = size == 0 ? OptionalLong.empty() : OptionalLong.of((long) MAX_VALUE.getVolatile(this));
         return new NodePropertyArray(
+            valueType,
             defaultValue,
             maxValue,
             size,

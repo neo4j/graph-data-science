@@ -38,12 +38,12 @@ public class NullPropertyMap implements NodeProperties {
     }
 
     @Override
-    public double nodeProperty(final long nodeId) {
+    public double getDouble(final long nodeId) {
         return defaultValue;
     }
 
     @Override
-    public double nodeProperty(final long nodeId, final double defaultValue) {
+    public double getDouble(final long nodeId, final double defaultValue) {
         return defaultValue;
     }
 }
