@@ -72,13 +72,14 @@ final class PregelValidation {
             return Optional.empty();
         }
 
-        var computationName = pregelElement.getSimpleName().toString();
         var procedure = Optional.ofNullable(pregelElement.getAnnotation(PregelProcedure.class)).get();
+
+        var computationName = pregelElement.getSimpleName().toString();
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
-        var maybeDescription = Optional.ofNullable(MoreElements
-            .getAnnotationMirror(pregelElement, Description.class)
-            .orNull());
+        var maybeDescription = procedure.description().isBlank()
+            ? Optional.<String>empty()
+            : Optional.of(procedure.description());
 
         return Optional.of(ImmutableSpec.of(
             pregelElement,
@@ -192,7 +193,7 @@ final class PregelValidation {
 
         GDSMode[] procedureModes();
 
-        Optional<AnnotationMirror> description();
+        Optional<String> description();
     }
 
 }

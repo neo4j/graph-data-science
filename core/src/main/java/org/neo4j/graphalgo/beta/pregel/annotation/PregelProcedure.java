@@ -42,4 +42,11 @@ public @interface PregelProcedure {
      * @return procedure modes
      */
     GDSMode[] modes() default {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS};
+
+    /**
+     * A description of the procedure that can be accessed via Cypher.
+     *
+     * @return procedure description
+     */
+    String description() default "";
 }

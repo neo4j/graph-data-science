@@ -28,8 +28,11 @@ import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
-@PregelProcedure(name = "gds.pregel.test", modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS})
-@Description("Test computation description")
+@PregelProcedure(
+    name = "gds.pregel.test",
+    description = "Test computation description",
+    modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS}
+)
 public class Computation implements PregelComputation<PregelConfig> {
 
     @Override

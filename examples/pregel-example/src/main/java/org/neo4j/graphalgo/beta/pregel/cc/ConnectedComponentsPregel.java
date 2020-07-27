@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
@@ -31,8 +30,11 @@ import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STATS;
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.WRITE;
 
-@PregelProcedure(name = "example.pregel.cc", modes = {STREAM, WRITE, MUTATE, STATS})
-@Description("Connected Components")
+@PregelProcedure(
+    name = "example.pregel.cc",
+    description = "Connected Components",
+    modes = {STREAM, WRITE, MUTATE, STATS}
+)
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
     @Override

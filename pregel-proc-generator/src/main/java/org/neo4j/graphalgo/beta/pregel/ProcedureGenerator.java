@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 
@@ -120,7 +121,11 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .build()
         );
         // add description
-        pregelSpec.description().ifPresent(annotationMirror -> methodBuilder.addAnnotation(AnnotationSpec.get(annotationMirror)));
+        pregelSpec.description().ifPresent(description -> methodBuilder.addAnnotation(
+            AnnotationSpec.builder(Description.class)
+                .addMember("value", "$S", description)
+                .build()
+        ));
 
         return methodBuilder
             .addModifiers(Modifier.PUBLIC)
