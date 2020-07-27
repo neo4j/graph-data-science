@@ -111,9 +111,10 @@ class ProgressLoggingTest extends BaseTest {
     }
 
     private static Log testLogger(StringWriter writer) {
-        return Neo4jProxy.toPrintWriter(
-            FormattedLog.withLogLevel(Level.DEBUG).withCategory("Test"),
-            new PrintWriter(writer)
+        return Neo4jProxy.testLogger(
+            Level.DEBUG,
+            "Test",
+            writer
         );
     }
 }

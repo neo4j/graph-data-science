@@ -56,7 +56,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
-import org.neo4j.logging.FormattedLog;
+import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
@@ -64,7 +64,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.nio.file.OpenOption;
 
 public interface Neo4jProxyApi {
@@ -150,7 +150,7 @@ public interface Neo4jProxyApi {
 
     String queryText(ExecutingQuery query);
 
-    Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer);
+    Log testLogger(Level logLevel, String category, Writer writer);
 
     Setting<Boolean> onlineBackupEnabled();
 

@@ -62,6 +62,7 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.logging.FormattedLog;
+import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
@@ -71,6 +72,7 @@ import org.neo4j.values.storable.Value;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.OpenOption;
 import java.util.function.ToIntFunction;
@@ -236,8 +238,15 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public Log toPrintWriter(FormattedLog.Builder builder, PrintWriter writer) {
-        return builder.toPrintWriter(() -> writer);
+    public Log testLogger(
+        Level logLevel,
+        String category,
+        Writer writer
+    ) {
+        return FormattedLog
+            .withLogLevel(logLevel)
+            .withCategory(category)
+            .toPrintWriter(new PrintWriter(writer));
     }
 
     @Override

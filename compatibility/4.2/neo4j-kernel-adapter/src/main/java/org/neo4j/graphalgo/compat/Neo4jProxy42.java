@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.ExternalSettings;
@@ -65,31 +66,31 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
-import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.log4j.Log4jLogProvider;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 
-public final class Neo4jProxy41 implements Neo4jProxyApi {
+public final class Neo4jProxy42 implements Neo4jProxyApi {
 
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
-        return new CompatGraphDatabaseAPI41(dbms);
+        return new CompatGraphDatabaseAPI42(dbms);
     }
 
     @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return new CompatAccessMode41(customAccessMode);
+        return new CompatAccessMode42(customAccessMode);
     }
 
     @Override
@@ -138,7 +139,7 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         int pageSize,
         OpenOption... openOptions
     ) throws IOException {
-        return pageCache.map(file, pageSize, Sets.immutable.of(openOptions));
+        return pageCache.map(file.toPath(), pageSize, Sets.immutable.of(openOptions));
     }
 
     @Override
@@ -238,10 +239,8 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
         String category,
         Writer writer
     ) {
-        return FormattedLog
-            .withLogLevel(logLevel)
-            .withCategory(category)
-            .toPrintWriter(() -> new PrintWriter(writer));
+        var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
+        return new Log4jLogProvider(outStream, logLevel).getLog(category);
     }
 
     @Override
