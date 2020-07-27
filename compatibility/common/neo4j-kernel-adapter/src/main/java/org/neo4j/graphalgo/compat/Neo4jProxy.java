@@ -56,7 +56,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
-import org.neo4j.logging.FormattedLog;
+import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
@@ -65,9 +65,9 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
 import java.util.ServiceLoader;
 
 public final class Neo4jProxy {
@@ -178,6 +178,14 @@ public final class Neo4jProxy {
 
     public static MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
         return IMPL.memoryTracker(kernelTransaction);
+    }
+
+    public static LogService logProviderForStoreAndRegister(
+        Path storeLogPath,
+        FileSystemAbstraction fs,
+        LifeSupport lifeSupport
+    ) throws IOException {
+        return IMPL.logProviderForStoreAndRegister(storeLogPath, fs, lifeSupport);
     }
 
     public static BatchImporter instantiateBatchImporter(

@@ -48,8 +48,8 @@ import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.lifecycle.LifeSupport;
+import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
-import org.neo4j.logging.internal.StoreLogService;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,9 +102,13 @@ public class GraphStoreExport {
         var lifeSupport = new LifeSupport();
 
         try (FileSystemAbstraction fs = new DefaultFileSystemAbstraction()) {
-            var logService = config.enableDebugLog()
-                ? lifeSupport.add(StoreLogService.withInternalLog(databaseConfig.get(Settings.storeInternalLogPath()).toFile()).build(fs))
-                : NullLogService.getInstance();
+            LogService logService;
+            if (config.enableDebugLog()) {
+                var storeInternalLogPath = databaseConfig.get(Settings.storeInternalLogPath());
+                logService = Neo4jProxy.logProviderForStoreAndRegister(storeInternalLogPath, fs, lifeSupport);
+            } else {
+                logService = NullLogService.getInstance();
+            }
             var jobScheduler = lifeSupport.add(createScheduler());
 
             lifeSupport.start();

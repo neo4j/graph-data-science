@@ -56,6 +56,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
+import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
@@ -66,6 +67,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
 
 public interface Neo4jProxyApi {
 
@@ -128,6 +130,12 @@ public interface Neo4jProxyApi {
     LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue);
 
     MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
+
+    LogService logProviderForStoreAndRegister(
+        Path storeLogPath,
+        FileSystemAbstraction fs,
+        LifeSupport lifeSupport
+    ) throws IOException;
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

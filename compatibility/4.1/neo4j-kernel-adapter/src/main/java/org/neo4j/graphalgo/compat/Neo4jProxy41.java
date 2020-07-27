@@ -65,10 +65,12 @@ import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
+import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.FormattedLog;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
@@ -79,6 +81,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.OpenOption;
+import java.nio.file.Path;
 
 public final class Neo4jProxy41 implements Neo4jProxyApi {
 
@@ -184,6 +187,15 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
         return kernelTransaction.memoryTracker();
+    }
+
+    @Override
+    public LogService logProviderForStoreAndRegister(
+        Path storeLogPath,
+        FileSystemAbstraction fs,
+        LifeSupport lifeSupport
+    ) throws IOException {
+        return lifeSupport.add(StoreLogService.withInternalLog(storeLogPath.toFile()).build(fs));
     }
 
     @Override
