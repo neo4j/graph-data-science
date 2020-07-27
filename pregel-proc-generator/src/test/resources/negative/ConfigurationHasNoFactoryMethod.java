@@ -21,14 +21,12 @@ import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
-import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
-@Pregel
-@Procedure(name = "gds.pregel.test", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "gds.pregel.test", modes = {GDSMode.STREAM})
 @Description("Test computation description")
 public class ConfigurationHasNoFactoryMethod implements PregelComputation<ConfigurationHasNoFactoryMethod.ComputationConfig> {
 

@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface Procedure {
+public @interface PregelProcedure {
 
     /**
      * The namespace and name for the procedure, as a period-separated

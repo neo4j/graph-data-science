@@ -24,8 +24,7 @@ import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.TypeName;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
-import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
@@ -65,20 +64,16 @@ final class PregelValidation {
     }
 
     Optional<Spec> validate(Element pregelElement) {
-        var pregelAnnotationMirror = MoreElements.getAnnotationMirror(pregelElement, Pregel.class).get();
-        var maybeProcedure = Optional.ofNullable(pregelElement.getAnnotation(Procedure.class));
-
         if (
             !isClass(pregelElement) ||
             !isPregelComputation(pregelElement) ||
-            !configHasFactoryMethod(pregelElement) ||
-            !hasProcedureAnnotation(maybeProcedure, pregelElement, pregelAnnotationMirror)
+            !configHasFactoryMethod(pregelElement)
         ) {
             return Optional.empty();
         }
 
         var computationName = pregelElement.getSimpleName().toString();
-        var procedure = maybeProcedure.get();
+        var procedure = Optional.ofNullable(pregelElement.getAnnotation(PregelProcedure.class)).get();
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
         var maybeDescription = Optional.ofNullable(MoreElements
@@ -181,22 +176,6 @@ final class PregelValidation {
             .stream()
             .findFirst()
             .get();
-    }
-
-    private boolean hasProcedureAnnotation(
-        Optional<Procedure> maybeProcedure,
-        Element pregelElement,
-        AnnotationMirror pregelAnnotationMirror
-    ) {
-        return maybeProcedure.map(x -> true).orElseGet(() -> {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                "The annotated Pregel computation must be annotated with the @Procedure annotation.",
-                pregelElement,
-                pregelAnnotationMirror
-            );
-            return false;
-        });
     }
 
     @ValueClass

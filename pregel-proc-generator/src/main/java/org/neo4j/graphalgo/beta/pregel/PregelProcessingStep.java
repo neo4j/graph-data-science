@@ -23,7 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
 import com.squareup.javapoet.JavaFile;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -36,7 +36,7 @@ import java.util.Set;
 
 public final class PregelProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
 
-    private static final Class<Pregel> ANNOTATION_CLASS = Pregel.class;
+    private static final Class<PregelProcedure> ANNOTATION_CLASS = PregelProcedure.class;
 
     private final Messager messager;
     private final Filer filer;

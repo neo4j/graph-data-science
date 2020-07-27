@@ -26,8 +26,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
-import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -36,8 +35,7 @@ import java.util.Queue;
 
 import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
-@Pregel
-@Procedure(name = "example.pregel.sssp", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "example.pregel.sssp", modes = {GDSMode.STREAM})
 public class SingleSourceShortestPathPregel implements PregelComputation<SingleSourceShortestPathPregelConfig> {
 
     @Override

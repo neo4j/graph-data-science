@@ -26,16 +26,14 @@ import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.Pregel;
-import org.neo4j.graphalgo.beta.pregel.annotation.Procedure;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 import java.util.Queue;
 
-@Pregel
-@Procedure(name = "example.pregel.pr", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "example.pregel.pr", modes = {GDSMode.STREAM})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override
