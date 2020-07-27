@@ -102,6 +102,7 @@ allprojects { proj ->
 
                 // These files were copied from lucene and need to keep their license headers
                 exclude '**/CloseableThreadLocal*.java'
+                exclude '**/IntPriorityQueue*.java'
             }
             tasks.check.dependsOn tasks.license
 
