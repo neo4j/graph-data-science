@@ -77,6 +77,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        return graph.degreeWithoutParallelRelationships(nodeId);
+    }
+
+    @Override
     public NodeMapping nodeMapping() {
         return graph.nodeMapping();
     }
@@ -194,5 +199,12 @@ public abstract class FilterGraph implements Graph {
     @Override
     public void releaseProperties() {
         graph.releaseProperties();
+    }
+
+    @Override
+    public boolean isMultiGraph() {
+        // by filtering out elements the guarantee could become fulfilled, but we don't know
+        // it would never go from fulfilled to not fulfilled however, so this is safe
+        return graph.isMultiGraph();
     }
 }

@@ -142,4 +142,8 @@ public enum Aggregation {
         return aggregation == Aggregation.DEFAULT ? Aggregation.NONE : aggregation;
 
     }
+
+    public static boolean equivalentToNone(Aggregation aggregation) {
+        return resolve(aggregation) == NONE;
+    }
 }

@@ -70,6 +70,11 @@ public class NodeFilteredGraph extends FilterGraph {
     }
 
     @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
+        return super.degreeWithoutParallelRelationships(filteredIdMap.toOriginalNodeId(nodeId));
+    }
+
+    @Override
     public long nodeCount() {
         return filteredIdMap.nodeCount();
     }

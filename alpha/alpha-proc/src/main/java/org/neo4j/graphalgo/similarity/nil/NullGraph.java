@@ -64,6 +64,11 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public boolean isMultiGraph() {
+        return false;
+    }
+
+    @Override
     public boolean hasRelationshipProperty() {
         return false;
     }
@@ -88,6 +93,11 @@ public class NullGraph implements Graph {
 
     @Override
     public int degree(long nodeId) {
+        return 0;
+    }
+
+    @Override
+    public int degreeWithoutParallelRelationships(long nodeId) {
         return 0;
     }
 

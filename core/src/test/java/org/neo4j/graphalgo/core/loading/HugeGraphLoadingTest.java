@@ -23,12 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
@@ -36,6 +38,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
@@ -191,5 +195,60 @@ final class HugeGraphLoadingTest extends BaseTest {
 
         Graph union = graphStore.getUnion();
         assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b), (a)<--(b), (a)-->(b)"), union);
+    }
+
+    @Test
+    void canIdentifyMultigraph() {
+        runQuery("CREATE (a)-[:TYPE {t: 1}]->(b), (a)-[:TYPE {t: 2}]->(b), (a)-[:TYPE2]->(b)");
+
+        GraphStore graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_NONE",
+                RelationshipProjection.of("TYPE", Aggregation.NONE)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_PROP_NONE",
+                RelationshipProjection.builder()
+                    .type("TYPE")
+                    .properties(PropertyMappings.builder()
+                        .addMapping(PropertyMapping.of("t", Aggregation.NONE))
+                        .build())
+                    .build()
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_SINGLE",
+                RelationshipProjection.of("TYPE", Aggregation.SINGLE)
+            )
+            .putRelationshipProjectionsWithIdentifier(
+                "TYPE_PROP_SINGLE",
+                RelationshipProjection.builder()
+                    .type("TYPE")
+                    .properties(PropertyMappings.builder()
+                        .addMapping(PropertyMapping.of("t", Aggregation.SINGLE))
+                        .build())
+                    .build()
+            )
+            .addRelationshipProjection(RelationshipProjection.of("TYPE2", Aggregation.SINGLE))
+            .build()
+            .graphStore();
+
+        // using single rel type with aggregation guarantees no parallels
+        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_SINGLE")).isMultiGraph());
+        assertFalse(graphStore.getGraph(RelationshipType.of("TYPE_PROP_SINGLE")).isMultiGraph());
+
+        // using a NONE may have a parallel (indeed has in this test)
+        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_NONE")).isMultiGraph());
+        assertTrue(graphStore.getGraph(RelationshipType.of("TYPE_PROP_NONE")).isMultiGraph());
+
+        // using multiple rel types does not guarantee, even if they are all aggregated
+        // if union graph improves, these conditions could change
+        assertTrue(graphStore.getUnion().isMultiGraph());
+        assertTrue(graphStore
+            .getGraph(RelationshipType.of("TYPE_SINGLE"), RelationshipType.of("TYPE2"))
+            .isMultiGraph());
+        assertTrue(graphStore
+            .getGraph(RelationshipType.of("TYPE_SINGLE"), RelationshipType.of("TYPE_PROP_SINGLE"))
+            .isMultiGraph());
     }
 }

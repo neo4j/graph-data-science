@@ -168,6 +168,7 @@ class GraphStoreTest extends BaseTest {
         HugeGraph.Relationships relationships = HugeGraph.Relationships.of(
             0L,
             Orientation.NATURAL,
+            false,
             new AdjacencyList(new byte[0][0]),
             AdjacencyOffsets.of(new long[0]),
             null,
