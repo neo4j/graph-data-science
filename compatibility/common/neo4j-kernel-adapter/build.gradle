@@ -16,5 +16,6 @@ dependencies {
 
     implementation project(':neo4j-kernel-adapter-4.0')
     implementation project(':neo4j-kernel-adapter-4.1')
+    implementation project(':neo4j-kernel-adapter-4.2')
 }
 

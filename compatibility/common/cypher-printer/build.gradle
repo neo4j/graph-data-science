@@ -7,6 +7,7 @@ dependencies {
     api project(':cypher-printer-api')
     implementation project(':cypher-printer-4.0')
     implementation project(':cypher-printer-4.1')
+    implementation project(':cypher-printer-4.2')
 
     annotationProcessor group: 'org.immutables', name: 'builder',               version: ver.'immutables'
     annotationProcessor group: 'org.immutables', name: 'value',                 version: ver.'immutables'
