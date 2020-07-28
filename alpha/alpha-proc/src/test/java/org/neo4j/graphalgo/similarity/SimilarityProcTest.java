@@ -50,6 +50,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
@@ -252,5 +253,20 @@ public abstract class SimilarityProcTest<
             });
         });
 
+    }
+
+    @Test
+    void leavesNoTraceInGraphCatalogOnError() {
+        applyOnProcedure((proc) -> {
+            getProcMethods(proc).forEach(method -> {
+                Map<String, Object> config = minimalViableConfig();
+                config.put("foo", 5);
+                var ignored = assertThrows(
+                    InvocationTargetException.class,
+                    () -> method.invoke(proc, config, Map.of())
+                );
+                assertEquals(0, GraphStoreCatalog.getGraphStores(getUsername()).size());
+            });
+        });
     }
 }

@@ -146,11 +146,13 @@ abstract class SimilarityProc
                 AllocationTracker tracker,
                 Log log
             ) {
-                GraphStoreCatalog.remove(getUsername(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+                removeGraph();
                 return newAlgo(config);
             }
         };
     }
+
+
 
     // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override
@@ -186,7 +188,16 @@ abstract class SimilarityProc
             );
         }
         // And finally we call super in named graph mode
-        return super.processInput(graphNameOrConfig, configuration);
+        try {
+            return super.processInput(graphNameOrConfig, configuration);
+        } catch (RuntimeException e) {
+            removeGraph();
+            throw e;
+        }
+    }
+
+    private void removeGraph() {
+        GraphStoreCatalog.remove(getUsername(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
