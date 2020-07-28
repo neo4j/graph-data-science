@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
@@ -251,19 +250,6 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
     /* test-only */
     static HugeIntArray newSingleArray(int size, AllocationTracker tracker) {
         return SingleHugeIntArray.of(size, tracker);
-    }
-
-    /**
-     * A {@link PropertyTranslator} for instances of {@link HugeIntArray}s.
-     */
-    public static class Translator implements PropertyTranslator.OfInt<HugeIntArray> {
-
-        public static final Translator INSTANCE = new Translator();
-
-        @Override
-        public int toInt(final HugeIntArray data, final long nodeId) {
-            return data.get(nodeId);
-        }
     }
 
     private static final class SingleHugeIntArray extends HugeIntArray {

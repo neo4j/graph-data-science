@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
-
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -78,16 +76,6 @@ public final class PagedAtomicIntegerArray extends PagedDataStructure<AtomicInte
         final int pageIndex = pageIndex(index);
         final int indexInPage = indexInPage(index);
         return pages[pageIndex].compareAndSet(indexInPage, expected, update);
-    }
-
-    public static class Translator implements PropertyTranslator.OfInt<PagedAtomicIntegerArray> {
-
-        public static final PagedAtomicIntegerArray.Translator INSTANCE = new PagedAtomicIntegerArray.Translator();
-
-        @Override
-        public int toInt(final PagedAtomicIntegerArray data, final long nodeId) {
-            return data.get((int) nodeId);
-        }
     }
 
 }

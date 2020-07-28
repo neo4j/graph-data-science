@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -166,19 +165,6 @@ public abstract class HugeAtomicDoubleArray {
         final DoublePageCreator pageFiller
     ) {
         return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.EMPTY);
-    }
-
-    /**
-     * A {@link PropertyTranslator} for instances of {@link HugeAtomicDoubleArray}s.
-     */
-    public static class Translator implements PropertyTranslator.OfDouble<HugeAtomicDoubleArray> {
-
-        public static final HugeAtomicDoubleArray.Translator INSTANCE = new HugeAtomicDoubleArray.Translator();
-
-        @Override
-        public double toDouble(final HugeAtomicDoubleArray data, final long nodeId) {
-            return data.get(nodeId);
-        }
     }
 
     private static final class SingleHugeAtomicDoubleArray extends HugeAtomicDoubleArray {

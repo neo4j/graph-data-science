@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -186,19 +185,6 @@ public abstract class HugeAtomicLongArray {
     /* test-only */
     static HugeAtomicLongArray newSingleArray(int size, final LongPageCreator pageFiller, AllocationTracker tracker) {
         return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
-    }
-
-    /**
-     * A {@link PropertyTranslator} for instances of {@link HugeAtomicLongArray}s.
-     */
-    public static class Translator implements PropertyTranslator.OfLong<HugeAtomicLongArray> {
-
-        public static final Translator INSTANCE = new Translator();
-
-        @Override
-        public long toLong(final HugeAtomicLongArray data, final long nodeId) {
-            return data.get(nodeId);
-        }
     }
 
     private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {

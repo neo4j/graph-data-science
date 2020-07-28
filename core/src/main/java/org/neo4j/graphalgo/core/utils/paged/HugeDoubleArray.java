@@ -238,22 +238,6 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
         return SingleHugeDoubleArray.of(size, tracker);
     }
 
-    /**
-     * A {@link PropertyTranslator} for instances of {@link HugeDoubleArray}s.
-     */
-    public static class HugeDoubleNodeProperties implements DoubleNodeProperties {
-        private final HugeDoubleArray data;
-
-        public HugeDoubleNodeProperties(HugeDoubleArray data) {
-            this.data = data;
-        }
-
-        @Override
-        public double getDouble(long nodeId) {
-            return data.get(nodeId);
-        }
-    }
-
     private static final class SingleHugeDoubleArray extends HugeDoubleArray {
 
         private static HugeDoubleArray of(long size, AllocationTracker tracker) {

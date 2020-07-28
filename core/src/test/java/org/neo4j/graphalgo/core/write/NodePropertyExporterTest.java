@@ -152,11 +152,4 @@ class NodePropertyExporterTest extends BaseTest {
             assertEquals(0, count.intValue());
         });
     }
-
-    static class DoublePropertyTranslator implements PropertyTranslator.OfDouble<Double> {
-        @Override
-        public double toDouble(final Double data, final long nodeId) {
-            return data;
-        }
-    }
 }

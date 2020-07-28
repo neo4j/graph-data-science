@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -90,24 +89,6 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     @Override
     protected AlgorithmFactory<Louvain, LouvainWriteConfig> algorithmFactory() {
         return new LouvainFactory<>();
-    }
-
-    static final class CommunityTranslator implements PropertyTranslator.OfLong<Louvain> {
-        public static final CommunityTranslator INSTANCE = new CommunityTranslator();
-
-        @Override
-        public long toLong(Louvain louvain, long nodeId) {
-            return louvain.getCommunity(nodeId);
-        }
-    }
-
-    static final class CommunitiesTranslator implements PropertyTranslator.OfLongArray<Louvain> {
-        public static final CommunitiesTranslator INSTANCE = new CommunitiesTranslator();
-
-        @Override
-        public long[] toLongArray(Louvain louvain, long nodeId) {
-            return louvain.getCommunities(nodeId);
-        }
     }
 
     public static final class WriteResult {

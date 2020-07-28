@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -134,15 +133,4 @@ public interface NodeProperties {
         return OptionalLong.empty();
     }
 
-
-    @Deprecated
-    static PropertyTranslator<NodeProperties> translatorFor(ValueType valueType) {
-        if (valueType == ValueType.DOUBLE) {
-            return (PropertyTranslator.OfDouble<NodeProperties>) NodeProperties::nodeProperty;
-        } else if (valueType == ValueType.LONG) {
-            return (PropertyTranslator.OfLong<NodeProperties>) (data, nodeId) -> (long) data.nodeProperty(nodeId);
-        } else {
-            throw new UnsupportedOperationException("Can not provide a property translator for non-numeric types.");
-        }
-    }
 }

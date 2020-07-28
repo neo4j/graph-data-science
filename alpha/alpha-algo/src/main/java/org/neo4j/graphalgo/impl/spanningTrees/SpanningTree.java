@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.spanningTrees;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 /**
  * group of nodes that form a spanning tree
@@ -74,15 +73,6 @@ public class SpanningTree {
             .append(effectiveNodeCount, that.effectiveNodeCount)
             .append(parent, that.parent)
             .isEquals();
-    }
-
-    public static final PropertyTranslator<SpanningTree> TRANSLATOR = new SpanningTreeTranslator();
-
-    public static class SpanningTreeTranslator implements PropertyTranslator.OfInt<SpanningTree> {
-        @Override
-        public int toInt(final SpanningTree data, final long nodeId) {
-            return data.head((int) nodeId);
-        }
     }
 
 }
