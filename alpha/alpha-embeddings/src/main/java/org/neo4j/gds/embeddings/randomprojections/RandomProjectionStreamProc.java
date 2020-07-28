@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.randomprojections;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
@@ -53,7 +54,9 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
+    protected StreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
         throw new UnsupportedOperationException("RandomProjection handles result building individually.");
     }
 

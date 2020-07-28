@@ -26,10 +26,10 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.compat.WriterLogBuilder;
 import org.neo4j.graphalgo.core.write.ExporterBuilder;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.Translators;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
@@ -94,13 +94,12 @@ class ProgressLoggingTest extends BaseTest {
         Arrays.fill(ints, -1);
 
         NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE)
-                .withLog(testLogger(buffer))
-                .build()
-                .write(
-                        "test",
-                        ints,
-                        Translators.INT_ARRAY_TRANSLATOR
-                );
+            .withLog(testLogger(buffer))
+            .build()
+            .write(
+                "test",
+                (LongNodeProperties) (long nodeId) -> ints[(int) nodeId]
+            );
 
         final String output = buffer.toString();
 

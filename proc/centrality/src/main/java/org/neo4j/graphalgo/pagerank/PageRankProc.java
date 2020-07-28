@@ -21,8 +21,9 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.helpers.collection.MapUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -55,6 +56,10 @@ final class PageRankProc {
             .withConfig(computeResult.config());
 
         return procResultBuilder;
+    }
+
+    static <CONFIG extends PageRankBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
+        return (DoubleNodeProperties) computeResult.result().result()::score;
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
@@ -143,15 +148,6 @@ final class PageRankProc {
             this.postProcessingMillis = timer.getDuration();
 
             return buildResult();
-        }
-    }
-
-    static final class ScoresTranslator implements PropertyTranslator.OfDouble<PageRank> {
-        public static final ScoresTranslator INSTANCE = new ScoresTranslator();
-
-        @Override
-        public double toDouble(PageRank pageRank, long nodeId) {
-            return pageRank.result().array().get(nodeId);
         }
     }
 }

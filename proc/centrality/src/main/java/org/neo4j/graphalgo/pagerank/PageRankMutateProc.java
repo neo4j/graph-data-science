@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -78,8 +78,8 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
     }
 
     @Override
-    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
-        return PageRankProc.ScoresTranslator.INSTANCE;
+    protected NodeProperties getNodeProperties(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
+        return PageRankProc.nodeProperties(computationResult);
     }
 
     @Override

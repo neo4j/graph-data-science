@@ -23,7 +23,8 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.NullPropertyMap;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
@@ -77,7 +78,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
             seedProperty = graph.nodeProperties(seedPropertyKey);
         } else {
-            seedProperty = new NullPropertyMap(0.0);
+            seedProperty = new LongNullPropertyMap(0);
         }
         this.nodeProperties = seedProperty;
 
@@ -86,7 +87,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         if (nodeWeightPropertyKey != null && graph.availableNodeProperties().contains(nodeWeightPropertyKey)) {
             nodeWeightProperty = graph.nodeProperties(nodeWeightPropertyKey);
         } else {
-            nodeWeightProperty = new NullPropertyMap(1.0);
+            nodeWeightProperty = new DoubleNullPropertyMap(1.0);
         }
         this.nodeWeights = nodeWeightProperty;
 

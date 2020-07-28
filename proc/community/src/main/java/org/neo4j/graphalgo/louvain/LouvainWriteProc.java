@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -64,8 +65,8 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodePropertyTranslator(computationResult, computationResult.config().writeProperty());
+    protected NodeProperties getNodeProperties(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
+        return LouvainProc.nodeProperties(computationResult, computationResult.config().writeProperty());
     }
 
     @Override

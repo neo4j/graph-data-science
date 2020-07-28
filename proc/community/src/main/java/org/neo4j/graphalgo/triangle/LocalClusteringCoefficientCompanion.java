@@ -21,11 +21,12 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -40,10 +41,10 @@ final class LocalClusteringCoefficientCompanion {
 
     private LocalClusteringCoefficientCompanion() {}
 
-    static PropertyTranslator<LocalClusteringCoefficient.Result> nodePropertyTranslator() {
-        return (PropertyTranslator.OfDouble<LocalClusteringCoefficient.Result>) (data, nodeId) -> data
-            .localClusteringCoefficients()
-            .get(nodeId);
+    static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(
+        AlgoBaseProc.ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
+    ) {
+        return (DoubleNodeProperties) computeResult.result().localClusteringCoefficients()::get;
     }
 
     static void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientBaseConfig config, Log log) {

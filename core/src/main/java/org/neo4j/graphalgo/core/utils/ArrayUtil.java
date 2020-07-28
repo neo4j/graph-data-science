@@ -164,6 +164,14 @@ public final class ArrayUtil {
         return low - 1;
     }
 
+    public static double[] floatToDoubleArray(float[] floats) {
+        double[] doubles = new double[floats.length];
+        for (int i = 0; i < floats.length; i++) {
+            doubles[i] = floats[i];
+        }
+        return doubles;
+    }
+
     private ArrayUtil() {
         throw new UnsupportedOperationException("No instances");
     }

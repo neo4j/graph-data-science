@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.result;
 
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -37,32 +37,18 @@ public class CentralityResult {
         return this.result;
     }
 
-    public void export(
-            final String propertyName, final NodePropertyExporter exporter) {
+    public void export(String propertyName, NodePropertyExporter exporter) {
         exporter.write(
-                propertyName,
-                result,
-                HugeDoubleArray.Translator.INSTANCE);
+            propertyName,
+            (DoubleNodeProperties) result::get
+        );
     }
 
     public void export(String propertyName, NodePropertyExporter exporter, DoubleUnaryOperator normalizationFunction) {
         exporter.write(
-                propertyName,
-                result,
-                new MapTranslator(normalizationFunction));
-    }
-
-    public static class MapTranslator implements PropertyTranslator.OfDouble<HugeDoubleArray> {
-
-        private DoubleUnaryOperator fn;
-
-        public MapTranslator(DoubleUnaryOperator fn) {
-            this.fn = fn;
-        }
-
-        public double toDouble(final HugeDoubleArray data, final long nodeId) {
-            return fn.applyAsDouble(data.get(nodeId));
-        }
+            propertyName,
+            (DoubleNodeProperties) nodeId -> normalizationFunction.applyAsDouble(result.get(nodeId))
+        );
     }
 
     public double score(final long nodeId) {

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
@@ -66,9 +67,9 @@ public class NodePropertyExporter extends StatementApi {
     public interface NodeProperty<T> {
         String propertyKey();
 
-        T data();
+        NodeProperties properties();
 
-        PropertyTranslator<T> translator();
+//        PropertyTranslator<T> translator();
 
         default ResolvedNodeProperty resolveWith(int propertyToken) {
             if (propertyToken == -1) {
@@ -86,8 +87,8 @@ public class NodePropertyExporter extends StatementApi {
         static ResolvedNodeProperty of(NodeProperty<Object> nodeProperty, int propertyToken) {
             return ImmutableResolvedNodeProperty.of(
                 nodeProperty.propertyKey(),
-                nodeProperty.data(),
-                nodeProperty.translator(),
+                nodeProperty.properties(),
+//                nodeProperty.translator(),
                 propertyToken
             );
         }
@@ -140,8 +141,8 @@ public class NodePropertyExporter extends StatementApi {
         this.propertiesWritten = new LongAdder();
     }
 
-    public <T> void write(String property, T data, PropertyTranslator<T> translator) {
-        write(ImmutableNodeProperty.of(property, data, translator));
+    public void write(String property, NodeProperties properties) {
+        write(ImmutableNodeProperty.of(property, properties));
     }
 
     public <T> void write(NodeProperty<T> nodeProperty) {
@@ -175,7 +176,7 @@ public class NodePropertyExporter extends StatementApi {
     void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
             int propertyId = nodeProperty.propertyToken();
-            final Value prop = nodeProperty.translator().toProperty(propertyId, nodeProperty.data(), nodeId);
+            final Value prop = nodeProperty.properties().getValue(nodeId);
             if (prop != null) {
                 ops.nodeSetProperty(
                     toOriginalId.applyAsLong(nodeId),

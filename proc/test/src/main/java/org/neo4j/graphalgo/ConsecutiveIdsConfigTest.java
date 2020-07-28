@@ -20,11 +20,11 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Optional;
 import java.util.Set;
@@ -51,13 +51,13 @@ public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM,
 
         applyOnProcedure((proc) -> {
             var computationResult = proc.compute(graphName, consecutiveIdsConfig);
-            var propertyTranslator = proc.nodePropertyTranslator(computationResult);
+            var nodeProperties = proc.getNodeProperties(computationResult);
 
-            assertTrue(propertyTranslator instanceof PropertyTranslator.ConsecutivePropertyTranslator);
+            assertTrue(nodeProperties instanceof LongNodeProperties);
 
             Set<Long> consecutiveIds = LongStream
                 .range(0, computationResult.graph().nodeCount())
-                .map(nodeId -> (long) propertyTranslator.toDouble(computationResult.result(), nodeId))
+                .map(nodeId -> (long) nodeProperties.getDouble(nodeId))
                 .boxed()
                 .collect(Collectors.toSet());
 

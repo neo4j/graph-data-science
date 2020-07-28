@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.CommunityProcCompanion;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -33,39 +35,17 @@ final class LouvainProc {
 
     private LouvainProc() {}
 
-    static <CONFIG extends LouvainBaseConfig> PropertyTranslator<Louvain> nodePropertyTranslator(
+    static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty
     ) {
-        var graph = computationResult.graph();
-        var louvain = computationResult.result();
         var config = computationResult.config();
-        var graphStore = computationResult.graphStore();
-
-        var isIncremental = config.isIncremental();
-        var consecutiveIds = config.consecutiveIds();
-        var seedProperty = config.seedProperty();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
-
+        LongNodeProperties nodeProperties = computationResult.result()::getCommunity;
         if (!includeIntermediateCommunities) {
-            if (isIncremental && resultProperty.equals(seedProperty)) {
-                return PropertyTranslator.OfLongIfChanged.of(
-                    graphStore,
-                    seedProperty,
-                    Louvain::getCommunity
-                );
-            } else if (consecutiveIds) {
-                return new PropertyTranslator.ConsecutivePropertyTranslator<>(
-                    louvain,
-                    LouvainWriteProc.CommunityTranslator.INSTANCE,
-                    graph.nodeCount(),
-                    computationResult.tracker()
-                );
-            } else {
-                return LouvainWriteProc.CommunityTranslator.INSTANCE;
-            }
+            return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, nodeProperties);
         } else {
-            return LouvainWriteProc.CommunitiesTranslator.INSTANCE;
+            return nodeProperties;
         }
     }
 

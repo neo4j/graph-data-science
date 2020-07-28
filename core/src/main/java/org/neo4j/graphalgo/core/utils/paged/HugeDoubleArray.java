@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -226,12 +227,15 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     /**
      * A {@link PropertyTranslator} for instances of {@link HugeDoubleArray}s.
      */
-    public static class Translator implements PropertyTranslator.OfDouble<HugeDoubleArray> {
+    public static class HugeDoubleNodeProperties implements DoubleNodeProperties {
+        private final HugeDoubleArray data;
 
-        public static final Translator INSTANCE = new Translator();
+        public HugeDoubleNodeProperties(HugeDoubleArray data) {
+            this.data = data;
+        }
 
         @Override
-        public double toDouble(final HugeDoubleArray data, final long nodeId) {
+        public double getDouble(long nodeId) {
             return data.get(nodeId);
         }
     }

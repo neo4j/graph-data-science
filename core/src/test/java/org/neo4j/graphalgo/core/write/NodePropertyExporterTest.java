@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
@@ -64,7 +66,8 @@ class NodePropertyExporterTest extends BaseTest {
 
         NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
-        exporter.write("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR);
+        int[] intData = {23, 42, 84};
+        exporter.write("newProp1",  (LongNodeProperties) (long nodeId) -> intData[(int) nodeId]);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
@@ -95,9 +98,12 @@ class NodePropertyExporterTest extends BaseTest {
 
         NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
 
+        int[] intData = {23, 42, 84};
+        double[] doubleData = {123D, 142D, 184D};
+
         List<NodePropertyExporter.NodeProperty<?>> nodeProperties = Arrays.asList(
-            ImmutableNodeProperty.of("newProp1", new int[]{23, 42, 84}, Translators.INT_ARRAY_TRANSLATOR),
-            ImmutableNodeProperty.of("newProp2", new double[]{123D, 142D, 184D}, Translators.DOUBLE_ARRAY_TRANSLATOR)
+            ImmutableNodeProperty.of("newProp1", (LongNodeProperties) (long nodeId) -> intData[(int) nodeId]),
+            ImmutableNodeProperty.of("newProp2", (DoubleNodeProperties) (long nodeId) -> doubleData[(int) nodeId])
         );
 
         exporter.write(nodeProperties);
@@ -138,7 +144,7 @@ class NodePropertyExporterTest extends BaseTest {
             .parallel(executorService, 4)
             .build();
 
-        assertTransactionTermination(() -> exporter.write("foo", 42.0, new DoublePropertyTranslator()));
+        assertTransactionTermination(() -> exporter.write("foo", (DoubleNodeProperties) ignore -> 42.0));
 
         runQueryWithRowConsumer(db, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");

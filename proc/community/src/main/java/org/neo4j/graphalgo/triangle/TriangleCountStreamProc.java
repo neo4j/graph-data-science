@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.triangle.IntersectingTriangleCount.TriangleCountResult;
 import org.neo4j.procedure.Description;
@@ -80,7 +80,9 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected Result streamResult(long originalNodeId, double value) {
+    protected Result streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
         throw new UnsupportedOperationException("TriangleCount handles result building individually.");
     }
 
@@ -105,10 +107,10 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected PropertyTranslator<TriangleCountResult> nodePropertyTranslator(
+    protected NodeProperties getNodeProperties(
         ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult
     ) {
-        return TriangleCountCompanion.nodePropertyTranslator();
+        return TriangleCountCompanion.nodePropertyTranslator(computationResult);
     }
 
     public static class Result {

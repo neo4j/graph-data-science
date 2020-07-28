@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -82,19 +84,20 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
-        return new WccStreamProc.StreamResult(originalNodeId, (long) value);
+    protected StreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
+        return new WccStreamProc.StreamResult(originalNodeId, nodeProperties.getLong(internalNodeId));
     }
 
     @Override
-    protected PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+    protected NodeProperties getNodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         DisjointSetStruct dss = computationResult.result();
-
-        PropertyTranslator.OfLong<DisjointSetStruct> simpleTranslator = (data, nodeId) -> dss.setIdOf(nodeId);
+        LongNodeProperties simpleNodeProperties = dss::setIdOf;
 
         return computationResult.config().consecutiveIds()
-            ? new PropertyTranslator.ConsecutivePropertyTranslator<>(dss, simpleTranslator, computationResult.graph().nodeCount(), computationResult.tracker())
-            : simpleTranslator;
+            ? new ConsecutiveLongNodeProperties(simpleNodeProperties, computationResult.graph().nodeCount(), computationResult.tracker())
+            : simpleNodeProperties;
     }
 
     public static class StreamResult {

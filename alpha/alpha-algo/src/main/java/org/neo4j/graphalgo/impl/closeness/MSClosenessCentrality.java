@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.impl.closeness;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 
@@ -81,10 +81,14 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
 
     public void export(final String propertyName, final NodePropertyExporter exporter) {
         exporter.write(
-                propertyName,
-                farness,
-                (PropertyTranslator.OfDouble<PagedAtomicIntegerArray>)
-                        (data, nodeId) -> centrality(data.get(nodeId), component.get(nodeId), nodeCount, wassermanFaust));
+            propertyName,
+            (DoubleNodeProperties) (nodeId) -> centrality(
+                farness.get(nodeId),
+                component.get(nodeId),
+                nodeCount,
+                wassermanFaust
+            )
+        );
     }
 
     public Stream<MSClosenessCentrality.Result> resultStream() {

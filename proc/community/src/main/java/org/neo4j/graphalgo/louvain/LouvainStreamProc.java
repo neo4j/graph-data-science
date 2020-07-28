@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -96,12 +96,14 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
     }
 
     @Override
-    protected PropertyTranslator<Louvain> nodePropertyTranslator(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
-        return LouvainProc.nodePropertyTranslator(computationResult, UUID.randomUUID().toString());
+    protected NodeProperties getNodeProperties(ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
+        return LouvainProc.nodeProperties(computationResult, UUID.randomUUID().toString());
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
+    protected StreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
         throw new UnsupportedOperationException("Louvain handles result building individually.");
     }
 

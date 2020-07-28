@@ -21,8 +21,10 @@
 package org.neo4j.graphalgo.beta.modularity;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -45,27 +47,14 @@ final class ModularityOptimizationProc {
 
     }
 
-    static <CONFIG extends ModularityOptimizationConfig> PropertyTranslator<ModularityOptimization> nodePropertyTranslator(
+    static <CONFIG extends ModularityOptimizationConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
     ) {
+        LongNodeProperties resultCommunities = computationResult.result()::getCommunityId;
         if (computationResult.config().consecutiveIds()) {
-            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
-                computationResult.result(),
-                ModularityOptimizationTranslator.INSTANCE,
-                computationResult.graph().nodeCount(),
-                computationResult.tracker()
-            );
+            return new ConsecutiveLongNodeProperties(resultCommunities, computationResult.graph().nodeCount(), computationResult.tracker());
         } else {
-            return ModularityOptimizationTranslator.INSTANCE;
-        }
-    }
-
-    static final class ModularityOptimizationTranslator implements PropertyTranslator.OfLong<ModularityOptimization> {
-        public static final ModularityOptimizationTranslator INSTANCE = new ModularityOptimizationTranslator();
-
-        @Override
-        public long toLong(ModularityOptimization data, long nodeId) {
-            return data.getCommunityId(nodeId);
+            return resultCommunities;
         }
     }
 

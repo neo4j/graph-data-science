@@ -35,6 +35,11 @@ public class IdentityProperties implements NodeProperties {
     }
 
     @Override
+    public long getLong(long nodeId) {
+        return nodeId;
+    }
+
+    @Override
     public ValueType getType() {
         return ValueType.LONG;
     }

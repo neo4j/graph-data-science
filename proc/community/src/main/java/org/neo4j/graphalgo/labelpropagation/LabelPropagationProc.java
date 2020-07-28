@@ -20,8 +20,9 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.CommunityProcCompanion;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -33,38 +34,11 @@ final class LabelPropagationProc {
 
     private LabelPropagationProc() {}
 
-    static <CONFIG extends LabelPropagationBaseConfig> PropertyTranslator<LabelPropagation> nodePropertyTranslator(
+    static <CONFIG extends LabelPropagationBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty
     ) {
-        var config = computationResult.config();
-        var graphStore = computationResult.graphStore();
-
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        var seedProperty = config.seedProperty();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(seedProperty);
-
-        PropertyTranslator.OfLong<LabelPropagation> nonSeedingTranslator = (data, nodeId) -> data
-            .labels()
-            .get(nodeId);
-
-        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return PropertyTranslator.OfLongIfChanged.of(
-                graphStore,
-                seedProperty,
-                (data, nodeId) -> data.labels().get(nodeId)
-            );
-        } else if (config.consecutiveIds() && !isIncremental) {
-            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
-                computationResult.result(),
-                nonSeedingTranslator,
-                computationResult.graph().nodeCount(),
-                computationResult.tracker()
-            );
-        } else {
-            return nonSeedingTranslator;
-        }
+        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result().labels()::get);
     }
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

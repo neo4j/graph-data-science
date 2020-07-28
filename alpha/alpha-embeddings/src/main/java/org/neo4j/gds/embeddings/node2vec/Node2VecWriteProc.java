@@ -22,13 +22,15 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
@@ -110,8 +112,8 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
     }
 
     @Override
-    protected PropertyTranslator<HugeObjectArray<Vector>> nodePropertyTranslator(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
-        return (PropertyTranslator.OfFloatArray<HugeObjectArray<Vector>>) (data, nodeId) -> data.get(nodeId).data();
+    protected NodeProperties getNodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
+        return (DoubleArrayNodeProperties) (nodeId) -> ArrayUtil.floatToDoubleArray(computationResult.result().get(nodeId).data());
     }
 
     @Override

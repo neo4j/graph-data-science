@@ -21,8 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -33,7 +33,7 @@ public abstract class StreamProc<
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PROC_RESULT streamResult(long originalNodeId, double value);
+    protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
 
     protected Stream<PROC_RESULT> stream(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         if (computationResult.isGraphEmpty()) {
@@ -41,10 +41,10 @@ public abstract class StreamProc<
         }
 
         Graph graph = computationResult.graph();
-        PropertyTranslator<ALGO_RESULT> propertyTranslator = nodePropertyTranslator(computationResult);
+        NodeProperties nodeProperties = getNodeProperties(computationResult);
 
         return LongStream
             .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), propertyTranslator.toDouble(computationResult.result(), nodeId)));
+            .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
     }
 }

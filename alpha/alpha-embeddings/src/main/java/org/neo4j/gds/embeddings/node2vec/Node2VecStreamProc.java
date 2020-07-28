@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -121,7 +122,9 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, double value) {
+    protected StreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
         throw new UnsupportedOperationException(
             "Node2VecStreamProc doesn't want to build results this way. He won't be just another brick in the wall, man.");
     }

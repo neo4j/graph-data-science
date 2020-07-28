@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.common.CentralityStreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -62,8 +62,10 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, Centralit
     }
 
     @Override
-    protected CentralityStreamResult streamResult(long originalNodeId, double value) {
-        return new CentralityStreamResult(originalNodeId, value);
+    protected CentralityStreamResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
+        return new CentralityStreamResult(originalNodeId, nodeProperties.getDouble(internalNodeId));
     }
 
     @Override
@@ -82,7 +84,7 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, Centralit
     }
 
     @Override
-    protected PropertyTranslator<PageRank> nodePropertyTranslator(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
-        return PageRankProc.ScoresTranslator.INSTANCE;
+    protected NodeProperties getNodeProperties(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
+        return PageRankProc.nodeProperties(computationResult);
     }
 }

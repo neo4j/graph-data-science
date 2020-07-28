@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -64,8 +64,8 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected PropertyTranslator<HugeLongArray> nodePropertyTranslator(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
-        return K1ColoringProc.nodePropertyTranslator();
+    protected NodeProperties getNodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
+        return K1ColoringProc.nodeProperties(computationResult);
     }
 
     @Override

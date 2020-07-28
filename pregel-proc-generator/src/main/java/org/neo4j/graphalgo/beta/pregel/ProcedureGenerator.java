@@ -28,6 +28,8 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -35,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -200,10 +201,10 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec propertyTranslator(ClassName algorithmClassName) {
-        return MethodSpec.methodBuilder("nodePropertyTranslator")
+        return MethodSpec.methodBuilder("getNodeProperties")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PROTECTED)
-            .returns(ParameterizedTypeName.get(PropertyTranslator.class, HugeDoubleArray.class))
+            .returns(NodeProperties.class)
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 algorithmClassName,
@@ -211,7 +212,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 pregelSpec.configTypeName()
                 ), "computationResult"
             )
-            .addStatement("return $T.Translator.INSTANCE", HugeDoubleArray.class)
+            .addStatement("return ($T) computationResult.result()::get", DoubleNodeProperties.class)
             .build();
     }
 

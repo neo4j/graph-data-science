@@ -81,11 +81,11 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             ? embeddingSize * maxIterations
             : embeddingSize;
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
-            float[] embeddings = (float[]) row.get("embedding");
+            double[] embeddings = (double[]) row.get("embedding");
             assertEquals(expectedEmbeddingsDimension, embeddings.length);
             boolean allMatch = true;
-            for (float embedding : embeddings) {
-                if (Float.compare(embedding, 0.0f) != 0) {
+            for (double embedding : embeddings) {
+                if (Double.compare(embedding, 0.0D) != 0) {
                     allMatch = false;
                     break;
                 }

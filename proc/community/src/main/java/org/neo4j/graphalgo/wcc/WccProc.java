@@ -21,8 +21,9 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.CommunityProcCompanion;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 
 final class WccProc {
@@ -43,31 +44,10 @@ final class WccProc {
         return procResultBuilder.withCommunityFunction(!computationResult.isGraphEmpty() ? computationResult.result()::setIdOf : null);
     }
 
-    static <CONFIG extends WccBaseConfig> PropertyTranslator<DisjointSetStruct> nodePropertyTranslator(
+    static <CONFIG extends WccBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty
     ) {
-        var config = computationResult.config();
-        var graphStore = computationResult.graphStore();
-
-        var consecutiveIds = config.consecutiveIds();
-        var isIncremental = config.isIncremental();
-        var seedProperty = config.seedProperty();
-        var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(seedProperty);
-
-        PropertyTranslator.OfLong<DisjointSetStruct> nonSeedingTranslator = DisjointSetStruct::setIdOf;
-
-        if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            return PropertyTranslator.OfLongIfChanged.of(graphStore, seedProperty, DisjointSetStruct::setIdOf);
-        } else if (consecutiveIds && !isIncremental) {
-            return new PropertyTranslator.ConsecutivePropertyTranslator<>(
-                computationResult.result(),
-                nonSeedingTranslator,
-                computationResult.graph().nodeCount(),
-                computationResult.tracker()
-            );
-        } else {
-            return nonSeedingTranslator;
-        }
+        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result()::setIdOf);
     }
 }

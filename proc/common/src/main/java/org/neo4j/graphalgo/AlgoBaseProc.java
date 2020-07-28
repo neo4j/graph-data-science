@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
@@ -52,7 +53,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.StringJoining;
 
@@ -469,7 +469,7 @@ public abstract class AlgoBaseProc<
             .build();
     }
 
-    protected PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(
+    protected NodeProperties getNodeProperties(
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         throw new UnsupportedOperationException(

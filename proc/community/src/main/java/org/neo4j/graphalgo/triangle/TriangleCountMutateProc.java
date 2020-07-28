@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -85,10 +85,10 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     }
 
     @Override
-    protected PropertyTranslator<IntersectingTriangleCount.TriangleCountResult> nodePropertyTranslator(
+    protected NodeProperties getNodeProperties(
         ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig> computationResult
     ) {
-        return TriangleCountCompanion.nodePropertyTranslator();
+        return TriangleCountCompanion.nodePropertyTranslator(computationResult);
     }
 
     @Override

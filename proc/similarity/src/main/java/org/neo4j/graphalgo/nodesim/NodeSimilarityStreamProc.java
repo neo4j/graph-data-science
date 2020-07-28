@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.nodesim;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -88,7 +89,9 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected SimilarityResult streamResult(long originalNodeId, double value) {
+    protected SimilarityResult streamResult(
+        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+    ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 }

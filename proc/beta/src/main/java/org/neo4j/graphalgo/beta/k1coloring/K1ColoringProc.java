@@ -20,9 +20,10 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -47,8 +48,8 @@ final class K1ColoringProc {
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
     }
 
-    static PropertyTranslator<HugeLongArray> nodePropertyTranslator() {
-        return HugeLongArray.Translator.INSTANCE;
+    static <CONFIG extends K1ColoringConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
+        return (LongNodeProperties) computeResult.result()::get;
     }
 
     abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

@@ -20,16 +20,11 @@
 package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 import org.neo4j.graphalgo.result.CentralityResult;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class NormalizedCentralityResultTest {
@@ -100,27 +95,5 @@ class NormalizedCentralityResultTest {
         assertEquals(0.5, normalizedResult.score(1), 0.01);
         assertEquals(0.75, normalizedResult.score(2), 0.01);
         assertEquals(1.0, normalizedResult.score(3), 0.01);
-    }
-
-    @Test
-    void doubleArrayResultExport() {
-        String property = "eigenvector";
-        final HugeDoubleArray given = HugeDoubleArray.of(1, 2, 3, 4);
-        CentralityResultWithStatistics centralityResultWithStatistics =
-                CentralityResultWithStatistics.of(new CentralityResult(given), 4);
-
-        NodePropertyExporter exporter = mock(NodePropertyExporter.class);
-        ArgumentCaptor<CentralityResult.MapTranslator> arg = ArgumentCaptor
-                .forClass(CentralityResult.MapTranslator.class);
-
-        NormalizationFunction.MAX.apply(centralityResultWithStatistics).export(property, exporter);
-
-        verify(exporter).write(eq(property), eq(given), arg.capture());
-        CentralityResult.MapTranslator provided = arg.getValue();
-
-        assertEquals(0.25D, provided.toDouble(given, 0), 1e-4);
-        assertEquals(0.5D, provided.toDouble(given, 1), 1e-4);
-        assertEquals(0.75D, provided.toDouble(given, 2), 1e-4);
-        assertEquals(1.0D, provided.toDouble(given, 3), 1e-4);
     }
 }

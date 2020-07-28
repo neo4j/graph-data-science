@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import com.squareup.javapoet.MethodSpec;
 import org.neo4j.graphalgo.StreamProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
@@ -62,8 +63,9 @@ class StreamProcedureGenerator extends ProcedureGenerator {
             .addModifiers(Modifier.PROTECTED)
             .returns(procResultClass())
             .addParameter(long.class, "originalNodeId")
-            .addParameter(double.class, "value")
-            .addStatement("return new $T(originalNodeId, value)", procResultClass())
+            .addParameter(long.class, "internalNodeId")
+            .addParameter(NodeProperties.class, "nodeProperties")
+            .addStatement("return new $T(originalNodeId, nodeProperties.getDouble(internalNodeId))", procResultClass())
             .build();
     }
 }

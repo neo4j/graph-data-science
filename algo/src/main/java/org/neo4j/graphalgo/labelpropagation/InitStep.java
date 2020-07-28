@@ -58,7 +58,7 @@ final class InitStep implements Step {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
-            double existingLabelValue = nodeProperties.nodeProperty(nodeId, Double.NaN);
+            long existingLabelValue = nodeProperties.getLong(nodeId, Long.MIN_VALUE);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might
             // clash with node IDs. If we have loaded a graph with a greater node ID
@@ -69,9 +69,9 @@ final class InitStep implements Step {
             // node ID to maintain determinism since our internal node IDs are not
             // guaranteed to always map in the same fashion to the original IDs and those
             // one are as stable as we need them to be for getting deterministic results.
-            long existingLabel = Double.isNaN(existingLabelValue)
+            long existingLabel = existingLabelValue == Long.MIN_VALUE
                     ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
-                    : (long) existingLabelValue;
+                    : existingLabelValue;
             existingLabels.set(nodeId, existingLabel);
             progressLogger.logProgress(graph.degree(nodeId));
         }

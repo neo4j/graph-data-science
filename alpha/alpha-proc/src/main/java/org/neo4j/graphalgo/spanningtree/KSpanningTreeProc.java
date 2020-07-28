@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -101,8 +102,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
             exporter.write(
                 config.writeProperty(),
-                spanningTree,
-                SpanningTree.TRANSLATOR
+                (DoubleNodeProperties) (nodeId) -> spanningTree.head((int) nodeId)
             );
 
             builder.withNodePropertiesWritten(exporter.propertiesWritten());

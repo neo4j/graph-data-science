@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.betweenness;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -80,8 +80,8 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
     }
 
     @Override
-    protected PropertyTranslator<HugeAtomicDoubleArray> nodePropertyTranslator(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
-        return BetweennessCentralityProc.propertyTranslator();
+    protected NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
+        return BetweennessCentralityProc.nodeProperties(computationResult);
     }
 
     @Override

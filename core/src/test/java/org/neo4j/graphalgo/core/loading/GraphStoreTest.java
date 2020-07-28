@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -160,7 +161,7 @@ class GraphStoreTest extends BaseTest {
         // add node properties
         ZonedDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.addNodeProperty(ALL_NODES, "foo", new NullPropertyMap(42.0));
+        graphStore.addNodeProperty(ALL_NODES, "foo", new DoubleNullPropertyMap(42.0));
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships

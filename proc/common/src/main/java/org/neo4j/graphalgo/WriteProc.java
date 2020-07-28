@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ public abstract class WriteProc<
     PROC_RESULT,
     CONFIG extends WritePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract PropertyTranslator<ALGO_RESULT> nodePropertyTranslator(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract NodeProperties getNodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
@@ -75,8 +75,7 @@ public abstract class WriteProc<
 
             exporter.write(
                 writePropertyConfig.writeProperty(),
-                computationResult.result(),
-                nodePropertyTranslator(computationResult)
+                getNodeProperties(computationResult)
             );
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());

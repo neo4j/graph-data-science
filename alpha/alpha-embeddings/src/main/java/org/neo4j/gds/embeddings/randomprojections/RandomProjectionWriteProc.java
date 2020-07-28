@@ -21,9 +21,11 @@ package org.neo4j.gds.embeddings.randomprojections;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -66,8 +68,8 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
     }
 
     @Override
-    protected PropertyTranslator<RandomProjection> nodePropertyTranslator(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
-        return (PropertyTranslator.OfFloatArray<RandomProjection>) (data, nodeId) -> data.embeddings().get(nodeId);
+    protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
+        return (DoubleArrayNodeProperties) (nodeId) -> ArrayUtil.floatToDoubleArray(computationResult.result().embeddings().get(nodeId));
     }
 
     @Override
