@@ -13,6 +13,17 @@ ext {
     publicDir = "${project.rootDir}"
 
     checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
+
+    compatibilityModules = [
+            'kernel-adapter': [
+                    project(':neo4j-kernel-adapter-4.0'),
+                    project(':neo4j-kernel-adapter-4.1'),
+            ],
+            'cypher-printer': [
+                    project(':cypher-printer-4.0'),
+                    project(':cypher-printer-4.1'),
+            ]
+    ]
 }
 
 apply from: 'gradle/version.gradle'

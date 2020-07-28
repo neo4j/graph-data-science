@@ -14,8 +14,8 @@ dependencies {
     api project(':neo4j-adapter')
     api project(':neo4j-kernel-adapter-api')
 
-    implementation project(':neo4j-kernel-adapter-4.0')
-    implementation project(':neo4j-kernel-adapter-4.1')
-    implementation project(':neo4j-kernel-adapter-4.2')
+    compatibilityModules.'kernel-adapter'.each {
+        implementation it
+    }
 }
 

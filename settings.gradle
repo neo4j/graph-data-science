@@ -21,6 +21,7 @@ def registerSubModules(File file) {
     moduleDirectories.stream()
             .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
             .filter { moduleDir -> moduleDir.name != 'PregelK1Coloring' }
+            .filter { moduleDir -> moduleDir.getParentFile().name != "4.2" }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
                 def projectName = ":${moduleDir.name}";
