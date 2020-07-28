@@ -100,7 +100,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         long communityCount = 0L;
 
         SparseNodeMapping componentSizes = buildComponentSizes();
-        for (int communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
+        for (long communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
             long communitySize = componentSizes.get(communityId);
             if (communitySize > 0) {
                 communityCount++;

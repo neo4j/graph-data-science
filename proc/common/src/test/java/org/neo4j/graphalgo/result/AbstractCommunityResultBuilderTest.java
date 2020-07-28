@@ -177,6 +177,24 @@ final class AbstractCommunityResultBuilderTest {
     }
 
     @Test
+    void buildCommunityCountWithHugeCommunityCount() {
+        AbstractCommunityResultBuilder<Void> builder = builder(
+            procedureCallContext("communityCount"),
+            (maybeCommunityCount, maybeHistogram) -> {
+                assertTrue(maybeCommunityCount.isPresent());
+                assertFalse(maybeHistogram.isPresent());
+                long communityCount = maybeCommunityCount.orElse(-1);
+                assertEquals(2L, communityCount, "should build 2 communities");
+            });
+
+        LongUnaryOperator communityFunction = n -> n % 2 == 0 ? 0 : ((long) Integer.MAX_VALUE) + 2;
+        builder
+            .withCommunityFunction(communityFunction)
+            .withNodeCount(2)
+            .build();
+    }
+
+    @Test
     void buildCommunityHistogramWithHugeCommunityCount() {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
