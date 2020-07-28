@@ -27,10 +27,8 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.procedure.Description;
 
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -43,6 +41,7 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.Optional;
 
+import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class PregelValidation {
@@ -72,14 +71,13 @@ final class PregelValidation {
             return Optional.empty();
         }
 
-        var procedure = Optional.ofNullable(pregelElement.getAnnotation(PregelProcedure.class)).get();
+        // is never null since this is the annotation that triggers the processor
+        var procedure = pregelElement.getAnnotation(PregelProcedure.class);
 
         var computationName = pregelElement.getSimpleName().toString();
         var configTypeName = TypeName.get(config(pregelElement));
         var rootPackage = elementUtils.getPackageOf(pregelElement).getQualifiedName().toString();
-        var maybeDescription = procedure.description().isBlank()
-            ? Optional.<String>empty()
-            : Optional.of(procedure.description());
+        var maybeDescription = Optional.of(procedure.description()).filter(not(String::isBlank));
 
         return Optional.of(ImmutableSpec.of(
             pregelElement,
