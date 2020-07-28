@@ -138,6 +138,10 @@ public final class Neo4jProxy {
         return IMPL.pageCacheMap(pageCache, file, pageSize, openOptions);
     }
 
+    public static Path pagedFile(PagedFile pagedFile) {
+        return IMPL.pagedFile(pagedFile);
+    }
+
     public static PropertyCursor allocatePropertyCursor(
         CursorFactory cursorFactory,
         PageCursorTracer cursorTracer,
@@ -198,6 +202,10 @@ public final class Neo4jProxy {
 
     public static Path metadataStore(DatabaseLayout databaseLayout) {
         return IMPL.metadataStore(databaseLayout);
+    }
+
+    public static Path homeDirectory(DatabaseLayout databaseLayout) {
+        return IMPL.homeDirectory(databaseLayout);
     }
 
     public static BatchImporter instantiateBatchImporter(

@@ -51,9 +51,9 @@ import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -69,11 +69,11 @@ public class GraphStoreExport {
 
     private final GraphStore graphStore;
 
-    private final File neo4jHome;
+    private final Path neo4jHome;
 
     private final GraphStoreExportConfig config;
 
-    public GraphStoreExport(GraphStore graphStore, File neo4jHome, GraphStoreExportConfig config) {
+    public GraphStoreExport(GraphStore graphStore, Path neo4jHome, GraphStoreExportConfig config) {
         this.graphStore = graphStore;
         this.neo4jHome = neo4jHome;
         this.config = config;
@@ -95,7 +95,7 @@ public class GraphStoreExport {
 
     private ImportedProperties run(boolean defaultSettingsSuitableForTests) {
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
-        var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome.toPath());
+        var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
         var importConfig = getImportConfig(defaultSettingsSuitableForTests);
 
@@ -381,18 +381,17 @@ public class GraphStoreExport {
         }
     }
 
-    private static final Validator<File> DIRECTORY_IS_WRITABLE = value -> {
-        if (value.mkdirs()) {   // It's OK, we created the directory right now, which means we have write access to it
-            return;
-        }
-
-        var test = new File(value, "_______test___");
+    private static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {
-            test.createNewFile();
+            Files.createDirectories(value);
+            if (!Files.isDirectory(value)) {
+                throw new IllegalArgumentException("'" + value + "' is not a directory");
+            }
+            if (!Files.isWritable(value)) {
+                throw new IllegalArgumentException("Directory '" + value + "' not writable");
+            }
         } catch (IOException e) {
-            throw new IllegalArgumentException("Directory '" + value + "' not writable: " + e.getMessage());
-        } finally {
-            test.delete();
+            throw new IllegalArgumentException("Directory '" + value + "' not writable: ", e);
         }
     };
 }

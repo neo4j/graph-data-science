@@ -59,9 +59,7 @@ public abstract class GdsGraphDatabaseAPI implements GraphDatabaseAPI {
         dbms.shutdown();
     }
 
-    public Path dbHome(Path workingDir) {
-        return api.databaseLayout().getNeo4jLayout().homeDirectory().toPath();
-    }
+    public abstract Path dbHome(Path workingDir);
 
     // delegate methods
 

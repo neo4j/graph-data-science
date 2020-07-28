@@ -67,13 +67,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -115,6 +113,8 @@ public interface Neo4jProxyApi {
         OpenOption... openOptions
     ) throws IOException;
 
+    Path pagedFile(PagedFile pagedFile);
+
     PropertyCursor allocatePropertyCursor(
         CursorFactory cursorFactory,
         PageCursorTracer cursorTracer,
@@ -146,6 +146,8 @@ public interface Neo4jProxyApi {
     ) throws IOException;
 
     Path metadataStore(DatabaseLayout databaseLayout);
+
+    Path homeDirectory(DatabaseLayout databaseLayout);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

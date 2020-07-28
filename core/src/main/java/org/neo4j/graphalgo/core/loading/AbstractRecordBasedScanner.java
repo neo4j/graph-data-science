@@ -238,7 +238,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
         String storeFileName = storeFileName();
         try {
             for (PagedFile pf : pageCache.listExistingMappings()) {
-                if (pf.file().getName().equals(storeFileName)) {
+                if (Neo4jProxy.pagedFile(pf).getFileName().toString().equals(storeFileName)) {
                     pageSize = pf.pageSize();
                     recordsPerPage = pageSize / recordSize;
                     pagedFile = pf;
@@ -292,7 +292,7 @@ abstract class AbstractRecordBasedScanner<Reference, Record extends AbstractBase
     @Override
     public final long storeSize() {
         if (pagedFile != null) {
-            return pagedFile.file().length();
+            return Neo4jProxy.pagedFile(pagedFile).toFile().length();
         }
         long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, PageCursorTracer.NULL);
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;

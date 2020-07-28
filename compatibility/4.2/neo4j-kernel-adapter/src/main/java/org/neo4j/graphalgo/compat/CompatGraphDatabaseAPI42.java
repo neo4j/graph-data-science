@@ -22,10 +22,17 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
 
+import java.nio.file.Path;
+
 final class CompatGraphDatabaseAPI42 extends GdsGraphDatabaseAPI {
 
     CompatGraphDatabaseAPI42(DatabaseManagementService dbms) {
         super(dbms);
+    }
+
+    @Override
+    public Path dbHome(Path workingDir) {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory();
     }
 
     @Override

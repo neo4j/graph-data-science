@@ -154,6 +154,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     }
 
     @Override
+    public Path pagedFile(PagedFile pagedFile) {
+        return pagedFile.path();
+    }
+
+    @Override
     public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
         return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
     }
@@ -220,6 +225,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public Path metadataStore(DatabaseLayout databaseLayout) {
         return databaseLayout.metadataStore();
+    }
+
+    @Override
+    public Path homeDirectory(DatabaseLayout databaseLayout) {
+        return databaseLayout.getNeo4jLayout().homeDirectory();
     }
 
     @Override
