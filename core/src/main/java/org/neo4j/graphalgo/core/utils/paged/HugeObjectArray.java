@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import java.lang.reflect.Array;
@@ -170,6 +171,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
      */
     @Override
     public abstract T[] toArray();
+
+    @Override
+    public NodeProperties asNodeProperties() {
+        throw new UnsupportedOperationException("asNodeProperties() on HugeObjectArray");
+    }
 
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.

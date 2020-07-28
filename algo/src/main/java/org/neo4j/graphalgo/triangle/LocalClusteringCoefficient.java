@@ -156,5 +156,9 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
                 .averageClusteringCoefficient(averageClusteringCoefficient)
                 .build();
         }
+
+        default NodeProperties asNodeProperties() {
+            return localClusteringCoefficients().asNodeProperties();
+        }
     }
 }

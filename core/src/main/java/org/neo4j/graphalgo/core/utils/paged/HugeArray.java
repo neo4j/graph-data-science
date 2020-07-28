@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.NodeProperties;
+
 import java.util.function.LongFunction;
 
 abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
@@ -145,6 +147,8 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
      * @throws IllegalStateException if the array is too large
      */
     public abstract Array toArray();
+
+    public abstract NodeProperties asNodeProperties();
 
     /**
      * Copies data from {@code source} into this array, starting from {@code sliceStart} up until {@code sliceEnd}.

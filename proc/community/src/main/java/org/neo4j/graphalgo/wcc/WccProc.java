@@ -48,6 +48,6 @@ final class WccProc {
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
         String resultProperty
     ) {
-        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result()::setIdOf);
+        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result().asNodeProperties());
     }
 }

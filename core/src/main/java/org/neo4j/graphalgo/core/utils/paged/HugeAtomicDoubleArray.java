@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -102,6 +103,20 @@ public abstract class HugeAtomicDoubleArray {
      * @return the amount of memory freed, in bytes.
      */
     public abstract long release();
+
+    public DoubleNodeProperties asNodeProperties() {
+        return new DoubleNodeProperties() {
+            @Override
+            public double getDouble(long nodeId) {
+                return get(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return HugeAtomicDoubleArray.this.size();
+            }
+        };
+    }
 
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.

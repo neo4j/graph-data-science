@@ -40,7 +40,7 @@ public class CentralityResult {
     public void export(String propertyName, NodePropertyExporter exporter) {
         exporter.write(
             propertyName,
-            (DoubleNodeProperties) result::get
+            asNodeProperties()
         );
     }
 
@@ -57,5 +57,9 @@ public class CentralityResult {
 
     public double score(final int nodeId) {
         return result.get(nodeId);
+    }
+
+    public DoubleNodeProperties asNodeProperties() {
+        return result.asNodeProperties();
     }
 }

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.pagerank;
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.helpers.collection.MapUtil;
@@ -59,7 +58,7 @@ final class PageRankProc {
     }
 
     static <CONFIG extends PageRankBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
-        return (DoubleNodeProperties) computeResult.result().result()::score;
+        return computeResult.result().result().asNodeProperties();
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {

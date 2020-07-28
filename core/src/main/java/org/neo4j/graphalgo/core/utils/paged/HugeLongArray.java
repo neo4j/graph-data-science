@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -202,6 +203,21 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     @Override
     public long[] toArray() {
         return dumpToArray(long[].class);
+    }
+
+    @Override
+    public LongNodeProperties asNodeProperties() {
+        return new LongNodeProperties() {
+            @Override
+            public long getLong(long nodeId) {
+                return get(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return HugeLongArray.this.size();
+            }
+        };
     }
 
     /**

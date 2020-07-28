@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
@@ -255,6 +256,20 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
     public double[] modularities() {
         return this.modularities;
+    }
+
+    public LongNodeProperties asNodeProperties() {
+        return new LongNodeProperties() {
+            @Override
+            public long getLong(long nodeId) {
+                return getCommunity(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return dendrograms[levels() - 1].size();
+            }
+        };
     }
 
     @Override

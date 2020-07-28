@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
 import java.util.function.LongFunction;
@@ -179,6 +178,21 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     @Override
     public double[] toArray() {
         return dumpToArray(double[].class);
+    }
+
+    @Override
+    public DoubleNodeProperties asNodeProperties() {
+        return new DoubleNodeProperties() {
+            @Override
+            public double getDouble(long nodeId) {
+                return get(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return HugeDoubleArray.this.size();
+            }
+        };
     }
 
     /**

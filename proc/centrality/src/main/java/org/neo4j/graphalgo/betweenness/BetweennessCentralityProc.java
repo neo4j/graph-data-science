@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.betweenness;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -35,7 +34,7 @@ final class BetweennessCentralityProc {
     private BetweennessCentralityProc() {}
 
     static <CONFIG extends BetweennessCentralityBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
-        return (DoubleNodeProperties) computeResult.result()::get;
+        return computeResult.result().asNodeProperties();
     }
 
     static <CONFIG extends BetweennessCentralityBaseConfig> AlgorithmFactory<BetweennessCentrality, CONFIG> algorithmFactory() {

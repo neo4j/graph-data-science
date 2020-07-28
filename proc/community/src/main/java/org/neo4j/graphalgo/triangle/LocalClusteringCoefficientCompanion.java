@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.triangle;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -44,7 +43,7 @@ final class LocalClusteringCoefficientCompanion {
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
-        return (DoubleNodeProperties) computeResult.result().localClusteringCoefficients()::get;
+        return computeResult.result().localClusteringCoefficients().asNodeProperties();
     }
 
     static void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientBaseConfig config, Log log) {

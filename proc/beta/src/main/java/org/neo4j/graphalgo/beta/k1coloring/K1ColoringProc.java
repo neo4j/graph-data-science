@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
@@ -49,7 +48,7 @@ final class K1ColoringProc {
     }
 
     static <CONFIG extends K1ColoringConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
-        return (LongNodeProperties) computeResult.result()::get;
+        return computeResult.result().asNodeProperties();
     }
 
     abstract static class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

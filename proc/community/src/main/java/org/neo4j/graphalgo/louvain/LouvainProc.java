@@ -41,7 +41,7 @@ final class LouvainProc {
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
-        LongNodeProperties nodeProperties = computationResult.result()::getCommunity;
+        LongNodeProperties nodeProperties = computationResult.result().asNodeProperties();
         if (!includeIntermediateCommunities) {
             return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, nodeProperties);
         } else {

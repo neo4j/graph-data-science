@@ -38,7 +38,7 @@ final class LabelPropagationProc {
         AlgoBaseProc.ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty
     ) {
-        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result().labels()::get);
+        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result().labels().asNodeProperties());
     }
 
     static <PROC_RESULT, CONFIG extends LabelPropagationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

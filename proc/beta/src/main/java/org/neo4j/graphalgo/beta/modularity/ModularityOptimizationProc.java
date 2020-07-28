@@ -50,7 +50,7 @@ final class ModularityOptimizationProc {
     static <CONFIG extends ModularityOptimizationConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
     ) {
-        LongNodeProperties resultCommunities = computationResult.result()::getCommunityId;
+        LongNodeProperties resultCommunities = computationResult.result().asNodeProperties();
         if (computationResult.config().consecutiveIds()) {
             return new ConsecutiveLongNodeProperties(resultCommunities, computationResult.graph().nodeCount(), computationResult.tracker());
         } else {

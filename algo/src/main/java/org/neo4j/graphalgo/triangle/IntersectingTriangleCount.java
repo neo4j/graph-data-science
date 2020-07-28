@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -167,6 +168,10 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
                 .localTriangles(triangles)
                 .globalTriangles(globalTriangles)
                 .build();
+        }
+
+        default LongNodeProperties asNodeProperties() {
+            return localTriangles().asNodeProperties();
         }
     }
 }

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringFactory;
@@ -364,5 +365,19 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     public double getTolerance() {
         return tolerance;
+    }
+
+    public LongNodeProperties asNodeProperties() {
+        return new LongNodeProperties() {
+            @Override
+            public long getLong(long nodeId) {
+                return getCommunityId(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return currentCommunities.size();
+            }
+        };
     }
 }

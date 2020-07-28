@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+
 /**
  * Disjoint-set-struct is a data structure that keeps track of a set
  * of elements partitioned into a number of disjoint (non-overlapping) subsets.
@@ -60,4 +62,23 @@ public interface DisjointSetStruct {
      * @return element count
      */
     long size();
+
+    /**
+     * Wraps the DisjointSetStruct in an LongNodeProperties interface
+     *
+     * @return wrapped DisjointSetStruct
+     */
+    default LongNodeProperties asNodeProperties() {
+        return new LongNodeProperties() {
+            @Override
+            public long getLong(long nodeId) {
+                return setIdOf(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return DisjointSetStruct.this.size();
+            }
+        };
+    }
 }

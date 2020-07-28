@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -36,7 +35,7 @@ final class TriangleCountCompanion {
 
 
     static <CONFIG extends TriangleCountBaseConfig> NodeProperties nodePropertyTranslator(AlgoBaseProc.ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, CONFIG> computeResult) {
-        return (LongNodeProperties) computeResult.result().localTriangles()::get;
+        return computeResult.result().localTriangles().asNodeProperties();
     }
 
     static <PROC_RESULT, CONFIG extends TriangleCountBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(

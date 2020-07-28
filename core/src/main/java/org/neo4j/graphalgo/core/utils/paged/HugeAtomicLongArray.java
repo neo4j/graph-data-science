@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
@@ -128,6 +129,20 @@ public abstract class HugeAtomicLongArray {
      * @return the amount of memory freed, in bytes.
      */
     public abstract long release();
+
+    public LongNodeProperties asNodeProperties() {
+        return new LongNodeProperties() {
+            @Override
+            public long getLong(long nodeId) {
+                return get(nodeId);
+            }
+
+            @Override
+            public long size() {
+                return HugeAtomicLongArray.this.size();
+            }
+        };
+    }
 
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
