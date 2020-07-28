@@ -78,6 +78,16 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     @Override
+    public long getLong(long nodeId) {
+        return (long) getDouble(nodeId, defaultValue);
+    }
+
+    @Override
+    public long getLong(long nodeId, long defaultValue) {
+        return (long) getDouble(nodeId, defaultValue);
+    }
+
+    @Override
     public ValueType getType() {
         return valueType;
     }

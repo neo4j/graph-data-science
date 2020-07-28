@@ -20,30 +20,54 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 /**
  * {@link NodeProperties} implementation which always returns
  * a given default property value upon invocation.
  */
-public class NullPropertyMap implements NodeProperties {
+public abstract class NullPropertyMap implements NodeProperties {
 
-    static final MemoryEstimation MEMORY_USAGE = MemoryEstimations.of(NullPropertyMap.class);
+    static public class DoubleNullPropertyMap extends NullPropertyMap {
+        private final double defaultValue;
 
-    private final double defaultValue;
+        public DoubleNullPropertyMap(double defaultValue) {this.defaultValue = defaultValue;}
 
-    public NullPropertyMap(double defaultValue) {
-        this.defaultValue = defaultValue;
+        @Override
+        public double getDouble(long nodeId) {
+            return this.defaultValue;
+        }
+
+        @Override
+        public double getDouble(long nodeId, double defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public ValueType getType() {
+            return ValueType.DOUBLE;
+        }
     }
 
-    @Override
-    public double getDouble(final long nodeId) {
-        return defaultValue;
+    static public class LongNullPropertyMap extends NullPropertyMap {
+        private final long defaultValue;
+
+        public LongNullPropertyMap(long defaultValue) {this.defaultValue = defaultValue;}
+
+        @Override
+        public long getLong(long nodeId) {
+            return this.defaultValue;
+        }
+
+        @Override
+        public long getLong(long nodeId, long defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public ValueType getType() {
+            return ValueType.LONG;
+        }
     }
 
-    @Override
-    public double getDouble(final long nodeId, final double defaultValue) {
-        return defaultValue;
-    }
 }

@@ -28,10 +28,11 @@ import java.util.OptionalLong;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-@FunctionalInterface
 public interface NodeProperties {
 
-    double getDouble(long nodeId);
+    default double getDouble(long nodeId) {
+        throw new UnsupportedOperationException("double is not supported");
+    }
 
     default long getLong(long nodeId) {
         throw new UnsupportedOperationException("long is not supported");
@@ -39,15 +40,17 @@ public interface NodeProperties {
 
     default double[] getDoubleArray(long nodeId) {
         throw new UnsupportedOperationException("double[] is not supported");
-    };
+    }
+
+    default long[] getLongArray(long nodeId) {
+        throw new UnsupportedOperationException("long[] is not supported");
+    }
 
     default Object getObject(long nodeId) {
         return getDouble(nodeId);
     }
 
-    default ValueType getType() {
-        throw new UnsupportedOperationException("must be overwritten");
-    };
+    ValueType getType();
 
     default Value getValue(long nodeId) {
         Value value;
@@ -65,23 +68,27 @@ public interface NodeProperties {
         }
 
         return value;
-    };
+    }
 
     default double getDouble(long nodeId, double defaultValue) {
         return getDouble(nodeId);
-    };
+    }
 
     default long getLong(long nodeId, long defaultValue) {
         return getLong(nodeId);
-    };
+    }
 
     default double[] getDoubleArray(long nodeId, double[] defaultValue) {
         return getDoubleArray(nodeId);
-    };
+    }
+
+    default long[] getLongArray(long nodeId, long[] defaultValue) {
+        return getLongArray(nodeId);
+    }
 
     default Object getObject(long nodeId, Object defaultValue) {
         return getObject(nodeId);
-    };
+    }
 
     /**
      * Release internal data structures and return an estimate how many bytes were freed.

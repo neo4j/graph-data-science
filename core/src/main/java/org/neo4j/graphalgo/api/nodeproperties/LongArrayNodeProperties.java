@@ -23,29 +23,24 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-public interface DoubleArrayNodeProperties extends NodeProperties {
+public interface LongArrayNodeProperties extends NodeProperties {
 
     @Override
-    double[] getDoubleArray(long nodeId);
+    long[] getLongArray(long nodeId);
 
     @Override
     default Object getObject(long nodeId, Object defaultValue) {
-        return getDoubleArray(nodeId, (double[]) defaultValue);
+        return getLongArray(nodeId, (long[]) defaultValue);
     }
 
     @Override
     default Value getValue(long nodeId) {
-        var value = getDoubleArray(nodeId);
-        return value == null ? null : Values.doubleArray(value);
+        var value = getLongArray(nodeId);
+        return value == null ? null : Values.longArray(value);
     };
 
     @Override
     default ValueType getType() {
         return ValueType.DOUBLE_ARRAY;
-    };
-
-    @Override
-    default double getDouble(long nodeId) {
-        throw new UnsupportedOperationException("double is not supported");
     };
 }

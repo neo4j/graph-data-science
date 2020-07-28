@@ -82,8 +82,8 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public long toMappedNodeId(long nodeId) {
-        return filteredIdMap.toMappedNodeId(super.toMappedNodeId(nodeId));
+    public long toMappedNodeId(long neoNodeId) {
+        return filteredIdMap.toMappedNodeId(super.toMappedNodeId(neoNodeId));
     }
 
     @Override
@@ -115,8 +115,12 @@ public class NodeFilteredGraph extends CSRFilterGraph {
         return consumer.target;
     }
 
-    public long getMappedNodeId(long nodeId) {
+    public long getFilteredMappedNodeId(long nodeId) {
         return filteredIdMap.toMappedNodeId(nodeId);
+    }
+
+    public long getIntermediateOriginalNodeId(long nodeId) {
+        return filteredIdMap.toOriginalNodeId(nodeId);
     }
 
     @Override
@@ -165,7 +169,7 @@ public class NodeFilteredGraph extends CSRFilterGraph {
         if (properties == null) {
             return null;
         }
-        return new FilteredNodeProperties(properties, filteredIdMap);
+        return new FilteredNodeProperties(properties, this);
     }
 
     @Override

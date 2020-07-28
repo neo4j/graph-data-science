@@ -21,33 +21,74 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.values.storable.Value;
 
 import java.util.OptionalLong;
 
 public class FilteredNodeProperties implements NodeProperties {
-    private final NodeProperties properties;
-    private IdMap idMap;
+    protected final NodeProperties properties;
+    protected NodeFilteredGraph graph;
 
-    FilteredNodeProperties(NodeProperties properties, IdMap idMap) {
+    public FilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
         this.properties = properties;
-        this.idMap = idMap;
+        this.graph = graph;
     }
 
     @Override
     public double getDouble(long nodeId) {
-        return properties.getDouble(idMap.toOriginalNodeId(nodeId));
+        return properties.getDouble(translateId(nodeId));
     }
 
     @Override
     public double getDouble(long nodeId, double defaultValue) {
-        return properties.getDouble(idMap.toOriginalNodeId(nodeId), defaultValue);
+        return properties.getDouble(translateId(nodeId), defaultValue);
+    }
+
+    @Override
+    public long getLong(long nodeId) {
+        return properties.getLong(translateId(nodeId));
+    }
+
+    @Override
+    public long getLong(long nodeId, long defaultValue) {
+        return properties.getLong(translateId(nodeId), defaultValue);
+    }
+
+    @Override
+    public double[] getDoubleArray(long nodeId) {
+        return properties.getDoubleArray(translateId(nodeId));
+    }
+
+    @Override
+    public double[] getDoubleArray(long nodeId, double[] defaultValue) {
+        return properties.getDoubleArray(translateId(nodeId), defaultValue);
+    }
+
+    @Override
+    public Object getObject(long nodeId) {
+        return properties.getObject(translateId(nodeId));
+    }
+
+    @Override
+    public Object getObject(long nodeId, Object defaultValue) {
+        return properties.getObject(translateId(nodeId), defaultValue);
+    }
+
+    @Override
+    public Value getValue(long nodeId) {
+        return properties.getValue(translateId(nodeId));
+    }
+
+    @Override
+    public ValueType getType() {
+        return properties.getType();
     }
 
     @Override
     public OptionalLong getMaxPropertyValue() {
         MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
-        idMap.forEachNode(id -> {
+        graph.forEachNode(id -> {
             currentMax.setValue(Math.max(currentMax.doubleValue(), nodeProperty(id, Double.MIN_VALUE)));
             return true;
         });
@@ -59,12 +100,16 @@ public class FilteredNodeProperties implements NodeProperties {
     @Override
     public long release() {
         long releasedFromProps = properties.release();
-        idMap = null;
+        graph = null;
         return releasedFromProps;
     }
 
     @Override
     public long size() {
-        return Math.min(properties.size(), idMap.nodeCount());
+        return Math.min(properties.size(), graph.nodeCount());
+    }
+
+    protected long translateId(long nodeId) {
+        return graph.getIntermediateOriginalNodeId(nodeId);
     }
 }

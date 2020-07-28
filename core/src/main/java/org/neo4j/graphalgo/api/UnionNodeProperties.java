@@ -74,12 +74,13 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public long getLong(long nodeId) {
-        return getLong(nodeId, -1);
+        return getLong(nodeId, Long.MIN_VALUE);
     }
 
     @Override
     public long getLong(long nodeId, long defaultValue) {
-        if (valueType == ValueType.DOUBLE) {
+        // TODO forbid doubles once we load properties with their correct type
+        if (valueType == ValueType.LONG || valueType == ValueType.DOUBLE) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? defaultValue : nodeProperties.getLong(nodeId);
         } else {
@@ -97,7 +98,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double[] getDoubleArray(long nodeId, double[] defaultValue) {
-        if (valueType == ValueType.DOUBLE) {
+        if (valueType == ValueType.DOUBLE_ARRAY) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? defaultValue : nodeProperties.getDoubleArray(nodeId);
         } else {

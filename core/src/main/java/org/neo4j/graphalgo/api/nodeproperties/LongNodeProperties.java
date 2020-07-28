@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.api.nodeproperties;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
-
 @FunctionalInterface
 public interface LongNodeProperties extends NodeProperties {
 
