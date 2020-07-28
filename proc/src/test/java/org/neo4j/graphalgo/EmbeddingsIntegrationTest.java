@@ -150,10 +150,10 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .yields();
 
         runQueryWithRowConsumer(graphSageQuery, row -> {
-            Collection<Double> embeddings = (Collection<Double>) row.get("embeddings");
-            assertEquals(embeddings.size(), embeddingSize);
+            Collection<Double> embedding = (Collection<Double>) row.get("embedding");
+            assertEquals(embedding.size(), embeddingSize);
 
-            double[] values = embeddings.stream()
+            double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)
                 .toArray();
             assertNotEquals(0D, L2Norm.l2(Tensor.vector(values)));

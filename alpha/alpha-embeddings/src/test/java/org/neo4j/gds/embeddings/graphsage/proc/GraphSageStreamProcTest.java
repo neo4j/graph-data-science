@@ -53,7 +53,7 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             Number nodeId = row.getNumber("nodeId");
             assertNotNull(nodeId);
 
-            Object o = row.get("embeddings");
+            Object o = row.get("embedding");
             assertTrue(o instanceof List);
             Collection<Double> nodeEmbeddings = (List<Double>) o;
             assertEquals(embeddingSize, nodeEmbeddings.size());
