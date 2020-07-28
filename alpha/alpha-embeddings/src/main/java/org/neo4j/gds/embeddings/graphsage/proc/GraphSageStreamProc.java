@@ -97,11 +97,11 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     public static class GraphSageStreamResult {
         public long nodeId;
-        public List<Double> embeddings;
+        public List<Double> embedding;
 
         GraphSageStreamResult(long nodeId, double[] embeddings) {
             this.nodeId = nodeId;
-            this.embeddings = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
+            this.embedding = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
         }
     }
 }
