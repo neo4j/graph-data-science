@@ -139,10 +139,12 @@ abstract class SimilarityProc
     @Override
     protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
         return (AlphaAlgorithmFactory<ALGO, CONFIG>) (graph, configuration, tracker, log) -> {
-            GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+            removeGraph();
             return newAlgo(configuration);
         };
     }
+
+
 
     // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override
@@ -178,7 +180,16 @@ abstract class SimilarityProc
             );
         }
         // And finally we call super in named graph mode
-        return super.processInput(graphNameOrConfig, configuration);
+        try {
+            return super.processInput(graphNameOrConfig, configuration);
+        } catch (RuntimeException e) {
+            removeGraph();
+            throw e;
+        }
+    }
+
+    private void removeGraph() {
+        GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
