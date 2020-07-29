@@ -33,13 +33,16 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 import java.util.Queue;
 
-@PregelProcedure(name = "example.pregel.pr", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "example.pregel.pr", modes = {GDSMode.STREAM, GDSMode.MUTATE})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override
     public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperstep()) {
-            pregel.setNodeValue(nodeId, 1.0 / pregel.getNodeCount());
+            var initialValue = pregel.isSeeded()
+                ? pregel.getNodeValue(nodeId)
+                : 1.0 / pregel.getNodeCount();
+            pregel.setNodeValue(nodeId, initialValue);
         }
 
         double newRank = pregel.getNodeValue(nodeId);
@@ -58,10 +61,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             var jumpProbability = 1 - dampingFactor;
 
             newRank = (jumpProbability / pregel.getNodeCount()) + dampingFactor * sum;
+
+            pregel.setNodeValue(nodeId, newRank);
         }
 
         // send new rank to neighbors
-        pregel.setNodeValue(nodeId, newRank);
         pregel.sendMessages(nodeId, newRank / pregel.getDegree(nodeId));
     }
 

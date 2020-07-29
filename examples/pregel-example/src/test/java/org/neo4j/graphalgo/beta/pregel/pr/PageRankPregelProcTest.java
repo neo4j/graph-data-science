@@ -23,8 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.HashMap;
+import java.util.Map;
 
 class PageRankPregelProcTest extends BaseProcTest {
 
@@ -59,11 +61,29 @@ class PageRankPregelProcTest extends BaseProcTest {
         ", (j)-[:REL]->(e)" +
         ", (k)-[:REL]->(e)";
 
+    private static final Map<Long, Double> EXPECTED_RANKS = new HashMap<>();
+
+    static {
+        EXPECTED_RANKS.put(0L, 0.0276D);
+        EXPECTED_RANKS.put(1L, 0.3483D);
+        EXPECTED_RANKS.put(2L, 0.2650D);
+        EXPECTED_RANKS.put(3L, 0.0330D);
+        EXPECTED_RANKS.put(4L, 0.0682D);
+        EXPECTED_RANKS.put(5L, 0.0330D);
+        EXPECTED_RANKS.put(6L, 0.0136D);
+        EXPECTED_RANKS.put(7L, 0.0136D);
+        EXPECTED_RANKS.put(8L, 0.0136D);
+        EXPECTED_RANKS.put(9L, 0.0136D);
+        EXPECTED_RANKS.put(10L, 0.0136D);
+    }
+
     @BeforeEach
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
+        registerProcedures(GraphCreateProc.class);
         registerProcedures(PageRankPregelStreamProc.class);
+        registerProcedures(PageRankPregelMutateProc.class);
     }
 
     @Test
@@ -80,21 +100,44 @@ class PageRankPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
-        var expected = new HashMap<Long, Double>();
-        expected.put(0L, 0.0276D);
-        expected.put(1L, 0.3483D);
-        expected.put(2L, 0.2650D);
-        expected.put(3L, 0.0330D);
-        expected.put(4L, 0.0682D);
-        expected.put(5L, 0.0330D);
-        expected.put(6L, 0.0136D);
-        expected.put(7L, 0.0136D);
-        expected.put(8L, 0.0136D);
-        expected.put(9L, 0.0136D);
-        expected.put(10L, 0.0136D);
-
-        assertMapEqualsWithTolerance(expected, actual, 0.001);
+        assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);
     }
 
+    @Test
+    void streamSeeded() {
+        var createGraphQuery = GdsCypher.call()
+            .loadEverything()
+            .graphCreate("test")
+            .yields();
 
+        runQuery(createGraphQuery);
+
+        var mutateQuery = GdsCypher.call()
+            .explicitCreation("test")
+            .algo("example", "pregel", "pr")
+            .mutateMode()
+            .addParameter("maxIterations", 5)
+            .addParameter("mutateProperty", "pageRank")
+            .yields();
+
+        runQuery(mutateQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation("test")
+            .algo("example", "pregel", "pr")
+            .streamMode()
+            // we need 11 iterations in total to achieve the same result
+            // as the above test since for the computation iteration 6
+            // is the initial superstep where it doesn't receive messages
+            .addParameter("maxIterations", 6)
+            .addParameter("seedProperty", "pageRank")
+            .yields("nodeId", "value");
+
+        HashMap<Long, Double> actual = new HashMap<>();
+        runQueryWithRowConsumer(query, r -> {
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+        });
+
+        assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);
+    }
 }
