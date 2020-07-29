@@ -19,19 +19,16 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-import org.apache.lucene.util.LongsRef;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.AdjacencyCompression;
-import org.neo4j.graphalgo.core.loading.AdjacencyListAllocator;
-import org.neo4j.graphalgo.core.loading.AdjacencyListBuilder;
-import org.neo4j.graphalgo.core.loading.AdjacencyListPageSlice;
-import org.neo4j.graphalgo.core.loading.CompressedLongArray;
-import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
@@ -214,29 +211,26 @@ class TransientAdjacencyListTest {
         assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 
-    // TODO: consider using the adjacency list of a loaded graph instead
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
-        AdjacencyListBuilder adjacencyListBuilder = TransientAdjacencyListBuilder
-            .builderFactory(AllocationTracker.EMPTY)
-            .newAdjacencyListBuilder();
-
-        CompressedLongArray array = new CompressedLongArray(AllocationTracker.EMPTY);
-        array.add(targets, 0, targets.length);
-        byte[] storage = array.storage();
-        LongsRef buffer = new LongsRef();
-        AdjacencyCompression.copyFrom(buffer, array);
-        int degree = AdjacencyCompression.applyDeltaEncoding(buffer, Aggregation.NONE);
-        int requiredBytes = AdjacencyCompression.compress(buffer, storage);
-
-        AdjacencyListAllocator allocator = adjacencyListBuilder.newAllocator();
-        allocator.prepare();
-        AdjacencyListPageSlice slice = allocator.allocate(Integer.BYTES + requiredBytes);
-        slice.writeInt(degree);
-        slice.insert(storage, 0, requiredBytes);
-        long offset = slice.address();
-
-        array.release();
-        AdjacencyList adjacencyList = adjacencyListBuilder.build();
-        return (TransientAdjacencyList.DecompressingCursor) adjacencyList.decompressingCursor(offset);
+        long sourceNodeId = targets[0];
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(targets[targets.length - 1], Pools.DEFAULT, AllocationTracker.EMPTY);
+        for (long target : targets) {
+            idMapBuilder.addNode(target);
+        }
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
+            idMap,
+            Orientation.NATURAL,
+            false,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+        for (long target : targets) {
+            relationshipsBuilder.add(sourceNodeId, target);
+        }
+        Relationships relationships = relationshipsBuilder.build();
+        long offset = relationships.topology().offsets().get(idMap.toMappedNodeId(sourceNodeId));
+        return (TransientAdjacencyList.DecompressingCursor) relationships.topology().list().decompressingCursor(offset);
     }
 }
