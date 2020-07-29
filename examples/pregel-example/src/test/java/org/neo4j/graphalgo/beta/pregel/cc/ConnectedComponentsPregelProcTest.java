@@ -61,6 +61,32 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         ", (i)-[:TYPE]->(h)" +
         ", (h)-[:TYPE]->(i)";
 
+    private static final Map<Long, Double> EXPECTED_COMPONENTS = Map.of(
+        0L, 0D,
+        1L, 0D,
+        2L, 0D,
+        3L, 0D,
+        4L, 4D,
+        5L, 4D,
+        6L, 4D,
+        7L, 7D,
+        8L, 7D,
+        9L, 9D
+    );
+
+    private static final Map<Long, Double> EXPECTED_COMPONENTS_SEEDED = Map.of(
+        0L, 1D,
+        1L, 1D,
+        2L, 1D,
+        3L, 1D,
+        4L, 2D,
+        5L, 2D,
+        6L, 2D,
+        7L, 3D,
+        8L, 3D,
+        9L, 4D
+    );
+
     @BeforeEach
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
@@ -89,20 +115,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
-        var expected = Map.of(
-            0L, 0D,
-            1L, 0D,
-            2L, 0D,
-            3L, 0D,
-            4L, 4D,
-            5L, 4D,
-            6L, 4D,
-            7L, 7D,
-            8L, 7D,
-            9L, 9D
-        );
-
-        assertThat(actual, mapEquals(expected));
+        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
     }
 
     @Test
@@ -121,20 +134,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
-        var expected = Map.of(
-            0L, 1D,
-            1L, 1D,
-            2L, 1D,
-            3L, 1D,
-            4L, 2D,
-            5L, 2D,
-            6L, 2D,
-            7L, 3D,
-            8L, 3D,
-            9L, 4D
-        );
-
-        assertThat(actual, mapEquals(expected));
+        assertThat(actual, mapEquals(EXPECTED_COMPONENTS_SEEDED));
     }
 
     @Test
@@ -154,20 +154,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
-        var expected = Map.of(
-            0L, 0D,
-            1L, 0D,
-            2L, 0D,
-            3L, 0D,
-            4L, 4D,
-            5L, 4D,
-            6L, 4D,
-            7L, 7D,
-            8L, 7D,
-            9L, 9D
-        );
-
-        assertThat(actual, mapEquals(expected));
+        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
     }
 
     @Test
@@ -201,20 +188,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
-        var expected = Map.of(
-            0L, 0D,
-            1L, 0D,
-            2L, 0D,
-            3L, 0D,
-            4L, 4D,
-            5L, 4D,
-            6L, 4D,
-            7L, 7D,
-            8L, 7D,
-            9L, 9D
-        );
-
-        assertThat(actual, mapEquals(expected));
+        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
     }
 
     @Test

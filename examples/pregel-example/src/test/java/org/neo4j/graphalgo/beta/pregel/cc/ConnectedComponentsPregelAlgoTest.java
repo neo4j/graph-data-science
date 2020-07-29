@@ -53,7 +53,7 @@ class ConnectedComponentsPregelAlgoTest {
             ", (h:Node)" +
             ", (i:Node)" +
             // {J}
-            ", (j:Node { id: 9 })" +
+            ", (j:Node)" +
             // {A, B, C, D}
             ", (a)-[:TYPE]->(b)" +
             ", (b)-[:TYPE]->(c)" +
@@ -117,7 +117,6 @@ class ConnectedComponentsPregelAlgoTest {
         int maxIterations = 10;
 
         var config = ImmutableConnectedComponentsConfig.builder()
-            .isAsynchronous(true)
             .concurrency(2)
             .maxIterations(maxIterations)
             .build();
