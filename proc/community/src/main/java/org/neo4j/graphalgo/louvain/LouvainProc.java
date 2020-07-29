@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -41,11 +41,14 @@ final class LouvainProc {
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
-        LongNodeProperties nodeProperties = computationResult.result().asNodeProperties();
         if (!includeIntermediateCommunities) {
-            return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, nodeProperties);
+            return CommunityProcCompanion.nodeProperties(
+                computationResult,
+                resultProperty,
+                computationResult.result()::getCommunity
+            );
         } else {
-            return nodeProperties;
+            return (LongArrayNodeProperties) computationResult.result()::getCommunities;
         }
     }
 
