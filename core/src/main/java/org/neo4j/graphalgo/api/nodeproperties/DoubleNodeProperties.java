@@ -17,28 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.api.nodeproperties;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
-@ValueClass
-public
-interface NodeProperty {
+@FunctionalInterface
+public interface DoubleNodeProperties extends NodeProperties {
 
-    String key();
+    @Override
+    double getDouble(long nodeId);
 
-    GraphStore.PropertyState state();
+    @Override
+    default Object getObject(long nodeId, Object defaultValue) {
+        return getDouble(nodeId, (Double) defaultValue);
+    }
 
-    NodeProperties values();
-
-    @Configuration.Ignore
-    default ValueType type() {
-        return values().getType();
+    @Override
+    default Value getValue(long nodeId) {
+        var value = getDouble(nodeId);
+        return Double.isNaN(value) ? null : Values.doubleValue(value);
     };
 
-    static NodeProperty of(String key, GraphStore.PropertyState origin, NodeProperties values) {
-        return ImmutableNodeProperty.of(key, origin, values);
-    }
+    @Override
+    default ValueType getType() {
+        return ValueType.DOUBLE;
+    };
 }

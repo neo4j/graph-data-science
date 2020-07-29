@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Map;
@@ -44,8 +44,8 @@ public class BetweennessCentralityMutateProcTest
     }
 
     @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.FLOATING_POINT;
+    public ValueType mutatePropertyType() {
+        return ValueType.DOUBLE;
     }
 
     @Override

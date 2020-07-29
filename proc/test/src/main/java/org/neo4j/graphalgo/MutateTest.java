@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
-import org.neo4j.values.storable.NumberType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
 
     String mutateProperty();
 
-    NumberType mutatePropertyType();
+    ValueType mutatePropertyType();
 
     @Override
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
@@ -105,7 +105,7 @@ public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONF
         assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
     }
 
-    default boolean containsMutateProperty(Map<?, Map<String, NumberType>> entitySchema) {
+    default boolean containsMutateProperty(Map<?, Map<String, ValueType>> entitySchema) {
         return entitySchema
             .values()
             .stream()

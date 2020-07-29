@@ -24,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -50,8 +50,8 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
     }
 
     @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.INTEGRAL;
+    public ValueType mutatePropertyType() {
+        return ValueType.LONG;
     }
 
     @Override

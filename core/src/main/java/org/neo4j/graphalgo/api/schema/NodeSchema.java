@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api.schema;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.values.storable.NumberType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @ValueClass
 public interface NodeSchema {
-    Map<NodeLabel, Map<String, NumberType>> properties();
+    Map<NodeLabel, Map<String, ValueType>> properties();
 
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
@@ -42,12 +42,12 @@ public interface NodeSchema {
                 .stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    innerEntry -> GraphStoreSchema.fromNumberType(innerEntry.getValue()))
+                    innerEntry -> GraphStoreSchema.forValueType(innerEntry.getValue()))
                 )
         ));
     }
 
-    static NodeSchema of(Map<NodeLabel, Map<String, NumberType>> properties) {
+    static NodeSchema of(Map<NodeLabel, Map<String, ValueType>> properties) {
         return NodeSchema.builder().properties(properties).build();
     }
 
@@ -58,7 +58,7 @@ public interface NodeSchema {
     @AccessibleFields
     class Builder extends ImmutableNodeSchema.Builder {
 
-        public void addPropertyAndTypeForLabel(NodeLabel key, String propertyName, NumberType type) {
+        public void addPropertyAndTypeForLabel(NodeLabel key, String propertyName, ValueType type) {
             this.properties
                 .computeIfAbsent(key, ignore -> new LinkedHashMap<>())
                 .put(propertyName, type);

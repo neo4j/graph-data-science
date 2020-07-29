@@ -35,13 +35,13 @@ public class FilteredNodeProperties implements NodeProperties {
     }
 
     @Override
-    public double nodeProperty(long nodeId) {
-        return properties.nodeProperty(idMap.toOriginalNodeId(nodeId));
+    public double getDouble(long nodeId) {
+        return properties.getDouble(idMap.toOriginalNodeId(nodeId));
     }
 
     @Override
-    public double nodeProperty(long nodeId, double defaultValue) {
-        return properties.nodeProperty(idMap.toOriginalNodeId(nodeId), defaultValue);
+    public double getDouble(long nodeId, double defaultValue) {
+        return properties.getDouble(idMap.toOriginalNodeId(nodeId), defaultValue);
     }
 
     @Override

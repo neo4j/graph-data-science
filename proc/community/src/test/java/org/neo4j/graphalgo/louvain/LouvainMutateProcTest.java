@@ -25,10 +25,10 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +47,8 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Override
-    public NumberType mutatePropertyType() {
-        return NumberType.INTEGRAL;
+    public ValueType mutatePropertyType() {
+        return ValueType.LONG;
     }
 
     @Override

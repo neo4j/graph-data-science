@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.api.RelationshipProperty;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
@@ -100,7 +101,7 @@ public final class CSRGraphStore implements GraphStore {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
             propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyState.PERSISTENT, propertyValues)
+                NodeProperty.of(propertyKey, PropertyState.PERSISTENT, propertyValues)
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
@@ -224,7 +225,6 @@ public final class CSRGraphStore implements GraphStore {
     public void addNodeProperty(
         NodeLabel nodeLabel,
         String propertyKey,
-        NumberType propertyType,
         NodeProperties propertyValues
     ) {
         if (!nodeLabels().contains(nodeLabel)) {
@@ -240,7 +240,7 @@ public final class CSRGraphStore implements GraphStore {
                 storeBuilder.from(nodePropertyStore);
             }
             return storeBuilder
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, propertyValues))
+                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
                 .build();
         }));
     }
@@ -264,7 +264,7 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NumberType nodePropertyType(NodeLabel label, String propertyKey) {
+    public ValueType nodePropertyType(NodeLabel label, String propertyKey) {
         return nodeProperty(label, propertyKey).type();
     }
 
@@ -433,7 +433,6 @@ public final class CSRGraphStore implements GraphStore {
     private NodeProperty nodeProperty(String propertyKey) {
         if (nodes.availableNodeLabels().size() > 1) {
             var unionValues = new HashMap<NodeLabel, NodeProperties>();
-            var unionType = NumberType.NO_NUMBER;
             var unionOrigin = PropertyState.PERSISTENT;
 
             for (var labelAndPropertyStore : nodeProperties.entrySet()) {
@@ -442,14 +441,12 @@ public final class CSRGraphStore implements GraphStore {
                 if (nodePropertyStore.containsKey(propertyKey)) {
                     var nodeProperty = nodePropertyStore.get(propertyKey);
                     unionValues.put(nodeLabel, nodeProperty.values());
-                    unionType = nodeProperty.type();
                     unionOrigin = nodeProperty.state();
                 }
             }
 
             return NodeProperty.of(
                 propertyKey,
-                unionType,
                 unionOrigin,
                 new UnionNodeProperties(nodes, unionValues)
             );
@@ -605,7 +602,7 @@ public final class CSRGraphStore implements GraphStore {
                 relationshipPropsBuilder.addPropertyAndTypeForRelationshipType(
                     type,
                     propertyName,
-                    relationshipProperty.type()
+                    ValueType.fromNumberType(relationshipProperty.type())
                 );
             });
         });

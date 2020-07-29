@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -180,6 +181,7 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesBuilder.of(
                         dimensions.nodeCount(),
+                        ValueType.DOUBLE,
                         loadingContext.tracker(),
                         PropertyMapping.DEFAULT_FALLBACK_VALUE
                     )).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue));

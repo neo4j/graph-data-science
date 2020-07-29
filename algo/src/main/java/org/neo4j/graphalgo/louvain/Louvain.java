@@ -23,13 +23,14 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -274,8 +275,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         }
 
         @Override
-        public double nodeProperty(long nodeId) {
+        public double getDouble(long nodeId) {
             return graph.toOriginalNodeId(nodeId);
+        }
+
+        @Override
+        public ValueType getType() {
+            return ValueType.LONG;
         }
     }
 }
