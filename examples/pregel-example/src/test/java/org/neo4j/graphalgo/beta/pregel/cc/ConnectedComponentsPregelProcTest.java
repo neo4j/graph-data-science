@@ -121,6 +121,23 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
     }
 
     @Test
+    void streamEstimate() {
+        var query = GdsCypher.call()
+            .loadEverything()
+            .algo("example", "pregel", "cc")
+            .streamEstimation()
+            .addParameter("maxIterations", 10)
+            .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
+
+        runQueryWithRowConsumer(query, r -> {
+            assertEquals(10, r.getNumber("nodeCount").longValue());
+            assertEquals(9, r.getNumber("relationshipCount").longValue());
+            assertEquals(308_136, r.getNumber("bytesMin").longValue());
+            assertEquals(308_136, r.getNumber("bytesMax").longValue());
+        });
+    }
+
+    @Test
     void streamSeeded() {
         var query = GdsCypher.call()
             .withNodeProperty("seedProperty")

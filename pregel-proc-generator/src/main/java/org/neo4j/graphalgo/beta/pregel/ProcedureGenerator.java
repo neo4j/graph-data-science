@@ -25,8 +25,10 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
@@ -34,8 +36,8 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -102,6 +104,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
         addGeneratedAnnotation(typeSpecBuilder);
 
         typeSpecBuilder.addMethod(procMethod());
+        typeSpecBuilder.addMethod(procEstimateMethod());
         typeSpecBuilder.addMethod(procResultMethod());
 
         typeSpecBuilder.addMethod(newConfigMethod());
@@ -112,22 +115,37 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procMethod() {
-        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(procGdsMode().lowerCase());
-
-        // add procedure annotation
-        methodBuilder.addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-            .addMember("name", "$S", pregelSpec.procedureName() + "." + procGdsMode().lowerCase())
-            .addMember("mode", "$T.$L", org.neo4j.procedure.Mode.class, procExecMode())
-            .build()
-        );
-        // add description
+        var methodBuilder = procMethodSignature(procGdsMode().lowerCase(), procGdsMode().lowerCase());
         pregelSpec.description().ifPresent(description -> methodBuilder.addAnnotation(
             AnnotationSpec.builder(Description.class)
                 .addMember("value", "$S", description)
                 .build()
         ));
-
         return methodBuilder
+            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procGdsMode().lowerCase())
+            .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
+            .build();
+    }
+
+    private MethodSpec procEstimateMethod() {
+        return procMethodSignature(procGdsMode().lowerCase() + "Estimate", procGdsMode().lowerCase() + ".estimate")
+            .addAnnotation(AnnotationSpec.builder(Description.class)
+                .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
+                .build()
+            )
+            .addStatement("return computeEstimate(graphNameOrConfig, configuration)", procGdsMode().lowerCase())
+            .returns(ParameterizedTypeName.get(Stream.class, MemoryEstimateResult.class))
+            .build();
+    }
+
+    @NotNull
+    private MethodSpec.Builder procMethodSignature(String methodName, String procedureSuffix) {
+        return MethodSpec.methodBuilder(methodName)
+            .addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
+                .addMember("name", "$S", pregelSpec.procedureName() + "." + procedureSuffix)
+                .addMember("mode", "$T.$L", org.neo4j.procedure.Mode.class, procExecMode())
+                .build()
+            )
             .addModifiers(Modifier.PUBLIC)
             .addParameter(ParameterSpec.builder(Object.class, "graphNameOrConfig")
                 .addAnnotation(AnnotationSpec.builder(Name.class)
@@ -140,10 +158,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                     .addMember("value", "$S", "configuration")
                     .addMember("defaultValue", "$S", "{}")
                     .build())
-                .build())
-            .addStatement("return $L(compute(graphNameOrConfig, configuration))", procGdsMode().lowerCase())
-            .returns(ParameterizedTypeName.get(Stream.class, procResultClass()))
-            .build();
+                .build());
     }
 
     private MethodSpec newConfigMethod() {
@@ -182,7 +197,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(MemoryEstimation.class)
                 .addParameter(pregelSpec.configTypeName(), "configuration")
-                .addStatement("return $T.empty()", MemoryEstimations.class)
+                .addStatement("return $T.memoryEstimation()", Pregel.class)
                 .build()
             )
             .build();
