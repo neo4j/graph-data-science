@@ -78,7 +78,9 @@ class WriteProcedureGenerator extends ProcedureGenerator {
                 ClassName.get(Pregel.PregelResult.class),
                 pregelSpec.configTypeName()
             ), "computeResult")
-            .addStatement("return new $T()", procResultBuilderClass())
+            .addStatement("var ranIterations = computeResult.result().ranIterations()")
+            .addStatement("var didConverge = computeResult.result().didConverge()")
+            .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", procResultBuilderClass())
             .build();
     }
 }

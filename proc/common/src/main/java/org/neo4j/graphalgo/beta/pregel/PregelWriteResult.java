@@ -19,27 +19,31 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
-
 public final class PregelWriteResult {
     public final long nodePropertiesWritten;
     public final long createMillis;
     public final long computeMillis;
     public final long writeMillis;
+    public final long ranIterations;
+    public final boolean didConverge;
 
     private PregelWriteResult(
         long nodePropertiesWritten,
         long createMillis,
         long computeMillis,
-        long writeMillis
+        long writeMillis,
+        long ranIterations,
+        boolean didConverge
     ) {
         this.nodePropertiesWritten = nodePropertiesWritten;
         this.createMillis = createMillis;
         this.computeMillis = computeMillis;
         this.writeMillis = writeMillis;
+        this.ranIterations = ranIterations;
+        this.didConverge = didConverge;
     }
 
-    public static class Builder extends AbstractResultBuilder<PregelWriteResult> {
+    public static class Builder extends AbstractPregelResultBuilder<PregelWriteResult> {
 
         @Override
         public PregelWriteResult build() {
@@ -47,7 +51,9 @@ public final class PregelWriteResult {
                 nodePropertiesWritten,
                 createMillis,
                 computeMillis,
-                writeMillis
+                writeMillis,
+                ranIterations,
+                didConverge
             );
         }
     }

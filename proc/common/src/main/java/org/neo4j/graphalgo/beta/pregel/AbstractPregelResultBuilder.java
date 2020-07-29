@@ -19,29 +19,21 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public final class PregelStatsResult {
-    public final long createMillis;
-    public final long computeMillis;
-    public final long ranIterations;
-    public final boolean didConverge;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-    private PregelStatsResult(
-        long createMillis,
-        long computeMillis,
-        long ranIterations,
-        boolean didConverge
-    ) {
-        this.createMillis = createMillis;
-        this.computeMillis = computeMillis;
+public abstract class AbstractPregelResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
+
+    protected long ranIterations;
+    protected boolean didConverge;
+
+    public AbstractPregelResultBuilder<WRITE_RESULT> withRanIterations(long ranIterations) {
         this.ranIterations = ranIterations;
+        return this;
+    }
+
+    public AbstractPregelResultBuilder<WRITE_RESULT> didConverge(boolean didConverge) {
         this.didConverge = didConverge;
+        return this;
     }
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelStatsResult> {
-
-        @Override
-        public PregelStatsResult build() {
-            return new PregelStatsResult(createMillis, computeMillis, ranIterations, didConverge);
-        }
-    }
 }
