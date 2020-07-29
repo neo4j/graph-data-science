@@ -150,9 +150,9 @@ class GraphLoaderTest extends BaseTest {
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(factoryType);
 
-        Graph expected = fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
-                               "(b {prop1: 0, prop2: 2, prop3: 0})" +
-                               "(c {prop1: 0, prop2: 0, prop3: 3})" +
+        Graph expected = fromGdl("(a {prop1: 1.0, prop2: 0.0, prop3: 0.0})" +
+                               "(b {prop1: 0.0, prop2: 2.0, prop3: 0.0})" +
+                               "(c {prop1: 0.0, prop2: 0.0, prop3: 3.0})" +
                                "(a)-->(b), (a)-->(c), (b)-->(c)");
         assertGraphEquals(expected, graph);
     }

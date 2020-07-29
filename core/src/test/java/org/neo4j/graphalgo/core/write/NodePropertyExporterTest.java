@@ -47,9 +47,9 @@ class NodePropertyExporterTest extends BaseTest {
     void setup() {
         runQuery(
             "CREATE " +
-            "  (n1:Node {prop1: 1, prop2: 42})" +
-            ", (n2:Node {prop1: 2, prop2: 42})" +
-            ", (n3:Node {prop1: 3, prop2: 42})" +
+            "  (n1:Node {prop1: 1.0, prop2: 42.0})" +
+            ", (n2:Node {prop1: 2.0, prop2: 42.0})" +
+            ", (n3:Node {prop1: 3.0, prop2: 42.0})" +
             ", (n1)-[:REL]->(n2)" +
             ", (n1)-[:REL]->(n3)" +
             ", (n2)-[:REL]->(n3)" +
@@ -77,9 +77,9 @@ class NodePropertyExporterTest extends BaseTest {
 
         assertGraphEquals(
             fromGdl(
-                "(a { prop1: 1, newProp1: 23 })" +
-                "(b { prop1: 2, newProp1: 42 })" +
-                "(c { prop1: 3, newProp1: 84 })" +
+                "(a { prop1: 1.0, newProp1: 23.0 })" +
+                "(b { prop1: 2.0, newProp1: 42.0 })" +
+                "(c { prop1: 3.0, newProp1: 84.0 })" +
                 "(a)-->(b)" +
                 "(a)-->(c)" +
                 "(b)-->(c)" +
@@ -117,9 +117,9 @@ class NodePropertyExporterTest extends BaseTest {
 
         assertGraphEquals(
             fromGdl(
-                "(a { prop1: 1, newProp1: 23, newProp2: 123.0d })" +
-                "(b { prop1: 2, newProp1: 42, newProp2: 142.0d })" +
-                "(c { prop1: 3, newProp1: 84, newProp2: 184.0d })" +
+                "(a { prop1: 1.0, newProp1: 23.0, newProp2: 123.0d })" +
+                "(b { prop1: 2.0, newProp1: 42.0, newProp2: 142.0d })" +
+                "(c { prop1: 3.0, newProp1: 84.0, newProp2: 184.0d })" +
                 "(a)-->(b)" +
                 "(a)-->(c)" +
                 "(b)-->(c)" +

@@ -179,22 +179,22 @@ final class HugeGraphLoadingTest extends BaseTest {
             .graphStore();
 
         Graph natural = graphStore.getGraph(RelationshipType.of("TYPE_NATURAL"));
-        assertGraphEquals(fromGdl("({id: 0})-->({id: 1})"), natural);
+        assertGraphEquals(fromGdl("({id: 0.0})-->({id: 1.0})"), natural);
 
         Graph reverse = graphStore.getGraph(RelationshipType.of("TYPE_REVERSE"));
-        assertGraphEquals(fromGdl("({id: 1})-->({id: 0})"), reverse);
+        assertGraphEquals(fromGdl("({id: 1.0})-->({id: 0.0})"), reverse);
 
         Graph undirected = graphStore.getGraph(RelationshipType.of("TYPE_UNDIRECTED"));
-        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), undirected);
+        assertGraphEquals(fromGdl("(a {id: 0.0})-->(b {id: 1.0}), (a)<--(b)"), undirected);
 
         Graph both = graphStore.getGraph(Arrays.asList(
             RelationshipType.of("TYPE_NATURAL"),
             RelationshipType.of("TYPE_REVERSE")
         ), Optional.empty());
-        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b)"), both);
+        assertGraphEquals(fromGdl("(a {id: 0.0})-->(b {id: 1.0}), (a)<--(b)"), both);
 
         Graph union = graphStore.getUnion();
-        assertGraphEquals(fromGdl("(a {id: 0})-->(b {id: 1}), (a)<--(b), (a)<--(b), (a)-->(b)"), union);
+        assertGraphEquals(fromGdl("(a {id: 0.0})-->(b {id: 1.0}), (a)<--(b), (a)<--(b), (a)-->(b)"), union);
     }
 
     @Test

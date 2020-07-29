@@ -313,13 +313,13 @@ class GraphStoreTest extends BaseTest {
                 "filterByRelationshipProperty",
                 Arrays.asList(RelationshipType.of("T1"), RelationshipType.of("T2")),
                 Optional.of("property1"),
-                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b), (a)-[T2 {property1: 43}]->(b)"
+                "(a:A), (b:B), (a)-[T1 {property1: 42.0}]->(b), (a)-[T2 {property1: 43.0}]->(b)"
             ),
             Arguments.of(
                 "filterByRelationshipTypeAndProperty",
                 singletonList(RelationshipType.of("T1")),
                 Optional.of("property1"),
-                "(a:A), (b:B), (a)-[T1 {property1: 42}]->(b)"
+                "(a:A), (b:B), (a)-[T1 {property1: 42.0}]->(b)"
             )
         );
     }
@@ -329,22 +329,22 @@ class GraphStoreTest extends BaseTest {
             Arguments.of(
                 "filterAllLabels",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("Ignore")),
-                "(a:A {nodeProperty: 33, a: 33, b: 'NaN'}), (b:B {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33.0, a: 33.0}), (b:B {nodeProperty: 42.0, b: 42.0}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "filterAllTypesExplicit",
                 Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")),
-                "(a:A {nodeProperty: 33, a: 33, b: 'NaN'}), (b:B {nodeProperty: 42, a: 'NaN', b: 42}), (a)-[T1]->(b)"
+                "(a:A {nodeProperty: 33.0, a: 33.0}), (b:B {nodeProperty: 42.0, b: 42.0}), (a)-[T1]->(b)"
             ),
             Arguments.of(
                 "FilterA",
                 singletonList(NodeLabel.of("A")),
-                "(a:A {nodeProperty: 33, a: 33})"
+                "(a:A {nodeProperty: 33.0, a: 33.0})"
             ),
             Arguments.of(
                 "FilterB",
                 singletonList(NodeLabel.of("B")),
-                "(b:B {nodeProperty: 42, b: 42})"
+                "(b:B {nodeProperty: 42.0, b: 42.0})"
             )
         );
     }

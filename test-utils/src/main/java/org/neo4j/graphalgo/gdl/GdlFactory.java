@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.NodePropertyArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -181,13 +182,13 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesBuilder.of(
                         dimensions.nodeCount(),
-                        ValueType.DOUBLE,
+                        inferValueType(propertyValue),
                         loadingContext.tracker(),
                         PropertyMapping.DEFAULT_FALLBACK_VALUE
                     )).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue));
             }));
 
-        var nodeProperties = propertyBuilders
+        Map<PropertyMapping, NodePropertyArray> nodeProperties = propertyBuilders
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
@@ -255,6 +256,14 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
             entry -> RelationshipType.of(entry.getKey()),
             entry -> Tuples.pair(propertyKeysByRelType.get(entry.getKey()), entry.getValue().build())
         ));
+    }
+
+    private ValueType inferValueType(Object gdlValue) {
+        if (gdlValue instanceof Long || gdlValue instanceof Integer) {
+            return ValueType.LONG;
+        } else {
+            return ValueType.DOUBLE;
+        }
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {

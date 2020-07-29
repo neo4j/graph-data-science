@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.canonization;
 import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,10 +50,23 @@ public final class CanonicalAdjacencyMatrix {
                 .collect(Collectors.joining(":"));
 
             String sortedProperties = g.availableNodeProperties().stream()
-                    .map(propertyKey -> formatWithLocale(
-                            "%s: %f",
-                            propertyKey,
-                            g.nodeProperties(propertyKey).nodeProperty(nodeId)))
+                    .map(propertyKey -> {
+                        var nodeProperties = g.nodeProperties(propertyKey);
+
+                        if (nodeProperties.getType() == ValueType.DOUBLE) {
+                            return formatWithLocale(
+                                "%s: %f",
+                                propertyKey,
+                                nodeProperties.getDouble(nodeId)
+                            );
+                        } else {
+                            return formatWithLocale(
+                                "%s: %s",
+                                propertyKey,
+                                nodeProperties.getObject(nodeId)
+                            );
+                        }
+                    })
                     .sorted()
                     .collect(Collectors.joining(", "));
 

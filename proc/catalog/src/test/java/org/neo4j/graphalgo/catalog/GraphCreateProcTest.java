@@ -814,10 +814,10 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery(query, map());
 
         Graph graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
-        Graph expected = fromGdl("(:Node { fooProp: 42, barProp: 13.37D })" +
-                                 "(:Node { fooProp: 43, barProp: 13.38D })" +
-                                 "(:Node { fooProp: 44, barProp: 13.39D })" +
-                                 "(:Node { fooProp: 45, barProp: 19.84D })");
+        Graph expected = fromGdl("(:Node { fooProp: 42.0, barProp: 13.37D })" +
+                                 "(:Node { fooProp: 43.0, barProp: 13.38D })" +
+                                 "(:Node { fooProp: 44.0, barProp: 13.39D })" +
+                                 "(:Node { fooProp: 45.0, barProp: 19.84D })");
         assertGraphEquals(expected, graph);
     }
 
