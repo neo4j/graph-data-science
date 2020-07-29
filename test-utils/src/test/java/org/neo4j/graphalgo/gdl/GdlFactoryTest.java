@@ -66,7 +66,7 @@ class GdlFactoryTest {
     void testForAllNodes() {
         Graph graph = fromGdl("({w:1}),({w:2}),({w:3})");
         List<Double> nodeProps = Lists.newArrayList();
-        graph.forEachNode(nodeId -> nodeProps.add(graph.nodeProperties("w").nodeProperty(nodeId)));
+        graph.forEachNode(nodeId -> nodeProps.add(graph.nodeProperties("w").getDouble(nodeId)));
         assertEquals(3, nodeProps.size());
         assertEquals(Arrays.asList(1d, 2d, 3d), nodeProps);
     }

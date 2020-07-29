@@ -206,7 +206,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
 
             Graph graph = proc.createGraph(configAndName);
             graph.forEachNode(nodeId -> {
-                assertEquals(expectedWeight, graph.nodeProperties(propertyName).nodeProperty(nodeId));
+                assertEquals(expectedWeight, graph.nodeProperties(propertyName).getDouble(nodeId));
                 return true;
             });
 

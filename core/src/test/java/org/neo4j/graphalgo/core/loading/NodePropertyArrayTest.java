@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
@@ -34,7 +35,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 final class NodePropertyArrayTest {
 
     @Test
-    void emptyProperties() {
+    void emptyDoubleProperties() {
+        var properties = NodePropertiesBuilder.of(
+            100_000,
+            ValueType.DOUBLE,
+            AllocationTracker.EMPTY,
+            -1
+        ).build();
+
+        assertEquals(0L, properties.size());
+        assertEquals(OptionalDouble.empty(), properties.getDoubleMaxPropertyValue());
+        assertEquals(42.0, properties.getDouble(0, 42.0));
+    }
+
+    @Test
+    void emptyLongProperties() {
         var properties = NodePropertiesBuilder.of(
             100_000,
             ValueType.LONG,
@@ -43,16 +58,16 @@ final class NodePropertyArrayTest {
         ).build();
 
         assertEquals(0L, properties.size());
-        assertEquals(OptionalLong.empty(), properties.getMaxPropertyValue());
-        assertEquals(42.0, properties.nodeProperty(0, 42.0));
+        assertEquals(OptionalLong.empty(), properties.getLongMaxPropertyValue());
+        assertEquals(42, properties.getLong(0, 42));
     }
 
     @Test
     void returnsValuesThatHaveBeenSet() {
         var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, 1.0));
 
-        assertEquals(1.0, properties.nodeProperty(1));
-        assertEquals(1.0, properties.nodeProperty(1, 42.0));
+        assertEquals(1.0, properties.getDouble(1));
+        assertEquals(1.0, properties.getDouble(1, 42.0));
     }
 
     @Test
@@ -62,25 +77,25 @@ final class NodePropertyArrayTest {
 
         var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, expectedImplicitDefault, b -> {});
 
-        assertEquals(expectedImplicitDefault, properties.nodeProperty(2));
-        assertEquals(expectedExplicitDefault, properties.nodeProperty(2, expectedExplicitDefault));
+        assertEquals(expectedImplicitDefault, properties.getDouble(2));
+        assertEquals(expectedExplicitDefault, properties.getDouble(2, expectedExplicitDefault));
     }
 
     @Test
     void returnNaNIfItWasSet() {
         var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, Double.NaN));
 
-        assertEquals(42.0, properties.nodeProperty(0));
-        assertEquals(Double.NaN, properties.nodeProperty(1));
+        assertEquals(42.0, properties.getDouble(0));
+        assertEquals(Double.NaN, properties.getDouble(1));
     }
 
     @Test
     void trackMaxValue() {
-        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 0.0, b -> {
-            b.set(0, 42.0);
-            b.set(1, 21.0);
+        var properties = NodePropertiesBuilder.of(2L, ValueType.LONG, 0.0, b -> {
+            b.set(0, 42);
+            b.set(1, 21);
         });
-        var maxPropertyValue = properties.getMaxPropertyValue();
+        var maxPropertyValue = properties.getLongMaxPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
         assertEquals(42, maxPropertyValue.getAsLong());
     }
@@ -130,10 +145,10 @@ final class NodePropertyArrayTest {
         var properties = builder.build();
         for (int i = 0; i < nodeSize; i++) {
             var expected = i == 1338 ? 0x1p41 : i == 1337 ? 0x1p42 : i % 2 == 0 ? 2.0 : 1.0;
-            assertEquals(expected, properties.nodeProperty(i));
+            assertEquals(expected, properties.getDouble(i));
         }
         assertEquals(nodeSize, properties.size());
-        var maxPropertyValue = properties.getMaxPropertyValue();
+        var maxPropertyValue = properties.getLongMaxPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
 
         // If write were correctly ordered, this is always true

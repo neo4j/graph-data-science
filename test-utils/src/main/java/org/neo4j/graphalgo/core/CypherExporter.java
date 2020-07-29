@@ -330,7 +330,7 @@ public final class CypherExporter {
 
         @Override
         public Object property(String key, Long nodeId, Graph graph) {
-            return graph.nodeProperties(key).nodeProperty(nodeId);
+            return graph.nodeProperties(key).getObject(nodeId);
         }
     }
 

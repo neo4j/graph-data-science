@@ -92,7 +92,7 @@ public class NodePropertyFunc {
             ? graphStore.nodePropertyValues(propertyKey) // builds UnionNodeProperties and returns the first matching property
             : graphStore.nodePropertyValues(NodeLabel.of(nodeLabel), propertyKey);
 
-        double propertyValue = propertyValues.nodeProperty(internalId);
+        double propertyValue = propertyValues.getDouble(internalId);
         return Double.isNaN(propertyValue) ? null : propertyValue;
     }
 }

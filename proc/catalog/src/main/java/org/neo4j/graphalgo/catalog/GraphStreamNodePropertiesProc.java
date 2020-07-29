@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphExportNodePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphStreamNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -112,21 +111,10 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
                 var label = subGraph.nodeLabels(nodeId).iterator().next();
 
                 return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
-                    ValueType valueType = graphStore.nodePropertyType(label, propertyKeyAndValues.getKey());
-
-                    double doubleValue = propertyKeyAndValues.getValue().nodeProperty(nodeId);
-                    Number numberValue;
-                    if (valueType == ValueType.DOUBLE) {
-                        numberValue = doubleValue;
-                    }
-                    else {
-                        numberValue = (long) doubleValue;
-                    }
-
                     return producer.produce(
                         originalId,
                         usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
-                        numberValue
+                        propertyKeyAndValues.getValue().getObject(nodeId)
                     );
                 });
             });
@@ -135,9 +123,9 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
     public static class PropertiesResult {
         public final long nodeId;
         public final String nodeProperty;
-        public final Number propertyValue;
+        public final Object propertyValue;
 
-        PropertiesResult(long nodeId, String nodeProperty, Number propertyValue) {
+        PropertiesResult(long nodeId, String nodeProperty, Object propertyValue) {
             this.nodeId = nodeId;
             this.nodeProperty = nodeProperty;
             this.propertyValue = propertyValue;
@@ -146,15 +134,16 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
 
     public static class PropertyResult {
         public final long nodeId;
-        public final Number propertyValue;
+        public final Object propertyValue;
 
-        PropertyResult(long nodeId, Number propertyValue) {
+        PropertyResult(long nodeId, Object propertyValue) {
             this.nodeId = nodeId;
             this.propertyValue = propertyValue;
         }
     }
+
     interface ResultProducer<R> {
-        R produce(long nodeId, String propertyName, Number propertyValue);
+        R produce(long nodeId, String propertyName, Object propertyValue);
     }
 
 }
