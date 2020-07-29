@@ -5,7 +5,8 @@ plugins {
 }
 
 ext {
-    gdsVersion = '1.1.0-alpha01'
+    gdsVersion = '1.1.4'
+    neo4jVersion = '3.5.20'
 }
 
 description = 'Graph Data Science :: Pregel Training'
@@ -19,7 +20,7 @@ dependencies {
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
-    compileOnly 'org.neo4j:neo4j:3.5.16'
+    compileOnly "org.neo4j:neo4j:$neo4jVersion"
 
     // We need an annotation processor for our K1 configuration
     annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
