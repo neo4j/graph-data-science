@@ -53,7 +53,7 @@ final class ComputeStepConsumer implements RelationshipWithPropertyConsumer {
     }
 
     private double weightOf(final long candidate, final double relationshipWeight) {
-        double nodeWeight = nodeWeights.nodeProperty(candidate);
+        double nodeWeight = nodeWeights.getDouble(candidate);
         return relationshipWeight * nodeWeight;
     }
 

@@ -194,7 +194,7 @@ public final class GraphStoreInput implements CompatInput {
                                 for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
                                     visitor.property(
                                         propertyKeyAndValue.getKey(),
-                                        propertyKeyAndValue.getValue().nodeProperty(id)
+                                        propertyKeyAndValue.getValue().getObject(id)
                                     );
                                 }
                             }
@@ -204,7 +204,7 @@ public final class GraphStoreInput implements CompatInput {
                     for (var propertyKeyAndValue : nodeStore.nodeProperties.get(ALL_NODES.name).entrySet()) {
                         visitor.property(
                             propertyKeyAndValue.getKey(),
-                            propertyKeyAndValue.getValue().nodeProperty(id)
+                            propertyKeyAndValue.getValue().getObject(id)
                         );
                     }
                 }

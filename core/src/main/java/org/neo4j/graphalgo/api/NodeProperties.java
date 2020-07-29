@@ -24,22 +24,24 @@ import org.neo4j.values.storable.Value;
 
 import java.util.OptionalLong;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public interface NodeProperties {
 
     default double getDouble(long nodeId) {
-        throw new UnsupportedOperationException("double is not supported");
+        throw unsupportedTypeException(ValueType.DOUBLE);
     }
 
     default long getLong(long nodeId) {
-        throw new UnsupportedOperationException("long is not supported");
+        throw unsupportedTypeException(ValueType.LONG);
     };
 
     default double[] getDoubleArray(long nodeId) {
-        throw new UnsupportedOperationException("double[] is not supported");
+        throw unsupportedTypeException(ValueType.DOUBLE_ARRAY);
     }
 
     default long[] getLongArray(long nodeId) {
-        throw new UnsupportedOperationException("long[] is not supported");
+        throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }
 
     default Object getObject(long nodeId) {
@@ -84,6 +86,10 @@ public interface NodeProperties {
      */
     default long size() {
         return 0;
+    }
+
+    private UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
+        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, getType()));
     }
 
     /**

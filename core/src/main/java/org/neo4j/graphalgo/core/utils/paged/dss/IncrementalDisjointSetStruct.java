@@ -84,11 +84,9 @@ public final class IncrementalDisjointSetStruct extends SequentialDisjointSetStr
 
         this.parent.setAll(nodeId -> {
             long parentValue = -1;
-            double communityIdValue = communityMapping.nodeProperty(nodeId, Double.NaN);
+            long communityId = communityMapping.getLong(nodeId, Long.MIN_VALUE);
 
-            if (!Double.isNaN(communityIdValue)) {
-                long communityId = (long) communityIdValue;
-
+            if (!(communityId == Long.MIN_VALUE)) {
                 long internalCommunityId = internalMapping.getOrDefault(communityId, -1);
                 if (internalCommunityId != -1) {
                     parentValue = internalCommunityId;

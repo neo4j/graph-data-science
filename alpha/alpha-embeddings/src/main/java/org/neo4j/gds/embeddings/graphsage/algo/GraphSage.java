@@ -80,7 +80,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             AllocationTracker.EMPTY
         );
         features.setAll(n -> {
-            DoubleStream nodeFeatures = this.nodeProperties.stream().mapToDouble(p -> p.nodeProperty(n));
+            DoubleStream nodeFeatures = this.nodeProperties.stream().mapToDouble(p -> p.getDouble(n));
             if (useDegreeAsProperty) {
                 nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
             }
