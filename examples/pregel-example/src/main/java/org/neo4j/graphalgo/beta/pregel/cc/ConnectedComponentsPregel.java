@@ -38,13 +38,16 @@ import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.WRITE;
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
     @Override
-    public void compute(PregelContext<ConnectedComponentsConfig> context, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<ConnectedComponentsConfig> context, long nodeId, Queue<Double> messages) {
         double oldComponentId = context.getNodeValue(nodeId);
         double newComponentId = oldComponentId;
-        if (context.isInitialSuperStep()) {
-            // In the first round, every node uses its own id as the component id
-            newComponentId = nodeId;
-        } else if (messages != null && !messages.isEmpty()){
+
+        if (context.isInitialSuperstep()) {
+            // In the first superstep, each node needs to initialize its value.
+            // If the computation is seeded with an initial value, that value
+            // is taken, otherwise the node id is used as initial value.
+            newComponentId = context.isSeeded() ? oldComponentId : nodeId;
+        } else if (messages != null && !messages.isEmpty()) {
                 Double nextComponentId;
                 while ((nextComponentId = messages.poll()) != null) {
                     if (nextComponentId.longValue() < newComponentId) {
@@ -53,7 +56,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
                 }
         }
 
-        if (newComponentId != oldComponentId) {
+        if (context.isInitialSuperstep() || newComponentId != oldComponentId) {
             context.setNodeValue(nodeId, newComponentId);
             context.sendMessages(nodeId, newComponentId);
         }

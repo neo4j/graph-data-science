@@ -36,7 +36,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
     @Override
     public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperStep()) {
+        if (pregel.isInitialSuperstep()) {
             pregel.setNodeValue(nodeId, nodeId);
             pregel.sendMessages(nodeId, nodeId);
         } else {

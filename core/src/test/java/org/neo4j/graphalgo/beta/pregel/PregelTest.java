@@ -90,7 +90,7 @@ class PregelTest {
 
         @Override
         public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
-            if (pregel.isInitialSuperStep()) {
+            if (pregel.isInitialSuperstep()) {
                 pregel.setNodeValue(nodeId, 0.0);
                 pregel.sendMessages(nodeId, 1.0);
             } else if (messages != null) {

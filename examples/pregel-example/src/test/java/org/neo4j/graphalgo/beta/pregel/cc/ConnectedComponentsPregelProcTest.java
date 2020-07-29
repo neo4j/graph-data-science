@@ -37,17 +37,17 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH =
         "CREATE" +
-        "  (a:Node)" +
-        ", (b:Node)" +
-        ", (c:Node)" +
-        ", (d:Node)" +
-        ", (e:Node)" +
-        ", (f:Node)" +
-        ", (g:Node)" +
-        ", (h:Node)" +
-        ", (i:Node)" +
+        "  (a:Node { seedProperty: 1 })" +
+        ", (b:Node { seedProperty: 2 })" +
+        ", (c:Node { seedProperty: 3 })" +
+        ", (d:Node { seedProperty: 4 })" +
+        ", (e:Node { seedProperty: 2 })" +
+        ", (f:Node { seedProperty: 3 })" +
+        ", (g:Node { seedProperty: 4 })" +
+        ", (h:Node { seedProperty: 3 })" +
+        ", (i:Node { seedProperty: 4 })" +
         // {J}
-        ", (j:Node { id: 9 })" +
+        ", (j:Node { seedProperty: 4 })" +
         // {A, B, C, D}
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(c)" +
@@ -102,7 +102,39 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             9L, 9D
         );
 
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual, mapEquals(expected));
+    }
+
+    @Test
+    void streamSeeded() {
+        var query = GdsCypher.call()
+            .withNodeProperty("seedProperty")
+            .loadEverything()
+            .algo("example", "pregel", "cc")
+            .streamMode()
+            .addParameter("maxIterations", 10)
+            .addParameter("seedProperty", "seedProperty")
+            .yields("nodeId", "value");
+
+        HashMap<Long, Double> actual = new HashMap<>();
+        runQueryWithRowConsumer(query, r -> {
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+        });
+
+        var expected = Map.of(
+            0L, 1D,
+            1L, 1D,
+            2L, 1D,
+            3L, 1D,
+            4L, 2D,
+            5L, 2D,
+            6L, 2D,
+            7L, 3D,
+            8L, 3D,
+            9L, 4D
+        );
+
+        assertThat(actual, mapEquals(expected));
     }
 
     @Test
@@ -135,7 +167,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             9L, 9D
         );
 
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual, mapEquals(expected));
     }
 
     @Test
@@ -182,7 +214,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             9L, 9D
         );
 
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual, mapEquals(expected));
     }
 
     @Test

@@ -40,7 +40,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     @Override
     public void compute(PregelContext<SingleSourceShortestPathPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperStep()) {
+        if (pregel.isInitialSuperstep()) {
             if (nodeId == pregel.getConfig().startNode()) {
                 pregel.setNodeValue(nodeId, 0);
                 pregel.sendMessages(nodeId, 1);

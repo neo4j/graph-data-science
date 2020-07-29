@@ -37,15 +37,15 @@ import java.util.Queue;
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override
-    public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, final long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperStep()) {
+    public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, long nodeId, Queue<Double> messages) {
+        if (pregel.isInitialSuperstep()) {
             pregel.setNodeValue(nodeId, 1.0 / pregel.getNodeCount());
         }
 
         double newRank = pregel.getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks
-        if (!pregel.isInitialSuperStep()) {
+        if (!pregel.isInitialSuperstep()) {
             double sum = 0;
             if (messages != null) {
                 Double nextMessage;

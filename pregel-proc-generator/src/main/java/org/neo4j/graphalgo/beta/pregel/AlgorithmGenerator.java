@@ -37,6 +37,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 import java.util.Map;
+import java.util.Optional;
 
 class AlgorithmGenerator extends PregelGenerator {
     private final PregelValidation.Spec pregelSpec;
@@ -72,7 +73,15 @@ class AlgorithmGenerator extends PregelGenerator {
 
     private FieldSpec pregelJobField() {
         return FieldSpec
-            .builder(org.neo4j.graphalgo.beta.pregel.Pregel.class, "pregelJob", Modifier.PRIVATE, Modifier.FINAL)
+            .builder(
+                ParameterizedTypeName.get(
+                    ClassName.get(org.neo4j.graphalgo.beta.pregel.Pregel.class),
+                    pregelSpec.configTypeName()
+                ),
+                "pregelJob",
+                Modifier.PRIVATE,
+                Modifier.FINAL
+            )
             .build();
     }
 
@@ -83,23 +92,52 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
             .addStatement(
+                "var maybeSeedProperty = $T.ofNullable(configuration.seedProperty())",
+                Optional.class
+            )
+            .addStatement(
+                "var batchSize = (int) $T.adjustedBatchSize(graph.nodeCount(), configuration.concurrency())",
+                ParallelUtil.class
+            )
+            .beginControlFlow("if (maybeSeedProperty.isPresent())")
+            .addStatement(
+                CodeBlock.builder().addNamed(
+                    "this.pregelJob = $pregel:T.withInitialNodeValues(" +
+                    "graph, " +
+                    "configuration, " +
+                    "new $computation:T(), " +
+                    "graph.nodeProperties(maybeSeedProperty.get()), " +
+                    "batchSize, " +
+                    "$pools:T.DEFAULT, " +
+                    "tracker" +
+                    ")",
+                    Map.of(
+                        "pregel", Pregel.class,
+                        "computation", className(pregelSpec, ""),
+                        "pools", Pools.class
+                    )
+                ).build()
+            )
+            .nextControlFlow("else")
+            .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.withDefaultNodeValues(" +
                     "graph, " +
                     "configuration, " +
-                    "new $computation:T()," +
-                    "(int) $parallelUtil:T.adjustedBatchSize(graph.nodeCount(), configuration.concurrency())," +
+                    "new $computation:T(), " +
+                    "batchSize, " +
                     "$pools:T.DEFAULT," +
                     "tracker" +
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
                         "computation", className(pregelSpec, ""),
-                        "parallelUtil", ParallelUtil.class,
                         "pools", Pools.class
                     )
-                ).build()
+                )
+                    .build()
             )
+            .endControlFlow()
             .build();
     }
 

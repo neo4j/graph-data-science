@@ -41,7 +41,11 @@ public final class PregelContext<CONFIG extends PregelConfig> {
         computeStep.voteToHalt(nodeId);
     }
 
-    public boolean isInitialSuperStep() {
+    public boolean isSeeded() {
+        return config.isIncremental();
+    }
+
+    public boolean isInitialSuperstep() {
         return getSuperstep() == 0;
     }
 
