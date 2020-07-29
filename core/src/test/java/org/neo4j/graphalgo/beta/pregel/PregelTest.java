@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -34,6 +37,7 @@ import java.util.Queue;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
 class PregelTest {
@@ -64,6 +68,25 @@ class PregelTest {
 
         HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.toArray());
+    }
+
+
+    @Test
+    void memoryEstimation() {
+        var dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(10_000)
+            .maxRelCount(100_000)
+            .build();
+
+        assertEquals(
+            MemoryRange.of(4_724_064L),
+            Pregel.memoryEstimation().estimate(dimensions, 1).memoryUsage()
+        );
+
+        assertEquals(
+            MemoryRange.of(4_736_376L),
+            Pregel.memoryEstimation().estimate(dimensions, 10).memoryUsage()
+        );
     }
 
     static Stream<Arguments> configAndResult() {

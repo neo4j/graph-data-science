@@ -32,6 +32,9 @@ import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -117,6 +120,29 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 executor,
                 tracker
         );
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(Pregel.class)
+            .perNode("node values", HugeDoubleArray::memoryEstimation)
+            .perNode("receiver bits", MemoryUsage::sizeOfBitset)
+            .perNode("vote bits", MemoryUsage::sizeOfBitset)
+            .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class)
+                .perNode("sender bits", MemoryUsage::sizeOfBitset)
+                .build()
+            )
+            .add(
+                "message queues",
+                MemoryEstimations.setup("", (dimensions, concurrency) ->
+                    MemoryEstimations.builder(HugeObjectArray.class)
+                        .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
+                            .fixed("messages", dimensions.averageDegree() * Double.BYTES)
+                            .build()
+                        )
+                        .build()
+                )
+            )
+            .build();
     }
 
     private Pregel(
