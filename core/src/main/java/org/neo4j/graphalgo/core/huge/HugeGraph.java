@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -80,7 +80,7 @@ import static org.neo4j.graphalgo.core.utils.GenericUtil.castOrThrow;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraph implements Graph {
+public class HugeGraph implements CSRGraph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;
@@ -436,10 +436,7 @@ public class HugeGraph implements Graph {
         return isMultiGraph;
     }
 
-    public Orientation orientation() {
-        return orientation;
-    }
-
+    @Override
     public Relationships relationships() {
         return Relationships.of(
             relationshipCount,

@@ -47,7 +47,7 @@ public interface GraphLoader {
         return graphStoreFactory().build().graphStore();
     }
 
-    default GraphStoreFactory<? extends GraphCreateConfig> graphStoreFactory() {
+    default GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> graphStoreFactory() {
         return createConfig().graphStoreFactory().get(context());
     }
 

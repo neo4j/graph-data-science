@@ -20,26 +20,28 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.FilterGraph;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.CSRFilterGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public class NodeFilteredGraph extends FilterGraph {
+public class NodeFilteredGraph extends CSRFilterGraph {
 
     private final IdMap filteredIdMap;
 
-    public NodeFilteredGraph(Graph graph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph graph, IdMap filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -133,7 +135,7 @@ public class NodeFilteredGraph extends FilterGraph {
     }
 
     @Override
-    public Graph concurrentCopy() {
+    public CSRGraph concurrentCopy() {
         return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap);
     }
 
@@ -164,6 +166,22 @@ public class NodeFilteredGraph extends FilterGraph {
             return null;
         }
         return new FilteredNodeProperties(properties, filteredIdMap);
+    }
+
+    @Override
+    public Relationships relationships() {
+        Relationships.Topology topology = graph.relationships().topology();
+        Optional<Relationships.Properties> properties = graph.relationships().properties();
+        return Relationships.of(
+            graph.relationshipCount(),
+            topology.orientation(),
+            isMultiGraph(),
+            topology.list(),
+            new TransientFilteredAdjacencyOffsets(filteredIdMap, topology.offsets()),
+            properties.map(Relationships.Properties::list).orElse(null),
+            properties.map(p -> new TransientFilteredAdjacencyOffsets(filteredIdMap, p.offsets())).orElse(null),
+            properties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN)
+        );
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {

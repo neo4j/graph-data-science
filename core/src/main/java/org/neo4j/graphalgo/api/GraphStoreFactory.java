@@ -41,10 +41,10 @@ import java.util.stream.Collectors;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implements Assessable {
+public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphCreateConfig> implements Assessable {
 
     public interface Supplier {
-        GraphStoreFactory<? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
+        GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
     }
 
     public static final String TASK_LOADING = "LOADING";
@@ -65,7 +65,7 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
         this.progressLogger = initProgressLogger();
     }
 
-    public abstract ImportResult build();
+    public abstract ImportResult<STORE> build();
 
     public abstract MemoryEstimation memoryEstimation();
 
@@ -138,13 +138,13 @@ public abstract class GraphStoreFactory<CONFIG extends GraphCreateConfig> implem
     }
 
     @ValueClass
-    public interface ImportResult {
+    public interface ImportResult<STORE extends GraphStore> {
         GraphDimensions dimensions();
 
-        GraphStore graphStore();
+        STORE graphStore();
 
-        static ImportResult of(GraphDimensions dimensions, GraphStore graphStore) {
-            return ImmutableImportResult.builder()
+        static <STORE extends GraphStore> ImportResult<STORE> of(GraphDimensions dimensions, STORE graphStore) {
+            return ImmutableImportResult.<STORE>builder()
                 .dimensions(dimensions)
                 .graphStore(graphStore)
                 .build();

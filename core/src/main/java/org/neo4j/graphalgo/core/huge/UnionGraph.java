@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -27,6 +28,7 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -36,12 +38,12 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class UnionGraph implements Graph {
+public final class UnionGraph implements CSRGraph {
 
-    private final Graph first;
-    private final Collection<? extends Graph> graphs;
+    private final CSRGraph first;
+    private final Collection<? extends CSRGraph> graphs;
 
-    public static Graph of(Collection<? extends Graph> graphs) {
+    public static CSRGraph of(Collection<? extends CSRGraph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
@@ -51,7 +53,7 @@ public final class UnionGraph implements Graph {
         return new UnionGraph(graphs);
     }
 
-    private UnionGraph(Collection<? extends Graph> graphs) {
+    private UnionGraph(Collection<? extends CSRGraph> graphs) {
         first = graphs.iterator().next();
         this.graphs = graphs;
     }
@@ -158,8 +160,8 @@ public final class UnionGraph implements Graph {
     }
 
     @Override
-    public Graph concurrentCopy() {
-        return of(graphs.stream().map(Graph::concurrentCopy).collect(Collectors.toList()));
+    public CSRGraph concurrentCopy() {
+        return of(graphs.stream().map(CSRGraph::concurrentCopy).collect(Collectors.toList()));
     }
 
     @Override
@@ -223,6 +225,12 @@ public final class UnionGraph implements Graph {
         // we need to run a check across all relationships between the sub-graphs of the union
         // maybe we'll do that later; for now union never guarantees parallel-free
         return true;
+    }
+
+    @Override
+    public Relationships relationships() {
+        // this will be resolve in PR #1440
+        throw new UnsupportedOperationException("UnionGraph#relationships is not supported");
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {
