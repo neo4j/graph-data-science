@@ -115,7 +115,7 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         NodeProperties communities = mutatedGraph.nodePropertyValues(mutateProperty());
         NodeProperties seeds = mutatedGraph.nodePropertyValues("seed1");
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
-            assertEquals(communities.nodeProperty(i), seeds.nodeProperty(i));
+            assertEquals(communities.getLong(i), seeds.getLong(i));
         }
     }
 

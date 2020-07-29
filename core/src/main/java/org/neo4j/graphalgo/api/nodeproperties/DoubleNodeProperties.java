@@ -29,6 +29,11 @@ public interface DoubleNodeProperties extends NodeProperties {
     double getDouble(long nodeId);
 
     @Override
+    default Object getObject(long nodeId) {
+        return getDouble(nodeId);
+    }
+
+    @Override
     default Object getObject(long nodeId, Object defaultValue) {
         return getDouble(nodeId, (Double) defaultValue);
     }

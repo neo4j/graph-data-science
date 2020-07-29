@@ -29,6 +29,11 @@ public interface LongArrayNodeProperties extends NodeProperties {
     long[] getLongArray(long nodeId);
 
     @Override
+    default Object getObject(long nodeId) {
+        return getLongArray(nodeId);
+    }
+
+    @Override
     default Object getObject(long nodeId, Object defaultValue) {
         return getLongArray(nodeId, (long[]) defaultValue);
     }

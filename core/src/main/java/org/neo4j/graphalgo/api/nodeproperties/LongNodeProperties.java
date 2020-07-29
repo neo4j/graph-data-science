@@ -29,6 +29,11 @@ public interface LongNodeProperties extends NodeProperties {
     long getLong(long nodeId);
 
     @Override
+    default Object getObject(long nodeId) {
+        return getLong(nodeId);
+    }
+
+    @Override
     default Object getObject(long nodeId, Object defaultValue) {
         return getLong(nodeId, (Long) defaultValue);
     }

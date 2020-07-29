@@ -29,6 +29,11 @@ public interface DoubleArrayNodeProperties extends NodeProperties {
     double[] getDoubleArray(long nodeId);
 
     @Override
+    default Object getObject(long nodeId) {
+        return getDoubleArray(nodeId);
+    }
+
+    @Override
     default Object getObject(long nodeId, Object defaultValue) {
         return getDoubleArray(nodeId, (double[]) defaultValue);
     }
