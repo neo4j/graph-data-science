@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
 import javax.lang.model.SourceVersion;
@@ -56,7 +55,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
                 algorithmClassName,
-                ClassName.get(HugeDoubleArray.class)
+                ClassName.get(Pregel.PregelResult.class)
             ))
             .addOriginatingElement(pregelSpec.element());
 
@@ -145,7 +144,7 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("compute")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .returns(HugeDoubleArray.class)
+            .returns(Pregel.PregelResult.class)
             .addStatement("return pregelJob.run()")
             .build();
     }

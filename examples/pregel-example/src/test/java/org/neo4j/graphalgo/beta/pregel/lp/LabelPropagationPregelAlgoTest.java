@@ -82,7 +82,7 @@ class LabelPropagationPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
             "nAlice", 0L,
@@ -120,7 +120,7 @@ class LabelPropagationPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
             "nAlice", 0L,

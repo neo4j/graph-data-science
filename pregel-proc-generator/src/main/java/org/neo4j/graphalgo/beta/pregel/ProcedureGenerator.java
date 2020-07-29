@@ -94,7 +94,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(procBaseClass()),
                 algorithmClassName,
-                ClassName.get(HugeDoubleArray.class),
+                ClassName.get(Pregel.PregelResult.class),
                 ClassName.get(procResultClass()),
                 configTypeName
             ))
@@ -208,11 +208,11 @@ abstract class ProcedureGenerator extends PregelGenerator {
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 algorithmClassName,
-                ClassName.get(HugeDoubleArray.class),
+                ClassName.get(Pregel.PregelResult.class),
                 pregelSpec.configTypeName()
                 ), "computationResult"
             )
-            .addStatement("return ($T) computationResult.result()::get", DoubleNodeProperties.class)
+            .addStatement("return ($T) computationResult.result().nodeValues()::get", DoubleNodeProperties.class)
             .build();
     }
 

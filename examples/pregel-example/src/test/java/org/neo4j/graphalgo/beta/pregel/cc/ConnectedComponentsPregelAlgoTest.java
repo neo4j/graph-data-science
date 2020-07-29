@@ -94,7 +94,7 @@ class ConnectedComponentsPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);
@@ -130,7 +130,7 @@ class ConnectedComponentsPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);

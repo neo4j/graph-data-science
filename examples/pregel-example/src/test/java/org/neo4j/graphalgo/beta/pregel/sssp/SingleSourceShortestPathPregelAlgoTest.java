@@ -84,7 +84,7 @@ class SingleSourceShortestPathPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         assertLongValues(graph, nodeId -> (long) nodeValues.get(nodeId), Map.of(
                 "a", 0L,
