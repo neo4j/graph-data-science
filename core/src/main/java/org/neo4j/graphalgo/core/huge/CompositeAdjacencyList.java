@@ -76,7 +76,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
     public CompositeAdjacencyCursor decompressingCursor(long nodeId) {
         var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
         forEachOffset(nodeId, (index, offset, hasAdjacency) -> {
-            adjacencyCursors.add(index, hasAdjacency
+            adjacencyCursors.add(hasAdjacency
                 ? adjacencyLists.get(index).decompressingCursor(offset)
                 : adjacencyLists.get(index).rawDecompressingCursor()
             );

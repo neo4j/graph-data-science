@@ -52,9 +52,7 @@ class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
     }
 
     @Override
-    void copyFrom(
-        CompositeAdjacencyCursor sourceCursor, CompositeAdjacencyCursor targetCursor
-    ) {
+    void copyFrom(CompositeAdjacencyCursor sourceCursor, CompositeAdjacencyCursor targetCursor) {
         targetCursor.copyFrom(sourceCursor);
     }
 

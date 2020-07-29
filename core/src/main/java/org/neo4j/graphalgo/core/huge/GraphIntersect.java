@@ -34,9 +34,9 @@ import java.util.function.LongPredicate;
 abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     protected CURSOR empty;
-    private CURSOR cache;
-    private CURSOR cacheA;
-    private CURSOR cacheB;
+    private final CURSOR cache;
+    private final CURSOR cacheA;
+    private final CURSOR cacheB;
     private final LongPredicate degreeFilter;
 
     GraphIntersect(
@@ -68,8 +68,15 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
             return;
         }
 
-        CURSOR lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
-        long nodeIdC, currentA, s, t;
+        CURSOR lead;
+        CURSOR follow;
+        CURSOR decompressingCursorA = cacheA;
+        CURSOR decompressingCursorB = cacheB;
+
+        long nodeIdC;
+        long currentA;
+        long s;
+        long t;
 
         long lastNodeB;
         long lastNodeC;
