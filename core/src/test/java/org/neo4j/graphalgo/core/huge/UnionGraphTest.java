@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
 class UnionGraphTest {

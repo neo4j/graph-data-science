@@ -31,7 +31,6 @@
     <suppress checks="ParameterName" files=".*"/>
     <suppress checks="StaticVariableName" files=".*"/>
     <suppress checks="TypeName" files=".*"/>
-    <suppress checks="AvoidStarImport" files=".*"/>
     <suppress checks="IllegalImport" files=".*"/>
     <suppress checks="RedundantImport" files=".*"/>
     <suppress checks="UnusedImports" files=".*"/>
