@@ -182,7 +182,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             return;
         }
 
-        final long maxSeedCommunity = seedProperty.getMaxPropertyValue().orElse(0);
+        long maxSeedCommunity = seedProperty.getLongMaxPropertyValue().orElse(0L);
 
         HugeLongLongMap communityMapping = new HugeLongLongMap(nodeCount, tracker);
         long nextAvailableInternalCommunityId = -1;

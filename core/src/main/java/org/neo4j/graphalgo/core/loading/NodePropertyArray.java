@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 public final class NodePropertyArray implements NodeProperties {
@@ -47,7 +48,8 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     private final double defaultValue;
-    private final OptionalLong maxValue;
+    private final OptionalLong longMaxValue;
+    private final OptionalDouble doubleMaxValue;
     private final long size;
     private final HugeSparseLongArray properties;
     private final ValueType valueType;
@@ -55,13 +57,15 @@ public final class NodePropertyArray implements NodeProperties {
     NodePropertyArray(
         ValueType valueType,
         double defaultValue,
-        OptionalLong maxValue,
+        OptionalLong longMaxValue,
+        OptionalDouble doubleMaxValue,
         long size,
         HugeSparseLongArray properties
     ) {
         this.valueType = valueType;
         this.defaultValue = defaultValue;
-        this.maxValue = maxValue;
+        this.longMaxValue = longMaxValue;
+        this.doubleMaxValue = doubleMaxValue;
         this.size = size;
         this.properties = properties;
     }
@@ -95,13 +99,48 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     @Override
+    public Object getObject(long nodeId) {
+        if (getType() == ValueType.LONG) {
+            return getLong(nodeId);
+        } else {
+            return getDouble(nodeId);
+        }
+    }
+
+    @Override
+    public Object getObject(long nodeId, Object defaultValue) {
+        if (getType() == ValueType.LONG) {
+            return getLong(nodeId, (long) defaultValue);
+        } else {
+            return getDouble(nodeId, (double) defaultValue);
+        }
+    }
+
+    @Override
     public ValueType getType() {
         return valueType;
     }
 
     @Override
-    public OptionalLong getMaxPropertyValue() {
-        return maxValue;
+    public OptionalLong getLongMaxPropertyValue() {
+        if (longMaxValue.isPresent()) {
+            return longMaxValue;
+        } else if (doubleMaxValue.isPresent()) {
+           return OptionalLong.of(Double.valueOf(doubleMaxValue.getAsDouble()).longValue());
+        } else {
+            return OptionalLong.empty();
+        }
+    }
+
+    @Override
+    public OptionalDouble getDoubleMaxPropertyValue() {
+        if (doubleMaxValue.isPresent()) {
+            return doubleMaxValue;
+        } else if (longMaxValue.isPresent()) {
+            return OptionalDouble.of(Long.valueOf(longMaxValue.getAsLong()).doubleValue());
+        } else {
+            return OptionalDouble.empty();
+        }
     }
 
     @Override

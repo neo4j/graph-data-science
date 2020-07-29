@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -88,17 +89,23 @@ public interface NodeProperties {
         return 0;
     }
 
-    private UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
-        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, getType()));
-    }
-
     /**
-     * @return the maximum value contained in the mapping or an empty {@link OptionalLong} if the mapping is
+     * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.
      */
-    @Deprecated
-    default OptionalLong getMaxPropertyValue() {
+    default OptionalLong getLongMaxPropertyValue() {
         return OptionalLong.empty();
     }
 
+    /**
+     * @return the maximum double value contained in the mapping or an empty {@link OptionalDouble} if the mapping is
+     *         empty or the feature is not supported.
+     */
+    default OptionalDouble getDoubleMaxPropertyValue() {
+        return OptionalDouble.empty();
+    }
+
+    private UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
+        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, getType()));
+    }
 }

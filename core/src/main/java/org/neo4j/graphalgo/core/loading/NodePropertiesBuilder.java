@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
@@ -83,11 +84,13 @@ public final class NodePropertiesBuilder {
 
     public NodePropertyArray build() {
         var size = this.size.sum();
-        var maxValue = size == 0 ? OptionalLong.empty() : OptionalLong.of((long) MAX_VALUE.getVolatile(this));
+        OptionalLong maxLongValue = size == 0 ? OptionalLong.empty() : OptionalLong.of((long) MAX_VALUE.getVolatile(this));
+        OptionalDouble maxDoubleValue = size == 0 ? OptionalDouble.empty() : OptionalDouble.of((double) MAX_VALUE.getVolatile(this));
         return new NodePropertyArray(
             valueType,
             defaultValue,
-            maxValue,
+            maxLongValue,
+            maxDoubleValue,
             size,
             valuesBuilder.build()
         );
