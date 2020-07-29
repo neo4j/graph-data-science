@@ -99,7 +99,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     long skipUntil(long target) {
         cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
         for (var cursor : cursors) {
-            // an implementation aware cursor would probably be much faster and could skip while block
+            // an implementation aware cursor would probably be much faster and could skip whole blocks
             // see AdjacencyDecompressingReader#skipUntil
             while (cursor.hasNextVLong() && cursor.peekVLong() <= target) {
                 cursor.nextVLong();
@@ -115,8 +115,8 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     long advance(long target) {
         cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
         for (var cursor : cursors) {
-            // an implementation aware cursor would probably be much faster and could skip while block
-            // see AdjacencyDecompressingReader#skipUntil
+            // an implementation aware cursor would probably be much faster and could skip whole blocks
+            // see AdjacencyDecompressingReader#advance
             while (cursor.hasNextVLong() && cursor.peekVLong() < target) {
                 cursor.nextVLong();
             }
