@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 import com.carrotsearch.hppc.IntIntHashMap;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 
@@ -94,7 +94,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         assertMemoryEstimation(memoryEstimation(), 100_000_000_000L, MemoryRange.of(2_400_366_211_280L));
     }
 
-    static final class TestNodeProperties implements NodeProperties {
+    static final class TestNodeProperties implements DoubleNodeProperties {
         private final IntIntHashMap weights;
 
         private TestNodeProperties(final IntIntHashMap weights) {
@@ -129,11 +129,6 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
                 return weights.indexGet(index);
             }
             return defaultValue;
-        }
-
-        @Override
-        public ValueType getType() {
-            return ValueType.DOUBLE;
         }
 
         @Override

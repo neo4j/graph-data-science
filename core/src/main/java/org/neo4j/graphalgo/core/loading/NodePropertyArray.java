@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.OptionalLong;
 
@@ -85,6 +87,11 @@ public final class NodePropertyArray implements NodeProperties {
     @Override
     public long getLong(long nodeId, long defaultValue) {
         return (long) getDouble(nodeId, defaultValue);
+    }
+
+    @Override
+    public Value getValue(long nodeId) {
+        return Values.doubleValue(getDouble(nodeId));
     }
 
     @Override

@@ -21,10 +21,15 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE;
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE_ARRAY;
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class UnionNodeProperties implements NodeProperties {
@@ -32,7 +37,7 @@ public class UnionNodeProperties implements NodeProperties {
     private final ValueType valueType;
     private final NodeMapping nodeMapping;
     private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
-
+    private final ValueProducer valueProducer;
 
     public UnionNodeProperties(NodeMapping nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
         this.nodeMapping = nodeMapping;
@@ -52,6 +57,23 @@ public class UnionNodeProperties implements NodeProperties {
         }
 
         this.valueType = expectedType;
+
+        switch(valueType) {
+            case LONG:
+                this.valueProducer = (nodeId -> Values.longValue(getLong(nodeId)));
+                break;
+            case DOUBLE:
+                this.valueProducer = (nodeId -> Values.doubleValue(getDouble(nodeId)));
+                break;
+            case LONG_ARRAY:
+                this.valueProducer = (nodeId -> Values.longArray(getLongArray(nodeId)));
+                break;
+            case DOUBLE_ARRAY:
+                this.valueProducer = (nodeId -> Values.doubleArray(getDoubleArray(nodeId)));
+                break;
+            default:
+                throw new UnsupportedOperationException(formatWithLocale("No value converter for ValueType %s", valueTypes));
+        }
     }
 
     @Override
@@ -61,7 +83,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double getDouble(long nodeId, double defaultValue) {
-        if (valueType == ValueType.DOUBLE || valueType == ValueType.LONG) {
+        if (valueType == DOUBLE || valueType == LONG) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? defaultValue : nodeProperties.getDouble(nodeId);
         } else {
@@ -80,7 +102,7 @@ public class UnionNodeProperties implements NodeProperties {
     @Override
     public long getLong(long nodeId, long defaultValue) {
         // TODO forbid doubles once we load properties with their correct type
-        if (valueType == ValueType.LONG || valueType == ValueType.DOUBLE) {
+        if (valueType == LONG || valueType == DOUBLE) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? defaultValue : nodeProperties.getLong(nodeId);
         } else {
@@ -98,7 +120,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double[] getDoubleArray(long nodeId, double[] defaultValue) {
-        if (valueType == ValueType.DOUBLE_ARRAY) {
+        if (valueType == DOUBLE_ARRAY) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? defaultValue : nodeProperties.getDoubleArray(nodeId);
         } else {
@@ -118,6 +140,11 @@ public class UnionNodeProperties implements NodeProperties {
     public Object getObject(long nodeId, Object defaultValue) {
         var nodeProperties = getPropertiesForNodeId(nodeId);
         return nodeProperties == null ? defaultValue : nodeProperties.getObject(nodeId);
+    }
+
+    @Override
+    public Value getValue(long nodeId) {
+        return valueProducer.getValue(nodeId);
     }
 
     @Override
@@ -153,5 +180,9 @@ public class UnionNodeProperties implements NodeProperties {
             .map(NodeProperties::size)
             .reduce(Long::sum)
             .orElse(0L);
+    }
+
+    private interface ValueProducer {
+        Value getValue(long nodeId);
     }
 }

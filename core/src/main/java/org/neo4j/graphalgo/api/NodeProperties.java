@@ -21,11 +21,8 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.OptionalLong;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface NodeProperties {
 
@@ -51,23 +48,7 @@ public interface NodeProperties {
 
     ValueType getType();
 
-    default Value getValue(long nodeId) {
-        Value value;
-        switch(getType()) {
-            case DOUBLE:
-                value = Values.doubleValue(getDouble(nodeId));
-                break;
-            case LONG:
-                value = Values.longValue(getLong(nodeId));
-                break;
-            case DOUBLE_ARRAY:
-                value = Values.doubleArray(getDoubleArray(nodeId));
-                break;
-            default: throw new UnsupportedOperationException(formatWithLocale("Cannot create value for type %s", getType()));
-        }
-
-        return value;
-    }
+    Value getValue(long nodeId);
 
     default double getDouble(long nodeId, double defaultValue) {
         return getDouble(nodeId);

@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 /**
  * {@link NodeProperties} implementation which always returns
@@ -44,6 +46,11 @@ public abstract class NullPropertyMap implements NodeProperties {
         }
 
         @Override
+        public Value getValue(long nodeId) {
+            return Values.doubleValue(defaultValue);
+        }
+
+        @Override
         public ValueType getType() {
             return ValueType.DOUBLE;
         }
@@ -62,6 +69,11 @@ public abstract class NullPropertyMap implements NodeProperties {
         @Override
         public long getLong(long nodeId, long defaultValue) {
             return defaultValue;
+        }
+
+        @Override
+        public Value getValue(long nodeId) {
+            return Values.longValue(defaultValue);
         }
 
         @Override
