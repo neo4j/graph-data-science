@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
 import org.neo4j.logging.Log;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.DoubleStream;
-import java.util.stream.LongStream;
 
 import static java.util.stream.Collectors.toList;
 

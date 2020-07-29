@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
-import java.util.function.IntToLongFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongUnaryOperator;
 
@@ -105,14 +104,14 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
-     * The behavior is identical to {@link Arrays#setAll(long[], IntToLongFunction)}.
+     * The behavior is identical to {@link java.util.Arrays#setAll(long[], java.util.function.IntToLongFunction)}.
      */
     abstract public void setAll(LongUnaryOperator gen);
 
     /**
      * Assigns the specified long value to each element.
      * <p>
-     * The behavior is identical to {@link Arrays#fill(long[], long)}.
+     * The behavior is identical to {@link java.util.Arrays#fill(long[], long)}.
      */
     abstract public void fill(long value);
 

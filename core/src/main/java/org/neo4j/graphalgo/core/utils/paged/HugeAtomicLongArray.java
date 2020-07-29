@@ -24,8 +24,6 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.Arrays;
-import java.util.function.IntToLongFunction;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -142,7 +140,7 @@ public abstract class HugeAtomicLongArray {
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
-     * The values are pre-calculated according to the semantics of {@link Arrays#setAll(long[], IntToLongFunction)}
+     * The values are pre-calculated according to the semantics of {@link java.util.Arrays#setAll(long[], java.util.function.IntToLongFunction)}
      */
     public static HugeAtomicLongArray newArray(long size, LongPageCreator pageFiller, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {

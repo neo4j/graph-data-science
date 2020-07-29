@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
@@ -33,7 +32,8 @@ import java.util.function.DoubleUnaryOperator;
  * The algorithm computes the MST by traversing all nodes from a given
  * startNodeId. It aggregates all transitions into a MinPriorityQueue
  * and visits each (unvisited) connected node by following only the
- * cheapest transition and adding it to a specialized form of {@link UndirectedTree}.
+ * cheapest transition and adding it to a specialized form of
+ * {@link org.neo4j.graphalgo.core.utils.container.UndirectedTree}.
  * <p>
  * After calculating the MST the algorithm cuts the tree at its k weakest
  * relationships to form k spanning trees

@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.logging.Log;
@@ -33,11 +31,11 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
 
     /**
      * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
-     * compute the actual consumption depending on {@link GraphDimensions} and concurrency.
+     * compute the actual consumption depending on {@link org.neo4j.graphalgo.core.GraphDimensions} and concurrency.
      *
      * @return memory estimation
-     * @see MemoryEstimations
-     * @see MemoryEstimation#estimate(GraphDimensions, int)
+     * @see org.neo4j.graphalgo.core.utils.mem.MemoryEstimations
+     * @see MemoryEstimation#estimate(org.neo4j.graphalgo.core.GraphDimensions, int)
      */
     MemoryEstimation memoryEstimation(CONFIG configuration);
 }

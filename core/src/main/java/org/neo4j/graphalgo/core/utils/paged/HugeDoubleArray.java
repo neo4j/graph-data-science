@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.Arrays;
-import java.util.function.IntToDoubleFunction;
 import java.util.function.LongFunction;
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.DoubleStream;
@@ -88,7 +87,7 @@ public abstract class HugeDoubleArray extends HugeArray<double[], Double, HugeDo
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
-     * The behavior is identical to {@link Arrays#setAll(double[], IntToDoubleFunction)}.
+     * The behavior is identical to {@link Arrays#setAll(double[], java.util.function.IntToDoubleFunction)}.
      */
     abstract public void setAll(LongToDoubleFunction gen);
 

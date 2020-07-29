@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.InputIterable;
-import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
@@ -30,7 +28,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import java.io.IOException;
 
 /**
- * Unifies all data input given to a {@link BatchImporter} to allow for more coherent implementations.
+ * Unifies all data input given to a {@link org.neo4j.internal.batchimport.BatchImporter} to allow for more coherent implementations.
  */
 public interface CompatInput
 {
@@ -38,7 +36,7 @@ public interface CompatInput
      * Provides all node data for an import.
      *
      * @param badCollector for collecting bad entries.
-     * @return an {@link InputIterator} which will provide all node data for the whole import.
+     * @return an {@link org.neo4j.internal.batchimport.InputIterator} which will provide all node data for the whole import.
      */
     InputIterable nodes( Collector badCollector );
 
@@ -46,7 +44,7 @@ public interface CompatInput
      * Provides all relationship data for an import.
      *
      * @param badCollector for collecting bad entries.
-     * @return an {@link InputIterator} which will provide all relationship data for the whole import.
+     * @return an {@link org.neo4j.internal.batchimport.InputIterator} which will provide all relationship data for the whole import.
      */
     InputIterable relationships( Collector badCollector );
 

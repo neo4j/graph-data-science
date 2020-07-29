@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.api.Graph;
-
 public final class PregelContext<CONFIG extends PregelConfig> {
 
     private final Pregel.ComputeStep<CONFIG> computeStep;

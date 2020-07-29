@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
-import java.util.Arrays;
 import java.util.function.LongFunction;
 
 abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
@@ -32,7 +31,7 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
     public abstract void copyTo(final Self dest, long length);
 
     /**
-     * Creates a copy of the given array. The behavior is identical to {@link Arrays#copyOf(int[], int)}.
+     * Creates a copy of the given array. The behavior is identical to {@link java.util.Arrays#copyOf(int[], int)}.
      */
     public abstract Self copyOf(long newLength, AllocationTracker tracker);
 
@@ -128,14 +127,14 @@ abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
     /**
      * Set all elements using the provided generator function to compute each element.
      * <p>
-     * The behavior is identical to {@link Arrays#setAll(int[], java.util.function.IntUnaryOperator)}.
+     * The behavior is identical to {@link java.util.Arrays#setAll(int[], java.util.function.IntUnaryOperator)}.
      */
     abstract void boxedSetAll(LongFunction<Box> gen);
 
     /**
      * Assigns the specified value to each element.
      * <p>
-     * The behavior is identical to {@link Arrays#fill(int[], int)}.
+     * The behavior is identical to {@link java.util.Arrays#fill(int[], int)}.
      */
     abstract void boxedFill(Box value);
 

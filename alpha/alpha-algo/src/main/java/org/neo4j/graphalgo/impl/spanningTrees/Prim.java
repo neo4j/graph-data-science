@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.container.UndirectedTree;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
@@ -41,7 +40,8 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * The algorithm computes the MST by traversing all nodes from a given
  * startNodeId. It aggregates all transitions into a MinPriorityQueue
  * and visits each (unvisited) connected node by following only the
- * cheapest transition and adding it to a specialized form of {@link UndirectedTree}.
+ * cheapest transition and adding it to a specialized form of
+ * {@link org.neo4j.graphalgo.core.utils.container.UndirectedTree}.
  * <p>
  * The algorithm also computes the minimum, maximum and sum of all
  * weights in the MST.

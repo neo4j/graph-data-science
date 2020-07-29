@@ -41,7 +41,6 @@ import scala.collection.Seq;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.cypher.ScalaHelpers.pair;
 
 final class AstHelpers42 {
 

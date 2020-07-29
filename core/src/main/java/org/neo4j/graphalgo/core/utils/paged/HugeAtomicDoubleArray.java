@@ -25,15 +25,12 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
-import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntToDoubleFunction;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.indexInPage;
@@ -117,7 +114,7 @@ public abstract class HugeAtomicDoubleArray {
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
-     * The values are pre-calculated according to the semantics of {@link Arrays#setAll(double[], IntToDoubleFunction)}
+     * The values are pre-calculated according to the semantics of {@link java.util.Arrays#setAll(double[], java.util.function.IntToDoubleFunction)}
      */
     public static HugeAtomicDoubleArray newArray(long size, DoublePageCreator pageFiller, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {

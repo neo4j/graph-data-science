@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.extension.IdFunction;
 
 import java.util.Arrays;
 import java.util.List;
