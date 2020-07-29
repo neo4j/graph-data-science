@@ -68,14 +68,13 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         );
 
         runQuery(dbCypher());
-        runQuery("CALL gds.graph.create('g', 'A', {ALL: { type: '*', orientation: 'UNDIRECTED'}})");
+        runQuery("CALL gds.graph.create('g', 'A', {T: { orientation: 'UNDIRECTED'}})");
     }
 
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
-
 
     @Override
     public GraphDatabaseAPI graphDb() {
