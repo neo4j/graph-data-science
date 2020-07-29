@@ -86,25 +86,6 @@ public interface NodeProperties {
         return 0;
     }
 
-    //------------- Old Interface
-
-    /**
-     * Returns the property value for a node or the loaded default value if no property has been defined.
-     */
-    @Deprecated
-    default double nodeProperty(long nodeId) {
-        return getDouble(nodeId);
-    };
-
-    /**
-     * Returns the property value for a node or the given default value if no property had been defined.
-     * The default value has precedence over the default value defined by the loader.
-     */
-    @Deprecated
-    default double nodeProperty(long nodeId, double defaultValue) {
-        return getDouble(nodeId, defaultValue);
-    }
-
     /**
      * @return the maximum value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.
