@@ -40,7 +40,7 @@ public final class ComputationWriteProc extends WriteProc<ComputationAlgorithm, 
 
     @Procedure(
             name = "gds.pregel.test.write.estimate",
-            mode = Mode.WRITE
+            mode = Mode.READ
     )
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(@Name("graphName") Object graphNameOrConfig,

@@ -42,6 +42,7 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
@@ -49,6 +50,8 @@ import javax.lang.model.util.Elements;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class ProcedureGenerator extends PregelGenerator {
 
@@ -115,7 +118,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procMethod() {
-        var methodBuilder = procMethodSignature(procGdsMode().lowerCase(), procGdsMode().lowerCase());
+        var methodBuilder = procMethodSignature("", "", procExecMode());
         pregelSpec.description().ifPresent(description -> methodBuilder.addAnnotation(
             AnnotationSpec.builder(Description.class)
                 .addMember("value", "$S", description)
@@ -128,7 +131,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     private MethodSpec procEstimateMethod() {
-        return procMethodSignature(procGdsMode().lowerCase() + "Estimate", procGdsMode().lowerCase() + ".estimate")
+        return procMethodSignature("Estimate", ".estimate", Mode.READ)
             .addAnnotation(AnnotationSpec.builder(Description.class)
                 .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
                 .build()
@@ -139,11 +142,15 @@ abstract class ProcedureGenerator extends PregelGenerator {
     }
 
     @NotNull
-    private MethodSpec.Builder procMethodSignature(String methodName, String procedureSuffix) {
-        return MethodSpec.methodBuilder(methodName)
-            .addAnnotation(AnnotationSpec.builder(org.neo4j.procedure.Procedure.class)
-                .addMember("name", "$S", pregelSpec.procedureName() + "." + procedureSuffix)
-                .addMember("mode", "$T.$L", org.neo4j.procedure.Mode.class, procExecMode())
+    private MethodSpec.Builder procMethodSignature(String methodNameSuffix, String procedureSuffix, Mode procExecMode) {
+        return MethodSpec.methodBuilder(procGdsMode().lowerCase() + methodNameSuffix)
+            .addAnnotation(AnnotationSpec.builder(Procedure.class)
+                .addMember(
+                    "name",
+                    "$S",
+                    formatWithLocale("%s.%s%s", pregelSpec.procedureName(), procGdsMode().lowerCase(), procedureSuffix)
+                )
+                .addMember("mode", "$T.$L", Mode.class, procExecMode)
                 .build()
             )
             .addModifiers(Modifier.PUBLIC)
