@@ -29,7 +29,7 @@ import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Decompressing
 
 public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
-    private PriorityQueue<AdjacencyCursor> cursorQueue;
+    private final PriorityQueue<AdjacencyCursor> cursorQueue;
     private final List<AdjacencyCursor> cursors;
 
 
@@ -97,8 +97,8 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     long skipUntil(long target) {
-        cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
         for (var cursor : cursors) {
+            cursorQueue.remove(cursor);
             // an implementation aware cursor would probably be much faster and could skip whole blocks
             // see AdjacencyDecompressingReader#skipUntil
             while (cursor.hasNextVLong() && cursor.peekVLong() <= target) {
@@ -113,8 +113,8 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     long advance(long target) {
-        cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
         for (var cursor : cursors) {
+            cursorQueue.remove(cursor);
             // an implementation aware cursor would probably be much faster and could skip whole blocks
             // see AdjacencyDecompressingReader#advance
             while (cursor.hasNextVLong() && cursor.peekVLong() < target) {
