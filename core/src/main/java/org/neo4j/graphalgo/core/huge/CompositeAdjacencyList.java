@@ -51,11 +51,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
                 degree += adjacencyLists.get(i).degree(offset);
             }
         }
-        try {
-            return Math.toIntExact(degree);
-        } catch(ArithmeticException e) {
-            return Integer.MAX_VALUE;
-        }
+        return Math.toIntExact(degree);
     }
 
     @Override
