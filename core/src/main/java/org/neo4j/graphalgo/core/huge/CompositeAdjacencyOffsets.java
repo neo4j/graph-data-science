@@ -17,16 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.core.huge;
 
-/**
- * A subtype of {@link Graph} which exposes datastructures specific to the csr graph representation
- * such as {@link AdjacencyList} and {@link AdjacencyOffsets}.
- */
-public interface CSRGraph extends Graph {
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-    Relationships.Topology relationshipTopology();
+import java.util.List;
+
+public class CompositeAdjacencyOffsets implements AdjacencyOffsets {
+
+    private final List<AdjacencyOffsets> adjacencyOffsets;
+
+    CompositeAdjacencyOffsets(List<AdjacencyOffsets> adjacencyOffsets) {
+        this.adjacencyOffsets = adjacencyOffsets;
+    }
+
+    public List<AdjacencyOffsets> adjacencyOffsets() {
+        return adjacencyOffsets;
+    }
 
     @Override
-    CSRGraph concurrentCopy();
+    public long get(long index) {
+        // this should always be delegated to the wrapped adjacency offsets
+        // as offsets for a specific node id might differ
+        return index;
+    }
+
+    @Override
+    public void close() {
+        adjacencyOffsets.forEach(AdjacencyOffsets::close);
+    }
 }

@@ -31,25 +31,26 @@ import java.util.function.LongPredicate;
  * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
-class HugeGraphIntersectImpl implements RelationshipIntersect {
+abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
-    private TransientAdjacencyList adjacency;
-    private TransientAdjacencyOffsets offsets;
-    private TransientAdjacencyList.DecompressingCursor empty;
-    private TransientAdjacencyList.DecompressingCursor cache;
-    private TransientAdjacencyList.DecompressingCursor cacheA;
-    private TransientAdjacencyList.DecompressingCursor cacheB;
+    protected CURSOR empty;
+    private final CURSOR cache;
+    private final CURSOR cacheA;
+    private final CURSOR cacheB;
     private final LongPredicate degreeFilter;
 
-    HugeGraphIntersectImpl(final TransientAdjacencyList adjacency, final TransientAdjacencyOffsets offsets, long maxDegree) {
-        assert adjacency != null;
-        assert offsets != null;
-        this.adjacency = adjacency;
-        this.offsets = offsets;
-        cache = adjacency.rawDecompressingCursor();
-        cacheA = adjacency.rawDecompressingCursor();
-        cacheB = adjacency.rawDecompressingCursor();
-        empty = adjacency.rawDecompressingCursor();
+    GraphIntersect(
+        CURSOR cache,
+        CURSOR cacheA,
+        CURSOR cacheB,
+        CURSOR empty,
+        long maxDegree
+    ) {
+        this.cache = cache;
+        this.cacheA = cacheA;
+        this.cacheB = cacheB;
+        this.empty = empty;
+
         this.degreeFilter = maxDegree < Long.MAX_VALUE
             ? (node) -> degree(node) <= maxDegree
             : (ignore) -> true;
@@ -61,28 +62,32 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
             return;
         }
 
-        TransientAdjacencyOffsets offsets = this.offsets;
-        TransientAdjacencyList adjacency = this.adjacency;
-
-        TransientAdjacencyList.DecompressingCursor mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
-        long nodeIdB = mainDecompressingCursor.skipUntil(nodeIdA);
+        CURSOR mainDecompressingCursor = cursor(nodeIdA, cache);
+        long nodeIdB = skipUntil(mainDecompressingCursor, nodeIdA);
         if (nodeIdB <= nodeIdA) {
             return;
         }
 
-        TransientAdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
-        long nodeIdC, currentA, s, t;
+        CURSOR lead;
+        CURSOR follow;
+        CURSOR decompressingCursorA = cacheA;
+        CURSOR decompressingCursorB = cacheB;
+
+        long nodeIdC;
+        long currentA;
+        long s;
+        long t;
 
         long lastNodeB;
         long lastNodeC;
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
             if (degreeFilter.test(nodeIdB)) {
-                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
-                nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
+                decompressingCursorB = cursor(nodeIdB, decompressingCursorB);
+                nodeIdC = skipUntil(decompressingCursorB, nodeIdB);
                 if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
-                    decompressingCursorA.copyFrom(mainDecompressingCursor);
-                    currentA = decompressingCursorA.advance(nodeIdC);
+                    copyFrom(mainDecompressingCursor, decompressingCursorA);
+                    currentA = advance(decompressingCursorA, nodeIdC);
 
                     if (currentA == nodeIdC && nodeIdC > lastNodeC) {
                         consumer.accept(nodeIdA, nodeIdB, nodeIdC);
@@ -99,7 +104,7 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
                     while (lead.hasNextVLong() && follow.hasNextVLong()) {
                         s = lead.nextVLong();
-                        t = follow.advance(s);
+                        t = advance(follow, s);
                         if (t == s && t > lastNodeC) {
                             consumer.accept(nodeIdA, nodeIdB, s);
                             lastNodeC = t;
@@ -115,23 +120,13 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         }
     }
 
-    private int degree(long node) {
-        long offset = offsets.get(node);
-        if (offset == 0L) {
-            return 0;
-        }
-        return adjacency.degree(offset);
-    }
+    abstract long skipUntil(CURSOR cursor, long nodeId);
 
-    private TransientAdjacencyList.DecompressingCursor cursor(
-            long node,
-            TransientAdjacencyList.DecompressingCursor reuse,
-            TransientAdjacencyOffsets offsets,
-            TransientAdjacencyList array) {
-        final long offset = offsets.get(node);
-        if (offset == 0L) {
-            return empty;
-        }
-        return array.decompressingCursor(reuse, offset);
-    }
+    abstract long advance(CURSOR cursor, long nodeId);
+
+    abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
+
+    abstract CURSOR cursor(long node, CURSOR reuse);
+
+    abstract int degree(long node);
 }

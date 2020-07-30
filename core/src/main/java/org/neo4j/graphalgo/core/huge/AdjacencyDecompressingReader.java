@@ -27,15 +27,18 @@ import static org.neo4j.graphalgo.core.huge.VarLongDecoding.decodeDeltaVLongs;
 
 final class AdjacencyDecompressingReader {
 
-    private static final int CHUNK_SIZE = 64;
+    static final int CHUNK_SIZE = 64;
 
     private final long[] block;
     private int pos;
     private byte[] array;
     private int offset;
 
+    private boolean blockAlreadyDecoded;
+
     AdjacencyDecompressingReader() {
         this.block = new long[CHUNK_SIZE];
+        this.blockAlreadyDecoded = false;
     }
 
     //@formatter:off
@@ -80,13 +83,29 @@ final class AdjacencyDecompressingReader {
         if (pos < CHUNK_SIZE) {
             return block[pos];
         }
-        return readNextBlock(remaining);
+        long targetNode = readNextBlock(remaining);
+        this.pos = 1;
+        return targetNode;
+    }
+
+    long peek(int remaining) {
+        int pos = this.pos;
+        if (pos < CHUNK_SIZE) {
+            return block[pos];
+        }
+        long targetNode = readNextBlock(remaining);
+        blockAlreadyDecoded = true;
+        this.pos = 0;
+        return targetNode;
     }
 
     private long readNextBlock(int remaining) {
-        pos = 1;
-        offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
-        return block[0];
+        if (!blockAlreadyDecoded) {
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, Math.min(remaining, CHUNK_SIZE), block);
+            return block[0];
+        }
+        blockAlreadyDecoded = false;
+        return block[pos];
     }
 
     long skipUntil(long target, int remaining, MutableIntValue consumed) {

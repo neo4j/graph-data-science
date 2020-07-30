@@ -127,7 +127,7 @@ public final class CSRGraphStore implements GraphStore {
         );
     }
 
-    public static GraphStore of(
+    public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         HugeGraph graph,
         String relationshipType,

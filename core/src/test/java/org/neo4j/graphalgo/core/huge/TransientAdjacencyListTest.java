@@ -20,20 +20,73 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.core.huge.AdjacencyDecompressingReader.CHUNK_SIZE;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.computeAdjacencyByteSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 class TransientAdjacencyListTest {
+
+    @Test
+    void shouldPeekValues() {
+        AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{1, 42, 1337});
+        while(adjacencyCursor.hasNextVLong()) {
+            assertEquals(adjacencyCursor.peekVLong(), adjacencyCursor.nextVLong());
+        }
+    }
+
+    @Test
+    void shouldSkipUntilLargerValue() {
+        TransientAdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 1, 2});
+        assertEquals(2, adjacencyCursor.skipUntil(1));
+        assertFalse(adjacencyCursor.hasNextVLong());
+    }
+
+    @Test
+    void shouldAdvanceUntilEqualValue() {
+        TransientAdjacencyList.DecompressingCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 1, 2});
+        assertEquals(1, adjacencyCursor.advance(1));
+        assertEquals(1, adjacencyCursor.nextVLong());
+        assertEquals(2, adjacencyCursor.nextVLong());
+        assertFalse(adjacencyCursor.hasNextVLong());
+    }
+
+    @Test
+    void shouldPeekAcrossBlocks() {
+        long[] targets = new long[CHUNK_SIZE + 1];
+        Arrays.setAll(targets, i -> i);
+        AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
+        int position = 0;
+        while(adjacencyCursor.hasNextVLong() && position < CHUNK_SIZE) {
+            adjacencyCursor.nextVLong();
+            position++;
+        }
+
+        assertEquals(1, adjacencyCursor.remaining());
+        assertEquals(64, adjacencyCursor.peekVLong());
+        assertEquals(64, adjacencyCursor.peekVLong());
+        assertEquals(64, adjacencyCursor.nextVLong());
+    }
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
@@ -156,5 +209,28 @@ class TransientAdjacencyListTest {
         long nodeCount = 100;
         long delta = 0;
         assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
+    }
+
+    private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
+        long sourceNodeId = targets[0];
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(targets[targets.length - 1], Pools.DEFAULT, AllocationTracker.EMPTY);
+        for (long target : targets) {
+            idMapBuilder.addNode(target);
+        }
+        IdMap idMap = idMapBuilder.build();
+        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
+            idMap,
+            Orientation.NATURAL,
+            false,
+            Aggregation.NONE,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+        for (long target : targets) {
+            relationshipsBuilder.add(sourceNodeId, target);
+        }
+        Relationships relationships = relationshipsBuilder.build();
+        long offset = relationships.topology().offsets().get(idMap.toMappedNodeId(sourceNodeId));
+        return (TransientAdjacencyList.DecompressingCursor) relationships.topology().list().decompressingCursor(offset);
     }
 }

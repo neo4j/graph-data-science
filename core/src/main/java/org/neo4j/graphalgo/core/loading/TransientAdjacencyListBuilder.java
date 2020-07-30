@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
-final class TransientAdjacencyListBuilder implements AdjacencyListBuilder {
+public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder {
 
     private static final long PAGE_SIZE_IN_BYTES = sizeOfByteArray(PAGE_SIZE);
     private static final AtomicReferenceFieldUpdater<TransientAdjacencyListBuilder, byte[][]> PAGES_UPDATER =
@@ -49,7 +49,7 @@ final class TransientAdjacencyListBuilder implements AdjacencyListBuilder {
     @SuppressWarnings("FieldMayBeFinal")
     private volatile byte[][] pages;
 
-    static AdjacencyListBuilderFactory builderFactory(AllocationTracker tracker){
+    public static AdjacencyListBuilderFactory builderFactory(AllocationTracker tracker){
         return () -> new TransientAdjacencyListBuilder(tracker);
     }
 

@@ -43,7 +43,7 @@ public final class AdjacencyCompression {
         return values;
     }
 
-    static void copyFrom(LongsRef into, CompressedLongArray array) {
+    public static void copyFrom(LongsRef into, CompressedLongArray array) {
         into.longs = growWithDestroy(into.longs, array.length());
         into.length = array.uncompress(into.longs);
     }
@@ -80,7 +80,7 @@ public final class AdjacencyCompression {
         return data.length;
     }
 
-    static int compress(LongsRef data, byte[] out) {
+    public static int compress(LongsRef data, byte[] out) {
         return compress(data.longs, out, data.length);
     }
 

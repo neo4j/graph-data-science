@@ -24,8 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -93,6 +91,32 @@ class IntersectingTriangleCountTest {
             " (a3)-[:T]->(a4), " +
             " (a3)-[:T]->(a5), " +
             " (a4)-[:T]->(a5)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(10, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        for (int i = 0; i < result.localTriangles().size(); ++i) {
+            assertEquals(6, result.localTriangles().get(i));
+        }
+    }
+
+    @Test
+    void clique5UnionGraph() {
+        var graph = fromGdl(
+            "CREATE " +
+            " (a1)-[:T1]->(a2), " +
+            " (a1)-[:T1]->(a3), " +
+            " (a1)-[:T2]->(a4), " +
+            " (a1)-[:T3]->(a5), " +
+            " (a2)-[:T4]->(a3), " +
+            " (a2)-[:T2]->(a4), " +
+            " (a2)-[:T2]->(a5), " +
+            " (a3)-[:T3]->(a4), " +
+            " (a3)-[:T1]->(a5), " +
+            " (a4)-[:T4]->(a5)",
             UNDIRECTED
         );
 
@@ -248,6 +272,40 @@ class IntersectingTriangleCountTest {
             " ,(e)-[:T]->(f)"+
             " ,(f)-[:T]->(g)"+
             " ,(g)-[:T]->(e)",
+            UNDIRECTED
+        );
+
+        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
+            .builder()
+            .maxDegree(2)
+            .build();
+
+        TriangleCountResult result = compute(graph, config);
+
+        assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
+        assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
+        assertEquals(0, result.localTriangles().get(2));  // c (deg = 2)
+        assertEquals(0, result.localTriangles().get(3));  // d (deg = 2)
+
+        assertEquals(1, result.localTriangles().get(4)); // e (deg = 2)
+        assertEquals(1, result.localTriangles().get(5)); // f (deg = 2)
+        assertEquals(1, result.localTriangles().get(6)); // g (deg = 2)
+        assertEquals(1, result.globalTriangles());
+    }
+
+    @Test
+    void testTriangleCountingWithMaxDegreeOnUnionGraph() {
+        var graph = fromGdl(
+            "CREATE" +
+            "  (a)-[:T1]->(b)"+
+            " ,(a)-[:T2]->(c)"+
+            " ,(a)-[:T2]->(d)"+
+            " ,(b)-[:T1]->(c)"+
+            " ,(b)-[:T2]->(d)"+
+
+            " ,(e)-[:T1]->(f)"+
+            " ,(f)-[:T1]->(g)"+
+            " ,(g)-[:T1]->(e)",
             UNDIRECTED
         );
 

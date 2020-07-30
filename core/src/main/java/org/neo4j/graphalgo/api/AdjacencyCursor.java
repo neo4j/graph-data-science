@@ -39,6 +39,11 @@ public interface AdjacencyCursor extends AutoCloseable {
     long nextVLong();
 
     /**
+     * Decode and peek the next target id. Does not progress the internal cursor unlike {@link #nextVLong()}.
+     */
+    long peekVLong();
+
+    /**
      * Return how many targets are still left to be decoded.
      */
     int remaining();

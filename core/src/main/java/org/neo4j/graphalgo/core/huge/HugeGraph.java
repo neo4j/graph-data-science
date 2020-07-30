@@ -327,7 +327,7 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public RelationshipIntersect intersection(long maxDegree) {
-        return new HugeGraphIntersectImpl(adjacencyList, adjacencyOffsets, maxDegree);
+        return new HugeGraphIntersect(adjacencyList, adjacencyOffsets, maxDegree);
     }
 
     /**
@@ -373,7 +373,7 @@ public class HugeGraph implements CSRGraph {
         if (offset == 0L) {
             return emptyCursor;
         }
-        return adjacencyList.decompressingCursor(cursorCache, offset);
+        return TransientAdjacencyList.decompressingCursor(cursorCache, offset);
 
     }
 
@@ -436,7 +436,6 @@ public class HugeGraph implements CSRGraph {
         return isMultiGraph;
     }
 
-    @Override
     public Relationships relationships() {
         return Relationships.of(
             relationshipCount,
@@ -448,6 +447,11 @@ public class HugeGraph implements CSRGraph {
             propertyOffsets,
             defaultPropertyValue
         );
+    }
+
+    @Override
+    public Relationships.Topology relationshipTopology() {
+        return relationships().topology();
     }
 
     @Override
