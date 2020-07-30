@@ -9,11 +9,10 @@ import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.logging.Log;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, HugeDoubleArray> {
+public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, Pregel.PregelResult> {
     private final Pregel<PregelConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker,
@@ -28,7 +27,7 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
     }
 
     @Override
-    public HugeDoubleArray compute() {
+    public Pregel.PregelResult compute() {
         return pregelJob.run();
     }
 
