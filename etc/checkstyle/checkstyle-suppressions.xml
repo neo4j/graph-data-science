@@ -10,7 +10,6 @@
         See `checkstyle.xml` file for links to the rules details.
     -->
     <suppress checks="JavadocPackage" files=".*"/>
-    <suppress checks="NewlineAtEndOfFile" files=".*"/>
     <suppress checks="Translation" files=".*"/>
     <suppress checks="FileLength" files=".*"/>
     <suppress checks="LineLength" files=".*"/>
