@@ -74,18 +74,18 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
         double defaultNodeValue = config.initialNodeValue();
-        HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        HugeDoubleArray nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 config.concurrency(),
-                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, defaultNodeValue))
+                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, defaultNodeValue))
         );
 
         return new Pregel<>(
                 graph,
                 config,
                 computation,
-                hugeDoubleArray,
+                nodeValues,
                 batchSize,
                 executor,
                 tracker
@@ -102,18 +102,18 @@ public final class Pregel<CONFIG extends PregelConfig> {
             final AllocationTracker tracker) {
 
         // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
-        HugeDoubleArray hugeDoubleArray = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
+        HugeDoubleArray nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 config.concurrency(),
-                nodeIds -> nodeIds.forEach(nodeId -> hugeDoubleArray.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
+                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.nodeProperty(nodeId)))
         );
 
         return new Pregel<>(
                 graph,
                 config,
                 computation,
-                hugeDoubleArray,
+                nodeValues,
                 batchSize,
                 executor,
                 tracker
