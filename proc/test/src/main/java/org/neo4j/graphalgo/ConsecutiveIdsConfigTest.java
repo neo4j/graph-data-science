@@ -57,7 +57,7 @@ public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM,
 
             Set<Long> consecutiveIds = LongStream
                 .range(0, computationResult.graph().nodeCount())
-                .map(nodeId -> (long) nodeProperties.getDouble(nodeId))
+                .map(nodeProperties::getLong)
                 .boxed()
                 .collect(Collectors.toSet());
 

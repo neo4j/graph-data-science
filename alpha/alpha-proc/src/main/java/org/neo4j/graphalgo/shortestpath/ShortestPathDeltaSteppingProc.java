@@ -103,6 +103,8 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
         }
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
+            var shortestPaths = algorithm.getShortestPaths();
+
             NodePropertyExporter
                 .builder(api, graph, algorithm.getTerminationFlag())
                 .withLog(log)
@@ -110,7 +112,7 @@ public class ShortestPathDeltaSteppingProc extends AlgoBaseProc<ShortestPathDelt
                 .build()
                 .write(
                     config.writeProperty(),
-                    (DoubleNodeProperties) (nodeId) -> algorithm.getShortestPaths()[(int) nodeId]
+                    (DoubleNodeProperties) (nodeId) -> shortestPaths[(int) nodeId]
                 );
         }
 

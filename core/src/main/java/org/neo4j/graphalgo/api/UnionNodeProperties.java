@@ -182,6 +182,7 @@ public class UnionNodeProperties implements NodeProperties {
             .orElse(0L);
     }
 
+    @FunctionalInterface
     private interface ValueProducer {
         Value getValue(long nodeId);
     }
