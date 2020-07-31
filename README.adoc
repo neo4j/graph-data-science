@@ -28,6 +28,10 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 .2+<.^|GDS 1.3.x
 |Neo4j 4.0.0 - 4.0.7
 |Neo4j 4.1.0 - 4.1.1
+
+.2+<.^|GDS 1.4.x (alpha)
+|Neo4j 4.0.0 - 4.0.7
+|Neo4j 4.1.0 - 4.1.1
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
