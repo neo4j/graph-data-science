@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.write.PropertyTranslator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -374,15 +373,5 @@ public final class Pregel<CONFIG extends PregelConfig> {
         int ranIterations();
 
         boolean didConverge();
-
-        class Translator implements PropertyTranslator.OfDouble<PregelResult> {
-
-            public static final PregelResult.Translator INSTANCE = new PregelResult.Translator();
-
-            @Override
-            public double toDouble(PregelResult data, long nodeId) {
-                return data.nodeValues().get(nodeId);
-            }
-        }
     }
 }

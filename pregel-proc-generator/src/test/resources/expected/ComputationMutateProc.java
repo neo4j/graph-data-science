@@ -1,5 +1,9 @@
 package org.neo4j.graphalgo.beta.pregel.cc;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
@@ -20,11 +24,6 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-
-import javax.annotation.processing.Generated;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationMutateProc extends MutateProc<ComputationAlgorithm, Pregel.PregelResult, PregelMutateResult, PregelConfig> {
