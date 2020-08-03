@@ -41,10 +41,12 @@ public final class HugeSparseLongArray {
 
     private final long capacity;
     private final long[][] pages;
+    private final long defaultValue;
 
-    private HugeSparseLongArray(long capacity, long[][] pages) {
+    private HugeSparseLongArray(long capacity, long[][] pages, long defaultValue) {
         this.capacity = capacity;
         this.pages = pages;
+        this.defaultValue = defaultValue;
     }
 
     /**
@@ -80,7 +82,7 @@ public final class HugeSparseLongArray {
                 return page[indexInPage(index)];
             }
         }
-        return NOT_FOUND;
+        return defaultValue;
     }
 
     public boolean contains(long index) {
@@ -88,7 +90,7 @@ public final class HugeSparseLongArray {
         if (pageIndex < pages.length) {
             long[] page = pages[pageIndex];
             if (page != null) {
-                return page[indexInPage(index)] != NOT_FOUND;
+                return page[indexInPage(index)] != defaultValue;
             }
         }
         return false;
@@ -158,10 +160,10 @@ public final class HugeSparseLongArray {
             long storedValue = (long) ARRAY_HANDLE.compareAndExchange(
                 page,
                 indexInPage,
-                NOT_FOUND,
+                defaultValue,
                 value
             );
-            return storedValue == NOT_FOUND;
+            return storedValue == defaultValue;
         }
 
         public HugeSparseLongArray build() {
@@ -169,7 +171,7 @@ public final class HugeSparseLongArray {
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             long[][] pages = new long[numPages][];
             Arrays.setAll(pages, this.pages::get);
-            return new HugeSparseLongArray(capacity, pages);
+            return new HugeSparseLongArray(capacity, pages, defaultValue);
         }
 
         private long[] allocateNewPage(int pageIndex) {
@@ -251,7 +253,7 @@ public final class HugeSparseLongArray {
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
             long[][] pages = new long[numPages][];
             Arrays.setAll(pages, this.pages::get);
-            return new HugeSparseLongArray(capacity, pages);
+            return new HugeSparseLongArray(capacity, pages, defaultValue);
         }
 
         private long[] getPage(int pageIndex) {

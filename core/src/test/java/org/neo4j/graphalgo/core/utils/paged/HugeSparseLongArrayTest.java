@@ -211,11 +211,11 @@ final class HugeSparseLongArrayTest {
 
     @Test
     void shouldComputeMemoryEstimation() {
-        assertEquals(MemoryRange.of(40L), HugeSparseLongArray.memoryEstimation(0L, 0L));
-        assertEquals(MemoryRange.of(32832L), HugeSparseLongArray.memoryEstimation(100L, 100L));
-        assertEquals(MemoryRange.of(97_689_080L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 1L));
-        assertEquals(MemoryRange.of(177_714_824L, 327_937_656_296L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
-        assertEquals(MemoryRange.of(898_077_656L, 800_488_297_688L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
+        assertEquals(MemoryRange.of(48L), HugeSparseLongArray.memoryEstimation(0L, 0L));
+        assertEquals(MemoryRange.of(32840L), HugeSparseLongArray.memoryEstimation(100L, 100L));
+        assertEquals(MemoryRange.of(97_689_088L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 1L));
+        assertEquals(MemoryRange.of(177_714_832L, 327_937_656_304L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 10_000_000L));
+        assertEquals(MemoryRange.of(898_077_664L, 800_488_297_696L), HugeSparseLongArray.memoryEstimation(100_000_000_000L, 100_000_000L));
     }
 
     @Test
@@ -241,7 +241,8 @@ final class HugeSparseLongArrayTest {
         long classSizeComponents =
                 8L /* capacity */ +
                 4L /* ref for long[][] array */ +
-                12L /* object header */;
+                12L /* object header */ +
+                8L /* defaultValue */;
 
         long classSize = BitUtil.align(classSizeComponents, 8 /* object alignment */);
 

@@ -47,8 +47,8 @@ class NativeFactoryTest {
         );
 
         MemoryTree estimate = memoryEstimation.estimate(dimensions, 1);
-        assertEquals(3_405_981_448L, estimate.memoryUsage().min);
-        assertEquals(4_606_168_240L, estimate.memoryUsage().max);
+        assertEquals(3_405_981_456L, estimate.memoryUsage().min);
+        assertEquals(4_606_168_248L, estimate.memoryUsage().max);
     }
 
     @Test
@@ -71,7 +71,7 @@ class NativeFactoryTest {
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 72;
 
-        assertEquals(3_205_950_312L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
-        assertEquals(6_011_568_216L, estimate.memoryUsage().max);
+        assertEquals(3_205_950_320L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
+        assertEquals(6_011_568_224L, estimate.memoryUsage().max);
     }
 }
