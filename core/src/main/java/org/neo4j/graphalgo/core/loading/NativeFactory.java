@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -71,7 +72,7 @@ public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphC
 
         // nodeProperties
         nodeProjections.allProperties()
-            .forEach(property -> builder.add(property, NodePropertyArray.memoryEstimation()));
+            .forEach(property -> builder.add(property, NodePropertiesFromStoreBuilder.memoryEstimation()));
 
         // relationships
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {

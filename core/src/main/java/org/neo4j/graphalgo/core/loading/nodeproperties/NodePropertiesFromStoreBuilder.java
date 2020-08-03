@@ -22,7 +22,10 @@ package org.neo4j.graphalgo.core.loading.nodeproperties;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.DoubleValue;
 import org.neo4j.values.storable.FloatValue;
 import org.neo4j.values.storable.IntValue;
@@ -35,6 +38,21 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 
 public final class NodePropertiesFromStoreBuilder {
+
+    private static final MemoryEstimation MEMORY_ESTIMATION = MemoryEstimations
+        .builder(NodePropertiesFromStoreBuilder.class)
+        .rangePerGraphDimension(
+            "property values",
+            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
+                dimensions.nodeCount(),
+                dimensions.nodeCount()
+            )
+        )
+        .build();
+
+    public static MemoryEstimation memoryEstimation() {
+        return MEMORY_ESTIMATION;
+    }
 
     private final DefaultValue defaultValue;
     private final long nodeSize;
