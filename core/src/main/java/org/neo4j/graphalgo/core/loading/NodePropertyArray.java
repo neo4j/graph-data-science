@@ -122,7 +122,7 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     @Override
-    public OptionalLong getLongMaxPropertyValue() {
+    public OptionalLong getMaxLongPropertyValue() {
         if (longMaxValue.isPresent()) {
             return longMaxValue;
         } else if (doubleMaxValue.isPresent()) {
@@ -133,7 +133,7 @@ public final class NodePropertyArray implements NodeProperties {
     }
 
     @Override
-    public OptionalDouble getDoubleMaxPropertyValue() {
+    public OptionalDouble getMaxDoublePropertyValue() {
         if (doubleMaxValue.isPresent()) {
             return doubleMaxValue;
         } else if (longMaxValue.isPresent()) {

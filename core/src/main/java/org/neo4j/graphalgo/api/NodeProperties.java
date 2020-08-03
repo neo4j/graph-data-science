@@ -93,7 +93,7 @@ public interface NodeProperties {
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.
      */
-    default OptionalLong getLongMaxPropertyValue() {
+    default OptionalLong getMaxLongPropertyValue() {
         return OptionalLong.empty();
     }
 
@@ -101,7 +101,7 @@ public interface NodeProperties {
      * @return the maximum double value contained in the mapping or an empty {@link OptionalDouble} if the mapping is
      *         empty or the feature is not supported.
      */
-    default OptionalDouble getDoubleMaxPropertyValue() {
+    default OptionalDouble getMaxDoublePropertyValue() {
         return OptionalDouble.empty();
     }
 

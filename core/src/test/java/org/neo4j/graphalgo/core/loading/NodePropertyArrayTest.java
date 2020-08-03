@@ -44,7 +44,7 @@ final class NodePropertyArrayTest {
         ).build();
 
         assertEquals(0L, properties.size());
-        assertEquals(OptionalDouble.empty(), properties.getDoubleMaxPropertyValue());
+        assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
         assertEquals(42.0, properties.getDouble(0, 42.0));
     }
 
@@ -58,7 +58,7 @@ final class NodePropertyArrayTest {
         ).build();
 
         assertEquals(0L, properties.size());
-        assertEquals(OptionalLong.empty(), properties.getLongMaxPropertyValue());
+        assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
         assertEquals(42, properties.getLong(0, 42));
     }
 
@@ -95,7 +95,7 @@ final class NodePropertyArrayTest {
             b.set(0, 42);
             b.set(1, 21);
         });
-        var maxPropertyValue = properties.getLongMaxPropertyValue();
+        var maxPropertyValue = properties.getMaxLongPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
         assertEquals(42, maxPropertyValue.getAsLong());
     }
@@ -148,7 +148,7 @@ final class NodePropertyArrayTest {
             assertEquals(expected, properties.getDouble(i));
         }
         assertEquals(nodeSize, properties.size());
-        var maxPropertyValue = properties.getLongMaxPropertyValue();
+        var maxPropertyValue = properties.getMaxLongPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
 
         // If write were correctly ordered, this is always true

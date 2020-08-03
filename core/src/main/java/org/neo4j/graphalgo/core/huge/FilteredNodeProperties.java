@@ -88,7 +88,7 @@ public class FilteredNodeProperties implements NodeProperties {
     }
 
     @Override
-    public OptionalLong getLongMaxPropertyValue() {
+    public OptionalLong getMaxLongPropertyValue() {
         if (getType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
             graph.forEachNode(id -> {
@@ -115,7 +115,7 @@ public class FilteredNodeProperties implements NodeProperties {
     }
 
     @Override
-    public OptionalDouble getDoubleMaxPropertyValue() {
+    public OptionalDouble getMaxDoublePropertyValue() {
         if (getType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
             graph.forEachNode(id -> {

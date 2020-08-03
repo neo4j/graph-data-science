@@ -133,7 +133,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         }
 
         @Override
-        public OptionalLong getLongMaxPropertyValue() {
+        public OptionalLong getMaxLongPropertyValue() {
             return StreamSupport
                 .stream(weights.values().spliterator(), false)
                 .mapToLong(d -> d.value)
@@ -141,8 +141,8 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         }
 
         @Override
-        public OptionalDouble getDoubleMaxPropertyValue() {
-            return getLongMaxPropertyValue().stream().mapToDouble(l -> Long.valueOf(l).doubleValue()).findFirst();
+        public OptionalDouble getMaxDoublePropertyValue() {
+            return getMaxLongPropertyValue().stream().mapToDouble(l -> Long.valueOf(l).doubleValue()).findFirst();
         }
 
         @Override

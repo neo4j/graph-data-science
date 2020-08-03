@@ -100,7 +100,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
             LongPageCreator.of(concurrency, nodeId -> communityMapping.getLong(nodeId, -1)),
             tracker
         );
-        maxCommunityId = new AtomicLong(communityMapping.getLongMaxPropertyValue().orElse(NO_SUCH_SEED_VALUE));
+        maxCommunityId = new AtomicLong(communityMapping.getMaxLongPropertyValue().orElse(NO_SUCH_SEED_VALUE));
     }
 
     private long parent(long id) {

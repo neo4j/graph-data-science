@@ -91,7 +91,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         }
         this.nodeWeights = nodeWeightProperty;
 
-        maxLabelId = seedProperty.getLongMaxPropertyValue().orElse(NO_SUCH_LABEL);
+        maxLabelId = seedProperty.getMaxLongPropertyValue().orElse(NO_SUCH_LABEL);
 
         this.progressLogger = progressLogger;
     }
