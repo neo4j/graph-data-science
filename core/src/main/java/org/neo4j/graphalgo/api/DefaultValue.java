@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -55,19 +56,21 @@ public final class DefaultValue {
         }else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).longValue();
         }
-        throw new ClassCastException(formatWithLocale("Cannot cast variable of type %s into %s", defaultValue.getClass(), Long.class));
+        throw getInvalidTypeException(Long.class);
     }
 
     public double getDouble() {
-        if (defaultValue instanceof Number) {
+        if (defaultValue instanceof Long && defaultValue.equals(LONG_DEFAULT_FALLBACK)) {
+            return DOUBLE_DEFAULT_FALLBACK;
+        } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).doubleValue();
         } else if (defaultValue == null) {
             return DOUBLE_DEFAULT_FALLBACK;
         }
-        throw new ClassCastException(formatWithLocale("Cannot cast variable of type %s into %s", defaultValue.getClass(), Double.class));
+        throw getInvalidTypeException(Double.class);
     }
 
-    public Object getObject() {
+    public @Nullable Object getObject() {
         return defaultValue;
     }
 
@@ -88,5 +91,10 @@ public final class DefaultValue {
     @Override
     public int hashCode() {
         return Objects.hash(defaultValue);
+    }
+
+    @NotNull
+    public ClassCastException getInvalidTypeException(Class<?> expectedClass) {
+        return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
     }
 }
