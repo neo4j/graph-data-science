@@ -28,7 +28,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class DefaultValue {
     public static final DefaultValue DEFAULT = new DefaultValue(null);
+    public static final int INTEGER_DEFAULT_FALLBACK = Integer.MIN_VALUE;
     public static final long LONG_DEFAULT_FALLBACK = Long.MIN_VALUE;
+    public static final float FLOAT_DEFAULT_FALLBACK = Float.NaN;
     public static final double DOUBLE_DEFAULT_FALLBACK = Double.NaN;
 
     @Nullable

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.values.storable.Values;
@@ -34,15 +35,14 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// TODO Write more tests!
 final class NodePropertiesFromStoreBuilderTest {
 
     @Test
-    void emptyDoubleProperties() {
+    void testEmptyDoubleProperties() {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.EMPTY,
-            DefaultValue.of(42.0)
+            DefaultValue.of(42.0D)
         ).build();
 
         assertEquals(0L, properties.size());
@@ -51,11 +51,11 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     @Test
-    void emptyLongProperties() {
+    void testEmptyLongProperties() {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.EMPTY,
-            DefaultValue.of(42)
+            DefaultValue.of(42L)
         ).build();
 
         assertEquals(0L, properties.size());
@@ -74,8 +74,6 @@ final class NodePropertiesFromStoreBuilderTest {
     @Test
     void returnsDefaultOnMissingEntries() {
         var expectedImplicitDefault = 42.0;
-        var expectedExplicitDefault = 1337.0;
-
         var properties = NodePropertiesFromStoreBuilder.of(2L, expectedImplicitDefault, b -> {});
 
         assertEquals(expectedImplicitDefault, properties.getDouble(2));
@@ -107,6 +105,24 @@ final class NodePropertiesFromStoreBuilderTest {
             b.set(1, Values.of(21.0));
         });
         assertEquals(2, properties.size());
+    }
+
+    @Test
+    void shouldHandleNullValues() {
+        var builder = NodePropertiesFromStoreBuilder.of(
+            100,
+            AllocationTracker.EMPTY,
+            DefaultValue.DEFAULT
+        );
+
+        builder.set(0, null);
+        builder.set(1, Values.longValue(42L));
+
+        var properties = builder.build();
+
+        assertEquals(ValueType.LONG, properties.getType());
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, properties.getLong(0L));
+        assertEquals(42L, properties.getLong(1L));
     }
 
     @Test

@@ -45,10 +45,10 @@ class DefaultValueTest {
             arguments(42, 42L),
             arguments(42L, 42L),
             arguments(42.0F, 42L),
-            arguments(Float.NaN, Long.MIN_VALUE),
+            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
             arguments(42.0D, 42L),
-            arguments(Double.NaN, Long.MIN_VALUE),
-            arguments(null, Long.MIN_VALUE)
+            arguments(DefaultValue.DOUBLE_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
+            arguments(null, DefaultValue.LONG_DEFAULT_FALLBACK)
         );
     }
 
@@ -82,12 +82,12 @@ class DefaultValueTest {
         return Stream.of(
             arguments(42, 42.0D),
             arguments(42L, 42.0D),
-            arguments(Long.MIN_VALUE, Double.NaN),
+            arguments(DefaultValue.LONG_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
             arguments(42.123F, 42.123D),
             arguments(Float.MAX_VALUE, ((Float) Float.MAX_VALUE).doubleValue()),
-            arguments(Float.NaN, Double.NaN),
+            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
             arguments(42.4242D, 42.4242D),
-            arguments(null, Double.NaN)
+            arguments(null, DefaultValue.DOUBLE_DEFAULT_FALLBACK)
         );
     }
 
