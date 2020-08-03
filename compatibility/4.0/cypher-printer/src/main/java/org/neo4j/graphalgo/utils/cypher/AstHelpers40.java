@@ -133,16 +133,10 @@ final class AstHelpers40 {
         }
         if (value instanceof CypherPrinterApi.CypherParameter) {
             String name = ((CypherPrinterApi.CypherParameter) value).name();
-            // 3.5 erroneously throws on an empty string, but we test for that
-            //  reintroduce the 3.5 bug to maintain the same "feature"
-            name.chars().iterator().nextInt();
             return parameter(name);
         }
         if (value instanceof CypherPrinterApi.CypherVariable) {
             String name = ((CypherPrinterApi.CypherVariable) value).name();
-            // 3.5 erroneously throws on an empty string, but we test for that
-            //  reintroduce the 3.5 bug to maintain the same "feature"
-            name.chars().iterator().nextInt();
             return variable(name);
         }
         if (value instanceof Iterable) {
