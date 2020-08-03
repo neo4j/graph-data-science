@@ -205,10 +205,10 @@ public final class TestGraphLoader {
             ? propertyMappings
                 .stream()
                 .map(mapping -> formatWithLocale(
-                    "COALESCE(%s.%s, %f) AS %s",
+                    "COALESCE(%s.%s, %s) AS %s",
                     entityVar,
                     mapping.neoPropertyKey(),
-                    mapping.defaultValue(),
+                    mapping.defaultValue().getObject(),
                     mapping.propertyKey()
                 ))
                 .collect(Collectors.joining(", ", ", ", ""))
@@ -227,7 +227,7 @@ public final class TestGraphLoader {
                         "COALESCE(%s.%s, %f)",
                         entityVar,
                         removeSuffix(mapping.neoPropertyKey()),
-                        mapping.defaultValue()
+                        mapping.defaultValue().getObject()
                     )
                 ),
                 mapping.propertyKey()

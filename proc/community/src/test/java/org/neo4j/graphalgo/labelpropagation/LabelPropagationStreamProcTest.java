@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -74,9 +75,9 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
         String graphCreateQuery = GdsCypher
             .call()
             .withNodeLabels("A", "B", "Ignore")
-            .withNodeProperty("id")
-            .withNodeProperty("seed")
-            .withNodeProperty("weight")
+            .withNodeProperty("id", DefaultValue.of(-1))
+            .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
+            .withNodeProperty("weight", DefaultValue.of(Double.NaN))
             .withAnyRelationshipType()
             .graphCreate("nodeFilteredGraph")
             .yields("nodeCount", "relationshipCount");

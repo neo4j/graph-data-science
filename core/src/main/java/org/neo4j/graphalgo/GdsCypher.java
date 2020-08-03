@@ -24,6 +24,7 @@ import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -160,21 +161,21 @@ public abstract class GdsCypher {
                 .build());
         }
 
-        default ImplicitCreationBuildStage withNodeProperty(String neoPropertyKey, double defaultValue) {
+        default ImplicitCreationBuildStage withNodeProperty(String neoPropertyKey, DefaultValue defaultValue) {
             return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
             String neoPropertyKey,
-            double defaultValue
+            DefaultValue defaultValue
         ) {
             return withNodeProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
-            double defaultValue,
+            DefaultValue defaultValue,
             Aggregation aggregation
         ) {
             return withNodeProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
@@ -190,7 +191,7 @@ public abstract class GdsCypher {
         default ImplicitCreationBuildStage withNodeProperty(
             String propertyKey,
             String neoPropertyKey,
-            double defaultValue,
+            DefaultValue defaultValue,
             Aggregation aggregation
         ) {
             return withNodeProperty(PropertyMapping.of(
@@ -218,21 +219,21 @@ public abstract class GdsCypher {
                 .build());
         }
 
-        default ImplicitCreationBuildStage withRelationshipProperty(String neoPropertyKey, double defaultValue) {
+        default ImplicitCreationBuildStage withRelationshipProperty(String neoPropertyKey, DefaultValue defaultValue) {
             return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
             String neoPropertyKey,
-            double defaultValue
+            DefaultValue defaultValue
         ) {
             return withRelationshipProperty(PropertyMapping.of(neoPropertyKey, defaultValue));
         }
 
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
-            double defaultValue,
+            DefaultValue defaultValue,
             Aggregation aggregation
         ) {
             return withRelationshipProperty(PropertyMapping.of(propertyKey, defaultValue, aggregation));
@@ -248,7 +249,7 @@ public abstract class GdsCypher {
         default ImplicitCreationBuildStage withRelationshipProperty(
             String propertyKey,
             String neoPropertyKey,
-            double defaultValue,
+            DefaultValue defaultValue,
             Aggregation aggregation
         ) {
             return withRelationshipProperty(PropertyMapping.of(
@@ -842,8 +843,8 @@ public abstract class GdsCypher {
         }
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(PROPERTY_KEY, neoPropertyKey);
-        double defaultValue = propertyMapping.defaultValue();
-        if (Double.compare(defaultValue, PropertyMapping.DEFAULT_FALLBACK_VALUE) != 0) {
+        Object defaultValue = propertyMapping.defaultValue().getObject();
+        if (defaultValue != null) {
             value.put(DEFAULT_VALUE_KEY, defaultValue);
         }
         Aggregation aggregation = propertyMapping.aggregation();

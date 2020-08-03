@@ -22,8 +22,8 @@ package org.neo4j.graphalgo;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -36,8 +36,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public abstract class PropertyMapping {
-
-    public static final double DEFAULT_FALLBACK_VALUE = Double.NaN;
 
     public static final String PROPERTY_KEY = "property";
     public static final String DEFAULT_VALUE_KEY = "defaultValue";
@@ -56,8 +54,8 @@ public abstract class PropertyMapping {
     }
 
     @Value.Default
-    public double defaultValue() {
-        return DEFAULT_FALLBACK_VALUE;
+    public DefaultValue defaultValue() {
+        return DefaultValue.DEFAULT;
     }
 
     @Value.Default
@@ -106,23 +104,10 @@ public abstract class PropertyMapping {
                 ));
             }
 
-            final Object defaultPropertyValue = relPropertyMap.get(DEFAULT_VALUE_KEY);
-            double defaultProperty;
-            if (defaultPropertyValue == null) {
-                defaultProperty = HugeGraph.NO_PROPERTY_VALUE;
-            } else if (defaultPropertyValue instanceof Number) {
-                defaultProperty = ((Number) defaultPropertyValue).doubleValue();
-            } else {
-                throw new IllegalStateException(formatWithLocale(
-                    "Expected the value of '%s' to be of type double, but was '%s'",
-                    DEFAULT_VALUE_KEY, defaultPropertyValue.getClass().getSimpleName()
-                ));
-            }
-
             return PropertyMapping.of(
                 propertyKey,
                 neoPropertyKey,
-                defaultProperty,
+                relPropertyMap.get(DEFAULT_VALUE_KEY),
                 aggregation
             );
         } else {
@@ -145,7 +130,7 @@ public abstract class PropertyMapping {
     public Map.Entry<String, Object> toObject(boolean includeAggregation) {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(PROPERTY_KEY, neoPropertyKey());
-        value.put(DEFAULT_VALUE_KEY, defaultValue());
+        value.put(DEFAULT_VALUE_KEY, defaultValue().getObject());
         if (includeAggregation) {
             value.put(RelationshipProjection.AGGREGATION_KEY, aggregation().name());
         }
@@ -169,32 +154,32 @@ public abstract class PropertyMapping {
     /**
      * Creates a PropertyMapping. The given property key is also used for internal reference.
      */
-    public static PropertyMapping of(String neoPropertyKey, double defaultValue) {
+    public static PropertyMapping of(String neoPropertyKey, Object defaultValue) {
         return ImmutablePropertyMapping
             .builder()
             .propertyKey(neoPropertyKey)
-            .defaultValue(defaultValue)
+            .defaultValue(DefaultValue.of(defaultValue))
             .build();
     }
 
-    public static PropertyMapping of(String propertyKey, String neoPropertyKey, double defaultValue) {
+    public static PropertyMapping of(String propertyKey, String neoPropertyKey, Object defaultValue) {
         return ImmutablePropertyMapping
             .builder()
             .propertyKey(propertyKey)
             .neoPropertyKey(neoPropertyKey)
-            .defaultValue(defaultValue)
+            .defaultValue(DefaultValue.of(defaultValue))
             .build();
     }
 
     public static PropertyMapping of(
         String propertyKey,
-        double defaultValue,
+        Object defaultValue,
         Aggregation aggregation
     ) {
         return ImmutablePropertyMapping
             .builder()
             .propertyKey(propertyKey)
-            .defaultValue(defaultValue)
+            .defaultValue(DefaultValue.of(defaultValue))
             .aggregation(aggregation)
             .build();
     }
@@ -226,9 +211,9 @@ public abstract class PropertyMapping {
     public static PropertyMapping of(
         String propertyKey,
         String neoPropertyKey,
-        double defaultValue,
+        Object defaultValue,
         Aggregation aggregation
     ) {
-        return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, defaultValue, aggregation);
+        return ImmutablePropertyMapping.of(propertyKey, neoPropertyKey, DefaultValue.of(defaultValue), aggregation);
     }
 }

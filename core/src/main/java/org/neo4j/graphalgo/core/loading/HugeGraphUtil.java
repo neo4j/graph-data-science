@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
@@ -211,7 +212,7 @@ public final class HugeGraphUtil {
                 .orientation(orientation);
 
             if (loadRelationshipProperty) {
-                projectionBuilder.addProperty(DUMMY_PROPERTY, DUMMY_PROPERTY, Double.NaN, aggregation);
+                projectionBuilder.addProperty(DUMMY_PROPERTY, DUMMY_PROPERTY, DefaultValue.DEFAULT, aggregation);
             }
 
             this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(

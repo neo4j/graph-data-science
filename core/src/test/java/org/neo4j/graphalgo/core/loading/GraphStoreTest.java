@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.Relationships;
@@ -261,8 +262,8 @@ class GraphStoreTest extends BaseTest {
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property1", "property1", 42D, Aggregation.NONE)
-                    .addMapping("property2", "property2", 1337D, Aggregation.NONE)
+                    .addMapping("property1", "property1", DefaultValue.of(42D), Aggregation.NONE)
+                    .addMapping("property2", "property2", DefaultValue.of(1337D), Aggregation.NONE)
                     .build()
             ).build();
 
@@ -272,7 +273,7 @@ class GraphStoreTest extends BaseTest {
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property1", "property1", 42D, Aggregation.NONE)
+                    .addMapping("property1", "property1", DefaultValue.of(42D), Aggregation.NONE)
                     .build()
             ).build();
 
@@ -282,7 +283,7 @@ class GraphStoreTest extends BaseTest {
             .aggregation(Aggregation.NONE)
             .properties(
                 PropertyMappings.builder()
-                    .addMapping("property2", "property2", 42D, Aggregation.NONE)
+                    .addMapping("property2", "property2", DefaultValue.of(42D), Aggregation.NONE)
                     .build()
             ).build();
 

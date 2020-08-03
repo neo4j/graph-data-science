@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.LinkedHashMap;
@@ -88,7 +89,7 @@ public abstract class ElementProjection {
         default Self addProperty(
             @Nullable String propertyKey,
             @Nullable String neoPropertyKey,
-            double defaultValue
+            DefaultValue defaultValue
         ) {
             return this.addProperty(propertyKey, neoPropertyKey, defaultValue, Aggregation.DEFAULT);
         }
@@ -96,7 +97,7 @@ public abstract class ElementProjection {
         default Self addProperty(
             @Nullable String propertyKey,
             @Nullable String neoPropertyKey,
-            double defaultValue,
+            DefaultValue defaultValue,
             Aggregation aggregation
         ) {
             inlineBuilder()

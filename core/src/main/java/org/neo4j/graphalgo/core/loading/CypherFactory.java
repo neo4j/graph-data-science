@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
@@ -256,7 +257,7 @@ public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateF
             return LongStream
                 .range(0, propertyCount())
                 .boxed()
-                .map(property -> PropertyMapping.of(property.toString(), 0))
+                .map(property -> PropertyMapping.of(property.toString(), DefaultValue.DEFAULT))
                 .collect(Collectors.toList());
         }
 

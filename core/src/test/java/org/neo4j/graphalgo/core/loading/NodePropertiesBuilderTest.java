@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.values.storable.Values;
 
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -40,7 +42,7 @@ final class NodePropertyArrayTest {
             100_000,
             ValueType.DOUBLE,
             AllocationTracker.EMPTY,
-            -1
+            DefaultValue.of(42.0)
         ).build();
 
         assertEquals(0L, properties.size());
@@ -54,7 +56,7 @@ final class NodePropertyArrayTest {
             100_000,
             ValueType.LONG,
             AllocationTracker.EMPTY,
-            -1
+            DefaultValue.of(42)
         ).build();
 
         assertEquals(0L, properties.size());
@@ -113,7 +115,7 @@ final class NodePropertyArrayTest {
     void threadSafety() throws InterruptedException {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
-        var builder = NodePropertiesBuilder.of(nodeSize, ValueType.DOUBLE, AllocationTracker.EMPTY, Double.NaN);
+        var builder = NodePropertiesBuilder.of(nodeSize, AllocationTracker.EMPTY, DefaultValue.of(Double.NaN));
 
         var phaser = new Phaser(3);
         pool.execute(() -> {

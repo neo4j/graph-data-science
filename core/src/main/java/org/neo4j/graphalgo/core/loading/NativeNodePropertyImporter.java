@@ -207,7 +207,7 @@ public final class NativeNodePropertyImporter {
                     builders.putIfAbsent(nodeLabel, new HashMap<>());
                     for (PropertyMapping propertyMapping : propertyMappings) {
                         NodePropertiesBuilder builder = NodePropertiesBuilder.of(
-                            nodeCount, ValueType.DOUBLE, tracker, propertyMapping.defaultValue()
+                            nodeCount, tracker, propertyMapping.defaultValue()
                         );
                         builders.get(nodeLabel).put(propertyMapping, builder);
                     }

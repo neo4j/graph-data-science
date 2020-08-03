@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -325,12 +326,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                 RelationshipProjection
                     .builder()
                     .type(rel1.name)
-                    .addProperty(prop1, prop1, Double.NaN)
+                    .addProperty(prop1, prop1, DefaultValue.of(Double.NaN))
                     .build(),
                 RelationshipProjection
                     .builder()
                     .type(rel2.name)
-                    .addProperty(prop2, prop2, Double.NaN)
+                    .addProperty(prop2, prop2, DefaultValue.of(Double.NaN))
                     .build()
             ).build().graphStore();
 

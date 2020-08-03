@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -38,7 +39,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 
 public class CypherNodePropertyImporter {
 
-    public static final double NO_PROPERTY_VALUE = Double.NaN;
+    public static final DefaultValue NO_PROPERTY_VALUE = DefaultValue.DEFAULT;
 
     private final Collection<String> propertyColumns;
     private final long nodeCount;
@@ -106,7 +107,7 @@ public class CypherNodePropertyImporter {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), Double.NaN),
+                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), DefaultValue.of(Double.NaN)),
                     builderEntry -> builderEntry.getValue().build()
                 ))
             ));

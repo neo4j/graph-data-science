@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.SettingImpl;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
@@ -126,7 +127,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", 1.0D)
+            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
             .algo("gds.alpha.spanningTree")
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())
@@ -155,7 +156,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("TYPE", Orientation.UNDIRECTED)
-            .withRelationshipProperty("cost", 1.0D)
+            .withRelationshipProperty("cost", DefaultValue.of(1.0D))
             .algo("gds.alpha.spanningTree.maximum")
             .writeMode()
             .addParameter("startNodeId", getStartNodeId())

@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
@@ -232,7 +233,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .withNodeProperty("labelPropagation")
             .withRelationshipType("TYPE")
             .withRelationshipType("SIMILAR_TO")
-            .withRelationshipProperty("similarity", 1.0)
+            .withRelationshipProperty("similarity", DefaultValue.of(1.0))
             .graphCreate(TEST_GRAPH)
             .yields()
         );

@@ -107,7 +107,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         propertyDefaultValueByName = new ObjectDoubleHashMap<>(numberOfMappings);
         propertyMappings
             .stream()
-            .forEach(mapping -> propertyDefaultValueByName.put(mapping.neoPropertyKey(), mapping.defaultValue()));
+            .forEach(mapping -> propertyDefaultValueByName.put(
+                mapping.neoPropertyKey(),
+                mapping.defaultValue().getDouble()
+            ));
 
         // We can not rely on what the token store gives us.
         // We need to resolve the given property mappings
@@ -123,7 +126,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
         importProperties = !propertyMappings.isEmpty();
         propertyKeyIds = newDimensions.relationshipPropertyTokens().values().stream().mapToInt(i -> i).toArray();
-        propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(PropertyMapping::defaultValue).toArray();
+        propertyDefaultValues = propertyMappings.mappings().stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().getDouble()).toArray();
         aggregations = propertyMappings.mappings().stream().map(PropertyMapping::aggregation).toArray(Aggregation[]::new);
         if (propertyMappings.isEmpty()) {
             aggregations = new Aggregation[]{ Aggregation.NONE };

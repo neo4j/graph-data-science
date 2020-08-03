@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
@@ -80,7 +81,7 @@ public class DeleteRelationshipsIntegrationTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperty("nodeId")
             .withRelationshipType("TYPE")
-            .withRelationshipProperty("p", 2.0)
+            .withRelationshipProperty("p", DefaultValue.of(2.0))
             .graphCreate(TEST_GRAPH2)
             .yields());
     }

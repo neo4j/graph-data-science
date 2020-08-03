@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
@@ -60,7 +61,7 @@ class NodePropertyExporterTest extends BaseTest {
     @Test
     void exportSingleNodeProperty() {
         Graph graph = new StoreLoaderBuilder().api(db)
-            .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
 
@@ -70,8 +71,8 @@ class NodePropertyExporterTest extends BaseTest {
         exporter.write("newProp1",  (LongNodeProperties) (long nodeId) -> intData[(int) nodeId]);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
-            .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
-            .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
+            .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
             .build()
             .graph();
 
@@ -91,8 +92,8 @@ class NodePropertyExporterTest extends BaseTest {
     @Test
     void exportMultipleNodeProperties() {
         Graph graph = new StoreLoaderBuilder().api(db)
-            .addNodeProperty("newProp1", "prop1", 42.0, Aggregation.NONE)
-            .addNodeProperty("newProp2", "prop2", 42.0, Aggregation.NONE)
+            .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty("newProp2", "prop2", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
 
@@ -109,9 +110,9 @@ class NodePropertyExporterTest extends BaseTest {
         exporter.write(nodeProperties);
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
-            .addNodeProperty("prop1", "prop1", 42.0, Aggregation.NONE)
-            .addNodeProperty("newProp1", "newProp1", 42.0, Aggregation.NONE)
-            .addNodeProperty("newProp2", "newProp2", 42.0, Aggregation.NONE)
+            .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
+            .addNodeProperty("newProp2", "newProp2", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
 

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -120,7 +121,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements MutateNo
         runQuery(writeQuery);
 
         var updatedGraph = new StoreLoaderBuilder().api(db)
-            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
+            .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
 

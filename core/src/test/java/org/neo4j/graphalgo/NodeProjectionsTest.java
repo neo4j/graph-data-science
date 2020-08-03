@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.DefaultValue;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -77,8 +78,8 @@ class NodeProjectionsTest {
                 .label("A")
                 .properties(PropertyMappings
                     .builder()
-                    .addMapping(PropertyMapping.of("prop1", Double.NaN))
-                    .addMapping(PropertyMapping.of("prop2", Double.NaN))
+                    .addMapping(PropertyMapping.of("prop1", DefaultValue.DEFAULT))
+                    .addMapping(PropertyMapping.of("prop2", DefaultValue.DEFAULT))
                     .build()
                 )
                 .build()

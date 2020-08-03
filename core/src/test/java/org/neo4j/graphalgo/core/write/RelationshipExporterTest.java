@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -85,7 +86,7 @@ class RelationshipExporterTest extends BaseTest {
                 "NEW_REL",
                 RelationshipProjection.of("BARFOO", Orientation.NATURAL)
             )
-            .addRelationshipProperty("newWeight", "weight2", 0, Aggregation.NONE)
+            .addRelationshipProperty("newWeight", "weight2", DefaultValue.of(0), Aggregation.NONE)
             .build()
             .graphStore();
 

@@ -63,13 +63,13 @@ class PropertyMappingsTest {
         assertEquals(totalUsdMapping.propertyKey(), "total_usd");
         assertEquals(totalUsdMapping.neoPropertyKey(), "usd");
         assertEquals(totalUsdMapping.aggregation(), Aggregation.MIN);
-        assertEquals(totalUsdMapping.defaultValue(), 42.0);
+        assertEquals(totalUsdMapping.defaultValue().getDouble(), 42.0);
 
         PropertyMapping transactionCountMapping = mappingIterator.next();
         assertEquals(transactionCountMapping.propertyKey(), "transaction_count");
         assertEquals(transactionCountMapping.neoPropertyKey(), "usd");
         assertEquals(transactionCountMapping.aggregation(), Aggregation.SUM);
-        assertEquals(transactionCountMapping.defaultValue(), HugeGraph.NO_PROPERTY_VALUE);
+        assertEquals(transactionCountMapping.defaultValue().getDouble(), HugeGraph.NO_PROPERTY_VALUE);
     }
 
     @Test

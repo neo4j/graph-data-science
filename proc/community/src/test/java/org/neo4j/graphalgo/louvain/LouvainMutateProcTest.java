@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -142,8 +143,8 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         var updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeLabel("Node")
             .globalOrientation(Orientation.UNDIRECTED)
-            .addNodeProperty(mutateProperty(), mutateProperty(), 42.0, Aggregation.NONE)
-            .addNodeProperty("seed", "seed", 42.0, Aggregation.NONE)
+            .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
+            .addNodeProperty("seed", "seed", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
 

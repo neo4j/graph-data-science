@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -489,14 +490,14 @@ class GraphCreateProcTest extends BaseProcTest {
                             "weight", map(
                                 "property", "weight",
                                 AGGREGATION_KEY, aggregation,
-                                "defaultValue", Double.NaN
+                                "defaultValue", null
                             ),
                             "foo", map(
                                 "property", "weight",
                                 AGGREGATION_KEY, Optional.of(aggregation)
                                     .filter(a -> a.equals("NONE"))
                                     .orElse("MAX"),
-                                "defaultValue", Double.NaN
+                                "defaultValue", null
                             )
                         )
                     )
@@ -539,7 +540,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     PROPERTIES_KEY, map("weight", map(
                         "property", "weight",
                         AGGREGATION_KEY, aggregation,
-                        "defaultValue", Double.NaN)
+                        "defaultValue", null)
                     ))
                 ),
                 "nodeCount", 2L,
@@ -578,7 +579,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RelationshipProjection.builder()
                     .type("KNOWS")
                     .orientation(Orientation.NATURAL)
-                    .addProperty("weight", "weight", Double.NaN, Aggregation.lookup(aggregation))
+                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), Aggregation.lookup(aggregation))
                     .build()
             )
             .graphCreate(standard)
@@ -646,7 +647,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     "weight", map(
                         "property", "weight",
                             AGGREGATION_KEY, "SINGLE",
-                            "defaultValue", Double.NaN)
+                            "defaultValue", null)
                 ))
             ),
             "nodeCount", 2L,
@@ -668,7 +669,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     "label", "A",
                     "properties", map(
                         "age", map(
-                            "defaultValue", 1.0,
+                            "defaultValue", 1,
                             "property", "age"
                         )
                     )
@@ -885,7 +886,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("agg", "property", Double.NaN, aggregation)
+            .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
             .graphCreate("g")
             .yields();
@@ -913,7 +914,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("agg", "property", Double.NaN, aggregation)
+            .withRelationshipProperty("agg", "property", DefaultValue.of(Double.NaN), aggregation)
             .withRelationshipType("TYPE")
             .graphCreate("g")
             .yields();
@@ -940,7 +941,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("agg", "property", 42, aggregation)
+            .withRelationshipProperty("agg", "property", DefaultValue.of(42), aggregation)
             .withRelationshipType("TYPE")
             .graphCreate("g")
             .yields();
@@ -967,7 +968,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("count", "*", 42, Aggregation.COUNT)
+            .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
             .withRelationshipType("TYPE_1")
             .graphCreate("countGraph")
             .yields("relationshipProjection");
@@ -982,7 +983,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
             assertEquals("*", countParams.get("property").toString());
             assertEquals("COUNT", countParams.get("aggregation").toString());
-            assertEquals(42.0, (Double) countParams.get("defaultValue"));
+            assertEquals(42L, countParams.get("defaultValue"));
 
         });
 
@@ -1007,7 +1008,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("count", "foo", 42, Aggregation.COUNT)
+            .withRelationshipProperty("count", "foo", DefaultValue.of(42L), Aggregation.COUNT)
             .withRelationshipType("TYPE")
             .graphCreate("countGraph")
             .yields("relationshipProjection");
@@ -1022,7 +1023,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
             assertEquals("foo", countParams.get("property").toString());
             assertEquals("COUNT", countParams.get("aggregation").toString());
-            assertEquals(42.0, (Double) countParams.get("defaultValue"));
+            assertEquals(42L, countParams.get("defaultValue"));
 
         });
 
@@ -1047,8 +1048,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty("count", "*", 42, Aggregation.COUNT)
-            .withRelationshipProperty("foo", "foo", 42, Aggregation.SUM)
+            .withRelationshipProperty("count", "*", DefaultValue.of(42), Aggregation.COUNT)
+            .withRelationshipProperty("foo", "foo", DefaultValue.of(42), Aggregation.SUM)
             .withRelationshipType("TYPE_1")
             .graphCreate("countGraph")
             .yields("relationshipProjection");
@@ -1062,12 +1063,12 @@ class GraphCreateProcTest extends BaseProcTest {
             Map<String, Object> countParams = (Map<String, Object>) relProperties.get("count");
             assertEquals("*", countParams.get("property").toString());
             assertEquals("COUNT", countParams.get("aggregation").toString());
-            assertEquals(42.0, (Double) countParams.get("defaultValue"));
+            assertEquals(42L, countParams.get("defaultValue"));
 
             Map<String, Object> fooParams = (Map<String, Object>) relProperties.get("foo");
             assertEquals("foo", fooParams.get("property").toString());
             assertEquals("SUM", fooParams.get("aggregation").toString());
-            assertEquals(42.0, (Double) fooParams.get("defaultValue"));
+            assertEquals(42L, fooParams.get("defaultValue"));
 
         });
 
@@ -1445,7 +1446,7 @@ class GraphCreateProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 map("age", map("property", "age")),
-                map("age", map("property", "age", "defaultValue", Double.NaN))
+                map("age", map("property", "age", "defaultValue", null))
             ),
             Arguments.of(
                 map("weight", map("property", "age", "defaultValue", 3D)),
@@ -1457,7 +1458,7 @@ class GraphCreateProcTest extends BaseProcTest {
             ),
             Arguments.of(
                 map("weight", "age"),
-                map("weight", map("property", "age", "defaultValue", Double.NaN))
+                map("weight", map("property", "age", "defaultValue", null))
             )
         );
     }
@@ -1471,7 +1472,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map("property",
                         "weight",
                         "defaultValue",
-                        Double.NaN,
+                        null,
                         AGGREGATION_KEY,
                         "DEFAULT"
                     )
@@ -1491,7 +1492,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map("property",
                         "weight",
                         "defaultValue",
-                        Double.NaN,
+                        null,
                         AGGREGATION_KEY,
                         "DEFAULT"
                     )
@@ -1504,7 +1505,7 @@ class GraphCreateProcTest extends BaseProcTest {
                     map("property",
                         "weight",
                         "defaultValue",
-                        Double.NaN,
+                        null,
                         AGGREGATION_KEY,
                         "DEFAULT"
                     )

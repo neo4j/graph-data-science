@@ -24,6 +24,7 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -209,7 +210,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             .addRelationshipType("Type")
             .addRelationshipProjection(RelationshipProjection.builder()
                 .type("Ignore")
-                .addProperty("foo", "foo", 0)
+                .addProperty("foo", "foo", DefaultValue.of(0))
                 .build()
             ).build();
 

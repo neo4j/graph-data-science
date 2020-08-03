@@ -23,6 +23,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
@@ -141,8 +142,8 @@ class GraphCreateConfigBuildersTest {
                 new StoreConfigBuilder()
                     .addNodeLabel("Foo")
                     .addRelationshipType("BAR")
-                    .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", 23.0D)))
-                    .relationshipProperties(Collections.singletonList(PropertyMapping.of("rProp", 42.0D)))
+                    .nodeProperties(Collections.singletonList(PropertyMapping.of("nProp", DefaultValue.of(23.0D))))
+                    .relationshipProperties(Collections.singletonList(PropertyMapping.of("rProp", DefaultValue.of(42.0D))))
                     .build(),
                 ImmutableGraphCreateFromStoreConfig.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.builder()
@@ -150,7 +151,7 @@ class GraphCreateConfigBuildersTest {
                             NodeLabel.of("Foo"),
                             NodeProjection.builder()
                                 .label("Foo")
-                                .addProperty(PropertyMapping.of("nProp", 23.0D))
+                                .addProperty(PropertyMapping.of("nProp", DefaultValue.of(23.0D)))
                                 .build())
                         .build())
                     .relationshipProjections(RelationshipProjections.builder()
@@ -158,7 +159,7 @@ class GraphCreateConfigBuildersTest {
                             RelationshipType.of("BAR"),
                             RelationshipProjection.builder()
                                 .type("BAR")
-                                .addProperty(PropertyMapping.of("rProp", 42.0D))
+                                .addProperty(PropertyMapping.of("rProp", DefaultValue.of(42.0D)))
                                 .build()
                         )
                         .build())

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 
@@ -50,7 +51,7 @@ class PropertyMappingTest {
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "usd");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
-        assertEquals(propertyMapping.defaultValue(), 42.0);
+        assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }
 
     @Test
@@ -64,7 +65,7 @@ class PropertyMappingTest {
         assertEquals(propertyMapping.propertyKey(), "transaction_count");
         assertEquals(propertyMapping.neoPropertyKey(), "transaction_count");
         assertEquals(propertyMapping.aggregation(), Aggregation.MIN);
-        assertEquals(propertyMapping.defaultValue(), 42.0);
+        assertEquals(propertyMapping.defaultValue(), DefaultValue.of(42.0));
     }
 
     @Test

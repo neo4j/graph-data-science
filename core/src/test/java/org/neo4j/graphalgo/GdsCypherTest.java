@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.cypher.internal.evaluator.EvaluationException;
 import org.neo4j.cypher.internal.evaluator.Evaluator;
 import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
@@ -143,14 +144,14 @@ class GdsCypherTest {
 
         NodeProjection fooNode = NodeProjection.builder()
             .label("Foo")
-            .addProperty("nodeProp", "NodePropertyName", 42.1337)
+            .addProperty("nodeProp", "NodePropertyName", DefaultValue.of(42.1337))
             .build();
 
         RelationshipProjection barRel = RelationshipProjection.builder()
             .type("Bar")
             .orientation(Orientation.UNDIRECTED)
             .aggregation(Aggregation.SINGLE)
-            .addProperty("relProp", "RelationshipPropertyName", 1337, Aggregation.MAX)
+            .addProperty("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
             .build();
 
         GraphCreateFromStoreConfig configFromBuilder = ImmutableGraphCreateFromStoreConfig

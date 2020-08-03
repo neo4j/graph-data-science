@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -79,7 +80,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
                             .type("AGGREGATE")
                             .orientation(Orientation.UNDIRECTED)
                             .aggregation(Aggregation.SUM)
-                            .addProperty("prop", "prop", 0.0)
+                            .addProperty("prop", "prop", DefaultValue.of(0.0))
                             .build()
                     )
                     .build();

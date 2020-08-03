@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Collections;
@@ -45,7 +46,7 @@ class GraphCreateConfigFromStoreTest {
     @Test
     void testThrowOnOverlappingNodeProperties() {
         PropertyMappings propertyMappings = PropertyMappings.builder()
-            .addMapping("duplicate", "foo", 0.0, Aggregation.NONE)
+            .addMapping("duplicate", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
@@ -67,7 +68,7 @@ class GraphCreateConfigFromStoreTest {
     @Test
     void testThrowOnOverlappingRelProperties() {
         PropertyMappings propertyMappings = PropertyMappings.builder()
-            .addMapping("duplicate", "foo", 0.0, Aggregation.NONE)
+            .addMapping("duplicate", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         RelationshipProjections relProjections = RelationshipProjections.single(
@@ -94,11 +95,11 @@ class GraphCreateConfigFromStoreTest {
     @Test
     void testMergingOfNodePropertiesAndProjections() {
         PropertyMappings propertyMappings1 = PropertyMappings.builder()
-            .addMapping("foo", "foo", 0.0, Aggregation.NONE)
+            .addMapping("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         PropertyMappings propertyMappings2 = PropertyMappings.builder()
-            .addMapping("bar", "foo", 0.0, Aggregation.NONE)
+            .addMapping("bar", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         NodeProjections nodeProjections = NodeProjections.create(Collections.singletonMap(
@@ -121,11 +122,11 @@ class GraphCreateConfigFromStoreTest {
     @Test
     void testMergingOfRelationshipPropertiesAndProjections() {
         PropertyMappings propertyMappings1 = PropertyMappings.builder()
-            .addMapping("foo", "foo", 0.0, Aggregation.NONE)
+            .addMapping("foo", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         PropertyMappings propertyMappings2 = PropertyMappings.builder()
-            .addMapping("bar", "foo", 0.0, Aggregation.NONE)
+            .addMapping("bar", "foo", DefaultValue.of(0.0), Aggregation.NONE)
             .build();
 
         RelationshipProjections relProjections = RelationshipProjections.single(

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.io.PrintWriter;
@@ -90,12 +91,11 @@ final class CypherExporterTest extends BaseTest {
     private String dumpGraph() {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
-            .addNodeProperty(PropertyMapping.of("property", 42))
-            .addRelationshipProperty(PropertyMapping.of("property", 42))
+            .addNodeProperty(PropertyMapping.of("property", DefaultValue.of(42)))
+            .addRelationshipProperty(PropertyMapping.of("property", DefaultValue.of(42)))
             .build()
             .graph();
-
-
+        
         StringWriter output = new StringWriter();
         CypherExporter.export(new PrintWriter(output), graph);
         return output.toString().trim();
