@@ -122,22 +122,22 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         assertCypherResult(graphWriteQuery, asList(
             map("id", 0L, "nodeProperty", "newNodeProp1", "propertyValue", 0D),
-            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42D),
+            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42L),
 
             map("id", 1L, "nodeProperty", "newNodeProp1", "propertyValue", 1D),
-            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43D),
+            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
 
             map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
-            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44D),
+            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L),
 
             map("id", 3L, "nodeProperty", "newNodeProp1", "propertyValue", 3D),
-            map("id", 3L, "nodeProperty", "newNodeProp2", "propertyValue", 45D),
+            map("id", 3L, "nodeProperty", "newNodeProp2", "propertyValue", 45L),
 
             map("id", 4L, "nodeProperty", "newNodeProp1", "propertyValue", 4D),
-            map("id", 4L, "nodeProperty", "newNodeProp2", "propertyValue", 46D),
+            map("id", 4L, "nodeProperty", "newNodeProp2", "propertyValue", 46L),
 
             map("id", 5L, "nodeProperty", "newNodeProp1", "propertyValue", 5D),
-            map("id", 5L, "nodeProperty", "newNodeProp2", "propertyValue", 47D)
+            map("id", 5L, "nodeProperty", "newNodeProp2", "propertyValue", 47L)
         ));
     }
 
@@ -155,11 +155,11 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         assertCypherResult(graphWriteQuery, asList(
             map("id", 0L, "nodeProperty", "newNodeProp1", "propertyValue", 0D),
-            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42D),
+            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42L),
             map("id", 1L, "nodeProperty", "newNodeProp1", "propertyValue", 1D),
-            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43D),
+            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
             map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
-            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44D)
+            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L)
         ));
     }
 
@@ -176,11 +176,11 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 
         assertCypherResult(graphWriteQuery, asList(
             map("id", 0L, "nodeProperty", "newNodeProp1", "propertyValue", 0D),
-            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42D),
+            map("id", 0L, "nodeProperty", "newNodeProp2", "propertyValue", 42L),
             map("id", 1L, "nodeProperty", "newNodeProp1", "propertyValue", 1D),
-            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43D),
+            map("id", 1L, "nodeProperty", "newNodeProp2", "propertyValue", 43L),
             map("id", 2L, "nodeProperty", "newNodeProp1", "propertyValue", 2D),
-            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44D)
+            map("id", 2L, "nodeProperty", "newNodeProp2", "propertyValue", 44L)
         ));
     }
 
@@ -284,9 +284,9 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         );
 
         assertCypherResult(graphWriteQuery, asList(
-            map("id", 0L, "propertyValue", 42D),
-            map("id", 1L, "propertyValue", 43D),
-            map("id", 2L, "propertyValue", 44D)
+            map("id", 0L, "propertyValue", 42L),
+            map("id", 1L, "propertyValue", 43L),
+            map("id", 2L, "propertyValue", 44L)
         ));
     }
 

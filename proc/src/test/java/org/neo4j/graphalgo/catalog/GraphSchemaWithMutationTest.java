@@ -63,7 +63,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Float", "baz", "Integer")),
+                    "nodes", map("A", map("foo", "Integer", "baz", "Integer")),
                     "relationships", map("REL", map("bar", "Float"))
                 )
             )
@@ -80,7 +80,7 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
                 map(
                     "schema",
                     map("nodes",
-                        map("A", map("foo", "Float")),
+                        map("A", map("foo", "Integer")),
                         "relationships",
                         map("BOO", map("faz", "Float"),
                             "REL", map("bar", "Float"))

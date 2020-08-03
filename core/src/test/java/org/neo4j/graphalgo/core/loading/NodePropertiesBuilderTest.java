@@ -34,13 +34,13 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class NodePropertyArrayTest {
+// TODO Write more tests!
+final class NodePropertiesBuilderTest {
 
     @Test
     void emptyDoubleProperties() {
         var properties = NodePropertiesBuilder.of(
             100_000,
-            ValueType.DOUBLE,
             AllocationTracker.EMPTY,
             DefaultValue.of(42.0)
         ).build();
@@ -54,7 +54,6 @@ final class NodePropertyArrayTest {
     void emptyLongProperties() {
         var properties = NodePropertiesBuilder.of(
             100_000,
-            ValueType.LONG,
             AllocationTracker.EMPTY,
             DefaultValue.of(42)
         ).build();
@@ -66,7 +65,7 @@ final class NodePropertyArrayTest {
 
     @Test
     void returnsValuesThatHaveBeenSet() {
-        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, 1.0));
+        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
         assertEquals(1.0, properties.getDouble(1));
         assertEquals(1.0, properties.getDouble(1, 42.0));
@@ -77,15 +76,14 @@ final class NodePropertyArrayTest {
         var expectedImplicitDefault = 42.0;
         var expectedExplicitDefault = 1337.0;
 
-        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, expectedImplicitDefault, b -> {});
+        var properties = NodePropertiesBuilder.of(2L, expectedImplicitDefault, b -> {});
 
         assertEquals(expectedImplicitDefault, properties.getDouble(2));
-        assertEquals(expectedExplicitDefault, properties.getDouble(2, expectedExplicitDefault));
     }
 
     @Test
     void returnNaNIfItWasSet() {
-        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 42.0, b -> b.set(1, Double.NaN));
+        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
 
         assertEquals(42.0, properties.getDouble(0));
         assertEquals(Double.NaN, properties.getDouble(1));
@@ -93,9 +91,9 @@ final class NodePropertyArrayTest {
 
     @Test
     void trackMaxValue() {
-        var properties = NodePropertiesBuilder.of(2L, ValueType.LONG, 0.0, b -> {
-            b.set(0, 42);
-            b.set(1, 21);
+        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+            b.set(0, Values.of(42));
+            b.set(1, Values.of(21));
         });
         var maxPropertyValue = properties.getMaxLongPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
@@ -104,9 +102,9 @@ final class NodePropertyArrayTest {
 
     @Test
     void hasSize() {
-        var properties = NodePropertiesBuilder.of(2L, ValueType.DOUBLE, 0.0, b -> {
-            b.set(0, 42.0);
-            b.set(1, 21.0);
+        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+            b.set(0, Values.of(42.0));
+            b.set(1, Values.of(21.0));
         });
         assertEquals(2, properties.size());
     }
@@ -126,7 +124,7 @@ final class NodePropertyArrayTest {
             // that value, while the other thread will write 2^42 in the meantime. If that happens,
             // this thread would overwrite a new maxValue.
             for (int i = 0; i < nodeSize; i += 2) {
-                builder.set(i, i == 1338 ? 0x1p41 : 2.0);
+                builder.set(i, Values.of(i == 1338 ? 0x1p41 : 2.0));
             }
         });
         pool.execute(() -> {
@@ -135,7 +133,7 @@ final class NodePropertyArrayTest {
             // second task, sets the value 1 on every other node, except for 1337 which is set to 2^42
             // Depending on thread scheduling, the write for 2^42 might be overwritten by the first thread
             for (int i = 1; i < nodeSize; i += 2) {
-                builder.set(i, i == 1337 ? 0x1p42 : 1.0);
+                builder.set(i, Values.of(i == 1337 ? 0x1p42 : 1.0));
             }
         });
 
@@ -147,16 +145,16 @@ final class NodePropertyArrayTest {
         var properties = builder.build();
         for (int i = 0; i < nodeSize; i++) {
             var expected = i == 1338 ? 0x1p41 : i == 1337 ? 0x1p42 : i % 2 == 0 ? 2.0 : 1.0;
-            assertEquals(expected, properties.getDouble(i));
+            assertEquals(expected, properties.getDouble(i), "" + i);
         }
         assertEquals(nodeSize, properties.size());
-        var maxPropertyValue = properties.getMaxLongPropertyValue();
+        var maxPropertyValue = properties.getMaxDoublePropertyValue();
         assertTrue(maxPropertyValue.isPresent());
 
         // If write were correctly ordered, this is always true
         // If, however, the write to maxValue were to be non-atomic
         // e.g. `this.maxValue = Math.max(value, this.maxValue);`
         // this would occasionally be 2^41.
-        assertEquals(1L << 42, maxPropertyValue.getAsLong());
+        assertEquals(1L << 42, maxPropertyValue.getAsDouble());
     }
 }

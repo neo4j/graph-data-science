@@ -23,6 +23,7 @@ import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphdb.Result;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long rows;
     private long maxNeoId = 0;
     private final NodesBatchBuffer buffer;
-    private final List<Map<String, Number>> cypherNodeProperties;
+    private final List<Map<String, Value>> cypherNodeProperties;
     private final HugeNodeImporter importer;
     private final boolean hasLabelInformation;
     private final CypherNodePropertyImporter propertyImporter;
@@ -140,13 +141,13 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private int processProperties(Result.ResultRow row, List<String> labels) {
         propertyImporter.registerPropertiesForLabels(labels);
 
-        Map<String, Number> propertyValues = new HashMap<>();
+        Map<String, Value> propertyValues = new HashMap<>();
         for (String propertyKey : propertyImporter.propertyColumns()) {
             Object value = CypherLoadingUtils.getProperty(row, propertyKey);
             if (value instanceof Number) {
-                propertyValues.put(propertyKey, (Number) value);
+                propertyValues.put(propertyKey, Values.of(value));
             } else if (null == value) {
-                propertyValues.put(propertyKey, Double.NaN);
+                propertyValues.put(propertyKey, null);
             } else {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported type [%s] of value %s. Please use a numeric property.",

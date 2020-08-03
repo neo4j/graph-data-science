@@ -90,9 +90,9 @@ class CypherFactoryTest extends BaseTest {
         );
 
         assertGraphEquals(fromGdl(
-            "(a {partition: 6.0, foo: 5.0})" +
-            "(b {partition: 0.0, foo: 4.0})" +
-            "(c {partition: 0.0, foo: 5.0})" +
+            "(a {partition: 6, foo: 5.0})" +
+            "(b {partition: 0, foo: 4.0})" +
+            "(c {partition: 0, foo: 5.0})" +
             "(a)-[{w:1.0}]->(b)" +
             "(a)-[{w:3.0}]->(c)" +
             "(b)-[{w:2.0}]->(c)"
@@ -137,18 +137,18 @@ class CypherFactoryTest extends BaseTest {
             ", ({prop2: 2})" +
             ", ({prop3: 3})"
         );
-        PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
-        PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
-        PropertyMapping prop3 = PropertyMapping.of("prop3", 0D);
+        PropertyMapping prop1 = PropertyMapping.of("prop1", 0);
+        PropertyMapping prop2 = PropertyMapping.of("prop2", 0);
+        PropertyMapping prop3 = PropertyMapping.of("prop3", 0);
 
         Graph graph = TestGraphLoader
             .from(db)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
             .graph(CYPHER);
 
-        String gdl = "(a {prop1: 1.0, prop2: 0.0, prop3: 0.0})" +
-                     "(b {prop1: 0.0, prop2: 2.0, prop3: 0.0})" +
-                     "(c {prop1: 0.0, prop2: 0.0, prop3: 3.0})";
+        String gdl = "(a {prop1: 1, prop2: 0, prop3: 0})" +
+                     "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                     "(c {prop1: 0, prop2: 0, prop3: 3})";
 
         assertGraphEquals(fromGdl(gdl), graph);
     }
@@ -160,9 +160,9 @@ class CypherFactoryTest extends BaseTest {
             "CREATE" +
             "  (n1)" +
             ", (n2)" +
-            ", (n1)-[:REL {prop1: 1}]->(n2)" +
-            ", (n1)-[:REL {prop2: 2}]->(n2)" +
-            ", (n1)-[:REL {prop3: 3}]->(n2)"
+            ", (n1)-[:REL {prop1: 1.0}]->(n2)" +
+            ", (n1)-[:REL {prop2: 2.0}]->(n2)" +
+            ", (n1)-[:REL {prop3: 3.0}]->(n2)"
         );
         PropertyMapping prop1 = PropertyMapping.of("prop1", 0D);
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
@@ -206,7 +206,7 @@ class CypherFactoryTest extends BaseTest {
 
         Graph graph = applyInTransaction(db, tx -> loader.graph());
 
-        assertGraphEquals(fromGdl("(a { nodeProp: 42.0 })-[{ w: 21 }]->(a)"), graph);
+        assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
 
     @Test

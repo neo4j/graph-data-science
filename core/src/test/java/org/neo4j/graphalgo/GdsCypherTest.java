@@ -119,7 +119,7 @@ class GdsCypherTest {
             "      properties: {" +
             "        relProp: {" +
             "          property: 'RelationshipPropertyName'," +
-            "          defaultValue: 1337.0," +
+            "          defaultValue: 1337," +
             "          aggregation: 'MAX'" +
             "        }" +
             "      }" +
@@ -353,7 +353,7 @@ class GdsCypherTest {
                     "properties: {" +
                         "relProp: {" +
                             "property: \"RelationshipPropertyName\", " +
-                            "defaultValue: 1337.0, " +
+                            "defaultValue: 1337, " +
                             "aggregation: \"MAX\"" +
                         "}, " +
                         "global: {" +

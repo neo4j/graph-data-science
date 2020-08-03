@@ -135,12 +135,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "ORDER BY newProp1 ASC, newProp2 ASC";
 
         assertCypherResult(validationQuery, asList(
-            map("newProp1", 0D, "newProp2", 42D),
-            map("newProp1", 1D, "newProp2", 43D),
-            map("newProp1", 2D, "newProp2", 44D),
-            map("newProp1", 3D, "newProp2", 45D),
-            map("newProp1", 4D, "newProp2", 46D),
-            map("newProp1", 5D, "newProp2", 47D)
+            map("newProp1", 0L, "newProp2", 42L),
+            map("newProp1", 1L, "newProp2", 43L),
+            map("newProp1", 2L, "newProp2", 44L),
+            map("newProp1", 3L, "newProp2", 45L),
+            map("newProp1", 4L, "newProp2", 46L),
+            map("newProp1", 5L, "newProp2", 47L)
         ));
     }
 
@@ -171,9 +171,9 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "ORDER BY newProp1 ASC, newProp2 ASC";
 
         assertCypherResult(validationQuery, asList(
-            map("labels", singletonList("A"), "newProp1", 0D, "newProp2", 42D),
-            map("labels", singletonList("A"), "newProp1", 1D, "newProp2", 43D),
-            map("labels", singletonList("A"), "newProp1", 2D, "newProp2", 44D),
+            map("labels", singletonList("A"), "newProp1", 0L, "newProp2", 42L),
+            map("labels", singletonList("A"), "newProp1", 1L, "newProp2", 43L),
+            map("labels", singletonList("A"), "newProp1", 2L, "newProp2", 44L),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null)
@@ -206,9 +206,9 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "ORDER BY newProp1 ASC, newProp2 ASC";
 
         assertCypherResult(validationQuery, asList(
-            map("labels", singletonList("A"), "newProp1", 0D, "newProp2", 42D),
-            map("labels", singletonList("A"), "newProp1", 1D, "newProp2", 43D),
-            map("labels", singletonList("A"), "newProp1", 2D, "newProp2", 44D),
+            map("labels", singletonList("A"), "newProp1", 0L, "newProp2", 42L),
+            map("labels", singletonList("A"), "newProp1", 1L, "newProp2", 43L),
+            map("labels", singletonList("A"), "newProp1", 2L, "newProp2", 44L),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null),
             map("labels", singletonList("B"), "newProp1", null, "newProp2", null)

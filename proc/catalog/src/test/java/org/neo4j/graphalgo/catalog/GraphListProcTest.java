@@ -220,7 +220,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Float")),
+                    "nodes", map("A", map("foo", "Integer")),
                     "relationships", map("REL", map("bar", "Float"))
                 )
             )
@@ -283,7 +283,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Float")),
+                    "nodes", map("A", map("foo", "Integer")),
                     "relationships", map("REL", map("bar", "Float"))
                 )
             )
@@ -305,7 +305,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map(ALL_NODES.name, map("foo", "Float")),
+                    "nodes", map(ALL_NODES.name, map("foo", "Integer")),
                     "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float"))
                 )
             )
@@ -542,7 +542,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
+                    "nodes", map("all", map("foo", "Integer"), "B", map("age", "Integer")),
                     "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
                 )))
         );
@@ -562,7 +562,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("all", map("foo", "Float"), "B", map("age", "Float")),
+                    "nodes", map("all", map("foo", "Integer"), "B", map("age", "Integer")),
                     "relationships",  map("all", map("since", "Float"), "REL", map("bar", "Float"))
                 )))
         );
@@ -582,7 +582,7 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Float"), "B", map("age", "Float")),
+                    "nodes", map("A", map("foo", "Integer"), "B", map("age", "Integer")),
                     "relationships",  map("LIKES", map("since", "Float"), "REL", map("bar", "Float"))
                 )))
         );

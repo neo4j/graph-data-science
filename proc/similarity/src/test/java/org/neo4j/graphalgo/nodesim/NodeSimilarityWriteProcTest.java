@@ -125,10 +125,10 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
             orientation == REVERSE
                 ? fromGdl(
                 formatWithLocale(
-                    "  (i1:Item {id: 10.0})" +
-                    ", (i2:Item {id: 11.0})" +
-                    ", (i3:Item {id: 12.0})" +
-                    ", (i4:Item {id: 13.0})" +
+                    "  (i1:Item {id: 10})" +
+                    ", (i2:Item {id: 11})" +
+                    ", (i3:Item {id: 12})" +
+                    ", (i4:Item {id: 13})" +
                     ", (i1)-[{w: %f}]->(i2)" +
                     ", (i1)-[{w: %f}]->(i3)" +
                     ", (i2)-[{w: %f}]->(i1)" +
@@ -145,10 +145,10 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
             )
                 : fromGdl(
                     formatWithLocale(
-                        "  (a:Person {id: 0.0})" +
-                        ", (b:Person {id: 1.0})" +
-                        ", (c:Person {id: 2.0})" +
-                        ", (d:Person {id: 3.0})" +
+                        "  (a:Person {id: 0})" +
+                        ", (b:Person {id: 1})" +
+                        ", (c:Person {id: 2})" +
+                        ", (d:Person {id: 3})" +
                         ", (a)-[{w: %f}]->(b)" +
                         ", (a)-[{w: %f}]->(c)" +
                         ", (b)-[{w: %f}]->(c)" +

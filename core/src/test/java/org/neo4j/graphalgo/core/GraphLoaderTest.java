@@ -72,44 +72,44 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testWithMultipleLabelsAndProperties(TestSupport.FactoryType factoryType) {
-        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
+        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42L));
         PropertyMappings multipleProperties = PropertyMappings.of(
-            PropertyMapping.of("prop1", 42.0),
-            PropertyMapping.of("prop2", 42.0)
+            PropertyMapping.of("prop1", 42L),
+            PropertyMapping.of("prop2", 42L)
         );
 
         Graph graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(properties)
             .graph(factoryType);
-        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0})-->(b:Node2 {prop1: 42.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1L})-->(b:Node2 {prop1: 42L})"), graph);
 
         graph = TestGraphLoader.from(db)
             .withLabels("Node1", "Node2")
             .withNodeProperties(multipleProperties)
             .graph(factoryType);
-        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})-->(b:Node2 {prop1: 42.0, prop2: 2.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1L, prop2: 42L})-->(b:Node2 {prop1: 42L, prop2: 2L})"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
     void testWithSingleLabelAndProperties(TestSupport.FactoryType factoryType) {
-        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42.0));
+        PropertyMappings properties = PropertyMappings.of(PropertyMapping.of("prop1", 42));
         PropertyMappings multipleProperties = PropertyMappings.of(
-            PropertyMapping.of("prop1", 42.0),
-            PropertyMapping.of("prop2", 42.0)
+            PropertyMapping.of("prop1", 42),
+            PropertyMapping.of("prop2", 42)
         );
 
         Graph graph = TestGraphLoader.from(db)
             .withLabels("Node1")
             .withNodeProperties(properties)
             .graph(factoryType);
-        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1})"), graph);
 
         graph = TestGraphLoader.from(db)
             .withLabels("Node1")
             .withNodeProperties(multipleProperties)
             .graph(factoryType);
-        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1.0, prop2: 42.0})"), graph);
+        assertGraphEquals(fromGdl("(a:Node1 {prop1: 1, prop2: 42})"), graph);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -139,9 +139,9 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphStoreFactoryTypesTest
     void testWithNodeProperties(TestSupport.FactoryType factoryType) {
         PropertyMappings nodePropertyMappings = PropertyMappings.of(
-            PropertyMapping.of("prop1", "prop1", 0D),
-            PropertyMapping.of("prop2", "prop2", 0D),
-            PropertyMapping.of("prop3", "prop3", 0D)
+            PropertyMapping.of("prop1", "prop1", 0),
+            PropertyMapping.of("prop2", "prop2", 0),
+            PropertyMapping.of("prop3", "prop3", 0)
         );
 
         Graph graph = TestGraphLoader
@@ -150,9 +150,9 @@ class GraphLoaderTest extends BaseTest {
             .withDefaultAggregation(Aggregation.SINGLE)
             .graph(factoryType);
 
-        Graph expected = fromGdl("(a {prop1: 1.0, prop2: 0.0, prop3: 0.0})" +
-                               "(b {prop1: 0.0, prop2: 2.0, prop3: 0.0})" +
-                               "(c {prop1: 0.0, prop2: 0.0, prop3: 3.0})" +
+        Graph expected = fromGdl("(a {prop1: 1, prop2: 0, prop3: 0})" +
+                               "(b {prop1: 0, prop2: 2, prop3: 0})" +
+                               "(c {prop1: 0, prop2: 0, prop3: 3})" +
                                "(a)-->(b), (a)-->(c), (b)-->(c)");
         assertGraphEquals(expected, graph);
     }

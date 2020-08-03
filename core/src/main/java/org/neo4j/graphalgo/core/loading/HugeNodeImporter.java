@@ -29,6 +29,7 @@ import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.values.storable.Value;
 
 import java.util.Collections;
 import java.util.List;
@@ -86,7 +87,7 @@ public class HugeNodeImporter implements NodeImporter {
 
     long importCypherNodes(
         NodesBatchBuffer buffer,
-        List<Map<String, Number>> cypherNodeProperties,
+        List<Map<String, Value>> cypherNodeProperties,
         CypherNodePropertyImporter propertyImporter
     ) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {

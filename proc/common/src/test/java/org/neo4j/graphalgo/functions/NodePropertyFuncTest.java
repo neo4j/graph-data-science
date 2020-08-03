@@ -43,14 +43,15 @@ class NodePropertyFuncTest  extends BaseProcTest {
         registerProcedures(GraphCreateProc.class);
         registerFunctions(NodePropertyFunc.class);
         runQuery(DB_CYPHER);
-        runQuery(GdsCypher
+        var query = GdsCypher
             .call()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("prop")
             .withAnyRelationshipType()
             .graphCreate("testGraph")
-            .yields());
+            .yields();
+        runQuery(query);
     }
 
     @AfterEach

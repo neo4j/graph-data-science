@@ -46,7 +46,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
     void noRelationshipAccessAllowed() {
         var graph = noRelationshipAccessAllowedGraph();
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0}), (b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 42, prop2: 2}), (b:Node2 {prop1: 1, prop2: 1337})"),
             graph
         );
     }
@@ -55,7 +55,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
     void noTargetNodeAccessAllowed() throws Exception {
         var graph = noTargetNodeAccessAllowedGraph();
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})"),
+            fromGdl("(a:Node1 {prop1: 42, prop2: 2})"),
             graph
         );
     }
@@ -64,7 +64,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
     void noNodeProp1Allowed() throws Exception {
         var graph = noNodeProp1AllowedGraph();
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 1.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 1, prop2: 2})-[{prop3: 23.0}]->(b:Node2 {prop1: 1, prop2: 1337})"),
             graph
         );
     }
@@ -73,7 +73,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
     void noRelProp3Allowed() throws Exception {
         var graph = noRelProp3AllowedGraph();
         assertGraphEquals(
-            fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 3.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"),
+            fromGdl("(a:Node1 {prop1: 42, prop2: 2})-[{prop3: 3.0}]->(b:Node2 {prop1: 1, prop2: 1337})"),
             graph
         );
     }

@@ -38,8 +38,7 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
-import org.neo4j.graphalgo.core.loading.NodePropertyArray;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -49,6 +48,7 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
+import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
 
@@ -183,13 +183,12 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesBuilder.of(
                         dimensions.nodeCount(),
-                        inferValueType(propertyValue),
                         loadingContext.tracker(),
-                        PropertyMapping.DEFAULT_FALLBACK_VALUE
-                    )).set(idMap.toMappedNodeId(vertex.getId()), gdsValue(vertex, propertyKey, propertyValue));
+                        DefaultValue.DEFAULT
+                    )).set(idMap.toMappedNodeId(vertex.getId()), Values.of(propertyValue));
             }));
 
-        Map<PropertyMapping, NodePropertyArray> nodeProperties = propertyBuilders
+        Map<PropertyMapping, NodeProperties> nodeProperties = propertyBuilders
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().build()));

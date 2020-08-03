@@ -103,11 +103,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
         return CollectionUtil.enumerate(mappings());
     }
 
-    @Deprecated
-    public Optional<Double> defaultWeight() {
-        return stream().mapToDouble(PropertyMapping::defaultValue).boxed().findFirst();
-    }
-
     public boolean hasMappings() {
         return !mappings().isEmpty();
     }

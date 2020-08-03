@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.PrivateLookup;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -114,9 +116,10 @@ final class HugeSparseLongArrayTest {
         }
     }
 
-    @Test
-    void shouldReturnNegativeOneForMissingValues() {
-        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, AllocationTracker.EMPTY);
+    @ParameterizedTest
+    @ValueSource(longs = {-1, Long.MIN_VALUE})
+    void shouldReturnDefaultValueForMissingValues(long defaultValue) {
+        HugeSparseLongArray.Builder array = HugeSparseLongArray.Builder.create(10, defaultValue, AllocationTracker.EMPTY);
         int index = integer(2, 8);
         int value = integer(42, 1337);
         array.set(index, value);
@@ -127,7 +130,7 @@ final class HugeSparseLongArrayTest {
             String message = expectedContains
                     ? "Expected value at index " + i + " to be set to " + value + ", but got " + actual + " instead"
                     : "Expected value at index " + i + " to be missing (-1), but got " + actual + " instead";
-            assertEquals(expectedContains ? value : -1L, actual, message);
+            assertEquals(expectedContains ? value : defaultValue, actual, message);
         }
     }
 

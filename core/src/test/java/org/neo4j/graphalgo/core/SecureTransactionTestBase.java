@@ -161,7 +161,7 @@ abstract class SecureTransactionTestBase extends BaseTest {
 
     void assertFullGraph(Graph graph) {
         var expected = fromGdl(
-            "(a:Node1 {prop1: 42.0, prop2: 2.0})-[{prop3: 23.0}]->(b:Node2 {prop1: 1.0, prop2: 1337.0})"
+            "(a:Node1 {prop1: 42, prop2: 2})-[{prop3: 23}]->(b:Node2 {prop1: 1, prop2: 1337})"
         );
         assertGraphEquals(expected, graph);
     }
