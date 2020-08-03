@@ -39,6 +39,7 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -284,6 +285,11 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         @Override
         public Value getValue(long nodeId) {
             return Values.longValue(getLong(nodeId));
+        }
+
+        @Override
+        public OptionalLong getMaxLongPropertyValue() {
+            return OptionalLong.empty();
         }
     }
 }

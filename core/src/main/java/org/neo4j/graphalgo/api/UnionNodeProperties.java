@@ -25,6 +25,8 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE;
@@ -185,5 +187,15 @@ public class UnionNodeProperties implements NodeProperties {
     @FunctionalInterface
     private interface ValueProducer {
         Value getValue(long nodeId);
+    }
+
+    @Override
+    public OptionalLong getMaxLongPropertyValue() {
+        return OptionalLong.empty();
+    }
+
+    @Override
+    public OptionalDouble getMaxDoublePropertyValue() {
+        return OptionalDouble.empty();
     }
 }
