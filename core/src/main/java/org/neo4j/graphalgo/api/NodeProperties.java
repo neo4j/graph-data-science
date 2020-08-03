@@ -45,9 +45,7 @@ public interface NodeProperties {
         throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }
 
-    default Object getObject(long nodeId) {
-        return getDouble(nodeId);
-    }
+    Object getObject(long nodeId);
 
     ValueType getType();
 
@@ -92,17 +90,19 @@ public interface NodeProperties {
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
      *         empty or the feature is not supported.
+     * @throws java.lang.UnsupportedOperationException if the type is not coercible into a long.
      */
     default OptionalLong getMaxLongPropertyValue() {
-        return OptionalLong.empty();
+        throw unsupportedTypeException(ValueType.LONG);
     }
 
     /**
      * @return the maximum double value contained in the mapping or an empty {@link OptionalDouble} if the mapping is
      *         empty or the feature is not supported.
+     * @throws java.lang.UnsupportedOperationException if the type is not coercible into a double.
      */
     default OptionalDouble getMaxDoublePropertyValue() {
-        return OptionalDouble.empty();
+        throw unsupportedTypeException(ValueType.DOUBLE);
     }
 
     private UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
