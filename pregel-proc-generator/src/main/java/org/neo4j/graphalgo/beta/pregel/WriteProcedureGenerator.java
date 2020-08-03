@@ -25,7 +25,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import javax.lang.model.SourceVersion;
@@ -75,10 +74,12 @@ class WriteProcedureGenerator extends ProcedureGenerator {
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 className(pregelSpec, ALGORITHM_SUFFIX),
-                ClassName.get(HugeDoubleArray.class),
+                ClassName.get(Pregel.PregelResult.class),
                 pregelSpec.configTypeName()
             ), "computeResult")
-            .addStatement("return new $T()", procResultBuilderClass())
+            .addStatement("var ranIterations = computeResult.result().ranIterations()")
+            .addStatement("var didConverge = computeResult.result().didConverge()")
+            .addStatement("return new $T().withRanIterations(ranIterations).didConverge(didConverge)", procResultBuilderClass())
             .build();
     }
 }

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -34,7 +33,9 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 
 @GdlExtension
@@ -94,7 +95,10 @@ class ConnectedComponentsPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        var result = pregelJob.run();
+
+        assertTrue(result.didConverge(), "Algorithm did not converge.");
+        assertEquals(3, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);
@@ -108,7 +112,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(directedGraph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
+        TestSupport.assertLongValues(directedGraph, (nodeId) -> (long) result.nodeValues().get(nodeId), expected);
     }
 
     @Test
@@ -130,7 +134,10 @@ class ConnectedComponentsPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        var result = pregelJob.run();
+
+        assertTrue(result.didConverge(), "Algorithm did not converge.");
+        assertEquals(3, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);
@@ -144,7 +151,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> (long) nodeValues.get(nodeId), expected);
+        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> (long) result.nodeValues().get(nodeId), expected);
     }
 
     @Test

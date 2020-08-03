@@ -30,7 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
 class ConnectedComponentsPregelProcTest extends BaseProcTest {
@@ -147,7 +149,14 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("writeProperty", "value")
             .yields();
 
-        runQuery(query);
+        runQueryWithRowConsumer(query, row -> {
+            assertNotEquals(-1L, row.getNumber("createMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("writeMillis"));
+
+            assertEquals(3, row.getNumber("ranIterations").longValue());
+            assertTrue(row.getBoolean("didConverge"));
+        });
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value AS value", r -> {
@@ -177,7 +186,14 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("mutateProperty", "value")
             .yields();
 
-        runQuery(mutateQuery);
+        runQueryWithRowConsumer(mutateQuery, row -> {
+            assertNotEquals(-1L, row.getNumber("createMillis"));
+            assertNotEquals(-1L, row.getNumber("computeMillis"));
+            assertNotEquals(-1L, row.getNumber("mutateMillis"));
+
+            assertEquals(3, row.getNumber("ranIterations").longValue());
+            assertTrue(row.getBoolean("didConverge"));
+        });
 
         var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value') " +
                           "YIELD nodeId, propertyValue " +
@@ -200,7 +216,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields(
                 "createMillis",
-                "computeMillis"
+                "computeMillis",
+                "ranIterations",
+                "didConverge"
             );
 
         runQueryWithRowConsumer(
@@ -208,6 +226,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             row -> {
                 assertNotEquals(-1L, row.getNumber("createMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
+
+                assertEquals(3, row.getNumber("ranIterations").longValue());
+                assertTrue(row.getBoolean("didConverge"));
             }
         );
     }

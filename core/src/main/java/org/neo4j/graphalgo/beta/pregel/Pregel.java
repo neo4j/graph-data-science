@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
 import org.jctools.queues.MpscLinkedQueue;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -61,8 +62,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
-
-    private int iterations;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> withDefaultNodeValues(
             final Graph graph,
@@ -139,8 +138,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.messageQueues = initLinkedQueues(graph, tracker);
     }
 
-    public HugeDoubleArray run() {
-        iterations = 0;
+    public PregelResult run() {
+        int iterations = 0;
         boolean canHalt = false;
         // Tracks if a node received messages in the previous iteration
         // TODO: try RoaringBitSet instead
@@ -167,11 +166,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 canHalt = true;
             }
         }
-        return nodeValues;
-    }
 
-    public int getIterations() {
-        return iterations;
+        return ImmutablePregelResult.builder()
+            .nodeValues(nodeValues)
+            .didConverge(canHalt)
+            .ranIterations(iterations)
+            .build();
     }
 
     public void release() {
@@ -363,5 +363,15 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private Queue<Double> receiveMessages(final long nodeId) {
             return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
+    }
+
+    @ValueClass
+    public interface PregelResult {
+
+        HugeDoubleArray nodeValues();
+
+        int ranIterations();
+
+        boolean didConverge();
     }
 }

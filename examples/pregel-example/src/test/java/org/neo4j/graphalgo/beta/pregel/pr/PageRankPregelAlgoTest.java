@@ -93,7 +93,7 @@ class PageRankPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
 
         var expected = new HashMap<String, Double>();
         expected.put("a", 0.0276D);

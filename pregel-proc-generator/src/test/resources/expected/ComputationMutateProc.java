@@ -10,6 +10,7 @@ import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelMutateResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -17,7 +18,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -26,7 +26,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationMutateProc extends MutateProc<ComputationAlgorithm, HugeDoubleArray, PregelMutateResult, PregelConfig> {
+public final class ComputationMutateProc extends MutateProc<ComputationAlgorithm, Pregel.PregelResult, PregelMutateResult, PregelConfig> {
     @Procedure(
         name = "gds.pregel.test.mutate",
         mode = Mode.READ
@@ -39,8 +39,10 @@ public final class ComputationMutateProc extends MutateProc<ComputationAlgorithm
 
     @Override
     protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
-        AlgoBaseProc.ComputationResult<ComputationAlgorithm, HugeDoubleArray, PregelConfig> computeResult) {
-        return new PregelMutateResult.Builder();
+        AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+        var ranIterations = computeResult.result().ranIterations();
+        var didConverge = computeResult.result().didConverge();
+        return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
     }
 
     @Override
@@ -67,7 +69,7 @@ public final class ComputationMutateProc extends MutateProc<ComputationAlgorithm
 
     @Override
     protected NodeProperties getNodeProperties(
-        AlgoBaseProc.ComputationResult<ComputationAlgorithm, HugeDoubleArray, PregelConfig> computationResult) {
-        return (DoubleNodeProperties) computationResult.result()::get;
+        AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computationResult) {
+        return (DoubleNodeProperties) computationResult.result().nodeValues()::get;
     }
 }

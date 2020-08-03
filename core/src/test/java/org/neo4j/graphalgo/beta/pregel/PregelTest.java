@@ -62,7 +62,7 @@ class PregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.toArray());
     }
 
