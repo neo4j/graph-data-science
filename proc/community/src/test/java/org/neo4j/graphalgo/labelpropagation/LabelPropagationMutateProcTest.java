@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
@@ -84,8 +83,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
         return LabelPropagationMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    // TODO bring this test back once the graph loaders identify the correct type
-    @Ignore
+    @Test
     void testMutateAndWriteWithSeeding() {
         var testGraphName = "lpaGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)

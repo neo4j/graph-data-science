@@ -45,7 +45,7 @@ final class LouvainProc {
             return CommunityProcCompanion.nodeProperties(
                 computationResult,
                 resultProperty,
-                computationResult.result()::getCommunity
+                computationResult.result().finalDendrogram().asNodeProperties()
             );
         } else {
             return (LongArrayNodeProperties) computationResult.result()::getCommunities;

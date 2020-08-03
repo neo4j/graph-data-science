@@ -238,7 +238,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .yields()
         );
 
-        // TODO bring this test back once the graph loaders identify the correct type
-        //assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
     }
 }

@@ -23,6 +23,9 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.OptionalDouble;
+import java.util.stream.LongStream;
+
 public interface DoubleNodeProperties extends NodeProperties {
 
     @Override
@@ -48,4 +51,13 @@ public interface DoubleNodeProperties extends NodeProperties {
     default ValueType getType() {
         return ValueType.DOUBLE;
     };
+
+    @Override
+    default OptionalDouble getMaxDoublePropertyValue() {
+        return LongStream
+            .range(0, size())
+            .parallel()
+            .mapToDouble(this::getDouble)
+            .max();
+    }
 }
