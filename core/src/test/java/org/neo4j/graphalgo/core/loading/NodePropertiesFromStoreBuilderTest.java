@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.values.storable.Values;
 
@@ -35,11 +35,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 // TODO Write more tests!
-final class NodePropertiesBuilderTest {
+final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void emptyDoubleProperties() {
-        var properties = NodePropertiesBuilder.of(
+        var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.EMPTY,
             DefaultValue.of(42.0)
@@ -52,7 +52,7 @@ final class NodePropertiesBuilderTest {
 
     @Test
     void emptyLongProperties() {
-        var properties = NodePropertiesBuilder.of(
+        var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
             AllocationTracker.EMPTY,
             DefaultValue.of(42)
@@ -65,7 +65,7 @@ final class NodePropertiesBuilderTest {
 
     @Test
     void returnsValuesThatHaveBeenSet() {
-        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, Values.of(1.0)));
+        var properties = NodePropertiesFromStoreBuilder.of(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
         assertEquals(1.0, properties.getDouble(1));
         assertEquals(1.0, properties.getDouble(1, 42.0));
@@ -76,14 +76,14 @@ final class NodePropertiesBuilderTest {
         var expectedImplicitDefault = 42.0;
         var expectedExplicitDefault = 1337.0;
 
-        var properties = NodePropertiesBuilder.of(2L, expectedImplicitDefault, b -> {});
+        var properties = NodePropertiesFromStoreBuilder.of(2L, expectedImplicitDefault, b -> {});
 
         assertEquals(expectedImplicitDefault, properties.getDouble(2));
     }
 
     @Test
     void returnNaNIfItWasSet() {
-        var properties = NodePropertiesBuilder.of(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
+        var properties = NodePropertiesFromStoreBuilder.of(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
 
         assertEquals(42.0, properties.getDouble(0));
         assertEquals(Double.NaN, properties.getDouble(1));
@@ -91,7 +91,7 @@ final class NodePropertiesBuilderTest {
 
     @Test
     void trackMaxValue() {
-        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+        var properties = NodePropertiesFromStoreBuilder.of(2L, 0.0, b -> {
             b.set(0, Values.of(42));
             b.set(1, Values.of(21));
         });
@@ -102,7 +102,7 @@ final class NodePropertiesBuilderTest {
 
     @Test
     void hasSize() {
-        var properties = NodePropertiesBuilder.of(2L, 0.0, b -> {
+        var properties = NodePropertiesFromStoreBuilder.of(2L, 0.0, b -> {
             b.set(0, Values.of(42.0));
             b.set(1, Values.of(21.0));
         });
@@ -113,7 +113,7 @@ final class NodePropertiesBuilderTest {
     void threadSafety() throws InterruptedException {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
-        var builder = NodePropertiesBuilder.of(nodeSize, AllocationTracker.EMPTY, DefaultValue.of(Double.NaN));
+        var builder = NodePropertiesFromStoreBuilder.of(nodeSize, AllocationTracker.EMPTY, DefaultValue.of(Double.NaN));
 
         var phaser = new Phaser(3);
         pool.execute(() -> {

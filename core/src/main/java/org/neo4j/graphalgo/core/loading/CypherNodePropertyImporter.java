@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.values.storable.Value;
 
@@ -45,7 +45,7 @@ public class CypherNodePropertyImporter {
     private final Collection<String> propertyColumns;
     private final long nodeCount;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
-    private final Map<NodeLabel, Map<String, NodePropertiesBuilder>> buildersByNodeLabel;
+    private final Map<NodeLabel, Map<String, NodePropertiesFromStoreBuilder>> buildersByNodeLabel;
 
 
     public CypherNodePropertyImporter(
@@ -67,14 +67,14 @@ public class CypherNodePropertyImporter {
     public void registerPropertiesForLabels(List<String> labels) {
         for (String label : labels) {
             NodeLabel nodeLabel = new NodeLabel(label);
-            Map<String, NodePropertiesBuilder> propertyBuilders = buildersByNodeLabel.computeIfAbsent(
+            Map<String, NodePropertiesFromStoreBuilder> propertyBuilders = buildersByNodeLabel.computeIfAbsent(
                 nodeLabel,
                 (ignore) -> new HashMap<>()
             );
             for (String property : propertyColumns) {
                 propertyBuilders.computeIfAbsent(
                     property,
-                    (ignore) -> NodePropertiesBuilder.of(
+                    (ignore) -> NodePropertiesFromStoreBuilder.of(
                         nodeCount, AllocationTracker.EMPTY, NO_PROPERTY_VALUE
                     )
                 );
@@ -122,11 +122,11 @@ public class CypherNodePropertyImporter {
         int propertiesImported = 0;
 
         if (buildersByNodeLabel.containsKey(labelIdentifier)) {
-            Map<String, NodePropertiesBuilder> buildersByProperty = buildersByNodeLabel.get(labelIdentifier);
+            Map<String, NodePropertiesFromStoreBuilder> buildersByProperty = buildersByNodeLabel.get(labelIdentifier);
 
             for (Map.Entry<String, Value> propertyEntry : nodeProperties.entrySet()) {
                 if (buildersByProperty.containsKey(propertyEntry.getKey())) {
-                    NodePropertiesBuilder builder = buildersByProperty.get(propertyEntry.getKey());
+                    NodePropertiesFromStoreBuilder builder = buildersByProperty.get(propertyEntry.getKey());
                     builder.set(nodeId, propertyEntry.getValue());
                     propertiesImported++;
                 }

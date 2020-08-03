@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -169,7 +169,7 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
 
     private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> loadNodeProperties(IdMapping idMap) {
         var propertyKeysByLabel = new HashMap<NodeLabel, Set<PropertyMapping>>();
-        var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesBuilder>();
+        var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 
         gdlHandler.getVertices().forEach(vertex -> vertex
             .getProperties()
@@ -181,7 +181,7 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                         .add(PropertyMapping.of(propertyKey))
                     );
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
-                    NodePropertiesBuilder.of(
+                    NodePropertiesFromStoreBuilder.of(
                         dimensions.nodeCount(),
                         loadingContext.tracker(),
                         DefaultValue.DEFAULT

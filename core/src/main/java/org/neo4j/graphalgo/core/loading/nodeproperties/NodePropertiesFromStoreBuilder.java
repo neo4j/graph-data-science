@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 
-public final class NodePropertiesBuilder {
+public final class NodePropertiesFromStoreBuilder {
 
     private final DefaultValue defaultValue;
     private final long nodeSize;
@@ -44,18 +44,18 @@ public final class NodePropertiesBuilder {
 
     private final AtomicBoolean isInitialized;
 
-    public static NodePropertiesBuilder of(long nodeSize, AllocationTracker tracker, DefaultValue defaultValue) {
-        return new NodePropertiesBuilder(defaultValue, nodeSize, tracker);
+    public static NodePropertiesFromStoreBuilder of(long nodeSize, AllocationTracker tracker, DefaultValue defaultValue) {
+        return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, tracker);
     }
 
     @TestOnly
-    public static NodeProperties of(long size, Object defaultValue, Consumer<NodePropertiesBuilder> buildBlock) {
+    public static NodeProperties of(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = of(size, AllocationTracker.EMPTY, DefaultValue.of(defaultValue));
         buildBlock.accept(builder);
         return builder.build();
     }
 
-    private NodePropertiesBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker tracker) {
+    private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
         this.nodeSize = nodeSize;
         this.tracker = tracker;
