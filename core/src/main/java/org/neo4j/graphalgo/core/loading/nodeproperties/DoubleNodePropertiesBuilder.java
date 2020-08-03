@@ -126,7 +126,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
 
         @Override
-        public OptionalDouble getDoubleMaxPropertyValue() {
+        public OptionalDouble getMaxDoublePropertyValue() {
             return maxValue;
         }
 

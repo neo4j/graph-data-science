@@ -337,8 +337,8 @@ class CypherFactoryTest extends BaseTest {
                 "Node properties",
                 "MATCH (n) RETURN id(n) as id, n.id as idProp",
                 "MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target",
-                621400,
-                621400
+                621392,
+                621392
             ),
 
             Arguments.of(

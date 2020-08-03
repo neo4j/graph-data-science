@@ -93,19 +93,10 @@ public interface NodeProperties {
      * @throws java.lang.UnsupportedOperationException if the type is not coercible into a long.
      */
     default OptionalLong getMaxLongPropertyValue() {
-        if (getType() == ValueType.DOUBLE) {
-            var maxDoublePropertyValue = getMaxDoublePropertyValue();
-
-            if (maxDoublePropertyValue.isPresent()) {
-                return OptionalLong.of(((Double)maxDoublePropertyValue.getAsDouble()).longValue());
-            } else {
-                return OptionalLong.empty();
-            }
-        } else if (getType() == ValueType.LONG) {
+        if (getType() == ValueType.LONG) {
             throw new UnsupportedOperationException(formatWithLocale("%s does not overwrite `getMaxLongPropertyValue`", getClass().getSimpleName()));
         } else {
             throw unsupportedTypeException(ValueType.LONG);
-
         }
     }
 
@@ -115,15 +106,7 @@ public interface NodeProperties {
      * @throws java.lang.UnsupportedOperationException if the type is not coercible into a double.
      */
     default OptionalDouble getMaxDoublePropertyValue() {
-        if (getType() == ValueType.LONG) {
-            var maxLong = getMaxLongPropertyValue();
-
-            if (maxLong.isPresent()) {
-                return OptionalDouble.of(((Long)maxLong.getAsLong()).doubleValue());
-            } else {
-                return OptionalDouble.empty();
-            }
-        } else if (getType() == ValueType.DOUBLE) {
+        if (getType() == ValueType.DOUBLE) {
             throw new UnsupportedOperationException(formatWithLocale("%s does not overwrite `getMaxDoublePropertyValue`", getClass().getSimpleName()));
         } else {
             throw unsupportedTypeException(ValueType.DOUBLE);

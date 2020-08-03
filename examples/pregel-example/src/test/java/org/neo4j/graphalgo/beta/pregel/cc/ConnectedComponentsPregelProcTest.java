@@ -132,8 +132,8 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, r -> {
             assertEquals(10, r.getNumber("nodeCount").longValue());
             assertEquals(9, r.getNumber("relationshipCount").longValue());
-            assertEquals(308_136, r.getNumber("bytesMin").longValue());
-            assertEquals(308_136, r.getNumber("bytesMax").longValue());
+            assertEquals(308_144, r.getNumber("bytesMin").longValue());
+            assertEquals(308_144, r.getNumber("bytesMax").longValue());
         });
     }
 

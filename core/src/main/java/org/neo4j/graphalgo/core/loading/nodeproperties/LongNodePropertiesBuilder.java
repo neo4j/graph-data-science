@@ -128,7 +128,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
 
         @Override
-        public OptionalLong getLongMaxPropertyValue() {
+        public OptionalLong getMaxLongPropertyValue() {
             return maxValue;
         }
 
