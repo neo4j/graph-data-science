@@ -1,8 +1,22 @@
-window.versions = (async function() {
-  console.log("Calling versions()")
+window.docMeta = (async function () {
+  const version = '1.4-preview';
+  const name = 'graph-data-science';
+
+  const href = window.location.href;
+  const thisPubBaseUri = href.substring(0, href.indexOf(name) + name.length) + '/' + version;
+  const unversionedDocBaseUri = href.substring(0, href.indexOf(name) + name.length) + '/';
+  const commonDocsBaseUri = href.substring(0, href.indexOf(name) - 1);
+
+  const pathname = window.location.pathname;
+  let neo4jPageId;
+  if (pathname.indexOf(name) > -1) {
+    const baseUri = unversionedDocBaseUri + pathname.split(name + '/')[1].split('/')[0] + '/';
+    neo4jPageId = href.replace(baseUri, '');
+  }
+
   const versionsUrl =
     'https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/doc-versions.json';
-  const versions = await jQuery.ajax({
+  const availableDocVersions = await jQuery.ajax({
     type: 'GET',
     url: versionsUrl,
     headers: {
@@ -19,32 +33,13 @@ window.versions = (async function() {
   });
 
   return {
-    value: versions
-  };
-})();
-
-window.docMeta = (async function () {
-  console.log("1 window.docMeta")
-  const version = '1.4-preview';
-  const name = 'graph-data-science';
-  const href = window.location.href;
-
-  return {
     name: name,
     version: version,
-    availableDocVersions: window.versions,
-    thisPubBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/' + version,
-    unversionedDocBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/',
-    commonDocsBaseUri: href.substring(0, href.indexOf(name) - 1)
-  }
-
-})();
-
-(function () {
-  const pathname = window.location.pathname;
-  if (pathname.indexOf(window.docMeta.name) > -1) {
-    const baseUri = window.docMeta.unversionedDocBaseUri + pathname.split(window.docMeta.name + '/')[1].split('/')[0] + '/';
-    window.neo4jPageId = window.location.href.replace(baseUri, '');
+    availableDocVersions: availableDocVersions,
+    thisPubBaseUri: thisPubBaseUri,
+    unversionedDocBaseUri: unversionedDocBaseUri,
+    commonDocsBaseUri: commonDocsBaseUri,
+    neo4jPageId: neo4jPageId
   }
 })();
 // vim: set sw=2 ts=2:

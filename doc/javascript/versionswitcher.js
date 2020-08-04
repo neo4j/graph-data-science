@@ -1,16 +1,15 @@
 jQuery(window).load(function () {
-  versionSwitcher(jQuery);
+  versionSwitcher(jQuery).then(function() {});
 });
 
 /**
  * Utility to browse different versions of the documentation. Requires the versions.js file loaded, which lists the
  * available (relevant) versions of a particular publication.
  */
-function versionSwitcher($) {
-  const THIS_DOC_BASE_URI = window.docMeta.unversionedDocBaseUri;
-
-  let currentVersion;
-  const currentPage = window.neo4jPageId;
+async function versionSwitcher($) {
+  const docMeta = await window.docMeta;
+  const THIS_DOC_BASE_URI = docMeta.unversionedDocBaseUri;
+  const currentPage = docMeta.neo4jPageId;
 
   loadVersions();
 
@@ -22,30 +21,24 @@ function versionSwitcher($) {
     const $navHeader = $('header');
     const $additionalVersions = $('<ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1"/>');
     let versionCount = 0;
-    window.docMeta.then(function (result) {
-      currentVersion = result.version
-      result.availableDocVersions.then(function(availableVersions) {
-        console.log('availableVersions', availableVersions)
-        availableVersions.value.forEach(function (version) {
-          if (version !== currentVersion) {
-            addVersion(version, $additionalVersions);
-            versionCount++;
-          }
-        });
-
-        let $dropdown;
-        if (versionCount === 0) {
-          $dropdown = $('<div id="additional-versions"><div class="additional-versions">Version: ' + currentVersion + ' </div></div>');
-        } else {
-          $dropdown = $('<div id="additional-versions"><div class="dropdown"><a class="dropdown-toggle"id="dropdownMenu1" data-toggle="dropdown">Version: ' + currentVersion + ' <i class="fa fa-caret-down"></i></a></div></div>');
-          $dropdown.children().first().append($additionalVersions);
-        }
-        $navHeader.append($dropdown);
-      });
-
-
+    let currentVersion = docMeta.version
+    const availableVersions = docMeta.availableDocVersions;
+    console.log('availableVersions', availableVersions)
+    availableVersions.forEach(function (version) {
+      if (version !== currentVersion) {
+        addVersion(version, $additionalVersions);
+        versionCount++;
+      }
     });
 
+    let $dropdown;
+    if (versionCount === 0) {
+      $dropdown = $('<div id="additional-versions"><div class="additional-versions">Version: ' + currentVersion + ' </div></div>');
+    } else {
+      $dropdown = $('<div id="additional-versions"><div class="dropdown"><a class="dropdown-toggle"id="dropdownMenu1" data-toggle="dropdown">Version: ' + currentVersion + ' <i class="fa fa-caret-down"></i></a></div></div>');
+      $dropdown.children().first().append($additionalVersions);
+    }
+    $navHeader.append($dropdown);
   }
 
   function addVersion(version, $container) {
