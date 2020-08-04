@@ -24,14 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -200,7 +199,7 @@ class RandomGraphGeneratorTest {
 
         NodeProperties nodeProperties = graph.nodeProperties("foo");
         for (int nodeId = 0; nodeId < 10; nodeId++) {
-            double value = nodeProperties.nodeProperty(nodeId, -1);
+            double value = nodeProperties.getDouble(nodeId, -1);
             assertTrue(0 <= value && value <= 1);
         }
     }

@@ -125,4 +125,16 @@ public interface PropertyProducer {
                    '}';
         }
     }
+
+    class EmptyPropertyProducer implements PropertyProducer {
+        @Override
+        public String getPropertyName() {
+            return null;
+        }
+
+        @Override
+        public double getPropertyValue(java.util.Random random) {
+            return 0;
+        }
+    }
 }

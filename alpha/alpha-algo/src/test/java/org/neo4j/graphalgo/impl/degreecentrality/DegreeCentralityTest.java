@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.beta.generator.RelationshipPropertyProducer;
 import org.neo4j.graphalgo.centrality.degreecentrality.DegreeCentrality;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -38,7 +38,6 @@ import org.neo4j.graphdb.Label;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,17 +115,19 @@ final class DegreeCentralityTest extends AlgoTestBase {
     void shouldRunConcurrently() {
         int nodeCount = 20002;
         int averageDegree = 2;
-        HugeGraph graph = new RandomGraphGenerator(
-            nodeCount,
-            averageDegree,
-            RelationshipDistribution.POWER_LAW,
-            0L,
-            Optional.of(RelationshipPropertyProducer.random("similarity", 0, 1)),
-            Aggregation.NONE,
-            Orientation.NATURAL,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.EMPTY
-        ).generate();
+        HugeGraph graph = RandomGraphGenerator
+            .builder()
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(0L)
+            .relationshipPropertyProducer(PropertyProducer.random("similarity", 0, 1))
+            .aggregation(Aggregation.NONE)
+            .orientation(Orientation.NATURAL)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build()
+            .generate();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
             graph,

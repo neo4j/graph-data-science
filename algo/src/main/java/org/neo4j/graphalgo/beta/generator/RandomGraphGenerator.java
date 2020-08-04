@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -123,7 +123,7 @@ public final class RandomGraphGenerator {
 
     private NodeProperties generateNodeProperties() {
         PropertyProducer nodePropertyProducer = maybeNodePropertyProducer.get();
-        NodePropertiesBuilder builder = NodePropertiesBuilder.of(nodeCount, allocationTracker, 0D);
+        NodePropertiesBuilder builder = NodePropertiesBuilder.of(nodeCount, ValueType.DOUBLE, allocationTracker, 0D);
 
         for (long i = 0; i < nodeCount; i++) {
             builder.set(i, nodePropertyProducer.getPropertyValue(random));
@@ -153,7 +153,7 @@ public final class RandomGraphGenerator {
             averageDegree,
             random
         );
-        PropertyProducer relationshipPropertyProducer = maybeRelationshipPropertyProducer.orElse(new EmptyPropertyProducer());
+        PropertyProducer relationshipPropertyProducer = maybeRelationshipPropertyProducer.orElse(new PropertyProducer.EmptyPropertyProducer());
 
         long degree, targetId;
         double property;
@@ -171,20 +171,6 @@ public final class RandomGraphGenerator {
                 property = relationshipPropertyProducer.getPropertyValue(random);
                 relationshipsImporter.addFromInternal(nodeId, targetId, property);
             }
-        }
-    }
-
-
-
-    static class EmptyPropertyProducer implements PropertyProducer {
-        @Override
-        public String getPropertyName() {
-            return null;
-        }
-
-        @Override
-        public double getPropertyValue(java.util.Random random) {
-            return 0;
         }
     }
 }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.doc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel;
 import org.neo4j.graphalgo.beta.pregel.cc.ImmutableConnectedComponentsConfig;
@@ -28,9 +29,9 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-public class PregelConnectedComponentsDocExample {
+class PregelConnectedComponentsDocExample {
     @Test
-    public void testDoc() {
+    void testDoc() {
         int batchSize = 10;
         int maxIterations = 10;
 
@@ -39,8 +40,17 @@ public class PregelConnectedComponentsDocExample {
             .isAsynchronous(true)
             .build();
 
+        var randomGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(100)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .allocationTracker(AllocationTracker.EMPTY)
+            .build()
+            .generate();
+
         var pregelJob = Pregel.withDefaultNodeValues(
-            RandomGraphGenerator.generate(100, 10),
+            randomGraph,
             config,
             new ConnectedComponentsPregel(),
             batchSize,
