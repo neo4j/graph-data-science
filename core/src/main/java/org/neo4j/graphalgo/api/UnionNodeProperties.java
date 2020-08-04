@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG;
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG_ARRAY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class UnionNodeProperties implements NodeProperties {
@@ -112,6 +113,19 @@ public class UnionNodeProperties implements NodeProperties {
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double array",
+                valueType
+            ));
+        }
+    }
+
+    @Override
+    public long[] getLongArray(long nodeId) {
+        if (valueType == LONG_ARRAY) {
+            var nodeProperties = getPropertiesForNodeId(nodeId);
+            return nodeProperties == null ? null : nodeProperties.getLongArray(nodeId);
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot cast properties of type %s to long array",
                 valueType
             ));
         }

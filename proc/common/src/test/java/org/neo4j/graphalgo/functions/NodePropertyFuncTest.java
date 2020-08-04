@@ -35,8 +35,8 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE " +
-        "  (:A { prop: 42.0 })" +
-        ", (:B { prop: 84.0 })";
+        "  (a:A { prop: 42.0, longListProp: [ 1, 2 ] })" +
+        ", (b:B { prop: 84.0, longListProp: [ 3, 4 ] })";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -48,6 +48,7 @@ class NodePropertyFuncTest  extends BaseProcTest {
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("prop")
+            .withNodeProperty("longListProp")
             .withAnyRelationshipType()
             .graphCreate("testGraph")
             .yields());
@@ -68,6 +69,15 @@ class NodePropertyFuncTest  extends BaseProcTest {
     void shouldReturnNodePropertyForLabel() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'prop', 'A') AS prop ORDER BY prop ASC";
         assertCypherResult(query, Arrays.asList(map("prop", 42.0), map("prop", null)));
+    }
+
+    @Test
+    void shouldReturnLongArrayProperty() {
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'longListProp') AS longListProp ORDER BY longListProp ASC";
+        assertCypherResult(query, Arrays.asList(
+            map("longListProp", new long[] {1, 2}),
+            map("longListProp", new long[] {3, 4}))
+        );
     }
 
     @Test
