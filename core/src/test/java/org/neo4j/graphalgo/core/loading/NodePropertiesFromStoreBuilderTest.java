@@ -34,8 +34,11 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class NodePropertiesFromStoreBuilderTest {
@@ -100,6 +103,21 @@ final class NodePropertiesFromStoreBuilderTest {
 
         assertArrayEquals(data, properties.getDoubleArray(1));
         assertArrayEquals(defaultValue, properties.getDoubleArray(0));
+    }
+
+    @Test
+    void shouldFailOnUnSupportedTypes() {
+        String data = "a simple string";
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> NodePropertiesFromStoreBuilder.of(
+                2L,
+                "default",
+                b -> b.set(1, Values.of(data))
+            )
+        );
+
+        assertThat(ex.getMessage(), containsString("Properties of type String are not supported."));
     }
 
     @Test
