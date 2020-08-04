@@ -34,6 +34,7 @@ import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -70,7 +71,35 @@ final class NodePropertiesFromStoreBuilderTest {
         var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
         assertEquals(1.0, properties.getDouble(1));
-        assertEquals(1.0, properties.getDouble(1));
+        assertEquals(42.0, properties.getDouble(0));
+    }
+
+    @Test
+    void shouldReturnLongArrays() {
+        long[] data = {42L, 1337L};
+        long[] defaultValue = new long[2];
+        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+            2L,
+            defaultValue,
+            b -> b.set(1, Values.of(data))
+        );
+
+        assertArrayEquals(data, properties.getLongArray(1));
+        assertArrayEquals(defaultValue, properties.getLongArray(0));
+    }
+
+    @Test
+    void shouldReturnDoubleArrays() {
+        double[] data = {42.2D, 1337.1D};
+        double[] defaultValue = new double[2];
+        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+            2L,
+            defaultValue,
+            b -> b.set(1, Values.of(data))
+        );
+
+        assertArrayEquals(data, properties.getDoubleArray(1));
+        assertArrayEquals(defaultValue, properties.getDoubleArray(0));
     }
 
     @Test
