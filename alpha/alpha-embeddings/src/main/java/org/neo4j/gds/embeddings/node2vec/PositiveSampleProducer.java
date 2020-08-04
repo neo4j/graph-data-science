@@ -58,7 +58,7 @@ public class PositiveSampleProducer {
         prefixWindowSize = (int) ceilDiv(windowSize - 1, 2);
         postfixWindowSize = (windowSize - 1) / 2;
 
-        this.walkIndex = batchStart -1;
+        this.walkIndex = batchStart - 1;
         this.centerWordIndex = -1;
         this.contextWordIndex = 1;
         nextWalk();
@@ -95,7 +95,7 @@ public class PositiveSampleProducer {
             progressLogger.logProgress();
         }
 
-        if (walkIndex < walks.size()) {
+        if (hasNext()) {
             progressLogger.logProgress();
             this.currentWalk = walk;
             centerWordIndex = -1;
@@ -121,7 +121,7 @@ public class PositiveSampleProducer {
             contextWordIndex++;
         }
 
-        if(contextWordIndex >= Math.min(centerWordIndex + postfixWindowSize + 1, currentWalk.length)) {
+        if (contextWordIndex >= Math.min(centerWordIndex + postfixWindowSize + 1, currentWalk.length)) {
             nextCenterWord();
         }
     }

@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,6 +49,99 @@ class PositiveSampleProducerTest {
         1.0,
         1.0
     );
+
+    @Test
+    void doesNotCauseStackOverflow() {
+        // enough walks to potentially trigger StackOverflow
+        int nbrOfWalks = 5000;
+        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
+            .range(0, nbrOfWalks)
+            .mapToObj((l1) -> new long[]{l1})
+            .collect(Collectors.toList())
+            .toArray(new long[][]{})
+        );
+
+        // our sample producer is supposed to work within the first 3 walks
+        // it prefetches in the constructor
+        var sampleProducer = new PositiveSampleProducer(
+            walks,
+            HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
+            0,
+            3,
+            10,
+            TestProgressLogger.NULL_LOGGER
+        );
+        // does not overflow the stack = passes test
+
+        var counter = 0L;
+        while (sampleProducer.hasNext()) {
+            counter++;
+            sampleProducer.next(new long[2]);
+        }
+
+        assertEquals(0, counter, "no samples possible here because walks are too short");
+    }
+
+    @Test
+    void doesNotCauseStackOverflowDueToBadLuck() {
+        // enough walks to potentially trigger StackOverflow
+        int nbrOfWalks = 5000;
+        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
+            .range(0, nbrOfWalks)
+            .mapToObj((l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks})
+            .collect(Collectors.toList())
+            .toArray(new long[][]{})
+        );
+
+        // our sample producer is supposed to work within the first 3 walks
+        // it prefetches in the constructor
+        HugeDoubleArray probabilities = HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 0).toArray());
+        var sampleProducer = new PositiveSampleProducer(
+            walks,
+            probabilities,
+            0,
+            nbrOfWalks - 1,
+            10,
+            TestProgressLogger.NULL_LOGGER
+        );
+        // does not overflow the stack = passes test
+
+        var counter = 0L;
+        while (sampleProducer.hasNext()) {
+            counter++;
+            sampleProducer.next(new long[2]);
+        }
+
+        assertEquals(0, counter, "no samples possible here because walks are too short");
+    }
+
+    @Test
+    void doesNotAttemptToFetchOutsideBatch() {
+        int nbrOfWalks = 100;
+        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
+            .range(0, nbrOfWalks)
+            .mapToObj((l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks, (l1 + 2) % nbrOfWalks})
+            .collect(Collectors.toList())
+            .toArray(new long[][]{})
+        );
+
+        var sampleProducer = new PositiveSampleProducer(
+            walks,
+            HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
+            0,
+            nbrOfWalks / 2 - 1,
+            10,
+            TestProgressLogger.NULL_LOGGER
+        );
+
+        var counter = 0L;
+        while (sampleProducer.hasNext()) {
+            counter++;
+            sampleProducer.next(new long[2]);
+        }
+
+        assertEquals(300, counter, "50 walks in batch, 3 nodes each, 2 center word matches => 300 samples");
+    }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("org.neo4j.gds.embeddings.node2vec.PositiveSampleProducerTest#pairCombinations")
