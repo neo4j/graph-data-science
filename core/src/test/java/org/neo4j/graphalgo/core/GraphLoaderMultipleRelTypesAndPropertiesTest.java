@@ -117,12 +117,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(NodeLabel.of("N3")));
 
         NodeProperties prop1 = graphStore.nodePropertyValues("prop1");
-        assertEquals(1.0D, prop1.getDouble(0));
-        assertTrue(Double.isNaN(prop1.getDouble(1)));
+        assertEquals(1L, prop1.getLong(0));
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop1.getLong(1));
 
         NodeProperties prop2 = graphStore.nodePropertyValues("prop2");
-        assertTrue(Double.isNaN(prop2.getDouble(0)));
-        assertEquals(2.0D, prop2.getDouble(1));
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop2.getLong(0));
+        assertEquals(2L, prop2.getLong(1));
     }
 
     @Test

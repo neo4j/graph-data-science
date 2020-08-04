@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -78,7 +79,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
             seedProperty = graph.nodeProperties(seedPropertyKey);
         } else {
-            seedProperty = new LongNullPropertyMap(0);
+            seedProperty = new LongNullPropertyMap(DefaultValue.LONG_DEFAULT_FALLBACK);
         }
         this.nodeProperties = seedProperty;
 

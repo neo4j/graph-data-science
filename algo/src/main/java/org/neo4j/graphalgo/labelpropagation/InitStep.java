@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -58,7 +59,7 @@ final class InitStep implements Step {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
-            long existingLabelValue = nodeProperties.getLong(nodeId, Long.MIN_VALUE);
+            long existingLabelValue = nodeProperties.getLong(nodeId);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might
             // clash with node IDs. If we have loaded a graph with a greater node ID
@@ -69,7 +70,7 @@ final class InitStep implements Step {
             // node ID to maintain determinism since our internal node IDs are not
             // guaranteed to always map in the same fashion to the original IDs and those
             // one are as stable as we need them to be for getting deterministic results.
-            long existingLabel = existingLabelValue == Long.MIN_VALUE
+            long existingLabel = existingLabelValue == DefaultValue.LONG_DEFAULT_FALLBACK
                     ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
                     : existingLabelValue;
             existingLabels.set(nodeId, existingLabel);

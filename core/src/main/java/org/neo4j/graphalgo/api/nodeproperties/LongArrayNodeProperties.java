@@ -34,11 +34,6 @@ public interface LongArrayNodeProperties extends NodeProperties {
     }
 
     @Override
-    default Object getObject(long nodeId, Object defaultValue) {
-        return getLongArray(nodeId, (long[]) defaultValue);
-    }
-
-    @Override
     default Value getValue(long nodeId) {
         var value = getLongArray(nodeId);
         return value == null ? null : Values.longArray(value);

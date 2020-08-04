@@ -37,11 +37,6 @@ public interface DoubleNodeProperties extends NodeProperties {
     }
 
     @Override
-    default Object getObject(long nodeId, Object defaultValue) {
-        return getDouble(nodeId, (Double) defaultValue);
-    }
-
-    @Override
     default Value getValue(long nodeId) {
         var value = getDouble(nodeId);
         return Double.isNaN(value) ? null : Values.doubleValue(value);

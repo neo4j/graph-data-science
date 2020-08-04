@@ -42,20 +42,11 @@ public class FilteredNodeProperties implements NodeProperties {
         return properties.getDouble(translateId(nodeId));
     }
 
-    @Override
-    public double getDouble(long nodeId, double defaultValue) {
-        return properties.getDouble(translateId(nodeId), defaultValue);
-    }
-
-    @Override
+        @Override
     public long getLong(long nodeId) {
         return properties.getLong(translateId(nodeId));
     }
 
-    @Override
-    public long getLong(long nodeId, long defaultValue) {
-        return properties.getLong(translateId(nodeId), defaultValue);
-    }
 
     @Override
     public double[] getDoubleArray(long nodeId) {
@@ -63,18 +54,8 @@ public class FilteredNodeProperties implements NodeProperties {
     }
 
     @Override
-    public double[] getDoubleArray(long nodeId, double[] defaultValue) {
-        return properties.getDoubleArray(translateId(nodeId), defaultValue);
-    }
-
-    @Override
     public Object getObject(long nodeId) {
         return properties.getObject(translateId(nodeId));
-    }
-
-    @Override
-    public Object getObject(long nodeId, Object defaultValue) {
-        return properties.getObject(translateId(nodeId), defaultValue);
     }
 
     @Override
@@ -92,7 +73,7 @@ public class FilteredNodeProperties implements NodeProperties {
         if (getType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
             graph.forEachNode(id -> {
-                currentMax.setValue(Math.max(currentMax.doubleValue(), getLong(id, Long.MIN_VALUE)));
+                currentMax.setValue(Math.max(currentMax.doubleValue(), getLong(id)));
                 return true;
             });
             return currentMax.longValue() == Long.MIN_VALUE
@@ -102,7 +83,7 @@ public class FilteredNodeProperties implements NodeProperties {
         } else if (getType() == ValueType.DOUBLE) {
             MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
             graph.forEachNode(id -> {
-                currentMax.setValue(Math.max(currentMax.doubleValue(), getDouble(id, Double.MIN_VALUE)));
+                currentMax.setValue(Math.max(currentMax.doubleValue(), getDouble(id)));
                 return true;
             });
             return currentMax.doubleValue() == Double.NEGATIVE_INFINITY
@@ -119,7 +100,7 @@ public class FilteredNodeProperties implements NodeProperties {
         if (getType() == ValueType.LONG) {
             MutableLong currentMax = new MutableLong(Long.MIN_VALUE);
             graph.forEachNode(id -> {
-                currentMax.setValue(Math.max(currentMax.doubleValue(), getLong(id, Long.MIN_VALUE)));
+                currentMax.setValue(Math.max(currentMax.doubleValue(), getLong(id)));
                 return true;
             });
             return currentMax.longValue() == Long.MIN_VALUE
@@ -129,7 +110,7 @@ public class FilteredNodeProperties implements NodeProperties {
         } else if (getType() == ValueType.DOUBLE) {
             MutableDouble currentMax = new MutableDouble(Double.NEGATIVE_INFINITY);
             graph.forEachNode(id -> {
-                currentMax.setValue(Math.max(currentMax.doubleValue(), getDouble(id, Double.MIN_VALUE)));
+                currentMax.setValue(Math.max(currentMax.doubleValue(), getDouble(id)));
                 return true;
             });
             return currentMax.doubleValue() == Double.NEGATIVE_INFINITY

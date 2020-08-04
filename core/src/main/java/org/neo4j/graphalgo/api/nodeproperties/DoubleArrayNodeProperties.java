@@ -34,11 +34,6 @@ public interface DoubleArrayNodeProperties extends NodeProperties {
     }
 
     @Override
-    default Object getObject(long nodeId, Object defaultValue) {
-        return getDoubleArray(nodeId, (double[]) defaultValue);
-    }
-
-    @Override
     default Value getValue(long nodeId) {
         var value = getDoubleArray(nodeId);
         return value == null ? null : Values.doubleArray(value);

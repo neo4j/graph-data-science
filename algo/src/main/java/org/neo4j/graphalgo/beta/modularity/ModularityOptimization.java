@@ -188,7 +188,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         long nextAvailableInternalCommunityId = -1;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long seedCommunity = seedProperty.getLong(nodeId, -1);
+            long seedCommunity = seedProperty.getLong(nodeId);
+            if (seedCommunity < 0) {
+                seedCommunity = -1;
+            }
+
             seedCommunity = seedCommunity >= 0 ? seedCommunity : graph.toOriginalNodeId(nodeId) + maxSeedCommunity;
             if (communityMapping.getOrDefault(seedCommunity, -1) < 0) {
                 communityMapping.addTo(seedCommunity, ++nextAvailableInternalCommunityId);

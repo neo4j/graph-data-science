@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.functions;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -92,7 +94,17 @@ public class NodePropertyFunc {
             ? graphStore.nodePropertyValues(propertyKey) // builds UnionNodeProperties and returns the first matching property
             : graphStore.nodePropertyValues(NodeLabel.of(nodeLabel), propertyKey);
 
-        double propertyValue = propertyValues.getDouble(internalId);
-        return Double.isNaN(propertyValue) ? null : propertyValue;
+        if (propertyValues.getType() == ValueType.DOUBLE) {
+            double propertyValue = propertyValues.getDouble(internalId);
+            return Double.isNaN(propertyValue) ? null : propertyValue;
+        } else if (propertyValues.getType() == ValueType.LONG) {
+            long longValue = propertyValues.getLong(internalId);
+            return longValue == DefaultValue.LONG_DEFAULT_FALLBACK ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : (double) longValue;
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot retrieve a double value from a property with type %s",
+                propertyValues.getType()
+            ));
+        }
     }
 }

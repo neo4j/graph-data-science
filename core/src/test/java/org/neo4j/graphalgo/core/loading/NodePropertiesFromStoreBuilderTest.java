@@ -49,7 +49,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
-        assertEquals(42.0, properties.getDouble(0, 42.0));
+        assertEquals(42.0, properties.getDouble(0));
     }
 
     @Test
@@ -62,7 +62,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
-        assertEquals(42, properties.getLong(0, 42));
+        assertEquals(42, properties.getLong(0));
     }
 
     @Test
@@ -70,7 +70,7 @@ final class NodePropertiesFromStoreBuilderTest {
         var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
         assertEquals(1.0, properties.getDouble(1));
-        assertEquals(1.0, properties.getDouble(1, 42.0));
+        assertEquals(1.0, properties.getDouble(1));
     }
 
     @Test

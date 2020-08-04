@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 
 import com.carrotsearch.hppc.IntIntHashMap;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -119,17 +120,12 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
 
         @Override
         public long getLong(long nodeId) {
-            return getLong(nodeId, Long.MIN_VALUE);
-        }
-
-        @Override
-        public long getLong(long nodeId, long defaultValue) {
             int key = Math.toIntExact(nodeId);
             int index = weights.indexOf(key);
             if (weights.indexExists(index)) {
                 return weights.indexGet(index);
             }
-            return defaultValue;
+            return DefaultValue.LONG_DEFAULT_FALLBACK;
         }
 
         @Override

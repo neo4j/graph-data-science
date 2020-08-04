@@ -51,26 +51,6 @@ public interface NodeProperties {
 
     Value getValue(long nodeId);
 
-    default double getDouble(long nodeId, double defaultValue) {
-        return getDouble(nodeId);
-    }
-
-    default long getLong(long nodeId, long defaultValue) {
-        return getLong(nodeId);
-    }
-
-    default double[] getDoubleArray(long nodeId, double[] defaultValue) {
-        return getDoubleArray(nodeId);
-    }
-
-    default long[] getLongArray(long nodeId, long[] defaultValue) {
-        return getLongArray(nodeId);
-    }
-
-    default Object getObject(long nodeId, Object defaultValue) {
-        return getObject(nodeId);
-    }
-
     /**
      * Release internal data structures and return an estimate how many bytes were freed.
      *

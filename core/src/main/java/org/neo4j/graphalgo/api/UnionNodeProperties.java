@@ -80,14 +80,9 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double getDouble(long nodeId) {
-        return getDouble(nodeId, Double.NaN);
-    }
-
-    @Override
-    public double getDouble(long nodeId, double defaultValue) {
-        if (valueType == DOUBLE || valueType == LONG) {
+        if (valueType == DOUBLE) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? defaultValue : nodeProperties.getDouble(nodeId);
+            return nodeProperties == null ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : nodeProperties.getDouble(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double",
@@ -98,15 +93,9 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public long getLong(long nodeId) {
-        return getLong(nodeId, Long.MIN_VALUE);
-    }
-
-    @Override
-    public long getLong(long nodeId, long defaultValue) {
-        // TODO forbid doubles once we load properties with their correct type
-        if (valueType == LONG || valueType == DOUBLE) {
+        if (valueType == LONG) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? defaultValue : nodeProperties.getLong(nodeId);
+            return nodeProperties == null ? DefaultValue.LONG_DEFAULT_FALLBACK : nodeProperties.getLong(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to long",
@@ -117,14 +106,9 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double[] getDoubleArray(long nodeId) {
-        return getDoubleArray(nodeId, null);
-    }
-
-    @Override
-    public double[] getDoubleArray(long nodeId, double[] defaultValue) {
         if (valueType == DOUBLE_ARRAY) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? defaultValue : nodeProperties.getDoubleArray(nodeId);
+            return nodeProperties == null ? null : nodeProperties.getDoubleArray(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double array",
@@ -135,13 +119,8 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public Object getObject(long nodeId) {
-        return getObject(nodeId, null);
-    }
-
-    @Override
-    public Object getObject(long nodeId, Object defaultValue) {
         var nodeProperties = getPropertiesForNodeId(nodeId);
-        return nodeProperties == null ? defaultValue : nodeProperties.getObject(nodeId);
+        return nodeProperties == null ? null : nodeProperties.getObject(nodeId);
     }
 
     @Override

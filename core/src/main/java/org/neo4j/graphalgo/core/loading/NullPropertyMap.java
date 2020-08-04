@@ -45,11 +45,6 @@ public abstract class NullPropertyMap implements NodeProperties {
         }
 
         @Override
-        public double getDouble(long nodeId, double defaultValue) {
-            return defaultValue;
-        }
-
-        @Override
         public Object getObject(long nodeId) {
             return getDouble(nodeId);
         }
@@ -78,11 +73,6 @@ public abstract class NullPropertyMap implements NodeProperties {
         @Override
         public long getLong(long nodeId) {
             return this.defaultValue;
-        }
-
-        @Override
-        public long getLong(long nodeId, long defaultValue) {
-            return defaultValue;
         }
 
         @Override
