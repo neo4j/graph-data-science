@@ -76,6 +76,22 @@ public final class DefaultValue {
         throw getInvalidTypeException(Double.class);
     }
 
+    public long[] getLongArray() {
+        if (defaultValue instanceof long[]) {
+            return (long[]) defaultValue;
+        } else {
+            throw getInvalidTypeException(long[].class);
+        }
+    }
+
+    public double[] getDoubleArray() {
+        if (defaultValue instanceof double[]) {
+            return (double[]) defaultValue;
+        } else {
+            throw getInvalidTypeException(double[].class);
+        }
+    }
+
     public @Nullable Object getObject() {
         return defaultValue;
     }
