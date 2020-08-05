@@ -113,7 +113,6 @@ class EuclideanProcTest extends SimilarityProcTest<EuclideanAlgorithm, WeightedI
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private void buildRandomDB(int size) {

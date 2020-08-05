@@ -45,8 +45,8 @@ public final class Settings {
         return GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
     }
 
-    public static Setting<Boolean> enterpriseLicensed() {
-        return EnterpriseLicensingSettings.enterpriseLicensed;
+    public static Setting<String> enterpriseLicenseKey() {
+        return EnterpriseLicensingSettings.enterpriseLicenseKey;
     }
 
     public static Setting<Boolean> boltEnabled() {

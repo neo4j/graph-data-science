@@ -115,7 +115,6 @@ class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private void buildRandomDB(int size) {

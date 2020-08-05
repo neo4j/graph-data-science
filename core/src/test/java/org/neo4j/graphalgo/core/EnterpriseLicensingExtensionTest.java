@@ -43,7 +43,7 @@ class EnterpriseLicensingExtensionTest {
     void shouldSetMonitorTrue() {
         new TestDatabaseManagementServiceBuilder()
             .addExtension(new EnterpriseLicensingExtension())
-            .setConfig(Settings.enterpriseLicensed(), true)
+            .setConfig(Settings.enterpriseLicenseKey(), "TXlTdXBlclNlY3JldE1lc3NhZ2U9PT09PT1TSUdOQVRVUkU9PT09PT1hQ1hkbHByZmdMYVNEanZzS2ZVQWFrMXpvVEMrTit3aGRBeUxDdWZuRFRXVlNUTExURlpJREtWWmorZXB1ajllaXVVd0hVcDZqbGxDTGEwY2lHL3VkUDhMWTR0UjY3aDhwcWo2bk5pUzBnRktyL1hCTkpVQ3RIL3FJbDY2aWllQXJncEw2T1NxSGN3Rm85Zzc2bDVaVkxqYktucmNhSFNLVkQ5TVAwdDkrbEx0d0hpcFVRRTVHWGM5dkhqMTczTzhwSytIU0hLMzNqSFEvSHdrUWJJUHlhTC9VM0Z6TFlqbXFnYm8zZDJyVU9IQndicjRFVkZyczRPMVhCRGRtTXBmNE1HejEyc050djJHZlVkeEo3SkFvSXpwN1EyQmx2TzFrQzR3b01FSHBKbjZnN2JBbFE1UUs1WVpJbU1TdU4xZzdPKzk2YkROTk5iVmsxMjNnT1RZRXc9PQ==")
             .impermanent()
             .build()
             .database(Settings.defaultDatabaseName());
@@ -51,5 +51,4 @@ class EnterpriseLicensingExtensionTest {
         assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
         assertFalse(GdsEdition.instance().isOnCommunityEdition());
     }
-
 }

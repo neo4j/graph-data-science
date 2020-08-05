@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -74,7 +73,6 @@ class EmbeddingsAsInputTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private static final String RUN_COSINE_STREAM =

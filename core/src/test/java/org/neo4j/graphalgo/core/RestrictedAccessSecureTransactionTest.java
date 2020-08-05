@@ -33,7 +33,6 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
     @Override
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     @Test

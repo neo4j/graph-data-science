@@ -39,14 +39,16 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                boolean enterpriseLicensed = dependencies
+                String enterpriseLicenseKey = dependencies
                     .config()
-                    .get(Settings.enterpriseLicensed());
+                    .get(Settings.enterpriseLicenseKey());
                 GdsEdition gdsEdition = GdsEdition.instance();
-                if (enterpriseLicensed) {
-                    gdsEdition.setToEnterpriseEdition();
-                } else {
-                    gdsEdition.setToCommunityEdition();
+                gdsEdition.setToCommunityEdition();
+
+                if(enterpriseLicenseKey != null) {
+                    if (new SignatureTool().verify(enterpriseLicenseKey)) {
+                        gdsEdition.setToEnterpriseEdition();
+                    }
                 }
             }
 

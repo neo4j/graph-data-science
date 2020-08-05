@@ -127,7 +127,6 @@ class CosineProcTest extends SimilarityProcTest<CosineAlgorithm, WeightedInput> 
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private void buildRandomDB(int size) {

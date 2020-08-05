@@ -110,7 +110,6 @@ class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalIn
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     private void buildRandomDB(int size) {
