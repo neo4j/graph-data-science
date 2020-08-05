@@ -109,9 +109,13 @@ final class SingleTypeRelationshipImporter {
                 return importer.flushTasks().stream();
             }
 
-            SingleTypeRelationshipImporter withBuffer(IdMapping idMap, int bulkSize, RelationshipImporter.PropertyReader propertyReader) {
+            SingleTypeRelationshipImporter withBuffer(
+                IdMapping idMap,
+                int bulkSize,
+                RelationshipImporter.PropertyReader propertyReader
+            ) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap,
+                    idMap.cloneIdMapping(),
                     typeId,
                     bulkSize,
                     validateRelationships
@@ -128,7 +132,7 @@ final class SingleTypeRelationshipImporter {
                 MemoryTracker memoryTracker
             ) {
                 RelationshipsBatchBuffer buffer = new RelationshipsBatchBuffer(
-                    idMap,
+                    idMap.cloneIdMapping(),
                     typeId,
                     bulkSize,
                     validateRelationships

@@ -49,4 +49,8 @@ public interface IdMapping {
      * Number of mapped nodeIds.
      */
     long nodeCount();
+
+    default IdMapping cloneIdMapping() {
+        return this;
+    }
 }
