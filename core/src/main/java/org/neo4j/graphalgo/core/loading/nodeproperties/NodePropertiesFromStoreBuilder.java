@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading.nodeproperties;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -33,9 +32,10 @@ import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
-import java.util.function.Consumer;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class NodePropertiesFromStoreBuilder {
 
@@ -57,63 +57,58 @@ public final class NodePropertiesFromStoreBuilder {
     private final DefaultValue defaultValue;
     private final long nodeSize;
     private final AllocationTracker tracker;
-    private InnerNodePropertiesBuilder innerBuilder;
+    private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
     private final LongAdder size;
-
-    private final AtomicBoolean isInitialized;
 
     public static NodePropertiesFromStoreBuilder of(long nodeSize, AllocationTracker tracker, DefaultValue defaultValue) {
         return new NodePropertiesFromStoreBuilder(defaultValue, nodeSize, tracker);
-    }
-
-    @TestOnly
-    public static NodeProperties of(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
-        var builder = of(size, AllocationTracker.EMPTY, DefaultValue.of(defaultValue));
-        buildBlock.accept(builder);
-        return builder.build();
     }
 
     private NodePropertiesFromStoreBuilder(DefaultValue defaultValue, long nodeSize, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
         this.nodeSize = nodeSize;
         this.tracker = tracker;
+        this.innerBuilder = new AtomicReference<>();
         this.size = new LongAdder();
-        this.isInitialized = new AtomicBoolean(false);
     }
 
     public void set(long nodeId, Value value) {
         if (value != null) {
-            if (!isInitialized.get()) {
+            if (innerBuilder.get() == null) {
                 initializeWithType(value);
             }
-            if (isInitialized.get()) {
-                innerBuilder.setValue(nodeId, value);
-                size.increment();
-            }
+            innerBuilder.get().setValue(nodeId, value);
+            size.increment();
         }
     }
 
     public NodeProperties build() {
-        if (innerBuilder == null) {
+        if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
                 initializeWithType(Values.of(defaultValue.getObject()));
             } else {
                 throw new IllegalStateException("Cannot infer type of property");
             }
         }
-        return innerBuilder.build(this.size.sum());
+        return innerBuilder.get().build(this.size.sum());
     }
 
+    // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
     private synchronized void initializeWithType(Value value) {
-        if (!isInitialized.get()) {
+        if (innerBuilder.get() == null) {
+            InnerNodePropertiesBuilder newBuilder;
             if (value instanceof LongValue || value instanceof IntValue) {
-                this.innerBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, tracker);
             } else if (value instanceof DoubleValue || value instanceof FloatValue) {
-                this.innerBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+                newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, tracker);
             } else {
-                throw new IllegalArgumentException("TODO"); //TODO
+                throw new UnsupportedOperationException(formatWithLocale(
+                    "Loading of values of type %s is currently not supported",
+                    value.getTypeName()
+                ));
             }
-            this.isInitialized.set(true);
+
+            innerBuilder.compareAndSet(null, newBuilder);
         }
     }
 

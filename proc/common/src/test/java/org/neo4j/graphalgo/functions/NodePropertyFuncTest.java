@@ -43,15 +43,14 @@ class NodePropertyFuncTest  extends BaseProcTest {
         registerProcedures(GraphCreateProc.class);
         registerFunctions(NodePropertyFunc.class);
         runQuery(DB_CYPHER);
-        var query = GdsCypher
+        runQuery(GdsCypher
             .call()
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("prop")
             .withAnyRelationshipType()
             .graphCreate("testGraph")
-            .yields();
-        runQuery(query);
+            .yields());
     }
 
     @AfterEach
@@ -94,5 +93,4 @@ class NodePropertyFuncTest  extends BaseProcTest {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'noProp', 'A') AS prop";
         assertError(query, "Node projection 'A' does not have property key 'noProp'. Available keys: ['prop'].");
     }
-
 }

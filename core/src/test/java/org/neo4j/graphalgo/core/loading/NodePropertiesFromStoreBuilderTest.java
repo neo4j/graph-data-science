@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -31,6 +32,7 @@ import java.util.OptionalLong;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -65,7 +67,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void returnsValuesThatHaveBeenSet() {
-        var properties = NodePropertiesFromStoreBuilder.of(2L, 42.0, b -> b.set(1, Values.of(1.0)));
+        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
         assertEquals(1.0, properties.getDouble(1));
         assertEquals(1.0, properties.getDouble(1, 42.0));
@@ -74,14 +76,14 @@ final class NodePropertiesFromStoreBuilderTest {
     @Test
     void returnsDefaultOnMissingEntries() {
         var expectedImplicitDefault = 42.0;
-        var properties = NodePropertiesFromStoreBuilder.of(2L, expectedImplicitDefault, b -> {});
+        var properties = createNodeProperties(2L, expectedImplicitDefault, b -> {});
 
         assertEquals(expectedImplicitDefault, properties.getDouble(2));
     }
 
     @Test
     void returnNaNIfItWasSet() {
-        var properties = NodePropertiesFromStoreBuilder.of(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
+        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
 
         assertEquals(42.0, properties.getDouble(0));
         assertEquals(Double.NaN, properties.getDouble(1));
@@ -89,7 +91,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void trackMaxValue() {
-        var properties = NodePropertiesFromStoreBuilder.of(2L, 0.0, b -> {
+        var properties = createNodeProperties(2L, 0.0, b -> {
             b.set(0, Values.of(42));
             b.set(1, Values.of(21));
         });
@@ -100,7 +102,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void hasSize() {
-        var properties = NodePropertiesFromStoreBuilder.of(2L, 0.0, b -> {
+        var properties = createNodeProperties(2L, 0.0, b -> {
             b.set(0, Values.of(42.0));
             b.set(1, Values.of(21.0));
         });
@@ -172,5 +174,11 @@ final class NodePropertiesFromStoreBuilderTest {
         // e.g. `this.maxValue = Math.max(value, this.maxValue);`
         // this would occasionally be 2^41.
         assertEquals(1L << 42, maxPropertyValue.getAsDouble());
+    }
+
+    static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
+        var builder = NodePropertiesFromStoreBuilder.of(size, AllocationTracker.EMPTY, DefaultValue.of(defaultValue));
+        buildBlock.accept(builder);
+        return builder.build();
     }
 }

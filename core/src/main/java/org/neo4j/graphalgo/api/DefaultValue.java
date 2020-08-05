@@ -55,7 +55,9 @@ public final class DefaultValue {
             return LONG_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Float && Float.isNaN((float) defaultValue)) {
             return LONG_DEFAULT_FALLBACK;
-        }else if (defaultValue instanceof Number) {
+        } else if (defaultValue instanceof Double || defaultValue instanceof Float) {
+            return exactDoubleToLong((double) defaultValue);
+        } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).longValue();
         }
         throw getInvalidTypeException(Long.class);
@@ -64,6 +66,8 @@ public final class DefaultValue {
     public double getDouble() {
         if (defaultValue instanceof Long && defaultValue.equals(LONG_DEFAULT_FALLBACK)) {
             return DOUBLE_DEFAULT_FALLBACK;
+        } else if (defaultValue instanceof Long || defaultValue instanceof Integer) {
+            return exactLongToDouble((long) defaultValue);
         } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).doubleValue();
         } else if (defaultValue == null) {
@@ -98,5 +102,21 @@ public final class DefaultValue {
     @NotNull
     public ClassCastException getInvalidTypeException(Class<?> expectedClass) {
         return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
+    }
+
+    private long exactDoubleToLong(double d) {
+        if(d % 1 == 0) {
+            return (long) d;
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale("Cannot safely convert %.2f into an long value", d));
+        }
+    }
+
+    private double exactLongToDouble(long l) {
+        if(l <= 1L << 53) {
+            return (double) l;
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale("Cannot safely convert %d into an double value", l));
+        }
     }
 }

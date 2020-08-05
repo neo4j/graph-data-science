@@ -22,15 +22,14 @@ package org.neo4j.graphalgo.beta.generator;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.NodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
 import java.util.Map;
 import java.util.Optional;
@@ -123,13 +122,13 @@ public final class RandomGraphGenerator {
 
     private NodeProperties generateNodeProperties() {
         PropertyProducer nodePropertyProducer = maybeNodePropertyProducer.get();
-        NodePropertiesBuilder builder = NodePropertiesBuilder.of(nodeCount, ValueType.DOUBLE, allocationTracker, 0D);
+        HugeDoubleArray nodePropertiesArray = HugeDoubleArray.newArray(nodeCount, allocationTracker);
 
         for (long i = 0; i < nodeCount; i++) {
-            builder.set(i, nodePropertyProducer.getPropertyValue(random));
+            nodePropertiesArray.set(i, nodePropertyProducer.getPropertyValue(random));
         }
 
-        return builder.build();
+        return nodePropertiesArray.asNodeProperties();
     }
 
     public RelationshipDistribution getRelationshipDistribution() {

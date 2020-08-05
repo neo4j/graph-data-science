@@ -119,7 +119,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
                             relationshipCount,
                             projection.orientation(),
                             projection.isMultiGraph(),
-                            propertyIndexAndMapping.getTwo().defaultValue().getDouble()
+                            propertyIndexAndMapping.getTwo().defaultValue().getDouble() // This is fine because relationships currently only support doubles
                         )
                     ));
                 relationshipProperties.put(relationshipType, propertyMap);

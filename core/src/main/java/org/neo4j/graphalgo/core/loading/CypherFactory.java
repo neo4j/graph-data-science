@@ -256,8 +256,7 @@ public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateF
         default Collection<PropertyMapping> propertyMappings() {
             return LongStream
                 .range(0, propertyCount())
-                .boxed()
-                .map(property -> PropertyMapping.of(property.toString(), DefaultValue.DEFAULT))
+                .mapToObj(property -> PropertyMapping.of(Long.toString(property), DefaultValue.DEFAULT))
                 .collect(Collectors.toList());
         }
 
