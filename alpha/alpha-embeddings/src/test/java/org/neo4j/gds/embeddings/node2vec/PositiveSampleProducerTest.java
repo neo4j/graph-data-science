@@ -71,7 +71,6 @@ class PositiveSampleProducerTest {
             10,
             TestProgressLogger.NULL_LOGGER
         );
-        // does not overflow the stack = passes test
 
         var counter = 0L;
         while (sampleProducer.hasNext()) {
@@ -79,6 +78,7 @@ class PositiveSampleProducerTest {
             sampleProducer.next(new long[2]);
         }
 
+        // does not overflow the stack = passes test
         assertEquals(0, counter, "no samples possible here because walks are too short");
     }
 
@@ -93,7 +93,7 @@ class PositiveSampleProducerTest {
             .toArray(new long[][]{})
         );
 
-        // our sample producer is supposed to work within the first 3 walks
+        // our sample producer is supposed to work within the first nbrOfWalks - 1 walks
         // it prefetches in the constructor
         HugeDoubleArray probabilities = HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 0).toArray());
         var sampleProducer = new PositiveSampleProducer(
