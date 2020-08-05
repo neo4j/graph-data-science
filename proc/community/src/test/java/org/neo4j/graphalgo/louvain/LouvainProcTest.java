@@ -200,4 +200,9 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
         assertEquals(result1.modularities()[result1.levels() - 1], result2.modularities()[result2.levels() - 1]);
         assertArrayEquals(result1.finalDendrogram().toArray(), result2.finalDendrogram().toArray());
     }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(dbCypher());
+    }
 }

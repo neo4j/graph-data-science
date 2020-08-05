@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -323,32 +324,48 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
+    void createGraphTopology();
+
     @Test
     default void testNonConsecutiveIds() {
-        Random random = new Random();
+        RESULT originalResult = loadGraphAndRunCompute("originalGraph");
 
-        randomGraph(random.nextInt(250));
+        createRandomNodes();
         emptyDb();
-        randomGraph(random.nextInt(250));
+        createGraphTopology();
 
-        applyOnProcedure((proc) -> {
-            getWriteAndStreamProcedures(proc)
-                .forEach(method -> {
-                    Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
-                    assertDoesNotThrow(() -> method.invoke(proc, configMap, Collections.emptyMap()));
-                });
-        });
+        RESULT reloadedResult = loadGraphAndRunCompute("reloadedGraph");
+
+        assertResultEquals(originalResult, reloadedResult);
     }
 
-    private void randomGraph(int size) {
-        runQuery(graphDb(),"UNWIND range(1,$size/10) as _ CREATE (:Person) CREATE (:Item) ", Map.of("size", size));
-        String statement =
-            "MATCH (p:Person) WITH collect(p) as people " +
-            "MATCH (i:Item) WITH people, collect(i) as items " +
-            "UNWIND range(1,$size) as _ " +
-            "WITH people[toInteger(rand()*size(people))] as p, items[toInteger(rand()*size(items))] as i " +
-            "MERGE (p)-[likes:LIKES]->(i)";
-        runQuery(graphDb(), statement, Map.of("size", size));
+    default void loadGraph(String graphName){
+        runQuery(
+            graphDb(),
+            GdsCypher.call()
+                .loadEverything()
+                .graphCreate(graphName)
+                .yields()
+        );
+    }
+
+    private RESULT loadGraphAndRunCompute(String graphName) {
+        loadGraph(graphName);
+
+        AtomicReference<AlgoBaseProc.ComputationResult<?, RESULT, CONFIG>> computationResult = new AtomicReference<>();
+        applyOnProcedure((proc) -> {
+            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+            computationResult.set(proc.compute(graphName, configMap));
+        });
+        return computationResult.get().result();
+    }
+
+    private void createRandomNodes() {
+        runQuery(
+            graphDb(),
+            "UNWIND range(1,$size) as _ CREATE (:Fake)",
+            Map.of("size", new Random().nextInt(1000))
+        );
     }
 
     @Test

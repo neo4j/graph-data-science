@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -46,7 +47,10 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
     @BeforeEach
     void setUp() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(getProcedureClazz());
+        registerProcedures(
+            getProcedureClazz(),
+            GraphCreateProc.class
+        );
     }
 
     public GraphDatabaseAPI graphDb() {
@@ -57,4 +61,10 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.get(0).data().length, result2.get(0).data().length);
     }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(DB_CYPHER);
+    }
+
 }

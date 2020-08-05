@@ -25,9 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AbstractRelationshipProjections;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.OnlyUndirectedTest;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
@@ -124,5 +126,21 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             String message = exception.getMessage();
             assertTrue(message.contains("maxDegree") && message.contains("greater than 1") );
         });
+    }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(dbCypher());
+    }
+
+    @Override
+    public void loadGraph(String graphName){
+        String graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("T", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
     }
 }

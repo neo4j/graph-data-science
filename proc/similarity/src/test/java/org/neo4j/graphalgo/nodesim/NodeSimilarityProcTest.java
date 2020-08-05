@@ -279,4 +279,9 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     private CONFIG config(CypherMapWrapper input) {
         return createConfig(input);
     }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(DB_CYPHER);
+    }
 }

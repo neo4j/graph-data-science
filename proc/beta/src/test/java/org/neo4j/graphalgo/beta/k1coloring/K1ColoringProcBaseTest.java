@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -59,7 +60,8 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
             K1ColoringWriteProc.class,
             K1ColoringStatsProc.class,
             K1ColoringStreamProc.class,
-            K1ColoringMutateProc.class
+            K1ColoringMutateProc.class,
+            GraphCreateProc.class
         );
         runQuery(DB_CYPHER);
     }
@@ -80,4 +82,10 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
             .withAnyRelationshipType()
             .algo("gds", "beta", "k1coloring");
     }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(DB_CYPHER);
+    }
+
 }

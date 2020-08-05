@@ -201,6 +201,11 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         assertEquals(result1.getIterations(), result2.getIterations());
     }
 
+    @Override
+    public void createGraphTopology() {
+        runQuery(DB_CYPHER);
+    }
+
     GdsCypher.ModeBuildStage explicitAlgoBuildStage() {
         return GdsCypher.call()
             .explicitCreation(TEST_GRAPH_NAME)

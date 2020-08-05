@@ -206,4 +206,8 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         assertEquals(expected, actual);
     }
 
+    @Override
+    public void createGraphTopology() {
+        runQuery(DB_CYPHER);
+    }
 }

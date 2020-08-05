@@ -26,9 +26,11 @@ import org.neo4j.graphalgo.AbstractRelationshipProjections;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.ConfigurableSeedConfigTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.OnlyUndirectedTest;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -181,5 +183,21 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
                           "You might experience a slowdown in the procedure execution.";
         String actual = testLog.getMessages("warn").get(0);
         assertEquals(expected, actual);
+    }
+
+    @Override
+    public void createGraphTopology() {
+        runQuery(dbCypher());
+    }
+
+    @Override
+    public void loadGraph(String graphName){
+        String graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("T", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
     }
 }

@@ -55,17 +55,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
 
     @BeforeEach
     void setupGraph() throws Exception {
-        @Language("Cypher") var cypher =
-            "CREATE" +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
-            ", (a)-[:REL]->(b)" +
-            ", (b)-[:REL]->(c)" +
-            ", (c)-[:REL]->(d)" +
-            ", (d)-[:REL]->(e)";
+        createGraphTopology();
 
         registerProcedures(
             BetweennessCentralityStreamProc.class,
@@ -75,8 +65,6 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             GraphWriteNodePropertiesProc.class,
             GraphCreateProc.class
         );
-
-        runQuery(cypher);
 
         runInTransaction(db, tx -> {
             var label = Label.label("Node");
@@ -96,4 +84,21 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             assertEquals(result1.get(nodeId), result2.get(nodeId));
         }
     }
+
+    public void createGraphTopology() {
+        @Language("Cypher") var cypher =
+            "CREATE" +
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (a)-[:REL]->(b)" +
+            ", (b)-[:REL]->(c)" +
+            ", (c)-[:REL]->(d)" +
+            ", (d)-[:REL]->(e)";
+
+        runQuery(cypher);
+    }
+
 }
