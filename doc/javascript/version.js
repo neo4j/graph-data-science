@@ -1,20 +1,45 @@
-window.docMeta = (function () {
-  var version = '1.1';
-  var name = 'graph-data-science';
-  var href = window.location.href;
+window.docMeta = (async function () {
+  const version = '1.1';
+  const name = 'graph-data-science';
+
+  const href = window.location.href;
+  const thisPubBaseUri = href.substring(0, href.indexOf(name) + name.length) + '/' + version;
+  const unversionedDocBaseUri = href.substring(0, href.indexOf(name) + name.length) + '/';
+  const commonDocsBaseUri = href.substring(0, href.indexOf(name) - 1);
+
+  const pathname = window.location.pathname;
+  let neo4jPageId;
+  if (pathname.indexOf(name) > -1) {
+    const baseUri = unversionedDocBaseUri + pathname.split(name + '/')[1].split('/')[0] + '/';
+    neo4jPageId = href.replace(baseUri, '');
+  }
+
+  const versionsUrl =
+    'https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/doc-versions.json';
+  const availableDocVersions = await jQuery.ajax({
+    type: 'GET',
+    url: versionsUrl,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/vnd.github.v3+json'
+    },
+    crossOrigin: true,
+    success: function (data) {
+      return data;
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.error('Request failed...', jqXHR, textStatus, errorThrown);
+    }
+  });
+
   return {
     name: name,
     version: version,
-    availableDocVersions: ['1.0', '1.1', '1.2', '1.3'],
-    thisPubBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/' + version,
-    unversionedDocBaseUri: href.substring(0, href.indexOf(name) + name.length) + '/',
-    commonDocsBaseUri: href.substring(0, href.indexOf(name) - 1)
+    availableDocVersions: availableDocVersions,
+    thisPubBaseUri: thisPubBaseUri,
+    unversionedDocBaseUri: unversionedDocBaseUri,
+    commonDocsBaseUri: commonDocsBaseUri,
+    neo4jPageId: neo4jPageId
   }
-})();
-
-(function () {
-  var baseUri = window.docMeta.unversionedDocBaseUri + window.location.pathname.split(window.docMeta.name + '/')[1].split('/')[0] + '/';
-  var docPath = window.location.href.replace(baseUri, '');
-  window.neo4jPageId = docPath;
 })();
 // vim: set sw=2 ts=2:
