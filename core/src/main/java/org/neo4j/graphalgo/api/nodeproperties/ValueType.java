@@ -40,6 +40,12 @@ public enum ValueType {
             return "List of Float";
         }
     },
+    FLOAT_ARRAY {
+        @Override
+        public String cypherName() {
+            return "List of Float";
+        }
+    },
     LONG_ARRAY {
         @Override
         public String cypherName() {

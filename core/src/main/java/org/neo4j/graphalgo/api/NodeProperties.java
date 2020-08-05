@@ -41,6 +41,10 @@ public interface NodeProperties {
         throw unsupportedTypeException(ValueType.DOUBLE_ARRAY);
     }
 
+    default float[] getFloatArray(long nodeId) {
+        throw unsupportedTypeException(ValueType.FLOAT_ARRAY);
+    }
+
     default long[] getLongArray(long nodeId) {
         throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }

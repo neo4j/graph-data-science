@@ -79,18 +79,22 @@ public final class DefaultValue {
     }
 
     public long[] getLongArray() {
-        if (defaultValue instanceof long[]) {
-            return (long[]) defaultValue;
-        } else {
-            throw getInvalidTypeException(long[].class);
-        }
+        return getArray(long[].class);
     }
 
     public double[] getDoubleArray() {
-        if (defaultValue instanceof double[]) {
-            return (double[]) defaultValue;
+        return getArray(double[].class);
+    }
+
+    public float[] getFloatArray() {
+        return getArray(float[].class);
+    }
+
+    private <T> T getArray(Class<T> arrayType) {
+        if (arrayType.isAssignableFrom(Objects.requireNonNull(defaultValue).getClass())) {
+            return arrayType.cast(defaultValue);
         } else {
-            throw getInvalidTypeException(double[].class);
+            throw getInvalidTypeException(arrayType);
         }
     }
 
