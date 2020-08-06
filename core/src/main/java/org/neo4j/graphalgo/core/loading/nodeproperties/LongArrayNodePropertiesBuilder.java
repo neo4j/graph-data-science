@@ -23,23 +23,23 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 
-public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeObjectArray<long[]> objectArray;
     private final DefaultValue defaultValue;
 
-    public LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+    LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
         this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, tracker);
     }
 
     @Override
     void setValue(long nodeId, Value value) {
-        long[] arrayValue = ((LongArray) value).asObjectCopy();
-        objectArray.set(nodeId, arrayValue);
+        objectArray.set(nodeId, ValueConversion.getLongArray(value));
     }
 
     @Override

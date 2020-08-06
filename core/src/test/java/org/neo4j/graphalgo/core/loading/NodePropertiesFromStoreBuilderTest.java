@@ -20,11 +20,15 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.OptionalDouble;
@@ -33,6 +37,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
@@ -40,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 final class NodePropertiesFromStoreBuilderTest {
 
@@ -81,7 +87,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnLongArrays() {
         long[] data = {42L, 1337L};
         long[] defaultValue = new long[2];
-        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+        NodeProperties properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -95,7 +101,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnDoubleArrays() {
         double[] data = {42.2D, 1337.1D};
         double[] defaultValue = new double[2];
-        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+        NodeProperties properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -105,19 +111,30 @@ final class NodePropertiesFromStoreBuilderTest {
         assertArrayEquals(defaultValue, properties.getDoubleArray(0));
     }
 
-    @Test
-    void shouldFailOnUnSupportedTypes() {
-        String data = "a simple string";
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> NodePropertiesFromStoreBuilder.of(
+    static Stream<Arguments> unsupportedValues() {
+        return Stream.of(
+            arguments(Values.stringValue("42L")),
+            arguments(Values.floatArray(new float[]{42.0f})),
+            arguments(Values.shortArray(new short[]{(short) 42})),
+            arguments(Values.byteArray(new byte[]{(byte) 42})),
+            arguments(Values.booleanValue(true)),
+            arguments(Values.charValue('c'))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues")
+    void shouldFailOnUnSupportedTypes(Value data) {
+        UnsupportedOperationException ex = assertThrows(
+            UnsupportedOperationException.class,
+            () -> createNodeProperties(
                 2L,
-                "default",
-                b -> b.set(1, Values.of(data))
+                null,
+                b -> b.set(1, data)
             )
         );
 
-        assertThat(ex.getMessage(), containsString("Properties of type String are not supported."));
+        assertThat(ex.getMessage(), containsString("Loading of values of type"));
     }
 
     @Test

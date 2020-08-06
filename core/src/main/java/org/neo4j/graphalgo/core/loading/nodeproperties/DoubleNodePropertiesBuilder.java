@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 
@@ -60,7 +61,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     @Override
     void setValue(long nodeId, Value value) {
-        double doubleValue = ((NumberValue) value).doubleValue();
+        double doubleValue = ValueConversion.getDoubleValue(value);
         valuesBuilder.set(nodeId, Double.doubleToLongBits(doubleValue));
         updateMaxValue(doubleValue);
     }

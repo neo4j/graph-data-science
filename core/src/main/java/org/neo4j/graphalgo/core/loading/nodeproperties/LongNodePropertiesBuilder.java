@@ -19,17 +19,24 @@
  */
 package org.neo4j.graphalgo.core.loading.nodeproperties;
 
+import com.sun.jdi.IntegerValue;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.utils.ValueConversion;
+import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.NumberValue;
+import org.neo4j.values.storable.ShortValue;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.ValueGroup;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.OptionalLong;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
@@ -61,9 +68,9 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     @Override
     void setValue(long nodeId, Value value) {
-        long longValue = ((NumberValue) value).longValue();
-        valuesBuilder.set(nodeId, longValue);
-        updateMaxValue(longValue);
+            var longValue = ValueConversion.getLongValue(value);
+            valuesBuilder.set(nodeId, longValue);
+            updateMaxValue(longValue);
     }
 
     @Override

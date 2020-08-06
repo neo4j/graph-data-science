@@ -143,17 +143,9 @@ public final class NativeNodePropertyImporter {
         if (builders != null) {
             Value value = propertyCursor.propertyValue();
 
-            if (value instanceof NumberValue || value instanceof ArrayValue) {
-                for (NodePropertiesFromStoreBuilder builder : builders) {
-                    builder.set(nodeId, value);
-                    propertiesImported++;
-                }
-            } else if (!Values.NO_VALUE.equals(value)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported type [%s] of value %s. Please use a numeric property.",
-                    value.valueGroup(),
-                    value
-                ));
+            for (NodePropertiesFromStoreBuilder builder : builders) {
+                builder.set(nodeId, value);
+                propertiesImported++;
             }
         }
 

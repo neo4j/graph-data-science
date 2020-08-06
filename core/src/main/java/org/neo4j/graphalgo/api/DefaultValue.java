@@ -25,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.ValueConversion.exactDoubleToLong;
+import static org.neo4j.graphalgo.utils.ValueConversion.exactLongToDouble;
 
 public final class DefaultValue {
     public static final DefaultValue DEFAULT = new DefaultValue(null);
@@ -118,21 +120,5 @@ public final class DefaultValue {
     @NotNull
     public ClassCastException getInvalidTypeException(Class<?> expectedClass) {
         return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
-    }
-
-    private long exactDoubleToLong(double d) {
-        if(d % 1 == 0) {
-            return (long) d;
-        } else {
-            throw new UnsupportedOperationException(formatWithLocale("Cannot safely convert %.2f into an long value", d));
-        }
-    }
-
-    private double exactLongToDouble(long l) {
-        if(l <= 1L << 53) {
-            return (double) l;
-        } else {
-            throw new UnsupportedOperationException(formatWithLocale("Cannot safely convert %d into an double value", l));
-        }
     }
 }

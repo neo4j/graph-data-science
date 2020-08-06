@@ -23,23 +23,23 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.Value;
 
-public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeObjectArray<double[]> objectArray;
     private final DefaultValue defaultValue;
 
-    public DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+    DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
         this.objectArray = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
     }
 
     @Override
     void setValue(long nodeId, Value value) {
-        double[] arrayValue = ((DoubleArray) value).asObjectCopy();
-        objectArray.set(nodeId, arrayValue);
+        objectArray.set(nodeId, ValueConversion.getDoubleArray(value));
     }
 
     @Override
