@@ -199,7 +199,7 @@ class RandomGraphGeneratorTest {
 
         NodeProperties nodeProperties = graph.nodeProperties("foo");
         for (int nodeId = 0; nodeId < 10; nodeId++) {
-            double value = nodeProperties.getDouble(nodeId, -1);
+            double value = nodeProperties.getDouble(nodeId);
             assertTrue(0 <= value && value <= 1);
         }
     }
