@@ -32,7 +32,6 @@ public class Weights extends AbstractVariable implements Matrix {
 
     public Weights(Tensor data) {
         super(List.of(), data.dimensions());
-        validateDimensions(data.dimensions().length);
         this.data = data;
     }
 

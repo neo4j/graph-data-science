@@ -35,10 +35,4 @@ public interface Matrix extends Variable {
         assert idx <=1 : "Matrix variable can't have dimension higher than 2";
         return idx == 0 ? rows() : cols();
     }
-
-
-    default void validateDimensions(int dimensionsLength) {
-        assert dimensionsLength == 2 : "Matrix variable must have exactly two dimensions";
-    }
-
 }

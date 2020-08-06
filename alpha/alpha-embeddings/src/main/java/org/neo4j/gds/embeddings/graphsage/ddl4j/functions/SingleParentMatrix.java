@@ -25,7 +25,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 public abstract class SingleParentMatrix extends SingleParentVariable implements Matrix {
     SingleParentMatrix(Variable parent, int[] dimensions) {
         super(parent, dimensions);
-        validateDimensions(dimensions.length);
     }
 
     @Override
