@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.ValueConversion;
-import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.Value;
 
 class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {

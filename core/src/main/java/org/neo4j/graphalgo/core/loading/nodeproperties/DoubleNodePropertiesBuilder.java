@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.utils.ValueConversion;
-import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 
 import java.lang.invoke.MethodHandles;

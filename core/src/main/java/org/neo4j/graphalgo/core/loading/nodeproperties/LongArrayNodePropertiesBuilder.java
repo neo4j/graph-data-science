@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.ValueConversion;
-import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 
 class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
