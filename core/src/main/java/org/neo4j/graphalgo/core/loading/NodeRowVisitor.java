@@ -146,7 +146,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             Object value = CypherLoadingUtils.getProperty(row, propertyKey);
             if (value instanceof Number) {
                 propertyValues.put(propertyKey, Values.of(value));
-            } else {
+            } else if (value != null) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported type [%s] of value %s. Please use a numeric property.",
                     Values.of(value).valueGroup(),

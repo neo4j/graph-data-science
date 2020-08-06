@@ -56,7 +56,7 @@ public final class DefaultValue {
         } else if (defaultValue instanceof Float && Float.isNaN((float) defaultValue)) {
             return LONG_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Double || defaultValue instanceof Float) {
-            return exactDoubleToLong((double) defaultValue);
+            return exactDoubleToLong(((Number) defaultValue).doubleValue());
         } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).longValue();
         }
@@ -67,7 +67,7 @@ public final class DefaultValue {
         if (defaultValue instanceof Long && defaultValue.equals(LONG_DEFAULT_FALLBACK)) {
             return DOUBLE_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Long || defaultValue instanceof Integer) {
-            return exactLongToDouble((long) defaultValue);
+            return exactLongToDouble((((Number) defaultValue).longValue()));
         } else if (defaultValue instanceof Number) {
             return ((Number) defaultValue).doubleValue();
         } else if (defaultValue == null) {
