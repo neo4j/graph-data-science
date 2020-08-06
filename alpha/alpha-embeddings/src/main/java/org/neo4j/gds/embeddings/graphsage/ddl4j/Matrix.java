@@ -30,10 +30,15 @@ public interface Matrix extends Variable {
     }
 
     @Override
-    default int dimension(int i) {
-        assert i >=0 : "Matrix variable can't have negative dimension";
-        assert i <=1 : "Matrix variable can't have dimension higher than 2";
-
-        return i == 0 ? rows() : cols();
+    default int dimension(int idx) {
+        assert idx >=0 : "Matrix variable can't have negative dimension";
+        assert idx <=1 : "Matrix variable can't have dimension higher than 2";
+        return idx == 0 ? rows() : cols();
     }
+
+
+    default void validateDimensions(int dimensionsLength) {
+        assert dimensionsLength == 2 : "Matrix variable must have exactly two dimensions";
+    }
+
 }

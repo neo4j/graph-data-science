@@ -19,25 +19,22 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class Relu extends SingleParentMatrix {
-
-    private static final double ALPHA = 0.01;
-
-    public Relu(Variable parent) {
-        super(parent, parent.dimensions());
+public abstract class SingleParentMatrix extends SingleParentVariable implements Matrix {
+    SingleParentMatrix(Variable parent, int[] dimensions) {
+        super(parent, dimensions);
+        validateDimensions(dimensions.length);
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
+    public final int rows() {
+        return parent().dimension(0);
     }
 
     @Override
-    public Tensor gradient(Variable contextParent, ComputationContext ctx) {
-        return ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
+    public final int cols() {
+        return parent().dimension(1);
     }
 }

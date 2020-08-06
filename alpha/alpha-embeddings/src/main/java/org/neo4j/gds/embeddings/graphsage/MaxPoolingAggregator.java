@@ -69,8 +69,8 @@ public class MaxPoolingAggregator implements Aggregator {
         Matrix elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
 
         Matrix selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
-        Variable self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
-        Variable neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
+        Matrix self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
+        Matrix neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable tensorAdd = new TensorAdd(List.of(self, neighbors), self.dimensions());
 
         return activationFunction.apply(tensorAdd);

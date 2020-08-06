@@ -20,11 +20,10 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class Sigmoid extends SingleParentVariable implements Matrix {
+public class Sigmoid extends SingleParentMatrix {
 
     public Sigmoid(Variable parent) {
         super(parent, parent.dimensions());
@@ -42,15 +41,5 @@ public class Sigmoid extends SingleParentVariable implements Matrix {
 
     public static double sigmoid(double x) {
         return 1 / (1 + Math.pow(Math.E, -1 * x));
-    }
-
-    @Override
-    public int rows() {
-        return parent().dimension(0);
-    }
-
-    @Override
-    public int cols() {
-        return parent().dimension(1);
     }
 }
