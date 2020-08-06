@@ -74,6 +74,7 @@ public class MultiMean extends SingleParentVariable implements Matrix {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
+        Variable parent = parent();
         Tensor parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
         int cols = parent.dimension(1);

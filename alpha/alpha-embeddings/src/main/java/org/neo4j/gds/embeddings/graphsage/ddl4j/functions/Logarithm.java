@@ -31,7 +31,7 @@ public class Logarithm extends SingleParentVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return Tensor.scalar(Math.log(ctx.data(parent).dataAt(0)));
+        return Tensor.scalar(Math.log(ctx.data(parent()).dataAt(0)));
     }
 
     @Override

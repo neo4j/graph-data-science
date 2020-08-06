@@ -25,14 +25,15 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import java.util.List;
 
 public abstract class SingleParentVariable extends AbstractVariable {
-    protected final Variable parent;
 
     public SingleParentVariable(
         Variable parent,
         int[] dimensions
     ) {
         super(List.of(parent), dimensions);
-        this.parent = parent;
     }
 
+    protected Variable parent() {
+        return parents().get(0);
+    }
 }
