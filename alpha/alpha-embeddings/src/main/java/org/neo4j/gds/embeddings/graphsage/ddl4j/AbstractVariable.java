@@ -23,20 +23,13 @@ import java.util.List;
 
 public abstract class AbstractVariable implements Variable {
     private final int[] dimensions;
-    private boolean requireGradient;
-
+    private final boolean requireGradient;
     private final List<Variable> parents;
 
     protected AbstractVariable(List<Variable> parents, int[] dimensions) {
         this.dimensions = dimensions;
         this.parents = parents;
-
-        this.requireGradient = false;
-        for (Variable parent : parents) {
-            if (parent.requireGradient()) {
-                this.requireGradient = true;
-            }
-        }
+        this.requireGradient = anyParentRequiresGradient();
     }
 
     @Override
@@ -56,6 +49,14 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public boolean requireGradient() {
         return requireGradient;
+    }
+
+    private boolean anyParentRequiresGradient() {
+        boolean parentRequiresGradient = false;
+        for (Variable parent : parents) {
+            parentRequiresGradient |= parent.requireGradient();
+        }
+        return parentRequiresGradient;
     }
 
     public static class NotAFunctionException extends RuntimeException {
