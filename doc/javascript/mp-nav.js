@@ -84,8 +84,9 @@ function highlightToc() {
 }
 
 // Highlight the active publication in the docs library header
-function highlightLibraryHeader() {
-    var thisName = window.docMeta.name
+async function highlightLibraryHeader() {
+    var meta = await window.docMeta;
+    var thisName = meta.name
     var thisEntry;
     $('header > ul.documentation-library').children('li').children('a').each(
         function (key, value) {
