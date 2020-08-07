@@ -39,17 +39,17 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.De
     }
 
     @Override
-    long skipUntil(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
+    protected long skipUntil(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
         return cursor.skipUntil(nodeId);
     }
 
     @Override
-    long advance(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
+    protected long advance(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
         return cursor.advance(nodeId);
     }
 
     @Override
-    void copyFrom(
+    protected void copyFrom(
         TransientAdjacencyList.DecompressingCursor sourceCursor, TransientAdjacencyList.DecompressingCursor targetCursor
     ) {
         targetCursor.copyFrom(sourceCursor);
@@ -68,7 +68,7 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.De
     }
 
     @Override
-    int degree(long node) {
+    protected int degree(long node) {
         long offset = offsets.get(node);
         if (offset == 0L) {
             return 0;

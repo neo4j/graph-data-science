@@ -31,7 +31,7 @@ import java.util.function.LongPredicate;
  * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
-abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
+public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     protected CURSOR empty;
     private final CURSOR cache;
@@ -39,7 +39,7 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
     private final CURSOR cacheB;
     private final LongPredicate degreeFilter;
 
-    GraphIntersect(
+    protected GraphIntersect(
         CURSOR cache,
         CURSOR cacheA,
         CURSOR cacheB,
@@ -120,13 +120,13 @@ abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements Relatio
         }
     }
 
-    abstract long skipUntil(CURSOR cursor, long nodeId);
+    protected abstract long skipUntil(CURSOR cursor, long nodeId);
 
-    abstract long advance(CURSOR cursor, long nodeId);
+    protected abstract long advance(CURSOR cursor, long nodeId);
 
-    abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
+    protected abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
 
-    abstract CURSOR cursor(long node, CURSOR reuse);
+    protected abstract CURSOR cursor(long node, CURSOR reuse);
 
-    abstract int degree(long node);
+    protected abstract int degree(long node);
 }
