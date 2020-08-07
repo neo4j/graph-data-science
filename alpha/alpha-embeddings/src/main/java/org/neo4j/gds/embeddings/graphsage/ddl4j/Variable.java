@@ -21,16 +21,16 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public interface Variable {
-    Tensor apply(ComputationContext ctx);
+public interface Variable<T extends Tensor> {
+    T apply(ComputationContext ctx);
 
-    <T extends Variable> Tensor gradient(T parent, ComputationContext ctx);
+    <PT extends Tensor, V extends Variable<PT>> Tensor gradient(V parent, ComputationContext ctx);
 
     default boolean requireGradient() {
         return false;
     }
 
-    Iterable<? extends Variable> parents();
+    Iterable<? extends Variable<?>> parents();
 
     int[] dimensions();
 
