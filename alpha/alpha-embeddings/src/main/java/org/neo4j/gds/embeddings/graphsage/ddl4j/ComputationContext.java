@@ -106,13 +106,6 @@ public class ComputationContext {
         gradients.get(variable).addInPlace(gradient);
     }
 
-    private static double l2(Tensor tensor) {
-        return Math.sqrt(
-            Arrays.stream(tensor.data())
-                .map(value -> value * value)
-                .sum());
-    }
-
     static class BackPropTask {
         Variable variable;
         Variable child;

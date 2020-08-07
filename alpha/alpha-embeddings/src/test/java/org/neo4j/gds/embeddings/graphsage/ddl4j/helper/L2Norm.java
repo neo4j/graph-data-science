@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 
-import static java.util.Arrays.stream;
+import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
 
 public class L2Norm extends SingleParentVariable {
     public L2Norm(Variable parent) {
@@ -33,19 +34,11 @@ public class L2Norm extends SingleParentVariable {
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        double norm = l2(ctx.data(parent()));
-        return Tensor.scalar(norm);
+        return Tensor.scalar(l2Norm(ctx.data(parent()).data()));
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
         return ctx.data(parent).scalarMultiply(ctx.gradient(this).dataAt(0) / ctx.data(this).dataAt(0));
-    }
-
-    public static double l2(Tensor tensor) {
-        return Math.sqrt(
-            stream(tensor.data())
-                .map(value -> value * value)
-                .sum());
     }
 }

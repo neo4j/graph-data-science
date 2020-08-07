@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -43,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
@@ -198,7 +197,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)
                 .toArray();
-            assertNotEquals(0D, L2Norm.l2(Tensor.vector(values)));
+            assertNotEquals(0D, l2Norm(values));
         });
 
         // write new properties and relationships to Neo

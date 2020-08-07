@@ -22,8 +22,6 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
 import org.neo4j.gds.embeddings.randomprojections.RandomProjectionWriteProc;
@@ -35,6 +33,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
 
 class EmbeddingsIntegrationTest extends BaseProcTest {
 
@@ -156,7 +155,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)
                 .toArray();
-            assertNotEquals(0D, L2Norm.l2(Tensor.vector(values)));
+            assertNotEquals(0D, l2Norm(values));
         });
     }
 }
