@@ -28,7 +28,7 @@ import org.neo4j.values.storable.Value;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class ValueConversion {
+public final class ValueConversion {
 
     public static long getLongValue(Value value) {
         if (value instanceof IntegralValue) {
@@ -96,4 +96,6 @@ public class ValueConversion {
             expected
         ));
     }
+
+    private ValueConversion() {}
 }

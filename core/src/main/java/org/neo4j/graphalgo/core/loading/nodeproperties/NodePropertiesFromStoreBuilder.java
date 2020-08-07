@@ -26,11 +26,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.DoubleArray;
-import org.neo4j.values.storable.DoubleValue;
-import org.neo4j.values.storable.FloatValue;
-import org.neo4j.values.storable.IntValue;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -99,9 +97,9 @@ public final class NodePropertiesFromStoreBuilder {
     private synchronized void initializeWithType(Value value) {
         if (innerBuilder.get() == null) {
             InnerNodePropertiesBuilder newBuilder;
-            if (value instanceof LongValue || value instanceof IntValue) {
+            if (value instanceof IntegralValue) {
                 newBuilder = new LongNodePropertiesBuilder(nodeSize, defaultValue, tracker);
-            } else if (value instanceof DoubleValue || value instanceof FloatValue) {
+            } else if (value instanceof FloatingPointValue) {
                 newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, tracker);
             } else if (value instanceof LongArray) {
                 newBuilder = new LongArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
