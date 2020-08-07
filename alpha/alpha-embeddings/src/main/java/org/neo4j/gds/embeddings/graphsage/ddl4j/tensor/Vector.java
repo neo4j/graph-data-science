@@ -20,17 +20,15 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-
-import java.util.Arrays;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 public class Vector extends Tensor {
+
     public Vector(double[] data) {
         super(data, Dimensions.vector(data.length));
     }
 
     public static Vector fill(double v, int length) {
-        double[] data = new double[length];
-        Arrays.fill(data, v);
-        return new Vector(data);
+        return new Vector(ArrayUtil.fill(v, length));
     }
 }

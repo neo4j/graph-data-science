@@ -20,8 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-
-import java.util.Arrays;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 public class Matrix extends Tensor {
     public Matrix(double[] data, int rows, int cols) {
@@ -29,8 +28,6 @@ public class Matrix extends Tensor {
     }
 
     public static Matrix fill(double v, int rows, int cols) {
-        double[] data = new double[rows * cols];
-        Arrays.fill(data, v);
-        return new Matrix(data, rows, cols);
+        return new Matrix(ArrayUtil.fill(v, rows * cols), rows, cols);
     }
 }

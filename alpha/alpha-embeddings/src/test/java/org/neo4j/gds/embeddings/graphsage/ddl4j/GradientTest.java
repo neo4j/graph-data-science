@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import java.util.List;
 
@@ -59,7 +59,7 @@ class GradientTest {
         assertEquals(45D, ctx.data(sum).getAtIndex(0));
         assertArrayEquals(new int[]{5, 1}, ctx.data(add).dimensions());
 
-        assertArrayEquals(Vector.fill(9D, 5).data(), ctx.data(add).data());
+        assertArrayEquals(ArrayUtil.fill(9D, 5), ctx.data(add).data());
 
         ctx.backward(sum);
 
@@ -67,7 +67,7 @@ class GradientTest {
         assertArrayEquals(new int[]{5, 1}, ctx.gradient(add).dimensions());
         assertArrayEquals(new int[]{5, 1}, ctx.gradient(operand1).dimensions());
 
-        assertArrayEquals(Vector.fill(1D, 5).data(), ctx.gradient(add).data());
-        assertArrayEquals(Vector.fill(1D, 5).data(), ctx.gradient(operand1).data());
+        assertArrayEquals(ArrayUtil.fill(1D, 5), ctx.gradient(add).data());
+        assertArrayEquals(ArrayUtil.fill(1D, 5), ctx.gradient(operand1).data());
     }
 }

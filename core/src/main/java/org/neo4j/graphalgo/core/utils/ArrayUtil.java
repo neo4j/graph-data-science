@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.util.FeatureToggles;
 
+import java.util.Arrays;
+
 
 public final class ArrayUtil {
 
@@ -170,6 +172,12 @@ public final class ArrayUtil {
             doubles[i] = floats[i];
         }
         return doubles;
+    }
+
+    public static double[] fill(double value, int length) {
+        double[] data = new double[length];
+        Arrays.fill(data, value);
+        return data;
     }
 
     private ArrayUtil() {

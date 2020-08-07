@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -59,5 +61,12 @@ class ArrayUtilTest {
             assertTrue(ArrayUtil.linearSearch(testData, testData.length, (i + 1) * 2), formatWithLocale("False negative at %d value %d%n", i, testData[i]));
             assertFalse(ArrayUtil.linearSearch(testData, testData.length, (i * 2) + 1), formatWithLocale("False positive at %d value %d%n", i, testData[i]));
         }
+    }
+
+    @Test
+    void fillsAnArray() {
+        assertArrayEquals(new double[]{1D, 1D, 1D}, ArrayUtil.fill(1D, 3));
+        assertArrayEquals(new double[]{}, ArrayUtil.fill(1D, 0));
+        assertArrayEquals(new double[]{42D}, ArrayUtil.fill(42D, 1));
     }
 }
