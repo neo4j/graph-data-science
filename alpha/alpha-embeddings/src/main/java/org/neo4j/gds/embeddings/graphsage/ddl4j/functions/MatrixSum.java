@@ -28,9 +28,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import java.util.Arrays;
 import java.util.List;
 
-public class TensorAdd extends AbstractVariable<Matrix> {
+public class MatrixSum extends AbstractVariable<Matrix> {
 
-    public TensorAdd(List<Variable<Matrix>> parents) {
+    public MatrixSum(List<Variable<Matrix>> parents) {
         super(parents, validateDimensions(parents));
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
@@ -39,7 +39,7 @@ class GradientTest {
     void matrixAddition() {
         var operand1 = new Weights<>(Matrix.fill(5, 5, 1));
         var operand2 = new Constant<>(Matrix.fill(4, 5, 1));
-        var add = new TensorAdd(List.of(operand1, operand2));
+        var add = new MatrixSum(List.of(operand1, operand2));
         var sum = new ElementSum(List.of(add));
 
         ComputationContext ctx = new ComputationContext();

@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
@@ -74,9 +74,9 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
         Variable<Matrix> neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
-        Variable<Matrix> tensorAdd = new TensorAdd(List.of(self, neighbors));
+        Variable<Matrix> sum = new MatrixSum(List.of(self, neighbors));
 
-        return activationFunction.apply(tensorAdd);
+        return activationFunction.apply(sum);
     }
 
     @Override

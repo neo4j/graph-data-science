@@ -28,12 +28,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class TensorAddTest {
+class MatrixSumTest {
 
     @Test
     void adds() {
         MatrixConstant operand = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
-        TensorAdd add = new TensorAdd(List.of(operand, operand, operand));
+        MatrixSum add = new MatrixSum(List.of(operand, operand, operand));
 
         assertArrayEquals(new int[]{2, 2}, add.dimensions());
 
@@ -48,7 +48,7 @@ class TensorAddTest {
         MatrixConstant op1 = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
         MatrixConstant op2 = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 1, 4);
 
-        assertThrows(AssertionError.class, () -> new TensorAdd(List.of(op1, op2, op1)));
+        assertThrows(AssertionError.class, () -> new MatrixSum(List.of(op1, op2, op1)));
     }
 
 }

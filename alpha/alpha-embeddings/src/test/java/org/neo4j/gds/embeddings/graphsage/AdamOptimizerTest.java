@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.L2Norm;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
@@ -63,7 +63,7 @@ class AdamOptimizerTest {
 
         double oldLoss = Double.MAX_VALUE;
         while(true) {
-            Variable<Matrix> difference = new TensorAdd(List.of(
+            Variable<Matrix> difference = new MatrixSum(List.of(
                 weights, new ConstantScale<>(expectedOptimum, -1)
             ));
             L2Norm lossFunction = new L2Norm(difference);
