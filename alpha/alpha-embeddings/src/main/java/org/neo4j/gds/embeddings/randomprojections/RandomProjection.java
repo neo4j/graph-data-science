@@ -188,8 +188,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     }
 
     private void updateEmbeddings(double weight, float[] embedding, float[] newEmbedding) {
-        multiplyArrayValues(newEmbedding, weight);
-        addArrayValues(embedding, newEmbedding);
+        addMultipliedArray(embedding, newEmbedding, weight);
     }
 
     private void addArrayValues(float[] lhs, float[] rhs) {
@@ -201,6 +200,12 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private void multiplyArrayValues(float[] lhs, double scalar) {
         for (int i = 0; i < lhs.length; i++) {
             lhs[i] *= scalar;
+        }
+    }
+
+    private void addMultipliedArray(float[] lhs, float[] rhs, double scalar) {
+        for (int i = 0; i < lhs.length; i++) {
+            lhs[i] += scalar * rhs[i];
         }
     }
 
