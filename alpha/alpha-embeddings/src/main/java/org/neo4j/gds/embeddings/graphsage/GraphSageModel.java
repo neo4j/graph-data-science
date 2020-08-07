@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -302,7 +302,7 @@ public class GraphSageModel {
 
         Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
-        return new DummyVariable(lossFunction);
+        return new PassthroughVariable(lossFunction);
     }
 
     private LongStream neighborBatch(Graph graph, long[] batch) {

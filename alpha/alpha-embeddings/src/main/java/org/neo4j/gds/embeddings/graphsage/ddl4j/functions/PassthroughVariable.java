@@ -24,9 +24,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 
-public class DummyVariable extends SingleParentVariable {
+public class PassthroughVariable extends SingleParentVariable {
 
-    public DummyVariable(Variable parent) {
+    public PassthroughVariable(Variable parent) {
         super(parent, Dimensions.scalar());
     }
 

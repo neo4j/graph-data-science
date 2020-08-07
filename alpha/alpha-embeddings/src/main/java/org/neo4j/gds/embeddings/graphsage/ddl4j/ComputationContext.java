@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.DummyVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -62,7 +61,7 @@ public class ComputationContext {
         }
         gradients.clear();
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
-        DummyVariable dummy = new DummyVariable(function);
+        PassthroughVariable dummy = new PassthroughVariable(function);
         executionQueue.add(new BackPropTask(function, dummy));
         Map<Variable, AtomicInteger> upstreamCounters = new HashMap<>();
         initUpstream(dummy, upstreamCounters);
