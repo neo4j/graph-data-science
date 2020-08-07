@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 
 import java.util.List;
 
@@ -85,7 +85,7 @@ class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
 
-        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new MultiMean(weights, adj, selfAdjacency))));
+        finiteDifferenceShouldApproximateGradient(weights, new ElementSum(List.of(new MultiMean(weights, adj, selfAdjacency))));
     }
 
 }

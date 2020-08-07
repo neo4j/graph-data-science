@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
@@ -40,7 +40,7 @@ class GradientTest {
         var operand1 = new Weights<>(Matrix.fill(5, 5, 1));
         var operand2 = new Constant<>(Matrix.fill(4, 5, 1));
         var add = new TensorAdd(List.of(operand1, operand2));
-        var sum = new Sum(List.of(add));
+        var sum = new ElementSum(List.of(add));
 
         ComputationContext ctx = new ComputationContext();
         assertNull(ctx.gradient(operand1), "Gradient should be null before forward");

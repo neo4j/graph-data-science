@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
         double[] vectorData = {-1, 5, 2};
         Weights<Vector> weights = new Weights<>(new Vector(vectorData));
 
-        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new Relu<>(weights))));
+        finiteDifferenceShouldApproximateGradient(weights, new ElementSum(List.of(new Relu<>(weights))));
     }
 
     @Test

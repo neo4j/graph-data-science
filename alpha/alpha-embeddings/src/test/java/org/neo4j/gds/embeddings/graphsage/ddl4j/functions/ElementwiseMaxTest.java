@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 
@@ -69,7 +69,7 @@ public class ElementwiseMaxTest extends GraphSageBaseTest implements FiniteDiffe
             new int[]{0, 1, 2},
             new int[]{}
         };
-        Sum sum = new Sum(List.of(new ElementwiseMax(weights, adjacencyMatrix)));
+        ElementSum sum = new ElementSum(List.of(new ElementwiseMax(weights, adjacencyMatrix)));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }

@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.List;
@@ -48,7 +48,7 @@ class ConstantScaleTest extends GraphSageBaseTest implements FiniteDifferenceTes
         double constant = 5.34D;
         finiteDifferenceShouldApproximateGradient(
             matrix,
-            new Sum(List.of(new ConstantScale<>(matrix, constant)))
+            new ElementSum(List.of(new ConstantScale<>(matrix, constant)))
         );
     }
 

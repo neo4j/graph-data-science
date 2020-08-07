@@ -27,7 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
@@ -58,7 +58,7 @@ class MatrixVectorSumTest extends GraphSageBaseTest implements FiniteDifferenceT
         Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3));
         Weights<Vector> vector = new Weights<>(Vector.fill(1, 3));
 
-        Variable<Scalar> broadcastSum = new Sum(List.of(new MatrixVectorSum(weights, vector)));
+        Variable<Scalar> broadcastSum = new ElementSum(List.of(new MatrixVectorSum(weights, vector)));
 
         finiteDifferenceShouldApproximateGradient(List.of(weights, vector), broadcastSum);
     }

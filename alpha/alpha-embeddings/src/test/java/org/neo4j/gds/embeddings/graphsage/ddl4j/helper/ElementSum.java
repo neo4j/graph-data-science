@@ -28,8 +28,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public class Sum extends AbstractVariable<Scalar> {
-    public Sum(List<Variable<?>> parents) {
+public class ElementSum extends AbstractVariable<Scalar> {
+
+    public ElementSum(List<Variable<?>> parents) {
         super(parents, Dimensions.scalar());
     }
 
