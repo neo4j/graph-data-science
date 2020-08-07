@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -36,7 +36,7 @@ public final class LayerFactory {
 
         ActivationFunction activationFunction = layerConfig.activationFunction();
 
-        Weights weights = generateWeights(
+        Weights<Matrix> weights = generateWeights(
             rows,
             cols,
             activationFunction.weightInitBound(rows, cols)
@@ -47,21 +47,21 @@ public final class LayerFactory {
         }
 
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
-            Weights poolWeights = weights;
+            Weights<Matrix> poolWeights = weights;
 
-            Weights selfWeights = generateWeights(
+            Weights<Matrix> selfWeights = generateWeights(
                 rows,
                 cols,
                 activationFunction.weightInitBound(rows, cols)
             );
 
-            Weights neighborsWeights = generateWeights(
+            Weights<Matrix> neighborsWeights = generateWeights(
                 rows,
                 rows,
                 activationFunction.weightInitBound(rows, rows)
             );
 
-            Weights bias = new Weights(Tensor.constant(0D, Dimensions.vector(rows)));
+            Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
 
             return new MaxPoolAggregatingLayer(
                 layerConfig.sampleSize(),
@@ -76,13 +76,13 @@ public final class LayerFactory {
         throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
     }
 
-    private static Weights generateWeights(int rows, int cols, double weightBound) {
+    private static Weights<Matrix> generateWeights(int rows, int cols, double weightBound) {
 
         double[] data = ThreadLocalRandom.current()
             .doubles(rows * cols, -weightBound, weightBound)
             .toArray();
 
-        return new Weights(Tensor.matrix(
+        return new Weights<>(new Matrix(
             data,
             rows,
             cols

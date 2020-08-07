@@ -38,8 +38,8 @@ class AbstractVariableTest {
 
         ComputationContext ctx = new ComputationContext();
         int[] dimensions = Dimensions.vector(5);
-        var x = new Weights(Tensor.constant(5, dimensions));
-        var y = new Constant(Tensor.constant(4, dimensions));
+        var x = new Weights<>(Tensor.constant(5, dimensions));
+        var y = new Constant<>(Tensor.constant(4, dimensions));
         var z = new TensorAdd(List.of(x, y), dimensions);
         var w = new Sum(List.of(z));
 

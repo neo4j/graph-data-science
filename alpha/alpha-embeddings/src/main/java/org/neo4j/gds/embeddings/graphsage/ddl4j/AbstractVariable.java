@@ -39,10 +39,6 @@ public abstract class AbstractVariable<T extends Tensor> implements Variable<T> 
         return parents;
     }
 
-    protected Variable<?> firstParent() {
-        return parents.get(0);
-    }
-
     @Override
     public int[] dimensions() {
         return dimensions;

@@ -19,38 +19,39 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class MatrixVectorSum extends AbstractVariable implements Matrix {
+public class MatrixVectorSum extends AbstractVariable<Matrix> {
 
-    private final Matrix matrix;
-    private final Variable vector;
+    private final Variable<Matrix> matrix;
+    private final Variable<Vector> vector;
     private final int rows;
     private final int cols;
 
-    public MatrixVectorSum(Matrix matrix, Variable vector) {
+    public MatrixVectorSum(Variable<Matrix> matrix, Variable<Vector> vector) {
         super(List.of(matrix, vector), matrix.dimensions());
-        assert matrix.cols() == vector.dimension(0) : formatWithLocale(
+        assert matrix.dimension(1) == vector.dimension(0) : formatWithLocale(
             "Cannot broadcast vector with length %d to a matrix with %d columns",
             vector.dimension(0),
-            matrix.cols()
+            matrix.dimension(1)
         );
         this.matrix = matrix;
-        this.rows = matrix.rows();
-        this.cols = matrix.cols();
+        this.rows = matrix.dimension(0);
+        this.cols = matrix.dimension(1);
         this.vector = vector;
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
 
         double[] matrixData = ctx.data(matrix).data();
         double[] vectorData = ctx.data(vector).data();
@@ -64,11 +65,11 @@ public class MatrixVectorSum extends AbstractVariable implements Matrix {
             }
         }
 
-        return Tensor.matrix(result, rows, cols);
+        return new Matrix(result, rows, cols);
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == matrix) {
             return ctx.gradient(this);
         } else {
@@ -81,17 +82,7 @@ public class MatrixVectorSum extends AbstractVariable implements Matrix {
                 }
             }
 
-            return Tensor.vector(result);
+            return new Vector(result);
         }
-    }
-
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
     }
 }

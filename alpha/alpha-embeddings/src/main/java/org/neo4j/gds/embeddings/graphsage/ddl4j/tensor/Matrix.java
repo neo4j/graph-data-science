@@ -21,8 +21,16 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 
+import java.util.Arrays;
+
 public class Matrix extends Tensor {
     public Matrix(double[] data, int rows, int cols) {
         super(data, Dimensions.matrix(rows, cols));
+    }
+
+    public static Matrix fill(double v, int rows, int cols) {
+        double[] data = new double[rows * cols];
+        Arrays.fill(data, v);
+        return new Matrix(data, rows, cols);
     }
 }

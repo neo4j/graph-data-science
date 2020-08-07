@@ -24,24 +24,21 @@ import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable implements Matrix {
+public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
 
-    private final Matrix A;
-    private final Matrix B;
+    private final Variable<Matrix> A;
+    private final Variable<Matrix> B;
 
-    private final int rows;
-    private final int cols;
-
-    public MatrixMultiplyWithTransposedSecondOperand(Matrix A, Matrix B) {
-        super(List.of(A, B), Dimensions.matrix(A.rows(), B.rows()));
+    public MatrixMultiplyWithTransposedSecondOperand(Variable<Matrix> A, Variable<Matrix> B) {
+        super(List.of(A, B), Dimensions.matrix(A.dimension(0), B.dimension(0)));
         // The dimensions of a matrix multiplication of dimensions (m, n) x (n, p) = (m, p)
         // When B is of the dimensions (p, n) it needs to be transposed in order to allow the multiplication.
         // When B is being transposed as B_T its dimensions become (n, p)
@@ -49,20 +46,17 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable 
 
         this.A = A;
         this.B = B;
-
-        this.rows = A.rows();
-        this.cols = B.rows();
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
         Tensor t1 = ctx.data(A);
         Tensor t2 = ctx.data(B);
         return multiplyTransB(t1, t2);
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         Tensor gradient = ctx.gradient(this);
         if (parent == A) {
             return multiply(gradient, ctx.data(B));
@@ -76,15 +70,15 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable 
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
         MatrixMatrixMult_DDRM.mult_reorder(m1, m2, prod);
-        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
+        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    private Tensor multiplyTransB(Tensor t1, Tensor t2) {
+    private Matrix multiplyTransB(Tensor t1, Tensor t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
         MatrixMatrixMult_DDRM.multTransB(m1, m2, prod);
-        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
+        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     private Tensor multiplyTransA(Tensor t1, Tensor t2) {
@@ -92,28 +86,18 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable 
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);
         MatrixMatrixMult_DDRM.multTransA_reorder(m1, m2, prod);
-        return Tensor.matrix(prod.getData(), prod.numRows, prod.numCols);
+        return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    public static MatrixMultiplyWithTransposedSecondOperand of(Matrix A, Matrix B) {
+    public static MatrixMultiplyWithTransposedSecondOperand of(Variable<Matrix> A, Variable<Matrix> B) {
         return new MatrixMultiplyWithTransposedSecondOperand(A, B);
     }
 
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
-    }
-
-    private void assertDimensions(Matrix A, Matrix B) {
-        assert A.cols() == B.cols() : formatWithLocale(
+    private void assertDimensions(Variable<Matrix> A, Variable<Matrix> B) {
+        assert A.dimension(1) == B.dimension(1) : formatWithLocale(
             "Cannot multiply matrix having dimensions (%d, %d) with transposed matrix of dimensions (%d, %d)",
-            A.rows(), A.cols(),
-            B.cols(), B.rows()
+            A.dimension(1), A.dimension(0),
+            B.dimension(0), B.dimension(1)
         );
     }
 }

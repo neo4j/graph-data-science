@@ -41,19 +41,19 @@ public class AdamOptimizer {
     private final double beta_2 = 0.999;
     private final double epsilon = 1e-8;
 
-    private final List<Weights> variables;
+    private final List<Weights<? extends Tensor>> variables;
 
     private List<Tensor> momentumTerms;
     private List<Tensor> velocityTerms;
 
     private int iteration = 0;
 
-    public AdamOptimizer(List<Weights> variables) {
+    public AdamOptimizer(List<Weights<? extends Tensor>> variables) {
         this(variables, DEFAULT_ALPHA);
     }
 
     public AdamOptimizer(
-        List<Weights> variables,
+        List<Weights<? extends Tensor>> variables,
         double learningRate
     ) {
         alpha = learningRate;
@@ -76,7 +76,7 @@ public class AdamOptimizer {
         // m_t = beta_1*m_t + (1-beta_1)*g_t	#updates the moving averages of the gradient
         momentumTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
-                Variable variable = variables.get(i);
+                Variable<?> variable = variables.get(i);
                 Tensor momentumTerm = momentumTerms.get(i);
                 return Tensor.add(
                     momentumTerm.scalarMultiply(beta_1),
@@ -88,7 +88,7 @@ public class AdamOptimizer {
         // v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)	#updates the moving averages of the squared gradient
         velocityTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
-                Variable variable = variables.get(i);
+                Variable<?> variable = variables.get(i);
                 Tensor velocityTerm = velocityTerms.get(i);
                 Tensor gradient = otherCtx.gradient(variable);
                 Tensor squaredGradient = gradient.elementwiseProduct(gradient);
@@ -111,7 +111,7 @@ public class AdamOptimizer {
 
         IntStream.range(0, variables.size())
             .forEach(i -> {
-                Weights variable = variables.get(i);
+                Weights<? extends Tensor> variable = variables.get(i);
                 Tensor mCap = mCaps.get(i);
                 Tensor vCap = vCaps.get(i);
 

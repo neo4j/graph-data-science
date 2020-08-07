@@ -35,6 +35,6 @@ public abstract class SingleParentVariable<T extends Tensor> extends AbstractVar
     }
 
     protected Variable<?> parent() {
-        return firstParent();
+        return parents().get(0);
     }
 }

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
@@ -60,8 +60,8 @@ class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
         int[] expectedDim = Dimensions.matrix(2, 2);
 
-        Matrix data = new MatrixConstant(matrix, 4, 2);
-        Variable mean = new MultiMean(data, adj, selfAdjacency);
+        Variable<Matrix> data = new MatrixConstant(matrix, 4, 2);
+        Variable<Matrix> mean = new MultiMean(data, adj, selfAdjacency);
 
         Tensor result = ctx.forward(mean);
 
@@ -83,7 +83,7 @@ class MultiMeanTest extends GraphSageBaseTest implements FiniteDifferenceTest {
         adj[1] = new int[] {0, 2};
         int[] selfAdjacency = {0, 1};
 
-        Weights weights = new Weights(Tensor.matrix(matrix, 3, 2));
+        Weights<Matrix> weights = new Weights<>(new Matrix(matrix, 3, 2));
 
         finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new MultiMean(weights, adj, selfAdjacency))));
     }

@@ -23,28 +23,29 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 
-public class Constant extends AbstractVariable {
-    private final Tensor data;
+public class Constant<T extends Tensor> extends AbstractVariable<T> {
+    private final T data;
 
-    public Constant(Tensor data) {
+    public Constant(T data) {
         super(List.of(), data.dimensions());
         this.data = data;
     }
 
-    public static Constant vector(double[] data) {
-        return new Constant(Tensor.vector(data));
+    public static Constant<Vector> vector(double[] data) {
+        return new Constant<>(new Vector(data));
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public T apply(ComputationContext ctx) {
         return data;
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return data.zeros();
     }
 

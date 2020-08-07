@@ -22,9 +22,9 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.L2Norm;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
         MatrixConstant A = new MatrixConstant(m1, 2, 3);
         MatrixConstant B = new MatrixConstant(m2, 2, 3);
 
-        Variable product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
+        Variable<Matrix> product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
         double[] result = ctx.forward(product).data();
 
         assertArrayEquals(expected, result);
@@ -78,8 +78,8 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
             2.1, 5, -1
         };
 
-        Weights A = new Weights(Tensor.matrix(m1, 2, 3));
-        Weights B = new Weights(Tensor.matrix(m2, 2, 3));
+        Weights<Matrix> A = new Weights<>(new Matrix(m1, 2, 3));
+        Weights<Matrix> B = new Weights<>(new Matrix(m2, 2, 3));
 
         finiteDifferenceShouldApproximateGradient(List.of(A, B), new L2Norm(new MatrixMultiplyWithTransposedSecondOperand(A, B)));
     }
@@ -96,8 +96,8 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
             6, 2.1,
             5, -1
         };
-        Weights A = new Weights(Tensor.matrix(m1, 2, 3));
-        Weights B = new Weights(Tensor.matrix(m2, 3, 2));
+        Weights<Matrix> A = new Weights<>(new Matrix(m1, 2, 3));
+        Weights<Matrix> B = new Weights<>(new Matrix(m2, 3, 2));
 
         AssertionError assertionError = assertThrows(
             AssertionError.class,
@@ -107,8 +107,8 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends GraphSageBaseTest im
         assertEquals(
             formatWithLocale(
                 "Cannot multiply matrix having dimensions (%d, %d) with transposed matrix of dimensions (%d, %d)",
-                A.rows(), A.cols(),
-                B.cols(), B.rows()
+                A.dimension(1), A.dimension(0),
+                B.dimension(0), B.dimension(1)
             ),
             assertionError.getMessage()
         );

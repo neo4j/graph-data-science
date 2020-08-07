@@ -20,11 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.List;
 
@@ -33,9 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 class ConstantScaleTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Test
     void testApply() {
-        Weights matrix = new Weights(Tensor.matrix(new double[]{1, 2, 3, 4}, 2, 2));
+        Weights<Matrix> matrix = new Weights<>(new Matrix(new double[]{1, 2, 3, 4}, 2, 2));
         double constant = 5.34D;
-        ConstantScale scaled = new ConstantScale(matrix, constant);
+        Variable<Matrix> scaled = new ConstantScale<>(matrix, constant);
 
         assertArrayEquals(new double[]{constant, 2 * constant, 3 * constant, 4 * constant}, ctx.forward(scaled).data());
     }
@@ -43,11 +44,11 @@ class ConstantScaleTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
     @Test
     void shouldApproximateGradient() {
-        Weights matrix = new Weights(Tensor.matrix(new double[]{1, 2, 3, 4}, 2, 2));
+        Weights<Matrix> matrix = new Weights<>(new Matrix(new double[]{1, 2, 3, 4}, 2, 2));
         double constant = 5.34D;
         finiteDifferenceShouldApproximateGradient(
             matrix,
-            new Sum(List.of(new ConstantScale(matrix, constant)))
+            new Sum(List.of(new ConstantScale<>(matrix, constant)))
         );
     }
 

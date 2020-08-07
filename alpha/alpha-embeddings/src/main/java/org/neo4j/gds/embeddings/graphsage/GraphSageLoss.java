@@ -21,10 +21,10 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
@@ -34,10 +34,10 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
-    private final Matrix combinedEmbeddings;
+    private final Variable<Matrix> combinedEmbeddings;
     private final int negativeSamplingFactor;
 
-    GraphSageLoss(Matrix combinedEmbeddings, int negativeSamplingFactor) {
+    GraphSageLoss(Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;
@@ -58,7 +58,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     private double affinity(Tensor embeddingData, int nodeId, int otherNodeId) {
-        int dimensionSize = combinedEmbeddings.cols();
+        int dimensionSize = combinedEmbeddings.dimension(1);
         double sum = 0;
         for (int i = 0; i < dimensionSize; i++) {
             sum += embeddingData.dataAt(nodeId * dimensionSize + i) * embeddingData.dataAt(otherNodeId * dimensionSize + i);
@@ -99,7 +99,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
             ));
 
         });
-        return Tensor.matrix(gradientResult, totalBatchSize, embeddingSize);
+        return new Matrix(gradientResult, totalBatchSize, embeddingSize);
     }
 
     private void partialComputeGradient(

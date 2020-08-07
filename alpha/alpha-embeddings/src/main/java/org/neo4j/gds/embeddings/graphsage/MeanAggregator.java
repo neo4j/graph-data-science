@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiMean;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 import java.util.function.Function;
@@ -34,23 +35,23 @@ import java.util.function.Function;
 
 public class MeanAggregator implements Aggregator {
 
-    private final Weights weights;
-    private final Function<Variable, Matrix> activationFunction;
+    private final Weights<Matrix> weights;
+    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
 
-    public MeanAggregator(Weights weights, Function<Variable, Matrix> activationFunction) {
+    MeanAggregator(Weights<Matrix> weights, Function<Variable<?>, Variable<Matrix>> activationFunction) {
         this.weights = weights;
         this.activationFunction = activationFunction;
     }
 
     @Override
-    public Matrix aggregate(Matrix previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacency) {
-        Matrix means = new MultiMean(previousLayerRepresentations, adjacencyMatrix, selfAdjacency);
-        Matrix product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
+    public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacency) {
+        Variable<Matrix> means = new MultiMean(previousLayerRepresentations, adjacencyMatrix, selfAdjacency);
+        Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
     }
 
     @Override
-    public List<Weights> weights() {
+    public List<Weights<? extends Tensor>> weights() {
         return List.of(weights);
     }
 }

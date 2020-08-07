@@ -20,14 +20,14 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class PassthroughVariable extends SingleParentVariable {
+public class PassthroughVariable extends SingleParentVariable<Tensor> {
 
-    public PassthroughVariable(Variable parent) {
-        super(parent, Dimensions.scalar());
+    public PassthroughVariable(Variable<?> parent) {
+        super(parent, parent.dimensions());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class PassthroughVariable extends SingleParentVariable {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
-        return Tensor.scalar(1D);
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+        return new Scalar(1D);
     }
 }

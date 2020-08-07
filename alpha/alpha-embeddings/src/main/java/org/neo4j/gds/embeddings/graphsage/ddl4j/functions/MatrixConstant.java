@@ -19,47 +19,31 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public class MatrixConstant implements Matrix {
-    private final Tensor data;
-    private final int rows;
-    private final int cols;
+public class MatrixConstant extends AbstractVariable<Matrix> {
+
+    private final Matrix data;
 
     public MatrixConstant(double[] elements, int rows, int cols) {
-
-        this.data = Tensor.matrix(elements, rows, cols);
-        this.rows = rows;
-        this.cols = cols;
+        super(List.of(), Dimensions.matrix(rows, cols));
+        this.data = new Matrix(elements, rows, cols);
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
         return data;
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return data.zeros();
-    }
-
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
-    }
-
-    @Override
-    public Iterable<? extends Variable> parents() {
-        return List.of();
     }
 }

@@ -21,12 +21,14 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -176,7 +178,7 @@ public class GraphSageModel {
     }
 
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
-        List<Weights> weights = getWeights();
+        List<Weights<? extends Tensor>> weights = getWeights();
 
         AdamOptimizer updater = new AdamOptimizer(weights, learningRate);
 
@@ -253,8 +255,8 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Matrix embeddingVariable = embeddingVariable(graph, batch, features);
-                int cols = embeddingVariable.cols();
+                Variable<Matrix> embeddingVariable = embeddingVariable(graph, batch, features);
+                int cols = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data();
 
                 for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
@@ -283,7 +285,7 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable loss = lossFunction(batch, graph, features);
+                Variable<?> loss = lossFunction(batch, graph, features);
                 doubleAdder.add(ctx.forward(loss).dataAt(0));
             })
         );
@@ -292,15 +294,15 @@ public class GraphSageModel {
         return lossValue;
     }
 
-    Variable lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
+    Variable<?> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
         long[] totalBatch = LongStream
             .concat(Arrays.stream(batch), LongStream.concat(
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Matrix embeddingVariable = embeddingVariable(graph, totalBatch, features);
+        Variable<Matrix> embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
-        Variable lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
+        Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
         return new PassthroughVariable(lossFunction);
     }
@@ -340,7 +342,7 @@ public class GraphSageModel {
             });
     }
 
-    private Matrix featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+    private Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
@@ -355,7 +357,7 @@ public class GraphSageModel {
         return new MatrixConstant(data, nodeIds.length, dimension);
     }
 
-    private Matrix embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
+    private Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -363,7 +365,7 @@ public class GraphSageModel {
         Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
-        Matrix previousLayerRepresentations = featureVariables(
+        Variable<Matrix> previousLayerRepresentations = featureVariables(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
             features
         );
@@ -381,7 +383,7 @@ public class GraphSageModel {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    private List<Weights> getWeights() {
+    private List<Weights<? extends Tensor>> getWeights() {
         return Arrays.stream(layers)
             .flatMap(layer -> layer.weights().stream())
             .collect(Collectors.toList());

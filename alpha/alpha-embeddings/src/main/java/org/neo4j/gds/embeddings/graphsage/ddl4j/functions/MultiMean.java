@@ -22,17 +22,17 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class MultiMean extends SingleParentVariable implements Matrix {
+public class MultiMean extends SingleParentVariable<Matrix> {
     private final int[][] adjacency;
     private final int[] selfAdjacency;
     private final int rows;
     private final int cols;
 
     public MultiMean(
-        Variable parent,
+        Variable<?> parent,
         int[][] adjacency,
         int[] selfAdjacency
     ) {
@@ -44,10 +44,33 @@ public class MultiMean extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
+        Variable<?> parent = parent();
+        Tensor parentTensor = ctx.data(parent);
+        double[] parentData = parentTensor.data();
+        double[] means = new double[adjacency.length * cols];
+        for (int source = 0; source < adjacency.length; source++) {
+            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
+            int sourceOffset = source * cols;
+            int[] neighbors = adjacency[source];
+            int numberOfNeighbors = neighbors.length;
+            for (int col = 0; col < cols; col++) {
+                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
+            }
+            for (int target : neighbors) {
+                int targetOffset = target * cols;
+                for (int col = 0; col < cols; col++) {
+                    means[sourceOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
+                }
+            }
+        }
+
+        return new Matrix(means, this.rows, this.cols);
+    }
+
+    @Override
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
-        int rows = dimension(0);
-        int cols = dimension(1);
 
         Tensor result = ctx.data(parent).zeros();
 
@@ -70,41 +93,5 @@ public class MultiMean extends SingleParentVariable implements Matrix {
         }
 
         return result;
-    }
-
-    @Override
-    public Tensor apply(ComputationContext ctx) {
-        Variable parent = parent();
-        Tensor parentTensor = ctx.data(parent);
-        double[] parentData = parentTensor.data();
-        int cols = parent.dimension(1);
-        double[] means = new double[adjacency.length * cols];
-        for (int source = 0; source < adjacency.length; source++) {
-            int selfAdjacencyOfSourceOffset = selfAdjacency[source] * cols;
-            int sourceOffset = source * cols;
-            int[] neighbors = adjacency[source];
-            int numberOfNeighbors = neighbors.length;
-            for (int col = 0; col < cols; col++) {
-                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
-            }
-            for (int target : neighbors) {
-                int targetOffset = target * cols;
-                for (int col = 0; col < cols; col++) {
-                    means[sourceOffset + col] += parentData[targetOffset + col] / (numberOfNeighbors + 1);
-                }
-            }
-        }
-
-        return new Tensor(means, dimensions());
-    }
-
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
     }
 }

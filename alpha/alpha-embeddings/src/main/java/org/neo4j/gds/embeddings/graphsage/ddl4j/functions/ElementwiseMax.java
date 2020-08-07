@@ -22,15 +22,15 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class ElementwiseMax extends SingleParentVariable implements Matrix {
+public class ElementwiseMax extends SingleParentVariable<Matrix> {
     private final int[][] adjacencyMatrix;
     private final int rows;
     private final int cols;
 
-    public ElementwiseMax(Variable parent, int[][] adjacencyMatrix) {
+    public ElementwiseMax(Variable<?> parent, int[][] adjacencyMatrix) {
         super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(1)));
         this.adjacencyMatrix = adjacencyMatrix;
         this.rows = adjacencyMatrix.length;
@@ -38,8 +38,8 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        Tensor max = Tensor.constant(Double.NEGATIVE_INFINITY, dimensions());
+    public Matrix apply(ComputationContext ctx) {
+        Matrix max = Matrix.fill(Double.NEGATIVE_INFINITY, rows, cols);
 
         double[] parentData = ctx.data(parent()).data();
         for (int row = 0; row < rows; row++) {
@@ -64,10 +64,8 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         Tensor result = ctx.data(parent).zeros();
-
-        int cols = parent.dimension(1);
 
         double[] parentData = ctx.data(parent).data();
         double[] thisGradient = ctx.gradient(this).data();
@@ -87,15 +85,5 @@ public class ElementwiseMax extends SingleParentVariable implements Matrix {
         }
 
         return result;
-    }
-
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
     }
 }

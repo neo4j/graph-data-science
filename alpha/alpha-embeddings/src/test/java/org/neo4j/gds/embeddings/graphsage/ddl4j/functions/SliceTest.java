@@ -22,9 +22,10 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 
 import java.util.List;
 
@@ -35,14 +36,14 @@ class SliceTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Test
     void shouldSlice() {
 
-        Weights weights = new Weights(Tensor.matrix(new double[]{
+        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{
             1, 2, 3,
             3, 2, 1,
             1, 3, 2
         }, 3, 3));
 
         int[] rows = new int[] {0, 2, 0};
-        Slice slice = new Slice(weights, rows);
+        Variable<Matrix> slice = new Slice(weights, rows);
         double[] result = ctx.forward(slice).data();
 
         assertArrayEquals(
@@ -55,14 +56,14 @@ class SliceTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @Test
     void shouldApproximateGradient() {
-        Weights  weights = new Weights(Tensor.matrix(new double[]{
+        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{
             1, 2, 3,
             3, 2, 1,
             1, 3, 2
         }, 3, 3));
 
         int[] rows = new int[] {0, 2, 0};
-        Variable sum = new Sum(List.of(new Slice(weights, rows)));
+        Variable<Scalar> sum = new Sum(List.of(new Slice(weights, rows)));
 
         finiteDifferenceShouldApproximateGradient(weights, sum);
     }

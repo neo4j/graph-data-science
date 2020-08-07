@@ -21,24 +21,25 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 
 import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
 
-public class L2Norm extends SingleParentVariable {
-    public L2Norm(Variable parent) {
+public class L2Norm extends SingleParentVariable<Scalar> {
+    public L2Norm(Variable<?> parent) {
         super(parent, Dimensions.scalar());
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        return Tensor.scalar(l2Norm(ctx.data(parent()).data()));
+    public Scalar apply(ComputationContext ctx) {
+        return new Scalar(l2Norm(ctx.data(parent()).data()));
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return ctx.data(parent).scalarMultiply(ctx.gradient(this).dataAt(0) / ctx.data(this).dataAt(0));
     }
 }

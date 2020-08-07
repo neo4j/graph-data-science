@@ -26,23 +26,23 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class ConstantScale extends AbstractVariable {
-    private final Variable parent;
+public class ConstantScale<T extends Tensor> extends AbstractVariable<T> {
+    private final Variable<T> parent;
     private final double constant;
 
-    public ConstantScale(Variable parent, double constant) {
+    public ConstantScale(Variable<T> parent, double constant) {
         super(List.of(parent), parent.dimensions());
         this.parent = parent;
         this.constant = constant;
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent).scalarMultiply(constant);
+    public T apply(ComputationContext ctx) {
+        return (T) ctx.data(parent).scalarMultiply(constant);
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return ctx.gradient(this).scalarMultiply(constant);
     }
 }

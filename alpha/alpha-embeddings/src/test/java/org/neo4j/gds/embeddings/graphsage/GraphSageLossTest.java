@@ -24,7 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
@@ -45,7 +46,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 24.239937336323717"
     })
     void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
-        Matrix combinedEmbeddings = new MatrixConstant(
+        Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -54,7 +55,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         );
 
-        Variable lossVar = new GraphSageLoss(combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
         Tensor lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -72,7 +73,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "50, 76.87999339630119"
     })
     void shouldComputeLoss(int Q, double expectedLoss) {
-        Matrix combinedEmbeddings = new MatrixConstant(
+        Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
                 0.5, -0.1, 0.7,     // nodeId
@@ -87,7 +88,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             9, 3
         );
 
-        Variable lossVar = new GraphSageLoss(combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
         Tensor lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -96,7 +97,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
     @Test
     void testGradient() {
-        Weights combinedEmbeddings = new Weights(Tensor.matrix(
+        Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId

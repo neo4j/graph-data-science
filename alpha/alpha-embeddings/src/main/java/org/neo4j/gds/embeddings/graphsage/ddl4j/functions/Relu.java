@@ -23,21 +23,21 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class Relu extends SingleParentMatrix {
+public class Relu<T extends Tensor> extends SingleParentVariable<T> {
 
     private static final double ALPHA = 0.01;
 
-    public Relu(Variable parent) {
+    public Relu(Variable<?> parent) {
         super(parent, parent.dimensions());
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
+    public T apply(ComputationContext ctx) {
+        return (T) ctx.data(parent()).map(value -> value > 0 ? value : ALPHA * value);
     }
 
     @Override
-    public Tensor gradient(Variable contextParent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> contextParent, ComputationContext ctx) {
         return ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
     }
 }

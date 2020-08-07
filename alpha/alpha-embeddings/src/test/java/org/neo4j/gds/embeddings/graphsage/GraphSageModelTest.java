@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
@@ -71,7 +71,7 @@ class GraphSageModelTest implements FiniteDifferenceTest {
     private Layer mockLayer1;
     private Layer mockLayer2;
     private HugeObjectArray<double[]> features;
-    private static final Weights LAYER_1_WEIGHTS = new Weights(Tensor.matrix(
+    private static final Weights<Matrix> LAYER_1_WEIGHTS = new Weights<>(new Matrix(
         new double[]{
             0.1, 0.1, 0.1,
             0.4, 0.3, 0.9,
@@ -80,7 +80,7 @@ class GraphSageModelTest implements FiniteDifferenceTest {
         3,
         3
     ));
-    private static final Weights LAYER_2_WEIGHTS = new Weights(Tensor.matrix(
+    private static final Weights<Matrix> LAYER_2_WEIGHTS = new Weights(new Matrix(
         new double[]{
             0.35, 0.1, 0.3,
             0.25, 0.4, 0.9,

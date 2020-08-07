@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public interface Layer {
 
     UniformNeighborhoodSampler sampler();
 
-    default List<Weights> weights() {
+    default List<Weights<? extends Tensor>> weights() {
         return aggregator().weights();
     }
 

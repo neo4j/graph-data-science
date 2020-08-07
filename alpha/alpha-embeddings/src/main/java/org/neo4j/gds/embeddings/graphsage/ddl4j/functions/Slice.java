@@ -22,16 +22,16 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class Slice extends SingleParentVariable implements Matrix {
+public class Slice extends SingleParentVariable<Matrix> {
 
     private final int[] selfAdjacency;
     private final int rows;
     private final int cols;
 
-    public Slice(Variable parent, int[] selfAdjacencyMatrix) {
+    public Slice(Variable<Matrix> parent, int[] selfAdjacencyMatrix) {
         super(parent, Dimensions.matrix(selfAdjacencyMatrix.length, parent.dimension(1)));
 
         this.selfAdjacency = selfAdjacencyMatrix;
@@ -40,7 +40,7 @@ public class Slice extends SingleParentVariable implements Matrix {
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
         double[] parentData = ctx.data(parent()).data();
 
         double[] result = new double[rows * cols];
@@ -49,11 +49,11 @@ public class Slice extends SingleParentVariable implements Matrix {
             System.arraycopy(parentData, selfAdjacency[row] * cols, result, row * cols, cols);
         }
 
-        return Tensor.matrix(result, rows, cols);
+        return new Matrix(result, rows, cols);
     }
 
     @Override
-    public Tensor gradient(Variable contextParent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> contextParent, ComputationContext ctx) {
         Tensor result = ctx.data(contextParent).zeros();
 
         double[] selfGradient = ctx.gradient(this).data();
@@ -68,15 +68,5 @@ public class Slice extends SingleParentVariable implements Matrix {
         }
 
         return result;
-    }
-
-    @Override
-    public int rows() {
-        return rows;
-    }
-
-    @Override
-    public int cols() {
-        return cols;
     }
 }

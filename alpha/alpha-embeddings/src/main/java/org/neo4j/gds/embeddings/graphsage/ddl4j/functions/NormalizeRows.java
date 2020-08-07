@@ -20,59 +20,69 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class NormalizeRows extends SingleParentMatrix {
+public class NormalizeRows extends SingleParentVariable<Matrix> {
 
-    public NormalizeRows(Matrix matrix) {
+    private final int rows;
+    private final int cols;
+
+    public NormalizeRows(Variable<Matrix> matrix) {
         super(matrix, matrix.dimensions());
+
+        this.rows = dimension(0);
+        this.cols = dimension(1);
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Matrix apply(ComputationContext ctx) {
         double[] parentData = ctx.data(parent()).data();
-        double[] result = new double[rows() * cols()];
-        for (int row = 0; row < rows(); row++) {
+        double[] result = new double[this.rows * this.cols];
+        for (int row = 0; row < this.rows; row++) {
             double sum = 0;
-            for (int col = 0; col < cols(); col++) {
-                int elementIndex = row * cols() + col;
+            for (int col = 0; col < this.cols; col++) {
+                int elementIndex = row * this.cols + col;
                 sum += Math.pow(parentData[elementIndex], 2);
             }
             double l2 = Math.sqrt(sum);
-            for (int col = 0; col < cols(); col++) {
-                int elementIndex = row * cols() + col;
+            for (int col = 0; col < this.cols; col++) {
+                int elementIndex = row * this.cols + col;
                 result[elementIndex] = parentData[elementIndex] / l2;
             }
         }
-        return Tensor.matrix(result, rows(), cols());
+        return new Matrix(result, this.rows, this.cols);
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         double[] parentData = ctx.data(parent).data();
         double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];
-        for (int row = 0; row < rows(); row++) {
+        for (int row = 0; row < this.rows; row++) {
             double l2Squared = 0;
-            for (int col = 0; col < cols(); col++) {
-                int elementIndex = row * cols() + col;
+            for (int col = 0; col < this.cols; col++) {
+                int elementIndex = row * this.cols + col;
                 l2Squared += parentData[elementIndex] * parentData[elementIndex];
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
-            for (int col = 0; col < cols(); col++) {
-                int elementIndex = row * cols() + col;
-                for (int gradCol = 0; gradCol < cols(); gradCol++) {
+            for (int col = 0; col < this.cols; col++) {
+                int elementIndex = row * this.cols + col;
+                for (int gradCol = 0; gradCol < this.cols; gradCol++) {
                     if (col == gradCol) {
-                        result[elementIndex] += gradientData[elementIndex] * (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
+                        result[elementIndex] +=
+                            gradientData[elementIndex] *
+                            (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
                     } else {
-                        result[elementIndex] -= gradientData[row * cols() + gradCol] * (parentData[elementIndex] * parentData[row * cols() + gradCol]) / l2Cubed;
+                        result[elementIndex] -=
+                            gradientData[row * this.cols + gradCol] *
+                            (parentData[elementIndex] * parentData[row * this.cols + gradCol]) / l2Cubed;
                     }
                 }
             }
         }
-        return Tensor.matrix(result, rows(), cols());
+        return new Matrix(result, this.rows, this.cols);
     }
 }

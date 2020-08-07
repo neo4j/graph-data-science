@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
@@ -141,10 +139,6 @@ public class Tensor {
         return new Tensor(data, dimensions);
     }
 
-    public static Tensor matrix(double[] data, int rows, int cols) {
-        return new Tensor(data, Dimensions.matrix(rows, cols));
-    }
-
     public int totalSize() {
         return totalSize(dimensions);
     }
@@ -178,17 +172,9 @@ public class Tensor {
 
     public double sum() {
         double sum = 0;
-        for (int pos = 0; pos < data.length; pos++) {
-            sum += data[pos];
+        for (double datum : data) {
+            sum += datum;
         }
         return sum;
-    }
-
-    public static Tensor vector(double[] data) {
-        return new Tensor(data, Dimensions.vector(data.length));
-    }
-
-    public static Tensor scalar(double value) {
-        return new Tensor(new double[]{value}, Dimensions.scalar());
     }
 }

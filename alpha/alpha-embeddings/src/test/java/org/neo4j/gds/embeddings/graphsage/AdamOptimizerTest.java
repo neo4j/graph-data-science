@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ class AdamOptimizerTest {
 
     @Test
     void shouldConverge() {
-        Weights weights = new Weights(Tensor.matrix(
+        Weights<Matrix> weights = new Weights<>(new Matrix(
             new double[]{
                 0.1, 0.1, 0.1,
                 0.4, 0.3, 0.9,
@@ -46,7 +46,7 @@ class AdamOptimizerTest {
             3
         ));
 
-        Variable expectedOptimum = new Weights(Tensor.matrix(
+        Variable<Matrix> expectedOptimum = new Weights<>(new Matrix(
             new double[]{
                 0.11, 0.13, 0.231,
                 0.4, 0.3, 0.9,

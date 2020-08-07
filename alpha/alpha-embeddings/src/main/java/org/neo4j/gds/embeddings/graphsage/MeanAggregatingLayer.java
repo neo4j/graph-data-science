@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -30,11 +30,11 @@ public class MeanAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
-    private final Weights weights;
+    private final Weights<Matrix> weights;
     private long randomState;
-    private final Function<Variable, Matrix> activationFunction;
+    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
 
-    public MeanAggregatingLayer(Weights weights, long sampleSize, Function<Variable, Matrix> activationFunction) {
+    public MeanAggregatingLayer(Weights<Matrix> weights, long sampleSize, Function<Variable<?>, Variable<Matrix>> activationFunction) {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;

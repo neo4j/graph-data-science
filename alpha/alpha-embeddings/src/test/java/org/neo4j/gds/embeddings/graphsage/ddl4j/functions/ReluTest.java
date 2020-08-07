@@ -22,9 +22,11 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 
@@ -41,25 +43,25 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
     @Test
     void shouldApproximateGradientScalarValued() {
         double[] vectorData = {0.1};
-        Weights weights = new Weights(Tensor.vector(vectorData));
+        Weights<Vector> weights = new Weights<>(new Vector(vectorData));
 
-        finiteDifferenceShouldApproximateGradient(weights, new Relu(weights));
+        finiteDifferenceShouldApproximateGradient(weights, new Relu<>(weights));
     }
 
     @Test
     void shouldApproximateGradient() {
         double[] vectorData = {-1, 5, 2};
-        Weights weights = new Weights(Tensor.vector(vectorData));
+        Weights<Vector> weights = new Weights<>(new Vector(vectorData));
 
-        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new Relu(weights))));
+        finiteDifferenceShouldApproximateGradient(weights, new Sum(List.of(new Relu<>(weights))));
     }
 
     @Test
     void shouldComputeRelu() {
         double[] vectorData = {14, -5, 36, 0};
-        Constant p = Constant.vector(vectorData);
+        Constant<Vector> p = Constant.vector(vectorData);
 
-        Relu relu = new Relu(p);
+        Variable<Vector> relu = new Relu<>(p);
 
         Tensor resultData = ctx.forward(relu);
         assertNotNull(resultData);
@@ -71,9 +73,9 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
     @Test
     void returnsEmptyDataForEmptyVariable() {
         double[] vectorData = {};
-        Constant p = Constant.vector(vectorData);
+        Constant<Vector> p = Constant.vector(vectorData);
 
-        Relu relu = new Relu(p);
+        Variable<Vector> relu = new Relu<>(p);
 
         Tensor resultData = ctx.forward(relu);
         assertNotNull(resultData);
