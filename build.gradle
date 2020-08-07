@@ -15,7 +15,6 @@ ext {
 
     checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
 
-    spotbugsToolVersion = '4.0.6'
     spotbugsReportsDir = "${buildDir}/reports/spotbugs/"
     SpotBugsTask = com.github.spotbugs.snom.SpotBugsTask
 

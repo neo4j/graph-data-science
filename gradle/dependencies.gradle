@@ -39,6 +39,7 @@ ext {
             'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.1'),
             'qala-datagen':                 '2.3.0',
             'RoaringBitmap':                '0.7.45',
+            'spotbugsToolVersion':          '4.0.6',
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5}",

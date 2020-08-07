@@ -5,7 +5,7 @@ allprojects { proj ->
         proj.apply plugin: 'com.github.spotbugs'
 
         proj.spotbugs {
-            toolVersion = spotbugsToolVersion
+            toolVersion = ver.spotbugsToolVersion
             effort = "max"
 
             // When  `ignoreFailures=false` the build will be failing on spotbugs errors
@@ -22,7 +22,6 @@ allprojects { proj ->
                 html {
                     // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
                     enabled = true
-                    stylesheet = resources.text.fromFile("$publicDir/etc/spotbugs/xsl/fancy-hist.xsl")
                     destination = file("${spotbugsReportsDir}/html/${taskName}/${proj.name}.html")
                 }
                 xml {
