@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -26,31 +26,23 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class ScalarMultiply extends AbstractVariable {
-    private final Variable scalar;
-    private final Variable tensor;
+public class ConstantScale extends AbstractVariable {
+    private final Variable parent;
+    private final double constant;
 
-    ScalarMultiply(Variable scalar, Variable tensor, int[] dimensions) {
-        super(List.of(scalar, tensor), dimensions);
-        this.scalar = scalar;
-        this.tensor = tensor;
+    public ConstantScale(Variable parent, double constant) {
+        super(List.of(parent), parent.dimensions());
+        this.parent = parent;
+        this.constant = constant;
     }
 
     @Override
     public Tensor apply(ComputationContext ctx) {
-        return ctx.data(tensor).scalarMultiply(ctx.data(scalar).dataAt(0));
+        return ctx.data(parent).scalarMultiply(constant);
     }
 
     @Override
     public Tensor gradient(Variable parent, ComputationContext ctx) {
-        if (parent == scalar) {
-            // scalar
-            return Tensor.constant(ctx.gradient(this).innerProduct(ctx.data(tensor)), scalar.dimensions());
-        } else if (parent == tensor) {
-            // tensor
-            return ctx.gradient(this).scalarMultiply(ctx.data(scalar).dataAt(0));
-        } else {
-            throw new IllegalArgumentException("Variable requesting gradient does not match any of the parents.");
-        }
+        return ctx.gradient(this).scalarMultiply(constant);
     }
 }

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2Norm;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
