@@ -35,9 +35,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.memory.MemoryTracker;
-import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +45,6 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class NativeNodePropertyImporter {
 
@@ -142,17 +139,9 @@ public final class NativeNodePropertyImporter {
         if (builders != null) {
             Value value = propertyCursor.propertyValue();
 
-            if (value instanceof NumberValue) {
-                for (NodePropertiesFromStoreBuilder builder : builders) {
-                    builder.set(nodeId, value);
-                    propertiesImported++;
-                }
-            } else if (!Values.NO_VALUE.equals(value)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported type [%s] of value %s. Please use a numeric property.",
-                    value.valueGroup(),
-                    value
-                ));
+            for (NodePropertiesFromStoreBuilder builder : builders) {
+                builder.set(nodeId, value);
+                propertiesImported++;
             }
         }
 

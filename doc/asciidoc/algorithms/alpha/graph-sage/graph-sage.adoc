@@ -135,7 +135,7 @@ CREATE
   (Jeff:Person{ name: 'Jeff', age: 45, height: 192, weight: 85 }),
   (Brie:Person{ name: 'Brie', age: 27, height: 176, weight: 57 }),
   (Elsa:Person{ name: 'Elsa', age: 32, height: 158, weight: 55 }),
-  (John:Person{ name: 'John', age: 35, height: 172, weight: 76.4 }),
+  (John:Person{ name: 'John', age: 35, height: 172, weight: 76 }),
 
   (Dan)-[:REL]->(Annie),
   (Dan)-[:REL]->(Matt),
