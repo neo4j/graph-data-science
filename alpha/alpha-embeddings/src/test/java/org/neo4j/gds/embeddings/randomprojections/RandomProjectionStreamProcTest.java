@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -55,6 +56,35 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             .algo("gds.alpha.randomProjection")
             .streamMode()
             .addParameter("embeddingSize", embeddingSize)
+            .addParameter("maxIterations", maxIterations);
+
+        if (!weights.isEmpty()) {
+            queryBuilder.addParameter("iterationWeights", weights);
+        }
+        String query = queryBuilder.yields();
+
+        int expectedEmbeddingsDimension = weights.isEmpty()
+            ? embeddingSize * maxIterations
+            : embeddingSize;
+        runQueryWithRowConsumer(query, row -> {
+            List<Double> embeddings = (List<Double>) row.get("embedding");
+            assertEquals(expectedEmbeddingsDimension, embeddings.size());
+            assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
+        });
+    }
+
+    @Test
+    void shouldComputeNonZeroEmbeddingsWhenFirstWeightIsZero() {
+        int embeddingSize = 128;
+        int maxIterations = 4;
+        List<Float> weights = List.of(0.0f, 1.0f, 2.0f, 4.0f);
+        GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .algo("gds.alpha.randomProjection")
+            .streamMode()
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("iterationWeights", weights)
             .addParameter("maxIterations", maxIterations);
 
         if (!weights.isEmpty()) {
