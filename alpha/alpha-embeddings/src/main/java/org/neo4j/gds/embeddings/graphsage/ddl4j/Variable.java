@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 public interface Variable<T extends Tensor> {
     T apply(ComputationContext ctx);
 
-    <PT extends Tensor, V extends Variable<PT>> Tensor gradient(V parent, ComputationContext ctx);
+    Tensor gradient(Variable<?> parent, ComputationContext ctx);
 
     default boolean requireGradient() {
         return false;

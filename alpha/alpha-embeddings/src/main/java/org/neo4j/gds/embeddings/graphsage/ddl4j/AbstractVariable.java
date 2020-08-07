@@ -19,22 +19,28 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+
 import java.util.List;
 
-public abstract class AbstractVariable implements Variable {
+public abstract class AbstractVariable<T extends Tensor> implements Variable<T> {
     private final int[] dimensions;
     private final boolean requireGradient;
-    private final List<Variable> parents;
+    private final List<? extends Variable<?>> parents;
 
-    protected AbstractVariable(List<Variable> parents, int[] dimensions) {
+    protected AbstractVariable(List<? extends Variable<?>> parents, int[] dimensions) {
         this.dimensions = dimensions;
         this.parents = parents;
         this.requireGradient = anyParentRequiresGradient();
     }
 
     @Override
-    public List<Variable> parents() {
+    public List<? extends Variable<?>> parents() {
         return parents;
+    }
+
+    protected Variable<?> firstParent() {
+        return parents.get(0);
     }
 
     @Override
@@ -53,7 +59,7 @@ public abstract class AbstractVariable implements Variable {
 
     private boolean anyParentRequiresGradient() {
         boolean parentRequiresGradient = false;
-        for (Variable parent : parents) {
+        for (Variable<?> parent : parents) {
             parentRequiresGradient |= parent.requireGradient();
         }
         return parentRequiresGradient;

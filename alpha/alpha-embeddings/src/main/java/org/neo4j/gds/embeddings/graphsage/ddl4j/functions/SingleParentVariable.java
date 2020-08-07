@@ -21,19 +21,20 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public abstract class SingleParentVariable extends AbstractVariable {
+public abstract class SingleParentVariable<T extends Tensor> extends AbstractVariable<T> {
 
     public SingleParentVariable(
-        Variable parent,
+        Variable<?> parent,
         int[] dimensions
     ) {
         super(List.of(parent), dimensions);
     }
 
-    protected Variable parent() {
-        return parents().get(0);
+    protected Variable<?> parent() {
+        return firstParent();
     }
 }

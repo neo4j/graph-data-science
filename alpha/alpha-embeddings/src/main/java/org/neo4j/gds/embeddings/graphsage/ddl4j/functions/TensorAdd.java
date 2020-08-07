@@ -26,22 +26,22 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class TensorAdd extends AbstractVariable {
-    public TensorAdd(List<Variable> parents, int[] dimensions) {
+public class TensorAdd extends AbstractVariable<Tensor> {
+    public TensorAdd(List<Variable<?>> parents, int[] dimensions) {
         super(parents, dimensions);
     }
 
     @Override
     public Tensor apply(ComputationContext ctx) {
         Tensor sum = Tensor.constant(0D, dimensions());
-        for (Variable parent : parents()) {
+        for (Variable<?> parent : parents()) {
             sum.addInPlace(ctx.data(parent));
         }
         return sum;
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return ctx.gradient(this);
     }
 }

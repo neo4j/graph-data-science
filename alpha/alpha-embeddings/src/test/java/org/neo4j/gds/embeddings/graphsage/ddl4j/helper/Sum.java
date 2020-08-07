@@ -19,30 +19,31 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 
 import java.util.List;
 
-public class Sum extends AbstractVariable {
-    public Sum(List<Variable> parents) {
+public class Sum extends AbstractVariable<Scalar> {
+    public Sum(List<Variable<?>> parents) {
         super(parents, Dimensions.scalar());
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
+    public Scalar apply(ComputationContext ctx) {
         double sum = 0;
         for (var parent : parents()) {
             sum += ctx.data(parent).sum();
         }
-        return Tensor.scalar(sum);
+        return new Scalar(sum);
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         return ctx.data(parent).map(ignore -> ctx.gradient(this).getAtIndex(0));
     }
 }

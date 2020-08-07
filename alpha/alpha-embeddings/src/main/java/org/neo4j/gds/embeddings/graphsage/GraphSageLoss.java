@@ -22,14 +22,15 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.stream.IntStream;
 
-public class GraphSageLoss extends SingleParentVariable {
+public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
@@ -43,8 +44,8 @@ public class GraphSageLoss extends SingleParentVariable {
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        Tensor embeddingData = ctx.data(parents().get(0));
+    public Scalar apply(ComputationContext ctx) {
+        Tensor embeddingData = ctx.data(parent());
         int batchSize = embeddingData.dimension(0) / 3;
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
@@ -53,7 +54,7 @@ public class GraphSageLoss extends SingleParentVariable {
             double negativeAffinity = affinity(embeddingData, nodeId, negativeNodeId);
             return -Math.log(Sigmoid.sigmoid(positiveAffinity)) - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
         }).sum();
-        return Tensor.scalar(loss);
+        return new Scalar(loss);
     }
 
     private double affinity(Tensor embeddingData, int nodeId, int otherNodeId) {
@@ -66,7 +67,7 @@ public class GraphSageLoss extends SingleParentVariable {
     }
 
     @Override
-    public Tensor gradient(Variable parent, ComputationContext ctx) {
+    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
         Tensor embeddingData = ctx.data(parent);
         double[] embeddings = embeddingData.data();
         int totalBatchSize = embeddingData.dimension(0);
