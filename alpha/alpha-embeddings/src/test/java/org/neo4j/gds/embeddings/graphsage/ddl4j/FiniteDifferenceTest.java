@@ -36,12 +36,12 @@ public interface FiniteDifferenceTest {
         return 1E-4;
     }
 
-    default void finiteDifferenceShouldApproximateGradient(Weights weightVariable, Variable loss) {
+    default void finiteDifferenceShouldApproximateGradient(Weights<?> weightVariable, Variable<?> loss) {
         finiteDifferenceShouldApproximateGradient(List.of(weightVariable), loss);
     }
 
-    default void finiteDifferenceShouldApproximateGradient(List<Weights> weightVariables, Variable loss) {
-        for (Weights variable : weightVariables) {
+    default void finiteDifferenceShouldApproximateGradient(List<Weights<?>> weightVariables, Variable<?> loss) {
+        for (Weights<?> variable : weightVariables) {
             for (int i = 0; i < Tensor.totalSize(variable.dimensions()); i++) {
                 ComputationContext ctx = new ComputationContext();
                 double f0 = ctx.forward(loss).dataAt(0);
@@ -60,7 +60,7 @@ public interface FiniteDifferenceTest {
         }
     }
 
-    private void perturb(Weights variable, int index, double epsilon) {
+    private void perturb(Weights<?> variable, int index, double epsilon) {
         variable.data().addDataAt(index, epsilon);
     }
 

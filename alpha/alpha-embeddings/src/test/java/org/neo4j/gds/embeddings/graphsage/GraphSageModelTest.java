@@ -80,7 +80,7 @@ class GraphSageModelTest implements FiniteDifferenceTest {
         3,
         3
     ));
-    private static final Weights<Matrix> LAYER_2_WEIGHTS = new Weights(new Matrix(
+    private static final Weights<Matrix> LAYER_2_WEIGHTS = new Weights<>(new Matrix(
         new double[]{
             0.35, 0.1, 0.3,
             0.25, 0.4, 0.9,

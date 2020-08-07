@@ -24,15 +24,15 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class PassthroughVariable extends SingleParentVariable<Tensor> {
+public class PassthroughVariable<T extends Tensor> extends SingleParentVariable<T> {
 
-    public PassthroughVariable(Variable<?> parent) {
+    public PassthroughVariable(Variable<T> parent) {
         super(parent, parent.dimensions());
     }
 
     @Override
-    public Tensor apply(ComputationContext ctx) {
-        return ctx.data(parent());
+    public T apply(ComputationContext ctx) {
+        return (T) ctx.data(parent());
     }
 
     @Override

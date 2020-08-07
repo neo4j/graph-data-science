@@ -209,7 +209,7 @@ public class GraphSageModel {
             layer.generateNewRandomState();
         }
 
-        Variable lossFunction = lossFunction(batch, graph, features);
+        Variable<Scalar> lossFunction = lossFunction(batch, graph, features);
 
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
@@ -285,7 +285,7 @@ public class GraphSageModel {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<?> loss = lossFunction(batch, graph, features);
+                Variable<Scalar> loss = lossFunction(batch, graph, features);
                 doubleAdder.add(ctx.forward(loss).dataAt(0));
             })
         );
@@ -294,7 +294,7 @@ public class GraphSageModel {
         return lossValue;
     }
 
-    Variable<?> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
+    Variable<Scalar> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
         long[] totalBatch = LongStream
             .concat(Arrays.stream(batch), LongStream.concat(
                 neighborBatch(graph, batch),
@@ -304,7 +304,7 @@ public class GraphSageModel {
 
         Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
-        return new PassthroughVariable(lossFunction);
+        return new PassthroughVariable<>(lossFunction);
     }
 
     private LongStream neighborBatch(Graph graph, long[] batch) {
