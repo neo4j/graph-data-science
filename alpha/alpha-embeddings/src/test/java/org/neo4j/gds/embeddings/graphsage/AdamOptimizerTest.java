@@ -63,10 +63,9 @@ class AdamOptimizerTest {
 
         double oldLoss = Double.MAX_VALUE;
         while(true) {
-            Variable difference = new TensorAdd(
-                List.of(weights, new ConstantScale(expectedOptimum, -1)),
-                expectedOptimum.dimensions()
-            );
+            Variable<Matrix> difference = new TensorAdd(List.of(
+                weights, new ConstantScale<>(expectedOptimum, -1)
+            ));
             L2Norm lossFunction = new L2Norm(difference);
 
             double newLoss = ctx.forward(lossFunction).dataAt(0);
