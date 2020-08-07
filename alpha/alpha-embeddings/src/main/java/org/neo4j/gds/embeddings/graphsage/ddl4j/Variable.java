@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+
 public interface Variable {
     Tensor apply(ComputationContext ctx);
 

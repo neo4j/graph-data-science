@@ -17,7 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
+
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
