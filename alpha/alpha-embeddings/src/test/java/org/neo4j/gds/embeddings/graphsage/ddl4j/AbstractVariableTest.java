@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Constant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Sum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.TensorAdd;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
