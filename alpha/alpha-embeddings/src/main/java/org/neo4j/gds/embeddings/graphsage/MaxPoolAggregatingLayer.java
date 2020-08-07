@@ -36,7 +36,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
     private long randomState;
-    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
+    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MaxPoolAggregatingLayer(
         long sampleSize,
@@ -44,7 +44,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        Function<Variable<?>, Variable<Matrix>> activationFunction
+        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;

@@ -32,7 +32,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 public enum ActivationFunction {
     SIGMOID {
         @Override
-        public Function<Variable<?>, Variable<Matrix>> activationFunction() {
+        public Function<Variable<Matrix>, Variable<Matrix>> activationFunction() {
             return Sigmoid::new;
         }
 
@@ -43,7 +43,7 @@ public enum ActivationFunction {
     },
     RELU {
         @Override
-        public Function<Variable<?>, Variable<Matrix>> activationFunction() {
+        public Function<Variable<Matrix>, Variable<Matrix>> activationFunction() {
             return Relu::new;
         }
 
@@ -53,7 +53,7 @@ public enum ActivationFunction {
         }
     };
 
-    public abstract Function<Variable<?>, Variable<Matrix>> activationFunction();
+    public abstract Function<Variable<Matrix>, Variable<Matrix>> activationFunction();
 
     public abstract double weightInitBound(int rows, int cols);
 

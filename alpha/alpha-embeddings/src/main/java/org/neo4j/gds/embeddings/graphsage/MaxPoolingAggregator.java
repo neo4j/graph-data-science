@@ -39,14 +39,14 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
-    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
+    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MaxPoolingAggregator(
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        Function<Variable<?>, Variable<Matrix>> activationFunction
+        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
 
         this.poolWeights = poolWeights;

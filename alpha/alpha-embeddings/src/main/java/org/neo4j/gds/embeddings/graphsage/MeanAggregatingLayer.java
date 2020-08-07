@@ -32,9 +32,9 @@ public class MeanAggregatingLayer implements Layer {
     private final long sampleSize;
     private final Weights<Matrix> weights;
     private long randomState;
-    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
+    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    public MeanAggregatingLayer(Weights<Matrix> weights, long sampleSize, Function<Variable<?>, Variable<Matrix>> activationFunction) {
+    public MeanAggregatingLayer(Weights<Matrix> weights, long sampleSize, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;

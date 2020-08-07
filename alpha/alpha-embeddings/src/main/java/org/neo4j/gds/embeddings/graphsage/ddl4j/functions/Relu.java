@@ -27,7 +27,7 @@ public class Relu<T extends Tensor> extends SingleParentVariable<T> {
 
     private static final double ALPHA = 0.01;
 
-    public Relu(Variable<?> parent) {
+    public Relu(Variable<T> parent) {
         super(parent, parent.dimensions());
     }
 

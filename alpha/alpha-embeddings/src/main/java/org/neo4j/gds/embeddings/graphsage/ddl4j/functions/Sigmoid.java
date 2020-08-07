@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 public class Sigmoid<T extends Tensor> extends SingleParentVariable<T> {
 
-    public Sigmoid(Variable<?> parent) {
+    public Sigmoid(Variable<T> parent) {
         super(parent, parent.dimensions());
     }
 

@@ -36,9 +36,9 @@ import java.util.function.Function;
 public class MeanAggregator implements Aggregator {
 
     private final Weights<Matrix> weights;
-    private final Function<Variable<?>, Variable<Matrix>> activationFunction;
+    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    MeanAggregator(Weights<Matrix> weights, Function<Variable<?>, Variable<Matrix>> activationFunction) {
+    MeanAggregator(Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
         this.weights = weights;
         this.activationFunction = activationFunction;
     }
