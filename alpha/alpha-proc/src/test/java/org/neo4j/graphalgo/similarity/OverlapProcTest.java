@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
@@ -148,18 +147,12 @@ class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalIn
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0))
                 );
-                Result result8 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "concurrency", 8, "topK", 0))
-                )
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
                     Map<String, Object> row1 = result1.next();
                     assertEquals(row1, result2.next(), row1.toString());
                     assertEquals(row1, result4.next(), row1.toString());
-                    assertEquals(row1, result8.next(), row1.toString());
                     cnt++;
                 }
                 return cnt;
@@ -192,21 +185,14 @@ class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalIn
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4))
                 );
-                Result result8 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8))
-                )
             ) {
                 while (result1.hasNext()) {
                     Map<String, Object> row1 = result1.next();
                     assertEquals(row1, result2.next(), row1.toString());
                     assertEquals(row1, result4.next(), row1.toString());
-                    assertEquals(row1, result8.next(), row1.toString());
                 }
                 assertFalse(result2.hasNext());
                 assertFalse(result4.hasNext());
-                assertFalse(result8.hasNext());
             }
         });
     }

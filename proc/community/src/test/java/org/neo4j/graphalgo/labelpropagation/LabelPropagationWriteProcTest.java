@@ -142,7 +142,7 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
     static Stream<Arguments> concurrenciesExplicitAndImplicitCreate() {
         return TestSupport.crossArguments(
-            () -> Stream.of(1, 4, 8).map(Arguments::of),
+            () -> Stream.of(1, 2, 4).map(Arguments::of),
             LabelPropagationProcTest::gdsGraphVariations
         );
     }

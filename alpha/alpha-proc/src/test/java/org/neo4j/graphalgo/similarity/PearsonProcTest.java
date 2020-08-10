@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
@@ -184,18 +183,12 @@ class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
                 );
-                Result result8 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -1.0, "concurrency", 1, "topK", 0), "missingValue", 0)
-                )
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
                     Map<String, Object> row1 = result1.next();
                     assertEquals(row1, result2.next(), row1.toString());
                     assertEquals(row1, result4.next(), row1.toString());
-                    assertEquals(row1, result8.next(), row1.toString());
                     cnt++;
                 }
                 return cnt;
@@ -228,18 +221,12 @@ class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
                 );
-                Result result8 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 8), "missingValue", 0)
-                )
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
                     Map<String, Object> row1 = result1.next();
                     assertEquals(row1, result2.next(), row1.toString());
                     assertEquals(row1, result4.next(), row1.toString());
-                    assertEquals(row1, result8.next(), row1.toString());
                     cnt++;
                 }
                 return cnt;

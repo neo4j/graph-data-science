@@ -45,7 +45,7 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
                 GdsEdition gdsEdition = GdsEdition.instance();
                 gdsEdition.setToCommunityEdition();
 
-                if(enterpriseLicenseKey != null) {
+                if (enterpriseLicenseKey != null && !enterpriseLicenseKey.isBlank()) {
                     SignatureTool.LicenseCheckResult checkResult = SignatureTool.verify(enterpriseLicenseKey);
                     if (checkResult.isValid()) {
                         gdsEdition.setToEnterpriseEdition();
