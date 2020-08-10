@@ -19,99 +19,83 @@
  */
 package org.neo4j.graphalgo.core;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
+import java.util.Date;
 
-public class SignatureTool {
-    private static final String CHARSET = "UTF-8";
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public final class SignatureTool {
     private static final String ENCRYPTION_ALGORITHM = "RSA";
-    private static final String HASH_ENCRYPTION_ALGORITHM = "SHA256withRSA";
-    private static final String SIGNATURE_SEPARATOR = "======SIGNATURE======";
 
-    private final Base64.Encoder encoder;
-    private final Base64.Decoder decoder;
-
-    public SignatureTool() {
-        this.encoder = Base64.getEncoder();
-        this.decoder = Base64.getDecoder();
-    }
-
-    public String sign(String message) throws
-        NoSuchAlgorithmException,
-        IOException,
-        InvalidKeySpecException,
-        InvalidKeyException, SignatureException {
-        PrivateKey privateKey = getPrivateKey();
-
-        Signature sign = Signature.getInstance(HASH_ENCRYPTION_ALGORITHM);
-        sign.initSign(privateKey);
-        sign.update(message.getBytes(CHARSET));
-        ;
-        var signatureString = encoder.encodeToString(sign.sign());
-
-        var messageAndSignature = message + SIGNATURE_SEPARATOR + signatureString;
-
-        return encoder.encodeToString(messageAndSignature.getBytes(CHARSET));
-    }
-
-    public boolean verify(String encodedMessageAndSignature) {
+    public static LicenseCheckResult verify(String license) {
         try {
-            String messageAndSignature = new String(decoder.decode(encodedMessageAndSignature), CHARSET);
-            String[] messageAndSignatureList = messageAndSignature.split(SIGNATURE_SEPARATOR);
+            PublicKey key = getPublicKey();
+            Jws<Claims> token = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(license);
+            Claims claims = token.getBody();
 
-            String message = messageAndSignatureList[0];
-            byte[] signature = decoder.decode(messageAndSignatureList[1]);
-
-            Signature sign = Signature.getInstance(HASH_ENCRYPTION_ALGORITHM);
-            sign.initVerify(getPublicKey());
-            sign.update(message.getBytes(CHARSET));
-            return sign.verify(signature);
+            Date now = new Date();
+            // TODO teach the UI to generate keys for GDS
+            if (!claims.getSubject().equals("neo4j-desktop")) {
+                return ImmutableLicenseCheckResult.of(
+                    false,
+                    "License is not valid for the Graph Data Science library. Please contact your system administrator."
+                );
+            } else {
+                long daysLeft = (claims
+                                     .getExpiration()
+                                     .getTime() - now.getTime()) / 1000 / 60 / 60 / 24; // Divide to go from milliseconds to days
+                return ImmutableLicenseCheckResult.of(true, formatWithLocale("License valid, %d days left", daysLeft));
+            }
+        } catch (ExpiredJwtException e) {
+            return ImmutableLicenseCheckResult.of(
+                false,
+                formatWithLocale("License expired on %s", e.getClaims().getExpiration())
+            );
         } catch (Exception e) {
-            throw new RuntimeException("Verification of the License Key failed", e);
+            return ImmutableLicenseCheckResult.of(
+                false,
+                formatWithLocale("Could not validate license. Cause: %s", e.getMessage())
+            );
         }
     }
 
+    private static PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
+        InputStream inputStream = SignatureTool.class.getResourceAsStream("/signing-keys/public_key.pem");
 
-    private PrivateKey getPrivateKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        InputStream inputStream = getClass().getResourceAsStream("/signing-keys/private_key.pem");
-        byte[] key = readPem(inputStream);
-
-        KeyFactory keyFactory = KeyFactory.getInstance( ENCRYPTION_ALGORITHM );
-        return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(key));
-    }
-
-    private PublicKey getPublicKey() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        InputStream inputStream = getClass().getResourceAsStream("/signing-keys/public_key.pem");
-
-        byte[] key = readPem(inputStream);
-
-        KeyFactory keyFactory = KeyFactory.getInstance( ENCRYPTION_ALGORITHM );
-        return keyFactory.generatePublic(new X509EncodedKeySpec(key));
-    }
-
-    private byte[] readPem(InputStream inputStream) throws IOException {
         InputStreamReader streamReader = new InputStreamReader(
             inputStream,
             StandardCharsets.UTF_8
         );
 
         PemReader pemReader = new PemReader(streamReader);
-        return pemReader.readPemObject().getContent();
+        byte[] key = pemReader.readPemObject().getContent();
+
+        KeyFactory keyFactory = KeyFactory.getInstance(ENCRYPTION_ALGORITHM);
+        return keyFactory.generatePublic(new X509EncodedKeySpec(key));
     }
 
+    @ValueClass
+    public interface LicenseCheckResult {
+
+        boolean isValid();
+
+        String message();
+    }
+
+    private SignatureTool() {}
 }

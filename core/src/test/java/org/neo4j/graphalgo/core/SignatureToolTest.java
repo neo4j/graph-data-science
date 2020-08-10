@@ -21,30 +21,16 @@ package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SignatureToolTest {
 
     @Test
-    void signAndVerify() throws
-        IOException,
-        NoSuchAlgorithmException,
-        InvalidKeySpecException,
-        InvalidKeyException,
-        SignatureException {
+    void testValidLicense() {
+        String licenseKey = "";
 
-        String message = "MySuperSecretMessage";
-
-        SignatureTool signatureTool = new SignatureTool();
-        var signedMessage = signatureTool.sign(message);
-        System.out.println(signedMessage);
-        assertTrue(signatureTool.verify(signedMessage));
+        SignatureTool.LicenseCheckResult licenseCheckResult = SignatureTool.verify(licenseKey);
+        assertTrue(licenseCheckResult.isValid(), licenseCheckResult.message());
     }
 
 }
