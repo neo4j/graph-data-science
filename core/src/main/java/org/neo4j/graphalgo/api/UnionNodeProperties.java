@@ -48,7 +48,7 @@ public class UnionNodeProperties implements NodeProperties {
 
         var valueTypes = labelToNodePropertiesMap.values()
             .stream()
-            .map(NodeProperties::getType)
+            .map(NodeProperties::valueType)
             .collect(Collectors.toList());
 
         var expectedType = valueTypes.get(0);
@@ -63,16 +63,16 @@ public class UnionNodeProperties implements NodeProperties {
 
         switch(valueType) {
             case LONG:
-                this.valueProducer = (nodeId -> Values.longValue(getLong(nodeId)));
+                this.valueProducer = (nodeId -> Values.longValue(longValue(nodeId)));
                 break;
             case DOUBLE:
-                this.valueProducer = (nodeId -> Values.doubleValue(getDouble(nodeId)));
+                this.valueProducer = (nodeId -> Values.doubleValue(doubleValue(nodeId)));
                 break;
             case LONG_ARRAY:
-                this.valueProducer = (nodeId -> Values.longArray(getLongArray(nodeId)));
+                this.valueProducer = (nodeId -> Values.longArray(longArrayValue(nodeId)));
                 break;
             case DOUBLE_ARRAY:
-                this.valueProducer = (nodeId -> Values.doubleArray(getDoubleArray(nodeId)));
+                this.valueProducer = (nodeId -> Values.doubleArray(doubleArrayValue(nodeId)));
                 break;
             default:
                 throw new UnsupportedOperationException(formatWithLocale("No value converter for ValueType %s", valueTypes));
@@ -80,10 +80,10 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     @Override
-    public double getDouble(long nodeId) {
+    public double doubleValue(long nodeId) {
         if (valueType == DOUBLE) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : nodeProperties.getDouble(nodeId);
+            return nodeProperties == null ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : nodeProperties.doubleValue(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double",
@@ -93,10 +93,10 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     @Override
-    public long getLong(long nodeId) {
+    public long longValue(long nodeId) {
         if (valueType == LONG) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? DefaultValue.LONG_DEFAULT_FALLBACK : nodeProperties.getLong(nodeId);
+            return nodeProperties == null ? DefaultValue.LONG_DEFAULT_FALLBACK : nodeProperties.longValue(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to long",
@@ -106,10 +106,10 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     @Override
-    public double[] getDoubleArray(long nodeId) {
+    public double[] doubleArrayValue(long nodeId) {
         if (valueType == DOUBLE_ARRAY) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? null : nodeProperties.getDoubleArray(nodeId);
+            return nodeProperties == null ? null : nodeProperties.doubleArrayValue(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double array",
@@ -119,10 +119,10 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     @Override
-    public long[] getLongArray(long nodeId) {
+    public long[] longArrayValue(long nodeId) {
         if (valueType == LONG_ARRAY) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
-            return nodeProperties == null ? null : nodeProperties.getLongArray(nodeId);
+            return nodeProperties == null ? null : nodeProperties.longArrayValue(nodeId);
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to long array",
@@ -138,12 +138,12 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     @Override
-    public Value getValue(long nodeId) {
+    public Value value(long nodeId) {
         return valueProducer.getValue(nodeId);
     }
 
     @Override
-    public ValueType getType() {
+    public ValueType valueType() {
         return valueType;
     }
 

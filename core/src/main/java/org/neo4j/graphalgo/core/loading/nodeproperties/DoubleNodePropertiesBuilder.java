@@ -121,7 +121,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
 
         @Override
-        public double getDouble(long nodeId) {
+        public double doubleValue(long nodeId) {
             return Double.longBitsToDouble(propertyValues.get(nodeId));
         }
 

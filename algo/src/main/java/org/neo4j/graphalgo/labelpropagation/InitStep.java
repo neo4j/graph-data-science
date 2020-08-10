@@ -59,7 +59,7 @@ final class InitStep implements Step {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
-            long existingLabelValue = nodeProperties.getLong(nodeId);
+            long existingLabelValue = nodeProperties.longValue(nodeId);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might
             // clash with node IDs. If we have loaded a graph with a greater node ID

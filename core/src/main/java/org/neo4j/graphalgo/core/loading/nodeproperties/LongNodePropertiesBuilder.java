@@ -123,7 +123,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
 
         @Override
-        public long getLong(long nodeId) {
+        public long longValue(long nodeId) {
             return propertyValues.get(nodeId);
         }
 

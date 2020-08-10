@@ -61,7 +61,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.getLong(internalNodeId));
+        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
     }
 
     @Override

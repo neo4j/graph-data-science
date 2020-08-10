@@ -73,7 +73,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             HugeAtomicLongArray triangleCounts = computeTriangleCounts();
             calculateCoefficients((nodeId) -> Long.valueOf(triangleCounts.get(nodeId)).doubleValue());
         } else {
-            calculateCoefficients(triangleCountProperty::getDouble);
+            calculateCoefficients(triangleCountProperty::doubleValue);
         }
 
         return Result.of(

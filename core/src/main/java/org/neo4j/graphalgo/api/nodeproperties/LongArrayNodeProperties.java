@@ -26,21 +26,21 @@ import org.neo4j.values.storable.Values;
 public interface LongArrayNodeProperties extends NodeProperties {
 
     @Override
-    long[] getLongArray(long nodeId);
+    long[] longArrayValue(long nodeId);
 
     @Override
     default Object getObject(long nodeId) {
-        return getLongArray(nodeId);
+        return longArrayValue(nodeId);
     }
 
     @Override
-    default Value getValue(long nodeId) {
-        var value = getLongArray(nodeId);
+    default Value value(long nodeId) {
+        var value = longArrayValue(nodeId);
         return value == null ? null : Values.longArray(value);
     };
 
     @Override
-    default ValueType getType() {
+    default ValueType valueType() {
         return ValueType.LONG_ARRAY;
     };
 }

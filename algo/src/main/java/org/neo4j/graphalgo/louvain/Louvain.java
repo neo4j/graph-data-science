@@ -278,13 +278,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         }
 
         @Override
-        public long getLong(long nodeId) {
+        public long longValue(long nodeId) {
             return graph.toOriginalNodeId(nodeId);
         }
 
         @Override
-        public Value getValue(long nodeId) {
-            return Values.longValue(getLong(nodeId));
+        public Value value(long nodeId) {
+            return Values.longValue(longValue(nodeId));
         }
 
         @Override

@@ -188,7 +188,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         long nextAvailableInternalCommunityId = -1;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            long seedCommunity = seedProperty.getLong(nodeId);
+            long seedCommunity = seedProperty.longValue(nodeId);
             if (seedCommunity < 0) {
                 seedCommunity = -1;
             }
@@ -374,7 +374,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     public LongNodeProperties asNodeProperties() {
         return new LongNodeProperties() {
             @Override
-            public long getLong(long nodeId) {
+            public long longValue(long nodeId) {
                 return getCommunityId(nodeId);
             }
 

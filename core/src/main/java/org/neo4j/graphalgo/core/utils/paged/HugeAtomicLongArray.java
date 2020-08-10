@@ -132,7 +132,7 @@ public abstract class HugeAtomicLongArray {
     public LongNodeProperties asNodeProperties() {
         return new LongNodeProperties() {
             @Override
-            public long getLong(long nodeId) {
+            public long longValue(long nodeId) {
                 return get(nodeId);
             }
 

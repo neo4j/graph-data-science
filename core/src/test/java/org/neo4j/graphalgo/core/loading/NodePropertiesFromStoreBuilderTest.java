@@ -59,7 +59,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalDouble.empty(), properties.getMaxDoublePropertyValue());
-        assertEquals(42.0, properties.getDouble(0));
+        assertEquals(42.0, properties.doubleValue(0));
     }
 
     @Test
@@ -72,15 +72,15 @@ final class NodePropertiesFromStoreBuilderTest {
 
         assertEquals(0L, properties.size());
         assertEquals(OptionalLong.empty(), properties.getMaxLongPropertyValue());
-        assertEquals(42, properties.getLong(0));
+        assertEquals(42, properties.longValue(0));
     }
 
     @Test
     void returnsValuesThatHaveBeenSet() {
         var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(1.0)));
 
-        assertEquals(1.0, properties.getDouble(1));
-        assertEquals(42.0, properties.getDouble(0));
+        assertEquals(1.0, properties.doubleValue(1));
+        assertEquals(42.0, properties.doubleValue(0));
     }
 
     @Test
@@ -93,8 +93,8 @@ final class NodePropertiesFromStoreBuilderTest {
             b -> b.set(1, Values.of(data))
         );
 
-        assertArrayEquals(data, properties.getLongArray(1));
-        assertArrayEquals(defaultValue, properties.getLongArray(0));
+        assertArrayEquals(data, properties.longArrayValue(1));
+        assertArrayEquals(defaultValue, properties.longArrayValue(0));
     }
 
     @Test
@@ -107,8 +107,8 @@ final class NodePropertiesFromStoreBuilderTest {
             b -> b.set(1, Values.of(data))
         );
 
-        assertArrayEquals(data, properties.getDoubleArray(1));
-        assertArrayEquals(defaultValue, properties.getDoubleArray(0));
+        assertArrayEquals(data, properties.doubleArrayValue(1));
+        assertArrayEquals(defaultValue, properties.doubleArrayValue(0));
     }
 
     @Test
@@ -121,8 +121,8 @@ final class NodePropertiesFromStoreBuilderTest {
             b -> b.set(1, Values.of(data))
         );
 
-        assertArrayEquals(data, properties.getFloatArray(1));
-        assertArrayEquals(defaultValue, properties.getFloatArray(0));
+        assertArrayEquals(data, properties.floatArrayValue(1));
+        assertArrayEquals(defaultValue, properties.floatArrayValue(0));
     }
 
     @Test
@@ -136,12 +136,12 @@ final class NodePropertiesFromStoreBuilderTest {
             b -> b.set(1, Values.of(floatData))
         );
 
-        assertArrayEquals(floatData, properties.getFloatArray(1));
-        double[] doubleArray = properties.getDoubleArray(1);
+        assertArrayEquals(floatData, properties.floatArrayValue(1));
+        double[] doubleArray = properties.doubleArrayValue(1);
         for (int i = 0; i < floatData.length; i++) {
             assertEquals(doubleData[i], doubleArray[i], 0.0001D);
         }
-        assertArrayEquals(defaultValue, properties.getFloatArray(0));
+        assertArrayEquals(defaultValue, properties.floatArrayValue(0));
     }
 
     @Test
@@ -155,9 +155,9 @@ final class NodePropertiesFromStoreBuilderTest {
             b -> b.set(1, Values.of(doubleData))
         );
 
-        assertArrayEquals(doubleData, properties.getDoubleArray(1));
-        assertArrayEquals(floatData, properties.getFloatArray(1));
-        assertArrayEquals(defaultValue, properties.getDoubleArray(0));
+        assertArrayEquals(doubleData, properties.doubleArrayValue(1));
+        assertArrayEquals(floatData, properties.floatArrayValue(1));
+        assertArrayEquals(defaultValue, properties.doubleArrayValue(0));
     }
 
     static Stream<Arguments> unsupportedValues() {
@@ -190,15 +190,15 @@ final class NodePropertiesFromStoreBuilderTest {
         var expectedImplicitDefault = 42.0;
         var properties = createNodeProperties(2L, expectedImplicitDefault, b -> {});
 
-        assertEquals(expectedImplicitDefault, properties.getDouble(2));
+        assertEquals(expectedImplicitDefault, properties.doubleValue(2));
     }
 
     @Test
     void returnNaNIfItWasSet() {
         var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
 
-        assertEquals(42.0, properties.getDouble(0));
-        assertEquals(Double.NaN, properties.getDouble(1));
+        assertEquals(42.0, properties.doubleValue(0));
+        assertEquals(Double.NaN, properties.doubleValue(1));
     }
 
     @Test
@@ -234,9 +234,9 @@ final class NodePropertiesFromStoreBuilderTest {
 
         var properties = builder.build();
 
-        assertEquals(ValueType.LONG, properties.getType());
-        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, properties.getLong(0L));
-        assertEquals(42L, properties.getLong(1L));
+        assertEquals(ValueType.LONG, properties.valueType());
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, properties.longValue(0L));
+        assertEquals(42L, properties.longValue(1L));
     }
 
     @Test
@@ -275,7 +275,7 @@ final class NodePropertiesFromStoreBuilderTest {
         var properties = builder.build();
         for (int i = 0; i < nodeSize; i++) {
             var expected = i == 1338 ? 0x1p41 : i == 1337 ? 0x1p42 : i % 2 == 0 ? 2.0 : 1.0;
-            assertEquals(expected, properties.getDouble(i), "" + i);
+            assertEquals(expected, properties.doubleValue(i), "" + i);
         }
         assertEquals(nodeSize, properties.size());
         var maxPropertyValue = properties.getMaxDoublePropertyValue();

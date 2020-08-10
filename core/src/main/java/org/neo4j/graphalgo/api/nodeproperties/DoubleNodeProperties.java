@@ -29,21 +29,21 @@ import java.util.stream.LongStream;
 public interface DoubleNodeProperties extends NodeProperties {
 
     @Override
-    double getDouble(long nodeId);
+    double doubleValue(long nodeId);
 
     @Override
     default Object getObject(long nodeId) {
-        return getDouble(nodeId);
+        return doubleValue(nodeId);
     }
 
     @Override
-    default Value getValue(long nodeId) {
-        var value = getDouble(nodeId);
+    default Value value(long nodeId) {
+        var value = doubleValue(nodeId);
         return Double.isNaN(value) ? null : Values.doubleValue(value);
     };
 
     @Override
-    default ValueType getType() {
+    default ValueType valueType() {
         return ValueType.DOUBLE;
     };
 
@@ -52,7 +52,7 @@ public interface DoubleNodeProperties extends NodeProperties {
         return LongStream
             .range(0, size())
             .parallel()
-            .mapToDouble(this::getDouble)
+            .mapToDouble(this::doubleValue)
             .max();
     }
 }

@@ -83,7 +83,7 @@ public class LocalClusteringCoefficientStreamProc
     protected Result streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        return new Result(originalNodeId, nodeProperties.getDouble(internalNodeId));
+        return new Result(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override

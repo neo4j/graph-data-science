@@ -50,7 +50,7 @@ public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm
     @Override
     protected PregelStreamResult streamResult(long originalNodeId, long internalNodeId,
                                               NodeProperties nodeProperties) {
-        return new PregelStreamResult(originalNodeId, nodeProperties.getDouble(internalNodeId));
+        return new PregelStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override

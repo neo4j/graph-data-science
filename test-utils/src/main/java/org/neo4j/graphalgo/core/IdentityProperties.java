@@ -29,7 +29,7 @@ public class IdentityProperties implements LongNodeProperties {
     }
 
     @Override
-    public long getLong(long nodeId) {
+    public long longValue(long nodeId) {
         return nodeId;
     }
 

@@ -87,7 +87,7 @@ public class WccStreamProc extends StreamProc<
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        return new WccStreamProc.StreamResult(originalNodeId, nodeProperties.getLong(internalNodeId));
+        return new WccStreamProc.StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
     }
 
     @Override
