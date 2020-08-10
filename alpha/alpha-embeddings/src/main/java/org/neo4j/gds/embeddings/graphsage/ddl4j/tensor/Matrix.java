@@ -22,12 +22,51 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
-public class Matrix extends Tensor {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public class Matrix extends Tensor<Matrix> {
+
     public Matrix(double[] data, int rows, int cols) {
         super(data, Dimensions.matrix(rows, cols));
     }
 
     public static Matrix fill(double v, int rows, int cols) {
         return new Matrix(ArrayUtil.fill(v, rows * cols), rows, cols);
+    }
+
+    @Override
+    public Matrix zeros() {
+        return fill(0D, rows(), cols());
+    }
+
+    @Override
+    public Matrix copy() {
+        return new Matrix(data.clone(), rows(), cols());
+    }
+
+    @Override
+    public Matrix add(Matrix b) {
+        if (rows() != b.rows() || cols() != b.cols()) {
+            throw new ArithmeticException(formatWithLocale(
+                "Matrix dimensions must match! Got dimensions (%d, %d) + (%d, %d)",
+                rows(),
+                cols(),
+                b.rows(),
+                b.cols()
+            ));
+        }
+        var sum = zeros();
+        for (int i = 0; i < data.length; ++i) {
+            sum.data[i] = data[i] + b.data[i];
+        }
+        return sum;
+    }
+
+    private int rows() {
+        return dimensions[0];
+    }
+
+    private int cols() {
+        return dimensions[1];
     }
 }

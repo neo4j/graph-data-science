@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-public class PassthroughVariable<T extends Tensor> extends SingleParentVariable<T> {
+public class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     public PassthroughVariable(Variable<T> parent) {
         super(parent, parent.dimensions());
@@ -36,7 +36,7 @@ public class PassthroughVariable<T extends Tensor> extends SingleParentVariable<
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Scalar gradient(Variable<?> parent, ComputationContext ctx) {
         return new Scalar(1D);
     }
 }

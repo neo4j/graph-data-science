@@ -36,7 +36,7 @@ public interface Layer {
 
     UniformNeighborhoodSampler sampler();
 
-    default List<Weights<? extends Tensor>> weights() {
+    default List<Weights<? extends Tensor<?>>> weights() {
         return aggregator().weights();
     }
 

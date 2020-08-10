@@ -31,29 +31,29 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ComputationContext {
-    private final Map<Variable<?>, Tensor> data;
-    private final Map<Variable<?>, Tensor> gradients;
+    private final Map<Variable<?>, Tensor<?>> data;
+    private final Map<Variable<?>, Tensor<?>> gradients;
 
     public ComputationContext() {
         this.data = new ConcurrentHashMap<>();
         this.gradients = new ConcurrentHashMap<>();
     }
 
-    public Tensor forward(Variable<?> variable) {
+    public Tensor<?> forward(Variable<?> variable) {
         for (Variable<?> parent : variable.parents()) {
             if (!data.containsKey(parent)) {
-                Tensor parentData = forward(parent);
+                Tensor<?> parentData = forward(parent);
                 data.put(parent, parentData);
             }
         }
         return data.computeIfAbsent(variable, ignore -> variable.apply(this));
     }
 
-    public Tensor data(Variable<?> variable) {
+    public Tensor<?> data(Variable<?> variable) {
         return data.get(variable);
     }
 
-    public Tensor gradient(Variable<?> variable) {
+    public Tensor<?> gradient(Variable<?> variable) {
         return gradients.get(variable);
     }
 
@@ -75,7 +75,7 @@ public class ComputationContext {
             BackPropTask task = executionQueue.poll();
             var variable = task.variable;
             var child = task.child;
-            Tensor gradient = child.gradient(variable, this);
+            Tensor<?> gradient = child.gradient(variable, this);
             updateGradient(variable, gradient);
 
             upstreamCounters.get(variable).decrementAndGet();
@@ -102,7 +102,7 @@ public class ComputationContext {
         }
     }
 
-    private void updateGradient(Variable<?> variable, Tensor gradient) {
+    private void updateGradient(Variable<?> variable, Tensor<?> gradient) {
         gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
         gradients.get(variable).addInPlace(gradient);
     }

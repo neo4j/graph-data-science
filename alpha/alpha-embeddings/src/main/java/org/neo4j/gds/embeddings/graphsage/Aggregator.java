@@ -32,7 +32,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 public interface Aggregator {
     Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix);
 
-    List<Weights<? extends Tensor>> weights();
+    // TODO: maybe turn this generic?
+    List<Weights<? extends Tensor<?>>> weights();
 
     enum AggregatorType {
         MEAN,

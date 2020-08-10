@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public class Weights<T extends Tensor> extends AbstractVariable<T> {
+public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
     private final T data;
 
     public Weights(T data) {
@@ -40,11 +40,11 @@ public class Weights<T extends Tensor> extends AbstractVariable<T> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         throw new NotAFunctionException();
     }
 
-    public Tensor data() {
+    public T data() {
         return data;
     }
 

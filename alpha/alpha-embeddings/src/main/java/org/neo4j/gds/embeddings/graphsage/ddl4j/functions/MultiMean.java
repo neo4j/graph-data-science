@@ -46,7 +46,7 @@ public class MultiMean extends SingleParentVariable<Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         Variable<?> parent = parent();
-        Tensor parentTensor = ctx.data(parent);
+        Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
         double[] means = new double[adjacency.length * cols];
         for (int source = 0; source < adjacency.length; source++) {
@@ -69,10 +69,10 @@ public class MultiMean extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
 
-        Tensor result = ctx.data(parent).zeros();
+        Tensor<?> result = ctx.data(parent).zeros();
 
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {

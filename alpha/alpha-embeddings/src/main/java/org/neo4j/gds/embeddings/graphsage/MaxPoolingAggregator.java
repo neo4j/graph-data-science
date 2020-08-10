@@ -80,7 +80,7 @@ public class MaxPoolingAggregator implements Aggregator {
     }
 
     @Override
-    public List<Weights<? extends Tensor>> weights() {
+    public List<Weights<? extends Tensor<?>>> weights() {
         return List.of(
             poolWeights,
             selfWeights,

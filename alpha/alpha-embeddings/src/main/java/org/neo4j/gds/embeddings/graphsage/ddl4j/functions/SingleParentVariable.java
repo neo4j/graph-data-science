@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public abstract class SingleParentVariable<T extends Tensor> extends AbstractVariable<T> {
+public abstract class SingleParentVariable<T extends Tensor<T>> extends AbstractVariable<T> {
 
     public SingleParentVariable(
         Variable<?> parent,

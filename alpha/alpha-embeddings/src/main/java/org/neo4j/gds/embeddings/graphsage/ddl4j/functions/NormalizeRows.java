@@ -56,7 +56,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
         double[] parentData = ctx.data(parent).data();
         double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];

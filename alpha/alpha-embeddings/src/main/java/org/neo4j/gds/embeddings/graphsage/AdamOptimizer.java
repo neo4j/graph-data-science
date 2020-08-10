@@ -20,9 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,31 +44,26 @@ public class AdamOptimizer {
     private final double beta_2 = 0.999;
     private final double epsilon = 1e-8;
 
-    private final List<Weights<? extends Tensor>> variables;
+    private final List<Weights<? extends Tensor<?>>> variables;
 
-    private List<Tensor> momentumTerms;
-    private List<Tensor> velocityTerms;
+    private List<? extends Tensor<?>> momentumTerms;
+    private List<? extends Tensor<?>> velocityTerms;
 
     private int iteration = 0;
 
-    public AdamOptimizer(List<Weights<? extends Tensor>> variables) {
+    public AdamOptimizer(List<Weights<? extends Tensor<?>>> variables) {
         this(variables, DEFAULT_ALPHA);
     }
 
     public AdamOptimizer(
-        List<Weights<? extends Tensor>> variables,
+        List<Weights<? extends Tensor<?>>> variables,
         double learningRate
     ) {
         alpha = learningRate;
         this.variables = variables;
 
-        momentumTerms = variables.stream()
-            .map(v -> v.data().zeros())
-            .collect(Collectors.toList());
-
-        velocityTerms = variables.stream()
-            .map(v -> v.data().zeros())
-            .collect(Collectors.toList());
+        momentumTerms = variables.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
+        velocityTerms = List.copyOf(momentumTerms);
     }
 
     // TODO: probably doesnt have to be synchronized
@@ -77,8 +75,8 @@ public class AdamOptimizer {
         momentumTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
                 Variable<?> variable = variables.get(i);
-                Tensor momentumTerm = momentumTerms.get(i);
-                return Tensor.add(
+                Tensor<?> momentumTerm = momentumTerms.get(i);
+                return castAndAdd(
                     momentumTerm.scalarMultiply(beta_1),
                     otherCtx.gradient(variable).scalarMultiply(1 - beta_1)
                 );
@@ -89,10 +87,10 @@ public class AdamOptimizer {
         velocityTerms = IntStream.range(0, variables.size())
             .mapToObj(i -> {
                 Variable<?> variable = variables.get(i);
-                Tensor velocityTerm = velocityTerms.get(i);
-                Tensor gradient = otherCtx.gradient(variable);
-                Tensor squaredGradient = gradient.elementwiseProduct(gradient);
-                return Tensor.add(
+                Tensor<?> velocityTerm = velocityTerms.get(i);
+                Tensor<?> gradient = otherCtx.gradient(variable);
+                Tensor<?> squaredGradient = gradient.elementwiseProduct(gradient);
+                return castAndAdd(
                     velocityTerm.scalarMultiply(beta_2),
                     squaredGradient.scalarMultiply(1 - beta_2)
                 );
@@ -100,28 +98,41 @@ public class AdamOptimizer {
             .collect(Collectors.toList());
 
         // m_cap = m_t/(1-(beta_1**t))		#calculates the bias-corrected estimates
-        List<Tensor> mCaps = momentumTerms.stream()
+        List<Tensor<?>> mCaps = momentumTerms.stream()
             .map(mTerm -> mTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration))))
             .collect(Collectors.toList());
 
         // v_cap = v_t/(1-(beta_2**t))		#calculates the bias-corrected estimates
-        List<Tensor> vCaps = velocityTerms.stream()
+        List<Tensor<?>> vCaps = velocityTerms.stream()
             .map(vTerm -> vTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration))))
             .collect(Collectors.toList());
 
         IntStream.range(0, variables.size())
             .forEach(i -> {
-                Weights<? extends Tensor> variable = variables.get(i);
-                Tensor mCap = mCaps.get(i);
-                Tensor vCap = vCaps.get(i);
+                Weights<? extends Tensor<?>> variable = variables.get(i);
+                Tensor<?> mCap = mCaps.get(i);
+                Tensor<?> vCap = vCaps.get(i);
 
                 // theta_0 = theta_0 - (alpha*m_cap)/(math.sqrt(v_cap)+epsilon)	#updates the parameters
-                Tensor theta_0 = variable.data();
+                Tensor<?> theta_0 = variable.data();
                 theta_0.addInPlace(mCap
                     .scalarMultiply(-alpha)
                     .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
                 );
             });
+    }
+
+    // TODO: Try to retain type information and avoid these checks
+    private Tensor<?> castAndAdd(Tensor<?> op1, Tensor<?> op2) {
+        if (op1 instanceof Scalar && op2 instanceof Scalar) {
+            return ((Scalar) op1).add(((Scalar) op2));
+        } else if (op1 instanceof Vector && op2 instanceof Vector) {
+            return ((Vector) op1).add(((Vector) op2));
+        } else if (op1 instanceof Matrix && op2 instanceof Matrix) {
+            return ((Matrix) op1).add(((Matrix) op2));
+        } else {
+            throw new IllegalStateException("Mismatched tensors! Can only add same types");
+        }
     }
 
     private double clip(double value) {

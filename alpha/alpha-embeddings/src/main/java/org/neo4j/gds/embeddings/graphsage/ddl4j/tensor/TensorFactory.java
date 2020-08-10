@@ -25,7 +25,7 @@ public final class TensorFactory {
 
     private TensorFactory() {}
 
-    public static Tensor constant(double v, int[] dimensions) {
+    public static Tensor<?> constant(double v, int[] dimensions) {
         if (dimensions.length == 1 && dimensions[0] == 1) {
             return new Scalar(v);
         } else if (dimensions.length == 1 && dimensions[0] > 1) {

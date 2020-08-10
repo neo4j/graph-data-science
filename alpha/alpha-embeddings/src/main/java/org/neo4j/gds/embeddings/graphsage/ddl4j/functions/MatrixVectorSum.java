@@ -69,11 +69,11 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == matrix) {
             return ctx.gradient(this);
         } else {
-            Tensor gradient = ctx.gradient(this);
+            Tensor<?> gradient = ctx.gradient(this);
             double[] result = new double[cols];
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {

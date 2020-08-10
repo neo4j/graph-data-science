@@ -158,15 +158,17 @@ class GraphSageModelTrainEmbedTest extends BaseProcTest {
     }
 
     void runSmokeTest(GraphSageModel model) {
-        List<Tensor> weightsBeforeTraining = layer2.weights()
-            .stream().map(Weights::data).map(Tensor::clone)
+        Stream<? extends Tensor<?>> layer2Stream = layer2.weights()
+            .stream().map(Weights::data).map(Tensor::copy);
+        List<Tensor<?>> weightsBeforeTraining = layer2Stream
             .collect(Collectors.toList());
 
         model.train(graph, features);
 
         assertNotNull(layer1);
-        List<Tensor> expectedWeights = layer1.weights()
-            .stream().map(Weights::data).map(Tensor::clone)
+        Stream<? extends Tensor<?>> layer1Stream = layer1.weights()
+            .stream().map(Weights::data).map(Tensor::copy);
+        List<Tensor<?>> expectedWeights = layer1Stream
             .collect(Collectors.toList());
 
         for (int i = 0; i < expectedWeights.size(); i++) {

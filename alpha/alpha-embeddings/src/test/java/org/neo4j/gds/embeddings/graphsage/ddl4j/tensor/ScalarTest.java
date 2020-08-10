@@ -19,30 +19,41 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
+import org.junit.jupiter.api.Test;
 
-public class Scalar extends Tensor<Scalar> {
+import static org.junit.jupiter.api.Assertions.*;
 
-    public Scalar(double value) {
-        super(new double[] {value}, Dimensions.scalar());
+class ScalarTest {
+
+    @Test
+    void returnsScalarZero() {
+       var scalar = new Scalar(5D);
+
+        Scalar zero = scalar.zeros();
+
+        assertNotSame(scalar, zero);
+        assertArrayEquals(new double[] {0D}, zero.data);
     }
 
-    @Override
-    public Scalar zeros() {
-        return new Scalar(0D);
+    @Test
+    void copiesScalar() {
+        var scalar = new Scalar(5D);
+
+        Scalar copy = scalar.copy();
+
+        assertNotSame(scalar, copy);
+        assertArrayEquals(new double[] {5D}, copy.data);
     }
 
-    @Override
-    public Scalar copy() {
-        return new Scalar(value());
-    }
+    @Test
+    void addsScalar() {
+        var scalar = new Scalar(5D);
+        var scalarToAdd = new Scalar(2D);
 
-    @Override
-    public Scalar add(Scalar b) {
-        return new Scalar(value() + b.value());
-    }
+        Scalar sum = scalar.add(scalarToAdd);
 
-    private double value() {
-        return data[0];
+        assertNotSame(scalar, sum);
+        assertNotSame(scalarToAdd, sum);
+        assertArrayEquals(new double[] {7D}, sum.data);
     }
 }

@@ -178,7 +178,7 @@ public class GraphSageModel {
     }
 
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
-        List<Weights<? extends Tensor>> weights = getWeights();
+        List<Weights<? extends Tensor<?>>> weights = getWeights();
 
         AdamOptimizer updater = new AdamOptimizer(weights, learningRate);
 
@@ -383,7 +383,7 @@ public class GraphSageModel {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    private List<Weights<? extends Tensor>> getWeights() {
+    private List<Weights<? extends Tensor<?>>> getWeights() {
         return Arrays.stream(layers)
             .flatMap(layer -> layer.weights().stream())
             .collect(Collectors.toList());

@@ -38,7 +38,7 @@ class MatrixSumTest {
         assertArrayEquals(new int[]{2, 2}, add.dimensions());
 
         ComputationContext ctx = new ComputationContext();
-        Tensor forward = ctx.forward(add);
+        Tensor<?> forward = ctx.forward(add);
         assertArrayEquals(new double[]{3.0, 6.0, 9.0, 12.0}, forward.data());
         assertArrayEquals(new int[]{2, 2}, forward.dimensions());
     }

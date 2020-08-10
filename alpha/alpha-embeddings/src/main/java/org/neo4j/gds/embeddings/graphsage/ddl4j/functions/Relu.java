@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
-public class Relu<T extends Tensor> extends SingleParentVariable<T> {
+public class Relu<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     private static final double ALPHA = 0.01;
 
@@ -37,7 +37,7 @@ public class Relu<T extends Tensor> extends SingleParentVariable<T> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> contextParent, ComputationContext ctx) {
-        return ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
+    public T gradient(Variable<?> contextParent, ComputationContext ctx) {
+        return (T) ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
     }
 }

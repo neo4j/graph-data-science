@@ -44,7 +44,7 @@ public class MatrixSum extends AbstractVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         return ctx.gradient(this);
     }
 

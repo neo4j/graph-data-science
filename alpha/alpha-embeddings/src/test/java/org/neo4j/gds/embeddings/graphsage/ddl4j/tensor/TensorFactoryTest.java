@@ -27,9 +27,9 @@ class TensorFactoryTest {
 
     @Test
     void canBuildTensors() {
-        Tensor scalar = TensorFactory.constant(1, new int[]{1});
-        Tensor vector = TensorFactory.constant(1, new int[]{2});
-        Tensor matrix = TensorFactory.constant(1, new int[]{3, 4});
+        Tensor<?> scalar = TensorFactory.constant(1, new int[]{1});
+        Tensor<?> vector = TensorFactory.constant(1, new int[]{2});
+        Tensor<?> matrix = TensorFactory.constant(1, new int[]{3, 4});
 
         assertTrue(scalar instanceof Scalar);
         assertArrayEquals(new int[]{1}, scalar.dimensions);

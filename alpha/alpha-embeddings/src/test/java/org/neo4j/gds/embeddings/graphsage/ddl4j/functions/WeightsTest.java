@@ -19,31 +19,19 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
-import java.util.List;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class MatrixConstant extends AbstractVariable<Matrix> {
+class WeightsTest {
 
-    private final Matrix data;
+    @Test
+    void inAndOutInT() {
+        Matrix in = Matrix.fill(1, 2, 3);
+        Matrix out = new Weights<>(in).data();
 
-    public MatrixConstant(double[] elements, int rows, int cols) {
-        super(List.of(), Dimensions.matrix(rows, cols));
-        this.data = new Matrix(elements, rows, cols);
+        assertEquals(in, out);
     }
 
-    @Override
-    public Matrix apply(ComputationContext ctx) {
-        return data;
-    }
-
-    @Override
-    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
-        return data.zeros();
-    }
 }

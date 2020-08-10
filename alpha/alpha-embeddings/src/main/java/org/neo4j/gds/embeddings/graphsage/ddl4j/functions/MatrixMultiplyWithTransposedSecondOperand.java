@@ -50,14 +50,14 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Tensor t1 = ctx.data(A);
-        Tensor t2 = ctx.data(B);
+        Tensor<?> t1 = ctx.data(A);
+        Tensor<?> t2 = ctx.data(B);
         return multiplyTransB(t1, t2);
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor gradient = ctx.gradient(this);
+    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
+        Tensor<?> gradient = ctx.gradient(this);
         if (parent == A) {
             return multiply(gradient, ctx.data(B));
         } else {
@@ -65,7 +65,7 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
         }
     }
 
-    private Tensor multiply(Tensor t1, Tensor t2) {
+    private Matrix multiply(Tensor<?> t1, Tensor<?> t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
@@ -73,7 +73,7 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
         return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    private Matrix multiplyTransB(Tensor t1, Tensor t2) {
+    private Matrix multiplyTransB(Tensor<?> t1, Tensor<?> t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
@@ -81,7 +81,7 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
         return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
-    private Tensor multiplyTransA(Tensor t1, Tensor t2) {
+    private Matrix multiplyTransA(Tensor<?> t1, Tensor<?> t2) {
         DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
         DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);

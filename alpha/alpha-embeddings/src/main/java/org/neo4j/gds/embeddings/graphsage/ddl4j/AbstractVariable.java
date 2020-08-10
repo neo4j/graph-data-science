@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public abstract class AbstractVariable<T extends Tensor> implements Variable<T> {
+public abstract class AbstractVariable<T extends Tensor<T>> implements Variable<T> {
     private final int[] dimensions;
     private final boolean requireGradient;
     private final List<? extends Variable<?>> parents;

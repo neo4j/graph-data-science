@@ -27,7 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 
-public class Constant<T extends Tensor> extends AbstractVariable<T> {
+public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
     private final T data;
 
     public Constant(T data) {
@@ -45,7 +45,7 @@ public class Constant<T extends Tensor> extends AbstractVariable<T> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
+    public T gradient(Variable<?> parent, ComputationContext ctx) {
         return data.zeros();
     }
 

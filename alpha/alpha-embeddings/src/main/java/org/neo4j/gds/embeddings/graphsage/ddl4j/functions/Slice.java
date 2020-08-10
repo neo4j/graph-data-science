@@ -53,8 +53,8 @@ public class Slice extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> contextParent, ComputationContext ctx) {
-        Tensor result = ctx.data(contextParent).zeros();
+    public Tensor<?> gradient(Variable<?> contextParent, ComputationContext ctx) {
+        Tensor<?> result = ctx.data(contextParent).zeros();
 
         double[] selfGradient = ctx.gradient(this).data();
         for (int row = 0; row < rows; row++) {

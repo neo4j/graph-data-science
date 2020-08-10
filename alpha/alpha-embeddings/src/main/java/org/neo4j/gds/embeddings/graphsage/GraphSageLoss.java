@@ -45,7 +45,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Tensor embeddingData = ctx.data(parent());
+        Tensor<?> embeddingData = ctx.data(parent());
         int batchSize = embeddingData.dimension(0) / 3;
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
@@ -57,7 +57,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         return new Scalar(loss);
     }
 
-    private double affinity(Tensor embeddingData, int nodeId, int otherNodeId) {
+    private double affinity(Tensor<?> embeddingData, int nodeId, int otherNodeId) {
         int dimensionSize = combinedEmbeddings.dimension(1);
         double sum = 0;
         for (int i = 0; i < dimensionSize; i++) {
@@ -67,8 +67,8 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor embeddingData = ctx.data(parent);
+    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
+        Tensor<?> embeddingData = ctx.data(parent);
         double[] embeddings = embeddingData.data();
         int totalBatchSize = embeddingData.dimension(0);
         int batchSize = totalBatchSize / 3;

@@ -21,14 +21,20 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import java.util.function.DoubleUnaryOperator;
 
-public class Tensor {
-    private final double[] data;
-    private final int[] dimensions;
+public abstract class Tensor<SELF extends Tensor<SELF>> {
+    protected final double[] data;
+    protected final int[] dimensions;
 
     public Tensor(double[] data, int[] dimensions) {
         this.data = data;
         this.dimensions = dimensions;
     }
+
+    public abstract SELF zeros();
+
+    public abstract SELF copy();
+
+    public abstract SELF add(SELF b);
 
     public int dimension(int dimensionIndex) {
         return dimensions[dimensionIndex];
@@ -54,16 +60,7 @@ public class Tensor {
         data[idx] += newValue;
     }
 
-    public Tensor zeros() {
-        return new Tensor(new double[data.length], dimensions);
-    }
-
-    @Override
-    public Tensor clone() {
-        return new Tensor(data.clone(), dimensions.clone());
-    }
-
-    public int indexOf(int[] coordinates) {
+    private int indexOf(int[] coordinates) {
         // TODO: Is `assert` enough?
         assert coordinates.length == dimensions.length : "coordinates should have the same size as dimensions: " + dimensions.length;
 
@@ -89,7 +86,7 @@ public class Tensor {
         data[indexOf(coordinates)] = value;
     }
 
-    public Tensor map(DoubleUnaryOperator f) {
+    public SELF map(DoubleUnaryOperator f) {
         var result = zeros();
         for (int i = 0; i < data.length; i++) {
             result.data[i] = f.applyAsDouble(data[i]);
@@ -103,16 +100,8 @@ public class Tensor {
         }
     }
 
-    public static Tensor add(Tensor a, Tensor b) {
-        int totalSize = totalSize(a.dimensions);
-        double[] sum = new double[totalSize];
-        for (int pos = 0; pos < totalSize; pos++) {
-            sum[pos] = a.data[pos] + b.data[pos];
-        }
-        return new Tensor(sum, a.dimensions);
-    }
-
-    public void addInPlace(Tensor other) {
+    // TODO: figure out how to replace this one
+    public void addInPlace(Tensor<?> other) {
         int totalSize = totalSize(dimensions);
         for (int pos = 0; pos < totalSize; pos++) {
             data[pos] += other.data[pos];
@@ -126,8 +115,8 @@ public class Tensor {
         }
     }
 
-    public Tensor scalarMultiply(double scalar) {
-        Tensor scaled = clone();
+    public SELF scalarMultiply(double scalar) {
+        SELF scaled = copy();
         scaled.scalarMultiplyMutate(scalar);
         return scaled;
     }
@@ -136,26 +125,8 @@ public class Tensor {
         return totalSize(dimensions);
     }
 
-    public static int totalSize(int[] dimensions) {
-        if (dimensions.length == 0) {
-            return 0;
-        }
-        int totalSize = 1;
-        for (int dim : dimensions) {
-            totalSize *= dim;
-        }
-        return totalSize;
-    }
-
-    public double innerProduct(Tensor other) {
-        double result = 0;
-        for (int i = 0; i < data.length; i++) {
-            result += data[i] * other.data[i];
-        }
-        return result;
-    }
-
-    public Tensor elementwiseProduct(Tensor other) {
+    // TODO: figure out how to replace this one
+    public SELF elementwiseProduct(Tensor<?> other) {
         var result = zeros();
         for (int i = 0; i < data.length; i++) {
             result.data[i] = data[i] * other.data[i];
@@ -169,5 +140,16 @@ public class Tensor {
             sum += datum;
         }
         return sum;
+    }
+
+    public static int totalSize(int[] dimensions) {
+        if (dimensions.length == 0) {
+            return 0;
+        }
+        int totalSize = 1;
+        for (int dim : dimensions) {
+            totalSize *= dim;
+        }
+        return totalSize;
     }
 }

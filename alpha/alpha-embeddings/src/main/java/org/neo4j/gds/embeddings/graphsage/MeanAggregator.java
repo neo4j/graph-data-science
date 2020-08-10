@@ -51,7 +51,7 @@ public class MeanAggregator implements Aggregator {
     }
 
     @Override
-    public List<Weights<? extends Tensor>> weights() {
+    public List<Weights<? extends Tensor<?>>> weights() {
         return List.of(weights);
     }
 }

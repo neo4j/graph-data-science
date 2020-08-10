@@ -64,8 +64,8 @@ public class ElementwiseMax extends SingleParentVariable<Matrix> {
     }
 
     @Override
-    public Tensor gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor result = ctx.data(parent).zeros();
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+        Tensor<?> result = ctx.data(parent).zeros();
 
         double[] parentData = ctx.data(parent).data();
         double[] thisGradient = ctx.gradient(this).data();

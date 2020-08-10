@@ -22,7 +22,9 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
-public class Vector extends Tensor {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public class Vector extends Tensor<Vector> {
 
     public Vector(double[] data) {
         super(data, Dimensions.vector(data.length));
@@ -30,5 +32,35 @@ public class Vector extends Tensor {
 
     public static Vector fill(double v, int length) {
         return new Vector(ArrayUtil.fill(v, length));
+    }
+
+    @Override
+    public Vector zeros() {
+        return fill(0D, length());
+    }
+
+    @Override
+    public Vector copy() {
+        return new Vector(data.clone());
+    }
+
+    @Override
+    public Vector add(Vector b) {
+        if (length() != b.length()) {
+            throw new ArithmeticException(formatWithLocale(
+                "Vector lengths must be equal, got %d + %d lengths",
+                length(),
+                b.length()
+            ));
+        }
+        Vector sum = zeros();
+        for (int i = 0; i < length(); ++i) {
+            sum.data[i] = data[i] + b.data[i];
+        }
+        return sum;
+    }
+
+    private int length() {
+        return dimensions[0];
     }
 }

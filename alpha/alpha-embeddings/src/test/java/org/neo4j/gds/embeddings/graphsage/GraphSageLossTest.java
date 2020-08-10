@@ -57,7 +57,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
         Variable<Scalar> lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
-        Tensor lossData = ctx.forward(lossVar);
+        Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
 
         assertEquals(expectedLoss, lossData.getAtIndex(0));
@@ -90,7 +90,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
         Variable<Scalar> lossVar = new GraphSageLoss(combinedEmbeddings, Q);
 
-        Tensor lossData = ctx.forward(lossVar);
+        Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
         assertEquals(expectedLoss, lossData.getAtIndex(0), 1e-10);
     }

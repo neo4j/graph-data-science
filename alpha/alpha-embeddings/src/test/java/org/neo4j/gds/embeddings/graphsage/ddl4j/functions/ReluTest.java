@@ -63,7 +63,7 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
 
         Variable<Vector> relu = new Relu<>(p);
 
-        Tensor resultData = ctx.forward(relu);
+        Tensor<?> resultData = ctx.forward(relu);
         assertNotNull(resultData);
         assertEquals(vectorData.length, resultData.data().length);
 
@@ -77,7 +77,7 @@ public class ReluTest extends GraphSageBaseTest implements FiniteDifferenceTest 
 
         Variable<Vector> relu = new Relu<>(p);
 
-        Tensor resultData = ctx.forward(relu);
+        Tensor<?> resultData = ctx.forward(relu);
         assertNotNull(resultData);
         assertEquals(vectorData.length, resultData.data().length);
 
