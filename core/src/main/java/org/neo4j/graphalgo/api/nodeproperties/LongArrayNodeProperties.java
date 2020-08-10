@@ -41,6 +41,6 @@ public interface LongArrayNodeProperties extends NodeProperties {
 
     @Override
     default ValueType getType() {
-        return ValueType.DOUBLE_ARRAY;
+        return ValueType.LONG_ARRAY;
     };
 }

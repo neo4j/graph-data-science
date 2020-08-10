@@ -35,8 +35,8 @@ class NodePropertyFuncTest  extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE " +
-        "  (:A { prop: 42.0 })" +
-        ", (:B { prop: 84.0 })";
+        "  (a:A { prop: 42.0, longListProp: [ 1, 2 ], doubleListProp: [ 0.1, 2.7 ] })" +
+        ", (b:B { prop: 84.0, longListProp: [ 3, 4 ], doubleListProp: [ 0.3, 4.7 ] })";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -48,6 +48,8 @@ class NodePropertyFuncTest  extends BaseProcTest {
             .withNodeLabel("A")
             .withNodeLabel("B")
             .withNodeProperty("prop")
+            .withNodeProperty("longListProp")
+            .withNodeProperty("doubleListProp")
             .withAnyRelationshipType()
             .graphCreate("testGraph")
             .yields());
@@ -71,6 +73,24 @@ class NodePropertyFuncTest  extends BaseProcTest {
     }
 
     @Test
+    void shouldReturnLongArrayProperty() {
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'longListProp') AS longListProp ORDER BY longListProp ASC";
+        assertCypherResult(query, Arrays.asList(
+            map("longListProp", new long[] {1, 2}),
+            map("longListProp", new long[] {3, 4}))
+        );
+    }
+
+    @Test
+    void shouldReturnDoubleArrayProperty() {
+        String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'doubleListProp') AS doubleListProp ORDER BY doubleListProp ASC";
+        assertCypherResult(query, Arrays.asList(
+            map("doubleListProp", new double[] {0.1, 2.7}),
+            map("doubleListProp", new double[] {0.3, 4.7}))
+        );
+    }
+
+    @Test
     void failsOnNonExistingGraph() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('noGraph', id(n), 'prop') AS prop";
         assertError(query, "Cannot find graph with name 'noGraph'.");
@@ -91,6 +111,6 @@ class NodePropertyFuncTest  extends BaseProcTest {
     @Test
     void failsOnNonExistingPropertyForLabel() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('testGraph', id(n), 'noProp', 'A') AS prop";
-        assertError(query, "Node projection 'A' does not have property key 'noProp'. Available keys: ['prop'].");
+        assertError(query, "Node projection 'A' does not have property key 'noProp'. Available keys: ['doubleListProp', 'longListProp', 'prop'].");
     }
 }
