@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
-
 import java.util.function.DoubleUnaryOperator;
 
 public class Tensor {
@@ -132,10 +130,6 @@ public class Tensor {
         Tensor scaled = clone();
         scaled.scalarMultiplyMutate(scalar);
         return scaled;
-    }
-
-    public static Tensor constant(double v, int[] dimensions) {
-        return new Tensor(ArrayUtil.fill(v, totalSize(dimensions)), dimensions);
     }
 
     public int totalSize() {

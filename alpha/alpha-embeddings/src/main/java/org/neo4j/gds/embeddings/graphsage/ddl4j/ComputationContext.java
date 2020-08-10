@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.TensorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -102,7 +103,7 @@ public class ComputationContext {
     }
 
     private void updateGradient(Variable<?> variable, Tensor gradient) {
-        gradients.putIfAbsent(variable, Tensor.constant(0D, variable.dimensions()));
+        gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
         gradients.get(variable).addInPlace(gradient);
     }
 
