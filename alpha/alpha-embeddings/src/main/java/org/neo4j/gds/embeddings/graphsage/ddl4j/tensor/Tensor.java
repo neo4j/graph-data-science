@@ -60,32 +60,6 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         data[idx] += newValue;
     }
 
-    private int indexOf(int[] coordinates) {
-        // TODO: Is `assert` enough?
-        assert coordinates.length == dimensions.length : "coordinates should have the same size as dimensions: " + dimensions.length;
-
-        int index = 0;
-        int factor = 1;
-        for (int dimension = coordinates.length - 1; dimension >= 0; dimension--) {
-            index += coordinates[dimension] * factor;
-            factor *= dimensions[dimension];
-        }
-        return index;
-    }
-
-    public double get(int... coordinates) {
-        return data[indexOf(coordinates)];
-    }
-
-    // TODO: Check if we can use the varargs version instead.
-    public double getAtIndex(int index) {
-        return data[index];
-    }
-
-    public void set(double value, int... coordinates) {
-        data[indexOf(coordinates)] = value;
-    }
-
     public SELF map(DoubleUnaryOperator f) {
         var result = zeros();
         for (int i = 0; i < data.length; i++) {
@@ -108,7 +82,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         }
     }
 
-    public void scalarMultiplyMutate(double scalar) {
+    void scalarMultiplyMutate(double scalar) {
         int totalSize = totalSize();
         for (int pos = 0; pos < totalSize; pos++) {
             data[pos] *= scalar;
@@ -134,7 +108,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return result;
     }
 
-    public double sum() {
+    public double aggregateSum() {
         double sum = 0;
         for (double datum : data) {
             sum += datum;

@@ -60,7 +60,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
 
-        assertEquals(expectedLoss, lossData.getAtIndex(0));
+        assertEquals(expectedLoss, lossData.dataAt(0));
     }
 
     @ParameterizedTest
@@ -92,7 +92,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
-        assertEquals(expectedLoss, lossData.getAtIndex(0), 1e-10);
+        assertEquals(expectedLoss, lossData.dataAt(0), 1e-10);
     }
 
     @Test

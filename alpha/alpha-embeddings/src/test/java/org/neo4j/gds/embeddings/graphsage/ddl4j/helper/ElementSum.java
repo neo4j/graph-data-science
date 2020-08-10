@@ -38,13 +38,13 @@ public class ElementSum extends AbstractVariable<Scalar> {
     public Scalar apply(ComputationContext ctx) {
         double sum = 0;
         for (var parent : parents()) {
-            sum += ctx.data(parent).sum();
+            sum += ctx.data(parent).aggregateSum();
         }
         return new Scalar(sum);
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        return ctx.data(parent).map(ignore -> ctx.gradient(this).getAtIndex(0));
+        return ctx.data(parent).map(ignore -> ctx.gradient(this).dataAt(0));
     }
 }
