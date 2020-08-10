@@ -54,7 +54,8 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
 
-    String dbCypher() {
+    @Override
+    public String createQuery() {
         return "CREATE " +
                "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
                "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
@@ -101,7 +102,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             LocalClusteringCoefficientMutateProc.class
         );
 
-        runQuery(dbCypher());
+        runQuery(createQuery());
         runQuery("CALL gds.graph.create('g', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
     }
 
@@ -183,11 +184,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
                           "You might experience a slowdown in the procedure execution.";
         String actual = testLog.getMessages("warn").get(0);
         assertEquals(expected, actual);
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(dbCypher());
     }
 
     @Override

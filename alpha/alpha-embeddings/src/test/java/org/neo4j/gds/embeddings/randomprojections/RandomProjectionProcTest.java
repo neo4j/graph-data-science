@@ -50,9 +50,14 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
         ", (d:Isolated)" +
         ", (a)-[:REL]->(b)";
 
+    @Override
+    public String createQuery() {
+        return DB_CYPHER;
+    }
+
     @BeforeEach
     void setUp() throws Exception {
-        createGraphTopology();
+        runQuery(createQuery());
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class
@@ -119,11 +124,6 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
                 );
             });
         });
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
     }
 
     @Override

@@ -188,9 +188,4 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
         }
         return mapWrapper;
     }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
-    }
 }

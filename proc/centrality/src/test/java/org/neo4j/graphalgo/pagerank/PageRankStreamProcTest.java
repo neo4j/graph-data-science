@@ -213,9 +213,4 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             assertEquals(Collections.emptyList(), badConfigKeys);
         });
     }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
-    }
 }

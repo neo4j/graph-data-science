@@ -51,7 +51,8 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 
-    String dbCypher() {
+    @Override
+    public String createQuery() {
         return "CREATE " +
                "(a:A)-[:T]->(b:A), " +
                "(b)-[:T]->(c:A), " +
@@ -69,7 +70,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             TriangleCountMutateProc.class
         );
 
-        runQuery(dbCypher());
+        runQuery(createQuery());
         runQuery("CALL gds.graph.create('g', 'A', {T: { orientation: 'UNDIRECTED'}})");
     }
 
@@ -126,11 +127,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             String message = exception.getMessage();
             assertTrue(message.contains("maxDegree") && message.contains("greater than 1") );
         });
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(dbCypher());
     }
 
     @Override

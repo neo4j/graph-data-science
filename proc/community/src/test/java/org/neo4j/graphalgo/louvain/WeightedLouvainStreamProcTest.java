@@ -70,7 +70,7 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
     );
 
     @Override
-    String dbCypher() {
+    public String createQuery() {
         return "CREATE" +
                "  (nAlice:User {name: 'Alice', seed: 42})" +
                ", (nBridget:User {name: 'Bridget', seed: 42})" +

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -72,28 +71,29 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
     static final String TEST_GRAPH_NAME = "myGraph";
-    static final String TEST_CYPHER_GRAPH_NAME = "myCypherGraph";
+    private static final String TEST_CYPHER_GRAPH_NAME = "myCypherGraph";
 
-    static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
-    static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
+    private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
+    private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
 
-    @Language("Cypher")
-    static final String DB_CYPHER =
-        "CREATE" +
-        "  (a:A {id: 0, seed: 42}) " +
-        ", (b:B {id: 1, seed: 42}) " +
+    @Override
+    public String createQuery() {
+        return "CREATE" +
+               "  (a:A {id: 0, seed: 42}) " +
+               ", (b:B {id: 1, seed: 42}) " +
 
-        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+               ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+               ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+               ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+               ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+               ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+               ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+               ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+               ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+               ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+               ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+    }
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -110,18 +110,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-        setupGraph(DB_CYPHER);
-    }
-
-    @Override
-    @ExtensionCallback
-    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        super.configuration(builder);
-        builder.setConfig(Settings.enterpriseLicensed(), true);
-    }
-
-    void setupGraph(String cypher) {
-        runQuery(cypher);
+        runQuery(createQuery());
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(formatWithLocale(
@@ -130,6 +119,13 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             nodeQuery,
             relQuery
         ));
+    }
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfig(Settings.enterpriseLicensed(), true);
     }
 
     @AfterEach
@@ -186,9 +182,4 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     @Override
     @Disabled("The algorithm is using Neo4j Node IDs to compute labels hence can't compare offset results")
     public void testNonConsecutiveIds() {}
-
-    @Override
-    public void createGraphTopology() {
-        // NOOP: used in `org.neo4j.graphalgo.AlgoBaseProcTest.testNonConsecutiveIds`
-    }
 }

@@ -40,14 +40,16 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     MemoryEstimateTest<K1Coloring, CONFIG, HugeLongArray>,
     HeapControlTest<K1Coloring, CONFIG, HugeLongArray> {
 
-    private final String DB_CYPHER =
-        "CREATE" +
-        " (a)" +
-        ",(b)" +
-        ",(c)" +
-        ",(d)" +
-        ",(a)-[:REL]->(b)" +
-        ",(a)-[:REL]->(c)";
+    @Override
+    public String createQuery() {
+        return "CREATE" +
+               " (a)" +
+               ",(b)" +
+               ",(c)" +
+               ",(d)" +
+               ",(a)-[:REL]->(b)" +
+               ",(a)-[:REL]->(c)";
+    }
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -63,7 +65,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
             K1ColoringMutateProc.class,
             GraphCreateProc.class
         );
-        runQuery(DB_CYPHER);
+        runQuery(createQuery());
     }
 
     @AfterEach
@@ -81,11 +83,6 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
             .withAnyLabel()
             .withAnyRelationshipType()
             .algo("gds", "beta", "k1coloring");
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
     }
 
 }

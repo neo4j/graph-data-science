@@ -162,7 +162,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     @Test
     void testGraphMutationFiltered() {
         long deletedNodes = clearDb();
-        runQuery("CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER);
+        runQuery("CREATE (x:Ignore {id: -1, communityId: null}) " + createQuery());
 
         String graphName = "loadGraph";
 

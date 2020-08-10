@@ -99,6 +99,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
+    String createQuery();
+
     GraphDatabaseAPI graphDb();
 
     default NamedDatabaseId namedDatabaseId() {
@@ -324,15 +326,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
-    void createGraphTopology();
-
     @Test
     default void testNonConsecutiveIds() {
         RESULT originalResult = loadGraphAndRunCompute("originalGraph");
 
         createRandomNodes();
         emptyDb();
-        createGraphTopology();
+        runQuery(graphDb(), createQuery());
 
         RESULT reloadedResult = loadGraphAndRunCompute("reloadedGraph");
 

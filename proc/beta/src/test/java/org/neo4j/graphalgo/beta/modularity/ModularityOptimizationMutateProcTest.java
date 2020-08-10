@@ -70,6 +70,11 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         runQuery(graphCreateQuery());
     }
 
+    @Override
+    public String createQuery() {
+        return DB_CYPHER;
+    }
+
     @Test
     void testMutate() {
         String query = explicitAlgoBuildStage()
@@ -199,11 +204,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
     ) {
         assertEquals(result1.getModularity(), result2.getModularity());
         assertEquals(result1.getIterations(), result2.getIterations());
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
     }
 
     GdsCypher.ModeBuildStage explicitAlgoBuildStage() {

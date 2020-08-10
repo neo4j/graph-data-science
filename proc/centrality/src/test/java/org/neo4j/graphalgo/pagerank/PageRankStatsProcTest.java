@@ -89,9 +89,4 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             }
         );
     }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
-    }
 }

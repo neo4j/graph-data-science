@@ -148,10 +148,4 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
             }
         );
     }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
-    }
-
 }

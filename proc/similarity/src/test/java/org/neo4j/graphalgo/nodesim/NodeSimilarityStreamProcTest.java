@@ -97,7 +97,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         long deletedNodes = clearDb();
         registerProcedures(GraphDropProc.class);
         runQuery(formatWithLocale("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
-        runQuery(DB_CYPHER);
+        runQuery(createQuery());
         runQuery("CALL gds.graph.drop('myGraphNATURAL')");
         runQuery(graphCreate);
         runQuery("MATCH (n:IncrementIdSpace) DELETE n");

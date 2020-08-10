@@ -70,7 +70,7 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     @Test
     void testStreamWithFilteredNodes() {
         long deletedNodes = clearDb();
-        runQuery("CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
+        runQuery("CREATE (c:Ignore {id:12, seed: 0}) " + createQuery() + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
 
         String graphCreateQuery = GdsCypher
             .call()

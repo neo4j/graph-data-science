@@ -30,23 +30,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<Vector>> {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a:Node1)" +
-        ", (b:Node1)" +
-        ", (c:Node2)" +
-        ", (d:Isolated)" +
-        ", (e:Isolated)" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(a)" +
-        ", (a)-[:REL]->(c)" +
-        ", (c)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(b)";
+    @Override
+    public String createQuery() {
+        return "CREATE" +
+               "  (a:Node1)" +
+               ", (b:Node1)" +
+               ", (c:Node2)" +
+               ", (d:Isolated)" +
+               ", (e:Isolated)" +
+               ", (a)-[:REL]->(b)" +
+               ", (b)-[:REL]->(a)" +
+               ", (a)-[:REL]->(c)" +
+               ", (c)-[:REL]->(a)" +
+               ", (b)-[:REL]->(c)" +
+               ", (c)-[:REL]->(b)";
+    }
 
     @BeforeEach
     void setUp() throws Exception {
-        runQuery(DB_CYPHER);
+        runQuery(createQuery());
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class
@@ -60,11 +62,6 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
     public void assertResultEquals(HugeObjectArray<Vector> result1, HugeObjectArray<Vector> result2) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.get(0).data().length, result2.get(0).data().length);
-    }
-
-    @Override
-    public void createGraphTopology() {
-        runQuery(DB_CYPHER);
     }
 
 }
