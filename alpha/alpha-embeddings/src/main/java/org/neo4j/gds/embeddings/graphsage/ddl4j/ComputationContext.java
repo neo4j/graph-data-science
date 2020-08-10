@@ -62,7 +62,7 @@ public class ComputationContext {
         }
         gradients.clear();
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
-        PassthroughVariable dummy = new PassthroughVariable(function);
+        PassthroughVariable<?> dummy = new PassthroughVariable<>(function);
         executionQueue.add(new BackPropTask(function, dummy));
         Map<Variable<?>, AtomicInteger> upstreamCounters = new HashMap<>();
         initUpstream(dummy, upstreamCounters);
