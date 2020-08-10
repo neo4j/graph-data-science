@@ -22,7 +22,10 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 class MatrixTest {
 

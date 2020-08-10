@@ -24,7 +24,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 

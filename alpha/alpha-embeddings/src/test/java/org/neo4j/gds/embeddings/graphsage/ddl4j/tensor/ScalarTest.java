@@ -21,7 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 class ScalarTest {
 

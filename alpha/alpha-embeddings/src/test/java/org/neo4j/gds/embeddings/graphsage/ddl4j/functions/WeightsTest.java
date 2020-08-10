@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WeightsTest {
 
