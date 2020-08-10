@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
@@ -59,8 +60,10 @@ import org.neo4j.graphalgo.utils.StringJoining;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -283,6 +286,21 @@ public abstract class AlgoBaseProc<
                     configurableSeedConfig.propertyNameOverride(),
                     seedProperty,
                     graphStore.nodePropertyKeys().values()
+                ));
+            }
+        }
+        if (config instanceof NodePropertiesConfig) {
+            List<String> weightProperties= ((NodePropertiesConfig) config).nodePropertyNames();
+            List<String> missingProperties = weightProperties
+                .stream()
+                .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
+                .collect(Collectors.toList());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node properties %s not found in graph with node properties: %s in all node labels: %s",
+                    missingProperties,
+                    graphStore.nodePropertyKeys(filterLabels),
+                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
                 ));
             }
         }

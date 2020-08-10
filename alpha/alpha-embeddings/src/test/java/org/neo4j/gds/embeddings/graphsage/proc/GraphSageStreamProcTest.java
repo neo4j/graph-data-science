@@ -19,18 +19,24 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphSageStreamProcTest extends GraphSageBaseProcTest {
 
@@ -58,5 +64,24 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             Collection<Double> nodeEmbeddings = (List<Double>) o;
             assertEquals(embeddingSize, nodeEmbeddings.size());
         });
+    }
+
+    @Test
+    void shouldFailOnMissingProperties() {
+        String query = GdsCypher.call().explicitCreation("embeddingsGraph")
+            .algo("gds.alpha.graphSage")
+            .streamMode()
+            .addParameter("concurrency", 1)
+            .addParameter("nodePropertyNames", List.of("age", "missing_1", "missing_2"))
+            .addParameter("aggregator", "mean")
+            .addParameter("activationFunction", "sigmoid")
+            .addParameter("embeddingSize", 42)
+            .addParameter("degreeAsProperty", true)
+            .yields();
+
+        String expectedFail = "Node properties [missing_1, missing_2] not found in graph with node properties";
+        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        assertThat(throwable.getMessage(), startsWith(expectedFail));
     }
 }

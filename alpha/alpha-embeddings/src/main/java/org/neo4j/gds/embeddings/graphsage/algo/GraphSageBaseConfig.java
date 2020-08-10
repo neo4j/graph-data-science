@@ -27,13 +27,14 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
 
     @Value.Default
     default int embeddingSize() {
@@ -57,12 +58,6 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     @Value.Default
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;
-    }
-
-    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
-    @Value.Default
-    default List<String> nodePropertyNames() {
-        return List.of();
     }
 
     @Value.Default
@@ -102,6 +97,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
         return GraphSageModel.DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
     }
 
+    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
     @Value.Default
     default boolean degreeAsProperty() {
         return false;
