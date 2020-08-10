@@ -124,4 +124,24 @@ class ValueConversionTest {
             arguments(Values.stringValue("42L"), null)
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.utils.ValueConversionTest#floatArrayConversion")
+    void testGettingAFloatArray(Value value, float[] expected) {
+        if (expected != null) {
+            assertArrayEquals(expected, ValueConversion.getFloatArray(value), 0.1f);
+        } else {
+            assertThrows(UnsupportedOperationException.class, () -> ValueConversion.getFloatArray(value));
+        }
+    }
+
+    static Stream<Arguments> floatArrayConversion() {
+        return Stream.of(
+            arguments(Values.floatArray(new float[]{42.0f}), new float[]{42.0f}),
+
+            arguments(Values.doubleArray(new double[]{42.0}), null),
+            arguments(Values.longArray(new long[]{42}), null),
+            arguments(Values.stringValue("42L"), null)
+        );
+    }
 }

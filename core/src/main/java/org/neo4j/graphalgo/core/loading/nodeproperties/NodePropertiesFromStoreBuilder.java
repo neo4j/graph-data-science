@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.DoubleArray;
+import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
@@ -103,8 +104,10 @@ public final class NodePropertiesFromStoreBuilder {
                 newBuilder = new DoubleNodePropertiesBuilder(nodeSize, defaultValue, tracker);
             } else if (value instanceof LongArray) {
                 newBuilder = new LongArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
-            } else if(value instanceof DoubleArray) {
+            } else if (value instanceof DoubleArray) {
                 newBuilder = new DoubleArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
+            } else if (value instanceof FloatArray) {
+                newBuilder = new FloatArrayNodePropertiesBuilder(nodeSize, defaultValue, tracker);
             } else {
                 throw new UnsupportedOperationException(formatWithLocale(
                     "Loading of values of type %s is currently not supported",

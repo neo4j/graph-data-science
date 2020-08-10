@@ -111,10 +111,58 @@ final class NodePropertiesFromStoreBuilderTest {
         assertArrayEquals(defaultValue, properties.getDoubleArray(0));
     }
 
+    @Test
+    void shouldReturnFloatArrays() {
+        float[] data = {42.2F, 1337.1F};
+        float[] defaultValue = new float[2];
+        NodeProperties properties = createNodeProperties(
+            2L,
+            defaultValue,
+            b -> b.set(1, Values.of(data))
+        );
+
+        assertArrayEquals(data, properties.getFloatArray(1));
+        assertArrayEquals(defaultValue, properties.getFloatArray(0));
+    }
+
+    @Test
+    void shouldCastFromFloatArrayToDoubleArray() {
+        float[] floatData = {42.2F, 1337.1F};
+        double[] doubleData = {42.2D, 1337.1D};
+        float[] defaultValue = new float[2];
+        NodeProperties properties = createNodeProperties(
+            2L,
+            defaultValue,
+            b -> b.set(1, Values.of(floatData))
+        );
+
+        assertArrayEquals(floatData, properties.getFloatArray(1));
+        double[] doubleArray = properties.getDoubleArray(1);
+        for (int i = 0; i < floatData.length; i++) {
+            assertEquals(doubleData[i], doubleArray[i], 0.0001D);
+        }
+        assertArrayEquals(defaultValue, properties.getFloatArray(0));
+    }
+
+    @Test
+    void shouldCastFromDoubleArrayToFloatArray() {
+        double[] doubleData = {42.2D, 1337.1D};
+        float[] floatData = {42.2F, 1337.1F};
+        double[] defaultValue = new double[2];
+        NodeProperties properties = createNodeProperties(
+            2L,
+            defaultValue,
+            b -> b.set(1, Values.of(doubleData))
+        );
+
+        assertArrayEquals(doubleData, properties.getDoubleArray(1));
+        assertArrayEquals(floatData, properties.getFloatArray(1));
+        assertArrayEquals(defaultValue, properties.getDoubleArray(0));
+    }
+
     static Stream<Arguments> unsupportedValues() {
         return Stream.of(
             arguments(Values.stringValue("42L")),
-            arguments(Values.floatArray(new float[]{42.0f})),
             arguments(Values.shortArray(new short[]{(short) 42})),
             arguments(Values.byteArray(new byte[]{(byte) 42})),
             arguments(Values.booleanValue(true)),

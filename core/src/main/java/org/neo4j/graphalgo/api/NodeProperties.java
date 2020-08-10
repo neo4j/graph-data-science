@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 
@@ -37,14 +38,22 @@ public interface NodeProperties {
         throw unsupportedTypeException(ValueType.LONG);
     };
 
+    @Nullable
     default double[] getDoubleArray(long nodeId) {
         throw unsupportedTypeException(ValueType.DOUBLE_ARRAY);
     }
 
+    @Nullable
+    default float[] getFloatArray(long nodeId) {
+        throw unsupportedTypeException(ValueType.FLOAT_ARRAY);
+    }
+
+    @Nullable
     default long[] getLongArray(long nodeId) {
         throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }
 
+    @Nullable
     Object getObject(long nodeId);
 
     ValueType getType();

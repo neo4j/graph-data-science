@@ -79,18 +79,24 @@ public final class DefaultValue {
     }
 
     public long[] getLongArray() {
-        if (defaultValue instanceof long[]) {
-            return (long[]) defaultValue;
-        } else {
-            throw getInvalidTypeException(long[].class);
-        }
+        return getArray(long[].class);
     }
 
     public double[] getDoubleArray() {
-        if (defaultValue instanceof double[]) {
-            return (double[]) defaultValue;
+        return getArray(double[].class);
+    }
+
+    public float[] getFloatArray() {
+        return getArray(float[].class);
+    }
+
+    private <T> T getArray(Class<T> arrayType) {
+        if (defaultValue == null) {
+            return null;
+        } else if (arrayType.isAssignableFrom(defaultValue.getClass())) {
+            return arrayType.cast(defaultValue);
         } else {
-            throw getInvalidTypeException(double[].class);
+            throw getInvalidTypeException(arrayType);
         }
     }
 
@@ -118,7 +124,7 @@ public final class DefaultValue {
     }
 
     @NotNull
-    public ClassCastException getInvalidTypeException(Class<?> expectedClass) {
+    private ClassCastException getInvalidTypeException(Class<?> expectedClass) {
         return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
     }
 }

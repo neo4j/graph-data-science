@@ -23,44 +23,40 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-public interface DoubleArrayNodeProperties extends NodeProperties {
+public interface FloatArrayNodeProperties extends NodeProperties {
 
     @Override
-    double[] getDoubleArray(long nodeId);
+    float[] getFloatArray(long nodeId);
 
     @Override
-    default float[] getFloatArray(long nodeId) {
-        double[] doubleArray = getDoubleArray(nodeId);
+    default double[] getDoubleArray(long nodeId) {
+        float[] floatArray = getFloatArray(nodeId);
 
-        if (doubleArray == null) {
+        if (floatArray == null) {
             return null;
         } else {
-            float[] floatArray = new float[doubleArray.length];
-            for (int i = 0; i < doubleArray.length; i++) {
-                floatArray[i] = (float) doubleArray[i];
+
+            double[] doubleArray = new double[floatArray.length];
+            for (int i = 0; i < floatArray.length; i++) {
+                doubleArray[i] = floatArray[i];
             }
-            return floatArray;
+            return doubleArray;
         }
     }
 
     @Override
     default Object getObject(long nodeId) {
-        return getDoubleArray(nodeId);
+        return getFloatArray(nodeId);
     }
 
     @Override
     default Value getValue(long nodeId) {
-        var value = getDoubleArray(nodeId);
-        return value == null ? null : Values.doubleArray(value);
+        var value = getFloatArray(nodeId);
+        return value == null ? null : Values.floatArray(value);
     };
 
     @Override
     default ValueType getType() {
-        return ValueType.DOUBLE_ARRAY;
-    };
-
-    @Override
-    default double getDouble(long nodeId) {
-        throw new UnsupportedOperationException("double is not supported");
+        return ValueType.FLOAT_ARRAY;
     };
 }

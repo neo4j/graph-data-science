@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.utils;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.values.storable.DoubleArray;
+import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.FloatingPointValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
@@ -63,6 +64,14 @@ public final class ValueConversion {
             return ((DoubleArray) value).asObjectCopy();
         } else {
             throw conversionError(value, "Double Array");
+        }
+    }
+
+    public static float[] getFloatArray(Value value) {
+        if (value instanceof FloatArray) {
+            return ((FloatArray) value).asObjectCopy();
+        } else {
+            throw conversionError(value, "Float Array");
         }
     }
 
