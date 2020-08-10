@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.values.storable.FloatArray;
+import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.Value;
 
 public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
@@ -38,8 +38,7 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
 
     @Override
     void setValue(long nodeId, Value value) {
-        float[] arrayValue = ((FloatArray) value).asObjectCopy();
-        objectArray.set(nodeId, arrayValue);
+        objectArray.set(nodeId, ValueConversion.getFloatArray(value));
     }
 
     @Override

@@ -91,7 +91,9 @@ public final class DefaultValue {
     }
 
     private <T> T getArray(Class<T> arrayType) {
-        if (arrayType.isAssignableFrom(Objects.requireNonNull(defaultValue).getClass())) {
+        if (defaultValue == null) {
+            return null;
+        } else if (arrayType.isAssignableFrom(defaultValue.getClass())) {
             return arrayType.cast(defaultValue);
         } else {
             throw getInvalidTypeException(arrayType);
@@ -122,7 +124,7 @@ public final class DefaultValue {
     }
 
     @NotNull
-    public ClassCastException getInvalidTypeException(Class<?> expectedClass) {
+    private ClassCastException getInvalidTypeException(Class<?> expectedClass) {
         return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
     }
 }

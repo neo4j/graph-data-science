@@ -31,11 +31,17 @@ public interface FloatArrayNodeProperties extends NodeProperties {
     @Override
     default double[] getDoubleArray(long nodeId) {
         float[] floatArray = getFloatArray(nodeId);
-        double[] doubleArray = new double[floatArray.length];
-        for (int i = 0; i < floatArray.length; i++) {
-            doubleArray[i] = floatArray[i];
+
+        if (floatArray == null) {
+            return null;
+        } else {
+
+            double[] doubleArray = new double[floatArray.length];
+            for (int i = 0; i < floatArray.length; i++) {
+                doubleArray[i] = floatArray[i];
+            }
+            return doubleArray;
         }
-        return doubleArray;
     }
 
     @Override

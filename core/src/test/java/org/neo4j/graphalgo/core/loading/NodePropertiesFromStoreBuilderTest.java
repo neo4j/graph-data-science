@@ -115,7 +115,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnFloatArrays() {
         float[] data = {42.2F, 1337.1F};
         float[] defaultValue = new float[2];
-        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+        NodeProperties properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -130,7 +130,7 @@ final class NodePropertiesFromStoreBuilderTest {
         float[] floatData = {42.2F, 1337.1F};
         double[] doubleData = {42.2D, 1337.1D};
         float[] defaultValue = new float[2];
-        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+        NodeProperties properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(floatData))
@@ -149,7 +149,7 @@ final class NodePropertiesFromStoreBuilderTest {
         double[] doubleData = {42.2D, 1337.1D};
         float[] floatData = {42.2F, 1337.1F};
         double[] defaultValue = new double[2];
-        NodeProperties properties = NodePropertiesFromStoreBuilder.of(
+        NodeProperties properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(doubleData))
@@ -163,7 +163,6 @@ final class NodePropertiesFromStoreBuilderTest {
     static Stream<Arguments> unsupportedValues() {
         return Stream.of(
             arguments(Values.stringValue("42L")),
-            arguments(Values.floatArray(new float[]{42.0f})),
             arguments(Values.shortArray(new short[]{(short) 42})),
             arguments(Values.byteArray(new byte[]{(byte) 42})),
             arguments(Values.booleanValue(true)),
