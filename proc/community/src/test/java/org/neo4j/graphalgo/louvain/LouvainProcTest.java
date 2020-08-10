@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.louvain;
 
-import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
