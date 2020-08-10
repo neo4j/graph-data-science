@@ -25,9 +25,10 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,27 +38,29 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements MutateNodePropertyTest<PageRank, PageRankMutateConfig, PageRank> {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a:Label1 {name: 'a'})" +
-        ", (b:Label1 {name: 'b'})" +
-        ", (c:Label1 {name: 'c'})" +
-        ", (d:Label1 {name: 'd'})" +
-        ", (e:Label1 {name: 'e'})" +
-        ", (f:Label1 {name: 'f'})" +
-        ", (g:Label1 {name: 'g'})" +
-        ", (h:Label1 {name: 'h'})" +
-        ", (i:Label1 {name: 'i'})" +
-        ", (j:Label1 {name: 'j'})" +
-        ", (b)-[:TYPE1]->(c)" +
-        ", (c)-[:TYPE1]->(b)" +
-        ", (d)-[:TYPE1]->(a)" +
-        ", (d)-[:TYPE1]->(b)" +
-        ", (e)-[:TYPE1]->(b)" +
-        ", (e)-[:TYPE1]->(d)" +
-        ", (e)-[:TYPE1]->(f)" +
-        ", (f)-[:TYPE1]->(b)" +
-        ", (f)-[:TYPE1]->(e)";
+    @Override
+    public String createQuery() {
+        return "CREATE" +
+               "  (a:Label1 {name: 'a'})" +
+               ", (b:Label1 {name: 'b'})" +
+               ", (c:Label1 {name: 'c'})" +
+               ", (d:Label1 {name: 'd'})" +
+               ", (e:Label1 {name: 'e'})" +
+               ", (f:Label1 {name: 'f'})" +
+               ", (g:Label1 {name: 'g'})" +
+               ", (h:Label1 {name: 'h'})" +
+               ", (i:Label1 {name: 'i'})" +
+               ", (j:Label1 {name: 'j'})" +
+               ", (b)-[:TYPE1]->(c)" +
+               ", (c)-[:TYPE1]->(b)" +
+               ", (d)-[:TYPE1]->(a)" +
+               ", (d)-[:TYPE1]->(b)" +
+               ", (e)-[:TYPE1]->(b)" +
+               ", (e)-[:TYPE1]->(d)" +
+               ", (e)-[:TYPE1]->(f)" +
+               ", (f)-[:TYPE1]->(b)" +
+               ", (f)-[:TYPE1]->(e)";
+    }
 
     @Override
     public String mutateProperty() {
@@ -71,9 +74,8 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
 
     @BeforeEach
     void setupGraph() throws Exception {
-        super.setupGraph();
-        runQuery(db, "MATCH (n) DETACH DELETE n", Collections.emptyMap());
-        runQuery(DB_CYPHER);
+        registerProcedures(GraphCreateProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
+        runQuery(createQuery());
     }
 
     @Override

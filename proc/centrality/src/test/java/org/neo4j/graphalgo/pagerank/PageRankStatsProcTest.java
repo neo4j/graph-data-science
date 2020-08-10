@@ -23,9 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,16 +35,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
 
-    private static final String DB_CYPHER = "CREATE " +
-                                            "  (a:Label1 {name: 'a'})" +
-                                            ", (b:Label1 {name: 'b'})" +
-                                            ", (a)-[:REL]->(b)";
+    @Override
+    public String createQuery() {
+        return "CREATE " +
+               "  (a:Label1 {name: 'a'})" +
+               ", (b:Label1 {name: 'b'})" +
+               ", (a)-[:REL]->(b)";
+    }
 
     @BeforeEach
     void setupGraph() throws Exception {
-        super.setupGraph();
-        runQuery(db, "MATCH (n) DETACH DELETE n", Collections.emptyMap());
-        runQuery(DB_CYPHER);
+        registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
+        runQuery(createQuery());
     }
 
     @Override

@@ -39,7 +39,8 @@ class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
     implements WritePropertyConfigTest<IntersectingTriangleCount, TriangleCountWriteConfig, IntersectingTriangleCount.TriangleCountResult> {
 
-    String dbCypher() {
+    @Override
+    public String createQuery() {
         return "CREATE " +
                "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
                "(b)-[:T]->(c:A { name: 'c' }), " +
