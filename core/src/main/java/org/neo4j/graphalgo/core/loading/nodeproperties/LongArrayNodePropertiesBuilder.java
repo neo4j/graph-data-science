@@ -65,7 +65,7 @@ class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         public long[] longArrayValue(long nodeId) {
             long[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.getLongArray();
+                return defaultValue.longArrayValue();
             }
             return data;
         }

@@ -124,7 +124,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             .stream()
             .mapToInt(mapping -> dimensions.relationshipPropertyTokens().get(mapping.neoPropertyKey())).toArray();
 
-        double[] defaultValues = propertyMappings.stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().getDouble()).toArray();
+        double[] defaultValues = propertyMappings.stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue()).toArray();
         Aggregation[] aggregations = propertyMappings.stream()
             .map(PropertyMapping::aggregation)
             .map(Aggregation::resolve)

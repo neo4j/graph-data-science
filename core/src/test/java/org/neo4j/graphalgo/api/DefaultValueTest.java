@@ -57,7 +57,7 @@ class DefaultValueTest {
     void shouldReturnLongsFromNumericValues(Object input, long expected) {
         var defaultValue = DefaultValue.of(input);
 
-        assertEquals(expected, defaultValue.getLong());
+        assertEquals(expected, defaultValue.longValue());
     }
 
     static Stream<Arguments> invalidNumericValues() {
@@ -73,7 +73,7 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToLong(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::getLong);
+        var e = assertThrows(ClassCastException.class, defaultValue::longValue);
 
         assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Long.", defaultValue.getObject())));
     }
@@ -82,7 +82,7 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfDoubleCannotBeSafelyCoercedToLong() {
         var defaultValue = DefaultValue.of(42.42);
 
-        var e = assertThrows(UnsupportedOperationException.class, defaultValue::getLong);
+        var e = assertThrows(UnsupportedOperationException.class, defaultValue::longValue);
 
         assertThat(e.getMessage(), containsString("Cannot safely convert 42.42 into an long value"));
     }
@@ -105,7 +105,7 @@ class DefaultValueTest {
     void shouldReturnDoublesFromNumericValues(Object input, Double expected) {
         var defaultValue = DefaultValue.of(input);
 
-        assertEquals(expected, defaultValue.getDouble(), 0.01);
+        assertEquals(expected, defaultValue.doubleValue(), 0.01);
     }
 
     @ParameterizedTest
@@ -113,7 +113,7 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToDouble(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::getDouble);
+        var e = assertThrows(ClassCastException.class, defaultValue::doubleValue);
 
         assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Double.", defaultValue.getObject())));
     }
@@ -122,7 +122,7 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfLongCannotBeSafelyCoercedToDouble() {
         var defaultValue = DefaultValue.of(1L << 53 + 1);
 
-        var e = assertThrows(UnsupportedOperationException.class, defaultValue::getDouble);
+        var e = assertThrows(UnsupportedOperationException.class, defaultValue::doubleValue);
 
         assertThat(e.getMessage(), containsString("Cannot safely convert"));
     }

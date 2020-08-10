@@ -50,7 +50,7 @@ public final class DefaultValue {
         this.defaultValue = defaultValue;
     }
 
-    public long getLong() {
+    public long longValue() {
         if (defaultValue == null) {
             return LONG_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Double && Double.isNaN((double) defaultValue)) {
@@ -65,7 +65,7 @@ public final class DefaultValue {
         throw getInvalidTypeException(Long.class);
     }
 
-    public double getDouble() {
+    public double doubleValue() {
         if (defaultValue instanceof Long && defaultValue.equals(LONG_DEFAULT_FALLBACK)) {
             return DOUBLE_DEFAULT_FALLBACK;
         } else if (defaultValue instanceof Long || defaultValue instanceof Integer) {
@@ -78,15 +78,15 @@ public final class DefaultValue {
         throw getInvalidTypeException(Double.class);
     }
 
-    public long[] getLongArray() {
+    public long[] longArrayValue() {
         return getArray(long[].class);
     }
 
-    public double[] getDoubleArray() {
+    public double[] doubleArrayValue() {
         return getArray(double[].class);
     }
 
-    public float[] getFloatArray() {
+    public float[] floatArrayValue() {
         return getArray(float[].class);
     }
 
