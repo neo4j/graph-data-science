@@ -65,7 +65,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
             .addParameter(long.class, "originalNodeId")
             .addParameter(long.class, "internalNodeId")
             .addParameter(NodeProperties.class, "nodeProperties")
-            .addStatement("return new $T(originalNodeId, nodeProperties.getDouble(internalNodeId))", procResultClass())
+            .addStatement("return new $T(originalNodeId, nodeProperties.doubleValue(internalNodeId))", procResultClass())
             .build();
     }
 }
