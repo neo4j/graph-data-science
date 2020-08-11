@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.gdl;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
@@ -52,13 +53,17 @@ import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromGdlConfig> {
 
@@ -180,6 +185,11 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                         .computeIfAbsent(nodeLabel, (ignore) -> new HashSet<>())
                         .add(PropertyMapping.of(propertyKey))
                     );
+
+                if (propertyValue instanceof List) {
+                    propertyValue = convertListProperty((List<?>) propertyValue);
+                }
+
                 propertyBuilders.computeIfAbsent(PropertyMapping.of(propertyKey), (key) ->
                     NodePropertiesFromStoreBuilder.of(
                         dimensions.nodeCount(),
@@ -201,6 +211,40 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                     nodeProperties::get
                 ))
             ));
+    }
+
+    @NotNull
+    private Object convertListProperty(List<?> list) {
+        var firstType = list.get(0).getClass();
+
+        var isLong = firstType.equals(Long.class);
+        var isDouble = firstType.equals(Double.class);
+        var isFloat = firstType.equals(Float.class);
+
+        if (!isLong && !isDouble && !isFloat) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "List property contains in-compatible type: %s.",
+                firstType.getSimpleName()
+            ));
+        }
+
+        var sameType = list.stream().allMatch(firstType::isInstance);
+        if (!sameType) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "List property contains mixed types: %s",
+                list
+                    .stream()
+                    .map(Object::getClass)
+                    .map(Class::getSimpleName)
+                    .collect(Collectors.joining(", ", "[", "]"))
+            ));
+        }
+
+        var array = Array.newInstance(firstType, list.size());
+        for (int i = 0; i < list.size(); i++) {
+            Array.set(array, i, firstType.cast(list.get(i)));
+        }
+        return array;
     }
 
     private Map<RelationshipType, Pair<Optional<String>, Relationships>> loadRelationships(IdMap nodes) {

@@ -30,8 +30,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GdlFactoryTest {
@@ -60,6 +64,26 @@ class GdlFactoryTest {
             .map(NodeLabel::new)
             .collect(Collectors.toSet());
         assertEquals(expectedLabels, graph.availableNodeLabels());
+    }
+
+    @Test
+    void testCompatibleListProperties() {
+        Graph graph = fromGdl("({f1: [1L, 3L, 3L, 7L], f2: [1.0D, 3.0D, 3.0D, 7.0D], f3: [1.0F, 3.0F, 3.0F, 7.0F]})");
+        assertArrayEquals(new long[]{1, 3, 3, 7}, graph.nodeProperties("f1").longArrayValue(0));
+        assertArrayEquals(new double[]{1, 3, 3, 7}, graph.nodeProperties("f2").doubleArrayValue(0));
+        assertArrayEquals(new float[]{1, 3, 3, 7}, graph.nodeProperties("f3").floatArrayValue(0));
+    }
+
+    @Test
+    void testIncompatibleListProperties() {
+        var ex = assertThrows(IllegalArgumentException.class, () -> fromGdl("({f1: [1, 3, 3, 7]})"));
+        assertThat(ex.getMessage(), containsString("Integer"));
+    }
+
+    @Test
+    void testMixedListProperties() {
+        var ex = assertThrows(IllegalArgumentException.class, () -> fromGdl("({f1: [4L, 2.0D, 4.2]})"));
+        assertThat(ex.getMessage(), containsString("[Long, Double, Float]"));
     }
 
     @Test
