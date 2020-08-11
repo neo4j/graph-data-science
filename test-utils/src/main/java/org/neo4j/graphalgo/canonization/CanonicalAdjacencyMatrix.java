@@ -70,6 +70,12 @@ public final class CanonicalAdjacencyMatrix {
                                     propertyKey,
                                     Arrays.toString(nodeProperties.longArrayValue(nodeId))
                                 );
+                            case FLOAT_ARRAY:
+                                return formatWithLocale(
+                                    "%s: %s",
+                                    propertyKey,
+                                    Arrays.toString(nodeProperties.floatArrayValue(nodeId))
+                                );
                             default:
                                 throw new IllegalArgumentException(formatWithLocale(
                                     "Unsupported type: %s",

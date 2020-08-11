@@ -219,8 +219,9 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
 
         var isLong = firstType.equals(Long.class);
         var isDouble = firstType.equals(Double.class);
+        var isFloat = firstType.equals(Float.class);
 
-        if (!isLong && !isDouble) {
+        if (!isLong && !isDouble && !isFloat) {
             throw new IllegalArgumentException(formatWithLocale(
                 "List property contains in-compatible type: %s.",
                 firstType.getSimpleName()

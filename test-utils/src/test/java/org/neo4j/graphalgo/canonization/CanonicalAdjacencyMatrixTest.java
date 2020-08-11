@@ -59,8 +59,8 @@ class CanonicalAdjacencyMatrixTest {
 
     @Test
     void testTopologyAndDataEquals() {
-        Graph g1 = fromGdl("(a {a:2, w:1, q:NaN, f: [1L, 3L, 3L, 7L]}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
-        Graph g2 = fromGdl("(a {a:2, w:1, q:NaN, f: [1L, 3L, 3L, 7L]}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
+        Graph g1 = fromGdl("(a {a:2, w:1, q:NaN, f1: [1L, 3L, 3L, 7L], f2: [1.0D, 3.0D, 3.0D, 7.0D], f3: [1.0, 3.0, 3.0, 7.0]}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
+        Graph g2 = fromGdl("(a {a:2, w:1, q:NaN, f1: [1L, 3L, 3L, 7L], f2: [1.0D, 3.0D, 3.0D, 7.0D], f3: [1.0, 3.0, 3.0, 7.0]}), (b {w:2, a:3, q:42.0d}), (a)-->(b)");
         assertEquals(canonicalize(g1), canonicalize(g2));
     }
 
