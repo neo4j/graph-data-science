@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -35,6 +34,12 @@ import java.util.Collection;
 import java.util.List;
 
 public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
+    double DEFAULT_TOLERANCE = 1e-4;
+    double DEFAULT_LEARNING_RATE = 0.1;
+    int DEFAULT_EPOCHS = 1;
+    int DEFAULT_MAX_ITERATIONS = 10;
+    int DEFAULT_MAX_SEARCH_DEPTH = 5;
+    int DEFAULT_NEGATIVE_SAMPLE_WEIGHT = 20;
 
     @Value.Default
     default int embeddingSize() {
@@ -60,6 +65,12 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
         return ActivationFunction.SIGMOID;
     }
 
+    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
+    @Value.Default
+    default List<String> nodePropertyNames() {
+        return List.of();
+    }
+
     @Value.Default
     default int batchSize() {
         return 100;
@@ -68,33 +79,33 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     @Value.Default
     @Override
     default double tolerance() {
-        return GraphSageModel.DEFAULT_TOLERANCE;
+        return DEFAULT_TOLERANCE;
     }
 
     @Value.Default
     default double learningRate() {
-        return GraphSageModel.DEFAULT_LEARNING_RATE;
+        return DEFAULT_LEARNING_RATE;
     }
 
     @Value.Default
     default int epochs() {
-        return GraphSageModel.DEFAULT_EPOCHS;
+        return DEFAULT_EPOCHS;
     }
 
     @Value.Default
     @Override
     default int maxIterations() {
-        return GraphSageModel.DEFAULT_MAX_ITERATIONS;
+        return DEFAULT_MAX_ITERATIONS;
     }
 
     @Value.Default
     default int searchDepth() {
-        return GraphSageModel.DEFAULT_MAX_SEARCH_DEPTH;
+        return DEFAULT_MAX_SEARCH_DEPTH;
     }
 
     @Value.Default
     default int negativeSampleWeight() {
-        return GraphSageModel.DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
+        return DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
     }
 
     @Value.Default

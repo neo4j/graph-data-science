@@ -22,9 +22,9 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
@@ -32,7 +32,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
@@ -53,14 +52,7 @@ import java.util.stream.LongStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class GraphSageModel {
-    public static final double DEFAULT_TOLERANCE = 1e-4;
-    public static final double DEFAULT_LEARNING_RATE = 0.1;
-    public static final int DEFAULT_EPOCHS = 1;
-    public static final int DEFAULT_MAX_ITERATIONS = 10;
-    public static final int DEFAULT_MAX_SEARCH_DEPTH = 5;
-    public static final int DEFAULT_NEGATIVE_SAMPLE_WEIGHT = 20;
-
+public class GraphSageTrainModel {
     private final Layer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
@@ -71,88 +63,25 @@ public class GraphSageModel {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
-
     private double degreeProbabilityNormalizer;
 
-    GraphSageModel(int concurrency, int batchSize, List<Layer> layers, Log log) {
-        this(
-            concurrency,
-            batchSize,
-            DEFAULT_TOLERANCE,
-            DEFAULT_LEARNING_RATE,
-            DEFAULT_EPOCHS,
-            DEFAULT_MAX_ITERATIONS,
-            layers.toArray(Layer[]::new),
-            log
-        );
-    }
 
-    GraphSageModel(
-        int concurrency,
-        int batchSize,
-        double tolerance,
-        double learningRate,
-        int epochs,
-        int maxIterations,
-        Layer[] layers,
-        Log log
-    ) {
-        this(
-            concurrency,
-            batchSize,
-            tolerance,
-            learningRate,
-            epochs,
-            maxIterations,
-            DEFAULT_MAX_SEARCH_DEPTH,
-            DEFAULT_NEGATIVE_SAMPLE_WEIGHT,
-            layers,
-            log
-        );
-    }
-
-    public GraphSageModel(GraphSageBaseConfig config, Log log) {
-        this(
-            config.concurrency(),
-            config.batchSize(),
-            config.tolerance(),
-            config.learningRate(),
-            config.epochs(),
-            config.maxIterations(),
-            config.searchDepth(),
-            config.negativeSampleWeight(),
-            config.layerConfigs().stream()
-                .map(LayerFactory::createLayer)
-                .toArray(Layer[]::new),
-            log
-        );
-    }
-
-    private GraphSageModel(
-        int concurrency,
-        int batchSize,
-        double tolerance,
-        double learningRate,
-        int epochs,
-        int maxIterations,
-        int maxSearchDepth,
-        int negativeSampleWeight,
-        Layer[] layers,
-        Log log
-    ) {
-        this.concurrency = concurrency;
-        this.layers = layers;
-        this.tolerance = tolerance;
-        this.learningRate = learningRate;
-        this.epochs = epochs;
-        this.maxIterations = maxIterations;
-        this.maxSearchDepth = maxSearchDepth;
-        this.negativeSampleWeight = negativeSampleWeight;
-        this.batchProvider = new BatchProvider(batchSize);
+    public GraphSageTrainModel(GraphSageBaseConfig config, Log log) {
+        this.layers = config.layerConfigs().stream()
+            .map(LayerFactory::createLayer)
+            .toArray(Layer[]::new);
         this.log = log;
+        this.batchProvider = new BatchProvider(config.batchSize());
+        this.learningRate = config.learningRate();
+        this.tolerance = config.tolerance();
+        this.negativeSampleWeight = config.negativeSampleWeight();
+        this.concurrency = config.concurrency();
+        this.epochs = config.epochs();
+        this.maxIterations = config.maxIterations();
+        this.maxSearchDepth = config.searchDepth();
     }
 
-    public TrainResult train(Graph graph, HugeObjectArray<double[]> features) {
+    public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         Map<String, Double> epochLosses = new TreeMap<>();
         degreeProbabilityNormalizer = LongStream
             .range(0, graph.nodeCount())
@@ -174,7 +103,7 @@ public class GraphSageModel {
             previousLoss = newLoss;
         }
 
-        return TrainResult.of(initialLoss, epochLosses);
+        return ModelTrainResult.of(initialLoss, epochLosses, this.layers);
     }
 
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
@@ -241,36 +170,6 @@ public class GraphSageModel {
             newLoss,
             iteration
         ));
-    }
-
-    public HugeObjectArray<double[]> makeEmbeddings(Graph graph, HugeObjectArray<double[]> features) {
-        HugeObjectArray<double[]> result = HugeObjectArray.newArray(
-            double[].class,
-            graph.nodeCount(),
-            AllocationTracker.EMPTY
-        );
-
-        parallelStreamConsume(
-            batchProvider.stream(graph),
-            concurrency,
-            batches -> batches.forEach(batch -> {
-                ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddingVariable(graph, batch, features);
-                int cols = embeddingVariable.dimension(1);
-                double[] embeddings = ctx.forward(embeddingVariable).data();
-
-                for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
-                    double[] nodeEmbedding = Arrays.copyOfRange(
-                        embeddings,
-                        nodeIndex * cols,
-                        (nodeIndex + 1) * cols
-                    );
-                    result.set(batch[nodeIndex], nodeEmbedding);
-                }
-            })
-        );
-
-        return result;
     }
 
     private double evaluateLoss(
@@ -390,16 +289,19 @@ public class GraphSageModel {
     }
 
     @ValueClass
-    public interface TrainResult {
+    public interface ModelTrainResult {
 
         double startLoss();
 
         Map<String, Double> epochLosses();
 
-        static TrainResult of(double startLoss, Map<String, Double> epochLosses) {
-            return ImmutableTrainResult.builder()
+        Layer[] layers();
+
+        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, Layer[] layers) {
+            return ImmutableModelTrainResult.builder()
                 .startLoss(startLoss)
                 .epochLosses(epochLosses)
+                .layers(layers)
                 .build();
         }
     }
