@@ -32,7 +32,7 @@ public class EnterpriseLicensingSettings implements SettingsDeclaration {
 
     private static final String ENTERPRISE_LICENSE_KEY = "gds.enterprise.licenseKey";
 
-    @Description("Sets the key to unlock the Enterprise Version of the Neo4j Graph Data Science Library")
+    @Description("Sets the key to unlock the Enterprise Edition of the Neo4j Graph Data Science library")
     public static Setting<String> enterpriseLicenseKey = newBuilder(
         ENTERPRISE_LICENSE_KEY,
         SettingValueParsers.STRING,

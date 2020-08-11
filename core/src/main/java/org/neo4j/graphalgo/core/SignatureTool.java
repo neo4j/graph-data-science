@@ -24,6 +24,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import org.bouncycastle.util.io.pem.PemReader;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class SignatureTool {
     private static final String ENCRYPTION_ALGORITHM = "RSA";
 
-    public static LicenseCheckResult verify(String license) {
+    public static LicenseCheckResult verify(@NotNull String license) {
         try {
             PublicKey key = getPublicKey();
             Jws<Claims> token = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(license);
