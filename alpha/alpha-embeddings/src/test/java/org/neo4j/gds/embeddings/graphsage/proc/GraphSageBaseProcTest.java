@@ -75,7 +75,8 @@ class GraphSageBaseProcTest extends BaseProcTest {
         registerProcedures(
             GraphCreateProc.class,
             GraphSageStreamProc.class,
-            GraphSageWriteProc.class
+            GraphSageWriteProc.class,
+            GraphSageTrainProc.class
         );
 
         runQuery(DB_CYPHER);
