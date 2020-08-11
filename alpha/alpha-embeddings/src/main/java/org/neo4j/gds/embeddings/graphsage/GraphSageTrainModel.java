@@ -22,17 +22,21 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -48,7 +52,8 @@ import java.util.stream.LongStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class GraphSageTrainModel extends GraphSageBase {
+public class GraphSageTrainModel {
+    private final Layer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
     private final double learningRate;
@@ -59,7 +64,6 @@ public class GraphSageTrainModel extends GraphSageBase {
     private final int maxIterations;
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
-    private final Layer[] layers;
 
 
     public GraphSageTrainModel(GraphSageBaseConfig config, Log log) {
@@ -189,13 +193,13 @@ public class GraphSageTrainModel extends GraphSageBase {
         return lossValue;
     }
 
-    private Variable<Scalar> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
+    Variable<Scalar> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
         long[] totalBatch = LongStream
             .concat(Arrays.stream(batch), LongStream.concat(
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable<Matrix> embeddingVariable = embeddingVariable(graph, totalBatch, features, this.layers);
+        Variable<Matrix> embeddingVariable = embeddingVariable(graph, totalBatch, features);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
@@ -235,6 +239,47 @@ public class GraphSageTrainModel extends GraphSageBase {
                 }
                 throw new RuntimeException("This should never happen");
             });
+    }
+
+    private Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+        int dimension = features.get(0).length;
+        double[] data = new double[nodeIds.length * dimension];
+        IntStream
+            .range(0, nodeIds.length)
+            .forEach(nodeOffset -> System.arraycopy(
+                features.get(nodeIds[nodeOffset]),
+                0,
+                data,
+                nodeOffset * dimension,
+                dimension
+            ));
+        return new MatrixConstant(data, nodeIds.length, dimension);
+    }
+
+    private Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
+        List<NeighborhoodFunction> neighborhoodFunctions = Arrays
+            .stream(layers)
+            .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
+            .collect(Collectors.toList());
+        Collections.reverse(neighborhoodFunctions);
+        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
+
+        Variable<Matrix> previousLayerRepresentations = featureVariables(
+            subGraphs.get(subGraphs.size() - 1).nextNodes,
+            features
+        );
+
+        for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
+            Layer layer = layers[layers.length - layerNr - 1];
+            previousLayerRepresentations = layer
+                .aggregator()
+                .aggregate(
+                    previousLayerRepresentations,
+                    subGraphs.get(layerNr).adjacency,
+                    subGraphs.get(layerNr).selfAdjacency
+                );
+        }
+        return new NormalizeRows(previousLayerRepresentations);
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {

@@ -21,16 +21,23 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
-public class GraphSageEmbeddingsGenerator extends GraphSageBase {
+public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final BatchProvider batchProvider;
     private final int concurrency;
@@ -57,7 +64,7 @@ public class GraphSageEmbeddingsGenerator extends GraphSageBase {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddingVariable(graph, batch, features, this.layers);
+                Variable<Matrix> embeddingVariable = embeddingVariable(graph, batch, features);
                 int cols = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data();
 
@@ -73,5 +80,48 @@ public class GraphSageEmbeddingsGenerator extends GraphSageBase {
         );
 
         return result;
+    }
+
+    // TODO: This is also used in the Train class; it's using fields, find how to abstract it in a super class.
+    private Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+        int dimension = features.get(0).length;
+        double[] data = new double[nodeIds.length * dimension];
+        IntStream
+            .range(0, nodeIds.length)
+            .forEach(nodeOffset -> System.arraycopy(
+                features.get(nodeIds[nodeOffset]),
+                0,
+                data,
+                nodeOffset * dimension,
+                dimension
+            ));
+        return new MatrixConstant(data, nodeIds.length, dimension);
+    }
+
+    // TODO: This is also used in the Train class; it's using fields, find how to abstract it in a super class.
+    private Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
+        List<NeighborhoodFunction> neighborhoodFunctions = Arrays
+            .stream(layers)
+            .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
+            .collect(Collectors.toList());
+        Collections.reverse(neighborhoodFunctions);
+        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
+
+        Variable<Matrix> previousLayerRepresentations = featureVariables(
+            subGraphs.get(subGraphs.size() - 1).nextNodes,
+            features
+        );
+
+        for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
+            Layer layer = layers[layers.length - layerNr - 1];
+            previousLayerRepresentations = layer
+                .aggregator()
+                .aggregate(
+                    previousLayerRepresentations,
+                    subGraphs.get(layerNr).adjacency,
+                    subGraphs.get(layerNr).selfAdjacency
+                );
+        }
+        return new NormalizeRows(previousLayerRepresentations);
     }
 }
