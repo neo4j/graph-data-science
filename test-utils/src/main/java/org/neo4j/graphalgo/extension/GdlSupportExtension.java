@@ -165,6 +165,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
+            injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
             injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
