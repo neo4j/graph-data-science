@@ -87,17 +87,11 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             .addParameter("iterationWeights", weights)
             .addParameter("maxIterations", maxIterations);
 
-        if (!weights.isEmpty()) {
-            queryBuilder.addParameter("iterationWeights", weights);
-        }
+        queryBuilder.addParameter("iterationWeights", weights);
         String query = queryBuilder.yields();
 
-        int expectedEmbeddingsDimension = weights.isEmpty()
-            ? embeddingSize * maxIterations
-            : embeddingSize;
         runQueryWithRowConsumer(query, row -> {
             List<Double> embeddings = (List<Double>) row.get("embedding");
-            assertEquals(expectedEmbeddingsDimension, embeddings.size());
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
     }
