@@ -20,36 +20,19 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageModel;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.DoubleStream;
 
-import static java.util.stream.Collectors.toList;
-
-public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
+public class GraphSage extends GraphSageBase<GraphSage, GraphSage.GraphSageResult, GraphSageBaseConfig> {
 
     private final GraphSageModel graphSageModel;
-    private final Graph graph;
-    private final List<NodeProperties> nodeProperties;
-    private final boolean useDegreeAsProperty;
 
     public GraphSage(Graph graph, GraphSageBaseConfig config, Log log) {
-        this.useDegreeAsProperty = config.degreeAsProperty();
-        this.graph = graph;
-
-        nodeProperties = config
-            .nodePropertyNames()
-            .stream()
-            .map(graph::nodeProperties)
-            .collect(toList());
+        super(graph, config);
 
         graphSageModel = new GraphSageModel(config, log);
     }
@@ -71,22 +54,6 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     @Override
     public void release() {
 
-    }
-
-    private HugeObjectArray<double[]> initializeFeatures() {
-        HugeObjectArray<double[]> features = HugeObjectArray.newArray(
-            double[].class,
-            graph.nodeCount(),
-            AllocationTracker.EMPTY
-        );
-        features.setAll(n -> {
-            DoubleStream nodeFeatures = this.nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));
-            if (useDegreeAsProperty) {
-                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
-            }
-            return nodeFeatures.toArray();
-        });
-        return features;
     }
 
     @ValueClass
