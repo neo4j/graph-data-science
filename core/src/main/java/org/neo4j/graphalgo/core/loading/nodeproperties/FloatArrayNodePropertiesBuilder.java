@@ -62,10 +62,10 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         }
 
         @Override
-        public float[] getFloatArray(long nodeId) {
+        public float[] floatArrayValue(long nodeId) {
             float[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.getFloatArray();
+                return defaultValue.floatArrayValue();
             }
             return data;
         }

@@ -35,7 +35,7 @@ interface NodeProperty {
 
     @Configuration.Ignore
     default ValueType type() {
-        return values().getType();
+        return values().valueType();
     };
 
     static NodeProperty of(String key, GraphStore.PropertyState origin, NodeProperties values) {

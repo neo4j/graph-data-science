@@ -173,7 +173,7 @@ public class NodePropertyExporter extends StatementApi {
     void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
             int propertyId = nodeProperty.propertyToken();
-            final Value prop = nodeProperty.properties().getValue(nodeId);
+            final Value prop = nodeProperty.properties().value(nodeId);
             if (prop != null) {
                 ops.nodeSetProperty(
                     toOriginalId.applyAsLong(nodeId),

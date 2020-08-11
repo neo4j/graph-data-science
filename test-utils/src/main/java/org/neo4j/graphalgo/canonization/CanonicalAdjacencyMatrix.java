@@ -53,11 +53,11 @@ public final class CanonicalAdjacencyMatrix {
                     .map(propertyKey -> {
                         var nodeProperties = g.nodeProperties(propertyKey);
 
-                        if (nodeProperties.getType() == ValueType.DOUBLE) {
+                        if (nodeProperties.valueType() == ValueType.DOUBLE) {
                             return formatWithLocale(
                                 "%s: %f",
                                 propertyKey,
-                                nodeProperties.getDouble(nodeId)
+                                nodeProperties.doubleValue(nodeId)
                             );
                         } else {
                             return formatWithLocale(

@@ -36,14 +36,14 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
         if (propertyState == GraphStore.PropertyState.PERSISTENT) {
             NodeProperties seedProperties = graphStore.nodePropertyValues(seedProperty);
             // TODO forbid doubles once we load properties with their correct type
-            if (seedProperties.getType() == ValueType.LONG || seedProperties.getType() == ValueType.DOUBLE) {
+            if (seedProperties.valueType() == ValueType.LONG || seedProperties.valueType() == ValueType.DOUBLE) {
                 return new LongIfChangedNodeProperties(seedProperties, newProperties);
             } else {
                 throw new IllegalStateException(formatWithLocale(
                     "Expected seedProperty `%s` to be of type %s, but was %s",
                     seedProperty,
                     ValueType.LONG,
-                    seedProperties.getType()
+                    seedProperties.valueType()
                 ));
             }
         } else {
@@ -60,14 +60,14 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
     }
 
     @Override
-    public long getLong(long nodeId) {
-        return newProperties.getLong(nodeId);
+    public long longValue(long nodeId) {
+        return newProperties.longValue(nodeId);
     }
 
     @Override
-    public Value getValue(long nodeId) {
-        long seedValue = seedProperties.getLong(nodeId);
-        long writeValue = newProperties.getLong(nodeId);
+    public Value value(long nodeId) {
+        long seedValue = seedProperties.longValue(nodeId);
+        long writeValue = newProperties.longValue(nodeId);
 
         return seedValue == Long.MIN_VALUE || (seedValue != writeValue) ? Values.longValue(writeValue) : null;
     }

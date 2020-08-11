@@ -53,16 +53,16 @@ public class PropertyLoadingTest extends BaseTest {
 
     @Test
     void loadDifferentPropertyTypesWithDefaults() {
-        assertEquals(42L, graph.nodeProperties("longProp").getLong(0));
-        assertEquals(24L, graph.nodeProperties("longProp").getLong(1));
+        assertEquals(42L, graph.nodeProperties("longProp").longValue(0));
+        assertEquals(24L, graph.nodeProperties("longProp").longValue(1));
 
-        assertEquals(13.37D, graph.nodeProperties("doubleProp").getDouble(0));
-        assertEquals(73.31D, graph.nodeProperties("doubleProp").getDouble(1));
+        assertEquals(13.37D, graph.nodeProperties("doubleProp").doubleValue(0));
+        assertEquals(73.31D, graph.nodeProperties("doubleProp").doubleValue(1));
 
-        assertArrayEquals(new long[]{ 0, 1 }, graph.nodeProperties("longListProp").getLongArray(0));
-        assertArrayEquals(new long[]{ 0 }, graph.nodeProperties("longListProp").getLongArray(1));
+        assertArrayEquals(new long[]{ 0, 1 }, graph.nodeProperties("longListProp").longArrayValue(0));
+        assertArrayEquals(new long[]{ 0 }, graph.nodeProperties("longListProp").longArrayValue(1));
 
-        assertArrayEquals(new double[]{ 0.1, 1.2 }, graph.nodeProperties("doubleListProp").getDoubleArray(0));
-        assertArrayEquals(new double[]{ 0.0 }, graph.nodeProperties("doubleListProp").getDoubleArray(1));
+        assertArrayEquals(new double[]{ 0.1, 1.2 }, graph.nodeProperties("doubleListProp").doubleArrayValue(0));
+        assertArrayEquals(new double[]{ 0.0 }, graph.nodeProperties("doubleListProp").doubleArrayValue(1));
     }
 }

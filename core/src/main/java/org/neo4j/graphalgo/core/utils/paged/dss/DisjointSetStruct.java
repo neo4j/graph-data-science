@@ -71,7 +71,7 @@ public interface DisjointSetStruct {
     default LongNodeProperties asNodeProperties() {
         return new LongNodeProperties() {
             @Override
-            public long getLong(long nodeId) {
+            public long longValue(long nodeId) {
                 return setIdOf(nodeId);
             }
 

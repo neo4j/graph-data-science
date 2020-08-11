@@ -98,7 +98,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
         this.communities = HugeAtomicLongArray.newArray(
             capacity,
             LongPageCreator.of(concurrency, nodeId -> {
-                var seedCommunity = communityMapping.getLong(nodeId);
+                var seedCommunity = communityMapping.longValue(nodeId);
                 return seedCommunity < 0 ? -1 : seedCommunity;
             }),
             tracker

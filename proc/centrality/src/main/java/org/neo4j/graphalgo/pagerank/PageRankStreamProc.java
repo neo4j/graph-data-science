@@ -65,7 +65,7 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, Centralit
     protected CentralityStreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        return new CentralityStreamResult(originalNodeId, nodeProperties.getDouble(internalNodeId));
+        return new CentralityStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override

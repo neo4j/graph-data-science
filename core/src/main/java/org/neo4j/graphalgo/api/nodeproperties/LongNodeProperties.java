@@ -30,26 +30,26 @@ import java.util.stream.LongStream;
 public interface LongNodeProperties extends NodeProperties {
 
     @Override
-    long getLong(long nodeId);
+    long longValue(long nodeId);
 
     @Override
     default Object getObject(long nodeId) {
-        return getLong(nodeId);
+        return longValue(nodeId);
     }
 
     @Override
-    default Value getValue(long nodeId) {
-        return Values.longValue(getLong(nodeId));
+    default Value value(long nodeId) {
+        return Values.longValue(longValue(nodeId));
     };
 
     @Override
-    default ValueType getType() {
+    default ValueType valueType() {
         return ValueType.LONG;
     };
 
     @Override
-    default double getDouble(long nodeId) {
-        return getLong(nodeId);
+    default double doubleValue(long nodeId) {
+        return longValue(nodeId);
     };
 
     @Override
@@ -57,7 +57,7 @@ public interface LongNodeProperties extends NodeProperties {
         return LongStream
             .range(0, size())
             .parallel()
-            .map(this::getLong)
+            .map(this::longValue)
             .max();
     }
 }

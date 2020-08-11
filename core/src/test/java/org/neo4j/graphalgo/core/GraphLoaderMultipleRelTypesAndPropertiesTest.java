@@ -117,12 +117,12 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(NodeLabel.of("N3")));
 
         NodeProperties prop1 = graphStore.nodePropertyValues("prop1");
-        assertEquals(1L, prop1.getLong(0));
-        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop1.getLong(1));
+        assertEquals(1L, prop1.longValue(0));
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop1.longValue(1));
 
         NodeProperties prop2 = graphStore.nodePropertyValues("prop2");
-        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop2.getLong(0));
-        assertEquals(2L, prop2.getLong(1));
+        assertEquals(DefaultValue.LONG_DEFAULT_FALLBACK, prop2.longValue(0));
+        assertEquals(2L, prop2.longValue(1));
     }
 
     @Test
@@ -160,9 +160,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         NodeProperties node2Prop2 = graphStore.nodePropertyValues(node2Identifier, "prop2");
 
         LongStream.range(0, 3).forEach(nodeId -> {
-            double allProp1Value = allProp1.getDouble(nodeId);
-            double allProp2Value = allProp2.getDouble(nodeId);
-            double node2Prop2Value = node2Prop2.getDouble(nodeId);
+            double allProp1Value = allProp1.doubleValue(nodeId);
+            double allProp2Value = allProp2.doubleValue(nodeId);
+            double node2Prop2Value = node2Prop2.doubleValue(nodeId);
 
             if (nodeId == 0) {
                 assertEquals(1.0, allProp1Value);

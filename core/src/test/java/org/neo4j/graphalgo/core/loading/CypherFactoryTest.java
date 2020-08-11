@@ -180,17 +180,17 @@ class CypherFactoryTest extends BaseTest {
             ", (a)-[{w: %f}]->(b)";
 
         assertGraphEquals(
-            fromGdl(formatWithLocale(expectedGraph, 1.0f, prop1.defaultValue().getDouble(), prop1.defaultValue().getDouble())),
+            fromGdl(formatWithLocale(expectedGraph, 1.0f, prop1.defaultValue().doubleValue(), prop1.defaultValue().doubleValue())),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop1.propertyKey()))
         );
 
         assertGraphEquals(
-            fromGdl(formatWithLocale(expectedGraph, prop2.defaultValue().getDouble(), 2.0, prop2.defaultValue().getDouble())),
+            fromGdl(formatWithLocale(expectedGraph, prop2.defaultValue().doubleValue(), 2.0, prop2.defaultValue().doubleValue())),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop2.propertyKey()))
         );
 
         assertGraphEquals(
-            fromGdl(formatWithLocale(expectedGraph, prop3.defaultValue().getDouble(), prop3.defaultValue().getDouble(), 3.0)),
+            fromGdl(formatWithLocale(expectedGraph, prop3.defaultValue().doubleValue(), prop3.defaultValue().doubleValue(), 3.0)),
             graphs.getGraph(ALL_RELATIONSHIPS, Optional.of(prop3.propertyKey()))
         );
     }

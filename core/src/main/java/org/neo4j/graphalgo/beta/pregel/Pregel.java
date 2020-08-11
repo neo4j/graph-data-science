@@ -108,7 +108,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, graph.nodeCount()),
                 config.concurrency(),
-                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.getDouble(nodeId)))
+                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.doubleValue(nodeId)))
         );
 
         return new Pregel<>(

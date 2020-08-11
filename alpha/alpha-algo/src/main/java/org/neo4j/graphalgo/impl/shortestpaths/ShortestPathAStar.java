@@ -150,11 +150,11 @@ public class ShortestPathAStar extends Algorithm<ShortestPathAStar, ShortestPath
     }
 
     private double getLongitude(long nodeId) {
-        return longitudes.getDouble(nodeId);
+        return longitudes.doubleValue(nodeId);
     }
 
     private double getLatitude(long nodeId) {
-        return latitudes.getDouble(nodeId);
+        return latitudes.doubleValue(nodeId);
     }
 
     private boolean updateCosts(int source, int target, double newCost, double heuristic) {

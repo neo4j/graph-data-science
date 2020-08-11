@@ -45,7 +45,7 @@ public class ConsecutiveLongNodeProperties implements LongNodeProperties {
         this.communities = HugeLongArray.newArray(nodeCount, tracker);
 
         for (var nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var setId = longNodeProperties.getLong(nodeId);
+            var setId = longNodeProperties.longValue(nodeId);
             var communityId = setIdToConsecutiveId.getOrDefault(setId, -1);
             if (communityId == -1) {
                 setIdToConsecutiveId.addTo(setId, ++nextConsecutiveId);
@@ -56,7 +56,7 @@ public class ConsecutiveLongNodeProperties implements LongNodeProperties {
     }
 
     @Override
-    public long getLong(long nodeId) {
+    public long longValue(long nodeId) {
         return communities.get(nodeId);
     }
 }

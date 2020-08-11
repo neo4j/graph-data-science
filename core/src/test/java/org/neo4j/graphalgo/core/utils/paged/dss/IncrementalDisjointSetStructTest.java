@@ -119,7 +119,7 @@ class IncrementalDisjointSetStructTest extends DisjointSetStructTest {
         }
 
         @Override
-        public long getLong(long nodeId) {
+        public long longValue(long nodeId) {
             int key = Math.toIntExact(nodeId);
             int index = weights.indexOf(key);
             if (weights.indexExists(index)) {

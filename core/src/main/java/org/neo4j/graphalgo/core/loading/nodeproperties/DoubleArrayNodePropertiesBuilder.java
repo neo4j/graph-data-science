@@ -62,10 +62,10 @@ class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
 
         @Override
-        public double[] getDoubleArray(long nodeId) {
+        public double[] doubleArrayValue(long nodeId) {
             double[] data = propertyValues.get(nodeId);
             if (data == null) {
-                return defaultValue.getDoubleArray();
+                return defaultValue.doubleArrayValue();
             }
             return data;
         }

@@ -26,11 +26,11 @@ import org.neo4j.values.storable.Values;
 public interface FloatArrayNodeProperties extends NodeProperties {
 
     @Override
-    float[] getFloatArray(long nodeId);
+    float[] floatArrayValue(long nodeId);
 
     @Override
-    default double[] getDoubleArray(long nodeId) {
-        float[] floatArray = getFloatArray(nodeId);
+    default double[] doubleArrayValue(long nodeId) {
+        float[] floatArray = floatArrayValue(nodeId);
 
         if (floatArray == null) {
             return null;
@@ -46,17 +46,17 @@ public interface FloatArrayNodeProperties extends NodeProperties {
 
     @Override
     default Object getObject(long nodeId) {
-        return getFloatArray(nodeId);
+        return floatArrayValue(nodeId);
     }
 
     @Override
-    default Value getValue(long nodeId) {
-        var value = getFloatArray(nodeId);
+    default Value value(long nodeId) {
+        var value = floatArrayValue(nodeId);
         return value == null ? null : Values.floatArray(value);
     };
 
     @Override
-    default ValueType getType() {
+    default ValueType valueType() {
         return ValueType.FLOAT_ARRAY;
     };
 }
