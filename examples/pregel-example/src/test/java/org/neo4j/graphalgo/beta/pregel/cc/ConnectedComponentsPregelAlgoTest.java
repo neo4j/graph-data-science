@@ -86,7 +86,7 @@ class ConnectedComponentsPregelAlgoTest {
             .maxIterations(maxIterations)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             directedGraph,
             config,
             new ConnectedComponentsPregel(),
@@ -125,7 +125,7 @@ class ConnectedComponentsPregelAlgoTest {
             .maxIterations(maxIterations)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             undirectedGraph,
             config,
             new ConnectedComponentsPregel(),

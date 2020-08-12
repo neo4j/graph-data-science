@@ -1,6 +1,5 @@
 package org.neo4j.graphalgo.beta.pregel.cc;
 
-import java.util.Optional;
 import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -17,13 +16,8 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
 
     ComputationAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker,
             Log log) {
-        var maybeSeedProperty = Optional.ofNullable(configuration.seedProperty());
         var batchSize = (int) ParallelUtil.adjustedBatchSize(graph.nodeCount(), configuration.concurrency());
-        if (maybeSeedProperty.isPresent()) {
-            this.pregelJob = Pregel.withInitialNodeValues(graph, configuration, new Computation(), graph.nodeProperties(maybeSeedProperty.get()), batchSize, Pools.DEFAULT, tracker);
-        } else {
-            this.pregelJob = Pregel.withDefaultNodeValues(graph, configuration, new Computation(), batchSize, Pools.DEFAULT,tracker);
-        }
+        this.pregelJob = Pregel.create(graph, configuration, new Computation(), batchSize, Pools.DEFAULT,tracker);
     }
 
     @Override

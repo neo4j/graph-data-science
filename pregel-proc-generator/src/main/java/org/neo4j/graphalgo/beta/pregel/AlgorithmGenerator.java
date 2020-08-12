@@ -91,36 +91,12 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
             .addStatement(
-                "var maybeSeedProperty = $T.ofNullable(configuration.seedProperty())",
-                Optional.class
-            )
-            .addStatement(
                 "var batchSize = (int) $T.adjustedBatchSize(graph.nodeCount(), configuration.concurrency())",
                 ParallelUtil.class
             )
-            .beginControlFlow("if (maybeSeedProperty.isPresent())")
             .addStatement(
                 CodeBlock.builder().addNamed(
-                    "this.pregelJob = $pregel:T.withInitialNodeValues(" +
-                    "graph, " +
-                    "configuration, " +
-                    "new $computation:T(), " +
-                    "graph.nodeProperties(maybeSeedProperty.get()), " +
-                    "batchSize, " +
-                    "$pools:T.DEFAULT, " +
-                    "tracker" +
-                    ")",
-                    Map.of(
-                        "pregel", Pregel.class,
-                        "computation", className(pregelSpec, ""),
-                        "pools", Pools.class
-                    )
-                ).build()
-            )
-            .nextControlFlow("else")
-            .addStatement(
-                CodeBlock.builder().addNamed(
-                    "this.pregelJob = $pregel:T.withDefaultNodeValues(" +
+                    "this.pregelJob = $pregel:T.create(" +
                     "graph, " +
                     "configuration, " +
                     "new $computation:T(), " +
@@ -136,7 +112,6 @@ class AlgorithmGenerator extends PregelGenerator {
                 )
                     .build()
             )
-            .endControlFlow()
             .build();
     }
 

@@ -84,7 +84,7 @@ class PageRankPregelAlgoTest {
             .isAsynchronous(false)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             graph,
             config,
             new PageRankPregel(),

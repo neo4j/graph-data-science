@@ -62,7 +62,7 @@ class PregelTest {
     @ParameterizedTest
     @MethodSource("configAndResult")
     <C extends PregelConfig> void sendsMessages(C config, PregelComputation<C> computation, double[] expected) {
-        Pregel<C> pregelJob = Pregel.withDefaultNodeValues(
+        Pregel<C> pregelJob = Pregel.create(
             graph,
             config,
             computation,
@@ -84,7 +84,7 @@ class PregelTest {
             .bProperty("b_seed")
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             graph,
             config,
             new CompositeTestComputation(),

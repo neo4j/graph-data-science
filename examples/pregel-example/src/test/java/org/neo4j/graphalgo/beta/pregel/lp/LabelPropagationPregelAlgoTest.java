@@ -73,7 +73,7 @@ class LabelPropagationPregelAlgoTest {
             .maxIterations(maxIterations)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             graph,
             config,
             new LabelPropagationPregel(),
@@ -111,7 +111,7 @@ class LabelPropagationPregelAlgoTest {
             }
         };
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
+        Pregel pregelJob = Pregel.create(
             graph,
             config,
             weightedLabelPropagation,

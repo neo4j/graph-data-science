@@ -49,7 +49,7 @@ class PregelConnectedComponentsDocExample {
             .build()
             .generate();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             randomGraph,
             config,
             new ConnectedComponentsPregel(),

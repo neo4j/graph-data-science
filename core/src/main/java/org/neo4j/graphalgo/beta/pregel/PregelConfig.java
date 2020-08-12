@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -41,7 +40,6 @@ public interface PregelConfig extends
     AlgoBaseConfig,
     RelationshipWeightConfig,
     IterationsConfig,
-    SeedConfig,
     WritePropertyConfig,
     MutatePropertyConfig,
     ConcurrencyConfig {

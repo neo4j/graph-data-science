@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -75,8 +74,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final int concurrency;
     private final ExecutorService executor;
 
-    // TODO rename to create or sth
-    public static <CONFIG extends PregelConfig> Pregel<CONFIG> withDefaultNodeValues(
+    public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
             Graph graph,
             CONFIG config,
             PregelComputation<CONFIG> computation,
@@ -93,36 +91,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 executor,
                 tracker
         );
-    }
-
-    // TODO delete
-    public static <CONFIG extends PregelConfig> Pregel<CONFIG> withInitialNodeValues(
-            final Graph graph,
-            final CONFIG config,
-            final PregelComputation<CONFIG> computation,
-            final NodeProperties initialNodeValues,
-            final int batchSize,
-            final ExecutorService executor,
-            final AllocationTracker tracker) {
-
-        // HugeDoubleArray is faster for set operations compared to HugeNodePropertyMap
-//        HugeDoubleArray nodeValues = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-//        ParallelUtil.parallelStreamConsume(
-//                LongStream.range(0, graph.nodeCount()),
-//                config.concurrency(),
-//                nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, initialNodeValues.doubleValue(nodeId)))
-//        );
-//
-//        return new Pregel<>(
-//                graph,
-//                config,
-//                computation,
-//                nodeValues,
-//                batchSize,
-//                executor,
-//                tracker
-//        );
-        return null;
     }
 
     // TODO: adapt for composite node value

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -37,14 +38,15 @@ import java.util.Queue;
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
     @Override
-    public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperstep()) {
-            var initialValue = pregel.isSeeded()
-                ? pregel.getNodeValue(nodeId)
-                : 1.0 / pregel.getNodeCount();
-            pregel.setNodeValue(nodeId, initialValue);
-        }
+    public void init(PregelContext<PageRankPregelConfig> context, long nodeId) {
+        var initialValue = context.getConfig().seedProperty() != null
+            ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(nodeId)
+            : 1.0 / context.getNodeCount();
+        context.setNodeValue(nodeId, initialValue);
+    }
 
+    @Override
+    public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, long nodeId, Queue<Double> messages) {
         double newRank = pregel.getNodeValue(nodeId);
 
         // compute new rank based on neighbor ranks
@@ -72,7 +74,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     @ValueClass
     @Configuration("PageRankPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    interface PageRankPregelConfig extends PregelConfig {
+    interface PageRankPregelConfig extends PregelConfig, SeedConfig {
         @Value.Default
         default double dampingFactor() {
             return 0.85;
