@@ -97,7 +97,6 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
         return GraphSageModel.DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
     }
 
-    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
     @Value.Default
     default boolean degreeAsProperty() {
         return false;

@@ -30,8 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -79,9 +77,9 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             .addParameter("degreeAsProperty", true)
             .yields();
 
-        String expectedFail = "Node properties [missing_1, missing_2] not found in graph with node properties";
+        String expectedFail = "Node properties [missing_1, missing_2] not found in graph with node properties: [death_year, age, birth_year] in all node labels: ['King']";
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
         assertEquals(IllegalArgumentException.class, throwable.getClass());
-        assertThat(throwable.getMessage(), startsWith(expectedFail));
+        assertEquals(expectedFail, throwable.getMessage());
     }
 }

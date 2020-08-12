@@ -290,7 +290,7 @@ public abstract class AlgoBaseProc<
             }
         }
         if (config instanceof NodePropertiesConfig) {
-            List<String> weightProperties= ((NodePropertiesConfig) config).nodePropertyNames();
+            List<String> weightProperties = ((NodePropertiesConfig) config).nodePropertyNames();
             List<String> missingProperties = weightProperties
                 .stream()
                 .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
