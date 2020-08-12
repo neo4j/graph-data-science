@@ -19,13 +19,15 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import java.util.concurrent.atomic.AtomicLong;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
-public class AllocationTracker implements Supplier<String> {
-    public static final AllocationTracker EMPTY = new AllocationTracker() {
+public interface AllocationTracker extends Supplier<String> {
+
+    AllocationTracker EMPTY = new AllocationTracker() {
         @Override
         public void add(long delta) {
         }
@@ -55,38 +57,30 @@ public class AllocationTracker implements Supplier<String> {
         }
     };
 
-    private final AtomicLong count = new AtomicLong();
-
-    public void add(long delta) {
-        count.addAndGet(delta);
+    static boolean isTracking(@Nullable AllocationTracker tracker) {
+        return tracker != null && tracker != EMPTY;
     }
 
-    public void remove(long delta) {
-        count.addAndGet(-delta);
+    static AllocationTracker create() {
+        return InMemoryAllocationTracker.create();
     }
 
-    public long tracked() {
-        return count.get();
-    }
+    void add(long delta);
 
-    public String getUsageString() {
+    void remove(long delta);
+
+    long tracked();
+
+    default String getUsageString() {
         return humanReadable(tracked());
     }
 
-    public String getUsageString(String label) {
-        return label + humanReadable(tracked());
+    default String getUsageString(String label) {
+        return label + getUsageString();
     }
 
     @Override
-    public String get() {
+    default String get() {
         return getUsageString("Memory usage: ");
-    }
-
-    public static AllocationTracker create() {
-        return new AllocationTracker();
-    }
-
-    public static boolean isTracking(AllocationTracker tracker) {
-        return tracker != null && tracker != EMPTY;
     }
 }

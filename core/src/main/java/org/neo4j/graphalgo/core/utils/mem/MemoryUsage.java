@@ -342,7 +342,7 @@ public final class MemoryUsage {
         }
         // we can never arrive here, longs are not large enough to
         // represent > 16384 yobibytes
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     private MemoryUsage() {
