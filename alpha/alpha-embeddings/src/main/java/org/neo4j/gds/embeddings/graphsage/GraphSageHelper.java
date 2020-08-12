@@ -33,24 +33,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class GraphSageBase {
+final class GraphSageHelper {
 
-    private Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
-        int dimension = features.get(0).length;
-        double[] data = new double[nodeIds.length * dimension];
-        IntStream
-            .range(0, nodeIds.length)
-            .forEach(nodeOffset -> System.arraycopy(
-                features.get(nodeIds[nodeOffset]),
-                0,
-                data,
-                nodeOffset * dimension,
-                dimension
-            ));
-        return new MatrixConstant(data, nodeIds.length, dimension);
-    }
+    private GraphSageHelper() {}
 
-    protected Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
+    static Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -74,5 +61,20 @@ public class GraphSageBase {
                 );
         }
         return new NormalizeRows(previousLayerRepresentations);
+    }
+
+    private static Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+        int dimension = features.get(0).length;
+        double[] data = new double[nodeIds.length * dimension];
+        IntStream
+            .range(0, nodeIds.length)
+            .forEach(nodeOffset -> System.arraycopy(
+                features.get(nodeIds[nodeOffset]),
+                0,
+                data,
+                nodeOffset * dimension,
+                dimension
+            ));
+        return new MatrixConstant(data, nodeIds.length, dimension);
     }
 }
