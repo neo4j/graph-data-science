@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -32,7 +35,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Stream;
 
@@ -45,14 +50,14 @@ class PregelTest {
     @GdlGraph
     private static final String TEST_GRAPH =
         "CREATE" +
-        "  (a:Node)" +
-        ", (b:Node)" +
-        ", (c:Node)" +
-        ", (a)-[:REL {prop: 2.0}]->(b)" +
-        ", (a)-[:REL {prop: 1.0}]->(c)";
+        "  (alice:Node { a_seed: 42.0, b_seed: 23 })" +
+        ", (bob:Node { a_seed: 43.0, b_seed: 24 })" +
+        ", (eve:Node { a_seed: 44.0, b_seed: 25 })" +
+        ", (alice)-[:REL {prop: 2.0}]->(bob)" +
+        ", (alice)-[:REL {prop: 1.0}]->(eve)";
 
     @Inject
-    private Graph graph;
+    private TestGraph graph;
 
     @ParameterizedTest
     @MethodSource("configAndResult")
@@ -70,6 +75,35 @@ class PregelTest {
         assertArrayEquals(expected, nodeValues.toArray());
     }
 
+    @Test
+    void compositeNodeValueTest() {
+        var config = ImmutableCompositeTestComputationConfig.builder()
+            .maxIterations(2)
+            .concurrency(1)
+            .aProperty("a_seed")
+            .bProperty("b_seed")
+            .build();
+
+        var pregelJob = Pregel.withDefaultNodeValues(
+            graph,
+            config,
+            new CompositeTestComputation(),
+            10,
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        var result = pregelJob.run().compositeNodeValues();
+
+        assertEquals(84.0D, result.doubleValue("a", graph.toOriginalNodeId("alice")));
+        assertEquals(46L, result.longValue("b", graph.toOriginalNodeId("alice")));
+
+        assertEquals(86.0D, result.doubleValue("a", graph.toOriginalNodeId("bob")));
+        assertEquals(48L, result.longValue("b", graph.toOriginalNodeId("bob")));
+
+        assertEquals(88.0D, result.doubleValue("a", graph.toOriginalNodeId("eve")));
+        assertEquals(50L, result.longValue("b", graph.toOriginalNodeId("eve")));
+    }
 
     @Test
     void memoryEstimation() {
@@ -134,6 +168,43 @@ class PregelTest {
         @Override
         public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
             return nodeValue * relationshipWeight;
+        }
+    }
+
+    @ValueClass
+    @Configuration
+    @SuppressWarnings("immutables:subtype")
+    public interface CompositeTestComputationConfig extends PregelConfig {
+        @Value
+        String aProperty();
+
+        @Value
+        String bProperty();
+    }
+
+    private static class CompositeTestComputation implements PregelComputation<CompositeTestComputationConfig> {
+
+        @Override
+        public Map<String, ValueType> nodeValueSchema() {
+            return Map.of(
+                "a", ValueType.DOUBLE,
+                "b", ValueType.LONG
+            );
+        }
+
+        @Override
+        public void init(PregelContext<CompositeTestComputationConfig> context, long nodeId) {
+            context.setNodeValue("a", nodeId, context.nodeProperties(context.getConfig().aProperty()).doubleValue(nodeId));
+            context.setNodeValue("b", nodeId, context.nodeProperties(context.getConfig().bProperty()).longValue(nodeId));
+        }
+
+        @Override
+        public void compute(PregelContext<CompositeTestComputationConfig> context, long nodeId, Queue<Double> messages) {
+            if (!context.isInitialSuperstep()) {
+                context.setNodeValue("a", nodeId, context.doubleNodeValue("a", nodeId) * 2);
+                context.setNodeValue("b", nodeId, context.longNodeValue("b", nodeId) * 2);
+            }
+            context.sendMessages(nodeId, 42.0);
         }
     }
 }

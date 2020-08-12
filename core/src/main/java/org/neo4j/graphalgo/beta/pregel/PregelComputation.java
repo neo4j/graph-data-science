@@ -19,10 +19,21 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+
+import java.util.Map;
 import java.util.Queue;
+
+import static org.neo4j.graphalgo.beta.pregel.Pregel.DEFAULT_NODE_VALUE_KEY;
 
 @FunctionalInterface
 public interface PregelComputation<C extends PregelConfig> {
+
+    default Map<String, ValueType> nodeValueSchema() {
+        return Map.of(DEFAULT_NODE_VALUE_KEY, ValueType.DOUBLE);
+    }
+
+    default void init(PregelContext<C> context, long nodeId) {}
 
     void compute(PregelContext<C> context, long nodeId, Queue<Double> messages);
 

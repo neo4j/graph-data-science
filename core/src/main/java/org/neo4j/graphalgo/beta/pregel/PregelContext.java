@@ -19,18 +19,37 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodePropertyContainer;
+
+import java.util.Set;
+
 public final class PregelContext<CONFIG extends PregelConfig> {
 
     private final Pregel.ComputeStep<CONFIG> computeStep;
     private final CONFIG config;
     private final SendMessageFunction sendMessageFunction;
+    private final NodePropertyContainer nodePropertyContainer;
 
-    PregelContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
+    PregelContext(
+        Pregel.ComputeStep<CONFIG> computeStep,
+        CONFIG config,
+        NodePropertyContainer nodePropertyContainer
+    ) {
         this.computeStep = computeStep;
         this.config = config;
+        this.nodePropertyContainer = nodePropertyContainer;
         this.sendMessageFunction = config.relationshipWeightProperty() == null
             ? computeStep::sendMessages
             : computeStep::sendWeightedMessages;
+    }
+
+    public Set<String> nodePropertyKeys() {
+        return this.nodePropertyContainer.availableNodeProperties();
+    }
+
+    public NodeProperties nodeProperties(String key) {
+        return this.nodePropertyContainer.nodeProperties(key);
     }
 
     public CONFIG getConfig() {
@@ -57,8 +76,24 @@ public final class PregelContext<CONFIG extends PregelConfig> {
         return computeStep.getNodeValue(nodeId);
     }
 
+    public double doubleNodeValue(String key, long nodeId) {
+        return computeStep.doubleNodeValue(key, nodeId);
+    }
+
+    public long longNodeValue(String key, long nodeId) {
+        return computeStep.longNodeValue(key, nodeId);
+    }
+
     public void setNodeValue(long nodeId, double value) {
         computeStep.setNodeValue(nodeId, value);
+    }
+
+    public void setNodeValue(String key, long nodeId, double value) {
+        computeStep.setNodeValue(key, nodeId, value);
+    }
+
+    public void setNodeValue(String key, long nodeId, long value) {
+        computeStep.setNodeValue(key, nodeId, value);
     }
 
     public void sendMessages(long nodeId, double message) {
