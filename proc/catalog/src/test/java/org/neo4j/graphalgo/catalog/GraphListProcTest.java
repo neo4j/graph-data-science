@@ -609,17 +609,6 @@ class GraphListProcTest extends BaseProcTest {
         assertNotEquals(creationTimeAlice.get(), creationTimeBob.get());
     }
 
-    @Test
-    void shouldHandleEmptyGraph() {
-        clearDb();
-        String loadQuery = "CALL gds.graph.create('graph', '*', '*')";
-        runQuery(loadQuery);
-
-        String listQuery = "CALL gds.graph.list()";
-
-        runQueryWithRowConsumer(listQuery, row -> assertEquals(0D, row.getNumber("density")));
-    }
-
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {

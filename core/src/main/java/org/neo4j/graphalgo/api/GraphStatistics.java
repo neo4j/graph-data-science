@@ -76,4 +76,8 @@ public final class GraphStatistics {
             "p999", histogram.getValueAtPercentile(99.9)
         );
     }
+
+    public static double density(long nodeCount, long relationshipCount) {
+        return (nodeCount > 0L) ? (double) relationshipCount / (nodeCount * (nodeCount - 1)) : 0;
+    }
 }

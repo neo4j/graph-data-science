@@ -20,13 +20,18 @@
 package org.neo4j.graphalgo.api;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
 @GdlExtension
@@ -60,5 +65,18 @@ class GraphStatisticsTest {
             "p999", 3L
         );
         assertThat(expected, mapEquals(actual));
+    }
+
+    @ParameterizedTest
+    @MethodSource("densitySource")
+    void density(long nodeCount, long relationshipCount, double expectedDensity) {
+        assertEquals(expectedDensity, GraphStatistics.density(nodeCount, relationshipCount));
+    }
+
+    private static Stream<Arguments> densitySource() {
+        return Stream.of(
+            Arguments.of(0, 10, 0),
+            Arguments.of(10, 9, 0.1)
+        );
     }
 }
