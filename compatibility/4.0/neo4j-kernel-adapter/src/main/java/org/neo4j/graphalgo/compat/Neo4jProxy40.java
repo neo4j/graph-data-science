@@ -81,6 +81,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.ToIntFunction;
 
 public final class Neo4jProxy40 implements Neo4jProxyApi {
@@ -207,6 +208,11 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
         return MemoryTracker.NONE;
+    }
+
+    @Override
+    public Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker) {
+        return Optional.empty();
     }
 
     @Override

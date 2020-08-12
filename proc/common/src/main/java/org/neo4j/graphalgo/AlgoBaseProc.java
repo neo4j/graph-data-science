@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
@@ -50,7 +51,6 @@ import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.InMemoryAllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
@@ -430,7 +430,9 @@ public abstract class AlgoBaseProc<
         boolean releaseTopology
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
-        AllocationTracker tracker = InMemoryAllocationTracker.create();
+        var memoryTracker = Neo4jProxy.memoryTracker(transaction);
+        var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+        var tracker = AllocationTracker.create(memoryTrackerProxy);
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();

@@ -72,6 +72,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -138,6 +139,8 @@ public interface Neo4jProxyApi {
     LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue);
 
     MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
+
+    Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker);
 
     LogService logProviderForStoreAndRegister(
         Path storeLogPath,

@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -62,7 +64,13 @@ public interface AllocationTracker extends Supplier<String> {
     }
 
     static AllocationTracker create() {
-        return InMemoryAllocationTracker.create();
+        return create(Optional.empty());
+    }
+
+    static AllocationTracker create(Optional<MemoryTrackerProxy> kernelProxy) {
+        return kernelProxy
+            .map(KernelAllocationTracker::create)
+            .orElseGet(InMemoryAllocationTracker::create);
     }
 
     void add(long delta);
