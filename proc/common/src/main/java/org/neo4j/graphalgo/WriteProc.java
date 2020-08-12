@@ -25,9 +25,11 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public abstract class WriteProc<
@@ -36,6 +38,8 @@ public abstract class WriteProc<
     PROC_RESULT,
     CONFIG extends WritePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
+    // TODO remove and use nodeProperties() instead
+    @Deprecated
     protected abstract NodeProperties getNodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
@@ -58,6 +62,10 @@ public abstract class WriteProc<
         });
     }
 
+    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), getNodeProperties(computationResult)));
+    }
+
     private void writeToNeo(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
@@ -73,10 +81,7 @@ public abstract class WriteProc<
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
-            exporter.write(
-                writePropertyConfig.writeProperty(),
-                getNodeProperties(computationResult)
-            );
+            exporter.write(nodeProperties(computationResult));
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
