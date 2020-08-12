@@ -20,12 +20,13 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.core.model.Model;
 
-public abstract class TrainProc<ALGO extends Algorithm<ALGO, ALGO_RESULT>,
-    ALGO_RESULT,
+public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT>>,
     TRAIN_RESULT,
-    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+    PROC_RESULT,
+    CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT>, CONFIG> {
 
-    protected abstract TRAIN_RESULT trainResult(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    protected abstract PROC_RESULT trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT>, CONFIG> computationResult);
 
 }

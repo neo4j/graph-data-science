@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -42,7 +43,7 @@ import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHS
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.alpha.graphSage.train", mode = Mode.READ)
@@ -50,20 +51,23 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> computationResult = compute(
+        ComputationResult<GraphSageTrain, Model<Layer[]>, GraphSageTrainConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        TrainResult trainResult = trainResult(computationResult);
-        GraphSageTrain.TrainedModel result = computationResult.result();
-        ModelCatalog.set(Model.of(result.modelName(), result.algoType(), result.layers()));
+        Model<Layer[]> result = computationResult.result();
+        ModelCatalog.set(result);
 
-        return Stream.of(trainResult);
+        return Stream.of(trainResult(computationResult));
     }
 
-    @Override
-    protected TrainResult trainResult(ComputationResult<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> computationResult) {
-        return new TrainResult(computationResult.result(), computationResult.config(), computationResult.computeMillis());
+     @Override
+    protected TrainResult trainResult(ComputationResult<GraphSageTrain, Model<Layer[]>, GraphSageTrainConfig> computationResult) {
+        return new TrainResult(
+            computationResult.result(),
+            computationResult.config(),
+            computationResult.computeMillis()
+        );
     }
 
     @Override
@@ -93,14 +97,14 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
         public final long trainMillis;
 
         TrainResult(
-            GraphSageTrain.TrainedModel trainedModel,
+            Model<Layer[]> trainedModel,
             GraphSageTrainConfig graphSageTrainConfig,
             long trainMillis
         ) {
             // TODO: figure out a way of displaying implicitly loaded graphs
             this.graphName = graphSageTrainConfig.graphName().orElse("");
             this.modelInfo = new HashMap<>();
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.modelName());
+            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
             modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
             this.configuration = graphSageTrainConfig.toMap();
             this.trainMillis = trainMillis;
