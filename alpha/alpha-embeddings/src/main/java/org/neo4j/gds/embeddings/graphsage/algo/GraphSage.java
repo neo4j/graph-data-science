@@ -28,7 +28,7 @@ import org.neo4j.logging.Log;
 
 import java.util.Map;
 
-public class GraphSage extends GraphSageBase<GraphSage, GraphSage.GraphSageResult, GraphSageBaseConfig> {
+public class GraphSage extends GraphSageAlgoBase<GraphSage, GraphSage.GraphSageResult, GraphSageBaseConfig> {
 
     private final GraphSageBaseConfig config;
 

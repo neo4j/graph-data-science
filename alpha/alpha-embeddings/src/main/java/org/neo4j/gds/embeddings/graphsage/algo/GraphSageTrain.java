@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 
-public class GraphSageTrain extends GraphSageBase<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> {
+public class GraphSageTrain extends GraphSageAlgoBase<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> {
 
     private final GraphSageTrainModel graphSageModel;
     private final GraphSageTrainConfig config;
