@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
