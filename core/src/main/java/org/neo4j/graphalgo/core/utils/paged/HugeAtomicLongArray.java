@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -144,7 +145,7 @@ public abstract class HugeAtomicLongArray {
     }
 
     /**
-     * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
+     * Creates a new array of the given size, tracking the memory requirements into the given {@link org.neo4j.graphalgo.core.utils.mem.AllocationTracker}.
      * The tracker is no longer referenced, as the arrays do not dynamically change their size.
      */
     public static HugeAtomicLongArray newArray(long size, AllocationTracker tracker) {

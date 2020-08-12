@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.generator;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Optional;
 

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
 public class HugeLongSquareMatrix extends HugeLongMatrix {
 
     public HugeLongSquareMatrix(long order, AllocationTracker tracker) {

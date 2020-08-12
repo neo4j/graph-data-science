@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
 public final class HugeLongArrayQueue {
 
     private final HugeLongArray array;

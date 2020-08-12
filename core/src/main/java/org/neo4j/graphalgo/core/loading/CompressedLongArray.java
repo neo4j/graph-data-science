@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.lucene.util.ArrayUtil;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged.dss;
 
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
 

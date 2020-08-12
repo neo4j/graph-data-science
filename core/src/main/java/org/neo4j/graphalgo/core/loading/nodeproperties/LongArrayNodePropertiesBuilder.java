@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading.nodeproperties;
 
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.Value;

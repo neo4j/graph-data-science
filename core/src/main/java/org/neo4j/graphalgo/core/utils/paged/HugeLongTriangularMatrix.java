@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
 import static org.neo4j.graphalgo.core.utils.paged.HugeMatrices.triangularIndex;
 
 public class HugeLongTriangularMatrix {

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;

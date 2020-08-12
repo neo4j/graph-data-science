@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfig;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfigImpl;

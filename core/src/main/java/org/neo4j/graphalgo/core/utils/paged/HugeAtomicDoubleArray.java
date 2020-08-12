@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
@@ -97,7 +98,7 @@ public abstract class HugeAtomicDoubleArray {
      * Note that the data might not immediately collectible if there are still cursors alive that reference this array.
      * You have to {@link HugeCursor#close()} every cursor instance as well.
      * <p>
-     * The amount is not removed from the {@link AllocationTracker} that had been provided in the constructor.
+     * The amount is not removed from the {@link org.neo4j.graphalgo.core.utils.mem.AllocationTracker} that had been provided in the constructor.
      *
      * @return the amount of memory freed, in bytes.
      */

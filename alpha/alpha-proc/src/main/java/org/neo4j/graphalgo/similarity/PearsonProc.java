@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.PearsonAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.PearsonConfigImpl;

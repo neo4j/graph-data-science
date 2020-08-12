@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.results;
 
 import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

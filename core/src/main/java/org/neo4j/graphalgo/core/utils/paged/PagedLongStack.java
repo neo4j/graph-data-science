@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
 public class PagedLongStack extends PagedDataStructure<long[]> {
 
     private static final PageAllocator.Factory<long[]> ALLOCATOR_FACTORY =

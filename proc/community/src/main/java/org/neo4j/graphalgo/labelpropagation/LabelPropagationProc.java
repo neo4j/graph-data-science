@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;

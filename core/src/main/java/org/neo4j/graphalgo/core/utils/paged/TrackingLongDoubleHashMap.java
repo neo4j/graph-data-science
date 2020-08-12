@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.HashOrderMixing;
 import com.carrotsearch.hppc.LongDoubleHashMap;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;

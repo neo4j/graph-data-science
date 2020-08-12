@@ -19,7 +19,7 @@ package org.neo4j.graphalgo.core.utils.queue;
 import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterator;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
