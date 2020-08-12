@@ -76,7 +76,6 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
     public static class TrainResult {
 
         public final String graphName;
-        public final String graphCreateConfig;
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> configuration;
         public final long trainMillis;
@@ -86,8 +85,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
             GraphSageTrainConfig graphSageTrainConfig,
             long trainMillis
         ) {
+            // TODO: figure out a way of displaying implicitly loaded graphs
             this.graphName = graphSageTrainConfig.graphName().orElse("");
-            this.graphCreateConfig = "";//graphSageTrainConfig.implicitCreateConfig().orElse(null);
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.modelName());
             modelInfo.put(ALGO_TYPE_KEY, trainedModel.algoType());
