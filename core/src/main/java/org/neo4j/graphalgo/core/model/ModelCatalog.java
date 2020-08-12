@@ -23,15 +23,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class ModelCatalog {
 
-    private static final ConcurrentHashMap<String, Model> modelCatalog = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Model<?>> modelCatalog = new ConcurrentHashMap<>();
 
     private ModelCatalog() {}
 
-    public static void set(Model model) {
+    public static void set(Model<?> model) {
         modelCatalog.put(model.name(), model);
     }
 
-    public static Model get(String modelName) {
+    public static Model<?> get(String modelName) {
         return modelCatalog.get(modelName);
     }
 }

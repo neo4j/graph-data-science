@@ -50,10 +50,13 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        TrainResult trainResult = trainResult(compute(graphNameOrConfig, configuration));
-        String modelName = (String) trainResult.modelInfo.get(MODEL_NAME_KEY);
-        String algoType = (String) trainResult.modelInfo.get(ALGO_TYPE_KEY);
-        ModelCatalog.set(Model.of(modelName, algoType));
+        ComputationResult<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        TrainResult trainResult = trainResult(computationResult);
+        GraphSageTrain.TrainedModel result = computationResult.result();
+        ModelCatalog.set(Model.of(result.modelName(), result.algoType(), result.layers()));
 
         return Stream.of(trainResult);
     }

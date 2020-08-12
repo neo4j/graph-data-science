@@ -72,5 +72,9 @@ public class GraphSageTrain extends GraphSageBaseAlgo<GraphSageTrain, GraphSageT
             return type;
         }
 
+        public Layer[] layers() {
+            return layers;
+        }
+
     }
 }

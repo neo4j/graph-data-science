@@ -22,13 +22,15 @@ package org.neo4j.graphalgo.core.model;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
-public interface Model {
+public interface Model<DATA> {
 
     String name();
 
     String algoType();
 
-    static Model of(String name, String algoType) {
-        return ImmutableModel.of(name, algoType);
+    DATA modelData();
+
+    static <T> Model<T> of(String name, String algoType, T modelData) {
+        return ImmutableModel.of(name, algoType, modelData);
     }
 }
