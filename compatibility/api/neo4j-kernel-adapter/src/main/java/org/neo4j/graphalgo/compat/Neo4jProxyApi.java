@@ -142,6 +142,10 @@ public interface Neo4jProxyApi {
 
     MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
 
+    MemoryTracker emptyMemoryTracker();
+
+    MemoryTracker limitedMemoryTracker(long limitInBytes);
+
     Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker);
 
     LogService logProviderForStoreAndRegister(

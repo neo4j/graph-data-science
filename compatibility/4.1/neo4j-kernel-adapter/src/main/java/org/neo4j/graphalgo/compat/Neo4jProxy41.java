@@ -72,6 +72,8 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
+import org.neo4j.memory.LocalMemoryTracker;
+import org.neo4j.memory.MemoryPools;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 
@@ -206,6 +208,17 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
         return kernelTransaction.memoryTracker();
+    }
+
+    @Override
+    public MemoryTracker emptyMemoryTracker() {
+        return EmptyMemoryTracker.INSTANCE;
+    }
+
+    @Override
+    public MemoryTracker limitedMemoryTracker(long limitInBytes) {
+        var oneKiloByte = 1024;
+        return new LocalMemoryTracker(MemoryPools.NO_TRACKING, limitInBytes, oneKiloByte, "setting");
     }
 
     @Override

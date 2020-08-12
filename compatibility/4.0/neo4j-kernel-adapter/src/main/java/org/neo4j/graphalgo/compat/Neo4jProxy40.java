@@ -216,6 +216,16 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
+    public MemoryTracker emptyMemoryTracker() {
+        return MemoryTracker.NONE;
+    }
+
+    @Override
+    public MemoryTracker limitedMemoryTracker(long limitInBytes) {
+        return MemoryTracker.NONE;
+    }
+
+    @Override
     public Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker) {
         return Optional.empty();
     }

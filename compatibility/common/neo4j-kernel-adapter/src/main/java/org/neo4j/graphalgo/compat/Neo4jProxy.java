@@ -197,6 +197,14 @@ public final class Neo4jProxy {
         return IMPL.memoryTracker(kernelTransaction);
     }
 
+    public static MemoryTracker emptyMemoryTracker() {
+        return IMPL.emptyMemoryTracker();
+    }
+
+    public static MemoryTracker limitedMemoryTracker(long limitInBytes) {
+        return IMPL.limitedMemoryTracker(limitInBytes);
+    }
+
     public static Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker) {
         return IMPL.memoryTrackerProxy(memoryTracker);
     }
