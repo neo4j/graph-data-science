@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 
@@ -110,11 +111,14 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "cc")
             .streamMode()
             .addParameter("maxIterations", 10)
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
@@ -146,11 +150,14 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("maxIterations", 10)
             .addParameter("seedProperty", "seedProperty")
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         assertThat(actual, mapEquals(EXPECTED_COMPONENTS_SEEDED));

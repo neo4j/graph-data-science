@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,24 +73,27 @@ class SingleSourceShortestPathPregelProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("maxIterations", 10)
             .addParameter("startNode", 0)
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
-        HashMap<Long, Long> actual = new HashMap<>();
+        HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         var expected = Map.of(
-            0L, 0L,
-            1L, 1L,
-            2L, 1L,
-            3L, 2L,
-            4L, Long.MAX_VALUE,
-            5L, Long.MAX_VALUE,
-            6L, Long.MAX_VALUE,
-            7L, Long.MAX_VALUE,
-            8L, Long.MAX_VALUE,
-            9L, Long.MAX_VALUE
+            0L, 0.0D,
+            1L, 1.0D,
+            2L, 1.0D,
+            3L, 2.0D,
+            4L, Double.MAX_VALUE,
+            5L, Double.MAX_VALUE,
+            6L, Double.MAX_VALUE,
+            7L, Double.MAX_VALUE,
+            8L, Double.MAX_VALUE,
+            9L, Double.MAX_VALUE
         );
 
         assertThat(expected, mapEquals(actual));

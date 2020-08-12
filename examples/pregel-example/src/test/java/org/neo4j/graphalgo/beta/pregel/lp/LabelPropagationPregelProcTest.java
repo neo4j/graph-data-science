@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,20 +67,23 @@ class LabelPropagationPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "lp")
             .streamMode()
             .addParameter("maxIterations", 10)
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
-        HashMap<Long, Long> actual = new HashMap<>();
+        HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         var expected = Map.of(
-            0L, 0L,
-            1L, 0L,
-            2L, 0L,
-            3L, 4L,
-            4L, 3L,
-            5L, 0L
+            0L, 0.0D,
+            1L, 0.0D,
+            2L, 0.0D,
+            3L, 4.0D,
+            4L, 3.0D,
+            5L, 0.0D
         );
 
         assertThat(expected, mapEquals(actual));

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.HashMap;
@@ -91,11 +92,14 @@ class PageRankPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "pr")
             .streamMode()
             .addParameter("maxIterations", 10)
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);
@@ -129,11 +133,14 @@ class PageRankPregelProcTest extends BaseProcTest {
             // is the initial superstep where it doesn't receive messages
             .addParameter("maxIterations", 6)
             .addParameter("seedProperty", "pageRank")
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+            actual.put(
+                r.getNumber("nodeId").longValue(),
+                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+            );
         });
 
         assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);

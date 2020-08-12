@@ -45,7 +45,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
                 pregel.setNodeValue(nodeId, 0);
                 pregel.sendMessages(nodeId, 1);
             } else {
-                pregel.setNodeValue(nodeId, Long.MAX_VALUE);
+                pregel.setNodeValue(nodeId, Double.MAX_VALUE);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)

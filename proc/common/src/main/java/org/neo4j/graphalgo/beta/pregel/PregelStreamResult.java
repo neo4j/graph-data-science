@@ -19,12 +19,15 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import java.util.Map;
+
 public class PregelStreamResult {
     public final long nodeId;
-    public final double value;
 
-    public PregelStreamResult(long nodeId, double value) {
+    public Map<String, Object> values;
+
+    public PregelStreamResult(long nodeId, Map<String, Object> values) {
         this.nodeId = nodeId;
-        this.value = value;
+        this.values = values;
     }
 }

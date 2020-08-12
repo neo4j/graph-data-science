@@ -7,12 +7,12 @@ import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelStreamProc;
 import org.neo4j.graphalgo.beta.pregel.PregelStreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -26,7 +26,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm, Pregel.PregelResult, PregelStreamResult, PregelConfig> {
+public final class ComputationStreamProc extends PregelStreamProc<ComputationAlgorithm, PregelConfig> {
     @Procedure(
             name = "gds.pregel.test.stream",
             mode = Mode.READ
@@ -45,12 +45,6 @@ public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm
     public Stream<MemoryEstimateResult> streamEstimate(@Name("graphName") Object graphNameOrConfig,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Override
-    protected PregelStreamResult streamResult(long originalNodeId, long internalNodeId,
-                                              NodeProperties nodeProperties) {
-        return new PregelStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
     }
 
     @Override

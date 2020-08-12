@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
@@ -48,7 +50,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return StreamProc.class;
+        return PregelStreamProc.class;
     }
 
     @Override
@@ -57,15 +59,25 @@ class StreamProcedureGenerator extends ProcedureGenerator {
     }
 
     @Override
+    @NotNull
+    protected TypeSpec.Builder getTypeSpecBuilder(
+        com.squareup.javapoet.TypeName configTypeName,
+        ClassName procedureClassName,
+        ClassName algorithmClassName
+    ) {
+        return TypeSpec
+            .classBuilder(procedureClassName)
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .superclass(ParameterizedTypeName.get(
+                ClassName.get(procBaseClass()),
+                algorithmClassName,
+                configTypeName
+            ))
+            .addOriginatingElement(pregelSpec.element());
+    }
+
+    @Override
     MethodSpec procResultMethod() {
-        return MethodSpec.methodBuilder("streamResult")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PROTECTED)
-            .returns(procResultClass())
-            .addParameter(long.class, "originalNodeId")
-            .addParameter(long.class, "internalNodeId")
-            .addParameter(NodeProperties.class, "nodeProperties")
-            .addStatement("return new $T(originalNodeId, nodeProperties.doubleValue(internalNodeId))", procResultClass())
-            .build();
+        return null;
     }
 }

@@ -55,7 +55,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class Pregel<CONFIG extends PregelConfig> {
 
-    static final String DEFAULT_NODE_VALUE_KEY = "__nodeValue";
+    public static final String DEFAULT_NODE_VALUE_KEY = "nodeValue";
 
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
@@ -384,8 +384,9 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
     }
 
-    static final class CompositeNodeValue {
+    public static final class CompositeNodeValue {
 
+        private final Map<String, ValueType> schema;
         private final Map<String, HugeDoubleArray> doubleProperties;
         private final Map<String, HugeLongArray> longProperties;
 
@@ -415,19 +416,28 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 }
             });
 
-            return new CompositeNodeValue(doubleProperties, longProperties);
+            return new CompositeNodeValue(schema, doubleProperties, longProperties);
         }
 
-        private CompositeNodeValue(Map<String, HugeDoubleArray> doubleProperties, Map<String, HugeLongArray> longProperties) {
+        private CompositeNodeValue(
+            Map<String, ValueType> schema,
+            Map<String, HugeDoubleArray> doubleProperties,
+            Map<String, HugeLongArray> longProperties
+        ) {
+            this.schema = schema;
             this.doubleProperties = doubleProperties;
             this.longProperties = longProperties;
         }
 
-        HugeDoubleArray doubleProperties(String propertyKey) {
+        public Map<String, ValueType> schema() {
+            return schema;
+        }
+
+        public HugeDoubleArray doubleProperties(String propertyKey) {
             return doubleProperties.get(propertyKey);
         }
 
-        HugeLongArray longProperties(String propertyKey) {
+        public HugeLongArray longProperties(String propertyKey) {
             return longProperties.get(propertyKey);
         }
 

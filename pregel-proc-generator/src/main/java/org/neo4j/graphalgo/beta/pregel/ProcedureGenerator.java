@@ -85,6 +85,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     abstract Class<?> procResultClass();
 
+    // TODO: maybe return Optional
     abstract MethodSpec procResultMethod();
 
     TypeSpec typeSpec() {
@@ -92,7 +93,31 @@ abstract class ProcedureGenerator extends PregelGenerator {
         var procedureClassName = className(pregelSpec, procGdsMode().camelCase() + PROCEDURE_SUFFIX);
         var algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
 
-        var typeSpecBuilder = TypeSpec
+        var typeSpecBuilder = getTypeSpecBuilder(configTypeName, procedureClassName, algorithmClassName);
+
+        addGeneratedAnnotation(typeSpecBuilder);
+
+        typeSpecBuilder.addMethod(procMethod());
+        typeSpecBuilder.addMethod(procEstimateMethod());
+        MethodSpec methodSpec = procResultMethod();
+        if (methodSpec != null) {
+            typeSpecBuilder.addMethod(methodSpec);
+        }
+
+        typeSpecBuilder.addMethod(newConfigMethod());
+        typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
+        typeSpecBuilder.addMethod(propertyTranslator(algorithmClassName));
+
+        return typeSpecBuilder.build();
+    }
+
+    @NotNull
+    protected TypeSpec.Builder getTypeSpecBuilder(
+        com.squareup.javapoet.TypeName configTypeName,
+        ClassName procedureClassName,
+        ClassName algorithmClassName
+    ) {
+        return TypeSpec
             .classBuilder(procedureClassName)
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             .superclass(ParameterizedTypeName.get(
@@ -103,18 +128,6 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 configTypeName
             ))
             .addOriginatingElement(pregelSpec.element());
-
-        addGeneratedAnnotation(typeSpecBuilder);
-
-        typeSpecBuilder.addMethod(procMethod());
-        typeSpecBuilder.addMethod(procEstimateMethod());
-        typeSpecBuilder.addMethod(procResultMethod());
-
-        typeSpecBuilder.addMethod(newConfigMethod());
-        typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
-        typeSpecBuilder.addMethod(propertyTranslator(algorithmClassName));
-
-        return typeSpecBuilder.build();
     }
 
     private MethodSpec procMethod() {
