@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfig;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
@@ -80,7 +81,7 @@ public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanC
     }
 
     @Override
-    EuclideanAlgorithm newAlgo(EuclideanConfig config) {
+    EuclideanAlgorithm newAlgo(EuclideanConfig config, AllocationTracker tracker) {
         return new EuclideanAlgorithm(config, api);
     }
 }

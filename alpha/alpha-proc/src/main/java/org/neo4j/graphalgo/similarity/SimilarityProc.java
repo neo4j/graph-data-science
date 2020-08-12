@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.Computations;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
@@ -131,13 +132,13 @@ abstract class SimilarityProc
             histogram
         ));
     }
-    abstract ALGO newAlgo(CONFIG config);
+    abstract ALGO newAlgo(CONFIG config, AllocationTracker tracker);
 
     @Override
     protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
         return (AlphaAlgorithmFactory<ALGO, CONFIG>) (graph, configuration, tracker, log) -> {
             removeGraph();
-            return newAlgo(configuration);
+            return newAlgo(configuration, tracker);
         };
     }
 

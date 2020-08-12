@@ -99,7 +99,10 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
     }
 
     @Override
-    ApproxNearestNeighborsAlgorithm<SimilarityInput> newAlgo(ApproximateNearestNeighborsConfig config) {
+    ApproxNearestNeighborsAlgorithm<SimilarityInput> newAlgo(
+        ApproximateNearestNeighborsConfig config,
+        AllocationTracker tracker
+    ) {
         SimilarityAlgorithm<?, SimilarityInput> similarity =
             (SimilarityAlgorithm<?, SimilarityInput>) similarityAlgorithm(config);
         return new ApproxNearestNeighborsAlgorithm<>(
@@ -108,7 +111,7 @@ public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeig
             api,
             log,
             Pools.DEFAULT,
-            AllocationTracker.create()
+            tracker
         );
     }
 

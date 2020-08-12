@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfig;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfigImpl;
@@ -80,7 +81,7 @@ public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig>
     }
 
     @Override
-    OverlapAlgorithm newAlgo(OverlapConfig config) {
+    OverlapAlgorithm newAlgo(OverlapConfig config, AllocationTracker tracker) {
         return new OverlapAlgorithm(config, api);
     }
 }
