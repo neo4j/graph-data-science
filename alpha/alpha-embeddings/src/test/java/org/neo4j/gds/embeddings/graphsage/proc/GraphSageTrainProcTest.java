@@ -20,18 +20,25 @@
 package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.config.TrainConfig.ALGO_TYPE_KEY;
+import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
     @Test
     void runsTraining() {
-        String train = GdsCypher.call().explicitCreation("embeddingsGraph")
+        String modelName = "gsModel";
+        String graphName = "embeddingsGraph";
+        String train = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.alpha.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
@@ -40,12 +47,19 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingSize", 64)
             .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
             .yields();
 
         runQueryWithResultConsumer(train, result -> {
             Map<String, Object> resultRow = result.next();
             assertNotNull(resultRow);
-//            assertNotNull(resultRow.get("configuration"));
+            assertNotNull(resultRow.get("configuration"));
+            assertEquals(graphName, resultRow.get("graphName"));
+            Map<String, Object> modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
+            assertNotNull(modelInfo);
+            assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
+            assertEquals(GraphSage.ALGO_TYPE, modelInfo.get(ALGO_TYPE_KEY));
+            assertTrue((long) resultRow.get("trainMillis") > 0);
         });
     }
 

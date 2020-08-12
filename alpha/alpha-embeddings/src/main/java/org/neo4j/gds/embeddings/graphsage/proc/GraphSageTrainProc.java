@@ -31,11 +31,14 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.graphalgo.config.TrainConfig.ALGO_TYPE_KEY;
+import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
 
@@ -50,7 +53,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
 
     @Override
     protected TrainResult trainResult(ComputationResult<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> computationResult) {
-        return new TrainResult();
+        return new TrainResult(computationResult.result(), computationResult.config(), computationResult.computeMillis());
     }
 
     @Override
@@ -71,6 +74,25 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
     }
 
     public static class TrainResult {
-        public Map<String, Object> configuration;
+
+        public final String graphName;
+        public final String graphCreateConfig;
+        public final Map<String, Object> modelInfo;
+        public final Map<String, Object> configuration;
+        public final long trainMillis;
+
+        TrainResult(
+            GraphSageTrain.TrainedModel trainedModel,
+            GraphSageTrainConfig graphSageTrainConfig,
+            long trainMillis
+        ) {
+            this.graphName = graphSageTrainConfig.graphName().orElse("");
+            this.graphCreateConfig = "";//graphSageTrainConfig.implicitCreateConfig().orElse(null);
+            this.modelInfo = new HashMap<>();
+            modelInfo.put(MODEL_NAME_KEY, trainedModel.modelName());
+            modelInfo.put(ALGO_TYPE_KEY, trainedModel.algoType());
+            this.configuration = graphSageTrainConfig.toMap();
+            this.trainMillis = trainMillis;
+        }
     }
 }

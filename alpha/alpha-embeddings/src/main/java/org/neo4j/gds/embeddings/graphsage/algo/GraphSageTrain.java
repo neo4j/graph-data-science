@@ -20,23 +20,26 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainModel;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 
 public class GraphSageTrain extends GraphSageBase<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainConfig> {
 
     private final GraphSageTrainModel graphSageModel;
+    private final GraphSageTrainConfig config;
 
     public GraphSageTrain(Graph graph, GraphSageTrainConfig config, Log log) {
         super(graph, config);
 
-        graphSageModel = new GraphSageTrainModel(config, log);
+        this.config = config;
+        this.graphSageModel = new GraphSageTrainModel(config, log);
     }
 
     @Override
     public TrainedModel compute() {
-        graphSageModel.train(graph, initializeFeatures());
-        return new TrainedModel();
+        GraphSageTrainModel.ModelTrainResult trainResult = graphSageModel.train(graph, initializeFeatures());
+        return new TrainedModel(config.modelName(), ALGO_TYPE, trainResult.layers());
     }
 
     @Override
@@ -50,6 +53,24 @@ public class GraphSageTrain extends GraphSageBase<GraphSageTrain, GraphSageTrain
     }
 
     public static class TrainedModel {
+
+        String modelName;
+        String algoType;
+        Layer[] layers;
+
+        TrainedModel(String modelName, String algoType, Layer[] layers) {
+            this.modelName = modelName;
+            this.algoType = algoType;
+            this.layers = layers;
+        }
+
+        public String modelName() {
+            return modelName;
+        }
+
+        public String algoType() {
+            return algoType;
+        }
 
     }
 }
