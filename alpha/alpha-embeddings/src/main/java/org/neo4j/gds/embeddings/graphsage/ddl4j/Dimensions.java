@@ -20,6 +20,10 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j;
 
 public final class Dimensions {
+
+    public static final int ROWS_INDEX = 0;
+    public static final int COLUMNS_INDEX = 1;
+
     private Dimensions() {}
 
     public static int[] scalar() {

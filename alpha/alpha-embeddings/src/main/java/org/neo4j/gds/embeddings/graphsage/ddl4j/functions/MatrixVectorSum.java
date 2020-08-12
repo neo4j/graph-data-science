@@ -28,6 +28,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.List;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class MatrixVectorSum extends AbstractVariable<Matrix> {
@@ -39,14 +41,14 @@ public class MatrixVectorSum extends AbstractVariable<Matrix> {
 
     public MatrixVectorSum(Variable<Matrix> matrix, Variable<Vector> vector) {
         super(List.of(matrix, vector), matrix.dimensions());
-        assert matrix.dimension(1) == vector.dimension(0) : formatWithLocale(
+        assert matrix.dimension(COLUMNS_INDEX) == vector.dimension(ROWS_INDEX) : formatWithLocale(
             "Cannot broadcast vector with length %d to a matrix with %d columns",
-            vector.dimension(0),
-            matrix.dimension(1)
+            vector.dimension(ROWS_INDEX),
+            matrix.dimension(COLUMNS_INDEX)
         );
         this.matrix = matrix;
-        this.rows = matrix.dimension(0);
-        this.cols = matrix.dimension(1);
+        this.rows = matrix.dimension(ROWS_INDEX);
+        this.cols = matrix.dimension(COLUMNS_INDEX);
         this.vector = vector;
     }
 

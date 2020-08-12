@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 public abstract class Tensor<SELF extends Tensor<SELF>> {
@@ -62,16 +63,12 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
 
     public SELF map(DoubleUnaryOperator f) {
         var result = zeros();
-        for (int i = 0; i < data.length; i++) {
-            result.data[i] = f.applyAsDouble(data[i]);
-        }
+        Arrays.setAll(result.data, i -> f.applyAsDouble(data[i]));
         return result;
     }
 
     public void mapInPlace(DoubleUnaryOperator f) {
-        for (int i = 0; i < data.length; i++) {
-            data[i] = f.applyAsDouble(data[i]);
-        }
+        Arrays.setAll(data, i -> f.applyAsDouble(data[i]));
     }
 
     // TODO: figure out how to replace this one

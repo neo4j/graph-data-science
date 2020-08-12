@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TensorFactory {
@@ -26,13 +28,13 @@ public final class TensorFactory {
     private TensorFactory() {}
 
     public static Tensor<?> constant(double v, int[] dimensions) {
-        if (dimensions.length == 1 && dimensions[0] == 1) {
+        if (dimensions.length == 1 && dimensions[ROWS_INDEX] == 1) {
             return new Scalar(v);
-        } else if (dimensions.length == 1 && dimensions[0] > 1) {
-            return Vector.fill(v, dimensions[0]);
+        } else if (dimensions.length == 1 && dimensions[ROWS_INDEX] > 1) {
+            return Vector.fill(v, dimensions[ROWS_INDEX]);
             // TODO: sort out if a (1, 2) is a matrix or a vector vs (2, 1) vector or matrix?
-        } else if (dimensions.length == 2 && dimensions[0] > 0 && dimensions[1] > 0) {
-            return Matrix.fill(v, dimensions[0], dimensions[1]);
+        } else if (dimensions.length == 2 && dimensions[ROWS_INDEX] > 0 && dimensions[COLUMNS_INDEX] > 0) {
+            return Matrix.fill(v, dimensions[ROWS_INDEX], dimensions[COLUMNS_INDEX]);
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Tensor of dimensions greater than 2 are not supported, got %d dimensions",

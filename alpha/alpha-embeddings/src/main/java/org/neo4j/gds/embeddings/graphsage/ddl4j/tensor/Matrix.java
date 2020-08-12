@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Matrix extends Tensor<Matrix> {
@@ -56,17 +58,18 @@ public class Matrix extends Tensor<Matrix> {
             ));
         }
         var sum = zeros();
-        for (int i = 0; i < data.length; ++i) {
-            sum.data[i] = data[i] + b.data[i];
+        double[] localData = this.data;
+        for (int i = 0; i < localData.length; ++i) {
+            sum.data[i] = localData[i] + b.data[i];
         }
         return sum;
     }
 
     private int rows() {
-        return dimensions[0];
+        return dimensions[ROWS_INDEX];
     }
 
     private int cols() {
-        return dimensions[1];
+        return dimensions[COLUMNS_INDEX];
     }
 }

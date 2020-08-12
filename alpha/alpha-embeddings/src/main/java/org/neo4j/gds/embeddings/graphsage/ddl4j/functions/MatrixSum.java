@@ -28,15 +28,18 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
+
 public class MatrixSum extends AbstractVariable<Matrix> {
 
     public MatrixSum(List<Variable<Matrix>> parents) {
-        super(parents, validateDimensions(parents));
+        super(parents, validatedDimensions(parents));
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix sum = Matrix.fill(0D, dimension(0), dimension(1));
+        Matrix sum = Matrix.fill(0D, dimension(ROWS_INDEX), dimension(COLUMNS_INDEX));
         for (Variable<?> parent : parents()) {
             sum.addInPlace(ctx.data(parent));
         }
@@ -48,7 +51,7 @@ public class MatrixSum extends AbstractVariable<Matrix> {
         return ctx.gradient(this);
     }
 
-    private static int[] validateDimensions(List<Variable<Matrix>> parents) {
+    private static int[] validatedDimensions(List<Variable<Matrix>> parents) {
         int[] dimensions = parents.get(0).dimensions();
         parents.forEach(v -> {
             assert Arrays.equals(v.dimensions(), dimensions);

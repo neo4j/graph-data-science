@@ -30,6 +30,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.stream.IntStream;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
+
 public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
@@ -46,7 +49,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         Tensor<?> embeddingData = ctx.data(parent());
-        int batchSize = embeddingData.dimension(0) / 3;
+        int batchSize = embeddingData.dimension(ROWS_INDEX) / 3;
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
             int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
@@ -58,7 +61,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     private double affinity(Tensor<?> embeddingData, int nodeId, int otherNodeId) {
-        int dimensionSize = combinedEmbeddings.dimension(1);
+        int dimensionSize = combinedEmbeddings.dimension(COLUMNS_INDEX);
         double sum = 0;
         for (int i = 0; i < dimensionSize; i++) {
             sum += embeddingData.dataAt(nodeId * dimensionSize + i) * embeddingData.dataAt(otherNodeId * dimensionSize + i);
@@ -70,16 +73,16 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
         Tensor<?> embeddingData = ctx.data(parent);
         double[] embeddings = embeddingData.data();
-        int totalBatchSize = embeddingData.dimension(0);
+        int totalBatchSize = embeddingData.dimension(ROWS_INDEX);
         int batchSize = totalBatchSize / 3;
 
-        int embeddingSize = embeddingData.dimension(1);
+        int embeddingSize = embeddingData.dimension(COLUMNS_INDEX);
         double[] gradientResult = new double[totalBatchSize * embeddingSize];
 
         IntStream.range(0, batchSize).forEach(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
             int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
-            int dimension = parent.dimension(1);
+            int dimension = parent.dimension(COLUMNS_INDEX);
             double positiveAffinity = affinity(embeddingData, nodeId, positiveNodeId);
             double negativeAffinity = affinity(embeddingData, nodeId, negativeNodeId);
 

@@ -38,16 +38,18 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         double[] parentData = ctx.data(parent()).data();
-        double[] result = new double[this.rows * this.cols];
-        for (int row = 0; row < this.rows; row++) {
+        int rows = this.rows;
+        int cols = this.cols;
+        double[] result = new double[rows * cols];
+        for (int row = 0; row < rows; row++) {
             double sum = 0;
-            for (int col = 0; col < this.cols; col++) {
-                int elementIndex = row * this.cols + col;
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
                 sum += Math.pow(parentData[elementIndex], 2);
             }
             double l2 = Math.sqrt(sum);
-            for (int col = 0; col < this.cols; col++) {
-                int elementIndex = row * this.cols + col;
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
                 result[elementIndex] = parentData[elementIndex] / l2;
             }
         }
@@ -59,25 +61,27 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
         double[] parentData = ctx.data(parent).data();
         double[] gradientData = ctx.gradient(this).data();
         double[] result = new double[parentData.length];
-        for (int row = 0; row < this.rows; row++) {
+        int rows = this.rows;
+        int cols = this.cols;
+        for (int row = 0; row < rows; row++) {
             double l2Squared = 0;
-            for (int col = 0; col < this.cols; col++) {
-                int elementIndex = row * this.cols + col;
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
                 l2Squared += parentData[elementIndex] * parentData[elementIndex];
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
-            for (int col = 0; col < this.cols; col++) {
-                int elementIndex = row * this.cols + col;
-                for (int gradCol = 0; gradCol < this.cols; gradCol++) {
+            for (int col = 0; col < cols; col++) {
+                int elementIndex = row * cols + col;
+                for (int gradCol = 0; gradCol < cols; gradCol++) {
                     if (col == gradCol) {
                         result[elementIndex] +=
                             gradientData[elementIndex] *
                             (l2Squared - parentData[elementIndex] * parentData[elementIndex]) / l2Cubed;
                     } else {
                         result[elementIndex] -=
-                            gradientData[row * this.cols + gradCol] *
-                            (parentData[elementIndex] * parentData[row * this.cols + gradCol]) / l2Cubed;
+                            gradientData[row * cols + gradCol] *
+                            (parentData[elementIndex] * parentData[row * cols + gradCol]) / l2Cubed;
                     }
                 }
             }

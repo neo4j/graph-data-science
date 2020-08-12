@@ -30,6 +30,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 
 import java.util.List;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
@@ -38,7 +40,7 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
     private final Variable<Matrix> B;
 
     public MatrixMultiplyWithTransposedSecondOperand(Variable<Matrix> A, Variable<Matrix> B) {
-        super(List.of(A, B), Dimensions.matrix(A.dimension(0), B.dimension(0)));
+        super(List.of(A, B), Dimensions.matrix(A.dimension(ROWS_INDEX), B.dimension(ROWS_INDEX)));
         // The dimensions of a matrix multiplication of dimensions (m, n) x (n, p) = (m, p)
         // When B is of the dimensions (p, n) it needs to be transposed in order to allow the multiplication.
         // When B is being transposed as B_T its dimensions become (n, p)
@@ -66,24 +68,24 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
     }
 
     private Matrix multiply(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numCols);
         MatrixMatrixMult_DDRM.mult_reorder(m1, m2, prod);
         return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     private Matrix multiplyTransB(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numRows, m2.numRows);
         MatrixMatrixMult_DDRM.multTransB(m1, m2, prod);
         return new Matrix(prod.getData(), prod.numRows, prod.numCols);
     }
 
     private Matrix multiplyTransA(Tensor<?> t1, Tensor<?> t2) {
-        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(0), t1.dimension(1), t1.data());
-        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(0), t2.dimension(1), t2.data());
+        DMatrixRMaj m1 = DMatrixRMaj.wrap(t1.dimension(ROWS_INDEX), t1.dimension(COLUMNS_INDEX), t1.data());
+        DMatrixRMaj m2 = DMatrixRMaj.wrap(t2.dimension(ROWS_INDEX), t2.dimension(COLUMNS_INDEX), t2.data());
         DMatrixRMaj prod = new DMatrixRMaj(m1.numCols, m2.numCols);
         MatrixMatrixMult_DDRM.multTransA_reorder(m1, m2, prod);
         return new Matrix(prod.getData(), prod.numRows, prod.numCols);
@@ -94,10 +96,10 @@ public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<
     }
 
     private void assertDimensions(Variable<Matrix> A, Variable<Matrix> B) {
-        assert A.dimension(1) == B.dimension(1) : formatWithLocale(
+        assert A.dimension(COLUMNS_INDEX) == B.dimension(COLUMNS_INDEX) : formatWithLocale(
             "Cannot multiply matrix having dimensions (%d, %d) with transposed matrix of dimensions (%d, %d)",
-            A.dimension(1), A.dimension(0),
-            B.dimension(0), B.dimension(1)
+            A.dimension(COLUMNS_INDEX), A.dimension(ROWS_INDEX),
+            B.dimension(ROWS_INDEX), B.dimension(COLUMNS_INDEX)
         );
     }
 }
