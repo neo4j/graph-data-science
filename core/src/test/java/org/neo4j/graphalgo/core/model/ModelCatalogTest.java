@@ -28,7 +28,7 @@ class ModelCatalogTest {
     @Test
     void shouldStoreModels() {
 
-        Model<String> model = ImmutableModel.of("testModel", "testAlgo", "testData");
+        Model<String> model = Model.of("testModel", "testAlgo", "testData");
 
         ModelCatalog.set(model);
 
