@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
