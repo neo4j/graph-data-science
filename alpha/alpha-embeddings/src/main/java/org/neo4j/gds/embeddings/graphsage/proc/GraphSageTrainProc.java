@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -48,7 +50,12 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return Stream.of(trainResult(compute(graphNameOrConfig, configuration)));
+        TrainResult trainResult = trainResult(compute(graphNameOrConfig, configuration));
+        String modelName = (String) trainResult.modelInfo.get(MODEL_NAME_KEY);
+        String algoType = (String) trainResult.modelInfo.get(ALGO_TYPE_KEY);
+        ModelCatalog.set(Model.of(modelName, algoType));
+
+        return Stream.of(trainResult);
     }
 
     @Override
