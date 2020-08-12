@@ -26,9 +26,13 @@ import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.huge.FilteredNodeProperties;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class MutateProc<
@@ -61,15 +65,26 @@ public abstract class MutateProc<
         });
     }
 
+    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), getNodeProperties(computationResult)));
+    }
+
     private void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
     ) {
         Graph graph = computationResult.graph();
 
-        NodeProperties nodeProperties = getNodeProperties(computationResult);
+        var nodeProperties = nodeProperties(computationResult);
+
         if (graph instanceof NodeFilteredGraph) {
-            nodeProperties = new ReverseFilteredNodeProperties(nodeProperties, (NodeFilteredGraph) graph);
+            nodeProperties = nodeProperties.stream().map(nodeProperty ->
+                ImmutableNodeProperty.of(
+                    nodeProperty.propertyKey(),
+                    new ReverseFilteredNodeProperties(nodeProperty.properties(), (NodeFilteredGraph) graph)
+                )
+            )
+            .collect(Collectors.toList());
         }
 
         MutatePropertyConfig mutatePropertyConfig = computationResult.config();
@@ -79,13 +94,15 @@ public abstract class MutateProc<
             GraphStore graphStore = computationResult.graphStore();
             Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
 
-            for (NodeLabel label : labelsToUpdate) {
-                graphStore.addNodeProperty(
-                    label,
-                    mutatePropertyConfig.mutateProperty(),
-                    nodeProperties
-                );
-            }
+            nodeProperties.forEach(nodeProperty -> {
+                for (NodeLabel label : labelsToUpdate) {
+                    graphStore.addNodeProperty(
+                        label,
+                        nodeProperty.propertyKey(),
+                        nodeProperty.properties()
+                    );
+                }
+            });
 
             resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
         }
