@@ -34,6 +34,6 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
         AllocationTracker tracker,
         Log log
     ) {
-        return new GraphSage(graph, configuration, log);
+        return new GraphSage(graph, configuration);
     }
 }

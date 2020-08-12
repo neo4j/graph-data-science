@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
@@ -69,6 +70,9 @@ class GraphSageBaseProcTest extends BaseProcTest {
         ", (j)-[:REL]->(l)" +
         ", (k)-[:REL]->(l)";
 
+    static String graphName = "embeddingsGraph";
+
+    static String modelName = "graphSageModel";
 
     @BeforeEach
     void setup() throws Exception {
@@ -93,7 +97,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
                     Orientation.UNDIRECTED
                 )
             )
-            .graphCreate("embeddingsGraph")
+            .graphCreate(graphName)
             .yields();
 
         runQuery(query);
@@ -103,7 +107,6 @@ class GraphSageBaseProcTest extends BaseProcTest {
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
-
 
     protected static Stream<Arguments> configVariations() {
         return crossArguments(
@@ -121,5 +124,21 @@ class GraphSageBaseProcTest extends BaseProcTest {
                 Arguments.of(ActivationFunction.RELU)
             )
         );
+    }
+
+    protected void train(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
+        String trainQuery = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds.alpha.graphSage")
+            .trainMode()
+            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("activationFunction", activationFunction)
+            .addParameter("degreeAsProperty", true)
+            .addParameter("aggregator", aggregator)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        runQuery(trainQuery);
     }
 }

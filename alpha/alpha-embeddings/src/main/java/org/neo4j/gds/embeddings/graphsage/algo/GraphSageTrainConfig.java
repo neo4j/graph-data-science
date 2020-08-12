@@ -26,7 +26,8 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
@@ -37,7 +38,13 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
+public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsConfig, ToleranceConfig {
+    double DEFAULT_TOLERANCE = 1e-4;
+    double DEFAULT_LEARNING_RATE = 0.1;
+    int DEFAULT_EPOCHS = 1;
+    int DEFAULT_MAX_ITERATIONS = 10;
+    int DEFAULT_MAX_SEARCH_DEPTH = 5;
+    int DEFAULT_NEGATIVE_SAMPLE_WEIGHT = 20;
 
     @Value.Default
     default int embeddingSize() {
@@ -63,6 +70,12 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return ActivationFunction.SIGMOID;
     }
 
+    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
+    @Value.Default
+    default List<String> nodePropertyNames() {
+        return List.of();
+    }
+
     @Value.Default
     @Override
     default double tolerance() {
@@ -86,8 +99,18 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
     }
 
     @Value.Default
+    default int searchDepth() {
+        return DEFAULT_MAX_SEARCH_DEPTH;
+    }
+
+    @Value.Default
     default int negativeSampleWeight() {
         return DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
+    }
+
+    @Value.Default
+    default boolean degreeAsProperty() {
+        return false;
     }
 
     // TODO: may be move this out
@@ -109,6 +132,21 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return result;
     }
 
+    @Configuration.Ignore
+    default int featuresSize() {
+        return nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
+    }
+
+    @Value.Check
+    default void validate() {
+        if (nodePropertyNames().isEmpty() && !degreeAsProperty()) {
+            throw new IllegalArgumentException(
+                "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set."
+            );
+        }
+    }
+
+
     static GraphSageTrainConfig of(
         String username,
         Optional<String> graphName,
@@ -123,6 +161,22 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         );
     }
 
-
+    static GraphSageTrainConfig of(
+        ActivationFunction activationFunction,
+        Aggregator.AggregatorType aggregator,
+        int batchSize,
+        int embeddingSize,
+        List<String> nodePropertyNames,
+        double tolerance
+    ) {
+        return ImmutableGraphSageTrainConfig.builder()
+            .activationFunction(activationFunction)
+            .aggregator(aggregator)
+            .batchSize(batchSize)
+            .embeddingSize(embeddingSize)
+            .nodePropertyNames(nodePropertyNames)
+            .tolerance(tolerance)
+            .build();
+    }
 
 }

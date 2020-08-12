@@ -41,16 +41,13 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
     void testStreaming(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
+        train(embeddingSize, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)
-            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
-            .addParameter("aggregator", aggregator)
-            .addParameter("activationFunction", activationFunction)
-            .addParameter("embeddingSize", embeddingSize)
-            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
             .yields();
 
         runQueryWithRowConsumer(query, Map.of("embeddingSize", embeddingSize), row -> {

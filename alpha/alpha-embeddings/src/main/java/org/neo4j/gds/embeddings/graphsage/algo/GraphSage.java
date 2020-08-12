@@ -20,39 +20,40 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageTrainModel;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.logging.Log;
 
-import java.util.Map;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 
-public class GraphSage extends GraphSageBaseAlgo<GraphSage, GraphSage.GraphSageResult, GraphSageBaseConfig> {
+public class GraphSage extends Algorithm<GraphSage, HugeObjectArray<double[]>> {
 
+    public static final String ALGO_TYPE = "graphSage";
+
+    private final Graph graph;
     private final GraphSageBaseConfig config;
 
-    private final GraphSageTrainModel trainModel;
-
-    public GraphSage(Graph graph, GraphSageBaseConfig config, Log log) {
-        super(graph, config);
-
-        this.trainModel = new GraphSageTrainModel(config, log);
+    public GraphSage(Graph graph, GraphSageBaseConfig config) {
+        this.graph = graph;
         this.config = config;
     }
 
     @Override
-    public GraphSageResult compute() {
-        // TODO: Split training into its own procedure?
-        HugeObjectArray<double[]> features = initializeFeatures();
-        GraphSageTrainModel.ModelTrainResult trainResult = trainModel.train(graph, features);
+    public HugeObjectArray<double[]> compute() {
+        Model<GraphSageModel> model = ModelCatalog.get(config.modelName());
+        GraphSageModel graphSageModel = model.data();
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
-            trainResult.layers(),
+            graphSageModel.layers(),
             config.batchSize(),
             config.concurrency()
         );
-        HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(graph, features);
-        return GraphSageResult.of(trainResult.startLoss(), trainResult.epochLosses(), embeddings);
+
+        return embeddingsGenerator.makeEmbeddings(
+            graph,
+            initializeFeatures(graph, graphSageModel.nodeProperties(), graphSageModel.useDegreeAsProperty())
+        );
     }
 
     @Override
@@ -63,27 +64,5 @@ public class GraphSage extends GraphSageBaseAlgo<GraphSage, GraphSage.GraphSageR
     @Override
     public void release() {
 
-    }
-
-    @ValueClass
-    public interface GraphSageResult {
-
-        Map<String, Double> epochLosses();
-
-        HugeObjectArray<double[]> embeddings();
-
-        double startLoss();
-
-        static GraphSageResult of(
-            double startLoss,
-            Map<String, Double> epochLosses,
-            HugeObjectArray<double[]> embeddings
-        ) {
-            return ImmutableGraphSageResult.builder()
-                .startLoss(startLoss)
-                .epochLosses(epochLosses)
-                .embeddings(embeddings)
-                .build();
-        }
     }
 }

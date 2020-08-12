@@ -17,20 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.model;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.NodeProperties;
+
+import java.util.List;
 
 @ValueClass
-public interface Model<DATA> {
+public interface GraphSageModel {
 
-    String name();
+    Layer[] layers();
 
-    String algoType();
+    List<NodeProperties> nodeProperties();
 
-    DATA data();
+    boolean useDegreeAsProperty();
 
-    static <T> Model<T> of(String name, String algoType, T modelData) {
-        return ImmutableModel.of(name, algoType, modelData);
+    static GraphSageModel of(Layer[] layers, List<NodeProperties> nodeProperties, boolean useDegreeAsProperty) {
+        return ImmutableGraphSageModel.of(layers, nodeProperties, useDegreeAsProperty);
     }
+
 }

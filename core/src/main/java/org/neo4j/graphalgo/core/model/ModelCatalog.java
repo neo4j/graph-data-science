@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.model;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class ModelCatalog {
 
     private static final ConcurrentHashMap<String, Model<?>> modelCatalog = new ConcurrentHashMap<>();
@@ -31,7 +33,11 @@ public final class ModelCatalog {
         modelCatalog.put(model.name(), model);
     }
 
-    public static Model<?> get(String modelName) {
-        return modelCatalog.get(modelName);
+    public static <T> Model<T> get(String modelName) {
+        Model<T> model = (Model<T>) modelCatalog.get(modelName);
+        if (model == null) {
+            throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
+        }
+        return model;
     }
 }

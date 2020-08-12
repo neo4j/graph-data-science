@@ -35,21 +35,16 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
     void testWriting(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
+        train(embeddingSize, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")
             .writeMode()
             .addParameter("writeProperty", "embedding")
-            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
-            .addParameter("aggregator", aggregator)
-            .addParameter("activationFunction", activationFunction)
-            .addParameter("embeddingSize", embeddingSize)
-            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
-            assertNotNull(row.get("startLoss"));
-            assertNotNull(row.get("epochLosses"));
             assertNotNull(row.get("nodeCount"));
             assertNotNull(row.get("nodePropertiesWritten"));
             assertNotNull(row.get("createMillis"));

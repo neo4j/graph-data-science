@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
-import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModel;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -43,7 +43,7 @@ import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHS
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageModel, GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.alpha.graphSage.train", mode = Mode.READ)
@@ -51,18 +51,18 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<GraphSageTrain, Model<Layer[]>, GraphSageTrainConfig> computationResult = compute(
+        ComputationResult<GraphSageTrain, Model<GraphSageModel>, GraphSageTrainConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        Model<Layer[]> result = computationResult.result();
+        Model<GraphSageModel> result = computationResult.result();
         ModelCatalog.set(result);
 
         return Stream.of(trainResult(computationResult));
     }
 
      @Override
-    protected TrainResult trainResult(ComputationResult<GraphSageTrain, Model<Layer[]>, GraphSageTrainConfig> computationResult) {
+    protected TrainResult trainResult(ComputationResult<GraphSageTrain, Model<GraphSageModel>, GraphSageTrainConfig> computationResult) {
         return new TrainResult(
             computationResult.result(),
             computationResult.config(),
@@ -97,7 +97,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         public final long trainMillis;
 
         TrainResult(
-            Model<Layer[]> trainedModel,
+            Model<GraphSageModel> trainedModel,
             GraphSageTrainConfig graphSageTrainConfig,
             long trainMillis
         ) {

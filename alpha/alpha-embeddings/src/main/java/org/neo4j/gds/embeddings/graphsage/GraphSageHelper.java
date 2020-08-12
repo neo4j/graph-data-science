@@ -25,15 +25,18 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-final class GraphSageHelper {
+public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
@@ -61,6 +64,22 @@ final class GraphSageHelper {
                 );
         }
         return new NormalizeRows(previousLayerRepresentations);
+    }
+
+    public static HugeObjectArray<double[]> initializeFeatures(Graph graph, List<NodeProperties> nodeProperties, boolean useDegreeAsProperty) {
+        HugeObjectArray<double[]> features = HugeObjectArray.newArray(
+            double[].class,
+            graph.nodeCount(),
+            AllocationTracker.EMPTY
+        );
+        features.setAll(n -> {
+            DoubleStream nodeFeatures = nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));
+            if (useDegreeAsProperty) {
+                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
+            }
+            return nodeFeatures.toArray();
+        });
+        return features;
     }
 
     private static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {

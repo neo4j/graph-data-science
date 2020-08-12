@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.model;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ModelCatalogTest {
 
     @Test
     void shouldStoreModels() {
-
         Model<String> model = Model.of("testModel", "testAlgo", "testData");
 
         ModelCatalog.set(model);
@@ -35,4 +35,13 @@ class ModelCatalogTest {
         assertEquals(model, ModelCatalog.get("testModel"));
     }
 
+    @Test
+    void shouldThrowOnMissingModel() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.get("something")
+        );
+
+        assertEquals("No model with model name `something` was found.", ex.getMessage());
+    }
 }

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
 
-public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
+public class GraphSageWriteProc extends WriteProc<GraphSage, HugeObjectArray<double[]>, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
     @Procedure(name = "gds.alpha.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
@@ -66,21 +67,16 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
-        return (DoubleArrayNodeProperties) computationResult.result().embeddings()::get;
+    protected NodeProperties getNodeProperties(ComputationResult<GraphSage, HugeObjectArray<double[]>, GraphSageWriteConfig> computationResult) {
+        return (DoubleArrayNodeProperties) computationResult.result()::get;
     }
 
     @Override
-    protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(ComputationResult<GraphSage,GraphSage.GraphSageResult, GraphSageWriteConfig> computeResult) {
-        return new GraphSageWriteResult.Builder()
-            .withStartLoss(computeResult.result().startLoss())
-            .withEpochLosses(computeResult.result().epochLosses());
+    protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(ComputationResult<GraphSage, HugeObjectArray<double[]>, GraphSageWriteConfig> computeResult) {
+        return new GraphSageWriteResult.Builder();
     }
 
     public static final class GraphSageWriteResult {
-
-        public final double startLoss;
-        public final Map<String, Double> epochLosses;
 
         public final long nodeCount;
         public final long nodePropertiesWritten;
@@ -90,8 +86,6 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         public final Map<String, Object> configuration;
 
         GraphSageWriteResult(
-            double startLoss,
-            Map<String, Double> epochLosses,
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
@@ -99,8 +93,6 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
             long writeMillis,
             Map<String, Object> configuration
         ) {
-            this.startLoss = startLoss;
-            this.epochLosses = epochLosses;
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
@@ -110,24 +102,10 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         }
 
         static class Builder extends AbstractResultBuilder<GraphSageWriteResult> {
-            private double startLoss;
-
-            public Builder withStartLoss(double startLoss) {
-                this.startLoss = startLoss;
-                return this;
-            }
-            private Map<String, Double> epochLosses;
-
-            public Builder withEpochLosses(Map<String, Double> epochLosses) {
-                this.epochLosses = epochLosses;
-                return this;
-            }
 
             @Override
             public GraphSageWriteResult build() {
                 return new GraphSageWriteResult(
-                    startLoss,
-                    epochLosses,
                     nodeCount,
                     nodePropertiesWritten,
                     createMillis,

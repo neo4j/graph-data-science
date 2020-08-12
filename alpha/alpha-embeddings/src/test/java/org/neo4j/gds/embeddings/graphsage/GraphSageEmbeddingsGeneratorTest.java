@@ -22,8 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
@@ -46,9 +45,11 @@ class GraphSageEmbeddingsGeneratorTest {
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_SIZE = 64;
 
+    private final String MODEL_NAME = "graphSageModel";
+
     private Graph graph;
     private HugeObjectArray<double[]> features;
-    private ImmutableGraphSageStreamConfig.Builder configBuilder;
+    private ImmutableGraphSageTrainConfig.Builder configBuilder;
 
     @BeforeEach
     void setUp() {
@@ -70,7 +71,7 @@ class GraphSageEmbeddingsGeneratorTest {
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
 
-        configBuilder = ImmutableGraphSageStreamConfig.builder()
+        configBuilder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
             .embeddingSize(EMBEDDING_SIZE);
     }
@@ -78,8 +79,9 @@ class GraphSageEmbeddingsGeneratorTest {
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddings(Aggregator.AggregatorType aggregatorType) {
-        GraphSageBaseConfig config = configBuilder
+        var config = configBuilder
             .aggregator(aggregatorType)
+            .modelName(MODEL_NAME)
             .build();
 
         var trainModel = new GraphSageTrainModel(config, new TestLog());

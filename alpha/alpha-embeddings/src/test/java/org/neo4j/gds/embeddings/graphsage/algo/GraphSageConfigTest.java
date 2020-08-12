@@ -28,13 +28,13 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class GraphSageConfigTest {
+class GraphSageTrainConfigTest {
 
     @Test
     void shouldThrowIfNoPropertiesProvided() {
-        var mapWrapper = CypherMapWrapper.create(Map.of());
+        var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
         var expectedMessage = "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set.";
-        var throwable = assertThrows(IllegalArgumentException.class, () -> GraphSageStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper));
+        var throwable = assertThrows(IllegalArgumentException.class, () -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper));
         assertEquals(expectedMessage, throwable.getMessage());
     }
 }

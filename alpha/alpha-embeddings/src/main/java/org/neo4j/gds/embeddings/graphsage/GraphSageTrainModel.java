@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
@@ -62,7 +62,7 @@ public class GraphSageTrainModel {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageTrainModel(GraphSageBaseConfig config, Log log) {
+    public GraphSageTrainModel(GraphSageTrainConfig config, Log log) {
         this.layers = config.layerConfigs().stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);

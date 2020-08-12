@@ -20,27 +20,45 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainModel;
-import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class GraphSageTrain extends GraphSageBaseAlgo<GraphSageTrain, Model<Layer[]>, GraphSageTrainConfig> {
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
+import static org.neo4j.gds.embeddings.graphsage.algo.GraphSage.ALGO_TYPE;
+
+public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageModel>> {
 
     private final GraphSageTrainModel graphSageModel;
+    private final Graph graph;
     private final GraphSageTrainConfig config;
+    private final List<NodeProperties> nodeProperties;
+    private final boolean useDegreeAsProperty;
 
     public GraphSageTrain(Graph graph, GraphSageTrainConfig config, Log log) {
-        super(graph, config);
-
+        this.graph = graph;
         this.config = config;
         this.graphSageModel = new GraphSageTrainModel(config, log);
+        this.useDegreeAsProperty = config.degreeAsProperty();
+        this.nodeProperties = config
+            .nodePropertyNames()
+            .stream()
+            .map(graph::nodeProperties)
+            .collect(toList());
     }
 
     @Override
-    public Model<Layer[]> compute() {
-        GraphSageTrainModel.ModelTrainResult trainResult = graphSageModel.train(graph, initializeFeatures());
-        return Model.of(config.modelName(), MODEL_TYPE, trainResult.layers());
+    public Model<GraphSageModel> compute() {
+        GraphSageTrainModel.ModelTrainResult trainResult = graphSageModel.train(
+            graph,
+            initializeFeatures(graph, nodeProperties, useDegreeAsProperty)
+        );
+        return Model.of(config.modelName(), ALGO_TYPE, GraphSageModel.of(trainResult.layers(), nodeProperties, useDegreeAsProperty));
     }
 
     @Override
