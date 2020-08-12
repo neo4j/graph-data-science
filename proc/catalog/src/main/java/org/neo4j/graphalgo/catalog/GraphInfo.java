@@ -41,6 +41,7 @@ public class GraphInfo {
     public final String relationshipQuery;
     public final long nodeCount;
     public final long relationshipCount;
+    public final double density;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
     public final Map<String, Object> schema;
@@ -70,6 +71,7 @@ public class GraphInfo {
         this.relationshipQuery = relationshipQuery;
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
+        this.density = (nodeCount > 0L) ? (double) relationshipCount / (nodeCount * (nodeCount - 1)) : 0;
         this.creationTime = creationTime;
         this.modificationTime = modificationTime;
         this.schema = schema;

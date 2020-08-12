@@ -110,6 +110,7 @@ class GraphListProcTest extends BaseProcTest {
                 "relationshipQuery", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
+                "density", 0.5D,
                 "degreeDistribution", map(
                     "min", 0L,
                     "mean", 0.5D,
@@ -606,6 +607,17 @@ class GraphListProcTest extends BaseProcTest {
         runQueryWithRowConsumer("bob", listQuery, resultRow -> assertEquals(creationTimeBob.get(), formatCreationTime(resultRow)));
 
         assertNotEquals(creationTimeAlice.get(), creationTimeBob.get());
+    }
+
+    @Test
+    void shouldHandleEmptyGraph() {
+        clearDb();
+        String loadQuery = "CALL gds.graph.create('graph', '*', '*')";
+        runQuery(loadQuery);
+
+        String listQuery = "CALL gds.graph.list()";
+
+        runQueryWithRowConsumer(listQuery, row -> assertEquals(0D, row.getNumber("density")));
     }
 
     @ParameterizedTest

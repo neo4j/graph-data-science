@@ -124,7 +124,7 @@ Moreover, `degreeDistribution` is only computed when included in the `YIELD` sub
 ----
 CALL gds.graph.list()
 YIELD graphName, database, nodeProjection, relationshipProjection, nodeQuery, relationshipQuery,
-      nodeCount, relationshipCount, schema, creationTime, modificationTime, sizeInBytes, memoryUsage;
+      nodeCount, relationshipCount, density, schema, creationTime, modificationTime, sizeInBytes, memoryUsage;
 ----
 
 The `nodeProjection` and `relationshipProjection` columns are primarily applicable to <<native-projection, Native projection>>.
@@ -138,6 +138,7 @@ For each node label, the schema maps the label to its property keys and their co
 Similarly, the schema maps the relationship types to their property keys and property types.
 The property type is either `Integer` or `Float`.
 
+The `density` is the result of `relationshipCount` divided by the maximal number of relationships.
 The `creationTime` indicates when the graph was created in memory.
 The `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
 The `sizeInBytes` yields the number of bytes used in the Java Heap to store that graph.
