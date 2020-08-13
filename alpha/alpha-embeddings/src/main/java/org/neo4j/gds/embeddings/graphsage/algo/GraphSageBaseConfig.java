@@ -26,13 +26,14 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
     double DEFAULT_TOLERANCE = 1e-4;
     double DEFAULT_LEARNING_RATE = 0.1;
     int DEFAULT_EPOCHS = 1;
@@ -62,12 +63,6 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, IterationsConfig, T
     @Value.Default
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;
-    }
-
-    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
-    @Value.Default
-    default List<String> nodePropertyNames() {
-        return List.of();
     }
 
     @Value.Default
