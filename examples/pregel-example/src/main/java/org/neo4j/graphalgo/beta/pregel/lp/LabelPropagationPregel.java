@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.beta.pregel.lp;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -27,7 +29,6 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -39,8 +40,8 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     public static final String LABEL_KEY = "label";
 
     @Override
-    public Map<String, ValueType> nodeValueSchema() {
-        return Map.of(LABEL_KEY, ValueType.LONG);
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder().putElement(LABEL_KEY, ValueType.LONG).build();
     }
 
     @Override

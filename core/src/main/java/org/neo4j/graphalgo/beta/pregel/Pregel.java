@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import com.carrotsearch.hppc.BitSet;
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -49,13 +51,16 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
 
     public static final String DEFAULT_NODE_VALUE_KEY = "nodeValue";
+    public static final ValueType DEFAULT_NODE_VALUE_TYPE = ValueType.DOUBLE;
 
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
@@ -86,7 +91,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 graph,
                 config,
                 computation,
-                CompositeNodeValue.of(computation.nodeValueSchema(), graph.nodeCount(), config.concurrency(), tracker),
+                CompositeNodeValue.of(computation.nodeSchema(), graph.nodeCount(), config.concurrency(), tracker),
                 batchSize,
                 executor,
                 tracker
@@ -386,51 +391,51 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static final class CompositeNodeValue {
 
-        private final Map<String, ValueType> schema;
+        private final NodeSchema nodeSchema;
         private final Map<String, HugeDoubleArray> doubleProperties;
         private final Map<String, HugeLongArray> longProperties;
 
-        static CompositeNodeValue of(Map<String, ValueType> schema, long nodeCount, int concurrency, AllocationTracker tracker) {
+        static CompositeNodeValue of(NodeSchema nodeSchema, long nodeCount, int concurrency, AllocationTracker tracker) {
             Map<String, HugeDoubleArray> doubleProperties = new HashMap<>();
             Map<String, HugeLongArray> longProperties = new HashMap<>();
 
-            schema.forEach((propertyKey, valueType) -> {
-                if (valueType == ValueType.DOUBLE) {
+            nodeSchema.elements().forEach(element -> {
+                if (element.propertyType() == ValueType.DOUBLE) {
                     var nodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
                     ParallelUtil.parallelStreamConsume(
                         LongStream.range(0, nodeCount),
                         concurrency,
                         nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK))
                     );
-                    doubleProperties.put(propertyKey, nodeValues);
-                } else if (valueType == ValueType.LONG) {
+                    doubleProperties.put(element.propertyKey(), nodeValues);
+                } else if (element.propertyType() == ValueType.LONG) {
                     var nodeValues = HugeLongArray.newArray(nodeCount, tracker);
                     ParallelUtil.parallelStreamConsume(
                         LongStream.range(0, nodeCount),
                         concurrency,
                         nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK))
                     );
-                    longProperties.put(propertyKey, nodeValues);
+                    longProperties.put(element.propertyKey(), nodeValues);
                 } else {
-                    throw new IllegalArgumentException(formatWithLocale("Unsupported value type: %s", valueType));
+                    throw new IllegalArgumentException(formatWithLocale("Unsupported value type: %s", element.propertyType()));
                 }
             });
 
-            return new CompositeNodeValue(schema, doubleProperties, longProperties);
+            return new CompositeNodeValue(nodeSchema, doubleProperties, longProperties);
         }
 
         private CompositeNodeValue(
-            Map<String, ValueType> schema,
+            NodeSchema nodeSchema,
             Map<String, HugeDoubleArray> doubleProperties,
             Map<String, HugeLongArray> longProperties
         ) {
-            this.schema = schema;
+            this.nodeSchema = nodeSchema;
             this.doubleProperties = doubleProperties;
             this.longProperties = longProperties;
         }
 
-        public Map<String, ValueType> schema() {
-            return schema;
+        public NodeSchema schema() {
+            return nodeSchema;
         }
 
         public HugeDoubleArray doubleProperties(String propertyKey) {
@@ -456,6 +461,25 @@ public final class Pregel<CONFIG extends PregelConfig> {
         void set(String key, long nodeId, long value) {
             longProperties.get(key).set(nodeId, value);
         }
+    }
+
+    @ValueClass
+    public interface NodeSchema {
+        List<Element> elements();
+    }
+
+    @ValueClass
+    public interface Element {
+        String propertyKey();
+        ValueType propertyType();
+    }
+
+    @Builder.Factory
+    static NodeSchema nodeSchema(Map<String, ValueType> elements) {
+        return ImmutableNodeSchema.of(elements.entrySet().stream()
+            .map(entry -> ImmutableElement.of(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList())
+        );
     }
 
     @ValueClass

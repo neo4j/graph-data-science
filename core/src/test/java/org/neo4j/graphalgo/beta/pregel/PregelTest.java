@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Stream;
 
@@ -185,11 +184,11 @@ class PregelTest {
     private static class CompositeTestComputation implements PregelComputation<CompositeTestComputationConfig> {
 
         @Override
-        public Map<String, ValueType> nodeValueSchema() {
-            return Map.of(
-                "a", ValueType.DOUBLE,
-                "b", ValueType.LONG
-            );
+        public Pregel.NodeSchema nodeSchema() {
+            return new NodeSchemaBuilder()
+                .putElement("a", ValueType.DOUBLE)
+                .putElement("b", ValueType.LONG)
+                .build();
         }
 
         @Override

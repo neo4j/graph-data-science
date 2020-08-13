@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -82,9 +81,11 @@ class LabelPropagationPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
+        var nodeValues = pregelJob.run()
+            .compositeNodeValues()
+            .longProperties(LabelPropagationPregel.LABEL_KEY);
 
-        assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
+        assertLongValues(graph, nodeValues::get, Map.of(
             "nAlice", 0L,
             "nBridget", 0L,
             "nCharles", 0L,
@@ -120,9 +121,11 @@ class LabelPropagationPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
+        var nodeValues = pregelJob.run()
+            .compositeNodeValues()
+            .longProperties(LabelPropagationPregel.LABEL_KEY);
 
-        assertLongValues(graph, (nodeId) -> (long) nodeValues.get(nodeId), Map.of(
+        assertLongValues(graph, nodeValues::get, Map.of(
             "nAlice", 0L,
             "nBridget", 0L,
             "nCharles", 0L,

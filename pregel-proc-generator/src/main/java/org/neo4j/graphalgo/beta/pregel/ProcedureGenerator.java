@@ -86,7 +86,6 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     abstract Class<?> procResultClass();
 
-    // TODO: maybe return Optional
     abstract MethodSpec procResultMethod();
 
     TypeSpec typeSpec() {

@@ -93,13 +93,13 @@ public final class ComputationStreamProc extends StreamProc<ComputationAlgorithm
         }
         var result = computationResult.result().compositeNodeValues();
         return LongStream.range(IdMapping.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
-            Map<String, Object> values = result.schema().entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> {
-                if (entry.getValue() == ValueType.DOUBLE) {
-                    return result.doubleProperties(entry.getKey()).get(nodeId);
+            Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
+            Pregel.Element::propertyKey,
+            element -> {
+                if (element.propertyType() == ValueType.DOUBLE) {
+                    return result.doubleProperties(element.propertyKey()).get(nodeId);
                 }
-                return result.longProperties(entry.getKey()).get(nodeId);
+                return result.longProperties(element.propertyKey()).get(nodeId);
             }
             ));
             return new PregelStreamResult(nodeId, values);
