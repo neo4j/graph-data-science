@@ -19,25 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;
 
@@ -59,7 +47,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return StreamProc.class;
+        return PregelStreamProc.class;
     }
 
     @Override
@@ -77,61 +65,6 @@ class StreamProcedureGenerator extends ProcedureGenerator {
             .addParameter(long.class, "internalNodeId")
             .addParameter(NodeProperties.class, "nodeProperties")
             .addStatement("throw new $T()", UnsupportedOperationException.class)
-            .build();
-    }
-
-    @Override
-    protected List<MethodSpec> additionalMethods() {
-        return List.of(streamMethod());
-    }
-
-    private MethodSpec streamMethod() {
-        var streamResultBlock = CodeBlock.builder()
-            .add("$T values = result.schema().elements().stream()", ParameterizedTypeName.get(Map.class, String.class, Object.class))
-            .add(".collect(")
-            .add(CodeBlock.builder()
-                .add("$T.toMap(\n", Collectors.class)
-                .add("$T::propertyKey,\n", Pregel.Element.class)
-                .beginControlFlow("element ->")
-                .add(CodeBlock.builder()
-                    .beginControlFlow("if (element.propertyType() == $T.DOUBLE)", ValueType.class)
-                    .addStatement("return result.doubleProperties(element.propertyKey()).get(nodeId)")
-                    .endControlFlow()
-                    .addStatement("return result.longProperties(element.propertyKey()).get(nodeId)")
-                    .build()
-                )
-                .endControlFlow()
-                .add(")")
-                .build()
-            )
-            .add(");")
-            .add("\n")
-            .addStatement("return new $T(nodeId, values)", PregelStreamResult.class)
-            .build();
-
-        return MethodSpec.methodBuilder("stream")
-            .addModifiers(Modifier.PROTECTED)
-            .addAnnotation(Override.class)
-            .returns(ParameterizedTypeName.get(Stream.class, PregelStreamResult.class))
-            .addParameter(ParameterizedTypeName.get(
-                ClassName.get(AlgoBaseProc.ComputationResult.class),
-                className(pregelSpec, ALGORITHM_SUFFIX),
-                ClassName.get(Pregel.PregelResult.class),
-                pregelSpec.configTypeName()
-            ), "computationResult")
-            .beginControlFlow("if (computationResult.isGraphEmpty())")
-            .addStatement("return $T.empty()", Stream.class)
-            .endControlFlow()
-            .addStatement("var result = computationResult.result().compositeNodeValues()")
-            .addCode(CodeBlock.builder()
-                .add("return $T", LongStream.class)
-                .add(".range($T.START_NODE_ID, computationResult.graph().nodeCount())", IdMapping.class)
-                .beginControlFlow(".mapToObj(nodeId ->")
-                .add(streamResultBlock)
-                .endControlFlow(")")
-                .build()
-            )
-            .addCode("\n")
             .build();
     }
 }

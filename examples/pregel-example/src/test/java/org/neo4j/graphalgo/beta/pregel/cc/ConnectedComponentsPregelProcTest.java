@@ -183,7 +183,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         });
 
         HashMap<Long, Double> actual = new HashMap<>();
-        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value AS value", r -> {
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value" + Pregel.DEFAULT_NODE_VALUE_KEY + " AS value", r -> {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
         });
 
@@ -219,7 +219,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertTrue(row.getBoolean("didConverge"));
         });
 
-        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value') " +
+        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value" + Pregel.DEFAULT_NODE_VALUE_KEY + "') " +
                           "YIELD nodeId, propertyValue " +
                           "RETURN nodeId, propertyValue AS value";
 

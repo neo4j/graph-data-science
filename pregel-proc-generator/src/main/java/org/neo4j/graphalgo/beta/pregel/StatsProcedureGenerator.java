@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
@@ -47,7 +46,7 @@ class StatsProcedureGenerator extends WriteProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return StatsProc.class;
+        return PregelStatsProc.class;
     }
 
     @Override

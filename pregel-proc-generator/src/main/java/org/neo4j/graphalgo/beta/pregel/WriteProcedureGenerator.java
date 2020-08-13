@@ -23,7 +23,6 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
@@ -53,7 +52,7 @@ class WriteProcedureGenerator extends ProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return WriteProc.class;
+        return PregelWriteProc.class;
     }
 
     @Override

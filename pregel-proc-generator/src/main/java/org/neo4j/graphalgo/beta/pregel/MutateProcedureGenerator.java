@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
@@ -47,7 +46,7 @@ class MutateProcedureGenerator extends WriteProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return MutateProc.class;
+        return PregelMutateProc.class;
     }
 
     @Override

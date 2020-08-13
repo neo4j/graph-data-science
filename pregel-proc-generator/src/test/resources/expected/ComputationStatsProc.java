@@ -7,12 +7,10 @@ import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelStatsProc;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -27,14 +25,14 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationStatsProc extends StatsProc<ComputationAlgorithm, Pregel.PregelResult, PregelStatsResult, PregelConfig> {
+public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgorithm, PregelConfig> {
     @Procedure(
-        name = "gds.pregel.test.stats",
-        mode = Mode.READ
+            name = "gds.pregel.test.stats",
+            mode = Mode.READ
     )
     @Description("Test computation description")
     public Stream<PregelStatsResult> stats(@Name("graphName") Object graphNameOrConfig,
-                                           @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
         return stats(compute(graphNameOrConfig, configuration));
     }
 
@@ -76,11 +74,5 @@ public final class ComputationStatsProc extends StatsProc<ComputationAlgorithm, 
                 return Pregel.memoryEstimation();
             }
         };
-    }
-
-    @Override
-    protected NodeProperties getNodeProperties(
-        AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computationResult) {
-        return (DoubleNodeProperties) computationResult.result().nodeValues()::get;
     }
 }

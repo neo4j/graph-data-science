@@ -132,7 +132,7 @@ class PageRankPregelProcTest extends BaseProcTest {
             // as the above test since for the computation iteration 6
             // is the initial superstep where it doesn't receive messages
             .addParameter("maxIterations", 6)
-            .addParameter("seedProperty", "pageRank")
+            .addParameter("seedProperty", "pageRank" + Pregel.DEFAULT_NODE_VALUE_KEY)
             .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
