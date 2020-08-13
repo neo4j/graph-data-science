@@ -32,7 +32,7 @@ import java.util.Queue;
 @Description("Test computation description")
 public interface BaseClassIsNotAClass extends PregelComputation<PregelConfig> {
     @Override
-    default void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    default void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 }

@@ -45,11 +45,6 @@ public interface PregelConfig extends
     ConcurrencyConfig {
 
     @Value.Default
-    default double initialNodeValue() {
-        return -1;
-    }
-
-    @Value.Default
     default boolean isAsynchronous() {
         return false;
     }

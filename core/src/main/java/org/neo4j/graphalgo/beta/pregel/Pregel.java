@@ -257,7 +257,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final long nodeCount;
         private final long relationshipCount;
         private final PregelComputation<CONFIG> computation;
-        private final PregelContext<CONFIG> pregelContext;
+        private final PregelContext.InitContext<CONFIG> initContext;
+        private final PregelContext.ComputeContext<CONFIG> computeContext;
         private final BitSet senderBits;
         private final BitSet receiverBits;
         private final BitSet voteBits;
@@ -291,7 +292,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
-            this.pregelContext = new PregelContext<>(this, config, graph);
+            this.computeContext = PregelContext.computeContext(this, config);
+            this.initContext = PregelContext.initContext(this, config, graph);
         }
 
         @Override
@@ -301,14 +303,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
 
-                if (pregelContext.isInitialSuperstep()) {
-                    computation.init(pregelContext, nodeId);
+                if (computeContext.isInitialSuperstep()) {
+                    computation.init(initContext, nodeId);
                 }
 
                 if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
 
-                    computation.compute(pregelContext, nodeId, receiveMessages(nodeId));
+                    computation.compute(computeContext, nodeId, receiveMessages(nodeId));
                 }
             }
         }

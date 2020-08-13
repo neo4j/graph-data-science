@@ -111,7 +111,7 @@ class PregelProcessorTest {
                 "org.neo4j.graphalgo.core.CypherMapWrapper userConfig" +
                 ")' " +
                 "in ConfigurationHasNoFactoryMethod.ComputationConfig.",
-                31,
+                33,
                 8
             )
         );

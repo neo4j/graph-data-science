@@ -49,7 +49,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void init(PregelContext<SingleSourceShortestPathPregelConfig> context, long nodeId) {
+    public void init(PregelContext.InitContext<SingleSourceShortestPathPregelConfig> context, long nodeId) {
         if (nodeId == context.getConfig().startNode()) {
             context.setNodeValue(DISTANCE, nodeId, 0);
         } else {
@@ -58,14 +58,14 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void compute(PregelContext<SingleSourceShortestPathPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperstep()) {
-            if (nodeId == pregel.getConfig().startNode()) {
-                pregel.sendMessages(nodeId, 1);
+    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, long nodeId, Queue<Double> messages) {
+        if (context.isInitialSuperstep()) {
+            if (nodeId == context.getConfig().startNode()) {
+                context.sendMessages(nodeId, 1);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)
-            long newDistance = pregel.longNodeValue(DISTANCE, nodeId);
+            long newDistance = context.longNodeValue(DISTANCE, nodeId);
             boolean hasChanged = false;
 
             if (messages != null) {
@@ -79,11 +79,11 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
             }
 
             if (hasChanged) {
-                pregel.setNodeValue(DISTANCE, nodeId, newDistance);
-                pregel.sendMessages(nodeId, newDistance + 1);
+                context.setNodeValue(DISTANCE, nodeId, newDistance);
+                context.sendMessages(nodeId, newDistance + 1);
             }
 
-            pregel.voteToHalt(nodeId);
+            context.voteToHalt(nodeId);
         }
 
     }

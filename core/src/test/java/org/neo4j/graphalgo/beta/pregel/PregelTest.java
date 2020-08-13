@@ -112,12 +112,12 @@ class PregelTest {
             .build();
 
         assertEquals(
-            MemoryRange.of(4_724_064L),
+            MemoryRange.of(4_724_072L),
             Pregel.memoryEstimation().estimate(dimensions, 1).memoryUsage()
         );
 
         assertEquals(
-            MemoryRange.of(4_736_376L),
+            MemoryRange.of(4_736_456L),
             Pregel.memoryEstimation().estimate(dimensions, 10).memoryUsage()
         );
     }
@@ -154,10 +154,10 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
-            if (pregel.isInitialSuperstep()) {
-                pregel.setNodeValue(KEY, nodeId, 0.0);
-                pregel.sendMessages(nodeId, 1.0);
+        public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Queue<Double> messages) {
+            if (context.isInitialSuperstep()) {
+                context.setNodeValue(KEY, nodeId, 0.0);
+                context.sendMessages(nodeId, 1.0);
             } else if (messages != null) {
                 double messageSum = 0.0;
                 Double nextMessage;
@@ -165,9 +165,9 @@ class PregelTest {
                     messageSum += nextMessage.longValue();
                 }
 
-                pregel.setNodeValue(KEY, nodeId, messageSum);
+                context.setNodeValue(KEY, nodeId, messageSum);
             }
-            pregel.voteToHalt(nodeId);
+            context.voteToHalt(nodeId);
         }
     }
 
@@ -201,13 +201,13 @@ class PregelTest {
         }
 
         @Override
-        public void init(PregelContext<CompositeTestComputationConfig> context, long nodeId) {
+        public void init(PregelContext.InitContext<CompositeTestComputationConfig> context, long nodeId) {
             context.setNodeValue("a", nodeId, context.nodeProperties(context.getConfig().aProperty()).doubleValue(nodeId));
             context.setNodeValue("b", nodeId, context.nodeProperties(context.getConfig().bProperty()).longValue(nodeId));
         }
 
         @Override
-        public void compute(PregelContext<CompositeTestComputationConfig> context, long nodeId, Queue<Double> messages) {
+        public void compute(PregelContext.ComputeContext<CompositeTestComputationConfig> context, long nodeId, Queue<Double> messages) {
             if (!context.isInitialSuperstep()) {
                 context.setNodeValue("a", nodeId, context.doubleNodeValue("a", nodeId) * 2);
                 context.setNodeValue("b", nodeId, context.longNodeValue("b", nodeId) * 2);

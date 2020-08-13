@@ -50,7 +50,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void init(PregelContext<ConnectedComponentsConfig> context, long nodeId) {
+    public void init(PregelContext.InitContext<ConnectedComponentsConfig> context, long nodeId) {
         var initialValue = context.getConfig().seedProperty() != null
             ? context.nodeProperties(context.getConfig().seedProperty()).longValue(nodeId)
             : nodeId;
@@ -58,7 +58,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void compute(PregelContext<ConnectedComponentsConfig> context, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, long nodeId, Queue<Double> messages) {
         long oldComponentId = context.longNodeValue(COMPONENT, nodeId);
         long newComponentId = oldComponentId;
 

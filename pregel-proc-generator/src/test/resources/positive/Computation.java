@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.pregel.cc;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.procedure.Description;
 
 import java.util.Queue;
 
@@ -36,7 +37,12 @@ import java.util.Queue;
 public class Computation implements PregelComputation<PregelConfig> {
 
     @Override
-    public void compute(PregelContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    public Pregel.NodeSchema nodeSchema() {
+        return null;
+    }
+
+    @Override
+    public void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 }

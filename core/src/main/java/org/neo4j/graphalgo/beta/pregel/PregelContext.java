@@ -24,56 +24,33 @@ import org.neo4j.graphalgo.api.NodePropertyContainer;
 
 import java.util.Set;
 
-public final class PregelContext<CONFIG extends PregelConfig> {
+public abstract class PregelContext<CONFIG extends PregelConfig> {
 
-    private final Pregel.ComputeStep<CONFIG> computeStep;
+    final Pregel.ComputeStep<CONFIG> computeStep;
     private final CONFIG config;
-    private final SendMessageFunction sendMessageFunction;
-    private final NodePropertyContainer nodePropertyContainer;
 
-    PregelContext(
+    public static <CONFIG extends PregelConfig> InitContext<CONFIG> initContext(
         Pregel.ComputeStep<CONFIG> computeStep,
         CONFIG config,
         NodePropertyContainer nodePropertyContainer
     ) {
+        return new InitContext<>(computeStep, config, nodePropertyContainer);
+    }
+
+    public static <CONFIG extends PregelConfig> ComputeContext<CONFIG> computeContext(
+        Pregel.ComputeStep<CONFIG> computeStep,
+        CONFIG config
+    ) {
+        return new ComputeContext<>(computeStep, config);
+    }
+
+    PregelContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
         this.computeStep = computeStep;
         this.config = config;
-        this.nodePropertyContainer = nodePropertyContainer;
-        this.sendMessageFunction = config.relationshipWeightProperty() == null
-            ? computeStep::sendMessages
-            : computeStep::sendWeightedMessages;
-    }
-
-    public Set<String> nodePropertyKeys() {
-        return this.nodePropertyContainer.availableNodeProperties();
-    }
-
-    public NodeProperties nodeProperties(String key) {
-        return this.nodePropertyContainer.nodeProperties(key);
     }
 
     public CONFIG getConfig() {
         return config;
-    }
-
-    public void voteToHalt(long nodeId) {
-        computeStep.voteToHalt(nodeId);
-    }
-
-    public boolean isInitialSuperstep() {
-        return getSuperstep() == 0;
-    }
-
-    public int getSuperstep() {
-        return computeStep.getIteration();
-    }
-
-    public double doubleNodeValue(String key, long nodeId) {
-        return computeStep.doubleNodeValue(key, nodeId);
-    }
-
-    public long longNodeValue(String key, long nodeId) {
-        return computeStep.longNodeValue(key, nodeId);
     }
 
     public void setNodeValue(String key, long nodeId, double value) {
@@ -82,10 +59,6 @@ public final class PregelContext<CONFIG extends PregelConfig> {
 
     public void setNodeValue(String key, long nodeId, long value) {
         computeStep.setNodeValue(key, nodeId, value);
-    }
-
-    public void sendMessages(long nodeId, double message) {
-        sendMessageFunction.sendMessage(nodeId, message);
     }
 
     public long getNodeCount() {
@@ -100,13 +73,67 @@ public final class PregelContext<CONFIG extends PregelConfig> {
         return computeStep.getDegree(nodeId);
     }
 
-    public double getInitialNodeValue() {
-        return config.initialNodeValue();
+    public static class InitContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
+        private final NodePropertyContainer nodePropertyContainer;
+
+        InitContext(
+            Pregel.ComputeStep<CONFIG> computeStep,
+            CONFIG config,
+            NodePropertyContainer nodePropertyContainer
+        ) {
+            super(computeStep, config);
+            this.nodePropertyContainer = nodePropertyContainer;
+        }
+
+        public Set<String> nodePropertyKeys() {
+            return this.nodePropertyContainer.availableNodeProperties();
+        }
+
+        public NodeProperties nodeProperties(String key) {
+            return this.nodePropertyContainer.nodeProperties(key);
+        }
     }
 
-    @FunctionalInterface
-    interface SendMessageFunction {
+    public static class ComputeContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
-        void sendMessage(long nodeId, double message);
+        ComputeContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
+            super(computeStep, config);
+            this.sendMessageFunction = config.relationshipWeightProperty() == null
+                ? computeStep::sendMessages
+                : computeStep::sendWeightedMessages;
+        }
+
+        private final SendMessageFunction sendMessageFunction;
+
+        public double doubleNodeValue(String key, long nodeId) {
+            return computeStep.doubleNodeValue(key, nodeId);
+        }
+
+        public long longNodeValue(String key, long nodeId) {
+            return computeStep.longNodeValue(key, nodeId);
+        }
+
+        public void voteToHalt(long nodeId) {
+            computeStep.voteToHalt(nodeId);
+        }
+
+        public boolean isInitialSuperstep() {
+            return getSuperstep() == 0;
+        }
+
+        public int getSuperstep() {
+            return computeStep.getIteration();
+        }
+
+        public void sendMessages(long nodeId, double message) {
+            sendMessageFunction.sendMessage(nodeId, message);
+        }
+
+        @FunctionalInterface
+        interface SendMessageFunction {
+
+            void sendMessage(long nodeId, double message);
+        }
+
     }
 }
