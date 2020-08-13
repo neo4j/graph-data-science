@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -114,6 +115,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             LabelPropagationMutateProc.class,
             LouvainMutateProc.class,
             NodeSimilarityMutateProc.class,
+            GraphSageTrainProc.class,
             GraphSageStreamProc.class
         );
 
@@ -181,16 +183,28 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
 
         int embeddingSize = 64;
-        String graphSageQuery = GdsCypher
+        String graphSageModel = "graphSageModel";
+        String graphSageTrainQuery = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH)
+            .algo("gds.alpha.graphSage")
+            .trainMode()
+            .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("modelName", graphSageModel)
+            .yields();
+
+        runQuery(graphSageTrainQuery);
+
+        String graphSageStreamQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
             .algo("gds.alpha.graphSage")
             .streamMode()
-            .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("modelName", graphSageModel)
             .yields();
 
-        runQueryWithRowConsumer(graphSageQuery, row -> {
+        runQueryWithRowConsumer(graphSageStreamQuery, row -> {
             Collection<Double> embedding = (Collection<Double>) row.get("embedding");
             assertEquals(embedding.size(), embeddingSize);
 
