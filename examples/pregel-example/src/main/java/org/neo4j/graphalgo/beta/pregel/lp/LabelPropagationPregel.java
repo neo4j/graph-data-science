@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel.lp;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -26,6 +27,7 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Queue;
 
 /**
@@ -34,14 +36,25 @@ import java.util.Queue;
 @PregelProcedure(name = "example.pregel.lp", modes = {GDSMode.STREAM})
 public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
+    public static final String LABEL_KEY = "label";
+
+    @Override
+    public Map<String, ValueType> nodeValueSchema() {
+        return Map.of(LABEL_KEY, ValueType.LONG);
+    }
+
+    @Override
+    public void init(PregelContext<PregelConfig> context, long nodeId) {
+        context.setNodeValue(LABEL_KEY, nodeId, nodeId);
+    }
+
     @Override
     public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperstep()) {
-            pregel.setNodeValue(nodeId, nodeId);
             pregel.sendMessages(nodeId, nodeId);
         } else {
             if (messages != null) {
-                long oldValue = (long) pregel.getNodeValue(nodeId);
+                long oldValue = pregel.longNodeValue(LABEL_KEY, nodeId);
                 long newValue = oldValue;
 
                 // TODO: could be shared across compute functions per thread
@@ -78,7 +91,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
                 }
 
                 if (newValue != oldValue) {
-                    pregel.setNodeValue(nodeId, newValue);
+                    pregel.setNodeValue(LABEL_KEY, nodeId, newValue);
                     pregel.sendMessages(nodeId, newValue);
                 }
             }

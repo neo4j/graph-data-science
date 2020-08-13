@@ -69,21 +69,21 @@ class LabelPropagationPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("nodeId", "values");
 
-        HashMap<Long, Double> actual = new HashMap<>();
+        HashMap<Long, Long> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+                ((Map<String, Long>) r.get("values")).get(LabelPropagationPregel.LABEL_KEY)
             );
         });
 
         var expected = Map.of(
-            0L, 0.0D,
-            1L, 0.0D,
-            2L, 0.0D,
-            3L, 4.0D,
-            4L, 3.0D,
-            5L, 0.0D
+            0L, 0L,
+            1L, 0L,
+            2L, 0L,
+            3L, 4L,
+            4L, 3L,
+            5L, 0L
         );
 
         assertThat(expected, mapEquals(actual));

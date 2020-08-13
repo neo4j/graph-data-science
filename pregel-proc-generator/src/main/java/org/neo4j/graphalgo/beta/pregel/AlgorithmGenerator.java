@@ -36,7 +36,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 import java.util.Map;
-import java.util.Optional;
 
 class AlgorithmGenerator extends PregelGenerator {
     private final PregelValidation.Spec pregelSpec;
