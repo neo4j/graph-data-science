@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -38,7 +39,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsConfig, ToleranceConfig {
+public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
     double DEFAULT_TOLERANCE = 1e-4;
     double DEFAULT_LEARNING_RATE = 0.1;
     int DEFAULT_EPOCHS = 1;
@@ -68,12 +69,6 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsCon
     @Value.Default
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;
-    }
-
-    // TODO: add validation that at least one of `nodePropertyNames` or `degreeAsProperty` is specified
-    @Value.Default
-    default List<String> nodePropertyNames() {
-        return List.of();
     }
 
     @Value.Default
@@ -113,7 +108,6 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsCon
         return false;
     }
 
-    // TODO: may be move this out
     @Configuration.Ignore
     default Collection<LayerConfig> layerConfigs() {
         Collection<LayerConfig> result = new ArrayList<>(sampleSizes().size());

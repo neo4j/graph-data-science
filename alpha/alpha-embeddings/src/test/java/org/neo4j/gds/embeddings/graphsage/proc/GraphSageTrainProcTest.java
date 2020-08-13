@@ -25,15 +25,18 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModel;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
@@ -70,4 +73,24 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
     }
 
+
+    @Test
+    void shouldFailOnMissingProperties() {
+        String query = GdsCypher.call().explicitCreation("embeddingsGraph")
+            .algo("gds.alpha.graphSage")
+            .trainMode()
+            .addParameter("concurrency", 1)
+            .addParameter("nodePropertyNames", List.of("age", "missing_1", "missing_2"))
+            .addParameter("aggregator", "mean")
+            .addParameter("activationFunction", "sigmoid")
+            .addParameter("embeddingSize", 42)
+            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        String expectedFail = "Node properties [missing_1, missing_2] not found in graph with node properties: [death_year, age, birth_year] in all node labels: ['King']";
+        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
+        assertEquals(IllegalArgumentException.class, throwable.getClass());
+        assertEquals(expectedFail, throwable.getMessage());
+    }
 }
