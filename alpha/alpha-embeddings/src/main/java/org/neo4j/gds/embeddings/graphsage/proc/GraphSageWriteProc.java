@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -40,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
 
-public class GraphSageWriteProc extends WriteProc<GraphSage, HugeObjectArray<double[]>, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
+public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
     @Procedure(name = "gds.alpha.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
@@ -67,12 +66,12 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, HugeObjectArray<dou
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<GraphSage, HugeObjectArray<double[]>, GraphSageWriteConfig> computationResult) {
-        return (DoubleArrayNodeProperties) computationResult.result()::get;
+    protected NodeProperties getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
+        return (DoubleArrayNodeProperties) computationResult.result().embeddings()::get;
     }
 
     @Override
-    protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(ComputationResult<GraphSage, HugeObjectArray<double[]>, GraphSageWriteConfig> computeResult) {
+    protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computeResult) {
         return new GraphSageWriteResult.Builder();
     }
 

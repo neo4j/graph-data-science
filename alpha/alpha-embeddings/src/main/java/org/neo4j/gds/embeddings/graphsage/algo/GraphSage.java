@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -28,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 
-public class GraphSage extends Algorithm<GraphSage, HugeObjectArray<double[]>> {
+public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     public static final String ALGO_TYPE = "graphSage";
 
@@ -41,7 +42,7 @@ public class GraphSage extends Algorithm<GraphSage, HugeObjectArray<double[]>> {
     }
 
     @Override
-    public HugeObjectArray<double[]> compute() {
+    public GraphSageResult compute() {
         Model<GraphSageModel> model = ModelCatalog.get(config.modelName());
         GraphSageModel graphSageModel = model.data();
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
@@ -50,10 +51,15 @@ public class GraphSage extends Algorithm<GraphSage, HugeObjectArray<double[]>> {
             config.concurrency()
         );
 
-        return embeddingsGenerator.makeEmbeddings(
+        HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
-            initializeFeatures(graph, graphSageModel.nodeProperties(), graphSageModel.useDegreeAsProperty())
+            initializeFeatures(
+                graph,
+                graphSageModel.nodeProperties(),
+                graphSageModel.useDegreeAsProperty()
+            )
         );
+        return GraphSageResult.of(embeddings);
     }
 
     @Override
@@ -64,5 +70,15 @@ public class GraphSage extends Algorithm<GraphSage, HugeObjectArray<double[]>> {
     @Override
     public void release() {
 
+    }
+
+    @ValueClass
+    public
+    interface GraphSageResult {
+        HugeObjectArray<double[]> embeddings();
+
+        static GraphSageResult of(HugeObjectArray<double[]> embeddings) {
+            return ImmutableGraphSageResult.of(embeddings);
+        }
     }
 }
