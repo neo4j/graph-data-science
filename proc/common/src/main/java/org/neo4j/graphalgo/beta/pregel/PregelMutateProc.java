@@ -22,14 +22,9 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class PregelMutateProc<
     ALGO extends Algorithm<ALGO, Pregel.PregelResult>,
@@ -38,20 +33,7 @@ public abstract class PregelMutateProc<
 
     @Override
     protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
-        var compositeNodeValue = computationResult.result().compositeNodeValues();
-        var schema = compositeNodeValue.schema();
-        var prefix = computationResult.config().mutateProperty();
-
-        return schema.elements().stream().map(schemaElement -> {
-            NodeProperties nodeProperties;
-            if (schemaElement.propertyType() == ValueType.DOUBLE) {
-                nodeProperties = compositeNodeValue.doubleProperties(schemaElement.propertyKey()).asNodeProperties();
-            } else {
-                nodeProperties = compositeNodeValue.longProperties(schemaElement.propertyKey()).asNodeProperties();
-            }
-
-            return ImmutableNodeProperty.of(formatWithLocale("%s%s", prefix, schemaElement.propertyKey()), nodeProperties);
-        }).collect(Collectors.toList());
+        return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
     }
 
     @Override

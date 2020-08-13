@@ -57,13 +57,13 @@ public interface PregelConfig extends
     @Value.Default
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     default String writeProperty() {
-        return "pregelValue";
+        return "pregel_";
     }
 
     @Value.Default
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     default String mutateProperty() {
-        return "pregelValue";
+        return "pregel_";
     }
 
     @Value.Default
