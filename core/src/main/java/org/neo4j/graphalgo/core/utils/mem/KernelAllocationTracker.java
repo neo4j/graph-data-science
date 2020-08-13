@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 
-public final class KernelAllocationTracker implements AllocationTracker {
+public final class KernelAllocationTracker extends AllocationTracker {
 
     private final MemoryTrackerProxy tracker;
 

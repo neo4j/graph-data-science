@@ -19,13 +19,16 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -73,6 +76,28 @@ class AllocationTrackerTest {
         assertTrue(AllocationTracker.isTracking(tracker));
         assertFalse(AllocationTracker.isTracking(AllocationTracker.EMPTY));
         assertFalse(AllocationTracker.isTracking(null));
+    }
+
+    @Test
+    void shouldUseInMemoryTrackerWhenFeatureIsToggledOff() {
+        var memoryTracker = Neo4jProxy.emptyMemoryTracker();
+        var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+        var allocationTracker = AllocationTracker.create(trackerProxy);
+        assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
+    }
+
+    @Test
+    void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
+        // There is no KernelTracker in 4.0
+        Assumptions.assumeTrue(GraphDatabaseApiProxy.neo4jVersion() != GraphDatabaseApiProxy.Neo4jVersion.V_4_0);
+        AllocationTracker.whileUsingKernelTracker(
+            () -> {
+                var memoryTracker = Neo4jProxy.emptyMemoryTracker();
+                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+                var allocationTracker = AllocationTracker.create(trackerProxy);
+                assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
+            }
+        );
     }
 
     static Stream<AllocationTracker> emptyTrackers() {

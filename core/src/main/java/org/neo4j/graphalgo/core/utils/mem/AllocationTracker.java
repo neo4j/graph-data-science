@@ -20,16 +20,20 @@
 package org.neo4j.graphalgo.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
+import org.neo4j.graphalgo.utils.CheckedRunnable;
+import org.neo4j.util.FeatureToggles;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
-public interface AllocationTracker extends Supplier<String> {
+public abstract class AllocationTracker implements Supplier<String> {
 
-    AllocationTracker EMPTY = new AllocationTracker() {
+    public static final AllocationTracker EMPTY = new AllocationTracker() {
         @Override
         public void add(long delta) {
         }
@@ -59,36 +63,61 @@ public interface AllocationTracker extends Supplier<String> {
         }
     };
 
-    static boolean isTracking(@Nullable AllocationTracker tracker) {
+    public static boolean isTracking(@Nullable AllocationTracker tracker) {
         return tracker != null && tracker != EMPTY;
     }
 
-    static AllocationTracker create() {
+    private static final AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(FeatureToggles.flag(
+        AllocationTracker.class,
+        "useKernelTracker",
+        false
+    ));
+
+    public static boolean useKernelTracker() {
+        return USE_KERNEL_TRACKER.get();
+    }
+
+    static void useKernelTracker(boolean value) {
+        USE_KERNEL_TRACKER.set(value);
+    }
+
+    public static AllocationTracker create() {
         return create(Optional.empty());
     }
 
-    static AllocationTracker create(Optional<MemoryTrackerProxy> kernelProxy) {
+    public static AllocationTracker create(Optional<MemoryTrackerProxy> kernelProxy) {
         return kernelProxy
+            .filter(ignore -> useKernelTracker())
             .map(KernelAllocationTracker::create)
             .orElseGet(InMemoryAllocationTracker::create);
     }
 
-    void add(long delta);
+    @TestOnly
+    public static synchronized <E extends Exception> void whileUsingKernelTracker(CheckedRunnable<E> code) throws E {
+        var useKernelTracker = USE_KERNEL_TRACKER.getAndSet(true);
+        try {
+            code.checkedRun();
+        } finally {
+            USE_KERNEL_TRACKER.set(useKernelTracker);
+        }
+    }
 
-    void remove(long delta);
+    public abstract void add(long delta);
 
-    long tracked();
+    public abstract void remove(long delta);
 
-    default String getUsageString() {
+    public abstract long tracked();
+
+    public String getUsageString() {
         return humanReadable(tracked());
     }
 
-    default String getUsageString(String label) {
+    public String getUsageString(String label) {
         return label + getUsageString();
     }
 
     @Override
-    default String get() {
+    public String get() {
         return getUsageString("Memory usage: ");
     }
 }

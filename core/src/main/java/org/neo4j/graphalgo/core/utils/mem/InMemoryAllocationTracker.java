@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryAllocationTracker implements AllocationTracker {
+public class InMemoryAllocationTracker extends AllocationTracker {
 
     private final AtomicLong count = new AtomicLong();
 

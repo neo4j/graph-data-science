@@ -14,6 +14,7 @@ ext {
                 'jaxen':                        '1.1.6',
                 'reflections':                  '0.9.11'
             ],
+            'assertj':                      '3.17.0',
             'auto-common':                  '0.11',
             'auto-service':                 '1.0-rc6',
             'bouncy-castle':                '1.66',
