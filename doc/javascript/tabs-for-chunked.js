@@ -1,6 +1,7 @@
 function tabTheSource($content) {
     var SESSION_STORAGE_KEY = 'active_procedure_mode';
     var MODES = {
+        'train': 'Train mode',
         'stream': 'Stream mode',
         'mutate': 'Mutate mode',
         'stats': 'Stats mode',

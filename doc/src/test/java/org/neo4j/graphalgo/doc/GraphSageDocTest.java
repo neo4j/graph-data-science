@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
@@ -30,6 +31,7 @@ class GraphSageDocTest extends DocTestBase {
     List<Class<?>> procedures() {
         return List.of(
             GraphCreateProc.class,
+            GraphSageTrainProc.class,
             GraphSageStreamProc.class,
             GraphSageWriteProc.class
         );

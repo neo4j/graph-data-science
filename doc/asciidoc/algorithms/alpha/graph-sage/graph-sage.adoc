@@ -24,6 +24,38 @@ For more information on this algorithm see:
 [.tabbed-example]
 ====
 
+[.include-with-train]
+======
+.Run GraphSAGE in train mode on a named graph.
+[source, cypher]
+----
+CALL gds.alpha.graphSage.train(
+  graphName: String,
+  configuration: Map
+) YIELD
+    graphName: String,
+    modelInfo: Map,
+    configuration: Map,
+    trainMillis: Integer
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-train-configuration.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type    | Description
+| graphName     | String  | The name of the in-memory graph used during training
+| modelInfo     | Map     | Details of the trained model
+| configuration | Map     | The configuration used to run the procedure
+| trainMillis   | Integer | Milliseconds to train the model
+|===
+======
+
 [.include-with-stream]
 ======
 .Run GraphSAGE in stream mode on a named graph.
@@ -82,8 +114,6 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name               | Type                 | Description
-| startLoss          | Float                | The Loss value before the first epoch.
-| epochLosses        | Map<String, Float>   | A map containing the loss for each of the ran epochs, may be less than the configured epochs.
 | nodesCount         | Integer              | The number of nodes processed.
 | propertiesWritten  | Integer              | The number of node properties written.
 | createMillis       | Integer              | Milliseconds for loading data.
@@ -181,19 +211,40 @@ CALL gds.graph.create(
 NOTE: The algorithm is defined for UNDIRECTED graphs.
 
 
-=== Stream
+=== Train
 
-[source, cypher, role=query-example, no-result=true]
+Before we are able to generate node embeddings we need to train a model.
+Below is an example how to do that.
+
+NOTE: The names specified in `nodePropertyNames` configuration parameter need to be exist into the in-memory graph.
+
+[source, cypher, role=query-example, no-result=true, test-group=graphSage]
 ----
-CALL gds.alpha.graphSage.stream(
+CALL gds.alpha.graphSage.train(
   'persons',
   {
+    modelName: 'graphSage',
     nodePropertyNames: ['age', 'height', 'weight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     embeddingSize: 3,
     sampleSizes: [25, 10],
     degreeAsProperty: true
+  }
+)
+----
+
+
+=== Stream
+
+Once we have a trained model (named `graphSage`) we can use it to generate and stream the embeddings
+
+[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+----
+CALL gds.alpha.graphSage.stream(
+  'persons',
+  {
+    modelName: 'graphSage'
   }
 )
 ----
@@ -215,27 +266,26 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 
 === Write
 
-[source, cypher, role=query-example, no-result=true]
+Below is an example of how to generate node embeddings and store them in Neo4j.
+
+--
+[source, cypher, role=query-example, no-result=true, test-group=graphSage]
 ----
 CALL gds.alpha.graphSage.write(
   'persons',
   {
     writeProperty: 'embedding',
-    nodePropertyNames: ['age', 'height', 'weight'],
-    aggregator: 'mean',
-    activationFunction: 'sigmoid',
-    embeddingSize: 3,
-    sampleSizes: [25, 10],
-    degreeAsProperty: true
+    modelName: 'graphSage'
   }
-) YIELD startLoss, epochLosses
+) YIELD
+  nodeCount,
+  nodePropertiesWritten
 ----
 
 [opts=header]
 .Results
 |===
-| startLoss         | epochLosses                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-| 186.0245759990926 | { Epoch: 0 -> 186.04946806517876 }
+| nodeCount | nodePropertiesWritten
+| 7         | 7
 |===
-
-NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
+--
