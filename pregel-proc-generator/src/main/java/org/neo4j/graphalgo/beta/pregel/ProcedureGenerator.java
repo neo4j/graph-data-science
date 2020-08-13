@@ -47,6 +47,7 @@ import org.neo4j.procedure.Procedure;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -99,20 +100,22 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
         typeSpecBuilder.addMethod(procMethod());
         typeSpecBuilder.addMethod(procEstimateMethod());
-        MethodSpec methodSpec = procResultMethod();
-        if (methodSpec != null) {
-            typeSpecBuilder.addMethod(methodSpec);
-        }
-
+        typeSpecBuilder.addMethod(procResultMethod());
         typeSpecBuilder.addMethod(newConfigMethod());
         typeSpecBuilder.addMethod(algorithmFactoryMethod(algorithmClassName));
         typeSpecBuilder.addMethod(propertyTranslator(algorithmClassName));
 
+        typeSpecBuilder.addMethods(additionalMethods());
+
         return typeSpecBuilder.build();
     }
 
+    protected List<MethodSpec> additionalMethods() {
+        return List.of();
+    }
+
     @NotNull
-    protected TypeSpec.Builder getTypeSpecBuilder(
+    private TypeSpec.Builder getTypeSpecBuilder(
         com.squareup.javapoet.TypeName configTypeName,
         ClassName procedureClassName,
         ClassName algorithmClassName
