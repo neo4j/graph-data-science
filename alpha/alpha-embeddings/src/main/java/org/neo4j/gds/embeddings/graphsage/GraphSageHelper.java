@@ -25,16 +25,18 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
 
 public final class GraphSageHelper {
 
@@ -66,7 +68,14 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    public static HugeObjectArray<double[]> initializeFeatures(Graph graph, List<NodeProperties> nodeProperties, boolean useDegreeAsProperty) {
+    public static HugeObjectArray<double[]> initializeFeatures(Graph graph, Collection<String> nodePropertyNames, boolean useDegreeAsProperty) {
+
+        var nodeProperties =
+            nodePropertyNames
+                .stream()
+                .map(graph::nodeProperties)
+                .collect(toList());
+
         HugeObjectArray<double[]> features = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),

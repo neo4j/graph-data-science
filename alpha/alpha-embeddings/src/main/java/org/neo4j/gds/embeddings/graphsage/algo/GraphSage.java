@@ -55,7 +55,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             graph,
             initializeFeatures(
                 graph,
-                graphSageModel.nodeProperties(),
+                graphSageModel.nodePropertyNames(),
                 graphSageModel.useDegreeAsProperty()
             )
         );

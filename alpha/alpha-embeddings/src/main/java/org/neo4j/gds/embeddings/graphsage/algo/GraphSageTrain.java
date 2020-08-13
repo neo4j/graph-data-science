@@ -22,43 +22,35 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainModel;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSage.ALGO_TYPE;
 
 public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageModel>> {
 
-    private final GraphSageTrainModel graphSageModel;
     private final Graph graph;
     private final GraphSageTrainConfig config;
-    private final List<NodeProperties> nodeProperties;
-    private final boolean useDegreeAsProperty;
+    private final Log log;
 
     public GraphSageTrain(Graph graph, GraphSageTrainConfig config, Log log) {
         this.graph = graph;
         this.config = config;
-        this.graphSageModel = new GraphSageTrainModel(config, log);
-        this.useDegreeAsProperty = config.degreeAsProperty();
-        this.nodeProperties = config
-            .nodePropertyNames()
-            .stream()
-            .map(graph::nodeProperties)
-            .collect(toList());
+        this.log = log;
     }
 
     @Override
     public Model<GraphSageModel> compute() {
+        var graphSageModel = new GraphSageTrainModel(config, log);
+
         GraphSageTrainModel.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeFeatures(graph, nodeProperties, useDegreeAsProperty)
+            initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
         );
-        return Model.of(config.modelName(), ALGO_TYPE, GraphSageModel.of(trainResult.layers(), nodeProperties, useDegreeAsProperty));
+        return Model.of(config.modelName(), ALGO_TYPE, GraphSageModel.of(trainResult.layers(), config.nodePropertyNames(),
+            config.degreeAsProperty()
+        ));
     }
 
     @Override

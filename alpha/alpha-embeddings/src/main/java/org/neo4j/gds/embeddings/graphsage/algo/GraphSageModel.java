@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.NodeProperties;
 
 import java.util.List;
 
@@ -30,12 +29,12 @@ public interface GraphSageModel {
 
     Layer[] layers();
 
-    List<NodeProperties> nodeProperties();
+    List<String> nodePropertyNames();
 
     boolean useDegreeAsProperty();
 
-    static GraphSageModel of(Layer[] layers, List<NodeProperties> nodeProperties, boolean useDegreeAsProperty) {
-        return ImmutableGraphSageModel.of(layers, nodeProperties, useDegreeAsProperty);
+    static GraphSageModel of(Layer[] layers, List<String> nodePropertyNames, boolean useDegreeAsProperty) {
+        return ImmutableGraphSageModel.of(layers, nodePropertyNames, useDegreeAsProperty);
     }
 
 }
