@@ -36,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 
 @GdlExtension
@@ -112,7 +113,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(directedGraph, (nodeId) -> (long) result.nodeValues().get(nodeId), expected);
+        TestSupport.assertLongValues(directedGraph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
     }
 
     @Test
@@ -151,7 +152,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> (long) result.nodeValues().get(nodeId), expected);
+        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
     }
 
     @Test

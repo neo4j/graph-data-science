@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -42,6 +41,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.beta.pregel.PregelTest.TestPregelComputation.KEY;
 
 @GdlExtension
 class PregelTest {
@@ -70,8 +70,8 @@ class PregelTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
-        assertArrayEquals(expected, nodeValues.toArray());
+        var nodeValues = pregelJob.run().nodeValues();
+        assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
     }
 
     @Test
@@ -92,7 +92,7 @@ class PregelTest {
             AllocationTracker.EMPTY
         );
 
-        var result = pregelJob.run().compositeNodeValues();
+        var result = pregelJob.run().nodeValues();
 
         assertEquals(84.0D, result.doubleValue("a", graph.toOriginalNodeId("alice")));
         assertEquals(46L, result.longValue("b", graph.toOriginalNodeId("alice")));
@@ -144,10 +144,19 @@ class PregelTest {
 
     public static class TestPregelComputation implements PregelComputation<PregelConfig> {
 
+        static final String KEY = "value";
+
+        @Override
+        public Pregel.NodeSchema nodeSchema() {
+            return new NodeSchemaBuilder()
+                .putElement(KEY, ValueType.DOUBLE)
+                .build();
+        }
+
         @Override
         public void compute(PregelContext<PregelConfig> pregel, long nodeId, Queue<Double> messages) {
             if (pregel.isInitialSuperstep()) {
-                pregel.setNodeValue(nodeId, 0.0);
+                pregel.setNodeValue(KEY, nodeId, 0.0);
                 pregel.sendMessages(nodeId, 1.0);
             } else if (messages != null) {
                 double messageSum = 0.0;
@@ -156,7 +165,7 @@ class PregelTest {
                     messageSum += nextMessage.longValue();
                 }
 
-                pregel.setNodeValue(nodeId, messageSum);
+                pregel.setNodeValue(KEY, nodeId, messageSum);
             }
             pregel.voteToHalt(nodeId);
         }

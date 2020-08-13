@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.beta.pregel.pr;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -37,17 +40,26 @@ import java.util.Queue;
 @PregelProcedure(name = "example.pregel.pr", modes = {GDSMode.STREAM, GDSMode.MUTATE})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
 
+    static final String PAGE_RANK = "pagerank";
+
+    @Override
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder()
+            .putElement(PAGE_RANK, ValueType.DOUBLE)
+            .build();
+    }
+
     @Override
     public void init(PregelContext<PageRankPregelConfig> context, long nodeId) {
         var initialValue = context.getConfig().seedProperty() != null
             ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(nodeId)
             : 1.0 / context.getNodeCount();
-        context.setNodeValue(nodeId, initialValue);
+        context.setNodeValue(PAGE_RANK, nodeId, initialValue);
     }
 
     @Override
     public void compute(PregelContext<PageRankPregel.PageRankPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        double newRank = pregel.getNodeValue(nodeId);
+        double newRank = pregel.doubleNodeValue(PAGE_RANK, nodeId);
 
         // compute new rank based on neighbor ranks
         if (!pregel.isInitialSuperstep()) {
@@ -64,7 +76,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
             newRank = (jumpProbability / pregel.getNodeCount()) + dampingFactor * sum;
 
-            pregel.setNodeValue(nodeId, newRank);
+            pregel.setNodeValue(PAGE_RANK, nodeId, newRank);
         }
 
         // send new rank to neighbors

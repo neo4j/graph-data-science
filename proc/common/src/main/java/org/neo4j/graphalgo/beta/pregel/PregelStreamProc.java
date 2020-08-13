@@ -42,7 +42,7 @@ public abstract class PregelStreamProc<
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();
         }
-        var result = computationResult.result().compositeNodeValues();
+        var result = computationResult.result().nodeValues();
         return LongStream.range(IdMapping.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
             Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
                 Pregel.Element::propertyKey,

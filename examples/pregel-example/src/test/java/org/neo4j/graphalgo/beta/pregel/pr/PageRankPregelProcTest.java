@@ -23,11 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.neo4j.graphalgo.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 class PageRankPregelProcTest extends BaseProcTest {
 
@@ -98,7 +99,7 @@ class PageRankPregelProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+                ((Map<String, Double>) r.get("values")).get(PAGE_RANK)
             );
         });
 
@@ -119,7 +120,7 @@ class PageRankPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "pr")
             .mutateMode()
             .addParameter("maxIterations", 5)
-            .addParameter("mutateProperty", "pageRank")
+            .addParameter("mutateProperty", "value_")
             .yields();
 
         runQuery(mutateQuery);
@@ -132,14 +133,14 @@ class PageRankPregelProcTest extends BaseProcTest {
             // as the above test since for the computation iteration 6
             // is the initial superstep where it doesn't receive messages
             .addParameter("maxIterations", 6)
-            .addParameter("seedProperty", "pageRank" + Pregel.DEFAULT_NODE_VALUE_KEY)
+            .addParameter("seedProperty", "value_" + PAGE_RANK)
             .yields("nodeId", "values");
 
         HashMap<Long, Double> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+                ((Map<String, Double>) r.get("values")).get(PAGE_RANK)
             );
         });
 

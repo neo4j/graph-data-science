@@ -68,20 +68,12 @@ public final class PregelContext<CONFIG extends PregelConfig> {
         return computeStep.getIteration();
     }
 
-    public double getNodeValue(long nodeId) {
-        return computeStep.getNodeValue(nodeId);
-    }
-
     public double doubleNodeValue(String key, long nodeId) {
         return computeStep.doubleNodeValue(key, nodeId);
     }
 
     public long longNodeValue(String key, long nodeId) {
         return computeStep.longNodeValue(key, nodeId);
-    }
-
-    public void setNodeValue(long nodeId, double value) {
-        computeStep.setNodeValue(nodeId, value);
     }
 
     public void setNodeValue(String key, long nodeId, double value) {

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import java.util.HashMap;
 
 import static org.neo4j.graphalgo.TestSupport.assertDoubleValues;
+import static org.neo4j.graphalgo.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 @GdlExtension
 class PageRankPregelAlgoTest {
@@ -93,7 +94,7 @@ class PageRankPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
+        HugeDoubleArray nodeValues = pregelJob.run().nodeValues().doubleProperties(PAGE_RANK);
 
         var expected = new HashMap<String, Double>();
         expected.put("a", 0.0276D);

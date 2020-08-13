@@ -21,17 +21,9 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import java.util.Queue;
 
-import static org.neo4j.graphalgo.beta.pregel.Pregel.DEFAULT_NODE_VALUE_KEY;
-import static org.neo4j.graphalgo.beta.pregel.Pregel.DEFAULT_NODE_VALUE_TYPE;
-
-@FunctionalInterface
 public interface PregelComputation<C extends PregelConfig> {
 
-    default Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder()
-            .putElement(DEFAULT_NODE_VALUE_KEY, DEFAULT_NODE_VALUE_TYPE)
-            .build();
-    }
+    Pregel.NodeSchema nodeSchema();
 
     default void init(PregelContext<C> context, long nodeId) {}
 

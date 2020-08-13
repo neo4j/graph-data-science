@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.TestSupport.assertLongValues;
+import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
 
 @GdlExtension
 class SingleSourceShortestPathPregelAlgoTest {
@@ -84,9 +85,9 @@ class SingleSourceShortestPathPregelAlgoTest {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
+        HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(DISTANCE);
 
-        assertLongValues(graph, nodeId -> (long) nodeValues.get(nodeId), Map.of(
+        assertLongValues(graph, nodeValues::get, Map.of(
                 "a", 0L,
                 "b", 1L,
                 "c", 1L,

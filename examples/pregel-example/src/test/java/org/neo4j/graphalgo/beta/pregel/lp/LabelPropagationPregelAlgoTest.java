@@ -82,7 +82,7 @@ class LabelPropagationPregelAlgoTest {
         );
 
         var nodeValues = pregelJob.run()
-            .compositeNodeValues()
+            .nodeValues()
             .longProperties(LabelPropagationPregel.LABEL_KEY);
 
         assertLongValues(graph, nodeValues::get, Map.of(
@@ -122,7 +122,7 @@ class LabelPropagationPregelAlgoTest {
         );
 
         var nodeValues = pregelJob.run()
-            .compositeNodeValues()
+            .nodeValues()
             .longProperties(LabelPropagationPregel.LABEL_KEY);
 
         assertLongValues(graph, nodeValues::get, Map.of(

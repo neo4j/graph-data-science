@@ -27,7 +27,9 @@ import org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel;
 import org.neo4j.graphalgo.beta.pregel.cc.ImmutableConnectedComponentsConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+
+import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 
 class PregelConnectedComponentsDocExample {
     @Test
@@ -58,7 +60,7 @@ class PregelConnectedComponentsDocExample {
             AllocationTracker.EMPTY
         );
 
-        HugeDoubleArray nodeValues = pregelJob.run().nodeValues();
+        HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(COMPONENT);
         System.out.println(nodeValues.toString());
     }
 }

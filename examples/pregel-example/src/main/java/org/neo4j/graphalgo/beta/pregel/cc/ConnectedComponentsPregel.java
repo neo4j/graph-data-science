@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.pregel.cc;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
@@ -37,18 +40,27 @@ import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.WRITE;
 )
 public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
+    public static final String COMPONENT = "component";
+
+    @Override
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder()
+            .putElement(COMPONENT, ValueType.LONG)
+            .build();
+    }
+
     @Override
     public void init(PregelContext<ConnectedComponentsConfig> context, long nodeId) {
         var initialValue = context.getConfig().seedProperty() != null
-            ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(nodeId)
+            ? context.nodeProperties(context.getConfig().seedProperty()).longValue(nodeId)
             : nodeId;
-        context.setNodeValue(nodeId, initialValue);
+        context.setNodeValue(COMPONENT, nodeId, initialValue);
     }
 
     @Override
     public void compute(PregelContext<ConnectedComponentsConfig> context, long nodeId, Queue<Double> messages) {
-        double oldComponentId = context.getNodeValue(nodeId);
-        double newComponentId = oldComponentId;
+        long oldComponentId = context.longNodeValue(COMPONENT, nodeId);
+        long newComponentId = oldComponentId;
 
         if (messages != null && !messages.isEmpty()) {
             Double nextComponentId;
@@ -60,7 +72,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
         }
 
         if (context.isInitialSuperstep() || newComponentId != oldComponentId) {
-            context.setNodeValue(nodeId, newComponentId);
+            context.setNodeValue(COMPONENT, nodeId, newComponentId);
             context.sendMessages(nodeId, newComponentId);
         }
     }

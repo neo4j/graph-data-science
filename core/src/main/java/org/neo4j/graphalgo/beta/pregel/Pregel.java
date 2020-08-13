@@ -59,9 +59,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
 
-    public static final String DEFAULT_NODE_VALUE_KEY = "nodeValue";
-    public static final ValueType DEFAULT_NODE_VALUE_TYPE = ValueType.DOUBLE;
-
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
 
@@ -171,7 +168,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
 
         return ImmutablePregelResult.builder()
-            .compositeNodeValues(nodeValues)
+            .nodeValues(nodeValues)
             .didConverge(canHalt)
             .ranIterations(iterations)
             .build();
@@ -340,14 +337,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return degrees.degree(nodeId);
         }
 
-        double getNodeValue(long nodeId) {
-            return nodeValues.doubleValue(DEFAULT_NODE_VALUE_KEY, nodeId);
-        }
-
-        void setNodeValue(long nodeId, double value) {
-            nodeValues.set(DEFAULT_NODE_VALUE_KEY, nodeId, value);
-        }
-
         void voteToHalt(long nodeId) {
             voteBits.set(nodeId);
         }
@@ -446,11 +435,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return longProperties.get(propertyKey);
         }
 
-        double doubleValue(String key, long nodeId) {
+        public double doubleValue(String key, long nodeId) {
             return doubleProperties.get(key).get(nodeId);
         }
 
-        long longValue(String key, long nodeId) {
+        public long longValue(String key, long nodeId) {
             return longProperties.get(key).get(nodeId);
         }
 
@@ -485,11 +474,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     @ValueClass
     public interface PregelResult {
 
-        CompositeNodeValue compositeNodeValues();
-
-        default HugeDoubleArray nodeValues() {
-            return compositeNodeValues().doubleProperties(DEFAULT_NODE_VALUE_KEY);
-        }
+        CompositeNodeValue nodeValues();
 
         int ranIterations();
 

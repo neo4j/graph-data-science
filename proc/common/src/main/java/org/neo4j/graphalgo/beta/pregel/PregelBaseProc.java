@@ -38,7 +38,7 @@ final class PregelBaseProc {
         AlgoBaseProc.ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult,
         String propertyPrefix
     ) {
-        var compositeNodeValue = computationResult.result().compositeNodeValues();
+        var compositeNodeValue = computationResult.result().nodeValues();
         var schema = compositeNodeValue.schema();
         // TODO change this to generic prefix setting
 

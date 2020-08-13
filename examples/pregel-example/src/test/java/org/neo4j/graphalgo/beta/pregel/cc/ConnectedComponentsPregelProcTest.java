@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 
@@ -35,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
+import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 
 class ConnectedComponentsPregelProcTest extends BaseProcTest {
 
@@ -64,30 +64,30 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         ", (i)-[:TYPE]->(h)" +
         ", (h)-[:TYPE]->(i)";
 
-    private static final Map<Long, Double> EXPECTED_COMPONENTS = Map.of(
-        0L, 0D,
-        1L, 0D,
-        2L, 0D,
-        3L, 0D,
-        4L, 4D,
-        5L, 4D,
-        6L, 4D,
-        7L, 7D,
-        8L, 7D,
-        9L, 9D
+    private static final Map<Long, Long> EXPECTED_COMPONENTS = Map.of(
+        0L, 0L,
+        1L, 0L,
+        2L, 0L,
+        3L, 0L,
+        4L, 4L,
+        5L, 4L,
+        6L, 4L,
+        7L, 7L,
+        8L, 7L,
+        9L, 9L
     );
 
-    private static final Map<Long, Double> EXPECTED_COMPONENTS_SEEDED = Map.of(
-        0L, 1D,
-        1L, 1D,
-        2L, 1D,
-        3L, 1D,
-        4L, 2D,
-        5L, 2D,
-        6L, 2D,
-        7L, 3D,
-        8L, 3D,
-        9L, 4D
+    private static final Map<Long, Long> EXPECTED_COMPONENTS_SEEDED = Map.of(
+        0L, 1L,
+        1L, 1L,
+        2L, 1L,
+        3L, 1L,
+        4L, 2L,
+        5L, 2L,
+        6L, 2L,
+        7L, 3L,
+        8L, 3L,
+        9L, 4L
     );
 
     @BeforeEach
@@ -113,11 +113,11 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("nodeId", "values");
 
-        HashMap<Long, Double> actual = new HashMap<>();
+        HashMap<Long, Long> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+                ((Map<String, Long>) r.get("values")).get(COMPONENT)
             );
         });
 
@@ -152,11 +152,11 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("seedProperty", "seedProperty")
             .yields("nodeId", "values");
 
-        HashMap<Long, Double> actual = new HashMap<>();
+        HashMap<Long, Long> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
             actual.put(
                 r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(Pregel.DEFAULT_NODE_VALUE_KEY)
+                ((Map<String, Long>) r.get("values")).get(COMPONENT)
             );
         });
 
@@ -170,7 +170,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "cc")
             .writeMode()
             .addParameter("maxIterations", 10)
-            .addParameter("writeProperty", "value")
+            .addParameter("writeProperty", "value_")
             .yields();
 
         runQueryWithRowConsumer(query, row -> {
@@ -182,9 +182,9 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertTrue(row.getBoolean("didConverge"));
         });
 
-        HashMap<Long, Double> actual = new HashMap<>();
-        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value" + Pregel.DEFAULT_NODE_VALUE_KEY + " AS value", r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+        HashMap<Long, Long> actual = new HashMap<>();
+        runQueryWithRowConsumer("MATCH (n) RETURN id(n) AS nodeId, n.value_" + COMPONENT + " AS value", r -> {
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
         });
 
         assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
@@ -207,7 +207,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "cc")
             .mutateMode()
             .addParameter("maxIterations", 10)
-            .addParameter("mutateProperty", "value")
+            .addParameter("mutateProperty", "value_")
             .yields();
 
         runQueryWithRowConsumer(mutateQuery, row -> {
@@ -219,13 +219,13 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertTrue(row.getBoolean("didConverge"));
         });
 
-        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value" + Pregel.DEFAULT_NODE_VALUE_KEY + "') " +
+        var streamQuery = "CALL gds.graph.streamNodeProperty('" + graphName + "', 'value_" + COMPONENT + "') " +
                           "YIELD nodeId, propertyValue " +
                           "RETURN nodeId, propertyValue AS value";
 
-        HashMap<Long, Double> actual = new HashMap<>();
+        HashMap<Long, Long> actual = new HashMap<>();
         runQueryWithRowConsumer(streamQuery, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").doubleValue());
+            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
         });
 
         assertThat(actual, mapEquals(EXPECTED_COMPONENTS));

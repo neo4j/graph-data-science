@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.beta.pregel.sssp;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -38,18 +41,31 @@ import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPrege
 @PregelProcedure(name = "example.pregel.sssp", modes = {GDSMode.STREAM})
 public class SingleSourceShortestPathPregel implements PregelComputation<SingleSourceShortestPathPregelConfig> {
 
+    static final String DISTANCE = "DISTANCE";
+
+    @Override
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder().putElement(DISTANCE, ValueType.LONG).build();
+    }
+
+    @Override
+    public void init(PregelContext<SingleSourceShortestPathPregelConfig> context, long nodeId) {
+        if (nodeId == context.getConfig().startNode()) {
+            context.setNodeValue(DISTANCE, nodeId, 0);
+        } else {
+            context.setNodeValue(DISTANCE, nodeId, Long.MAX_VALUE);
+        }
+    }
+
     @Override
     public void compute(PregelContext<SingleSourceShortestPathPregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperstep()) {
             if (nodeId == pregel.getConfig().startNode()) {
-                pregel.setNodeValue(nodeId, 0);
                 pregel.sendMessages(nodeId, 1);
-            } else {
-                pregel.setNodeValue(nodeId, Double.MAX_VALUE);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)
-            long newDistance = (long) pregel.getNodeValue(nodeId);
+            long newDistance = pregel.longNodeValue(DISTANCE, nodeId);
             boolean hasChanged = false;
 
             if (messages != null) {
@@ -63,7 +79,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
             }
 
             if (hasChanged) {
-                pregel.setNodeValue(nodeId, newDistance);
+                pregel.setNodeValue(DISTANCE, nodeId, newDistance);
                 pregel.sendMessages(nodeId, newDistance + 1);
             }
 
