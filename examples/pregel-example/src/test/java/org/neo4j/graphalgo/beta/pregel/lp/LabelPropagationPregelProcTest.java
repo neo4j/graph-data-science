@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
 
 import java.util.HashMap;
 import java.util.Map;
