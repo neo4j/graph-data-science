@@ -73,6 +73,11 @@ class GraphStatisticsTest {
         assertEquals(expectedDensity, GraphStatistics.density(nodeCount, relationshipCount));
     }
 
+    @Test
+    void graphBasedDensity() {
+        assertEquals(GraphStatistics.density(graph), 0.5);
+    }
+
     private static Stream<Arguments> densitySource() {
         return Stream.of(
             Arguments.of(0, 10, 0),

@@ -80,4 +80,8 @@ public final class GraphStatistics {
     public static double density(long nodeCount, long relationshipCount) {
         return (nodeCount > 0L) ? (double) relationshipCount / (nodeCount * (nodeCount - 1)) : 0;
     }
+
+    public static double density(Graph graph) {
+        return density(graph.nodeCount(), graph.relationshipCount());
+    }
 }
