@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,7 +29,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelCatalog {
 
-    private static final ConcurrentHashMap<String, Model<?>> modelCatalog = new ConcurrentHashMap<>();
+    private static final Map<String, Model<?>> modelCatalog = new ConcurrentHashMap<>();
 
     private ModelCatalog() {}
 
@@ -49,5 +52,10 @@ public final class ModelCatalog {
     public static Optional<String> type(String modelName) {
         return Optional.ofNullable(modelCatalog.get(modelName))
             .map(Model::algoType);
+    }
+
+    @Nullable
+    public static <T> Model<T> drop(String modelName) {
+        return (Model<T>) modelCatalog.remove(modelName);
     }
 }

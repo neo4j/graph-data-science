@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -73,5 +74,19 @@ class ModelCatalogTest {
     void getNonExistingModelType() {
         Optional<String> bogusModel = ModelCatalog.type("bogusModel");
         assertTrue(bogusModel.isEmpty());
+    }
+    @Test
+    void dropsModel() {
+        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+        ModelCatalog.set(model);
+
+        assertTrue(ModelCatalog.exists("testModel"));
+        ModelCatalog.drop("testModel");
+        assertFalse(ModelCatalog.exists("testModel"));
+    }
+
+    @Test
+    void returnsNullWhenTryingToDropNonExistingModel() {
+        assertNull(ModelCatalog.drop("bogusModel"));
     }
 }
