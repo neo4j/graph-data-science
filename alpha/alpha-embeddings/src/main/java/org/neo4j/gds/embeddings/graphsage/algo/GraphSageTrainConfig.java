@@ -25,10 +25,13 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
+import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
@@ -39,7 +42,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
+public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, BatchSizeConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
 
     @Value.Default
     default int embeddingSize() {

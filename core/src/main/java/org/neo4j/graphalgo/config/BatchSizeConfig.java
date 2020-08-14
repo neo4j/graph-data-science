@@ -17,24 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.algo;
+package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.BatchSizeConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.immutables.value.Value;
 
-import java.util.List;
-
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, NodePropertiesConfig {
-
-    @Override
-    @Configuration.Ignore
-    default List<String> nodePropertyNames() {
-        Model<GraphSageModel> model = ModelCatalog.get(modelName());
-        return model.data().nodePropertyNames();
+public interface BatchSizeConfig {
+    @Value.Default
+    default int batchSize() {
+        return 100;
     }
+
 }

@@ -25,15 +25,22 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 
 class GraphSageBaseProcTest extends BaseProcTest {
@@ -108,7 +115,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    protected static Stream<Arguments> configVariations() {
+    static Stream<Arguments> configVariations() {
         return crossArguments(
             () -> Stream.of(
                 Arguments.of(16),
@@ -126,7 +133,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
         );
     }
 
-    protected void train(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
+    void train(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
         String trainQuery = GdsCypher.call()
             .explicitCreation(graphName)
             .algo("gds.alpha.graphSage")
@@ -140,5 +147,64 @@ class GraphSageBaseProcTest extends BaseProcTest {
             .yields();
 
         runQuery(trainQuery);
+    }
+
+    static Stream<Arguments> missingNodeProperties() {
+        return Stream.of(
+            Arguments.of(
+                ImmutableGraphCreateFromStoreConfig.builder()
+                    .graphName("implicitWeightedGraph")
+                    .nodeProjections(NodeProjections
+                        .builder()
+                        .putProjection(
+                            NodeLabel.of("King"),
+                            NodeProjection.of(
+                                "King",
+                                PropertyMappings.of(
+                                    PropertyMapping.of("age")
+                                )
+                            )
+                        )
+                        .build())
+                    .relationshipProjections(RelationshipProjections.fromString("REL")
+                    ).build(),
+                "birth_year, death_year",
+                "age",
+                "King"
+            ),
+            Arguments.of(
+                ImmutableGraphCreateFromStoreConfig.builder()
+                    .graphName("implicitWeightedGraph")
+                    .nodeProjections(NodeProjections
+                        .builder()
+                        .putProjection(
+                            NodeLabel.of("King"),
+                            NodeProjection.of(
+                                "King",
+                                PropertyMappings.of(
+                                    PropertyMapping.of("age"),
+                                    PropertyMapping.of("birth_year")
+                                )
+                            )
+                        )
+                        .build())
+                    .relationshipProjections(RelationshipProjections.fromString("REL")
+                    ).build(),
+                "death_year",
+                "age, birth_year",
+                "King"
+            ),
+            Arguments.of(
+                ImmutableGraphCreateFromStoreConfig.of(
+                    "",
+                    "",
+                    NodeProjections.fromString(PROJECT_ALL),
+                    RelationshipProjections.fromString(PROJECT_ALL)
+                ),
+                "age, birth_year, death_year",
+                "",
+                "__ALL__"
+            )
+        );
     }
 }
