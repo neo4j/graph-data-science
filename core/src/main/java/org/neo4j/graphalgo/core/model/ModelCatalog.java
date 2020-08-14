@@ -40,4 +40,8 @@ public final class ModelCatalog {
         }
         return model;
     }
+
+    public static boolean exists(String modelName) {
+        return modelCatalog.containsKey(modelName);
+    }
 }

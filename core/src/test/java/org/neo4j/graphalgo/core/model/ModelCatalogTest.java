@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModelCatalogTest {
 
@@ -44,4 +46,14 @@ class ModelCatalogTest {
 
         assertEquals("No model with model name `something` was found.", ex.getMessage());
     }
+    @Test
+    void checksIfModelExists() {
+        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+
+        ModelCatalog.set(model);
+
+        assertTrue(ModelCatalog.exists("testModel"));
+        assertFalse(ModelCatalog.exists("bogusModel"));
+    }
+
 }
