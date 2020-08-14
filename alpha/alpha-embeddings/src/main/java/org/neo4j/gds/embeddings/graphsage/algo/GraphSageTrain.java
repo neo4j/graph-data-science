@@ -47,9 +47,7 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageMod
             graph,
             initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
         );
-        return Model.of(config.modelName(), GraphSage.MODEL_TYPE, GraphSageModel.of(trainResult.layers(), config.nodePropertyNames(),
-            config.degreeAsProperty()
-        ));
+        return Model.of(config.modelName(), GraphSage.MODEL_TYPE, GraphSageModel.of(trainResult.layers(), config));
     }
 
     @Override

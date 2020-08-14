@@ -20,8 +20,11 @@
 package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModel;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -71,11 +74,20 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         Model<GraphSageModel> model = ModelCatalog.get(modelName);
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
+
+        GraphSageTrainConfig trainConfig = model.data().config();
+        assertNotNull(trainConfig);
+        assertEquals(1, trainConfig.concurrency());
+        assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.nodePropertyNames());
+        assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
+        assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
+        assertEquals(64, trainConfig.embeddingSize());
+        assertTrue(trainConfig.degreeAsProperty());
     }
 
 
     @Test
-    void shouldFailOnMissingProperties() {
+    void shouldFailOnMissingNodeProperties() {
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")
             .trainMode()

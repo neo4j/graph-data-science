@@ -51,12 +51,13 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             config.concurrency()
         );
 
+        GraphSageTrainConfig trainConfig = graphSageModel.config();
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
             initializeFeatures(
                 graph,
-                graphSageModel.nodePropertyNames(),
-                graphSageModel.useDegreeAsProperty()
+                trainConfig.nodePropertyNames(),
+                trainConfig.degreeAsProperty()
             )
         );
         return GraphSageResult.of(embeddings);
