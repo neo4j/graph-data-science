@@ -16,7 +16,6 @@ dependencies {
 
     api(
         project(':annotations'),
-        project(':cypher-printer'),
         project(':neo4j-kernel-adapter'),
         [ group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram' ],
         [ group: 'com.carrotsearch', name: 'hppc',         version: ver.'hppc' ],

@@ -14,6 +14,7 @@ dependencies {
     api (
             platform(dep.junit5bom),
             dep.junit5jupiter,
+            project(':cypher-printer'),
             project(':algo-common'),
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
             [group: 'org.neo4j',               name: 'neo4j',                   version: ver.'neo4j'],
