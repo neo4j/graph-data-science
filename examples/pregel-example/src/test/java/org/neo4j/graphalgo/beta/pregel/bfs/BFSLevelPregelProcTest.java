@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
-class BFSPregelProcTest extends BaseProcTest {
+class BFSLevelPregelProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH =
         "CREATE" +
@@ -51,7 +51,7 @@ class BFSPregelProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(TEST_GRAPH);
 
-        registerProcedures(BFSPregelStreamProc.class);
+        registerProcedures(BFSLevelPregelStreamProc.class);
     }
 
     @Test

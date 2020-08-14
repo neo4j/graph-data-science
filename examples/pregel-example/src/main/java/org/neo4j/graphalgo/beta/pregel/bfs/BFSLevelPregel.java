@@ -19,27 +19,23 @@
  */
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
 import java.util.Queue;
 
+/**
+ * setting the value for each node, to the level/iteration the node is discovered via BFS
+ */
 @PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
-public class BFSPregel implements PregelComputation<BFSPregel.BFSPPregelConfig> {
+public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
 
     private static final double NOT_FOUND = -1;
 
     @Override
-    public void compute(PregelContext<BFSPPregelConfig> pregel, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext<BFSPregelConfig> pregel, long nodeId, Queue<Double> messages) {
         if (pregel.isInitialSuperstep()) {
             if (nodeId == pregel.getConfig().startNode()) {
                 pregel.setNodeValue(nodeId, 0);
@@ -59,23 +55,6 @@ public class BFSPregel implements PregelComputation<BFSPregel.BFSPPregelConfig> 
                 pregel.voteToHalt(nodeId);
                 pregel.voteToHalt(nodeId);
             }
-        }
-    }
-
-    @ValueClass
-    @Configuration("BFSPPregelConfigImpl")
-    @SuppressWarnings("immutables:subtype")
-    interface BFSPPregelConfig extends PregelConfig {
-        @Value
-        long startNode();
-
-        static BFSPPregelConfig of(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper userInput
-        ) {
-            return new BFSPPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
         }
     }
 }
