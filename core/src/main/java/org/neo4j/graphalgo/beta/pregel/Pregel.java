@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Degrees;
@@ -46,6 +48,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -256,6 +259,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final int iteration;
         private final long nodeCount;
         private final long relationshipCount;
+        private final boolean isAsync;
         private final PregelComputation<CONFIG> computation;
         private final PregelContext.InitContext<CONFIG> initContext;
         private final PregelContext.ComputeContext<CONFIG> computeContext;
@@ -283,6 +287,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.iteration = iteration;
             this.nodeCount = graph.nodeCount();
             this.relationshipCount = graph.relationshipCount();
+            this.isAsync = config.isAsynchronous();
             this.computation = computation;
             this.senderBits = new BitSet(nodeCount);
             this.receiverBits = receiverBits;
@@ -298,7 +303,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         @Override
         public void run() {
-            final PrimitiveLongIterator nodesIterator = nodeBatch.iterator();
+            PrimitiveLongIterator nodesIterator = nodeBatch.iterator();
+
+            var messageIterator = isAsync
+                ? new MessageIterator.Async()
+                : new MessageIterator.Sync();
+            var messages = new Messages(messageIterator);
 
             while (nodesIterator.hasNext()) {
                 final long nodeId = nodesIterator.next();
@@ -310,7 +320,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
 
-                    computation.compute(computeContext, nodeId, receiveMessages(nodeId));
+                    messageIterator.init(receiveMessages(nodeId));
+                    computation.compute(computeContext, nodeId, messages);
                 }
             }
         }
@@ -359,7 +370,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             });
         }
 
-        private Queue<Double> receiveMessages(long nodeId) {
+        private @Nullable Queue<Double> receiveMessages(long nodeId) {
             return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
 
@@ -451,6 +462,57 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         void set(String key, long nodeId, long value) {
             longProperties.get(key).set(nodeId, value);
+        }
+    }
+
+    public static class Messages implements Iterable<Double> {
+
+        private final MessageIterator iterator;
+
+        Messages(MessageIterator iterator) {
+            this.iterator = iterator;
+        }
+
+        @NotNull
+        @Override
+        public Iterator<Double> iterator() {
+            return iterator;
+        }
+    }
+
+    abstract static class MessageIterator implements Iterator<Double> {
+
+        Queue<Double> queue;
+
+        @Nullable Double next;
+
+        @Override
+        public @Nullable Double next() {
+            return next;
+        }
+
+        void init(@Nullable Queue<Double> queue) {
+            this.queue = queue;
+        }
+
+        static class Sync extends MessageIterator {
+            @Override
+            public boolean hasNext() {
+                if (queue == null) {
+                    return false;
+                }
+                return !Double.isNaN(next = queue.poll());
+            }
+        }
+
+        static class Async extends MessageIterator {
+            @Override
+            public boolean hasNext() {
+                if (queue == null) {
+                    return false;
+                }
+                return (next = queue.poll()) != null;
+            }
         }
     }
 

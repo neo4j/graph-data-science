@@ -58,16 +58,13 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, long nodeId, Pregel.Messages messages) {
         long oldComponentId = context.longNodeValue(COMPONENT, nodeId);
         long newComponentId = oldComponentId;
 
-        if (messages != null && !messages.isEmpty()) {
-            Double nextComponentId;
-            while ((nextComponentId = messages.poll()) != null) {
-                if (nextComponentId.longValue() < newComponentId) {
-                    newComponentId = nextComponentId.longValue();
-                }
+        for (var nextComponentId : messages) {
+            if (nextComponentId.longValue() < newComponentId) {
+                newComponentId = nextComponentId.longValue();
             }
         }
 
