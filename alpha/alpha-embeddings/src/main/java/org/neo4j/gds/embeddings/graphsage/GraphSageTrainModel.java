@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingVariable;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -195,7 +195,7 @@ public class GraphSageTrainModel {
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable<Matrix> embeddingVariable = embeddingVariable(graph, totalBatch, features, this.layers);
+        Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 

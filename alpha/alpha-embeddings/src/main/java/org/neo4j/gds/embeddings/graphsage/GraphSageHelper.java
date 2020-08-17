@@ -37,7 +37,7 @@ final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    static Variable<Matrix> embeddingVariable(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
+    static Variable<Matrix> embeddings(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -45,7 +45,7 @@ final class GraphSageHelper {
         Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
-        Variable<Matrix> previousLayerRepresentations = featureVariables(
+        Variable<Matrix> previousLayerRepresentations = features(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
             features
         );
@@ -63,7 +63,7 @@ final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    private static Variable<Matrix> featureVariables(long[] nodeIds, HugeObjectArray<double[]> features) {
+    private static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
