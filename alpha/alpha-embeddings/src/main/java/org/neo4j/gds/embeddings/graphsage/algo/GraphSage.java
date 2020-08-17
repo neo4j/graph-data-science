@@ -31,7 +31,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatu
 
 public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
-    public static final String ALGO_TYPE = "graphSage";
+    public static final String MODEL_TYPE = "graphSage";
 
     private final Graph graph;
     private final GraphSageBaseConfig config;

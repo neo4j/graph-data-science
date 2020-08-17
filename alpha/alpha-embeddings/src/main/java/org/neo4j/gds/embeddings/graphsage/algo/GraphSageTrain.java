@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
-import static org.neo4j.gds.embeddings.graphsage.algo.GraphSage.ALGO_TYPE;
 
 public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageModel>> {
 
@@ -48,7 +47,7 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageMod
             graph,
             initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
         );
-        return Model.of(config.modelName(), ALGO_TYPE, GraphSageModel.of(trainResult.layers(), config.nodePropertyNames(),
+        return Model.of(config.modelName(), GraphSage.MODEL_TYPE, GraphSageModel.of(trainResult.layers(), config.nodePropertyNames(),
             config.degreeAsProperty()
         ));
     }
