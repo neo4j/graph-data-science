@@ -42,7 +42,7 @@ import java.util.stream.LongStream;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class GraphSageTrainModelTest {
+class GraphSageModelTrainerTest {
 
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_SIZE = 64;
@@ -84,9 +84,9 @@ class GraphSageTrainModelTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageTrainModel(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, new TestLog());
 
-        GraphSageTrainModel.ModelTrainResult result = trainModel.train(graph, features);
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
         Layer[] layers = result.layers();
         assertEquals(2, layers.length);
@@ -111,9 +111,9 @@ class GraphSageTrainModelTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageTrainModel(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, new TestLog());
 
-        GraphSageTrainModel.ModelTrainResult result = trainModel.train(graph, features);
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
         assertEquals(2, layers.length);
 

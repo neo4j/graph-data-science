@@ -49,7 +49,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class GraphSageTrainModel {
+public class GraphSageModelTrainer {
     private final Layer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
@@ -62,7 +62,7 @@ public class GraphSageTrainModel {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageTrainModel(GraphSageTrainConfig config, Log log) {
+    public GraphSageModelTrainer(GraphSageTrainConfig config, Log log) {
         this.layers = config.layerConfigs().stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);

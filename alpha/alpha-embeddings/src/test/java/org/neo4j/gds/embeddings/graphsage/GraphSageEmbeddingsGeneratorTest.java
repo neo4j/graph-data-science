@@ -84,9 +84,9 @@ class GraphSageEmbeddingsGeneratorTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageTrainModel(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, new TestLog());
 
-        GraphSageTrainModel.ModelTrainResult result = trainModel.train(graph, features);
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             result.layers(),
