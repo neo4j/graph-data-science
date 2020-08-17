@@ -39,7 +39,6 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
 
-    // Training
     @Value.Default
     default int embeddingSize() {
         return 64;
@@ -50,7 +49,6 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return List.of(25L, 10L);
     }
 
-    // Training
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
     @Value.Default
@@ -58,7 +56,6 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return Aggregator.AggregatorType.MEAN;
     }
 
-    // Training
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
     @Value.Default
@@ -66,26 +63,22 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return ActivationFunction.SIGMOID;
     }
 
-    // Training
     @Value.Default
     @Override
     default double tolerance() {
         return DEFAULT_TOLERANCE;
     }
 
-    // Training
     @Value.Default
     default double learningRate() {
         return DEFAULT_LEARNING_RATE;
     }
 
-    // Training
     @Value.Default
     default int epochs() {
         return DEFAULT_EPOCHS;
     }
 
-    // Training
     @Value.Default
     @Override
     default int maxIterations() {
@@ -97,7 +90,6 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, TrainConfig {
         return DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
     }
 
-    // Training?
     // TODO: may be move this out
     @Configuration.Ignore
     default Collection<LayerConfig> layerConfigs() {
