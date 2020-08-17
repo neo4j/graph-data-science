@@ -30,7 +30,7 @@ import java.util.stream.DoubleStream;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class GraphSageAlgoBase<ALGO extends GraphSageAlgoBase<ALGO, RESULT, CONFIG>, RESULT, CONFIG extends GraphSageBaseConfig>
+public abstract class GraphSageBaseAlgo<ALGO extends GraphSageBaseAlgo<ALGO, RESULT, CONFIG>, RESULT, CONFIG extends GraphSageBaseConfig>
     extends Algorithm<ALGO, RESULT> {
 
     public static final String ALGO_TYPE = "graphSage";
@@ -39,7 +39,7 @@ public abstract class GraphSageAlgoBase<ALGO extends GraphSageAlgoBase<ALGO, RES
     protected final List<NodeProperties> nodeProperties;
     private final boolean useDegreeAsProperty;
 
-    GraphSageAlgoBase(Graph graph, CONFIG config) {
+    GraphSageBaseAlgo(Graph graph, CONFIG config) {
         this.useDegreeAsProperty = config.degreeAsProperty();
         this.graph = graph;
 
