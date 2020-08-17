@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.TrainConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,16 +30,16 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelCatalog {
 
-    private static final Map<String, Model<?>> modelCatalog = new ConcurrentHashMap<>();
+    private static final Map<String, Model<?, ?>> modelCatalog = new ConcurrentHashMap<>();
 
     private ModelCatalog() {}
 
-    public static void set(Model<?> model) {
+    public static void set(Model<?, ?> model) {
         modelCatalog.put(model.name(), model);
     }
 
-    public static <T> Model<T> get(String modelName) {
-        Model<T> model = (Model<T>) modelCatalog.get(modelName);
+    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(String modelName) {
+        Model<D, C> model = (Model<D, C>) modelCatalog.get(modelName);
         if (model == null) {
             throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
         }
@@ -54,8 +55,11 @@ public final class ModelCatalog {
             .map(Model::algoType);
     }
 
-    @Nullable
-    public static <T> Model<T> drop(String modelName) {
-        return (Model<T>) modelCatalog.remove(modelName);
+    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> drop(String modelName) {
+        Model<D, C> model = (Model<D, C>) modelCatalog.remove(modelName);
+        if (model == null) {
+            throw new IllegalArgumentException(formatWithLocale("Model with name `%s` does not exist and can't be removed.", modelName));
+        }
+        return model;
     }
 }

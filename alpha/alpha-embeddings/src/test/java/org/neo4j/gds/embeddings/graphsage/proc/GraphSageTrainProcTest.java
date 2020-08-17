@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.graphsage.proc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModel;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.model.Model;
@@ -71,11 +71,11 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        Model<GraphSageModel> model = ModelCatalog.get(modelName);
+        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(modelName);
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
 
-        GraphSageTrainConfig trainConfig = model.data().config();
+        GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
         assertEquals(1, trainConfig.concurrency());
         assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.nodePropertyNames());

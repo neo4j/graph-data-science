@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
@@ -27,7 +28,7 @@ import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 
-public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageModel>> {
+public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Layer[], GraphSageTrainConfig>> {
 
     private final Graph graph;
     private final GraphSageTrainConfig config;
@@ -40,14 +41,14 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<GraphSageMod
     }
 
     @Override
-    public Model<GraphSageModel> compute() {
+    public Model<Layer[], GraphSageTrainConfig> compute() {
         var graphSageModel = new GraphSageModelTrainer(config, log);
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
             initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
         );
-        return Model.of(config.modelName(), GraphSage.MODEL_TYPE, GraphSageModel.of(trainResult.layers(), config));
+        return Model.of(config.modelName(), GraphSage.MODEL_TYPE, trainResult.layers(), config);
     }
 
     @Override

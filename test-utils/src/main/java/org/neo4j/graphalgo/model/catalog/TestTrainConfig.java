@@ -17,17 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.model.catalog;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
-import org.neo4j.graphalgo.core.model.Model;
 
-public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>>,
-    TRAIN_RESULT,
-    TRAIN_CONFIG extends TrainConfig & AlgoBaseConfig,
-    PROC_RESULT> extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
+@ValueClass
+@Configuration("TestTrainConfigImpl")
+@SuppressWarnings("immutables:subtype")
+public interface TestTrainConfig extends BaseConfig, TrainConfig {
 
-    protected abstract PROC_RESULT trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult);
+    @Value.Default
+    default String dummyConfigProperty() {
+        return "dummyConfigProperty";
+    }
 
+    static TestTrainConfig of() {
+        return ImmutableTestTrainConfig.of("username", "modelName", "dummyProperty");
+    }
 }

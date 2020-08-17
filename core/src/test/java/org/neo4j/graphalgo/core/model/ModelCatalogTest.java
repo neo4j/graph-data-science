@@ -20,20 +20,23 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModelCatalogTest {
 
     @Test
     void shouldStoreModels() {
-        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
 
         ModelCatalog.set(model);
 
@@ -52,7 +55,7 @@ class ModelCatalogTest {
 
     @Test
     void checksIfModelExists() {
-        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
 
         ModelCatalog.set(model);
 
@@ -62,7 +65,7 @@ class ModelCatalogTest {
 
     @Test
     void getModelType() {
-        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testData", TestTrainConfig.of());
         ModelCatalog.set(model);
 
         Optional<String> testModel = ModelCatalog.type("testModel");
@@ -76,8 +79,8 @@ class ModelCatalogTest {
         assertTrue(bogusModel.isEmpty());
     }
     @Test
-    void dropsModel() {
-        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+    void shouldDropModel() {
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
         ModelCatalog.set(model);
 
         assertTrue(ModelCatalog.exists("testModel"));

@@ -20,9 +20,10 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.TrainConfig;
 
 @ValueClass
-public interface Model<DATA> {
+public interface Model<DATA, CONFIG extends TrainConfig> {
 
     String name();
 
@@ -30,7 +31,9 @@ public interface Model<DATA> {
 
     DATA data();
 
-    static <T> Model<T> of(String name, String algoType, T modelData) {
-        return ImmutableModel.of(name, algoType, modelData);
+    CONFIG trainConfig();
+
+    static <D, C extends TrainConfig> Model<D, C> of(String name, String algoType, D modelData, C trainConfig) {
+        return ImmutableModel.of(name, algoType, modelData, trainConfig);
     }
 }

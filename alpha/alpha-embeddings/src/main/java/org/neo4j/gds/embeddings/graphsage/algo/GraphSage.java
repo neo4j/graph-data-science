@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -43,15 +44,15 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     @Override
     public GraphSageResult compute() {
-        Model<GraphSageModel> model = ModelCatalog.get(config.modelName());
-        GraphSageModel graphSageModel = model.data();
+        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(config.modelName());
+        Layer[] layers = model.data();
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
-            graphSageModel.layers(),
+            layers,
             config.batchSize(),
             config.concurrency()
         );
 
-        GraphSageTrainConfig trainConfig = graphSageModel.config();
+        GraphSageTrainConfig trainConfig = model.trainConfig();
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
             initializeFeatures(
