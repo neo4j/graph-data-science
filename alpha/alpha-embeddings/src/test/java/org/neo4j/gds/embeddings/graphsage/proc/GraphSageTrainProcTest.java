@@ -67,7 +67,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         Model<Layer[]> model = (Model<Layer[]>) ModelCatalog.get(modelName);
         assertEquals(modelName, model.name());
-        assertEquals(GraphSage.ALGO_TYPE, model.algoType());
+        assertEquals(GraphSage.MODEL_TYPE, model.algoType());
     }
 
 }
