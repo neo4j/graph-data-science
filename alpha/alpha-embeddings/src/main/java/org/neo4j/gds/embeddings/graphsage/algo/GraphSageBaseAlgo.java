@@ -33,7 +33,7 @@ import static java.util.stream.Collectors.toList;
 public abstract class GraphSageBaseAlgo<ALGO extends GraphSageBaseAlgo<ALGO, RESULT, CONFIG>, RESULT, CONFIG extends GraphSageBaseConfig>
     extends Algorithm<ALGO, RESULT> {
 
-    public static final String ALGO_TYPE = "graphSage";
+    public static final String MODEL_TYPE = "GraphSAGE";
 
     protected final Graph graph;
     protected final List<NodeProperties> nodeProperties;

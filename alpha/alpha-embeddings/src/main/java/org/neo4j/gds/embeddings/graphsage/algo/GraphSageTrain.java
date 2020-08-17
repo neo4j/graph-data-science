@@ -39,7 +39,7 @@ public class GraphSageTrain extends GraphSageBaseAlgo<GraphSageTrain, GraphSageT
     @Override
     public TrainedModel compute() {
         GraphSageTrainModel.ModelTrainResult trainResult = graphSageModel.train(graph, initializeFeatures());
-        return new TrainedModel(config.modelName(), ALGO_TYPE, trainResult.layers());
+        return new TrainedModel(config.modelName(), MODEL_TYPE, trainResult.layers());
     }
 
     @Override
@@ -54,22 +54,22 @@ public class GraphSageTrain extends GraphSageBaseAlgo<GraphSageTrain, GraphSageT
 
     public static class TrainedModel {
 
-        String modelName;
-        String algoType;
+        String name;
+        String type;
         Layer[] layers;
 
-        TrainedModel(String modelName, String algoType, Layer[] layers) {
-            this.modelName = modelName;
-            this.algoType = algoType;
+        TrainedModel(String name, String type, Layer[] layers) {
+            this.name = name;
+            this.type = type;
             this.layers = layers;
         }
 
         public String modelName() {
-            return modelName;
+            return name;
         }
 
         public String algoType() {
-            return algoType;
+            return type;
         }
 
     }

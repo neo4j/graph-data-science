@@ -29,8 +29,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.config.TrainConfig.ALGO_TYPE_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
@@ -58,7 +58,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             Map<String, Object> modelInfo = (Map<String, Object>) resultRow.get("modelInfo");
             assertNotNull(modelInfo);
             assertEquals(modelName, modelInfo.get(MODEL_NAME_KEY));
-            assertEquals(GraphSage.ALGO_TYPE, modelInfo.get(ALGO_TYPE_KEY));
+            assertEquals(GraphSage.MODEL_TYPE, modelInfo.get(MODEL_TYPE_KEY));
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
     }

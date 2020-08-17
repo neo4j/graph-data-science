@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.graphalgo.config.TrainConfig.ALGO_TYPE_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain.TrainedModel, GraphSageTrainProc.TrainResult, GraphSageTrainConfig> {
 
@@ -63,14 +63,16 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return GraphSageTrainConfig.of(
-            username, graphName, maybeImplicitCreate, config);
+        return GraphSageTrainConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
     protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig>) (graph, configuration, tracker, log) -> new GraphSageTrain(
-            graph, configuration, log);
+            graph,
+            configuration,
+            log
+        );
     }
 
     public static class TrainResult {
@@ -89,7 +91,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, GraphSageTrain
             this.graphName = graphSageTrainConfig.graphName().orElse("");
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.modelName());
-            modelInfo.put(ALGO_TYPE_KEY, trainedModel.algoType());
+            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
             this.configuration = graphSageTrainConfig.toMap();
             this.trainMillis = trainMillis;
         }
