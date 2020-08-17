@@ -26,7 +26,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,7 +88,12 @@ class ModelCatalogTest {
     }
 
     @Test
-    void returnsNullWhenTryingToDropNonExistingModel() {
-        assertNull(ModelCatalog.drop("bogusModel"));
+    void failsWhenTryingToDropNonExistingModel() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.drop("something")
+        );
+
+        assertEquals("Model with name `something` does not exist and can't be removed.", ex.getMessage());
     }
 }
