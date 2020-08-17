@@ -40,12 +40,6 @@ import java.util.Optional;
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
-    double DEFAULT_TOLERANCE = 1e-4;
-    double DEFAULT_LEARNING_RATE = 0.1;
-    int DEFAULT_EPOCHS = 1;
-    int DEFAULT_MAX_ITERATIONS = 10;
-    int DEFAULT_MAX_SEARCH_DEPTH = 5;
-    int DEFAULT_NEGATIVE_SAMPLE_WEIGHT = 20;
 
     @Value.Default
     default int embeddingSize() {
@@ -74,33 +68,33 @@ public interface GraphSageTrainConfig extends GraphSageBaseConfig, IterationsCon
     @Value.Default
     @Override
     default double tolerance() {
-        return DEFAULT_TOLERANCE;
+        return 1e-4;
     }
 
     @Value.Default
     default double learningRate() {
-        return DEFAULT_LEARNING_RATE;
+        return 0.1;
     }
 
     @Value.Default
     default int epochs() {
-        return DEFAULT_EPOCHS;
+        return 1;
     }
 
     @Value.Default
     @Override
     default int maxIterations() {
-        return DEFAULT_MAX_ITERATIONS;
+        return 10;
     }
 
     @Value.Default
     default int searchDepth() {
-        return DEFAULT_MAX_SEARCH_DEPTH;
+        return 5;
     }
 
     @Value.Default
     default int negativeSampleWeight() {
-        return DEFAULT_NEGATIVE_SAMPLE_WEIGHT;
+        return 20;
     }
 
     @Value.Default
