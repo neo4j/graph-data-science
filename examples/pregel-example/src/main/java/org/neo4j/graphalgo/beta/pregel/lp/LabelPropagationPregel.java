@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import java.util.Arrays;
-import java.util.Queue;
 
 /**
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
@@ -50,7 +49,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             context.sendMessages(nodeId, nodeId);
         } else {
@@ -63,9 +62,9 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
                 long[] buffer = new long[context.getDegree(nodeId)];
 
                 int messageCount = 0;
-                Double nextMessage;
-                while (!(nextMessage = messages.poll()).isNaN()) {
-                    buffer[messageCount++] = nextMessage.longValue();
+
+                for (var message : messages) {
+                    buffer[messageCount++] = message.longValue();
                 }
 
                 int maxOccurences = 1;

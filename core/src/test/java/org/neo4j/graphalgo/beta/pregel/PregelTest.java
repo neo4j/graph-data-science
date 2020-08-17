@@ -29,14 +29,13 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Queue;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -154,17 +153,15 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Queue<Double> messages) {
+        public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Pregel.Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.setNodeValue(KEY, nodeId, 0.0);
                 context.sendMessages(nodeId, 1.0);
-            } else if (messages != null) {
+            } else {
                 double messageSum = 0.0;
-                Double nextMessage;
-                while (!(nextMessage = messages.poll()).isNaN()) {
-                    messageSum += nextMessage.longValue();
+                for (Double message : messages) {
+                    messageSum += message.longValue();
                 }
-
                 context.setNodeValue(KEY, nodeId, messageSum);
             }
             context.voteToHalt(nodeId);
@@ -207,7 +204,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext.ComputeContext<CompositeTestComputationConfig> context, long nodeId, Queue<Double> messages) {
+        public void compute(PregelContext.ComputeContext<CompositeTestComputationConfig> context, long nodeId, Pregel.Messages messages) {
             if (!context.isInitialSuperstep()) {
                 context.setNodeValue("a", nodeId, context.doubleNodeValue("a", nodeId) * 2);
                 context.setNodeValue("b", nodeId, context.longNodeValue("b", nodeId) * 2);

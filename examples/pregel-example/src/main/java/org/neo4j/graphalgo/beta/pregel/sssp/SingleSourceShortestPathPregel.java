@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
-import java.util.Queue;
 
 import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
@@ -58,7 +57,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, long nodeId, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             if (nodeId == context.getConfig().startNode()) {
                 context.sendMessages(nodeId, 1);
@@ -68,13 +67,10 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
             long newDistance = context.longNodeValue(DISTANCE, nodeId);
             boolean hasChanged = false;
 
-            if (messages != null) {
-                Double message;
-                while ((message = messages.poll()) != null) {
-                    if (message < newDistance) {
-                        newDistance = message.longValue();
-                        hasChanged = true;
-                    }
+            for (var message : messages) {
+                if (message < newDistance) {
+                    newDistance = message.longValue();
+                    hasChanged = true;
                 }
             }
 

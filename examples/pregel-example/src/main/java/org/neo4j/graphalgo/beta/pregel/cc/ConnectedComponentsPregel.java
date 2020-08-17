@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Queue;
-
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.MUTATE;
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STATS;
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;

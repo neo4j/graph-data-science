@@ -19,17 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import java.util.Queue;
-
 public interface PregelComputation<C extends PregelConfig> {
 
     Pregel.NodeSchema nodeSchema();
 
     default void init(PregelContext.InitContext<C> context, long nodeId) {}
 
-    default void compute(PregelContext.ComputeContext<C> context, long nodeId, Queue<Double> messages){ }
-
-    default void compute(PregelContext.ComputeContext<C> context, long nodeId, Pregel.Messages messages) { }
+    void compute(PregelContext.ComputeContext<C> context, long nodeId, Pregel.Messages messages);
 
     default double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
         return nodeValue;

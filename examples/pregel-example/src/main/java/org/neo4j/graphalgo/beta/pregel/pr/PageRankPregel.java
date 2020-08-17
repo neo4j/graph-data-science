@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
-import java.util.Queue;
 
 @PregelProcedure(name = "example.pregel.pr", modes = {GDSMode.STREAM, GDSMode.MUTATE})
 public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
@@ -58,17 +57,14 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PageRankPregelConfig> context, long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<PageRankPregelConfig> context, long nodeId, Pregel.Messages messages) {
         double newRank = context.doubleNodeValue(PAGE_RANK, nodeId);
 
         // compute new rank based on neighbor ranks
         if (!context.isInitialSuperstep()) {
             double sum = 0;
-            if (messages != null) {
-                Double nextMessage;
-                while (!(nextMessage = messages.poll()).isNaN()) {
-                    sum += nextMessage;
-                }
+            for (var message : messages) {
+                sum += message;
             }
 
             var dampingFactor = context.getConfig().dampingFactor();

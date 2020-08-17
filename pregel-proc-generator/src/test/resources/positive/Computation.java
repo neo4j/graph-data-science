@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Queue;
-
 @PregelProcedure(
     name = "gds.pregel.test",
     description = "Test computation description",
@@ -42,7 +40,7 @@ public class Computation implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    public void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Pregel.Messages messages) {
 
     }
 }
