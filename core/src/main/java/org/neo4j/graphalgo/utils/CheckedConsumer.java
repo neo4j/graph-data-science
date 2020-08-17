@@ -17,40 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.utils;
 
-/**
- * Bi-directional mapping between two id spaces.
- */
-public interface IdMapping {
+import java.util.function.Consumer;
 
-    /**
-     * Defines the lower bound of mapped ids
-     * TODO: function?
-     */
-    long START_NODE_ID = 0;
+@FunctionalInterface
+public interface CheckedConsumer<T, E extends Exception> extends Consumer<T> {
 
-    /**
-     * Map original nodeId to inner nodeId
-     */
-    long toMappedNodeId(long nodeId);
-
-    /**
-     * Map inner nodeId back to original nodeId
-     */
-    long toOriginalNodeId(long nodeId);
-
-    /**
-     * Returns true iff the nodeId is mapped, otherwise false.
-     */
-    boolean contains(long nodeId);
-
-    /**
-     * Number of mapped nodeIds.
-     */
-    long nodeCount();
-
-    default IdMapping cloneIdMapping() {
-        return this;
+    static <T, E extends Exception> CheckedConsumer<T, E> consumer(CheckedConsumer<T, E> consumer) {
+        return consumer;
     }
+
+    @Override
+    default void accept(T t) {
+        try {
+            checkedAccept(t);
+        } catch (Exception e) {
+            ExceptionUtil.throwIfUnchecked(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    void checkedAccept(T t) throws E;
 }
