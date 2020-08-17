@@ -32,6 +32,8 @@ import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class ModelExistsProcTest  extends BaseProcTest {
 
+    private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelExistsProc.class);
@@ -42,21 +44,35 @@ class ModelExistsProcTest  extends BaseProcTest {
         String existingModel = "testModel";
         ModelCatalog.set(Model.of(existingModel, "testAlgo", "testData"));
 
-        String existsQuery = "CALL gds.beta.model.exists($modelName)";
         assertCypherResult(
-            existsQuery,
-            Map.of("modelName", existingModel),
+            EXISTS_QUERY,
+            Map.of(
+                "modelName", existingModel
+            ),
             singletonList(
-                map("modelName", existingModel, "exists", true)
+                map(
+                    "modelName", existingModel,
+                    "modelType", "testAlgo",
+                    "exists", true
+                )
             )
         );
+    }
+
+    @Test
+    void returnsCorrectResultForNonExistingModel() {
 
         String bogusModel = "bogusModel";
         assertCypherResult(
-            existsQuery,
-            Map.of("modelName", bogusModel),
+            EXISTS_QUERY,
+            Map.of(
+                "modelName", bogusModel),
             singletonList(
-                map("modelName", bogusModel, "exists", false)
+                map(
+                    "modelName", bogusModel,
+                    "modelType", "n/a",
+                    "exists", false
+                )
             )
         );
     }

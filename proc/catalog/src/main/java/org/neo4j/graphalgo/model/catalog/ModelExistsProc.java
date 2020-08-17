@@ -37,15 +37,21 @@ public class ModelExistsProc extends ModelCatalogProc {
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        return Stream.of(new ModelExistsResult(modelName, ModelCatalog.exists(modelName)));
+        return Stream.of(new ModelExistsResult(
+            modelName,
+            ModelCatalog.type(modelName).orElse("n/a"),
+            ModelCatalog.exists(modelName)
+        ));
     }
 
     public static class ModelExistsResult {
         public final String modelName;
+        public final String modelType;
         public final boolean exists;
 
-        ModelExistsResult(String modelName, boolean exists) {
+        ModelExistsResult(String modelName, String modelType, boolean exists) {
             this.modelName = modelName;
+            this.modelType = modelType;
             this.exists = exists;
         }
     }

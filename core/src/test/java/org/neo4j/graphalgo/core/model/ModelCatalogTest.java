@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -46,6 +48,7 @@ class ModelCatalogTest {
 
         assertEquals("No model with model name `something` was found.", ex.getMessage());
     }
+
     @Test
     void checksIfModelExists() {
         Model<String> model = Model.of("testModel", "testAlgo", "testData");
@@ -56,4 +59,19 @@ class ModelCatalogTest {
         assertFalse(ModelCatalog.exists("bogusModel"));
     }
 
+    @Test
+    void getModelType() {
+        Model<String> model = Model.of("testModel", "testAlgo", "testData");
+        ModelCatalog.set(model);
+
+        Optional<String> testModel = ModelCatalog.type("testModel");
+        assertFalse(testModel.isEmpty());
+        assertEquals("testAlgo", testModel.get());
+    }
+
+    @Test
+    void getNonExistingModelType() {
+        Optional<String> bogusModel = ModelCatalog.type("bogusModel");
+        assertTrue(bogusModel.isEmpty());
+    }
 }

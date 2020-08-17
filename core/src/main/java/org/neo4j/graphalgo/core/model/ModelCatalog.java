@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -43,5 +44,10 @@ public final class ModelCatalog {
 
     public static boolean exists(String modelName) {
         return modelCatalog.containsKey(modelName);
+    }
+
+    public static Optional<String> type(String modelName) {
+        return Optional.ofNullable(modelCatalog.get(modelName))
+            .map(Model::algoType);
     }
 }
