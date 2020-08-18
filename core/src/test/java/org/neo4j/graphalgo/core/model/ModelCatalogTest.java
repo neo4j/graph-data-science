@@ -144,6 +144,29 @@ class ModelCatalogTest {
         assertEquals("Model with name `something` does not exist and can't be removed.", ex.getMessage());
     }
 
+    @Test
+    void shouldListModels() {
+        Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "modelData1", TestTrainConfig.of());
+        Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        ModelCatalog.set(model1);
+        ModelCatalog.set(model2);
+
+
+        Collection<Model<?, ?>> models = ModelCatalog.list();
+        assertEquals(2, models.size());
+        Map<String, ? extends Model<?, ?>> modelsMap = models
+            .stream()
+            .collect(Collectors.toMap(Model::name, model -> model));
+
+        assertEquals(model1, modelsMap.get(model1.name()));
+        assertEquals(model2, modelsMap.get(model2.name()));
+    }
+
+    @Test
+    void shouldReturnEmptyList() {
+        assertEquals(0, ModelCatalog.list().size());
+    }
+
     @ValueClass
     @Configuration("ModelCatalogTestTrainConfigImpl")
     @SuppressWarnings("immutables:subtype")

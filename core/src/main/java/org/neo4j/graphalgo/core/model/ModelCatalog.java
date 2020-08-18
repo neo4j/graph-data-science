@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.model;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -85,5 +86,9 @@ public final class ModelCatalog {
             throw new IllegalArgumentException(formatWithLocale("Model with name `%s` does not exist and can't be removed.", modelName));
         }
         return model;
+    }
+
+    public static Collection<Model<?, ?>> list() {
+        return modelCatalog.values();
     }
 }
