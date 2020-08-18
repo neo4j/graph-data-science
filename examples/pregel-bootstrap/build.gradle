@@ -1,13 +1,17 @@
 plugins {
     // Apply the java plugin to add support for Java
     id 'java'
+    // Used for building a standalone jar
     id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
 ext {
     // Make sure these are the same as your installation of GDS and Neo4j
-    gdsVersion = '1.2.2'
-    neo4jVersion = '4.0.6'
+    gdsVersion = '1.4.0-alpha03'
+    neo4jVersion = '4.1.1'
+
+    // Necessary to generate value classes for Pregel configs
+    immutablesVersion = '2.8.1'
 
     // Necessary compile-time dependency for code generation
     jetbrainsAnnotations = '18.0.0'
@@ -16,20 +20,23 @@ ext {
     junit5Version = '5.5.2'
 }
 
-description = 'Graph Data Science :: Pregel Training'
+description = 'Graph Data Science :: Pregel Bootstrap'
 
 dependencies {
     // We depend on the proc artifact of the GDS library
     compileOnly "org.neo4j.gds:proc:$gdsVersion"
-    compileOnly "org.neo4j.gds:algo-common:$gdsVersion"
+    compileOnly "org.neo4j.gds:core:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
     // Usually, Neo4j is available when we are running as a plugin.
     compileOnly "org.neo4j:neo4j:$neo4jVersion"
 
     // We need an annotation processor for our K1 configuration
+    annotationProcessor "org.immutables:value:$immutablesVersion"
     annotationProcessor "org.neo4j.gds:config-generator:$gdsVersion"
+    annotationProcessor "org.neo4j.gds:pregel-proc-generator:$gdsVersion"
     compileOnly         "org.jetbrains:annotations:$jetbrainsAnnotations"
+    compileOnly         "org.immutables:value-annotations:$immutablesVersion"
 
     // We need to provide GDS for the test as well, along with some test helpers
     testImplementation "org.neo4j.gds:test-utils:$gdsVersion"
@@ -47,10 +54,10 @@ test {
     useJUnitPlatform()
 }
 
-// If you have no extra dependencies you do not require the standalone JAR
+// This task produces a single jar.
+// The jar must be copied into the Neo4j plugin
+// directory in order to use the custom procedure.
 shadowJar {
-    baseName = "neo4j-gds-k1-pregel"
-    classifier = "standalone"
     exclude 'META-INF/versions/**/*'
 }
 
@@ -58,4 +65,5 @@ repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenLocal()
 }
