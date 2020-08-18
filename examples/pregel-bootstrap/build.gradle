@@ -66,4 +66,11 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
     mavenLocal()
+
+    // Used for internal CI support for that module.
+    // Can be removed in custom projects.
+    maven {
+        name = 'teamcity-artifacts'
+        url = "file://${rootProject.projectDir}/gds-repo"
+    }
 }
