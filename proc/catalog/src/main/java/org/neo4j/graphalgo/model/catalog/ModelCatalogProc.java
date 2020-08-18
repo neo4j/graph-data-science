@@ -20,10 +20,28 @@
 package org.neo4j.graphalgo.model.catalog;
 
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.model.Model;
+
+import java.util.Map;
 
 abstract class ModelCatalogProc {
 
     void validateModelName(String modelName) {
         CypherMapWrapper.failOnBlank("modelName", modelName);
+    }
+
+    public static class ModelResult {
+        public final Map<String, Object> modelInfo;
+        public final Map<String, Object> trainConfig;
+
+        public ModelResult(Model<?, ?> model) {
+            modelInfo = Map.of(
+                "modelName", model.name(),
+                "modelType", model.algoType()
+            );
+
+//            trainConfig = model.trainConfig();
+            trainConfig = Map.of();
+        }
     }
 }

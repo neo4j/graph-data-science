@@ -22,24 +22,22 @@ package org.neo4j.graphalgo.model.catalog;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelDropProc extends ModelCatalogProc {
+public class ModelListProc extends ModelCatalogProc {
 
-    private static final String DESCRIPTION = "Drops a model from the catalog and frees up the resources it occupies.";
+    private static final String DESCRIPTION = "Lists all models contained in the model catalog.";
 
-    @Procedure(name = "gds.beta.model.drop", mode = READ)
+    @Procedure(name = "gds.beta.model.list", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelResult> drop(@Name(value = "modelName") String modelName) {
-        validateModelName(modelName);
+    public Stream<ModelResult> list() {
+        Collection<Model<?, ?>> models = ModelCatalog.list();
 
-        Model<?, ?> drop = ModelCatalog.drop(modelName);
-
-        return Stream.of(new ModelResult(drop));
+        return models.stream().map(ModelResult::new);
     }
 }
