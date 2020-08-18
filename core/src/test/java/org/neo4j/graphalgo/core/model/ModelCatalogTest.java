@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -34,6 +35,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModelCatalogTest {
+
+    @AfterEach
+    void afterEach() {
+        ModelCatalog.removeAllLoadedModels();
+    }
 
     @Test
     void shouldStoreModels() {

@@ -52,6 +52,7 @@ The following table lists all production-quality graph operations in the GDS lib
 | Operation               | Procedure
 | Check if a model exists | `gds.beta.model.exists`
 | Remove a model          | `gds.beta.model.drop`
+| List models             | `gds.beta.model.list`
 |===
 
 [[production-quality-tier]]
