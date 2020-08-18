@@ -94,4 +94,8 @@ public final class ModelCatalog {
     public static Collection<Model<?, ?>> list() {
         return modelCatalog.values();
     }
+
+    public static void removeAllLoadedModels() {
+        modelCatalog.clear();
+    }
 }
