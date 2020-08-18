@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.model.catalog;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 abstract class ModelCatalogProc {
@@ -35,6 +36,7 @@ abstract class ModelCatalogProc {
     public static class ModelResult {
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> trainConfig;
+        public final ZonedDateTime creationTime;
 
         public ModelResult(Model<?, ?> model) {
             modelInfo = Map.of(
@@ -43,6 +45,8 @@ abstract class ModelCatalogProc {
             );
 
             trainConfig = Map.of();
+
+            creationTime = model.creationTime();
         }
     }
 }

@@ -29,9 +29,12 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -56,10 +59,16 @@ class ModelListProcTest extends BaseProcTest {
         ModelCatalog.set(model2);
 
         assertCypherResult(
-            formatWithLocale("CALL %s YIELD modelInfo RETURN modelInfo ORDER BY modelInfo.modelName", query),
+            formatWithLocale("CALL %s YIELD modelInfo, creationTime RETURN modelInfo, creationTime ORDER BY modelInfo.modelName", query),
             List.of(
-                map("modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1")),
-                map("modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"))
+                map(
+                    "modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "creationTime", isA(ZonedDateTime.class)
+                ),
+                map(
+                    "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "creationTime", isA(ZonedDateTime.class)
+                )
             )
         );
     }
@@ -81,8 +90,11 @@ class ModelListProcTest extends BaseProcTest {
 
         assertCypherResult(
             "CALL gds.beta.model.list('testModel2')",
-            List.of(
-                map("modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"))
+            singletonList(
+                map(
+                    "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "creationTime", isA(ZonedDateTime.class)
+                )
             )
         );
     }
