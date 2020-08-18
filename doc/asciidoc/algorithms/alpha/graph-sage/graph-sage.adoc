@@ -24,38 +24,6 @@ For more information on this algorithm see:
 [.tabbed-example]
 ====
 
-[.include-with-train]
-======
-.Run GraphSAGE in train mode on a named graph.
-[source, cypher]
-----
-CALL gds.alpha.graphSage.train(
-  graphName: String,
-  configuration: Map
-) YIELD
-    graphName: String,
-    modelInfo: Map,
-    configuration: Map,
-    trainMillis: Integer
-----
-
-include::../../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
-include::specific-train-configuration.adoc[]
-
-.Results
-[opts="header",cols="1m,1,6"]
-|===
-| Name          | Type    | Description
-| graphName     | String  | The name of the in-memory graph used during training
-| modelInfo     | Map     | Details of the trained model
-| configuration | Map     | The configuration used to run the procedure
-| trainMillis   | Integer | Milliseconds to train the model
-|===
-======
-
 [.include-with-stream]
 ======
 .Run GraphSAGE in stream mode on a named graph.
@@ -124,6 +92,37 @@ include::specific-configuration.adoc[]
 ======
 ====
 
+[.include-with-train]
+======
+.Run GraphSAGE in train mode on a named graph.
+[source, cypher]
+----
+CALL gds.alpha.graphSage.train(
+  graphName: String,
+  configuration: Map
+) YIELD
+  graphName: String,
+  modelInfo: Map,
+  configuration: Map,
+  trainMillis: Integer
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-train-configuration.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type    | Description
+| graphName     | String  | The name of the in-memory graph used during training
+| modelInfo     | Map     | Details of the trained model
+| configuration | Map     | The configuration used to run the procedure
+| trainMillis   | Integer | Milliseconds to train the model
+|===
+======
 
 [[algorithms-embeddings-graph-sage-syntax-anonymous]]
 === Anonymous graphs
@@ -214,20 +213,19 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 === Train
 
 Before we are able to generate node embeddings we need to train a model.
-Below is an example how to do that.
+Below is an example of how to do that.
 
-NOTE: The names specified in `nodePropertyNames` configuration parameter need to be exist into the in-memory graph.
+NOTE: The names specified in the `nodePropertyNames` configuration parameter must exist in the in-memory graph.
 
-[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+[source, cypher, role=query-example, no-result=true]
 ----
 CALL gds.alpha.graphSage.train(
   'persons',
   {
-    modelName: 'graphSage',
+    modelName: 'exampleTrainModel',
     nodePropertyNames: ['age', 'height', 'weight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
-    embeddingSize: 3,
     sampleSizes: [25, 10],
     degreeAsProperty: true
   }
@@ -237,7 +235,24 @@ CALL gds.alpha.graphSage.train(
 
 === Stream
 
-Once we have a trained model (named `graphSage`) we can use it to generate and stream the embeddings
+To generate embeddings and stream them back to the client we can use the stream mode.
+We must first train a model, which we do using the `gds.alpha.graphSage.train` procedure.
+
+[[graph-sage-trained-model-example]]
+[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+----
+CALL gds.alpha.graphSage.train(
+  'persons',
+  {
+    modelName: 'graphSage',
+    nodePropertyNames: ['age', 'height', 'weight'],
+    embeddingSize: 3,
+    degreeAsProperty: true
+  }
+)
+----
+
+Once we have trained a model (named `'graphSage'`) we can use it to generate and stream the embeddings.
 
 [source, cypher, role=query-example, no-result=true, test-group=graphSage]
 ----
@@ -266,7 +281,8 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 
 === Write
 
-Below is an example of how to generate node embeddings and store them in Neo4j.
+The <<graph-sage-trained-model-example, model trained as part of the stream example>> can be reused to write the results to Neo4j.
+Below is an example of how to achieve this.
 
 --
 [source, cypher, role=query-example, no-result=true, test-group=graphSage]
