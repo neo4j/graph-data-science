@@ -6,7 +6,8 @@ allprojects { proj ->
 
         proj.spotbugs {
             toolVersion = ver.spotbugsToolVersion
-            effort = "max"
+            effort = 'less'
+            reportLevel = 'high'
 
             // When  `ignoreFailures=false` the build will be failing on spotbugs errors
             ignoreFailures = true
