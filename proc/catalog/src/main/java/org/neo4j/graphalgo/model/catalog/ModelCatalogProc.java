@@ -26,6 +26,8 @@ import java.util.Map;
 
 abstract class ModelCatalogProc {
 
+    static final String NO_VALUE = "__NO_VALUE";
+
     void validateModelName(String modelName) {
         CypherMapWrapper.failOnBlank("modelName", modelName);
     }

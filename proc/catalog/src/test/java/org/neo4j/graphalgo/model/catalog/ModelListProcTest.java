@@ -19,8 +19,11 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -28,6 +31,7 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import java.util.List;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ModelListProcTest extends BaseProcTest {
 
@@ -36,15 +40,21 @@ class ModelListProcTest extends BaseProcTest {
         registerProcedures(ModelListProc.class);
     }
 
-    @Test
-    void listsModel() {
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
+    void listsModel(String query) {
         Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "testData", TestTrainConfig.of());
         Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
 
         assertCypherResult(
-            "CALL gds.beta.model.list()",
+            formatWithLocale("CALL %s YIELD modelInfo RETURN modelInfo ORDER BY modelInfo.modelName", query),
             List.of(
                 map("modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1")),
                 map("modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"))
@@ -57,6 +67,29 @@ class ModelListProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.beta.model.list()",
             List.of()
+        );
+    }
+
+    @Test
+    void returnSpecificModel() {
+        Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "testData", TestTrainConfig.of());
+        Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        ModelCatalog.set(model1);
+        ModelCatalog.set(model2);
+
+        assertCypherResult(
+            "CALL gds.beta.model.list('testModel2')",
+            List.of(
+                map("modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"))
+            )
+        );
+    }
+
+    @Test
+    void failOnEmptyModelName() {
+        assertError(
+            "CALL gds.beta.model.list('')",
+            "can not be null or blank"
         );
     }
 }
