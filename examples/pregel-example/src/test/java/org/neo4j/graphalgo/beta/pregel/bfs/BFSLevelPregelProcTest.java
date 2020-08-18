@@ -39,13 +39,18 @@ class BFSLevelPregelProcTest extends BaseProcTest {
         ", (b:Node)" +
         ", (c:Node)" +
         ", (d:Node)" +
-        // {J}
-        ", (j:Node)" +
-        // {A, B, C, D}
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (i:Node)" +
         ", (a)-[:TYPE]->(b)" +
-        ", (b)-[:TYPE]->(c)" +
+        ", (a)-[:TYPE]->(c)" +
         ", (b)-[:TYPE]->(d)" +
-        ", (a)-[:TYPE]->(c)";
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (d)-[:TYPE]->(f)" +
+        ", (e)-[:TYPE]->(g)" +
+        ", (f)-[:TYPE]->(g)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -62,19 +67,22 @@ class BFSLevelPregelProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("maxIterations", 10)
             .addParameter("startNode", 0)
-            .yields("nodeId", "value");
+            .yields("nodeId", "values");
 
         HashMap<Long, Long> actual = new HashMap<>();
         runQueryWithRowConsumer(query, r -> {
-            actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
+            actual.put(r.getNumber("nodeId").longValue(), ((Map<String, Long>) r.get("values")).get(BFSLevelPregel.LEVEL));
         });
 
-        var expected = Map.of(
+        Map<Long, Long> expected = Map.of(
             0L, 0L,
             1L, 1L,
             2L, 1L,
             3L, 2L,
-            4L, -1L
+            4L, 3L,
+            5L, 3L,
+            6L, 4L,
+            7L, -1L
         );
 
         assertThat(expected, mapEquals(actual));

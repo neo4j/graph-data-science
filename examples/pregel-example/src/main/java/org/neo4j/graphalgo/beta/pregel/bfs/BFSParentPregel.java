@@ -19,49 +19,53 @@
  */
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Queue;
-
 /**
- * setting the value for each node, to the node-id of its parent.
+ * Setting the value for each node to the node-id of its parent.
  * If there are multiple parents at the discovery level/iteration, the parent with the minimum id is chosen.
- *
  */
 @PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
 public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
 
-    private static final double NOT_FOUND = Double.MAX_VALUE;
+    private static final long NOT_FOUND = Long.MAX_VALUE;
+    public static final String PARENT = "parent";
 
     @Override
-    public void compute(PregelContext<BFSPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperstep()) {
-            if (nodeId == pregel.getConfig().startNode()) {
-                pregel.setNodeValue(nodeId, nodeId);
-                pregel.sendMessages(nodeId, nodeId);
-                pregel.voteToHalt(nodeId);
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder()
+            .putElement(PARENT, ValueType.LONG)
+            .build();
+    }
+
+    @Override
+    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, long nodeId, Pregel.Messages messages) {
+        if (context.isInitialSuperstep()) {
+            if (nodeId == context.getConfig().startNode()) {
+                context.setNodeValue(PARENT, nodeId, nodeId);
+                context.sendMessages(nodeId, nodeId);
+                context.voteToHalt(nodeId);
             } else {
-                pregel.setNodeValue(nodeId, NOT_FOUND);
+                context.setNodeValue(PARENT, nodeId, NOT_FOUND);
             }
-        } else if (messages != null && !messages.isEmpty()) {
-            double currentParent = pregel.getNodeValue(nodeId);
+        } else {
+            long currentParent = context.longNodeValue(PARENT, nodeId);
+
             if (currentParent == NOT_FOUND) {
-                Double message;
-                while ((message = messages.poll()) != null) {
-                    // somehow Double.NaN gets in the queue (although only nodeId values are send)
-                    if (!Double.isNaN(message)) {
-                        currentParent = Double.min(currentParent, message);
-                    }
+                for (var msg : messages) {
+                    currentParent = Long.min(currentParent, msg.longValue());
                 }
 
-                pregel.setNodeValue(nodeId, currentParent);
-                pregel.sendMessages(nodeId, nodeId);
-                pregel.voteToHalt(nodeId);
+                context.setNodeValue(PARENT, nodeId, currentParent);
+                context.sendMessages(nodeId, nodeId);
             }
-            pregel.voteToHalt(nodeId);
+            context.voteToHalt(nodeId);
         }
     }
 }

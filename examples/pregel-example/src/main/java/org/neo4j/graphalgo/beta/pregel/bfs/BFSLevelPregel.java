@@ -19,42 +19,49 @@
  */
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Queue;
-
 /**
- * setting the value for each node, to the level/iteration the node is discovered via BFS
+ * Setting the value for each node to the level/iteration the node is discovered via BFS.
  */
 @PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
 public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
 
-    private static final double NOT_FOUND = -1;
+    private static final long NOT_FOUND = -1;
+    public static final String LEVEL = "LEVEL";
 
     @Override
-    public void compute(PregelContext<BFSPregelConfig> pregel, long nodeId, Queue<Double> messages) {
-        if (pregel.isInitialSuperstep()) {
-            if (nodeId == pregel.getConfig().startNode()) {
-                pregel.setNodeValue(nodeId, 0);
-                pregel.sendMessages(nodeId, 1);
-                pregel.voteToHalt(nodeId);
-            } else {
-                pregel.setNodeValue(nodeId, NOT_FOUND);
-            }
-        } else {
-            Double level = pregel.getNodeValue(nodeId);
-            if (messages != null && level == NOT_FOUND) {
-                // TODO: verify there cannot be multiple messages with different values
-                level = messages.poll();
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder()
+            .putElement(LEVEL, ValueType.LONG)
+            .build();
+    }
 
-                pregel.setNodeValue(nodeId, level);
-                pregel.sendMessages(nodeId, level + 1);
-                pregel.voteToHalt(nodeId);
-                pregel.voteToHalt(nodeId);
+    @Override
+    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, long nodeId, Pregel.Messages messages) {
+        if (context.isInitialSuperstep()) {
+            if (nodeId == context.getConfig().startNode()) {
+                context.setNodeValue(LEVEL, nodeId, 0);
+                context.sendMessages(nodeId, 1);
+                context.voteToHalt(nodeId);
+            } else {
+                context.setNodeValue(LEVEL, nodeId, NOT_FOUND);
             }
+        } else if (messages.iterator().hasNext()) {
+            Long level = context.longNodeValue(LEVEL, nodeId);
+            if (level == NOT_FOUND) {
+                level = messages.iterator().next().longValue();
+
+                context.setNodeValue(LEVEL, nodeId, level);
+                context.sendMessages(nodeId, level + 1);
+            }
+            context.voteToHalt(nodeId);
         }
     }
 }

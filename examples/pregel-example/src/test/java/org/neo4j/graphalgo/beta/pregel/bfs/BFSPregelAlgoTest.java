@@ -23,13 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,26 +37,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @GdlExtension
 class BFSPregelAlgoTest {
 
-    /**
-     * Graph:
-     *         (i)
-     *     (b)   (e)
-     *    /  \  /  \
-     *  (a)  (d)   (g)
-     *    \  /  \  /
-     *    (c)   (f)
-     */
     @GdlGraph
     private static final String TEST_GRAPH =
-        " (a), (b), (c), (d), (e), (f), (g), (i)" +
-        " (a)-->(b)," +
-        " (a)-->(c)," +
-        " (b)-->(d)," +
-        " (c)-->(d)," +
-        " (d)-->(e)," +
-        " (d)-->(f)," +
-        " (e)-->(g)," +
-        " (f)-->(g)";;
+        "CREATE" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (i:Node)" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE]->(c)" +
+        ", (b)-[:TYPE]->(d)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(e)" +
+        ", (d)-[:TYPE]->(f)" +
+        ", (e)-[:TYPE]->(g)" +
+        ", (f)-[:TYPE]->(g)";
 
     @Inject
     private TestGraph graph;
@@ -71,7 +70,7 @@ class BFSPregelAlgoTest {
             .startNode(0)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             graph,
             config,
             new BFSLevelPregel(),
@@ -85,17 +84,18 @@ class BFSPregelAlgoTest {
         assertTrue(result.didConverge(), "Algorithm did not converge.");
         assertEquals(5, result.ranIterations());
 
-        var expected = new HashMap<String, Long>();
-        expected.put("a", 0L);
-        expected.put("b", 1L);
-        expected.put("c", 1L);
-        expected.put("d", 2L);
-        expected.put("e", 3L);
-        expected.put("f", 3L);
-        expected.put("g", 4L);
-        expected.put("i", -1L);
+       var expected = Map.of(
+            "a", 0L,
+            "b", 1L,
+            "c", 1L,
+            "d", 2L,
+            "e", 3L,
+            "f", 3L,
+            "g", 4L,
+            "i", -1L
+        );
 
-        TestSupport.assertLongValues(graph, (nodeId) -> (long) result.nodeValues().get(nodeId), expected);
+        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSLevelPregel.LEVEL,nodeId), expected);
     }
 
     @Test
@@ -108,7 +108,7 @@ class BFSPregelAlgoTest {
             .startNode(0)
             .build();
 
-        var pregelJob = Pregel.withDefaultNodeValues(
+        var pregelJob = Pregel.create(
             graph,
             config,
             new BFSParentPregel(),
@@ -120,18 +120,19 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(5, result.ranIterations());
+        assertEquals(4, result.ranIterations());
 
-        var expected = new HashMap<String, Double>();
-        expected.put("a", 0D);
-        expected.put("b", 0D);
-        expected.put("c", 0D);
-        expected.put("d", 1D);
-        expected.put("e", 3D);
-        expected.put("f", 3D);
-        expected.put("g", 4D);
-        expected.put("i", Double.MAX_VALUE);
+        var expected = Map.of(
+            "a", 0L,
+            "b", 0L,
+            "c", 0L,
+            "d", 1L,
+            "e", 3L,
+            "f", 3L,
+            "g", 4L,
+            "i", Long.MAX_VALUE
+        );
 
-        TestSupport.assertDoubleValues(graph, (nodeId) -> result.nodeValues().get(nodeId), expected, 0);
+        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
     }
 }
