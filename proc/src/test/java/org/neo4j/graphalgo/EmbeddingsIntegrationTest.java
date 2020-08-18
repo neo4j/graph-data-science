@@ -28,6 +28,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
 import org.neo4j.gds.embeddings.randomprojections.RandomProjectionWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.Collection;
 import java.util.List;
@@ -88,6 +89,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
     @AfterEach
     void shutdown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+        ModelCatalog.removeAllLoadedModels();
     }
 
     @Test
