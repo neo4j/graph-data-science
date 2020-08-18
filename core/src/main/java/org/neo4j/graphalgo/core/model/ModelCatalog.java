@@ -36,6 +36,9 @@ public final class ModelCatalog {
     private ModelCatalog() {}
 
     public static void set(Model<?, ?> model) {
+        if (exists(model.name())) {
+            throw new IllegalArgumentException(formatWithLocale("Model with name `%s` already exists", model.name()));
+        }
         modelCatalog.put(model.name(), model);
     }
 

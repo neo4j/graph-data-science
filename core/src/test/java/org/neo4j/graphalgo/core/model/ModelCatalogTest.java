@@ -167,6 +167,18 @@ class ModelCatalogTest {
         assertEquals(0, ModelCatalog.list().size());
     }
 
+    @Test
+    void shouldThrowOnOverridingModels() {
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        ModelCatalog.set(model);
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.set(model)
+        );
+
+        assertEquals("Model with name `testModel` already exists", ex.getMessage());
+    }
+
     @ValueClass
     @Configuration("ModelCatalogTestTrainConfigImpl")
     @SuppressWarnings("immutables:subtype")
