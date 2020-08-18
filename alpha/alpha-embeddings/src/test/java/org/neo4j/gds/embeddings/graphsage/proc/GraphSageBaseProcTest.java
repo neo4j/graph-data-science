@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -113,6 +114,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+        ModelCatalog.removeAllLoadedModels();
     }
 
     static Stream<Arguments> configVariations() {
