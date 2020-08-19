@@ -28,8 +28,11 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.util.HashSet;
@@ -73,7 +76,19 @@ public interface GraphCreateFromStoreConfig extends GraphCreateConfig {
     @Configuration.Ignore
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
-        return loaderContext -> new NativeFactory(this, loaderContext);
+        return new GraphStoreFactory.Supplier() {
+            @Override
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext) {
+                return new NativeFactory(GraphCreateFromStoreConfig.this, loaderContext);
+            }
+
+            @Override
+            public GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> getWithDimension(
+                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
+            ) {
+                return new NativeFactory(GraphCreateFromStoreConfig.this, loaderContext, graphDimensions);
+            }
+        };
     }
 
     @Value.Check

@@ -56,4 +56,16 @@ public interface GraphLoaderContext {
     default TerminationFlag terminationFlag() {
         return TerminationFlag.RUNNING_TRUE;
     }
+
+    GraphLoaderContext NULL_CONTEXT_FOR_FICTITIOUS_LOADING = new GraphLoaderContext() {
+        @Override
+        public GraphDatabaseAPI api() {
+            return null;
+        }
+
+        @Override
+        public Log log() {
+            return null;
+        }
+    };
 }
