@@ -1,6 +1,6 @@
 [[algorithms-harmonic-centrality]]
 [.alpha]
-= Harmomic Centrality
+= Harmonic Centrality
 
 [abstract]
 --
