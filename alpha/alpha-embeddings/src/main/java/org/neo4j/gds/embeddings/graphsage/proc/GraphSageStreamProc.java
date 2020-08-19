@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class GraphSageStreamProc extends StreamProc<GraphSage, HugeObjectArray<double[]>, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
+public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
 
     static final String GRAPHSAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
 
@@ -53,11 +53,11 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, HugeObjectArray<d
     }
 
     @Override
-    protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, HugeObjectArray<double[]>, GraphSageStreamConfig> computationResult) {
+    protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig> computationResult) {
         var graph = computationResult.graph();
-        var embeddings = computationResult.result();
+        var result = computationResult.result();
 
-        if (embeddings == null) {
+        if (result == null) {
             return Stream.empty();
         }
 

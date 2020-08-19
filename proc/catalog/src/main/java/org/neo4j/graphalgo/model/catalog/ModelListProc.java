@@ -42,7 +42,7 @@ public class ModelListProc extends ModelCatalogProc {
             return models.stream().map(ModelResult::new);
         } else {
             validateModelName(modelName);
-            return Stream.of(new ModelResult(ModelCatalog.get(modelName)));
+            return Stream.of(new ModelResult(ModelCatalog.list(modelName)));
         }
     }
 }

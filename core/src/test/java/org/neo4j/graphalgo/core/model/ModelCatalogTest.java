@@ -27,7 +27,10 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

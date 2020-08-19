@@ -43,10 +43,7 @@ public final class ModelCatalog {
     }
 
     public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(String modelName, Class<D> dataClass, Class<C> configClass) {
-        Model<?, ?> model = modelCatalog.get(modelName);
-        if (model == null) {
-            throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
-        }
+        Model<?, ?> model = get(modelName);
 
         var data = model.data();
         if (!dataClass.isInstance(data)) {
@@ -95,7 +92,19 @@ public final class ModelCatalog {
         return modelCatalog.values();
     }
 
+    public static Model<?, ?> list(String modelName) {
+        return get(modelName);
+    }
+
     public static void removeAllLoadedModels() {
         modelCatalog.clear();
+    }
+
+    private static Model<?, ?> get(String modelName) {
+        Model<?, ?> model = modelCatalog.get(modelName);
+        if (model == null) {
+            throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
+        }
+        return model;
     }
 }
