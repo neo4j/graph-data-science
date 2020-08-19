@@ -104,16 +104,15 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
 
     @Override
     public Traverse compute() {
-        long sourceNode = graph.toMappedNodeId(startNodeId);
         LongArrayList result = new LongArrayList(nodeCount);
         BitSet inResult = new BitSet(nodeCount);
         nodes.clear();
         sources.clear();
         visited.clear();
-        nodeFunc.accept(nodes, sourceNode);
-        nodeFunc.accept(sources, sourceNode);
+        nodeFunc.accept(nodes, startNodeId);
+        nodeFunc.accept(sources, startNodeId);
         weightFunc.accept(weights, .0);
-        visited.set(sourceNode);
+        visited.set(startNodeId);
 
         loop:
         while (!nodes.isEmpty() && running()) {
