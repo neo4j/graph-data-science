@@ -19,9 +19,29 @@
  */
 package org.neo4j.gds.estimation.cli;
 
-public class App {
+import picocli.CommandLine;
 
-    public static void main(String[] args) {
-        System.out.println("args = " + args);
+import java.util.concurrent.Callable;
+
+@CommandLine.Command(description = "Estimates the memory consumption of a GDS procedure.",
+    name = "checksum", mixinStandardHelpOptions = true, version = "checksum 3.0")
+public class App implements Callable<Integer> {
+
+    @CommandLine.Option(
+        names = {"-p", "--procedure"},
+        description = "Procedure call, e.g. gds.pagerank.stream, gds.wcc.write, ...",
+        split = ","
+    )
+    private String[] procedures;
+
+    public static void main(String... args) {
+        int exitCode = new CommandLine(new App()).execute(args);
+        System.exit(exitCode);
+    }
+
+    @Override
+    public Integer call() {
+        System.out.println("procedures = " + procedures);
+        return 0;
     }
 }

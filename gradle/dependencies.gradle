@@ -37,6 +37,7 @@ ext {
             'metrics-core':                 '4.0.2',
             'mockito':                      '3.3.3',
             'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.1'),
+            'picocli':                      '4.5.0',
             'qala-datagen':                 '2.3.0',
             'RoaringBitmap':                '0.7.45',
             'spotbugsToolVersion':          '4.0.6',
