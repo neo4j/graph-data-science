@@ -90,7 +90,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertTrue(trainConfig.degreeAsProperty());
     }
 
-
     @Test
     void shouldFailOnMissingNodeProperties() {
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")

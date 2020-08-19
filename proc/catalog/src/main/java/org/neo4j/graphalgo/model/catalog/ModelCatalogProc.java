@@ -45,7 +45,7 @@ abstract class ModelCatalogProc extends BaseProc {
                 "modelType", model.algoType()
             );
 
-            trainConfig = Map.of();
+            trainConfig = model.trainConfig().toMap();
 
             creationTime = model.creationTime();
         }

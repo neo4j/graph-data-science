@@ -137,7 +137,6 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
         }
     }
 
-
     static GraphSageTrainConfig of(
         String username,
         Optional<String> graphName,

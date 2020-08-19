@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends TrainConfig> {
+public interface Model<DATA, CONFIG extends TrainConfig & BaseConfig> {
 
     String username();
 
@@ -40,7 +41,7 @@ public interface Model<DATA, CONFIG extends TrainConfig> {
 
     ZonedDateTime creationTime();
 
-    static <D, C extends TrainConfig> Model<D, C> of(String username, String name, String algoType, D modelData, C trainConfig) {
+    static <D, C extends TrainConfig & BaseConfig> Model<D, C> of(String username, String name, String algoType, D modelData, C trainConfig) {
         return ImmutableModel.of(username, name, algoType, modelData, trainConfig, TimeUtil.now());
     }
 }

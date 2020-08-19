@@ -125,7 +125,7 @@ class ModelCatalogTest {
 
         assertEquals(
             "The model `testModel` has a training config with different types than expected. " +
-            "Expected train config type: `org.neo4j.graphalgo.model.catalog.ImmutableTestTrainConfig`, " +
+            "Expected train config type: `org.neo4j.graphalgo.model.catalog.TestTrainConfigImpl`, " +
             "invoked with model config type: `org.neo4j.graphalgo.core.model.ModelCatalogTest$ModelCatalogTestTrainConfig`.",
             ex.getMessage()
         );
