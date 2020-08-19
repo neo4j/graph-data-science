@@ -37,6 +37,8 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.model.catalog.ModelDropProc;
+import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -88,7 +90,9 @@ class GraphSageBaseProcTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphSageStreamProc.class,
             GraphSageWriteProc.class,
-            GraphSageTrainProc.class
+            GraphSageTrainProc.class,
+            ModelExistsProc.class,
+            ModelDropProc.class
         );
 
         runQuery(DB_CYPHER);
