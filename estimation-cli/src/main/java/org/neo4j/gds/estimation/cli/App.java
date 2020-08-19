@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
@@ -91,6 +92,8 @@ public class App implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        GdsEdition.instance().setToEnterpriseEdition();
+
         if (!procedure.endsWith(".estimate")) {
             procedure += ".estimate";
         }
@@ -112,10 +115,9 @@ public class App implements Callable<Integer> {
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(formatWithLocale("Procedure not found: %s", procedure)));
 
+        var memoryEstimation = runProcedure(procedureMethod, actualConfig);
 
-        runProcedure(procedureMethod, actualConfig);
-
-        System.out.println("procedureMethod = " + procedureMethod);
+        System.out.println("memoryEstimation = " + memoryEstimation.treeView);
 
         return 0;
     }
@@ -126,22 +128,15 @@ public class App implements Callable<Integer> {
             .stream()
             .filter(method -> {
                 var annotation = method.getDeclaredAnnotation(Procedure.class);
-                return annotation.value().equalsIgnoreCase(procedureName) || annotation
-                    .name()
-                    .equalsIgnoreCase(procedureName);
+                return annotation.value().equalsIgnoreCase(procedureName) ||
+                       annotation.name().equalsIgnoreCase(procedureName);
             })
             .findFirst();
     }
 
-    private void runProcedure(Method procedureMethod, Map<String, Object> config) throws Exception {
-        Class<?> declaringClass = procedureMethod.getDeclaringClass();
-
-        Object instance = declaringClass.getConstructor().newInstance();
-
-        Stream<?> result = (Stream<?>) procedureMethod.invoke(instance, config, Map.of());
-
-        var memoryEstimateResult = (MemoryEstimateResult) result.findFirst().orElseThrow(() -> new Exception("foo"));
-
-        System.out.println("memoryEstimateResult = " + memoryEstimateResult);
+    private MemoryEstimateResult runProcedure(Method procedureMethod, Map<String, Object> config) throws Exception {
+        var procInstance = procedureMethod.getDeclaringClass().getConstructor().newInstance();
+        var procResultStream = (Stream<?>) procedureMethod.invoke(procInstance, config, Map.of());
+        return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 }
