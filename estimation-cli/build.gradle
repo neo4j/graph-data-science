@@ -10,16 +10,16 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    api project(':proc-common')
+    api project(':proc')
 
-    implementation(
-            project(':neo4j-adapter'),
-            group: 'info.picocli', name: 'picocli', version: ver.'picocli'
-    )
+    implementation project(':neo4j-adapter')
+    implementation group: 'info.picocli',       name: 'picocli',        version: ver.'picocli'
+    implementation group: 'org.reflections',    name: 'reflections',    version: ver.doc.'reflections'
+    // TODO: reduce and depend on procedures only
+    implementation group: 'org.neo4j',          name: 'neo4j',          version: ver.'neo4j'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
 
     testAnnotationProcessor project(':annotations')
 

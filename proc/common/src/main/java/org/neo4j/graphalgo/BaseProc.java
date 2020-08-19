@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -67,7 +68,9 @@ public abstract class BaseProc {
     public ProcedureCallContext callContext;
 
     protected String username() {
-        return transaction.subjectOrAnonymous().username();
+        return transaction != null
+            ? transaction.subjectOrAnonymous().username()
+            : AuthSubject.ANONYMOUS.username();
     }
 
     protected NamedDatabaseId databaseId() {

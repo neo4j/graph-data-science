@@ -19,30 +19,129 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.procedure.Procedure;
+import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import picocli.CommandLine;
 
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
-@CommandLine.Command(description = "Estimates the memory consumption of a GDS procedure.",
-    name = "checksum", mixinStandardHelpOptions = true, version = "checksum 3.0")
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+@CommandLine.Command(
+    description = "Estimates the memory consumption of a GDS procedure.",
+    name = "estimation-cli",
+    mixinStandardHelpOptions = true,
+    version = "estimation-cli 0.4.2"
+)
 public class App implements Callable<Integer> {
 
+    private static final List<String> PACKAGES_TO_SCAN = List.of(
+        "org.neo4j.graphalgo",
+        "org.neo4j.gds.embeddings"
+    );
+
+    @CommandLine.Parameters(index = "0", description = "The procedure to estimate, e.g. gds.pagerank.stream.")
+    private String procedure;
+
     @CommandLine.Option(
-        names = {"-p", "--procedure"},
-        description = "Procedure call, e.g. gds.pagerank.stream, gds.wcc.write, ...",
+        names = {"-nc", "--node-count"},
+        description = "Number of nodes in the fictitious graph.",
+        required = true
+    )
+    private long nodeCount;
+
+    @CommandLine.Option(
+        names = {"-rc", "--relationship-count"},
+        description = "Number of relationship in the fictitious graph.",
+        required = true
+    )
+    private long relationshipCount;
+
+    @CommandLine.Option(
+        names = {"-c", "--config"},
+        description = "Numeric configuration options of the given procedure.",
         split = ","
     )
-    private String[] procedures;
+    private Map<String, Number> config;
 
     public static void main(String... args) {
-        int exitCode = new CommandLine(new App()).execute(args);
+        CommandLine app = new CommandLine(new App());
+        app.registerConverter(Number.class, number -> {
+            try {
+                return Integer.parseInt(number);
+            } catch (NumberFormatException ignored) {
+                try {
+                    return Long.parseLong(number);
+                } catch (NumberFormatException alsoIgnored) {
+                    return Double.parseDouble(number);
+                }
+            }
+        });
+        int exitCode = app.execute(args);
         System.exit(exitCode);
     }
 
     @Override
-    public Integer call() {
-        System.out.println("procedures = " + Arrays.toString(procedures));
+    public Integer call() throws Exception {
+        if (!procedure.endsWith(".estimate")) {
+            procedure += ".estimate";
+        }
+
+        if (config == null) {
+            config = new HashMap<>();
+        }
+        var actualConfig = new HashMap<String, Object>(config);
+
+        actualConfig.put("nodeCount", nodeCount);
+        actualConfig.put("relationshipCount", relationshipCount);
+        actualConfig.put("nodeProjection", "*");
+        actualConfig.put("relationshipProjection", "*");
+
+        var procedureMethod = PACKAGES_TO_SCAN.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+            .map(reflections -> findProcedure(reflections, procedure))
+            .flatMap(Optional::stream)
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale("Procedure not found: %s", procedure)));
+
+
+        runProcedure(procedureMethod, actualConfig);
+
+        System.out.println("procedureMethod = " + procedureMethod);
+
         return 0;
+    }
+
+    private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
+        return reflections
+            .getMethodsAnnotatedWith(Procedure.class)
+            .stream()
+            .filter(method -> {
+                var annotation = method.getDeclaredAnnotation(Procedure.class);
+                return annotation.value().equalsIgnoreCase(procedureName) || annotation
+                    .name()
+                    .equalsIgnoreCase(procedureName);
+            })
+            .findFirst();
+    }
+
+    private void runProcedure(Method procedureMethod, Map<String, Object> config) throws Exception {
+        Class<?> declaringClass = procedureMethod.getDeclaringClass();
+
+        Object instance = declaringClass.getConstructor().newInstance();
+
+        Stream<?> result = (Stream<?>) procedureMethod.invoke(instance, config, Map.of());
+
+        var memoryEstimateResult = (MemoryEstimateResult) result.findFirst().orElseThrow(() -> new Exception("foo"));
+
+        System.out.println("memoryEstimateResult = " + memoryEstimateResult);
     }
 }
