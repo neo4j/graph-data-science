@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -108,6 +109,7 @@ public class EstimationCli implements Callable<Integer> {
     public Integer call() throws Exception {
         GdsEdition.instance().setToEnterpriseEdition();
 
+        procedure = procedure.toLowerCase(Locale.ENGLISH);
         if (!procedure.endsWith(".estimate")) {
             procedure += ".estimate";
         }
@@ -121,6 +123,13 @@ public class EstimationCli implements Callable<Integer> {
         actualConfig.put("relationshipCount", relationshipCount);
         actualConfig.put(NODE_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
         actualConfig.put(RELATIONSHIP_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
+
+        if (procedure.endsWith(".write.estimate")) {
+            actualConfig.put("writeProperty", "ESTIMATE_FAKE_WRITE_PROPERTY");
+        }
+        if (procedure.endsWith(".mutate.estimate")) {
+            actualConfig.put("mutateProperty", "ESTIMATE_FAKE_MUTATE_PROPERTY");
+        }
 
         var procedureMethod = PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
