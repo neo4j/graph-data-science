@@ -19,14 +19,18 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import org.neo4j.graphalgo.ElementProjection;
+import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import picocli.CommandLine;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +38,10 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @CommandLine.Command(
@@ -111,8 +119,8 @@ public class EstimationCli implements Callable<Integer> {
 
         actualConfig.put("nodeCount", nodeCount);
         actualConfig.put("relationshipCount", relationshipCount);
-        actualConfig.put("nodeProjection", "*");
-        actualConfig.put("relationshipProjection", "*");
+        actualConfig.put(NODE_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
+        actualConfig.put(RELATIONSHIP_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
 
         var procedureMethod = PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
@@ -145,8 +153,54 @@ public class EstimationCli implements Callable<Integer> {
     }
 
     private MemoryEstimateResult runProcedure(Method procedureMethod, Map<String, Object> config) throws Exception {
+        var parameters = procedureMethod.getParameters();
+        var args = new Object[parameters.length];
+        var foundConfigParam = false;
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter parameter = parameters[i];
+            var name = parameter.getAnnotation(Name.class);
+            if (name != null) {
+                switch (name.value()) {
+                    case NODE_QUERY_KEY:
+                        args[i] = GraphCreateFromCypherConfig.ALL_NODES_QUERY;
+                        config.remove(NODE_PROJECTION_KEY);
+                        break;
+                    case RELATIONSHIP_QUERY_KEY:
+                        args[i] = GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+                        config.remove(RELATIONSHIP_PROJECTION_KEY);
+                        break;
+                    case NODE_PROJECTION_KEY: // explicit fall-through
+                    case RELATIONSHIP_PROJECTION_KEY:
+                        args[i] = ElementProjection.PROJECT_ALL;
+                        break;
+                    case "graphName":
+                        if (!foundConfigParam) {
+                            foundConfigParam = true;
+                            args[i] = config;
+                        } else {
+                            throw new RuntimeException(
+                                "found parameter annotated with `graphName`, expected to accept a config object, but there was already another parameter that accepted the config."
+                            );
+                        }
+                        break;
+                    case "configuration":
+                        if (!foundConfigParam) {
+                            foundConfigParam = true;
+                            args[i] = config;
+                        } else {
+                            args[i] = Map.of();
+                        }
+                        break;
+                    default:
+                        throw new RuntimeException(
+                            "Unexpected parameter name: `" + name.value() + "`. This is probably a bug in GDS."
+                        );
+                }
+            }
+        }
+
         var procInstance = procedureMethod.getDeclaringClass().getConstructor().newInstance();
-        var procResultStream = (Stream<?>) procedureMethod.invoke(procInstance, config, Map.of());
+        var procResultStream = (Stream<?>) procedureMethod.invoke(procInstance, args);
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 }

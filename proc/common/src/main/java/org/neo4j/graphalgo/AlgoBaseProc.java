@@ -141,7 +141,7 @@ public abstract class AlgoBaseProc<
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphStoreFactory<?, ?> graphStoreFactory;
 
-            if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
+            if (createConfig.isFictitiousLoading()) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
                     .nodeCount(createConfig.nodeCount())
                     .highestNeoId(createConfig.nodeCount())

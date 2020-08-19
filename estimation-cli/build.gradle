@@ -13,6 +13,7 @@ dependencies {
     implementation group: 'info.picocli',       name: 'picocli',             version: ver.'picocli'
     implementation group: 'org.reflections',    name: 'reflections',         version: ver.doc.'reflections'
     implementation group: 'org.neo4j',          name: 'neo4j-graphdb-api',   version: ver.'neo4j'
+    implementation group: 'org.neo4j',          name: 'neo4j-kernel',        version: ver.'neo4j'
     implementation group: 'org.neo4j',          name: 'neo4j-kernel-api',    version: ver.'neo4j'
     implementation group: 'org.neo4j',          name: 'neo4j-logging',       version: ver.'neo4j'
     implementation group: 'org.neo4j',          name: 'neo4j-procedure-api', version: ver.'neo4j'

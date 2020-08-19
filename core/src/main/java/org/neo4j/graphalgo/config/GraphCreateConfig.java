@@ -63,6 +63,12 @@ public interface GraphCreateConfig extends BaseConfig {
         return -1;
     }
 
+    @Value.Parameter(false)
+    @Configuration.Ignore
+    default boolean isFictitiousLoading() {
+        return nodeCount() > -1 || relationshipCount() > -1;
+    }
+
     @Value.Derived
     @Value.Auxiliary
     default ZonedDateTime creationTime() {
