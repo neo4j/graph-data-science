@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Tr
     @Override
     @Configuration.Ignore
     default List<String> nodePropertyNames() {
-        Model<GraphSageModel> model = ModelCatalog.get(modelName());
-        return model.data().nodePropertyNames();
+        var model = ModelCatalog.get(modelName(), Layer[].class, GraphSageTrainConfig.class);
+        return model.trainConfig().nodePropertyNames();
     }
 }
