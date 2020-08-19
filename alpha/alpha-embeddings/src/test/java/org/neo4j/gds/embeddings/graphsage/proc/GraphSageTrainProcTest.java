@@ -71,7 +71,11 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(modelName);
+        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(
+            modelName,
+            Layer[].class,
+            GraphSageTrainConfig.class
+        );
         assertEquals(modelName, model.name());
         assertEquals(GraphSage.MODEL_TYPE, model.algoType());
 

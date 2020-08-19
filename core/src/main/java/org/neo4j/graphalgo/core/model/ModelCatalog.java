@@ -38,12 +38,36 @@ public final class ModelCatalog {
         modelCatalog.put(model.name(), model);
     }
 
-    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(String modelName) {
-        Model<D, C> model = (Model<D, C>) modelCatalog.get(modelName);
+    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(String modelName, Class<D> dataClass, Class<C> configClass) {
+        Model<?, ?> model = modelCatalog.get(modelName);
         if (model == null) {
             throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
         }
-        return model;
+
+        var data = model.data();
+        if (!dataClass.isInstance(data)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The model `%s` has data with different types than expected. " +
+                "Expected data type: `%s`, invoked with model data type: `%s`.",
+                modelName,
+                data.getClass().getName(),
+                dataClass.getName()
+                ));
+        }
+        var config = model.trainConfig();
+        if (!configClass.isInstance(config)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The model `%s` has a training config with different types than expected. " +
+                "Expected train config type: `%s`, invoked with model config type: `%s`.",
+                modelName,
+                config.getClass().getName(),
+                configClass.getName()
+                ));
+        }
+
+        // We just did the check
+        // noinspection unchecked
+        return (Model<D, C>) model;
     }
 
     public static boolean exists(String modelName) {
@@ -55,8 +79,8 @@ public final class ModelCatalog {
             .map(Model::algoType);
     }
 
-    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> drop(String modelName) {
-        Model<D, C> model = (Model<D, C>) modelCatalog.remove(modelName);
+    public static Model<?, ?> drop(String modelName) {
+        Model<?, ?> model = modelCatalog.remove(modelName);
         if (model == null) {
             throw new IllegalArgumentException(formatWithLocale("Model with name `%s` does not exist and can't be removed.", modelName));
         }

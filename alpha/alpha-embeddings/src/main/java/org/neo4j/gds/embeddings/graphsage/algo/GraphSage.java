@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
@@ -36,15 +35,20 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     private final Graph graph;
     private final GraphSageBaseConfig config;
+    private final Model<Layer[], GraphSageTrainConfig> model;
 
-    public GraphSage(Graph graph, GraphSageBaseConfig config) {
+    public GraphSage(
+        Graph graph,
+        GraphSageBaseConfig config,
+        Model<Layer[], GraphSageTrainConfig> model
+    ) {
         this.graph = graph;
         this.config = config;
+        this.model = model;
     }
 
     @Override
     public GraphSageResult compute() {
-        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(config.modelName());
         Layer[] layers = model.data();
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             layers,

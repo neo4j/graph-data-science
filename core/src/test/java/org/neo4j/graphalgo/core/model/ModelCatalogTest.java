@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Optional;
@@ -39,18 +43,60 @@ class ModelCatalogTest {
 
         ModelCatalog.set(model);
 
-        assertEquals(model, ModelCatalog.get("testModel"));
+        assertEquals(model, ModelCatalog.get("testModel", String.class, TestTrainConfig.class));
     }
 
     @Test
     void shouldThrowOnMissingModel() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get("something")
+            () -> ModelCatalog.get("something", String.class, TestTrainConfig.class)
         );
 
         assertEquals("No model with model name `something` was found.", ex.getMessage());
     }
+
+    @Test
+    void shouldThrowOnModelDataTypeMismatch() {
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.get("testModel", Double.class, TestTrainConfig.class)
+        );
+
+        assertEquals(
+            "The model `testModel` has data with different types than expected. " +
+            "Expected data type: `java.lang.String`, invoked with model data type: `java.lang.Double`.",
+            ex.getMessage()
+        );
+    }
+
+    @Test
+    void shouldThrowOnModelConfigTypeMismatch() {
+        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.get("testModel", String.class, ModelCatalogTestTrainConfig.class)
+        );
+
+        assertEquals(
+            "The model `testModel` has a training config with different types than expected. " +
+            "Expected train config type: `org.neo4j.graphalgo.model.catalog.ImmutableTestTrainConfig`, " +
+            "invoked with model config type: `org.neo4j.graphalgo.core.model.ModelCatalogTest$ModelCatalogTestTrainConfig`.",
+            ex.getMessage()
+        );
+    }
+
 
     @Test
     void checksIfModelExists() {
@@ -77,6 +123,7 @@ class ModelCatalogTest {
         Optional<String> bogusModel = ModelCatalog.type("bogusModel");
         assertTrue(bogusModel.isEmpty());
     }
+
     @Test
     void shouldDropModel() {
         Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
@@ -95,5 +142,15 @@ class ModelCatalogTest {
         );
 
         assertEquals("Model with name `something` does not exist and can't be removed.", ex.getMessage());
+    }
+
+    @ValueClass
+    @Configuration("ModelCatalogTestTrainConfigImpl")
+    @SuppressWarnings("immutables:subtype")
+    interface ModelCatalogTestTrainConfig extends BaseConfig, TrainConfig {
+
+        static ModelCatalogTestTrainConfig of() {
+            return ImmutableModelCatalogTestTrainConfig.of("username", "modelName");
+        }
     }
 }

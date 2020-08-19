@@ -54,7 +54,6 @@ public class ModelDropProc extends ModelCatalogProc {
                 "modelType", model.algoType()
             );
 
-//            trainConfig = model.trainConfig();
             trainConfig = Map.of();
         }
     }

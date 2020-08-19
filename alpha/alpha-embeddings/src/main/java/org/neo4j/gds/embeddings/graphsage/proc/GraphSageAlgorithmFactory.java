@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
 
@@ -34,6 +37,10 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
         AllocationTracker tracker,
         Log log
     ) {
-        return new GraphSage(graph, configuration);
+        return new GraphSage(
+            graph,
+            configuration,
+            ModelCatalog.get(configuration.modelName(), Layer[].class, GraphSageTrainConfig.class)
+        );
     }
 }
