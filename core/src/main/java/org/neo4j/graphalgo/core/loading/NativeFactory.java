@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
@@ -56,6 +57,15 @@ public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphC
         GraphLoaderContext loadingContext
     ) {
         super(graphCreateConfig, loadingContext, new GraphDimensionsStoreReader(loadingContext.transaction(), graphCreateConfig).call());
+        this.storeConfig = graphCreateConfig;
+    }
+
+    public NativeFactory(
+        GraphCreateFromStoreConfig graphCreateConfig,
+        GraphLoaderContext loadingContext,
+        GraphDimensions graphDimensions
+    ) {
+        super(graphCreateConfig, loadingContext, graphDimensions);
         this.storeConfig = graphCreateConfig;
     }
 
