@@ -72,6 +72,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         });
 
         Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(
+            getUsername(),
             modelName,
             Layer[].class,
             GraphSageTrainConfig.class

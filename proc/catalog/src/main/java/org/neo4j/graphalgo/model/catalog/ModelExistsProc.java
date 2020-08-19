@@ -39,8 +39,8 @@ public class ModelExistsProc extends ModelCatalogProc {
 
         return Stream.of(new ModelExistsResult(
             modelName,
-            ModelCatalog.type(modelName).orElse("n/a"),
-            ModelCatalog.exists(modelName)
+            ModelCatalog.type(username(), modelName).orElse("n/a"),
+            ModelCatalog.exists(username(), modelName)
         ));
     }
 

@@ -43,7 +43,7 @@ class ModelDropProcTest  extends BaseProcTest {
         String existingModel = "testModel";
         String testModelType = "testAlgo";
 
-        ModelCatalog.set(Model.of(existingModel, testModelType, "testData", TestTrainConfig.of()));
+        ModelCatalog.set(Model.of(getUsername(), existingModel, testModelType, "testData", TestTrainConfig.of()));
 
         var dropQuery = "CALL gds.beta.model.drop($modelName)";
         assertCypherResult(

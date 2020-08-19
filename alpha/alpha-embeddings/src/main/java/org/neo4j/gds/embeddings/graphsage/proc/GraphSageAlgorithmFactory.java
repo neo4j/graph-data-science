@@ -40,7 +40,12 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
         return new GraphSage(
             graph,
             configuration,
-            ModelCatalog.get(configuration.modelName(), Layer[].class, GraphSageTrainConfig.class)
+            ModelCatalog.get(
+                configuration.username(),
+                configuration.modelName(),
+                Layer[].class,
+                GraphSageTrainConfig.class
+            )
         );
     }
 }

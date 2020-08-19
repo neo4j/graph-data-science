@@ -53,10 +53,13 @@ class ModelListProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
     void listsModel(String query) {
-        Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "testData", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(getUsername(),"testModel1", "testAlgo1", "testData", TestTrainConfig.of());
+        Model<Long, TestTrainConfig> model2 = Model.of(getUsername(),"testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<Long, TestTrainConfig> otherUserModel = Model.of("anotherUser","testModel1337", "testAlgo1337", 3435L, TestTrainConfig.of());
+
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
+        ModelCatalog.set(otherUserModel);
 
         assertCypherResult(
             formatWithLocale("CALL %s YIELD modelInfo, creationTime RETURN modelInfo, creationTime ORDER BY modelInfo.modelName", query),
@@ -83,8 +86,8 @@ class ModelListProcTest extends BaseProcTest {
 
     @Test
     void returnSpecificModel() {
-        Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "testData", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(getUsername(),"testModel1", "testAlgo1", "testData", TestTrainConfig.of());
+        Model<Long, TestTrainConfig> model2 = Model.of(getUsername(),"testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
 

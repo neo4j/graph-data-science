@@ -34,7 +34,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Tr
     @Override
     @Configuration.Ignore
     default List<String> nodePropertyNames() {
-        var model = ModelCatalog.get(modelName(), Layer[].class, GraphSageTrainConfig.class);
+        var model = ModelCatalog.get(username(), modelName(), Layer[].class, GraphSageTrainConfig.class);
         return model.trainConfig().nodePropertyNames();
     }
 }

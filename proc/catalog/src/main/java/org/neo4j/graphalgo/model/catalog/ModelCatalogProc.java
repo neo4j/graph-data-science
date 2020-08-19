@@ -19,13 +19,14 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-abstract class ModelCatalogProc {
+abstract class ModelCatalogProc extends BaseProc {
 
     static final String NO_VALUE = "__NO_VALUE";
 

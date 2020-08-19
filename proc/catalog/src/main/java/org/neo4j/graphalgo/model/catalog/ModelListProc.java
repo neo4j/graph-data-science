@@ -38,11 +38,11 @@ public class ModelListProc extends ModelCatalogProc {
     @Description(DESCRIPTION)
     public Stream<ModelResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
         if (modelName == null || modelName.equals(NO_VALUE)) {
-            Collection<Model<?, ?>> models = ModelCatalog.list();
+            Collection<Model<?, ?>> models = ModelCatalog.list(username());
             return models.stream().map(ModelResult::new);
         } else {
             validateModelName(modelName);
-            return Stream.of(new ModelResult(ModelCatalog.list(modelName)));
+            return Stream.of(new ModelResult(ModelCatalog.list(username(), modelName)));
         }
     }
 }

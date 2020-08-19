@@ -38,7 +38,7 @@ public class ModelDropProc extends ModelCatalogProc {
     public Stream<ModelResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        Model<?, ?> drop = ModelCatalog.drop(modelName);
+        Model<?, ?> drop = ModelCatalog.drop(username(), modelName);
 
         return Stream.of(new ModelResult(drop));
     }

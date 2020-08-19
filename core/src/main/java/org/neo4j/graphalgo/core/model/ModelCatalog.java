@@ -31,80 +31,143 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelCatalog {
 
-    private static final Map<String, Model<?, ?>> modelCatalog = new ConcurrentHashMap<>();
-
     private ModelCatalog() {}
 
+    private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
+
     public static void set(Model<?, ?> model) {
-        if (exists(model.name())) {
-            throw new IllegalArgumentException(formatWithLocale("Model with name `%s` already exists", model.name()));
-        }
-        modelCatalog.put(model.name(), model);
+        userCatalogs.compute(model.username(), (user, userCatalog) -> {
+            if (userCatalog == null) {
+                userCatalog = new UserCatalog();
+            }
+            userCatalog.set(model);
+            return userCatalog;
+        });
     }
 
-    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(String modelName, Class<D> dataClass, Class<C> configClass) {
-        Model<?, ?> model = get(modelName);
-
-        var data = model.data();
-        if (!dataClass.isInstance(data)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The model `%s` has data with different types than expected. " +
-                "Expected data type: `%s`, invoked with model data type: `%s`.",
-                modelName,
-                data.getClass().getName(),
-                dataClass.getName()
-                ));
-        }
-        var config = model.trainConfig();
-        if (!configClass.isInstance(config)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The model `%s` has a training config with different types than expected. " +
-                "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                modelName,
-                config.getClass().getName(),
-                configClass.getName()
-                ));
-        }
-
-        // We just did the check
-        // noinspection unchecked
-        return (Model<D, C>) model;
+    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(
+        String username, String modelName, Class<D> dataClass, Class<C> configClass
+    ) {
+        return getUserCatalog(username).get(modelName, dataClass, configClass);
     }
 
-    public static boolean exists(String modelName) {
-        return modelCatalog.containsKey(modelName);
+    public static boolean exists(String username, String modelName) {
+        return getUserCatalog(username).exists(modelName);
     }
 
-    public static Optional<String> type(String modelName) {
-        return Optional.ofNullable(modelCatalog.get(modelName))
-            .map(Model::algoType);
+    public static Optional<String> type(String username, String modelName) {
+        return getUserCatalog(username).type(modelName);
     }
 
-    public static Model<?, ?> drop(String modelName) {
-        Model<?, ?> model = modelCatalog.remove(modelName);
-        if (model == null) {
-            throw new IllegalArgumentException(formatWithLocale("Model with name `%s` does not exist and can't be removed.", modelName));
-        }
-        return model;
+    public static Model<?, ?> drop(String username, String modelName) {
+        return getUserCatalog(username).drop(modelName);
     }
 
-    public static Collection<Model<?, ?>> list() {
-        return modelCatalog.values();
+    public static Collection<Model<?, ?>> list(String username) {
+        return getUserCatalog(username).list();
     }
 
-    public static Model<?, ?> list(String modelName) {
-        return get(modelName);
+    public static Model<?, ?> list(String username, String modelName) {
+        return getUserCatalog(username).list(modelName);
     }
 
     public static void removeAllLoadedModels() {
-        modelCatalog.clear();
+        userCatalogs.clear();
     }
 
-    private static Model<?, ?> get(String modelName) {
-        Model<?, ?> model = modelCatalog.get(modelName);
-        if (model == null) {
-            throw new IllegalArgumentException(formatWithLocale("No model with model name `%s` was found.", modelName));
+    private static UserCatalog getUserCatalog(String username) {
+        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
+    }
+
+    static class UserCatalog {
+        private static final UserCatalog EMPTY = new UserCatalog();
+
+        private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
+
+        public void set(Model<?, ?> model) {
+            if (exists(model.name())) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Model with name `%s` already exists",
+                    model.name()
+                ));
+            }
+            userModels.put(model.name(), model);
         }
-        return model;
+
+        public <D, C extends TrainConfig & BaseConfig> Model<D, C> get(
+            String modelName,
+            Class<D> dataClass,
+            Class<C> configClass
+        ) {
+            Model<?, ?> model = get(modelName);
+
+            var data = model.data();
+            if (!dataClass.isInstance(data)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The model `%s` has data with different types than expected. " +
+                    "Expected data type: `%s`, invoked with model data type: `%s`.",
+                    modelName,
+                    data.getClass().getName(),
+                    dataClass.getName()
+                ));
+            }
+            var config = model.trainConfig();
+            if (!configClass.isInstance(config)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The model `%s` has a training config with different types than expected. " +
+                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
+                    modelName,
+                    config.getClass().getName(),
+                    configClass.getName()
+                ));
+            }
+
+            // We just did the check
+            // noinspection unchecked
+            return (Model<D, C>) model;
+        }
+
+        public boolean exists(String modelName) {
+            return userModels.containsKey(modelName);
+        }
+
+        public Optional<String> type(String modelName) {
+            return Optional.ofNullable(userModels.get(modelName))
+                .map(Model::algoType);
+        }
+
+        public Model<?, ?> drop(String modelName) {
+            Model<?, ?> model = userModels.remove(modelName);
+            if (model == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Model with name `%s` does not exist and can't be removed.",
+                    modelName
+                ));
+            }
+            return model;
+        }
+
+        public Collection<Model<?, ?>> list() {
+            return userModels.values();
+        }
+
+        public Model<?, ?> list(String modelName) {
+            return get(modelName);
+        }
+
+        public void removeAllLoadedModels() {
+            userModels.clear();
+        }
+
+        private Model<?, ?> get(String modelName) {
+            Model<?, ?> model = userModels.get(modelName);
+            if (model == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "No model with model name `%s` was found.",
+                    modelName
+                ));
+            }
+            return model;
+        }
     }
 }

@@ -28,6 +28,8 @@ import java.time.ZonedDateTime;
 @ValueClass
 public interface Model<DATA, CONFIG extends TrainConfig> {
 
+    String username();
+
     String name();
 
     String algoType();
@@ -38,7 +40,7 @@ public interface Model<DATA, CONFIG extends TrainConfig> {
 
     ZonedDateTime creationTime();
 
-    static <D, C extends TrainConfig> Model<D, C> of(String name, String algoType, D modelData, C trainConfig) {
-        return ImmutableModel.of(name, algoType, modelData, trainConfig, TimeUtil.now());
+    static <D, C extends TrainConfig> Model<D, C> of(String username, String name, String algoType, D modelData, C trainConfig) {
+        return ImmutableModel.of(username, name, algoType, modelData, trainConfig, TimeUtil.now());
     }
 }

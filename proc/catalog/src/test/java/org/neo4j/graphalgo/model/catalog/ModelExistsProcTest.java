@@ -42,7 +42,7 @@ class ModelExistsProcTest  extends BaseProcTest {
     @Test
     void checksIfModelExists() {
         String existingModel = "testModel";
-        ModelCatalog.set(Model.of(existingModel, "testAlgo", "testData", TestTrainConfig.of()));
+        ModelCatalog.set(Model.of(getUsername(), existingModel, "testAlgo", "testData", TestTrainConfig.of()));
 
         assertCypherResult(
             EXISTS_QUERY,

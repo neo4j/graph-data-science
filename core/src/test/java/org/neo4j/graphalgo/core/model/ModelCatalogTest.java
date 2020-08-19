@@ -45,15 +45,38 @@ class ModelCatalogTest {
         ModelCatalog.removeAllLoadedModels();
     }
 
+    private static final String USERNAME = "testUser";
+
     @Test
     void shouldStoreModels() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of("user1", "testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+        Model<String, TestTrainConfig> model2 = Model.of("user2", "testModel2", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.set(model2);
+
+        assertEquals(model, ModelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class));
+        assertEquals(model2, ModelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class));
+    }
+
+    @Test
+    void shouldThrowWhenTryingToGetOtherUsersModel() {
+        Model<String, TestTrainConfig> model = Model.of("user1", "testModel", "testAlgo", "testTrainData",
             TestTrainConfig.of()
         );
 
         ModelCatalog.set(model);
 
-        assertEquals(model, ModelCatalog.get("testModel", String.class, TestTrainConfig.class));
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class)
+        );
+
+        assertEquals("No model with model name `testModel` was found.", ex.getMessage());
         assertNotNull(model.creationTime());
     }
 
@@ -61,7 +84,7 @@ class ModelCatalogTest {
     void shouldThrowOnMissingModel() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get("something", String.class, TestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, "something", String.class, TestTrainConfig.class)
         );
 
         assertEquals("No model with model name `something` was found.", ex.getMessage());
@@ -69,7 +92,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelDataTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -77,7 +100,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get("testModel", Double.class, TestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, "testModel", Double.class, TestTrainConfig.class)
         );
 
         assertEquals(
@@ -89,7 +112,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelConfigTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -97,7 +120,7 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get("testModel", String.class, ModelCatalogTestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class)
         );
 
         assertEquals(
@@ -108,48 +131,67 @@ class ModelCatalogTest {
         );
     }
 
-
     @Test
     void checksIfModelExists() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "modelData", TestTrainConfig.of());
 
         ModelCatalog.set(model);
 
-        assertTrue(ModelCatalog.exists("testModel"));
-        assertFalse(ModelCatalog.exists("bogusModel"));
+        assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
+        assertFalse(ModelCatalog.exists(USERNAME, "bogusModel"));
+        assertFalse(ModelCatalog.exists("fakeUser", "testModel"));
     }
 
     @Test
     void getModelType() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "testData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            "testData",
+            TestTrainConfig.of()
+        );
         ModelCatalog.set(model);
 
-        Optional<String> testModel = ModelCatalog.type("testModel");
+        Optional<String> testModel = ModelCatalog.type(USERNAME, "testModel");
         assertFalse(testModel.isEmpty());
         assertEquals("testAlgo", testModel.get());
     }
 
     @Test
     void getNonExistingModelType() {
-        Optional<String> bogusModel = ModelCatalog.type("bogusModel");
+        Optional<String> bogusModel = ModelCatalog.type(USERNAME, "bogusModel");
         assertTrue(bogusModel.isEmpty());
     }
 
     @Test
     void shouldDropModel() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(USERNAME,  "testModel", "testAlgo", "modelData", TestTrainConfig.of());
         ModelCatalog.set(model);
 
-        assertTrue(ModelCatalog.exists("testModel"));
-        ModelCatalog.drop("testModel");
-        assertFalse(ModelCatalog.exists("testModel"));
+        assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
+        ModelCatalog.drop(USERNAME, "testModel");
+        assertFalse(ModelCatalog.exists(USERNAME, "testModel"));
+    }
+
+    @Test
+    void cantDropOtherUsersModel() {
+        Model<String, TestTrainConfig> model = Model.of(USERNAME,  "testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        ModelCatalog.set(model);
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.drop("fakeUser", "testModel")
+        );
+
+        assertEquals("Model with name `testModel` does not exist and can't be removed.", ex.getMessage());
     }
 
     @Test
     void failsWhenTryingToDropNonExistingModel() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.drop("something")
+            () -> ModelCatalog.drop(USERNAME, "something")
         );
 
         assertEquals("Model with name `something` does not exist and can't be removed.", ex.getMessage());
@@ -157,13 +199,13 @@ class ModelCatalogTest {
 
     @Test
     void shouldListModels() {
-        Model<String, TestTrainConfig> model1 = Model.of("testModel1", "testAlgo1", "modelData1", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of("testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(USERNAME, "testModel1", "testAlgo1", "modelData1", TestTrainConfig.of());
+        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME, "testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
 
 
-        Collection<Model<?, ?>> models = ModelCatalog.list();
+        Collection<Model<?, ?>> models = ModelCatalog.list(USERNAME);
         assertEquals(2, models.size());
         Map<String, ? extends Model<?, ?>> modelsMap = models
             .stream()
@@ -175,12 +217,12 @@ class ModelCatalogTest {
 
     @Test
     void shouldReturnEmptyList() {
-        assertEquals(0, ModelCatalog.list().size());
+        assertEquals(0, ModelCatalog.list(USERNAME).size());
     }
 
     @Test
     void shouldThrowOnOverridingModels() {
-        Model<String, TestTrainConfig> model = Model.of("testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "modelData", TestTrainConfig.of());
         ModelCatalog.set(model);
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
