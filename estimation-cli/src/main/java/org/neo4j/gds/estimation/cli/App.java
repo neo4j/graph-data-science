@@ -21,6 +21,7 @@ package org.neo4j.gds.estimation.cli;
 
 import picocli.CommandLine;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(description = "Estimates the memory consumption of a GDS procedure.",
@@ -41,7 +42,7 @@ public class App implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        System.out.println("procedures = " + procedures);
+        System.out.println("procedures = " + Arrays.toString(procedures));
         return 0;
     }
 }
