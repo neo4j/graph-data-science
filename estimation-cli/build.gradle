@@ -33,6 +33,6 @@ dependencies {
 shadowJar {
     mergeServiceFiles()
     archiveFileName.set('estimation-cli.jar')
-    mainClassName = 'org.neo4j.gds.estimation.cli.App'
+    mainClassName = 'org.neo4j.gds.estimation.cli.EstimationCli'
     zip64 = true
 }

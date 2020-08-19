@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
     mixinStandardHelpOptions = true,
     version = "estimation-cli 0.4.2"
 )
-public class App implements Callable<Integer> {
+public class EstimationCli implements Callable<Integer> {
 
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.graphalgo",
@@ -80,7 +80,7 @@ public class App implements Callable<Integer> {
     private boolean printTree = false;
 
     public static void main(String... args) {
-        CommandLine app = new CommandLine(new App());
+        CommandLine app = new CommandLine(new EstimationCli());
         app.registerConverter(Number.class, number -> {
             try {
                 return Integer.parseInt(number);
