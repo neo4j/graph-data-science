@@ -23,12 +23,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -85,11 +87,17 @@ class ModelListProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void failOnEmptyModelName() {
+    @ParameterizedTest
+    @MethodSource("invalidModelNames")
+    void failOnEmptyModelName(String modelName) {
         assertError(
-            "CALL gds.beta.model.list('')",
+            "CALL gds.beta.model.list($modelName)",
+            map("modelName", modelName),
             "can not be null or blank"
         );
+    }
+
+    static Stream<String> invalidModelNames() {
+        return Stream.of("", "   ", "           ", "\r\n\t");
     }
 }

@@ -42,7 +42,6 @@ abstract class ModelCatalogProc {
                 "modelType", model.algoType()
             );
 
-//            trainConfig = model.trainConfig();
             trainConfig = Map.of();
         }
     }
