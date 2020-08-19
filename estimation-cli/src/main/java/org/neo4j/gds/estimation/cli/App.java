@@ -61,7 +61,7 @@ public class App implements Callable<Integer> {
 
     @CommandLine.Option(
         names = {"-rc", "--relationship-count"},
-        description = "Number of relationship in the fictitious graph.",
+        description = "Number of relationships in the fictitious graph.",
         required = true
     )
     private long relationshipCount;
@@ -72,6 +72,12 @@ public class App implements Callable<Integer> {
         split = ","
     )
     private Map<String, Number> config;
+
+    @CommandLine.Option(
+        names = {"-t", "--tree"},
+        description = "Print estimated memory as human readable tree view."
+    )
+    private boolean printTree = false;
 
     public static void main(String... args) {
         CommandLine app = new CommandLine(new App());
@@ -117,7 +123,11 @@ public class App implements Callable<Integer> {
 
         var memoryEstimation = runProcedure(procedureMethod, actualConfig);
 
-        System.out.println("memoryEstimation = " + memoryEstimation.treeView);
+        var output = printTree
+            ? memoryEstimation.treeView
+            : formatWithLocale("%d,%d", memoryEstimation.bytesMin, memoryEstimation.bytesMax);
+
+        System.out.println(output);
 
         return 0;
     }
