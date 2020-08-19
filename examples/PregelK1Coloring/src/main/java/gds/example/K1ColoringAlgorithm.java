@@ -21,9 +21,9 @@ package gds.example;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -40,7 +40,7 @@ public class K1ColoringAlgorithm extends Algorithm<K1ColoringAlgorithm, HugeDoub
 
     @Override
     public HugeDoubleArray compute() {
-        PregelConfig config = new PregelConfig.Builder()
+        PregelConfig config = ImmutablePregelConfig.builder()
                 .isAsynchronous(true)
                 .build();
 
@@ -49,7 +49,6 @@ public class K1ColoringAlgorithm extends Algorithm<K1ColoringAlgorithm, HugeDoub
                 config,
                 new K1ColoringExample(),
                 10,
-                AlgoBaseConfig.DEFAULT_CONCURRENCY,
                 Pools.DEFAULT,
                 AllocationTracker.EMPTY
         );
