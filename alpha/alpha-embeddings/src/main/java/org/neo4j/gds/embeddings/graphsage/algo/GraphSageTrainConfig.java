@@ -152,6 +152,7 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
     }
 
     static GraphSageTrainConfig of(
+        String modelName,
         ActivationFunction activationFunction,
         Aggregator.AggregatorType aggregator,
         int batchSize,
@@ -160,6 +161,7 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
         double tolerance
     ) {
         return ImmutableGraphSageTrainConfig.builder()
+            .modelName(modelName)
             .activationFunction(activationFunction)
             .aggregator(aggregator)
             .batchSize(batchSize)
