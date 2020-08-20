@@ -20,11 +20,13 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Collection;
@@ -40,12 +42,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModelCatalogTest {
 
+    private static final String USERNAME = "testUser";
+
+    @BeforeEach
+    void setUp() {
+        GdsEdition.instance().setToEnterpriseEdition();
+    }
+
     @AfterEach
     void afterEach() {
         ModelCatalog.removeAllLoadedModels();
     }
-
-    private static final String USERNAME = "testUser";
 
     @Test
     void shouldStoreModels() {
@@ -79,6 +86,30 @@ class ModelCatalogTest {
         assertEquals("No model with model name `testModel` was found.", ex.getMessage());
         assertNotNull(model.creationTime());
     }
+
+    @Test
+    void onlyAllowOneCatalogInCE() {
+        GdsEdition.instance().setToCommunityEdition();
+
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+
+
+        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME,"testModel2", "testAlgo", 1337L,
+            TestTrainConfig.of()
+        );
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.set(model2)
+        );
+
+        assertEquals("Community users can only store one model in the catalog", ex.getMessage());
+    }
+
 
     @Test
     void shouldThrowOnMissingModel() {

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.core.GdsEdition;
 
 import java.util.Collection;
 import java.util.Map;
@@ -80,11 +81,13 @@ public final class ModelCatalog {
     }
 
     static class UserCatalog {
+        private static final int ALLOWED_MODELS_COUNT = 1;
         private static final UserCatalog EMPTY = new UserCatalog();
 
         private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
 
         public void set(Model<?, ?> model) {
+            canStoreModel();
             if (exists(model.name())) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Model with name `%s` already exists",
@@ -157,6 +160,16 @@ public final class ModelCatalog {
 
         public void removeAllLoadedModels() {
             userModels.clear();
+        }
+
+        private boolean checkAllowedModelsSize() {
+            return userModels.size() >= ALLOWED_MODELS_COUNT;
+        }
+
+        private void canStoreModel() {
+            if(GdsEdition.instance().isOnCommunityEdition() && checkAllowedModelsSize()) {
+                throw new IllegalArgumentException("Community users can only store one model in the catalog");
+            }
         }
 
         private Model<?, ?> get(String modelName) {

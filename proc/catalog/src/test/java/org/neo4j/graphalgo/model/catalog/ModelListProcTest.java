@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
@@ -43,6 +44,7 @@ class ModelListProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelListProc.class);
+        GdsEdition.instance().setToEnterpriseEdition();
     }
 
     @AfterEach
