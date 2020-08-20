@@ -52,22 +52,26 @@ class TraverseTest extends AlgoTestBase {
     @GdlGraph(graphNamePrefix = "natural")
     @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
-    private static final String CYPHER = "CREATE (a:Node)\n" +
-                                         "CREATE (b:Node)\n" +
-                                         "CREATE (c:Node)\n" +
-                                         "CREATE (d:Node)\n" +
-                                         "CREATE (e:Node)\n" +
-                                         "CREATE (f:Node)\n" +
-                                         "CREATE (g:Node)\n" +
-                                         "CREATE" +
-                                         " (a)-[:REL {cost:2.0}]->(b),\n" +
-                                         " (a)-[:REL {cost:1.0}]->(c),\n" +
-                                         " (b)-[:REL {cost:1.0}]->(d),\n" +
-                                         " (c)-[:REL {cost:2.0}]->(d),\n" +
-                                         " (d)-[:REL {cost:1.0}]->(e),\n" +
-                                         " (d)-[:REL {cost:2.0}]->(f),\n" +
-                                         " (e)-[:REL {cost:2.0}]->(g),\n" +
+    private static final String CYPHER = "CREATE (a:Node)" +
+                                         ", (b:Node)" +
+                                         ", (c:Node)" +
+                                         ", (d:Node)" +
+                                         ", (e:Node)" +
+                                         ", (f:Node)" +
+                                         ", (g:Node)" +
+                                         "," +
+                                         " (a)-[:REL {cost:2.0}]->(b)," +
+                                         " (a)-[:REL {cost:1.0}]->(c)," +
+                                         " (b)-[:REL {cost:1.0}]->(d)," +
+                                         " (c)-[:REL {cost:2.0}]->(d)," +
+                                         " (d)-[:REL {cost:1.0}]->(e)," +
+                                         " (d)-[:REL {cost:2.0}]->(f)," +
+                                         " (e)-[:REL {cost:2.0}]->(g)," +
                                          " (f)-[:REL {cost:1.0}]->(g)";
+
+    @GdlGraph(graphNamePrefix = "loop")
+    private static final String LOOP_CYPHER =
+        "CREATE (a)-[:REL]->(b)-[:REL]->(a)";
 
 
     @Inject
@@ -78,6 +82,9 @@ class TraverseTest extends AlgoTestBase {
 
     @Inject
     private static TestGraph undirectedGraph;
+
+    @Inject
+    private static TestGraph loopGraph;
 
     /**
      * bfs on outgoing rels. until target 'd' is reached
@@ -214,6 +221,16 @@ class TraverseTest extends AlgoTestBase {
             }
         ).compute().resultNodes();
         assertEquals(4, nodes.length);
+    }
+
+    @Test
+    void testBfsOnLoopGraph() {
+        Traverse.bfs(loopGraph, 0, (s, t, w) -> Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
+    }
+
+    @Test
+    void testDfsOnLoopGraph() {
+        Traverse.dfs(loopGraph, 0, (s, t, w) -> Result.FOLLOW, Traverse.DEFAULT_AGGREGATOR).compute();
     }
 
     /**

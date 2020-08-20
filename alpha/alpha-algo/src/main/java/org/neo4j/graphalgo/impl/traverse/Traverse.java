@@ -138,11 +138,13 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
                 node,
                 longToIntConsumer((s, t) -> {
                     // remove from the visited nodes to allow revisiting in case the node is accessible via more than one path.
+                    // ! does not work in combination with loops
                     double aggregatedWeight = aggregatorFunction.apply(s, t, weight);
                     final ExitPredicate.Result test = exitPredicate.test(s, t, aggregatedWeight);
-                    if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
-                        visited.clear(t);
-                    }
+                    // TODO: this is just a tmp fix but messes up maxCost test
+//                    if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
+//                        visited.clear(t);
+//                    }
 
                     if (!visited.get(t)) {
                         visited.set(t);

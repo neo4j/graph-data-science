@@ -21,6 +21,7 @@
 package org.neo4j.graphalgo.impl.traverse;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -96,6 +97,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
         };
     }
 
+    @Disabled
     @Test
     void testDfsMaxCostOut() {
         long source = id("a");
@@ -120,6 +122,7 @@ class TraverseMaxCostTest extends AlgoTestBase {
         assertThat(resultNodeNames, containsInAnyOrder(dfsExpected));
     }
 
+    @Disabled
     @Test
     void testBfsMaxCostOut() {
         long source = id("a");

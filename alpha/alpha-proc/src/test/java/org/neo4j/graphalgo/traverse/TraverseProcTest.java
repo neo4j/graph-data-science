@@ -56,6 +56,7 @@ class TraverseProcTest extends BaseProcTest {
         ", (f:Node {name:'f'})" +
         ", (g:Node {name:'g'})" +
         ", (a)-[:TYPE {cost:2.0}]->(b)" +
+        ", (b)-[:TYPE2 {cost:2.0}]->(a)" +
         ", (a)-[:TYPE {cost:1.0}]->(c)" +
         ", (b)-[:TYPE {cost:1.0}]->(d)" +
         ", (c)-[:TYPE {cost:2.0}]->(d)" +
@@ -169,7 +170,7 @@ class TraverseProcTest extends BaseProcTest {
             assertEquals(row.getNumber("startNodeId").longValue(), id);
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
 
-            var expectedOrder = new HashMap();
+            var expectedOrder = new HashMap<String, List<Integer>>();
             expectedOrder.put("g", Arrays.asList(0));
             expectedOrder.put("f", Arrays.asList(1, 6));
             expectedOrder.put("d", Arrays.asList(1, 2));
@@ -195,7 +196,7 @@ class TraverseProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             assertEquals(row.getNumber("startNodeId").longValue(), id);
             List<Long> nodeIds = (List<Long>) row.get("nodeIds");
-            var expectedOrder = new HashMap();
+            var expectedOrder = new HashMap<String, List<Integer>>();
             expectedOrder.put("g", Arrays.asList(0));
             expectedOrder.put("f", Arrays.asList(1, 2));
             expectedOrder.put("e", Arrays.asList(1, 2));
@@ -203,6 +204,32 @@ class TraverseProcTest extends BaseProcTest {
             expectedOrder.put("c", Arrays.asList(4, 5));
             expectedOrder.put("b", Arrays.asList(4, 5));
             expectedOrder.put("a", Arrays.asList(6));
+
+            assertOrder(expectedOrder, nodeIds);
+        });
+    }
+
+    @Test
+    void worksOnGraphWithLoop() {
+        long id = id("a");
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withAnyRelationshipType()
+            .algo("gds.alpha.bfs")
+            .streamMode()
+            .addParameter("startNode", id)
+            .yields("startNodeId, nodeIds");
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(row.getNumber("startNodeId").longValue(), id);
+            List<Long> nodeIds = (List<Long>) row.get("nodeIds");
+            var expectedOrder = new HashMap<String, List<Integer>>();
+            expectedOrder.put("g", Arrays.asList(6));
+            expectedOrder.put("f", Arrays.asList(4, 5));
+            expectedOrder.put("e", Arrays.asList(4, 5));
+            expectedOrder.put("d", Arrays.asList(3));
+            expectedOrder.put("c", Arrays.asList(1, 2));
+            expectedOrder.put("b", Arrays.asList(1, 2));
+            expectedOrder.put("a", Arrays.asList(0));
 
             assertOrder(expectedOrder, nodeIds);
         });
