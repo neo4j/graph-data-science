@@ -34,16 +34,13 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainConfig, GraphSageTrainProc.TrainResult> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.alpha.graphSage.train", mode = Mode.READ)
@@ -56,18 +53,9 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
             configuration
         );
         Model<Layer[], GraphSageTrainConfig> result = computationResult.result();
+
         ModelCatalog.set(result);
-
         return Stream.of(trainResult(computationResult));
-    }
-
-     @Override
-     protected TrainResult trainResult(ComputationResult<GraphSageTrain, Model<Layer[], GraphSageTrainConfig>, GraphSageTrainConfig> computationResult) {
-        return new TrainResult(
-            computationResult.result(),
-            computationResult.config(),
-            computationResult.computeMillis()
-        );
     }
 
     @Override
@@ -89,25 +77,4 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         );
     }
 
-    public static class TrainResult {
-
-        public final String graphName;
-        public final Map<String, Object> modelInfo;
-        public final Map<String, Object> configuration;
-        public final long trainMillis;
-
-        TrainResult(
-            Model<Layer[], GraphSageTrainConfig> trainedModel,
-            GraphSageTrainConfig graphSageTrainConfig,
-            long trainMillis
-        ) {
-            // TODO: figure out a way of displaying implicitly loaded graphs
-            this.graphName = graphSageTrainConfig.graphName().orElse("");
-            this.modelInfo = new HashMap<>();
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-            this.configuration = graphSageTrainConfig.toMap();
-            this.trainMillis = trainMillis;
-        }
-    }
 }
