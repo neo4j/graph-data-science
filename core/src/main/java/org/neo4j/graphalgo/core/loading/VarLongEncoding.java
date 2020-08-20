@@ -21,6 +21,15 @@ package org.neo4j.graphalgo.core.loading;
 
 public final class VarLongEncoding {
 
+    public static final long THRESHOLD_1_BYTE = 128L;
+    public static final long THRESHOLD_2_BYTE = 16384L;
+    public static final long THRESHOLD_3_BYTE = 2097152L;
+    public static final long THRESHOLD_4_BYTE = 268435456L;
+    public static final long THRESHOLD_5_BYTE = 34359738368L;
+    public static final long THRESHOLD_6_BYTE = 4398046511104L;
+    public static final long THRESHOLD_7_BYTE = 562949953421312L;
+    public static final long THRESHOLD_8_BYTE = 72057594037927936L;
+
     public static int encodeVLongs(long[] values, int limit, byte[] out, int into) {
         return encodeVLongs(values, 0, limit, out, into);
     }
@@ -34,32 +43,32 @@ public final class VarLongEncoding {
 
     //@formatter:off
     private static int encodeVLong(final byte[] buffer, final long val, int output) {
-        if (val < 128L) {
+        if (val < THRESHOLD_1_BYTE) {
             buffer[    output] = (byte) (val       | 128L);
             return 1 + output;
-        } else if (val < 16384L) {
+        } else if (val < THRESHOLD_2_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 | 128L);
             return 2 + output;
-        } else if (val < 2097152L) {
+        } else if (val < THRESHOLD_3_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 | 128L);
             return 3 + output;
-        } else if (val < 268435456L) {
+        } else if (val < THRESHOLD_4_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 & 127L);
             buffer[3 + output] = (byte) (val >> 21 | 128L);
             return 4 + output;
-        } else if (val < 34359738368L) {
+        } else if (val < THRESHOLD_5_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 & 127L);
             buffer[3 + output] = (byte) (val >> 21 & 127L);
             buffer[4 + output] = (byte) (val >> 28 | 128L);
             return 5 + output;
-        } else if (val < 4398046511104L) {
+        } else if (val < THRESHOLD_6_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 & 127L);
@@ -67,7 +76,7 @@ public final class VarLongEncoding {
             buffer[4 + output] = (byte) (val >> 28 & 127L);
             buffer[5 + output] = (byte) (val >> 35 | 128L);
             return 6 + output;
-        } else if (val < 562949953421312L) {
+        } else if (val < THRESHOLD_7_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 & 127L);
@@ -76,7 +85,7 @@ public final class VarLongEncoding {
             buffer[5 + output] = (byte) (val >> 35 & 127L);
             buffer[6 + output] = (byte) (val >> 42 | 128L);
             return 7 + output;
-        } else if (val < 72057594037927936L) {
+        } else if (val < THRESHOLD_8_BYTE) {
             buffer[    output] = (byte) (val       & 127L);
             buffer[1 + output] = (byte) (val >>  7 & 127L);
             buffer[2 + output] = (byte) (val >> 14 & 127L);
@@ -106,21 +115,21 @@ public final class VarLongEncoding {
      * {@code BitUtil.ceilDiv(64 - Long.numberOfLeadingZeros(nodeCount - 1), 7)}
      */
     public static int encodedVLongSize(final long val) {
-        if (val < 128L) {
+        if (val < THRESHOLD_1_BYTE) {
             return 1;
-        } else if (val < 16384L) {
+        } else if (val < THRESHOLD_2_BYTE) {
             return 2;
-        } else if (val < 2097152L) {
+        } else if (val < THRESHOLD_3_BYTE) {
             return 3;
-        } else if (val < 268435456L) {
+        } else if (val < THRESHOLD_4_BYTE) {
             return 4;
-        } else if (val < 34359738368L) {
+        } else if (val < THRESHOLD_5_BYTE) {
             return 5;
-        } else if (val < 4398046511104L) {
+        } else if (val < THRESHOLD_6_BYTE) {
             return 6;
-        } else if (val < 562949953421312L) {
+        } else if (val < THRESHOLD_7_BYTE) {
             return 7;
-        } else if (val < 72057594037927936L) {
+        } else if (val < THRESHOLD_8_BYTE) {
             return 8;
         } else {
             return 9;
