@@ -23,6 +23,8 @@ import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
 
@@ -40,5 +42,13 @@ class GraphSageDocTest extends DocTestBase {
     @Override
     String adocFile() {
         return "algorithms/alpha/graph-sage/graph-sage.adoc";
+    }
+
+    @Override
+    protected Runnable cleanup() {
+        return () -> {
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            ModelCatalog.removeAllLoadedModels();
+        };
     }
 }

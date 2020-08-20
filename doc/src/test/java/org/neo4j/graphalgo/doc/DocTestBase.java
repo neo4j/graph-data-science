@@ -66,7 +66,7 @@ abstract class DocTestBase extends BaseProcTest {
             defaultSetupQueryConsumer(),
             defaultQueryExampleConsumer(),
             defaultQueryExampleNoResultConsumer(),
-            GraphStoreCatalog::removeAllLoadedGraphs
+            this.cleanup()
         );
     }
 
@@ -80,6 +80,10 @@ abstract class DocTestBase extends BaseProcTest {
     @AfterAll
     static void clearLoadedGraphs() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
+    Runnable cleanup() {
+        return GraphStoreCatalog::removeAllLoadedGraphs;
     }
 
     abstract List<Class<?>> procedures();

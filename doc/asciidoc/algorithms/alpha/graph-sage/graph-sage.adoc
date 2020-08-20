@@ -239,7 +239,7 @@ To generate embeddings and stream them back to the client we can use the stream 
 We must first train a model, which we do using the `gds.alpha.graphSage.train` procedure.
 
 [[graph-sage-trained-model-example]]
-[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+[source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
 CALL gds.alpha.graphSage.train(
   'persons',
@@ -254,7 +254,7 @@ CALL gds.alpha.graphSage.train(
 
 Once we have trained a model (named `'graphSage'`) we can use it to generate and stream the embeddings.
 
-[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+[source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
 CALL gds.alpha.graphSage.stream(
   'persons',
@@ -285,7 +285,7 @@ The <<graph-sage-trained-model-example, model trained as part of the stream exam
 Below is an example of how to achieve this.
 
 --
-[source, cypher, role=query-example, no-result=true, test-group=graphSage]
+[source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
 CALL gds.alpha.graphSage.write(
   'persons',
