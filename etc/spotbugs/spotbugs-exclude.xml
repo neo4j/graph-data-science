@@ -6,4 +6,62 @@
     <Match>
         <Class name="~.*\.*ConfigImpl" />
     </Match>
+
+    <!--
+        Below are exclusions of issues found in our project,
+        these need to be analysed and enabled on per-issue basis.
+        For more details on the issues:
+        https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html
+    -->
+
+    <!-- Class defines field that masks a superclass field -->
+    <Match>
+        <Bug pattern="MF_CLASS_MASKS_FIELD" />
+    </Match>
+
+    <!-- Write to static field from instance method -->
+    <Match>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD" />
+    </Match>
+
+    <!-- Superclass uses subclass during initialization -->
+    <Match>
+        <Bug pattern="IC_SUPERCLASS_USES_SUBCLASS_DURING_INITIALIZATION" />
+    </Match>
+
+    <!-- Field isn't final but should be -->
+    <Match>
+        <Bug pattern="MS_SHOULD_BE_FINAL" />
+    </Match>
+
+    <!-- Class defines equals() and uses Object.hashCode() -->
+    <Match>
+        <Bug pattern="HE_EQUALS_USE_HASHCODE" />
+    </Match>
+
+    <!-- Reliance on default encoding -->
+    <Match>
+        <Bug pattern="DM_DEFAULT_ENCODING" />
+    </Match>
+
+    <!-- Result of integer multiplication cast to long -->
+    <Match>
+        <Bug pattern="ICAST_INTEGER_MULTIPLY_CAST_TO_LONG" />
+    </Match>
+
+    <!-- Explicit garbage collection; extremely dubious except in benchmarking code -->
+    <Match>
+        <Bug pattern="DM_GC" />
+    </Match>
+
+    <!-- Dead store to local variable -->
+    <Match>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE" />
+    </Match>
+
+    <!-- Random object created and used only once -->
+    <Match>
+        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
+    </Match>
+
 </FindBugsFilter>
