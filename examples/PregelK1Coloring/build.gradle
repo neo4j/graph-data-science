@@ -5,7 +5,7 @@ plugins {
 }
 
 ext {
-    gdsVersion = '1.1.4'
+    gdsVersion = '1.1.5'
     neo4jVersion = '3.5.20'
 }
 
