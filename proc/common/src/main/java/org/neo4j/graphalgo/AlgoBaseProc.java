@@ -53,10 +53,10 @@ import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -73,6 +73,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
@@ -148,6 +149,7 @@ public abstract class AlgoBaseProc<
                 estimateDimensions = ImmutableGraphDimensions.builder()
                     .nodeCount(createConfig.nodeCount())
                     .highestNeoId(createConfig.nodeCount())
+                    .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, createConfig.relationshipCount()))
                     .maxRelCount(createConfig.relationshipCount())
                     .build();
 
