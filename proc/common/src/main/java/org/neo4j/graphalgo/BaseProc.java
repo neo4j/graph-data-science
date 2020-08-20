@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -50,9 +51,11 @@ import org.neo4j.procedure.Context;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.util.function.Predicate.isEqual;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -199,9 +202,17 @@ public abstract class BaseProc {
         GraphStoreFactory<?, ?> graphStoreFactory;
 
         if (config.isFictitiousLoading()) {
+            var labelCount = 0;
+            if (config instanceof GraphCreateFromStoreConfig) {
+                var storeConfig = (GraphCreateFromStoreConfig) config;
+                Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
+                labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
+            }
+
             estimateDimensions = ImmutableGraphDimensions.builder()
                 .nodeCount(config.nodeCount())
                 .highestNeoId(config.nodeCount())
+                .estimationNodeLabelCount(labelCount)
                 .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();

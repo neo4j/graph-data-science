@@ -91,6 +91,12 @@ public class EstimationCli implements Callable<Integer> {
     private int labelCount = 0;
 
     @CommandLine.Option(
+        names = {"-t", "--types"},
+        description = "Number of relationship types in the fictitious graph."
+    )
+    private int relationshipTypes = 0;
+
+    @CommandLine.Option(
         names = {"-np", "--node-properties"},
         description = "Number of node properties in the fictitious graph."
     )
@@ -110,7 +116,7 @@ public class EstimationCli implements Callable<Integer> {
     private Map<String, Number> config;
 
     @CommandLine.Option(
-        names = {"-t", "--tree"},
+        names = {"--tree"},
         description = "Print estimated memory as human readable tree view."
     )
     private boolean printTree = false;

@@ -28,11 +28,11 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
@@ -66,7 +66,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         .perGraphDimension(
             "Node Label BitSets",
             (dimensions, concurrency) ->
-                MemoryRange.of(dimensions.estimationNodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+                MemoryRange.of(dimensions.estimationNodeLabelCount() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
         )
         .build();
 
