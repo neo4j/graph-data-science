@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -37,12 +38,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
+import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @CommandLine.Command(
@@ -62,18 +71,36 @@ public class EstimationCli implements Callable<Integer> {
     private String procedure;
 
     @CommandLine.Option(
-        names = {"-nc", "--node-count"},
+        names = {"-n", "--nodes"},
         description = "Number of nodes in the fictitious graph.",
         required = true
     )
     private long nodeCount;
 
     @CommandLine.Option(
-        names = {"-rc", "--relationship-count"},
+        names = {"-r", "--relationships"},
         description = "Number of relationships in the fictitious graph.",
         required = true
     )
     private long relationshipCount;
+
+    @CommandLine.Option(
+        names = {"-l", "--labels"},
+        description = "Number of node labels in the fictitious graph."
+    )
+    private int labelCount = 0;
+
+    @CommandLine.Option(
+        names = {"-np", "--node-properties"},
+        description = "Number of node properties in the fictitious graph."
+    )
+    private int nodePropertyCount = 0;
+
+    @CommandLine.Option(
+        names = {"-rp", "--relationship-properties"},
+        description = "Number of relationship properties in the fictitious graph."
+    )
+    private int relationshipPropertyCount = 0;
 
     @CommandLine.Option(
         names = {"-c", "--config"},
@@ -89,19 +116,10 @@ public class EstimationCli implements Callable<Integer> {
     private boolean printTree = false;
 
     public static void main(String... args) {
-        CommandLine app = new CommandLine(new EstimationCli());
-        app.registerConverter(Number.class, number -> {
-            try {
-                return Integer.parseInt(number);
-            } catch (NumberFormatException ignored) {
-                try {
-                    return Long.parseLong(number);
-                } catch (NumberFormatException alsoIgnored) {
-                    return Double.parseDouble(number);
-                }
-            }
-        });
-        int exitCode = app.execute(args);
+        int exitCode = new CommandLine(new EstimationCli())
+            .registerConverter(Number.class, new NumberConverter())
+            .execute(args);
+
         System.exit(exitCode);
     }
 
@@ -114,22 +132,7 @@ public class EstimationCli implements Callable<Integer> {
             procedure += ".estimate";
         }
 
-        if (config == null) {
-            config = new HashMap<>();
-        }
-        var actualConfig = new HashMap<String, Object>(config);
-
-        actualConfig.put("nodeCount", nodeCount);
-        actualConfig.put("relationshipCount", relationshipCount);
-        actualConfig.put(NODE_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
-        actualConfig.put(RELATIONSHIP_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
-
-        if (procedure.endsWith(".write.estimate")) {
-            actualConfig.put("writeProperty", "ESTIMATE_FAKE_WRITE_PROPERTY");
-        }
-        if (procedure.endsWith(".mutate.estimate")) {
-            actualConfig.put("mutateProperty", "ESTIMATE_FAKE_MUTATE_PROPERTY");
-        }
+        var actualConfig = updateConfig();
 
         var procedureMethod = PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
@@ -147,6 +150,41 @@ public class EstimationCli implements Callable<Integer> {
         System.out.println(output);
 
         return 0;
+    }
+
+    @NotNull
+    private Map<String, Object> updateConfig() {
+        if (config == null) {
+            config = new HashMap<>();
+        }
+        var actualConfig = new HashMap<String, Object>(config);
+        actualConfig.put(NODE_COUNT_KEY, nodeCount);
+        actualConfig.put(RELATIONSHIP_COUNT_KEY, relationshipCount);
+        actualConfig.put(NODE_PROJECTION_KEY, labelCount > 0
+            ? createEntries(labelCount, "Label")
+            : ElementProjection.PROJECT_ALL
+        );
+        actualConfig.put(RELATIONSHIP_PROJECTION_KEY, ElementProjection.PROJECT_ALL);
+
+        if (nodePropertyCount > 0) {
+            actualConfig.put(NODE_PROPERTIES_KEY, createEntries(nodePropertyCount, "prop"));
+        }
+        if (relationshipPropertyCount > 0) {
+            actualConfig.put(RELATIONSHIP_PROPERTIES_KEY, createEntries(relationshipPropertyCount, "prop"));
+        }
+        if (procedure.endsWith(".write.estimate")) {
+            actualConfig.put(WRITE_PROPERTY_KEY, "ESTIMATE_FAKE_WRITE_PROPERTY");
+        }
+        if (procedure.endsWith(".mutate.estimate")) {
+            actualConfig.put(MUTATE_PROPERTY_KEY, "ESTIMATE_FAKE_MUTATE_PROPERTY");
+        }
+        return actualConfig;
+    }
+
+    private List<String> createEntries(int count, String prefix) {
+        return IntStream.range(0, count)
+            .mapToObj(i -> formatWithLocale("%s%d", prefix, i))
+            .collect(Collectors.toList());
     }
 
     private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
@@ -211,5 +249,20 @@ public class EstimationCli implements Callable<Integer> {
         var procInstance = procedureMethod.getDeclaringClass().getConstructor().newInstance();
         var procResultStream = (Stream<?>) procedureMethod.invoke(procInstance, args);
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
+    }
+
+    private static class NumberConverter implements CommandLine.ITypeConverter<Number> {
+        @Override
+        public Number convert(String number) {
+            try {
+                return Integer.parseInt(number);
+            } catch (NumberFormatException ignored) {
+                try {
+                    return Long.parseLong(number);
+                } catch (NumberFormatException alsoIgnored) {
+                    return Double.parseDouble(number);
+                }
+            }
+        }
     }
 }
