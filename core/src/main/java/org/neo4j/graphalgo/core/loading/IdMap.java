@@ -66,7 +66,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         .perGraphDimension(
             "Node Label BitSets",
             (dimensions, concurrency) ->
-                MemoryRange.of(dimensions.nodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+                MemoryRange.of(dimensions.estimationNodeLabels().size() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
         )
         .build();
 
