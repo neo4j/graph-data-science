@@ -54,6 +54,7 @@ import org.neo4j.graphalgo.core.write.PropertyTranslator;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.AlgoBaseConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
@@ -140,6 +142,7 @@ public abstract class AlgoBaseProc<
                     .from(estimateDimensions)
                     .nodeCount(createConfig.nodeCount())
                     .highestNeoId(createConfig.nodeCount())
+                    .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, createConfig.relationshipCount()))
                     .maxRelCount(createConfig.relationshipCount())
                     .build();
             }
