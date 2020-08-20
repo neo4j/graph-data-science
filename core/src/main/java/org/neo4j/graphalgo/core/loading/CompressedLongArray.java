@@ -30,6 +30,7 @@ import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.loading.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArray {
 
@@ -104,9 +105,16 @@ public final class CompressedLongArray {
         System.arraycopy(weights, start, this.weights[weightIndex], this.length, targetCount);
     }
 
-    private void ensureCapacity(int pos, int required, byte[] storage) {
-        if (storage.length <= pos + required) {
-            int newLength = ArrayUtil.oversize(pos + required, Byte.BYTES);
+    void ensureCapacity(int pos, int required, byte[] storage) {
+        int targetLength = pos + required;
+        if (targetLength < 0) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
+                pos,
+                required
+            ));
+        } else if (storage.length <= targetLength) {
+            int newLength = ArrayUtil.oversize(targetLength, Byte.BYTES);
             tracker.remove(sizeOfByteArray(storage.length));
             tracker.add(sizeOfByteArray(newLength));
             this.storage = Arrays.copyOf(storage, newLength);

@@ -28,6 +28,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CompressedLongArrayTest {
@@ -107,5 +108,15 @@ class CompressedLongArrayTest {
         assertArrayEquals(inValues, outValues);
 
         assertArrayEquals(inWeights, Arrays.copyOf(compressedLongArray.weights()[0], inWeights.length));
+    }
+
+    @Test
+    void throwsOnOverflowInEnsureCapacity() {
+        CompressedLongArray longArray = new CompressedLongArray(AllocationTracker.EMPTY);
+        var e = assertThrows(
+            IllegalArgumentException.class,
+            () -> longArray.ensureCapacity(2147483622, 100, new byte[2147483622])
+        );
+        assertTrue(e.getMessage().contains("numeric overflow in internal buffer"));
     }
 }
