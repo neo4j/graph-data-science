@@ -79,6 +79,8 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
 
     @Test
     default void testMemoryEstimateOnExplicitDimensions() {
+        boolean isAllUndirected = relationshipProjections().equals(AbstractRelationshipProjections.ALL_UNDIRECTED);
+
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
@@ -96,8 +98,11 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
 
                             var graphComponent = components.get(0);
                             assertEquals("graph", graphComponent.get("name"));
-                            assertEquals("[21 GiB ... 58 GiB]", graphComponent.get("memoryUsage"));
-
+                            if (isAllUndirected) {
+                                assertEquals("[39 GiB ... 114 GiB]", graphComponent.get("memoryUsage"));
+                            } else {
+                                assertEquals("[21 GiB ... 58 GiB]", graphComponent.get("memoryUsage"));
+                            }
 
                             assertTrue(row.bytesMin > 0);
                             assertTrue(row.bytesMax >= row.bytesMin);
