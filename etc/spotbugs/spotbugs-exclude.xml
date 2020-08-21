@@ -14,6 +14,7 @@
         https://spotbugs.readthedocs.io/en/stable/bugDescriptions.html
     -->
 
+    <!-- High priority report -->
     <!-- Class defines field that masks a superclass field -->
     <Match>
         <Bug pattern="MF_CLASS_MASKS_FIELD" />
@@ -63,5 +64,21 @@
     <Match>
         <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE" />
     </Match>
+
+    <!-- Possible null pointer dereference -->
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH"/>
+    </Match>
+
+    <!-- Possible null pointer dereference due to return value of called method -->
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+
+    <!-- Parameter must be non-null but is marked as nullable -->
+    <Match>
+        <Bug pattern="NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE"/>
+    </Match>
+    <!-- /High priority report -->
 
 </FindBugsFilter>
