@@ -42,17 +42,17 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
 
     @Test
     void shouldRun() {
-        checkModelExistence("n/a", false);
+        modelDoesntExist();
 
         train(EMBEDDING_SIZE, "mean", SIGMOID);
 
-        checkModelExistence(GraphSage.MODEL_TYPE, true);
+        modelExists();
 
         stream();
 
         dropModel();
 
-        checkModelExistence("n/a", false);
+        modelDoesntExist();
     }
 
     private void dropModel() {
@@ -90,6 +90,14 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
             Collection<Double> nodeEmbeddings = (List<Double>) o;
             assertEquals(GraphSageIntegrationTest.EMBEDDING_SIZE, nodeEmbeddings.size());
         });
+    }
+
+    private void modelExists() {
+        checkModelExistence(GraphSage.MODEL_TYPE, true);
+    }
+
+    private void modelDoesntExist() {
+        checkModelExistence("n/a", false);
     }
 
     private void checkModelExistence(String modelType, boolean exists) {
