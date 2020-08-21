@@ -34,7 +34,6 @@ ext {
             'junit5':                       '5.6.2',
             'junit-quickcheck-core':        '0.8.1',
             'junit-quickcheck-generators':  '0.8.1',
-            'metrics-core':                 '4.0.2',
             'mockito':                      '3.5.2',
             'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.1'),
             'picocli':                      '4.5.0',
