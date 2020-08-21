@@ -81,4 +81,177 @@
     </Match>
     <!-- /High priority report -->
 
+    <!-- Medium priority report -->
+    <!-- Method uses the same code for two branches -->
+    <Match>
+        <Bug pattern="DB_DUPLICATE_BRANCHES"/>
+    </Match>
+
+    <!-- Class defines compareTo(...) and uses Object.equals() -->
+    <Match>
+        <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS"/>
+    </Match>
+
+    <!-- Unread public/protected field -->
+    <Match>
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD"/>
+    </Match>
+
+    <!-- Inconsistent synchronization -->
+    <Match>
+        <Bug pattern="IS2_INCONSISTENT_SYNC"/>
+    </Match>
+
+    <!-- Boxed value is unboxed and then immediately reboxed -->
+    <Match>
+        <Bug pattern="BX_UNBOXING_IMMEDIATELY_REBOXED"/>
+    </Match>
+
+    <!-- Method does not release lock on all exception paths -->
+    <Match>
+        <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH"/>
+    </Match>
+
+    <!-- May expose internal representation by incorporating reference to mutable object -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- Comparator doesn't implement Serializable -->
+    <Match>
+        <Bug pattern="SE_COMPARATOR_SHOULD_BE_SERIALIZABLE"/>
+    </Match>
+
+    <!-- Method names should start with a lower case letter -->
+    <Match>
+        <Bug pattern="NM_METHOD_NAMING_CONVENTION"/>
+    </Match>
+
+    <!-- Class doesn't override equals in superclass -->
+    <Match>
+        <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+    </Match>
+
+    <!-- Rough value of known constant found -->
+    <Match>
+        <Bug pattern="CNT_ROUGH_CONSTANT_VALUE"/>
+    </Match>
+
+    <!-- Useless object created -->
+    <Match>
+        <Bug pattern="UC_USELESS_OBJECT"/>
+    </Match>
+
+    <!-- Field is a mutable collection which should be package protected -->
+    <Match>
+        <Bug pattern="MS_MUTABLE_COLLECTION_PKGPROTECT"/>
+    </Match>
+
+    <!-- May expose internal representation by returning reference to mutable object -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <!-- Return value of method without side effect is ignored -->
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT"/>
+    </Match>
+
+    <!-- Unread field: should this field be static? -->
+    <Match>
+        <Bug pattern="SS_SHOULD_BE_STATIC"/>
+    </Match>
+
+    <!-- Unread field -->
+    <Match>
+        <Bug pattern="URF_UNREAD_FIELD"/>
+    </Match>
+
+    <!-- Invocation of equals() on an array, which is equivalent to == -->
+    <Match>
+        <Bug pattern="EC_BAD_ARRAY_COMPARE"/>
+    </Match>
+
+    <!-- Iterator next() method can't throw NoSuchElementException -->
+    <Match>
+        <Bug pattern="IT_NO_SUCH_ELEMENT"/>
+    </Match>
+
+    <!-- Possible null pointer dereference in method on exception path -->
+    <Match>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_EXCEPTION"/>
+    </Match>
+
+    <!-- A volatile reference to an array doesn't treat the array elements as volatile -->
+    <Match>
+        <Bug pattern="VO_VOLATILE_REFERENCE_TO_ARRAY"/>
+    </Match>
+
+    
+    <!-- Negating the result of compareTo()/compare() -->
+    <Match>
+        <Bug pattern="RV_NEGATING_RESULT_OF_COMPARETO"/>
+    </Match>
+    
+    <!-- Uninitialized read of field in constructor -->
+    <Match>
+        <Bug pattern="UR_UNINIT_READ"/>
+    </Match>
+    
+    <!-- Exception is caught when Exception is not thrown -->
+    <Match>
+        <Bug pattern="REC_CATCH_EXCEPTION"/>
+    </Match>
+    
+    <!-- Useless non-empty void method -->
+    <Match>
+        <Bug pattern="UC_USELESS_VOID_METHOD"/>
+    </Match>
+    
+    <!-- Should be a static inner class -->
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
+    </Match>
+    
+    <!-- Field should be moved out of an interface and made package protected -->
+    <Match>
+        <Bug pattern="MS_OOI_PKGPROTECT"/>
+    </Match>
+    
+    <!-- Method ignores exceptional return value -->
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
+    </Match>
+    
+    <!-- Code contains a hard coded reference to an absolute pathname -->
+    <Match>
+        <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME"/>
+    </Match>
+    
+    <!-- Method may fail to clean up stream or resource -->
+    <Match>
+        <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
+    </Match>
+    
+    <!-- Nullcheck of value previously dereferenced -->
+    <Match>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
+    
+    <!-- Inefficient use of keySet iterator instead of entrySet iterator -->
+    <Match>
+        <Bug pattern="WMI_WRONG_MAP_ITERATOR"/>
+    </Match>
+    
+    <!-- Method may fail to close stream -->
+    <Match>
+        <Bug pattern="OS_OPEN_STREAM"/>
+    </Match>
+    
+    <!-- Method allocates an object, only to get the class object -->
+    <Match>
+        <Bug pattern="DM_NEW_FOR_GETCLASS"/>
+    </Match>
+    <!-- /Medium priority report -->
+
 </FindBugsFilter>
