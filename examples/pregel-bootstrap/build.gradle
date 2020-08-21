@@ -71,6 +71,6 @@ repositories {
     // Can be removed in custom projects.
     maven {
         name = 'teamcity-artifacts'
-        url = "file://${rootProject.projectDir}/gds-repo"
+        url = "file://${rootProject.projectDir}/../../../gds-repo"
     }
 }
