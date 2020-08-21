@@ -254,4 +254,96 @@
     </Match>
     <!-- /Medium priority report -->
 
+    <!-- Low priority report -->
+    <!-- Class defines hashCode() and uses Object.equals() -->
+    <Match>
+        <Bug pattern="HE_HASHCODE_USE_OBJECT_EQUALS"/>
+    </Match>
+
+    <!-- Method may fail to close stream on exception -->
+    <Match>
+        <Bug pattern="OS_OPEN_STREAM_EXCEPTION_PATH"/>
+    </Match>
+
+    <!-- Non-serializable class has a serializable inner class -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD_INNER_CLASS"/>
+    </Match>
+
+    <!-- Method calls static Math class method on a constant value -->
+    <Match>
+        <Bug pattern="UM_UNNECESSARY_MATH"/>
+    </Match>
+
+    <!-- Confusing method names -->
+    <Match>
+        <Bug pattern="NM_CONFUSING"/>
+    </Match>
+
+    <!-- Class is Serializable, but doesn't define serialVersionUID -->
+    <Match>
+        <Bug pattern="SE_NO_SERIALVERSIONID"/>
+    </Match>
+
+    <!-- Consider returning a zero length array rather than null -->
+    <Match>
+        <Bug pattern="PZLA_PREFER_ZERO_LENGTH_ARRAYS"/>
+    </Match>
+
+    <!-- Unchecked/unconfirmed cast of return value from method -->
+    <Match>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <!-- Redundant nullcheck of value known to be non-null -->
+    <Match>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE"/>
+    </Match>
+
+    <!-- Test for floating point equality -->
+    <Match>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+    <!-- Non-transient non-serializable instance field in serializable class -->
+    <Match>
+        <Bug pattern="SE_BAD_FIELD"/>
+    </Match>
+
+    <!-- Field not initialized in constructor but dereferenced without null check -->
+    <Match>
+        <Bug pattern="UWF_FIELD_NOT_INITIALIZED_IN_CONSTRUCTOR"/>
+    </Match>
+
+    <!-- Method might ignore exception -->
+    <Match>
+        <Bug pattern="DE_MIGHT_IGNORE"/>
+    </Match>
+
+    <!-- Consider using Locale parameterized version of invoked method -->
+    <Match>
+        <Bug pattern="DM_CONVERT_CASE"/>
+    </Match>
+
+    <!-- Could be refactored into a named static inner class -->
+    <Match>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+    </Match>
+
+    <!-- Class implements same interface as superclass -->
+    <Match>
+        <Bug pattern="RI_REDUNDANT_INTERFACES"/>
+    </Match>
+
+    <!-- Private method is never called -->
+    <Match>
+        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
+    </Match>
+
+    <!-- Method invoked that should be only be invoked inside a doPrivileged block -->
+    <Match>
+        <Bug pattern="DP_DO_INSIDE_DO_PRIVILEGED"/>
+    </Match>
+    <!-- /Low priority report -->
+
 </FindBugsFilter>
