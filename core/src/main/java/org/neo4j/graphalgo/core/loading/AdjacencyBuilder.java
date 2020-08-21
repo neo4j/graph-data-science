@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
@@ -35,6 +38,8 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.unchecked;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 final class AdjacencyBuilder {
+
+    public static final long IGNORE_VALUE = Long.MIN_VALUE;
 
     static AdjacencyBuilder compressing(
         @NotNull RelationshipsBuilder globalBuilder,
@@ -128,10 +133,19 @@ final class AdjacencyBuilder {
         this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
     }
 
+    /**
+     *
+     * @param batch four-tuple values sorted by source (source, target, rel?, property?)
+     * @param targets slice of batch on second position; all targets in source-sorted order
+     * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
+     * @param offsets offsets into targets; every offset position indicates a source node group
+     * @param length how far we can read in the offsets array (how many source tuples to import)
+     * @param tracker
+     */
     void addAll(
         long[] batch,
         long[] targets,
-        long[][] propertyValues,
+        @Nullable long[][] propertyValues,
         int[] offsets,
         int length,
         AllocationTracker tracker
@@ -178,6 +192,10 @@ final class AdjacencyBuilder {
                 if (propertyValues == null) {
                     compressedTargets.add(targets, startOffset, endOffset);
                 } else {
+                    if (aggregations[0] != Aggregation.NONE) {
+                        aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
+                    }
+
                     compressedTargets.add(targets, propertyValues, startOffset, endOffset);
                 }
 
@@ -263,4 +281,39 @@ final class AdjacencyBuilder {
         globalBuilder.setGlobalAdjacencyOffsets(globalAdjacencyOffsets);
         globalBuilder.setGlobalPropertyOffsets(globalPropertiesOffsets);
     }
+
+    //TODO: consider only calling this method if `end-start` is sufficiently large
+    static void aggregate(long[] values, long[][] propertiesList, int startOffset, int endOffset, Aggregation[] aggregations) {
+        // Step 1: Sort the values (indirectly)
+        var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(values));
+
+
+        // Step 2: Aggregate the properties into the first property list of each distinct value
+        //         Every subsequent instance of any value is set to LONG.MIN_VALUE
+        int targetIndex = order[0];
+        long lastSeenValue = values[targetIndex];
+
+        for (int orderIndex = 1; orderIndex < order.length; orderIndex++) {
+            int currentIndex = order[orderIndex];
+
+            if (values[currentIndex] != lastSeenValue) {
+                targetIndex = currentIndex;
+                lastSeenValue = values[currentIndex];
+            } else {
+                for (int propertyId = 0; propertyId < propertiesList.length; propertyId++) {
+                    long[] longs = propertiesList[propertyId];
+                    double runningTotal = Double.longBitsToDouble(longs[targetIndex]);
+                    double value = Double.longBitsToDouble(propertiesList[propertyId][currentIndex]);
+
+                    double updatedProperty = aggregations[propertyId].merge(
+                        runningTotal,
+                        value
+                    );
+                    propertiesList[propertyId][targetIndex] = Double.doubleToLongBits(updatedProperty);
+                }
+
+                values[currentIndex] = IGNORE_VALUE;
+            }
+        }
+    };
 }

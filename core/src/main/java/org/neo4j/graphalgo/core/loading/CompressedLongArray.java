@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 
+import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
@@ -67,6 +68,10 @@ public final class CompressedLongArray {
         long compressedValue;
         int requiredBytes = 0;
         for (int i = start; i < end; i++) {
+            if(values[i] == IGNORE_VALUE) {
+                continue;
+            }
+
             delta = values[i] - currentLastValue;
             compressedValue = zigZag(delta);
             currentLastValue = values[i];
@@ -92,17 +97,28 @@ public final class CompressedLongArray {
         // write weights
         for (int i = 0; i < allWeights.length; i++) {
             long[] weights = allWeights[i];
-            addWeights(weights, start, end, i);
+            addWeights(values, weights, start, end, i);
         }
 
         // write values
         add(values, start, end);
     }
 
-    private void addWeights(long[] weights, int start, int end, int weightIndex) {
-        int targetCount = end - start;
-        ensureCapacity(length, targetCount, weightIndex);
-        System.arraycopy(weights, start, this.weights[weightIndex], this.length, targetCount);
+    private void addWeights(long[] values, long[] weights, int start, int end, int weightIndex) {
+        var valuesToCopy = 0;
+        for (int i = start; i < end; i++) {
+            if (values[i] != IGNORE_VALUE) {
+                valuesToCopy++;
+            }
+        }
+
+        ensureCapacity(length, valuesToCopy, weightIndex);
+
+        for (int i = 0; i < (end - start); i++) {
+            if (values[start + i] != IGNORE_VALUE) {
+                this.weights[weightIndex][length + i] = weights[start + i];
+            }
+        }
     }
 
     void ensureCapacity(int pos, int required, byte[] storage) {
@@ -122,6 +138,7 @@ public final class CompressedLongArray {
     }
 
     private void ensureCapacity(int pos, int required, int weightIndex) {
+        // TODO add same check as above
         if (weights[weightIndex].length <= pos + required) {
             int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));

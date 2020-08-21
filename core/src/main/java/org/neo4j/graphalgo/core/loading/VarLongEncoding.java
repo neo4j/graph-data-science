@@ -36,6 +36,10 @@ public final class VarLongEncoding {
 
     static int encodeVLongs(long[] values, int offset, int end, byte[] out, int into) {
         for (int i = offset; i < end; ++i) {
+            if (values[i] == Long.MIN_VALUE) {
+                continue;
+            }
+
             into = encodeVLong(out, values[i], into);
         }
         return into;
