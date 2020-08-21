@@ -20,12 +20,13 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -78,18 +79,31 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
 
     @Test
     default void testMemoryEstimateOnExplicitDimensions() {
+        boolean isAllUndirected = relationshipProjections().equals(AbstractRelationshipProjections.ALL_UNDIRECTED);
+
         applyOnProcedure(proc -> {
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
                     Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.empty()
-                        .withNumber("nodeCount", 10000L)
-                        .withNumber("relationshipCount", 10000L)).toMap();
+                        .withNumber("nodeCount", 100_000_000L)
+                        .withNumber("relationshipCount", 20_000_000_000L)).toMap();
                     try {
                         Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
                         result.forEach(row -> {
-                            assertEquals(10000, row.nodeCount);
-                            assertEquals(10000, row.relationshipCount);
+                            assertEquals(100_000_000L, row.nodeCount);
+                            assertEquals(20_000_000_000L, row.relationshipCount);
+                            var components = (List<Map<String, Object>>) row.mapView.get("components");
+                            assertEquals(2, components.size());
+
+                            var graphComponent = components.get(0);
+                            assertEquals("graph", graphComponent.get("name"));
+                            if (isAllUndirected) {
+                                assertEquals("[39 GiB ... 114 GiB]", graphComponent.get("memoryUsage"));
+                            } else {
+                                assertEquals("[21 GiB ... 58 GiB]", graphComponent.get("memoryUsage"));
+                            }
+
                             assertTrue(row.bytesMin > 0);
                             assertTrue(row.bytesMax >= row.bytesMin);
                             assertNotNull(row.mapView);

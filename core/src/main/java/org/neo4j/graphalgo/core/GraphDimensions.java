@@ -107,13 +107,19 @@ public interface GraphDimensions {
         return Collections.emptyMap();
     }
 
-    default Set<NodeLabel> nodeLabels() {
+    default Set<NodeLabel> estimationNodeLabels() {
         var nodeLabels = new HashSet<NodeLabel>();
-        if (tokenNodeLabelMapping() != null) {
-            for (var tokenToLabels : tokenNodeLabelMapping()) {
+        var tokenNodeLabelMapping = tokenNodeLabelMapping();
+        if (tokenNodeLabelMapping != null) {
+            for (var tokenToLabels : tokenNodeLabelMapping) {
                 nodeLabels.addAll(tokenToLabels.value);
             }
         }
+
+        if (nodeLabels.stream().allMatch(l -> l.equals(NodeLabel.ALL_NODES))) {
+            return Set.of();
+        }
+
         return nodeLabels;
     }
 
