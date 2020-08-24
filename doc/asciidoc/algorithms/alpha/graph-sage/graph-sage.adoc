@@ -90,7 +90,6 @@ include::specific-configuration.adoc[]
 | configuration      | Map                  | The configuration used for running the algorithm.
 |===
 ======
-====
 
 [.include-with-train]
 ======
@@ -123,6 +122,8 @@ include::specific-train-configuration.adoc[]
 | trainMillis   | Integer | Milliseconds to train the model
 |===
 ======
+====
+
 
 [[algorithms-embeddings-graph-sage-syntax-anonymous]]
 === Anonymous graphs
