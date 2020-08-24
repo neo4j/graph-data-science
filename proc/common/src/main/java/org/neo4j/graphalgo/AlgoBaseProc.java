@@ -25,7 +25,6 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -50,7 +49,6 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -59,8 +57,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.StringJoining;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -145,7 +141,7 @@ public abstract class AlgoBaseProc<
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
             GraphStoreFactory<?, ?> graphStoreFactory;
 
-            if (createConfig.nodeCount() >= 0 || createConfig.relationshipCount() >= 0) {
+            if (createConfig.isFictitiousLoading()) {
                 estimateDimensions = ImmutableGraphDimensions.builder()
                     .nodeCount(createConfig.nodeCount())
                     .highestNeoId(createConfig.nodeCount())
@@ -153,18 +149,11 @@ public abstract class AlgoBaseProc<
                     .maxRelCount(createConfig.relationshipCount())
                     .build();
 
-                GraphLoaderContext context = new GraphLoaderContext() {
-                    @Override
-                    public GraphDatabaseAPI api() {
-                        return null;
-                    }
-
-                    @Override
-                    public Log log() {
-                        return null;
-                    }
-                };
-                graphStoreFactory = new NativeFactory((GraphCreateFromStoreConfig) createConfig, context, estimateDimensions);
+                GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
+                graphStoreFactory = loader
+                    .createConfig()
+                    .graphStoreFactory()
+                    .getWithDimension(loader.context(), estimateDimensions);
             } else {
                 GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
                 graphStoreFactory = loader.graphStoreFactory();

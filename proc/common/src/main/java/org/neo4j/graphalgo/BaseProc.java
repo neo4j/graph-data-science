@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -78,6 +79,9 @@ public abstract class BaseProc {
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
+        if (api == null) {
+            return newFictitiousLoader(createConfig);
+        }
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
@@ -87,6 +91,15 @@ public abstract class BaseProc {
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))
                 .build())
+            .username(username())
+            .createConfig(createConfig)
+            .build();
+    }
+
+    private GraphLoader newFictitiousLoader(GraphCreateConfig createConfig) {
+        return ImmutableGraphLoader
+            .builder()
+            .context(GraphLoaderContext.NULL_CONTEXT_FOR_FICTITIOUS_LOADING)
             .username(username())
             .createConfig(createConfig)
             .build();

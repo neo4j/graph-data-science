@@ -38,9 +38,9 @@ import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -56,8 +56,11 @@ public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphC
         GraphCreateFromStoreConfig graphCreateConfig,
         GraphLoaderContext loadingContext
     ) {
-        super(graphCreateConfig, loadingContext, new GraphDimensionsStoreReader(loadingContext.transaction(), graphCreateConfig).call());
-        this.storeConfig = graphCreateConfig;
+        this(
+            graphCreateConfig,
+            loadingContext,
+            new GraphDimensionsStoreReader(loadingContext.transaction(), graphCreateConfig).call()
+        );
     }
 
     public NativeFactory(

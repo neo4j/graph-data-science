@@ -33,9 +33,9 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -161,7 +161,7 @@ public class GraphCreateProc extends CatalogProc {
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
             GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-            GraphStore graphStore =  loader.graphStore();
+            GraphStore graphStore = loader.graphStore();
 
             builder
                 .withNodeCount(graphStore.nodeCount())
@@ -178,10 +178,28 @@ public class GraphCreateProc extends CatalogProc {
     }
 
     public MemoryTreeWithDimensions memoryTreeWithDimensions(GraphCreateConfig config) {
-        GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
-        GraphStoreFactory<?, ?> graphStoreFactory = loader.graphStoreFactory();
-        GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, graphStoreFactory.estimationDimensions());
+        GraphDimensions estimateDimensions;
+        GraphStoreFactory<?, ?> graphStoreFactory;
 
+        if (config.isFictitiousLoading()) {
+            estimateDimensions = ImmutableGraphDimensions.builder()
+                .nodeCount(config.nodeCount())
+                .highestNeoId(config.nodeCount())
+                .maxRelCount(config.relationshipCount())
+                .build();
+
+            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            graphStoreFactory = loader
+                .createConfig()
+                .graphStoreFactory()
+                .getWithDimension(loader.context(), estimateDimensions);
+        } else {
+            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            graphStoreFactory = loader.graphStoreFactory();
+            estimateDimensions = graphStoreFactory.estimationDimensions();
+        }
+
+        GraphDimensions dimensions = updateDimensions(config, graphStoreFactory, estimateDimensions);
         MemoryTree memoryTree = estimate(graphStoreFactory, dimensions, config);
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }
@@ -191,7 +209,7 @@ public class GraphCreateProc extends CatalogProc {
         GraphStoreFactory<?, ?> graphStoreFactory,
         GraphDimensions dimensions
     ) {
-        if (config.nodeCount() > -1) {
+        if (config.isFictitiousLoading()) {
             dimensions = ImmutableGraphDimensions.builder()
                 .from(graphStoreFactory.dimensions())
                 .nodeCount(config.nodeCount())

@@ -45,6 +45,10 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
 
     public interface Supplier {
         GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
+
+        default GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> getWithDimension(GraphLoaderContext loaderContext, GraphDimensions graphDimensions) {
+            return get(loaderContext);
+        }
     }
 
     public static final String TASK_LOADING = "LOADING";
