@@ -51,6 +51,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
     private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
     private final long[][] labelIds;
+    private final boolean skipOrphans;
 
     // property ids, consecutive
     private final long[] properties;
@@ -67,11 +68,12 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new long[capacity] : null;
         this.labelIds = new long[capacity][];
+        this.skipOrphans = SKIP_ORPHANS.get();
     }
 
     @Override
     public void offer(final NodeReference record) {
-        if (SKIP_ORPHANS.get() && record.relationshipReference() == NO_ID) {
+        if (skipOrphans && record.relationshipReference() == NO_ID) {
             return;
         }
         if (nodeLabelIds.isEmpty()) {
