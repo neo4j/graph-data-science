@@ -18,6 +18,10 @@ dependencies {
     implementation group: 'org.neo4j',          name: 'neo4j-logging',       version: ver.'neo4j'
     implementation group: 'org.neo4j',          name: 'neo4j-procedure-api', version: ver.'neo4j'
     implementation group: 'org.neo4j',          name: 'neo4j-values',        version: ver.'neo4j'
+    // transitive from neo4j, defined explicitly because we use it; keep version in sync with neo4j
+    implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-annotations',  version: ver.'jackson'
+    implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-core',         version: ver.'jackson'
+    implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',     version: ver.'jackson'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

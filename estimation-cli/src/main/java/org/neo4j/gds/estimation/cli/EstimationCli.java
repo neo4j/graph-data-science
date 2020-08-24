@@ -19,8 +19,14 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementProjection;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -51,6 +57,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
@@ -137,11 +144,25 @@ public class EstimationCli implements Callable<Integer> {
     )
     private Map<String, Number> config;
 
-    @CommandLine.Option(
-        names = {"--tree"},
-        description = "Print estimated memory as human readable tree view."
-    )
-    private boolean printTree = false;
+    // explicit default value to avoid null field if no print option is specified
+    @CommandLine.ArgGroup(exclusive = true)
+    private PrintOptions printOptions = new PrintOptions();
+
+    static final class PrintOptions {
+        @CommandLine.Option(
+            names = {"--tree"},
+            description = "Print estimated memory as human readable tree view.",
+            required = true
+        )
+        private boolean printTree;
+
+        @CommandLine.Option(
+            names = {"--json"},
+            description = "Print estimated memory in json format.",
+            required = true
+        )
+        private boolean printJson;
+    }
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new EstimationCli())
@@ -157,12 +178,7 @@ public class EstimationCli implements Callable<Integer> {
 
         var actualConfig = updateConfig();
         var memoryEstimation = runProcedure(actualConfig);
-
-        var output = printTree
-            ? memoryEstimation.treeView
-            : formatWithLocale("%d,%d", memoryEstimation.bytesMin, memoryEstimation.bytesMax);
-
-        System.out.println(output);
+        System.out.println(renderResult(memoryEstimation));
 
         return 0;
     }
@@ -254,6 +270,36 @@ public class EstimationCli implements Callable<Integer> {
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 
+    private String renderResult(MemoryEstimateResult memoryEstimation) throws JsonProcessingException {
+        if (printOptions.printTree) {
+            return memoryEstimation.treeView;
+        }
+        if (printOptions.printJson) {
+            var json = ImmutableJsonOutput.builder()
+                .bytesMin(memoryEstimation.bytesMin)
+                .minMemory(humanReadable(memoryEstimation.bytesMin))
+                .bytesMax(memoryEstimation.bytesMax)
+                .maxMemory(humanReadable(memoryEstimation.bytesMax))
+                .procedure(procedureName)
+                .nodeCount(nodeCount)
+                .relationshipCount(relationshipCount)
+                .labelCount(labelCount)
+                .relationshipTypeCount(relationshipTypes)
+                .nodePropertyCount(nodePropertyCount)
+                .relationshipPropertyCount(relationshipPropertyCount)
+                .build();
+
+            var mapper = new ObjectMapper();
+            // Primary target consumes this from Python, snake_case is more pythonic.
+            mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+            // Pretty print output is nicer to read and any possible overhead from having to parse
+            // some whitespace is not important to our use-case
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            return mapper.writeValueAsString(json);
+        }
+        return formatWithLocale("%d,%d", memoryEstimation.bytesMin, memoryEstimation.bytesMax);
+    }
+
     private Method findProcedure(String procedure) {
         return PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
@@ -278,5 +324,31 @@ public class EstimationCli implements Callable<Integer> {
                        annotation.name().equalsIgnoreCase(procedureName);
             })
             .findFirst();
+    }
+
+    @JsonSerialize
+    @ValueClass
+    interface JsonOutput {
+        long bytesMin();
+
+        long bytesMax();
+
+        String minMemory();
+
+        String maxMemory();
+
+        String procedure();
+
+        long nodeCount();
+
+        long relationshipCount();
+
+        int labelCount();
+
+        int relationshipTypeCount();
+
+        int nodePropertyCount();
+
+        int relationshipPropertyCount();
     }
 }
