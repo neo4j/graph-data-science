@@ -189,14 +189,15 @@ final class AdjacencyBuilder {
                     this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
                 }
 
+                var targetsToImport = endOffset - startOffset;
                 if (propertyValues == null) {
-                    compressedTargets.add(targets, startOffset, endOffset);
+                    compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
                 } else {
                     if (aggregations[0] != Aggregation.NONE) {
-                        aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
+                        targetsToImport = aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
 
-                    compressedTargets.add(targets, propertyValues, startOffset, endOffset);
+                    compressedTargets.add(targets, propertyValues, startOffset, endOffset, targetsToImport);
                 }
 
                 startOffset = endOffset;
@@ -283,7 +284,7 @@ final class AdjacencyBuilder {
     }
 
     //TODO: consider only calling this method if `end-start` is sufficiently large
-    static void aggregate(long[] values, long[][] propertiesList, int startOffset, int endOffset, Aggregation[] aggregations) {
+    static int aggregate(long[] values, long[][] propertiesList, int startOffset, int endOffset, Aggregation[] aggregations) {
         // Step 1: Sort the values (indirectly)
         var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(values));
 
@@ -292,6 +293,7 @@ final class AdjacencyBuilder {
         //         Every subsequent instance of any value is set to LONG.MIN_VALUE
         int targetIndex = order[0];
         long lastSeenValue = values[targetIndex];
+        var distinctValues = 1;
 
         for (int orderIndex = 1; orderIndex < order.length; orderIndex++) {
             int currentIndex = order[orderIndex];
@@ -299,6 +301,7 @@ final class AdjacencyBuilder {
             if (values[currentIndex] != lastSeenValue) {
                 targetIndex = currentIndex;
                 lastSeenValue = values[currentIndex];
+                distinctValues++;
             } else {
                 for (int propertyId = 0; propertyId < propertiesList.length; propertyId++) {
                     long[] longs = propertiesList[propertyId];
@@ -315,5 +318,7 @@ final class AdjacencyBuilder {
                 values[currentIndex] = IGNORE_VALUE;
             }
         }
-    };
+
+        return distinctValues;
+    }
 }

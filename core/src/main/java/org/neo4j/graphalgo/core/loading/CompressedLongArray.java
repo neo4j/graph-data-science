@@ -61,7 +61,7 @@ public final class CompressedLongArray {
      * @param start  start index in values
      * @param end    end index in values
      */
-    public void add(long[] values, int start, int end) {
+    public void add(long[] values, int start, int end, int valuesToAdd) {
         // not inlined to avoid field access
         long currentLastValue = this.lastValue;
         long delta;
@@ -82,7 +82,7 @@ public final class CompressedLongArray {
         this.pos = encodeVLongs(values, start, end, this.storage, this.pos);
 
         this.lastValue = currentLastValue;
-        this.length += (end - start);
+        this.length += valuesToAdd;
     }
 
     /**
@@ -92,32 +92,30 @@ public final class CompressedLongArray {
      * @param allWeights    weights to write
      * @param start         start index in values and weights
      * @param end           end index in values and weights
+     * @param valuesToAdd  the actual number of targets to import from this range
      */
-    public void add(long[] values, long[][] allWeights, int start, int end) {
+    public void add(long[] values, long[][] allWeights, int start, int end, int valuesToAdd) {
         // write weights
         for (int i = 0; i < allWeights.length; i++) {
             long[] weights = allWeights[i];
-            addWeights(values, weights, start, end, i);
+            addWeights(values, weights, start, end, i, valuesToAdd);
         }
 
         // write values
-        add(values, start, end);
+        add(values, start, end, valuesToAdd);
     }
 
-    private void addWeights(long[] values, long[] weights, int start, int end, int weightIndex) {
-        var valuesToCopy = 0;
-        for (int i = start; i < end; i++) {
-            if (values[i] != IGNORE_VALUE) {
-                valuesToCopy++;
-            }
-        }
+    private void addWeights(long[] values, long[] weights, int start, int end, int weightIndex, int weightsToAdd) {
+        ensureCapacity(length, weightsToAdd, weightIndex);
 
-        ensureCapacity(length, valuesToCopy, weightIndex);
-
-        var writePos = length + 1;
-        for (int i = 0; i < (end - start); i++) {
-            if (values[start + i] != IGNORE_VALUE) {
-                this.weights[weightIndex][writePos++] = weights[start + i];
+        if (weightsToAdd == end - start) {
+            System.arraycopy(weights, start, this.weights[weightIndex], this.length, weightsToAdd);
+        } else {
+            var writePos = length;
+            for (int i = 0; i < (end - start); i++) {
+                if (values[start + i] != IGNORE_VALUE) {
+                    this.weights[weightIndex][writePos++] = weights[start + i];
+                }
             }
         }
     }
