@@ -24,11 +24,11 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import java.util.Arrays;
 
 @SuppressWarnings({"PointlessBitwiseExpression", "PointlessArithmeticExpression"})
-public final class NoopDoubleCompressor extends DoubleCompressor {
+public final class NoopDoubleCodec extends DoubleCodec {
 
-    private static final DoubleCompressor INSTANCE = new NoopDoubleCompressor();
+    private static final DoubleCodec INSTANCE = new NoopDoubleCodec();
 
-    public static DoubleCompressor instance() {
+    public static DoubleCodec instance() {
         return INSTANCE;
     }
 
@@ -81,6 +81,6 @@ public final class NoopDoubleCompressor extends DoubleCompressor {
             .build();
     }
 
-    private NoopDoubleCompressor() {
+    private NoopDoubleCodec() {
     }
 }

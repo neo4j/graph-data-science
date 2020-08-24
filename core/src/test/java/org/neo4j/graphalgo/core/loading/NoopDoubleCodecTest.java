@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-final class NoopDoubleCompressorTest extends DoubleCompressorTestBase {
-    NoopDoubleCompressorTest() {
-        super(NoopDoubleCompressor.instance());
+final class NoopDoubleCodecTest extends DoubleCodecTestBase {
+    NoopDoubleCodecTest() {
+        super(NoopDoubleCodec.instance());
     }
 }

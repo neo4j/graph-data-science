@@ -24,7 +24,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.core.loading.DoubleCompressor.CompressionInfo;
+import org.neo4j.graphalgo.core.loading.DoubleCodec.CompressionInfo;
 import org.neo4j.util.FeatureToggles;
 
 import java.nio.ByteBuffer;
@@ -41,14 +41,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public abstract class DoubleCompressorTestBase {
+public abstract class DoubleCodecTestBase {
 
-    private static final boolean DEBUG_PRINT = FeatureToggles.flag(DoubleCompressorTestBase.class, "debugPrint", false);
+    private static final boolean DEBUG_PRINT = FeatureToggles.flag(DoubleCodecTestBase.class, "debugPrint", false);
     private static final int NUMBER_OF_DOUBLES_TO_TEST = 100_000;
 
-    private DoubleCompressor compressor;
+    private DoubleCodec compressor;
 
-    public DoubleCompressorTestBase(DoubleCompressor compressor) {
+    public DoubleCodecTestBase(DoubleCodec compressor) {
         this.compressor = compressor;
     }
 

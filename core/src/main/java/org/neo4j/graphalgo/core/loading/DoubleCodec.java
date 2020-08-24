@@ -41,10 +41,10 @@ import java.util.Arrays;
  * This is required as many decompressing methods to not offer feedback on how much data they've read.
  *
  * For testing and debug purposes, implementors need to provide {@link #describeCompressedValue(byte[], int, double)}.
- * The value that is returned from {@link DoubleCompressor.CompressionInfo#compressedType()}
+ * The value that is returned from {@link DoubleCodec.CompressionInfo#compressedType()}
  * is used to call {@link #describeCompression(int)} so that one should be implemented accordingly.
  */
-public abstract class DoubleCompressor {
+public abstract class DoubleCodec {
 
     /**
      * The number of logical bits in the significand of a
