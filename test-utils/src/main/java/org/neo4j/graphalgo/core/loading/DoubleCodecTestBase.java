@@ -190,7 +190,6 @@ public abstract class DoubleCodecTestBase {
 
         // and then decompressing
         RuntimeException caughtException = null;
-        //        var decompressed = DoubleCompression.decompressDoubles(compressed, original.length);
         var decompressed = new double[original.length];
         try {
             compressor.decompressDoubles(compressed, original.length, decompressed, 0);
