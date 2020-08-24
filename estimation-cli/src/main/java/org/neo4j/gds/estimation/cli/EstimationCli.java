@@ -52,7 +52,6 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 @CommandLine.Command(
@@ -87,20 +86,23 @@ public class EstimationCli implements Callable<Integer> {
     @CommandLine.Option(
         names = {"-n", "--nodes"},
         description = "Number of nodes in the fictitious graph.",
-        required = true
+        required = true,
+        converter = LongParser.class
     )
     private long nodeCount;
 
     @CommandLine.Option(
         names = {"-r", "--relationships"},
         description = "Number of relationships in the fictitious graph.",
-        required = true
+        required = true,
+        converter = LongParser.class
     )
     private long relationshipCount;
 
     @CommandLine.Option(
         names = {"-l", "--labels"},
-        description = "Number of node labels in the fictitious graph."
+        description = "Number of node labels in the fictitious graph.",
+        converter = IntParser.class
     )
     private int labelCount = 0;
 
@@ -109,19 +111,22 @@ public class EstimationCli implements Callable<Integer> {
     @SuppressWarnings({"unused"})
     @CommandLine.Option(
         names = {"-t", "--types"},
-        description = "Number of relationship types in the fictitious graph."
+        description = "Number of relationship types in the fictitious graph.",
+        converter = IntParser.class
     )
     private int relationshipTypes = 0;
 
     @CommandLine.Option(
         names = {"-np", "--node-properties"},
-        description = "Number of node properties in the fictitious graph."
+        description = "Number of node properties in the fictitious graph.",
+        converter = IntParser.class
     )
     private int nodePropertyCount = 0;
 
     @CommandLine.Option(
         names = {"-rp", "--relationship-properties"},
-        description = "Number of relationship properties in the fictitious graph."
+        description = "Number of relationship properties in the fictitious graph.",
+        converter = IntParser.class
     )
     private int relationshipPropertyCount = 0;
 
@@ -140,7 +145,7 @@ public class EstimationCli implements Callable<Integer> {
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new EstimationCli())
-            .registerConverter(Number.class, new NumberConverter())
+            .registerConverter(Number.class, new NumberParser())
             .execute(args);
 
         System.exit(exitCode);
@@ -273,33 +278,5 @@ public class EstimationCli implements Callable<Integer> {
                        annotation.name().equalsIgnoreCase(procedureName);
             })
             .findFirst();
-    }
-
-    static final class ProcedureNameNormalizer implements CommandLine.ITypeConverter<String> {
-        public String convert(String value) {
-            String procedure = toLowerCaseWithLocale(value);
-            if (!procedure.endsWith(".estimate")) {
-                procedure += ".estimate";
-            }
-            if (!procedure.startsWith("gds.")) {
-                procedure = "gds." + procedure;
-            }
-            return procedure;
-        }
-    }
-
-    static final class NumberConverter implements CommandLine.ITypeConverter<Number> {
-        @Override
-        public Number convert(String number) {
-            try {
-                return Integer.parseInt(number);
-            } catch (NumberFormatException ignored) {
-                try {
-                    return Long.parseLong(number);
-                } catch (NumberFormatException alsoIgnored) {
-                    return Double.parseDouble(number);
-                }
-            }
-        }
     }
 }
