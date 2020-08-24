@@ -33,7 +33,15 @@ dependencies {
 
 shadowJar {
     mergeServiceFiles()
-    archiveFileName.set('estimation-cli.jar')
+    archiveBaseName.set("estimation-cli")
+    archiveClassifier.set("standalone")
     mainClassName = 'org.neo4j.gds.estimation.cli.EstimationCli'
     zip64 = true
 }
+
+task shadowCopy(type: Copy) {
+    from shadowJar
+    into distributionDir
+}
+
+tasks.ci.dependsOn tasks.shadowJar
