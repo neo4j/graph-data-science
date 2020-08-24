@@ -180,6 +180,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     }
 
     @Override
+    public long relationshipsReference(NodeCursor nodeCursor) {
+        return nodeCursor.relationshipsReference();
+    }
+
+    @Override
     public long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
         return NodeLabelsField.get(node, nodeStore, cursorTracer);
     }

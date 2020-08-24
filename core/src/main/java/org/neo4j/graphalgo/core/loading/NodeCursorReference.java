@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.NodeCursor;
 
 public final class NodeCursorReference implements NodeReference {
@@ -41,7 +42,7 @@ public final class NodeCursorReference implements NodeReference {
 
     @Override
     public long relationshipReference() {
-        return nodeCursor.relationshipsReference();
+        return Neo4jProxy.relationshipsReference(nodeCursor);
     }
 
     @Override

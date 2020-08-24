@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -51,7 +52,7 @@ public class NodeLabelIndexReference implements NodeReference {
     public long relationshipReference() {
         dataRead.singleNode(labelIndexCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {
-            return nodeCursor.relationshipsReference();
+            return Neo4jProxy.relationshipsReference(nodeCursor);
         } else {
             return Read.NO_ID;
         }

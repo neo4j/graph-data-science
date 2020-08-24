@@ -169,6 +169,10 @@ public final class Neo4jProxy {
         return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
+    public static long relationshipsReference(NodeCursor nodeCursor) {
+        return IMPL.relationshipsReference(nodeCursor);
+    }
+
     public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
         return IMPL.getNodeLabelFields(node, nodeStore, cursorTracer);
     }

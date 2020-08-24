@@ -128,6 +128,8 @@ public interface Neo4jProxyApi {
 
     NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
 
+    long relationshipsReference(NodeCursor nodeCursor);
+
     long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer);
 
     void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor);
