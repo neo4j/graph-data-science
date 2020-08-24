@@ -55,19 +55,23 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
         modelDoesntExist();
     }
 
-    private void dropModel() {
+    private void modelDoesntExist() {
+        checkModelExistence("n/a", false);
+    }
+
+    private void modelExists() {
+        checkModelExistence(GraphSage.MODEL_TYPE, true);
+    }
+
+    private void checkModelExistence(String modelType, boolean exists) {
         assertCypherResult(
-            "CALL gds.beta.model.drop($modelName)",
+            "CALL gds.beta.model.exists($modelName)",
             Map.of("modelName", modelName),
-            singletonList(
+            List.of(
                 Map.of(
-                    "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
-                    "trainConfig", allOf(
-                        aMapWithSize(18),
-                        hasEntry("modelName", modelName),
-                        hasEntry("aggregator", "MEAN"),
-                        hasEntry("activationFunction", "SIGMOID")
-                    )
+                    "modelName", modelName,
+                    "modelType", modelType,
+                    "exists", exists
                 )
             )
         );
@@ -92,23 +96,19 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
         });
     }
 
-    private void modelExists() {
-        checkModelExistence(GraphSage.MODEL_TYPE, true);
-    }
-
-    private void modelDoesntExist() {
-        checkModelExistence("n/a", false);
-    }
-
-    private void checkModelExistence(String modelType, boolean exists) {
+    private void dropModel() {
         assertCypherResult(
-            "CALL gds.beta.model.exists($modelName)",
+            "CALL gds.beta.model.drop($modelName)",
             Map.of("modelName", modelName),
-            List.of(
+            singletonList(
                 Map.of(
-                    "modelName", modelName,
-                    "modelType", modelType,
-                    "exists", exists
+                    "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
+                    "trainConfig", allOf(
+                        aMapWithSize(18),
+                        hasEntry("modelName", modelName),
+                        hasEntry("aggregator", "MEAN"),
+                        hasEntry("activationFunction", "SIGMOID")
+                    )
                 )
             )
         );
