@@ -40,6 +40,11 @@ public final class NodeCursorReference implements NodeReference {
     }
 
     @Override
+    public long relationshipReference() {
+        return nodeCursor.relationshipsReference();
+    }
+
+    @Override
     public long propertiesReference() {
         return nodeCursor.propertiesReference();
     }

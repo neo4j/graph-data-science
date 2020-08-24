@@ -48,6 +48,16 @@ public class NodeLabelIndexReference implements NodeReference {
     }
 
     @Override
+    public long relationshipReference() {
+        dataRead.singleNode(labelIndexCursor.nodeReference(), nodeCursor);
+        if (nodeCursor.next()) {
+            return nodeCursor.relationshipsReference();
+        } else {
+            return Read.NO_ID;
+        }
+    }
+
+    @Override
     public long propertiesReference() {
         dataRead.singleNode(labelIndexCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {

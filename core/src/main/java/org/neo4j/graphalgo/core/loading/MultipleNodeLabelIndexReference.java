@@ -50,6 +50,16 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
     }
 
     @Override
+    public long relationshipReference() {
+        dataRead.singleNode(compositeNodeCursor.nodeReference(), nodeCursor);
+        if (nodeCursor.next()) {
+            return nodeCursor.relationshipsReference();
+        } else {
+            return Read.NO_ID;
+        }
+    }
+
+    @Override
     public long propertiesReference() {
         dataRead.singleNode(compositeNodeCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {

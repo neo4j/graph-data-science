@@ -51,6 +51,11 @@ public final class NodeRecordReference implements NodeReference {
     }
 
     @Override
+    public long relationshipReference() {
+        return record.getNextRel();
+    }
+
+    @Override
     public long propertiesReference() {
         return record.getNextProp();
     }

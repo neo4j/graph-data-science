@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -182,6 +183,24 @@ class GraphLoaderTest extends BaseTest {
             .withLabels("Node1")
             .graph(TestSupport.FactoryType.NATIVE);
         assertGraphEquals(fromGdl("(a:Node1), (c:Node1)"), graph);
+    }
+
+    @Test
+    void testDontSkipOrphanNodesByDefault() {
+        // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
+        runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
+        Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);
+        assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d), (e), (f), (g)-->(h)"), graph);
+    }
+
+    @Test
+    void testSkipOrphanNodes() {
+        NodesBatchBuffer.whileSkippingOrphans(() -> {
+            // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
+            runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
+            Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);
+            assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c), (b)-->(c), (d)-->(e)"), graph);
+        });
     }
 
     @Test

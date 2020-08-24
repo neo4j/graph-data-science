@@ -22,14 +22,31 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.utils.CheckedRunnable;
 import org.neo4j.token.api.TokenConstants;
+import org.neo4j.util.FeatureToggles;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
+
+    private static final AtomicBoolean SKIP_ORPHANS =
+        new AtomicBoolean(FeatureToggles.flag(NodesBatchBuffer.class, "skipOrphans", false));
+
+    @TestOnly
+    public static synchronized <E extends Exception> void whileSkippingOrphans(CheckedRunnable<E> code) throws E {
+        var skipOrphans = SKIP_ORPHANS.getAndSet(true);
+        try {
+            code.checkedRun();
+        } finally {
+            SKIP_ORPHANS.set(skipOrphans);
+        }
+    }
 
     private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
@@ -54,6 +71,9 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
     @Override
     public void offer(final NodeReference record) {
+        if (SKIP_ORPHANS.get() && record.relationshipReference() == NO_ID) {
+            return;
+        }
         if (nodeLabelIds.isEmpty()) {
             long propertiesReference = properties == null ? NO_ID : record.propertiesReference();
             add(record.nodeId(), propertiesReference, new long[]{TokenConstants.ANY_LABEL});
