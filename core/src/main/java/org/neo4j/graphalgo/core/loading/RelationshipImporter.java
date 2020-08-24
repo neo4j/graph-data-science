@@ -89,8 +89,8 @@ class RelationshipImporter {
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedOut = importRelationships(buffer, batch, outProperties, adjacencyBuilder, tracker);
-        batch = buffer.sortByTarget();
 
+        batch = buffer.sortByTarget();
         long[][] inProperties = reader.readProperty(
             batch,
             batchLength,
@@ -100,6 +100,7 @@ class RelationshipImporter {
             adjacencyBuilder.atLeastOnePropertyToLoad()
         );
         int importedIn = importRelationships(buffer, batch, inProperties, adjacencyBuilder, tracker);
+
         return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
     }
 

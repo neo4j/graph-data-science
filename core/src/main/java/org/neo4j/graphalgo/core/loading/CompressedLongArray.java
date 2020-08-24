@@ -114,9 +114,10 @@ public final class CompressedLongArray {
 
         ensureCapacity(length, valuesToCopy, weightIndex);
 
+        var writePos = length + 1;
         for (int i = 0; i < (end - start); i++) {
             if (values[start + i] != IGNORE_VALUE) {
-                this.weights[weightIndex][length + i] = weights[start + i];
+                this.weights[weightIndex][writePos++] = weights[start + i];
             }
         }
     }
