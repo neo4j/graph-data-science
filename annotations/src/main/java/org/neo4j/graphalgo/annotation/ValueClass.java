@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
     clearBuilder = true,
     deferCollectionAllocation = true,
     depluralize = true,
+    forceJacksonPropertyNames = false,
     headerComments = true,
     jdkOnly = true,
     optionalAcceptNullable = true,
