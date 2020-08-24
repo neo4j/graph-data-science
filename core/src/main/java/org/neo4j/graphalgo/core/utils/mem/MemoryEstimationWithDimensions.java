@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.config;
+package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.GraphDimensions;
 
-public interface MutatePropertyConfig extends MutateConfig {
+@ValueClass
+public interface MemoryEstimationWithDimensions {
+    MemoryEstimation memoryEstimation();
 
-    String MUTATE_PROPERTY_KEY = "mutateProperty";
-
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    @Configuration.Key(MUTATE_PROPERTY_KEY)
-    String mutateProperty();
+    GraphDimensions graphDimensions();
 }

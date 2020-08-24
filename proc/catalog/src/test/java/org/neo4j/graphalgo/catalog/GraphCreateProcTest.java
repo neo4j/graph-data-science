@@ -693,7 +693,7 @@ class GraphCreateProcTest extends BaseProcTest {
                         NODE_PROJECTION_KEY, "*",
                         RELATIONSHIP_PROJECTION_KEY, "*"))
                 );
-                proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
+                proc.tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
             });
         });
 

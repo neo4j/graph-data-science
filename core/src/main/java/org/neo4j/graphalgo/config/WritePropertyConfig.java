@@ -23,7 +23,10 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface WritePropertyConfig extends WriteConfig {
 
+    String WRITE_PROPERTY_KEY = "writeProperty";
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.Key(WRITE_PROPERTY_KEY)
     String writeProperty();
 
 }

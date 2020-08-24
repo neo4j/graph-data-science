@@ -20,19 +20,25 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
+import org.neo4j.graphalgo.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -44,9 +50,13 @@ import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static java.util.function.Predicate.isEqual;
+import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class BaseProc {
@@ -185,6 +195,43 @@ public abstract class BaseProc {
                 MemoryUsage.humanReadable(freeMemory)
             ));
         }
+    }
+
+    protected MemoryEstimationWithDimensions estimateGraphCreate(GraphCreateConfig config) {
+        GraphDimensions estimateDimensions;
+        GraphStoreFactory<?, ?> graphStoreFactory;
+
+        if (config.isFictitiousLoading()) {
+            var labelCount = 0;
+            if (config instanceof GraphCreateFromStoreConfig) {
+                var storeConfig = (GraphCreateFromStoreConfig) config;
+                Set<NodeLabel> nodeLabels = storeConfig.nodeProjections().projections().keySet();
+                labelCount = nodeLabels.stream().allMatch(isEqual(NodeLabel.ALL_NODES)) ? 0 : nodeLabels.size();
+            }
+
+            estimateDimensions = ImmutableGraphDimensions.builder()
+                .nodeCount(config.nodeCount())
+                .highestNeoId(config.nodeCount())
+                .estimationNodeLabelCount(labelCount)
+                .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, config.relationshipCount()))
+                .maxRelCount(Math.max(config.relationshipCount(), 0))
+                .build();
+
+            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            graphStoreFactory = loader
+                .createConfig()
+                .graphStoreFactory()
+                .getWithDimension(loader.context(), estimateDimensions);
+        } else {
+            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            graphStoreFactory = loader.graphStoreFactory();
+            estimateDimensions = graphStoreFactory.estimationDimensions();
+        }
+
+        return ImmutableMemoryEstimationWithDimensions.builder()
+            .memoryEstimation(graphStoreFactory.memoryEstimation())
+            .graphDimensions(estimateDimensions)
+            .build();
     }
 
     @FunctionalInterface

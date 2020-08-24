@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -69,7 +68,6 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
@@ -139,28 +137,9 @@ public abstract class AlgoBaseProc<
 
         if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            GraphStoreFactory<?, ?> graphStoreFactory;
-
-            if (createConfig.isFictitiousLoading()) {
-                estimateDimensions = ImmutableGraphDimensions.builder()
-                    .nodeCount(createConfig.nodeCount())
-                    .highestNeoId(createConfig.nodeCount())
-                    .relationshipCounts(Collections.singletonMap(ALL_RELATIONSHIPS, createConfig.relationshipCount()))
-                    .maxRelCount(createConfig.relationshipCount())
-                    .build();
-
-                GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-                graphStoreFactory = loader
-                    .createConfig()
-                    .graphStoreFactory()
-                    .getWithDimension(loader.context(), estimateDimensions);
-            } else {
-                GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
-                graphStoreFactory = loader.graphStoreFactory();
-                estimateDimensions = graphStoreFactory.estimationDimensions();
-            }
-
-            estimationBuilder.add("graph", graphStoreFactory.memoryEstimation());
+            var memoryTreeWithDimensions = estimateGraphCreate(createConfig);
+            estimateDimensions = memoryTreeWithDimensions.graphDimensions();
+            estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
 
