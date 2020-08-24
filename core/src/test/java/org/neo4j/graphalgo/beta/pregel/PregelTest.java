@@ -111,12 +111,12 @@ class PregelTest {
             .build();
 
         assertEquals(
-            MemoryRange.of(4_724_072L),
+            MemoryRange.of(4_884_072L),
             Pregel.memoryEstimation().estimate(dimensions, 1).memoryUsage()
         );
 
         assertEquals(
-            MemoryRange.of(4_736_456L),
+            MemoryRange.of(4_896_456L),
             Pregel.memoryEstimation().estimate(dimensions, 10).memoryUsage()
         );
     }
