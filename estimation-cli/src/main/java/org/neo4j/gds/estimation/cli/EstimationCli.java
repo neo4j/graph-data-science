@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -53,6 +52,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
 @CommandLine.Command(
     description = "Estimates the memory consumption of a GDS procedure.",
@@ -67,8 +67,21 @@ public class EstimationCli implements Callable<Integer> {
         "org.neo4j.gds.embeddings"
     );
 
-    @CommandLine.Parameters(index = "0", description = "The procedure to estimate, e.g. gds.pagerank.stream.")
-    private String procedure;
+    @CommandLine.Spec
+    private CommandLine.Model.CommandSpec spec;
+
+    private String procedureName;
+    private Method procedure;
+
+    @CommandLine.Parameters(
+        index = "0",
+        description = "The procedure to estimate, e.g. gds.pagerank.stream.",
+        converter = ProcedureNameNormalizer.class
+    )
+    void setProcedure(String procedure) {
+        this.procedureName = procedure;
+        this.procedure = findProcedure(procedure);
+    }
 
     @CommandLine.Option(
         names = {"-n", "--nodes"},
@@ -133,21 +146,8 @@ public class EstimationCli implements Callable<Integer> {
     public Integer call() throws Exception {
         GdsEdition.instance().setToEnterpriseEdition();
 
-        procedure = procedure.toLowerCase(Locale.ENGLISH);
-        if (!procedure.endsWith(".estimate")) {
-            procedure += ".estimate";
-        }
-
         var actualConfig = updateConfig();
-
-        var procedureMethod = PACKAGES_TO_SCAN.stream()
-            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
-            .map(reflections -> findProcedure(reflections, procedure))
-            .flatMap(Optional::stream)
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale("Procedure not found: %s", procedure)));
-
-        var memoryEstimation = runProcedure(procedureMethod, actualConfig);
+        var memoryEstimation = runProcedure(actualConfig);
 
         var output = printTree
             ? memoryEstimation.treeView
@@ -178,10 +178,10 @@ public class EstimationCli implements Callable<Integer> {
         if (relationshipPropertyCount > 0) {
             actualConfig.put(RELATIONSHIP_PROPERTIES_KEY, createEntries(relationshipPropertyCount, "prop"));
         }
-        if (procedure.endsWith(".write.estimate")) {
+        if (procedureName.endsWith(".write.estimate")) {
             actualConfig.put(WRITE_PROPERTY_KEY, "ESTIMATE_FAKE_WRITE_PROPERTY");
         }
-        if (procedure.endsWith(".mutate.estimate")) {
+        if (procedureName.endsWith(".mutate.estimate")) {
             actualConfig.put(MUTATE_PROPERTY_KEY, "ESTIMATE_FAKE_MUTATE_PROPERTY");
         }
         return actualConfig;
@@ -193,20 +193,8 @@ public class EstimationCli implements Callable<Integer> {
             .collect(Collectors.toList());
     }
 
-    private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
-        return reflections
-            .getMethodsAnnotatedWith(Procedure.class)
-            .stream()
-            .filter(method -> {
-                var annotation = method.getDeclaredAnnotation(Procedure.class);
-                return annotation.value().equalsIgnoreCase(procedureName) ||
-                       annotation.name().equalsIgnoreCase(procedureName);
-            })
-            .findFirst();
-    }
-
-    private MemoryEstimateResult runProcedure(Method procedureMethod, Map<String, Object> config) throws Exception {
-        var parameters = procedureMethod.getParameters();
+    private MemoryEstimateResult runProcedure(Map<String, Object> config) throws Exception {
+        var parameters = procedure.getParameters();
         var args = new Object[parameters.length];
         var foundConfigParam = false;
         for (int i = 0; i < parameters.length; i++) {
@@ -252,12 +240,51 @@ public class EstimationCli implements Callable<Integer> {
             }
         }
 
-        var procInstance = procedureMethod.getDeclaringClass().getConstructor().newInstance();
-        var procResultStream = (Stream<?>) procedureMethod.invoke(procInstance, args);
+        var procInstance = procedure.getDeclaringClass().getConstructor().newInstance();
+        var procResultStream = (Stream<?>) procedure.invoke(procInstance, args);
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 
-    private static class NumberConverter implements CommandLine.ITypeConverter<Number> {
+    private Method findProcedure(String procedure) {
+        return PACKAGES_TO_SCAN.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+            .map(reflections -> findProcedure(reflections, procedure))
+            .flatMap(Optional::stream)
+            .findFirst()
+            .orElseThrow(() -> new CommandLine.ParameterException(
+                spec.commandLine(),
+                formatWithLocale("Procedure not found: %s", procedure),
+                spec.findOption("procedure"),
+                procedure
+            ));
+    }
+
+    private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
+        return reflections
+            .getMethodsAnnotatedWith(Procedure.class)
+            .stream()
+            .filter(method -> {
+                var annotation = method.getDeclaredAnnotation(Procedure.class);
+                return annotation.value().equalsIgnoreCase(procedureName) ||
+                       annotation.name().equalsIgnoreCase(procedureName);
+            })
+            .findFirst();
+    }
+
+    static final class ProcedureNameNormalizer implements CommandLine.ITypeConverter<String> {
+        public String convert(String value) {
+            String procedure = toLowerCaseWithLocale(value);
+            if (!procedure.endsWith(".estimate")) {
+                procedure += ".estimate";
+            }
+            if (!procedure.startsWith("gds.")) {
+                procedure = "gds." + procedure;
+            }
+            return procedure;
+        }
+    }
+
+    static final class NumberConverter implements CommandLine.ITypeConverter<Number> {
         @Override
         public Number convert(String number) {
             try {
