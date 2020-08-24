@@ -54,6 +54,7 @@ import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
+@SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 @CommandLine.Command(
     description = "Estimates the memory consumption of a GDS procedure.",
     name = "estimation-cli",
@@ -103,6 +104,9 @@ public class EstimationCli implements Callable<Integer> {
     )
     private int labelCount = 0;
 
+    // We don't make use of this because the number of types does not influence the estimation.
+    // We specify it here so that the options look symmetric, the result just doesn't change.
+    @SuppressWarnings({"unused"})
     @CommandLine.Option(
         names = {"-t", "--types"},
         description = "Number of relationship types in the fictitious graph."
