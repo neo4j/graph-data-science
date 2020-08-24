@@ -60,8 +60,7 @@ public abstract class DoubleCodecTestBase {
         assert value < 1L << 51 : "Can only encode longs with an absolute value of less than " + (1L << 51);
         long dataBits = value & ((1L << 51) - 1);
         long doubleBits = Double.doubleToLongBits(Double.NaN) | signBit | dataBits;
-        double encodedNaN = Double.longBitsToDouble(doubleBits);
-        return encodedNaN;
+        return Double.longBitsToDouble(doubleBits);
     }
 
     static long longFromDouble(double value) {
