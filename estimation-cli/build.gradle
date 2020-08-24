@@ -44,4 +44,4 @@ task shadowCopy(type: Copy) {
     into distributionDir
 }
 
-tasks.ci.dependsOn tasks.shadowJar
+tasks.ci.dependsOn tasks.shadowCopy
