@@ -66,24 +66,8 @@ final class NumericParser {
                 break;
             default:
         }
-        // hue hue hue
-        // switch (requireNonNullElse(longFormat.group("suffix"), "")) {
-        //     case "t":
-        //     case "T":
-        //         input.append("000");
-        //     case "g":
-        //     case "G":
-        //     case "b":
-        //     case "B":
-        //         input.append("000");
-        //     case "m":
-        //     case "M":
-        //         input.append("000");
-        //     case "k":
-        //     case "K":
-        //         input.append("000");
-        //     default:
-        // }
         return input.toString();
     }
+
+    private NumericParser() {}
 }
