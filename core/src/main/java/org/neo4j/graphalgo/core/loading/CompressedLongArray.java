@@ -137,8 +137,14 @@ public final class CompressedLongArray {
     }
 
     private void ensureCapacity(int pos, int required, int weightIndex) {
-        // TODO add same check as above
-        if (weights[weightIndex].length <= pos + required) {
+        int targetLength = pos + required;
+        if (targetLength < 0) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
+                pos,
+                required
+            ));
+        } else if (weights[weightIndex].length <= pos + required) {
             int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
             tracker.add(sizeOfDoubleArray(newLength));

@@ -134,12 +134,11 @@ final class AdjacencyBuilder {
     }
 
     /**
-     *
-     * @param batch four-tuple values sorted by source (source, target, rel?, property?)
-     * @param targets slice of batch on second position; all targets in source-sorted order
+     * @param batch          four-tuple values sorted by source (source, target, rel?, property?)
+     * @param targets        slice of batch on second position; all targets in source-sorted order
      * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
-     * @param offsets offsets into targets; every offset position indicates a source node group
-     * @param length how far we can read in the offsets array (how many source tuples to import)
+     * @param offsets        offsets into targets; every offset position indicates a source node group
+     * @param length         how far we can read in the offsets array (how many source tuples to import)
      * @param tracker
      */
     void addAll(
@@ -284,7 +283,13 @@ final class AdjacencyBuilder {
     }
 
     //TODO: consider only calling this method if `end-start` is sufficiently large
-    static int aggregate(long[] values, long[][] propertiesList, int startOffset, int endOffset, Aggregation[] aggregations) {
+    static int aggregate(
+        long[] values,
+        long[][] propertiesList,
+        int startOffset,
+        int endOffset,
+        Aggregation[] aggregations
+    ) {
         // Step 1: Sort the values (indirectly)
         var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(values));
 
