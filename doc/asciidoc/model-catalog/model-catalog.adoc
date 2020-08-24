@@ -1,0 +1,110 @@
+[[model-catalog-ops]]
+[.beta]
+= Model Catalog
+
+[abstract]
+--
+This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
+--
+
+Some graph algorithms use trained models in their computation.
+A model is generally a mathematical formula representing a real-world or fictitious entity.
+Each algorithm requiring a trained model provides the formulation and means to compute this model (see <<algorithms-embeddings-graph-sage-syntax, GraphSage train syntax>>).
+
+The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
+
+[NOTE]
+====
+The model catalog exists as long as the Neo4j instance is running.
+When Neo4j is restarted, models stored in the catalog are lost and need to be trained again.
+====
+
+This chapter explains the available model catalog operations.
+
+[[model-catalog-procs]]
+[opts=header,cols="1m,1"]
+|===
+| Name                                             | Description
+| <<catalog-model-exists, gds.beta.model.exists>>  | Checks if a named model is stored in the catalog.
+| <<catalog-model-list, gds.beta.model.list>>      | Prints information about models that are currently stored in the catalog.
+| <<catalog-model-drop, gds.beta.model.drop>>      | Drops a named model from the catalog.
+|===
+
+[NOTE]
+====
+Training models is a responsibility of the corresponding algorithm and is provided by a procedure mode - `train`.
+Training, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
+Models trained by a different Neo4j user are not accessible at any time.
+====
+
+
+[[catalog-model-exists]]
+== Check if a model exists in the catalog
+
+We can check if a model is stored in the catalog by looking up its name.
+
+.Check if a model exists in the catalog:
+[source,cypher]
+----
+CALL gds.beta.model.exists('my-model') YIELD exists;
+----
+
+
+[[catalog-model-list]]
+== List models stored in the catalog
+
+Once we have trained models in the catalog we can see information about either all of them or a single model using its name
+
+.Listing detailed information about all models:
+[source,cypher]
+----
+CALL gds.model.list()
+YIELD
+  modelInfo,
+  configuration,
+  creationTime
+----
+
+.Listing detailed information about specific model:
+[source,cypher]
+----
+CALL gds.model.list('my-model')
+YIELD
+  modelInfo,
+  configuration,
+  creationTime
+----
+
+.Results
+* `modelInfo`: detailed information for the trained model
+** `modelName: String`: the saved model name.
+** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
+** can also contain algorithm specific model details.
+* `configuration`: the configuration used for training the model.
+* `creationTime`: the time at which the model was registered in the catalog.
+
+
+[[catalog-model-drop]]
+== Removing models from the catalog
+
+If we no longer need a trained model we can remove it from the catalog.
+
+.Remove a model from the catalog:
+[source,cypher]
+----
+CALL gds.beta.model.drop('my-model')
+YIELD
+  modelInfo,
+  configuration,
+  creationTime
+----
+
+.Results
+* `modelInfo`: detailed information for the trained model
+** `modelName: String`: the saved model name.
+** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
+** can also contain algorithm specific model details.
+* `configuration`: the configuration used for training the model.
+* `creationTime`: the time at which the model was registered in the catalog.
+
+NOTE: If the model name does not exist, an error will be raised.
