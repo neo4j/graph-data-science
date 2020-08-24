@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
@@ -231,14 +232,15 @@ public abstract class DoubleCompressorTestBase {
 
         if (DEBUG_PRINT) {
             if (detailPrint) {
-                System.out.printf("original = %s%n", Arrays.toString(original));
-                System.out.printf("decompressed = %s%n", Arrays.toString(decompressed));
-                System.out.printf("compressed [%d] = %s%n", compressedSize, Arrays.toString(compressed));
-                System.out.printf("uncompressed [%d] = %s%n", uncompressedSize, Arrays.toString(uncompressed));
-                System.out.printf("space savings %.2f%%%n", 100 * savings);
-                System.out.printf("bytes per value %.4f%n", bytesPerValue);
+                System.out.printf(Locale.ENGLISH, "original = %s%n", Arrays.toString(original));
+                System.out.printf(Locale.ENGLISH, "decompressed = %s%n", Arrays.toString(decompressed));
+                System.out.printf(Locale.ENGLISH, "compressed [%d] = %s%n", compressedSize, Arrays.toString(compressed));
+                System.out.printf(Locale.ENGLISH, "uncompressed [%d] = %s%n", uncompressedSize, Arrays.toString(uncompressed));
+                System.out.printf(Locale.ENGLISH, "space savings %.2f%%%n", 100 * savings);
+                System.out.printf(Locale.ENGLISH, "bytes per value %.4f%n", bytesPerValue);
             } else {
                 System.out.printf(
+                    Locale.ENGLISH,
                     "uncompressed size = [%d] | compressed size = [%d] | space savings %.2f%% | bytes per value = %.4f%n",
                     uncompressedSize,
                     compressedSize,
@@ -253,6 +255,7 @@ public abstract class DoubleCompressorTestBase {
                 var numberOfValuesAtCompression = sizeDistribution[compressionSize];
                 cumulativeSizes += numberOfValuesAtCompression;
                 System.out.printf(
+                    Locale.ENGLISH,
                     "  %17s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
                     compressionSize,
                     numberOfValuesAtCompression,
@@ -271,6 +274,7 @@ public abstract class DoubleCompressorTestBase {
                 cumulativeTypes += numberOfValuesWithCompressionType;
                 if (numberOfValuesWithCompressionType > 0) {
                     System.out.printf(
+                        Locale.ENGLISH,
                         "  %17s  |  %16s  |  %16s  |  %9.2f%%  |  %15.2f%%%n",
                         compressor.describeCompression(compressionType),
                         "",
@@ -285,6 +289,7 @@ public abstract class DoubleCompressorTestBase {
                         allSizes += numberOfValuesAtCompression;
                         if (numberOfValuesAtCompression > 0) {
                             System.out.printf(
+                                Locale.ENGLISH,
                                 "  %17s  |  %16s  |  %16s  |  %7.2f%% ¦  |  %13.2f%% ¦%n",
                                 "",
                                 compressionSize,
@@ -334,6 +339,7 @@ public abstract class DoubleCompressorTestBase {
             var expected = info.input();
             var actual = info.decompressed();
             assertEquals(expected, actual, 1e-6, () -> String.format(
+                Locale.ENGLISH,
                 "Expected value compressed as [%3$s]%4$s to be equal to input [%2$f] (%2$A) but it actually was decompressed as [%1$f] (%1$A)",
                 actual,
                 expected,
