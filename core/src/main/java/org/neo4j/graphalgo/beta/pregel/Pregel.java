@@ -465,21 +465,20 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return nodeSchema;
         }
 
-        // TODO check if key exists and type is correct
         public HugeDoubleArray doubleProperties(String propertyKey) {
-            return (HugeDoubleArray) properties.get(propertyKey);
+            return checkProperty(propertyKey, HugeDoubleArray.class);
         }
 
         public HugeLongArray longProperties(String propertyKey) {
-            return (HugeLongArray) properties.get(propertyKey);
+            return checkProperty(propertyKey, HugeLongArray.class);
         }
 
         public HugeObjectArray<long[]> longArrayProperties(String propertyKey) {
-            return (HugeObjectArray<long[]>) properties.get(propertyKey);
+            return checkProperty(propertyKey, HugeObjectArray.class);
         }
 
         public HugeObjectArray<double[]> doubleArrayProperties(String propertyKey) {
-            return (HugeObjectArray<double[]>) properties.get(propertyKey);
+            return checkProperty(propertyKey, HugeObjectArray.class);
         }
 
         public double doubleValue(String key, long nodeId) {
@@ -514,6 +513,29 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         void set(String key, long nodeId, double[] value) {
             doubleArrayProperties(key).set(nodeId, value);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <PROPERTY> PROPERTY checkProperty(String key, Class<? extends PROPERTY> propertyKlass) {
+            var property = properties.get(key);
+            if (property == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Property with key %s does not exist. Available properties are: %s",
+                    key,
+                    properties.keySet()
+                ));
+            }
+
+            if (!(propertyKlass.isAssignableFrom(property.getClass()))) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Could not cast property %s of type %s into %s",
+                    key,
+                    property.getClass().getSimpleName(),
+                    propertyKlass.getSimpleName()
+                ));
+            }
+
+            return (PROPERTY) property;
         }
     }
 
