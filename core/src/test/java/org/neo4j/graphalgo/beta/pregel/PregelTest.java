@@ -64,7 +64,6 @@ class PregelTest {
             graph,
             config,
             computation,
-            10,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -86,7 +85,6 @@ class PregelTest {
             graph,
             config,
             new CompositeTestComputation(),
-            10,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

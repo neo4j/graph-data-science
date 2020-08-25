@@ -34,7 +34,6 @@ import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPO
 class PregelConnectedComponentsDocExample {
     @Test
     void testDoc() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableConnectedComponentsConfig.builder()
@@ -55,7 +54,6 @@ class PregelConnectedComponentsDocExample {
             randomGraph,
             config,
             new ConnectedComponentsPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

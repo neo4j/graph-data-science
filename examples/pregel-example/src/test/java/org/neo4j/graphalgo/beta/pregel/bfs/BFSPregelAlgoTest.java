@@ -62,7 +62,6 @@ class BFSPregelAlgoTest {
 
     @Test
     void levelBfs() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableBFSPregelConfig.builder()
@@ -74,7 +73,6 @@ class BFSPregelAlgoTest {
             graph,
             config,
             new BFSLevelPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -100,7 +98,6 @@ class BFSPregelAlgoTest {
 
     @Test
     void parentBfs() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableBFSPregelConfig.builder()
@@ -112,7 +109,6 @@ class BFSPregelAlgoTest {
             graph,
             config,
             new BFSParentPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
