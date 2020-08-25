@@ -23,9 +23,9 @@ public interface PregelComputation<C extends PregelConfig> {
 
     Pregel.NodeSchema nodeSchema();
 
-    default void init(PregelContext.InitContext<C> context, long nodeId) {}
+    default void init(PregelContext.InitContext<C> context) {}
 
-    void compute(PregelContext.ComputeContext<C> context, long nodeId, Pregel.Messages messages);
+    void compute(PregelContext.ComputeContext<C> context, Pregel.Messages messages);
 
     default double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
         return nodeValue;

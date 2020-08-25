@@ -48,16 +48,16 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void init(PregelContext.InitContext<ConnectedComponentsConfig> context, long nodeId) {
+    public void init(PregelContext.InitContext<ConnectedComponentsConfig> context) {
         var initialValue = context.getConfig().seedProperty() != null
-            ? context.nodeProperties(context.getConfig().seedProperty()).longValue(nodeId)
-            : nodeId;
-        context.setNodeValue(COMPONENT, nodeId, initialValue);
+            ? context.nodeProperties(context.getConfig().seedProperty()).longValue(context.nodeId())
+            : context.nodeId();
+        context.setNodeValue(COMPONENT, initialValue);
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, long nodeId, Pregel.Messages messages) {
-        long oldComponentId = context.longNodeValue(COMPONENT, nodeId);
+    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, Pregel.Messages messages) {
+        long oldComponentId = context.longNodeValue(COMPONENT);
         long newComponentId = oldComponentId;
 
         for (var nextComponentId : messages) {
@@ -67,8 +67,8 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
         }
 
         if (context.isInitialSuperstep() || newComponentId != oldComponentId) {
-            context.setNodeValue(COMPONENT, nodeId, newComponentId);
-            context.sendMessages(nodeId, newComponentId);
+            context.setNodeValue(COMPONENT, newComponentId);
+            context.sendMessages(newComponentId);
         }
     }
 }

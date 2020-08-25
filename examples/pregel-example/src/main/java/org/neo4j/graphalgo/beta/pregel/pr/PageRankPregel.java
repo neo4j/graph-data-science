@@ -49,16 +49,16 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     }
 
     @Override
-    public void init(PregelContext.InitContext<PageRankPregelConfig> context, long nodeId) {
+    public void init(PregelContext.InitContext<PageRankPregelConfig> context) {
         var initialValue = context.getConfig().seedProperty() != null
-            ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(nodeId)
+            ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(context.nodeId())
             : 1.0 / context.getNodeCount();
-        context.setNodeValue(PAGE_RANK, nodeId, initialValue);
+        context.setNodeValue(PAGE_RANK, initialValue);
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PageRankPregelConfig> context, long nodeId, Pregel.Messages messages) {
-        double newRank = context.doubleNodeValue(PAGE_RANK, nodeId);
+    public void compute(PregelContext.ComputeContext<PageRankPregelConfig> context, Pregel.Messages messages) {
+        double newRank = context.doubleNodeValue(PAGE_RANK);
 
         // compute new rank based on neighbor ranks
         if (!context.isInitialSuperstep()) {
@@ -72,11 +72,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
             newRank = (jumpProbability / context.getNodeCount()) + dampingFactor * sum;
 
-            context.setNodeValue(PAGE_RANK, nodeId, newRank);
+            context.setNodeValue(PAGE_RANK, newRank);
         }
 
         // send new rank to neighbors
-        context.sendMessages(nodeId, newRank / context.getDegree(nodeId));
+        context.sendMessages(newRank / context.getDegree());
     }
 
     @ValueClass

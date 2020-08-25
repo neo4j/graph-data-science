@@ -314,14 +314,16 @@ public final class Pregel<CONFIG extends PregelConfig> {
             for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
                 if (computeContext.isInitialSuperstep()) {
-                    computation.init(initContext, nodeId);
+                    initContext.setNodeId(nodeId);
+                    computation.init(initContext);
                 }
 
                 if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
+                    computeContext.setNodeId(nodeId);
 
                     messageIterator.init(receiveMessages(nodeId));
-                    computation.compute(computeContext, nodeId, messages);
+                    computation.compute(computeContext, messages);
                 }
             }
         }
