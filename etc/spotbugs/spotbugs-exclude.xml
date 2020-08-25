@@ -187,7 +187,11 @@
         <Bug pattern="VO_VOLATILE_REFERENCE_TO_ARRAY"/>
     </Match>
 
-    
+    <!-- Method invokes System.exit(...) -->
+    <Match>
+        <Bug pattern="DM_EXIT"/>
+    </Match>
+
     <!-- Negating the result of compareTo()/compare() -->
     <Match>
         <Bug pattern="RV_NEGATING_RESULT_OF_COMPARETO"/>
