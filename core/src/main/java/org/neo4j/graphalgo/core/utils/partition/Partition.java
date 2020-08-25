@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
+import java.util.Objects;
+
 public class Partition {
 
     public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
@@ -33,5 +35,27 @@ public class Partition {
 
     public boolean fits(int otherPartitionsCount) {
         return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Partition partition = (Partition) o;
+        return startNode == partition.startNode &&
+               nodeCount == partition.nodeCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startNode, nodeCount);
+    }
+
+    @Override
+    public String toString() {
+        return "Partition{" +
+               "startNode=" + startNode +
+               ", nodeCount=" + nodeCount +
+               '}';
     }
 }
