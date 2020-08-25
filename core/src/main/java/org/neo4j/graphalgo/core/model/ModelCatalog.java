@@ -162,12 +162,12 @@ public final class ModelCatalog {
             userModels.clear();
         }
 
-        private boolean checkAllowedModelsSize() {
-            return userModels.size() >= ALLOWED_MODELS_COUNT;
+        private boolean reachedModelsLimit() {
+            return userModels.size() == ALLOWED_MODELS_COUNT;
         }
 
         private void canStoreModel() {
-            if(GdsEdition.instance().isOnCommunityEdition() && checkAllowedModelsSize()) {
+            if(GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit()) {
                 throw new IllegalArgumentException("Community users can only store one model in the catalog");
             }
         }
