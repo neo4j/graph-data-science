@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface MutateTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
+public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     default Optional<String> mutateGraphName() {

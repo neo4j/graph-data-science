@@ -38,7 +38,7 @@ import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
-    extends MutateTest<ALGORITHM, CONFIG, RESULT> {
+    extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {
 
     @Test
     @Override
