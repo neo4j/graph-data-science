@@ -115,7 +115,6 @@ public class EstimationCli implements Callable<Integer> {
 
     // We don't make use of this because the number of types does not influence the estimation.
     // We specify it here so that the options look symmetric, the result just doesn't change.
-    @SuppressWarnings({"unused"})
     @CommandLine.Option(
         names = {"-t", "--types"},
         description = "Number of relationship types in the fictitious graph.",
@@ -148,7 +147,7 @@ public class EstimationCli implements Callable<Integer> {
     @CommandLine.ArgGroup(exclusive = true)
     private PrintOptions printOptions = new PrintOptions();
 
-    static final class PrintOptions {
+    private static final class PrintOptions {
         @CommandLine.Option(
             names = {"--tree"},
             description = "Print estimated memory as human readable tree view.",
@@ -165,11 +164,14 @@ public class EstimationCli implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-        int exitCode = new CommandLine(new EstimationCli())
+        int exitCode = run(args);
+        System.exit(exitCode);
+    }
+
+    static int run(String... args) {
+        return new CommandLine(new EstimationCli())
             .registerConverter(Number.class, new NumberParser())
             .execute(args);
-
-        System.exit(exitCode);
     }
 
     @Override
