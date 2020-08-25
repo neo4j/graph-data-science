@@ -104,7 +104,7 @@ class ModelListProcTest extends BaseProcTest {
         );
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "`{0}`")
     @MethodSource("invalidModelNames")
     void failOnEmptyModelName(String modelName) {
         assertError(

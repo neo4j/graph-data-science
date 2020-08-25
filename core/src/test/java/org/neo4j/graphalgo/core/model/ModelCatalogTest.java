@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,6 +89,24 @@ class ModelCatalogTest {
     }
 
     @Test
+    void shouldStoreModelsPerType() {
+        GdsEdition.instance().setToCommunityEdition();
+
+        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+            TestTrainConfig.of()
+        );
+        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME,"testModel2", "testAlgo2", 1337L,
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.set(model2);
+
+        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
+        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
+    }
+
+    @Test
     void onlyAllowOneCatalogInCE() {
         GdsEdition.instance().setToCommunityEdition();
 
@@ -97,6 +116,15 @@ class ModelCatalogTest {
 
         ModelCatalog.set(model);
 
+        assertDoesNotThrow(() -> {
+            ModelCatalog.set(Model.of(
+                USERNAME,
+                "testModel2",
+                "testAlgo2",
+                1337L,
+                TestTrainConfig.of()
+            ));
+        });
 
         Model<Long, TestTrainConfig> model2 = Model.of(USERNAME,"testModel2", "testAlgo", 1337L,
             TestTrainConfig.of()

@@ -81,13 +81,13 @@ public final class ModelCatalog {
     }
 
     static class UserCatalog {
-        private static final int ALLOWED_MODELS_COUNT = 1;
+        private static final long ALLOWED_MODELS_COUNT = 1;
         private static final UserCatalog EMPTY = new UserCatalog();
 
         private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
 
         public void set(Model<?, ?> model) {
-            canStoreModel();
+            canStoreModel(model.algoType());
             if (exists(model.name())) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Model with name `%s` already exists",
@@ -162,12 +162,19 @@ public final class ModelCatalog {
             userModels.clear();
         }
 
-        private boolean reachedModelsLimit() {
-            return userModels.size() == ALLOWED_MODELS_COUNT;
+        private boolean reachedModelsLimit(String modelType) {
+            return modelsPerType(modelType) == ALLOWED_MODELS_COUNT;
         }
 
-        private void canStoreModel() {
-            if(GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit()) {
+        private long modelsPerType(String modelType) {
+            return userModels.values()
+                .stream()
+                .filter(model -> model.algoType().equals(modelType))
+                .count();
+        }
+
+        private void canStoreModel(String modelType) {
+            if (GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit(modelType)) {
                 throw new IllegalArgumentException("Community users can only store one model in the catalog");
             }
         }
