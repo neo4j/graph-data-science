@@ -8,7 +8,7 @@ This section details the model catalog operations available to manage named trai
 --
 
 Some graph algorithms use trained models in their computation.
-A model is generally a mathematical formula representing a real-world or fictitious entity.
+A model is generally a mathematical formula representing a real-world or fictitious entities.
 Each algorithm requiring a trained model provides the formulation and means to compute this model (see <<algorithms-embeddings-graph-sage-syntax, GraphSage train syntax>>).
 
 The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
@@ -33,7 +33,7 @@ This chapter explains the available model catalog operations.
 [NOTE]
 ====
 Training models is a responsibility of the corresponding algorithm and is provided by a procedure mode - `train`.
-Training, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
+Training, using, listing, and dropping named models are management operations bound to a Neo4j user.
 Models trained by a different Neo4j user are not accessible at any time.
 ====
 
