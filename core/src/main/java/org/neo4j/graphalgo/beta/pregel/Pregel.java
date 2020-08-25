@@ -32,18 +32,15 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
-import org.neo4j.graphalgo.core.utils.LazyMappingCollection;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -150,19 +147,22 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // Tracks if a node voted to halt in the previous iteration
         BitSet voteBits = new BitSet(graph.nodeCount());
 
-        // TODO: maybe try degree partitioning or clustering (better locality)
-        Collection<PrimitiveLongIterable> nodeBatches = LazyBatchCollection.of(
-                graph.nodeCount(),
-                batchSize,
-                (start, length) -> () -> PrimitiveLongCollections.range(start, start + length - 1L));
+        List<ComputeStep<CONFIG>> computeSteps = createComputeSteps();
 
         while (iterations < config.maxIterations() && !canHalt) {
             int iteration = iterations++;
 
-            final List<ComputeStep<CONFIG>> computeSteps = runComputeSteps(nodeBatches, iteration, receiverBits, voteBits);
+            // Init compute steps with the updated state
+            for (ComputeStep<CONFIG> computeStep : computeSteps) {
+                computeStep.init(iteration, receiverBits, voteBits);
+            }
 
-            receiverBits = unionBitSets(computeSteps, ComputeStep::getSenders);
-            voteBits = unionBitSets(computeSteps, ComputeStep::getVotes);
+            runComputeSteps(computeSteps, iteration, receiverBits);
+
+            if (iteration > 0) {
+                receiverBits.clear();
+            }
+            receiverBits = unionBitSets(computeSteps, receiverBits, ComputeStep::getSenders);
 
             // No messages have been sent
             if (receiverBits.nextSetBit(0) == -1) {
@@ -181,21 +181,39 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messageQueues.release();
     }
 
-    private BitSet unionBitSets(Collection<ComputeStep<CONFIG>> computeSteps, Function<ComputeStep<CONFIG>, BitSet> fn) {
-        return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
-                stream.map(fn).reduce((bitSet1, bitSet2) -> {
-                    bitSet1.union(bitSet2);
-                    return bitSet1;
-                }).orElseGet(BitSet::new));
+    private List<ComputeStep<CONFIG>> createComputeSteps() {
+        List<Partition> partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
+
+        List<ComputeStep<CONFIG>> computeSteps = new ArrayList<>(concurrency);
+
+        for (Partition partition : partitions) {
+            computeSteps.add(new ComputeStep<>(
+                graph,
+                computation,
+                config,
+                0,
+                partition,
+                nodeValues,
+                messageQueues,
+                graph
+            ));
+        }
+        return computeSteps;
     }
 
-    private List<ComputeStep<CONFIG>> runComputeSteps(
-            Collection<PrimitiveLongIterable> nodeBatches,
-            final int iteration,
-            BitSet messageBits,
-            BitSet voteToHaltBits) {
+    private BitSet unionBitSets(Collection<ComputeStep<CONFIG>> computeSteps, BitSet identity, Function<ComputeStep<CONFIG>, BitSet> fn) {
+        return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
+                stream.map(fn).reduce(identity, (bitSet1, bitSet2) -> {
+                    bitSet1.union(bitSet2);
+                    return bitSet1;
+                }));
+    }
 
-        final List<ComputeStep<CONFIG>> tasks = new ArrayList<>(nodeBatches.size());
+    private void runComputeSteps(
+        Collection<ComputeStep<CONFIG>> computeSteps,
+        final int iteration,
+        BitSet messageBits
+    ) {
 
         if (!config.isAsynchronous()) {
             // Synchronization barrier:
@@ -213,27 +231,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             }
         }
 
-        Collection<ComputeStep<CONFIG>> computeSteps = LazyMappingCollection.of(
-                nodeBatches,
-                nodeBatch -> {
-                    ComputeStep<CONFIG> task = new ComputeStep<>(
-                        graph,
-                        computation,
-                        config,
-                        iteration,
-                        nodeBatch,
-                        nodeValues,
-                        messageBits,
-                        voteToHaltBits,
-                        messageQueues,
-                        graph
-                    );
-                    tasks.add(task);
-                    return task;
-                });
-
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
-        return tasks;
     }
 
     @SuppressWarnings({"unchecked"})
@@ -256,7 +254,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
 
-        private final int iteration;
         private final long nodeCount;
         private final long relationshipCount;
         private final boolean isAsync;
@@ -264,23 +261,23 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final PregelContext.InitContext<CONFIG> initContext;
         private final PregelContext.ComputeContext<CONFIG> computeContext;
         private final BitSet senderBits;
-        private final BitSet receiverBits;
-        private final BitSet voteBits;
-        private final PrimitiveLongIterable nodeBatch;
+        private final Partition nodeBatch;
         private final Degrees degrees;
         private final CompositeNodeValue nodeValues;
         private final HugeObjectArray<? extends Queue<Double>> messageQueues;
         private final RelationshipIterator relationshipIterator;
+
+        private int iteration;
+        private BitSet receiverBits;
+        private BitSet voteBits;
 
         private ComputeStep(
             Graph graph,
             PregelComputation<CONFIG> computation,
             CONFIG config,
             int iteration,
-            PrimitiveLongIterable nodeBatch,
+            Partition nodeBatch,
             CompositeNodeValue nodeValues,
-            BitSet receiverBits,
-            BitSet voteBits,
             HugeObjectArray<? extends Queue<Double>> messageQueues,
             RelationshipIterator relationshipIterator
         ) {
@@ -290,8 +287,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.isAsync = config.isAsynchronous();
             this.computation = computation;
             this.senderBits = new BitSet(nodeCount);
-            this.receiverBits = receiverBits;
-            this.voteBits = voteBits;
             this.nodeBatch = nodeBatch;
             this.degrees = graph;
             this.nodeValues = nodeValues;
@@ -301,17 +296,27 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.initContext = PregelContext.initContext(this, config, graph);
         }
 
+        void init(int iteration, BitSet receiverBits, BitSet voteBits) {
+            this.iteration = iteration;
+            this.receiverBits = receiverBits;
+            this.voteBits = voteBits;
+
+            if (iteration > 0) {
+                this.senderBits.clear();
+            }
+        }
+
         @Override
         public void run() {
-            PrimitiveLongIterator nodesIterator = nodeBatch.iterator();
-
             var messageIterator = isAsync
                 ? new MessageIterator.Async()
                 : new MessageIterator.Sync();
             var messages = new Messages(messageIterator);
 
-            while (nodesIterator.hasNext()) {
-                final long nodeId = nodesIterator.next();
+            long batchStart = nodeBatch.startNode;
+            long batchEnd = batchStart + nodeBatch.nodeCount;
+
+            for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
                 if (computeContext.isInitialSuperstep()) {
                     computation.init(initContext, nodeId);
