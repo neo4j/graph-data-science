@@ -94,7 +94,9 @@ public abstract class AlgoBaseProc<
         // implicit loading
         if (!graphName.isPresent()) {
             // inherit concurrency from AlgoBaseConfig
-            config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
+            if (!config.containsKey(READ_CONCURRENCY_KEY)) {
+                config = config.withNumber(READ_CONCURRENCY_KEY, config.getInt(CONCURRENCY_KEY, DEFAULT_CONCURRENCY));
+            }
             GraphCreateConfig createConfig = GraphCreateConfig.createImplicit(getUsername(), config);
             maybeImplicitCreate = Optional.of(createConfig);
             allowedKeys.addAll(createConfig.configKeys());

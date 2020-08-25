@@ -68,6 +68,7 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.IMPLICIT_GRAPH_NAME;
+import static org.neo4j.graphalgo.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -250,6 +251,25 @@ public interface AlgoBaseProcTest<CONFIG extends AlgoBaseConfig, RESULT> {
             );
 
             assertResultEquals(resultOnImplicitGraphFromCypher.result(), resultOnImplicitGraphFromStore.result());
+        });
+    }
+
+    @Test
+    default void useReadConcurrencyWhenSetOnImplicitlyLoadedGraph() {
+        CypherMapWrapper config = createMinimalConfig(
+            CypherMapWrapper.create(
+                MapUtil.map(
+                    NODE_PROJECTION_KEY, NodeProjections.ALL,
+                    RELATIONSHIP_PROJECTION_KEY, RelationshipProjections.ALL,
+                    READ_CONCURRENCY_KEY, 2
+                )
+            )
+        );
+
+        applyOnProcedure((proc) -> {
+            CONFIG algoConfig = proc.newConfig(Optional.empty(), config);
+            assertTrue(algoConfig.implicitCreateConfig().isPresent());
+            assertEquals(2, algoConfig.implicitCreateConfig().get().readConcurrency());
         });
     }
 
