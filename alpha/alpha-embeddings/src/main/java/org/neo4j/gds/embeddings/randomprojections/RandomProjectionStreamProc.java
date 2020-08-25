@@ -72,16 +72,18 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
 
     @Override
     protected Stream<StreamResult> stream(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
-        Graph graph = computationResult.graph();
+        return runWithExceptionLogging("Graph streaming failed", () -> {
+            Graph graph = computationResult.graph();
 
-        return LongStream
-            .range(0, graph.nodeCount())
-            .boxed()
-            .map((nodeId) -> {
-                RandomProjection randomProjection = computationResult.result();
+            return LongStream
+                .range(0, graph.nodeCount())
+                .boxed()
+                .map((nodeId) -> {
+                    RandomProjection randomProjection = computationResult.result();
 
-                return new StreamResult(graph.toOriginalNodeId(nodeId), randomProjection.embeddings().get(nodeId));
-            });
+                    return new StreamResult(graph.toOriginalNodeId(nodeId), randomProjection.embeddings().get(nodeId));
+                });
+        });
     }
 
     @Override

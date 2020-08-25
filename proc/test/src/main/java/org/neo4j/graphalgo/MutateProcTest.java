@@ -114,7 +114,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
 
     @Test
     default void testExceptionLogging() {
-
         List<TestLog> log = new ArrayList<>(1);
         assertThrows(
             NullPointerException.class,

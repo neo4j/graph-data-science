@@ -36,15 +36,17 @@ public abstract class StreamProc<
     protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
 
     protected Stream<PROC_RESULT> stream(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
+        return runWithExceptionLogging("Graph streaming failed", () -> {
+            if (computationResult.isGraphEmpty()) {
+                return Stream.empty();
+            }
 
-        Graph graph = computationResult.graph();
-        NodeProperties nodeProperties = getNodeProperties(computationResult);
+            Graph graph = computationResult.graph();
+            NodeProperties nodeProperties = getNodeProperties(computationResult);
 
-        return LongStream
-            .range(IdMapping.START_NODE_ID, graph.nodeCount())
-            .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
+            return LongStream
+                .range(IdMapping.START_NODE_ID, graph.nodeCount())
+                .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
+        });
     }
 }

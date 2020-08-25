@@ -81,31 +81,33 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
 
     @Override
     public Stream<StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
-        NodeSimilarityStatsConfig config = computationResult.config();
+        return runWithExceptionLogging("Graph stats failed", () -> {
+            NodeSimilarityStatsConfig config = computationResult.config();
 
-        if (computationResult.isGraphEmpty()) {
-            return Stream.of(
-                new StatsResult(
-                    computationResult.createMillis(),
-                    0,
-                    0,
-                    0,
-                    0,
-                    Collections.emptyMap(),
-                    config.toMap()
-                )
-            );
-        }
-
-        NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> resultBuilder =
-            NodeSimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
-
-        if (shouldComputeHistogram(callContext)) {
-            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                resultBuilder.withHistogram(computeHistogram(computationResult.result().graphResult().similarityGraph()));
+            if (computationResult.isGraphEmpty()) {
+                return Stream.of(
+                    new StatsResult(
+                        computationResult.createMillis(),
+                        0,
+                        0,
+                        0,
+                        0,
+                        Collections.emptyMap(),
+                        config.toMap()
+                    )
+                );
             }
-        }
-        return Stream.of(resultBuilder.build());
+
+            NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> resultBuilder =
+                NodeSimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
+
+            if (shouldComputeHistogram(callContext)) {
+                try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
+                    resultBuilder.withHistogram(computeHistogram(computationResult.result().graphResult().similarityGraph()));
+                }
+            }
+            return Stream.of(resultBuilder.build());
+        });
     }
 
     public static final class StatsResult {
