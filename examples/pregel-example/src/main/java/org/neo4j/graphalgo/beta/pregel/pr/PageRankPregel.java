@@ -82,7 +82,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     @ValueClass
     @Configuration("PageRankPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    interface PageRankPregelConfig extends PregelConfig, SeedConfig {
+    public interface PageRankPregelConfig extends PregelConfig, SeedConfig {
         @Value.Default
         default double dampingFactor() {
             return 0.85;
