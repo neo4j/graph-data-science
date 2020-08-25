@@ -72,6 +72,14 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
+    public void setNodeValue(String key, long[] value) {
+        computeStep.setNodeValue(key, nodeId, value);
+    }
+
+    public void setNodeValue(String key, double[] value) {
+        computeStep.setNodeValue(key, nodeId, value);
+    }
+
     public long getNodeCount() {
         return computeStep.getNodeCount();
     }
@@ -122,6 +130,14 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         public long longNodeValue(String key) {
             return computeStep.longNodeValue(key, nodeId);
+        }
+
+        public long[] longArrayNodeValue(String key) {
+            return computeStep.longArrayNodeValue(key, nodeId);
+        }
+
+        public double[] doubleArrayNodeValue(String key) {
+            return computeStep.doubleArrayNodeValue(key, nodeId);
         }
 
         public void voteToHalt() {

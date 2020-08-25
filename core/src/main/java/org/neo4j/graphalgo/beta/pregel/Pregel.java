@@ -373,11 +373,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
 
         double doubleNodeValue(String key, long nodeId) {
-            return nodeValues.doubleProperties(key).get(nodeId);
+            return nodeValues.doubleValue(key, nodeId);
         }
 
         long longNodeValue(String key, long nodeId) {
-            return nodeValues.longProperties(key).get(nodeId);
+            return nodeValues.longValue(key, nodeId);
+        }
+
+        long[] longArrayNodeValue(String key, long nodeId) {
+            return nodeValues.longArrayValue(key, nodeId);
+        }
+
+         double[] doubleArrayNodeValue(String key, long nodeId) {
+            return nodeValues.doubleArrayValue(key, nodeId);
         }
 
         void setNodeValue(String key, long nodeId, double value) {
@@ -387,79 +395,125 @@ public final class Pregel<CONFIG extends PregelConfig> {
         void setNodeValue(String key, long nodeId, long value) {
             nodeValues.set(key, nodeId, value);
         }
+
+        void setNodeValue(String key, long nodeId, long[] value) {
+            nodeValues.set(key, nodeId, value);
+        }
+
+        void setNodeValue(String key, long nodeId, double[] value) {
+            nodeValues.set(key, nodeId, value);
+        }
     }
 
     public static final class CompositeNodeValue {
 
         private final NodeSchema nodeSchema;
-        private final Map<String, HugeDoubleArray> doubleProperties;
-        private final Map<String, HugeLongArray> longProperties;
+        private final Map<String, Object> properties;
 
         static CompositeNodeValue of(NodeSchema nodeSchema, long nodeCount, int concurrency, AllocationTracker tracker) {
-            Map<String, HugeDoubleArray> doubleProperties = new HashMap<>();
-            Map<String, HugeLongArray> longProperties = new HashMap<>();
+            Map<String, Object> properties = new HashMap<>();
 
             nodeSchema.elements().forEach(element -> {
-                if (element.propertyType() == ValueType.DOUBLE) {
-                    var nodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
-                    ParallelUtil.parallelStreamConsume(
-                        LongStream.range(0, nodeCount),
-                        concurrency,
-                        nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK))
-                    );
-                    doubleProperties.put(element.propertyKey(), nodeValues);
-                } else if (element.propertyType() == ValueType.LONG) {
-                    var nodeValues = HugeLongArray.newArray(nodeCount, tracker);
-                    ParallelUtil.parallelStreamConsume(
-                        LongStream.range(0, nodeCount),
-                        concurrency,
-                        nodeIds -> nodeIds.forEach(nodeId -> nodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK))
-                    );
-                    longProperties.put(element.propertyKey(), nodeValues);
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale("Unsupported value type: %s", element.propertyType()));
+                switch(element.propertyType()) {
+                    case DOUBLE:
+                        var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
+                        ParallelUtil.parallelStreamConsume(
+                            LongStream.range(0, nodeCount),
+                            concurrency,
+                            nodeIds -> nodeIds.forEach(nodeId -> doubleNodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK))
+                        );
+                        properties.put(element.propertyKey(), doubleNodeValues);
+                        break;
+                    case LONG:
+                        var longNodeValues = HugeLongArray.newArray(nodeCount, tracker);
+                        ParallelUtil.parallelStreamConsume(
+                            LongStream.range(0, nodeCount),
+                            concurrency,
+                            nodeIds -> nodeIds.forEach(nodeId -> longNodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK))
+                        );
+                        properties.put(element.propertyKey(), longNodeValues);
+                        break;
+                    case LONG_ARRAY:
+                        properties.put(
+                            element.propertyKey(),
+                            HugeObjectArray.newArray(long[].class, nodeCount, tracker)
+                        );
+                        break;
+                    case DOUBLE_ARRAY:
+                        properties.put(
+                            element.propertyKey(),
+                            HugeObjectArray.newArray(double[].class, nodeCount, tracker)
+                        );
+                        break;
+                    default:
+                        throw new IllegalArgumentException(formatWithLocale("Unsupported value type: %s", element.propertyType()));
                 }
             });
 
-            return new CompositeNodeValue(nodeSchema, doubleProperties, longProperties);
+            return new CompositeNodeValue(nodeSchema, properties);
         }
 
         private CompositeNodeValue(
             NodeSchema nodeSchema,
-            Map<String, HugeDoubleArray> doubleProperties,
-            Map<String, HugeLongArray> longProperties
+            Map<String, Object> properties
         ) {
             this.nodeSchema = nodeSchema;
-            this.doubleProperties = doubleProperties;
-            this.longProperties = longProperties;
+            this.properties = properties;
         }
 
         public NodeSchema schema() {
             return nodeSchema;
         }
 
+        // TODO check if key exists and type is correct
         public HugeDoubleArray doubleProperties(String propertyKey) {
-            return doubleProperties.get(propertyKey);
+            return (HugeDoubleArray) properties.get(propertyKey);
         }
 
         public HugeLongArray longProperties(String propertyKey) {
-            return longProperties.get(propertyKey);
+            return (HugeLongArray) properties.get(propertyKey);
+        }
+
+        public HugeObjectArray<long[]> longArrayProperties(String propertyKey) {
+            return (HugeObjectArray<long[]>) properties.get(propertyKey);
+        }
+
+        public HugeObjectArray<double[]> doubleArrayProperties(String propertyKey) {
+            return (HugeObjectArray<double[]>) properties.get(propertyKey);
         }
 
         public double doubleValue(String key, long nodeId) {
-            return doubleProperties.get(key).get(nodeId);
+            return doubleProperties(key).get(nodeId);
         }
 
         public long longValue(String key, long nodeId) {
-            return longProperties.get(key).get(nodeId);
+            return longProperties(key).get(nodeId);
+        }
+
+        public long[] longArrayValue(String key, long nodeId) {
+            HugeObjectArray<long[]> arrayProperties = longArrayProperties(key);
+            return arrayProperties.get(nodeId);
+        }
+
+        public double[] doubleArrayValue(String key, long nodeId) {
+            HugeObjectArray<double[]> arrayProperties = doubleArrayProperties(key);
+            return arrayProperties.get(nodeId);
         }
 
         void set(String key, long nodeId, double value) {
-            doubleProperties.get(key).set(nodeId, value);
+            doubleProperties(key).set(nodeId, value);
         }
 
         void set(String key, long nodeId, long value) {
-            longProperties.get(key).set(nodeId, value);
+            longProperties(key).set(nodeId, value);
+        }
+
+        void set(String key, long nodeId, long[] value) {
+            longArrayProperties(key).set(nodeId, value);
+        }
+
+        void set(String key, long nodeId, double[] value) {
+            doubleArrayProperties(key).set(nodeId, value);
         }
     }
 
