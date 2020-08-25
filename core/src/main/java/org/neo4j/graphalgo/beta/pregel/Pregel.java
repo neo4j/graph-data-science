@@ -308,8 +308,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 : new MessageIterator.Sync();
             var messages = new Messages(messageIterator);
 
-            long batchStart = nodeBatch.startNode;
-            long batchEnd = batchStart + nodeBatch.nodeCount;
+            long batchStart = nodeBatch.startNode();
+            long batchEnd = batchStart + nodeBatch.nodeCount();
 
             for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 

@@ -243,14 +243,14 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
         while (parts.hasNext()) {
             Partition partition = parts.next();
-            int partitionSize = (int) partition.nodeCount;
-            long start = partition.startNode;
+            int partitionSize = (int) partition.nodeCount();
+            long start = partition.startNode();
             int i = 1;
             while (parts.hasNext()
                    && i < partitionsPerThread
                    && partition.fits(partitionSize)) {
                 partition = parts.next();
-                partitionSize += partition.nodeCount;
+                partitionSize += partition.nodeCount();
                 ++i;
             }
 

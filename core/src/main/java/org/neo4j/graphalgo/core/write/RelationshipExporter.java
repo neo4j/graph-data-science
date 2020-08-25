@@ -143,8 +143,8 @@ public final class RelationshipExporter extends StatementApi {
                 progress,
                 relationshipToken,
                 propertyKeyToken,
-                partition.startNode,
-                partition.nodeCount,
+                partition.startNode(),
+                partition.nodeCount(),
                 afterWriteConsumer
             ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));

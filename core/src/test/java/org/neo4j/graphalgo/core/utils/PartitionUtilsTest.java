@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.ImmutablePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -75,7 +76,7 @@ class PartitionUtilsTest {
 
         List<TestTask> tasks = partitions
             .stream()
-            .map(partition -> new TestTask(partition.startNode, partition.nodeCount))
+            .map(partition -> new TestTask(partition.startNode(), partition.nodeCount()))
             .collect(Collectors.toList());
 
         assertEquals(2, tasks.size());
@@ -92,19 +93,19 @@ class PartitionUtilsTest {
     //@formatter:off
     static Stream<Arguments> ranges() {
         return Stream.of(
-            Arguments.of(1, 42, List.of(new Partition(0, 42))),
-            Arguments.of(1, 42_000, List.of(new Partition(0, 42_000))),
+            Arguments.of(1, 42, List.of(ImmutablePartition.of(0, 42))),
+            Arguments.of(1, 42_000, List.of(ImmutablePartition.of(0, 42_000))),
             Arguments.of(4, 40_000, List.of(
-                new Partition(0, ParallelUtil.DEFAULT_BATCH_SIZE),
-                new Partition(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                new Partition(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                new Partition(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
+                ImmutablePartition.of(0, ParallelUtil.DEFAULT_BATCH_SIZE),
+                ImmutablePartition.of(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                ImmutablePartition.of(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                ImmutablePartition.of(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
             )),
             Arguments.of(4, 42_000, List.of(
-                new Partition(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                new Partition(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                new Partition(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                new Partition(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
+                ImmutablePartition.of(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                ImmutablePartition.of(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                ImmutablePartition.of(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                ImmutablePartition.of(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
             ))
         );
     }
@@ -127,10 +128,10 @@ class PartitionUtilsTest {
 
         List<Partition> partitions = PartitionUtils.degreePartition(graph, 2);
         assertEquals(2, partitions.size());
-        assertEquals(0, partitions.get(0).startNode);
-        assertEquals(2, partitions.get(0).nodeCount);
-        assertEquals(2, partitions.get(1).startNode);
-        assertEquals(1, partitions.get(1).nodeCount);
+        assertEquals(0, partitions.get(0).startNode());
+        assertEquals(2, partitions.get(0).nodeCount());
+        assertEquals(2, partitions.get(1).startNode());
+        assertEquals(1, partitions.get(1).nodeCount());
     }
 
     @Test
@@ -149,8 +150,8 @@ class PartitionUtilsTest {
             new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph, 2
         );
         assertEquals(1, partitions.size());
-        assertEquals(0, partitions.get(0).startNode);
-        assertEquals(3, partitions.get(0).nodeCount);
+        assertEquals(0, partitions.get(0).startNode());
+        assertEquals(3, partitions.get(0).nodeCount());
     }
 
 }
