@@ -246,9 +246,24 @@ public class EstimationCli implements Runnable {
     }
 
     static int runWithArgs(String... args) {
-        return new CommandLine(new EstimationCli())
-            .registerConverter(Number.class, new NumberParser())
-            .execute(args);
+        var commandLine = new CommandLine(new EstimationCli())
+            .registerConverter(Number.class, new NumberParser());
+
+        boolean parsed;
+        try {
+            parsed = commandLine.parseArgs(args).hasSubcommand();
+        } catch (RuntimeException e) {
+            parsed = false;
+        }
+
+        if (!parsed) {
+            var newArgs = new String[args.length + 1];
+            System.arraycopy(args, 0, newArgs, 1, args.length);
+            newArgs[0] = "estimate";
+            args = newArgs;
+        }
+
+        return commandLine.execute(args);
     }
 
     private Method findProcedure(String procedure) {
