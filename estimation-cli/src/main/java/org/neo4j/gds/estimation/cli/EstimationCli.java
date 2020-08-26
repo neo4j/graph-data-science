@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -69,62 +68,65 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
     mixinStandardHelpOptions = true,
     version = "estimation-cli 0.4.2"
 )
-public class EstimationCli implements Callable<Integer> {
+public class EstimationCli implements Runnable {
+
+    @CommandLine.Spec
+    CommandLine.Model.CommandSpec spec;
+
+    @CommandLine.Command(name = "list-available")
+    void listAvailable() {
+        var availableProcedures = PACKAGES_TO_SCAN.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+            .flatMap(reflections -> reflections
+                .getMethodsAnnotatedWith(Procedure.class)
+                .stream())
+            .flatMap(method -> {
+                var annotation = method.getAnnotation(Procedure.class);
+                var valueName = annotation.value();
+                var definedName = annotation.name();
+                var procName = definedName.trim().isEmpty() ? valueName : definedName;
+                return Optional.of(procName).filter(s -> s.endsWith(".estimate")).stream();
+            })
+            .filter(not(isEqual("gds.testProc.test.estimate")))
+            .sorted(String.CASE_INSENSITIVE_ORDER)
+            .collect(Collectors.joining(System.lineSeparator()));
+
+        System.out.println(availableProcedures);
+    }
+
+    @CommandLine.Command(name = "estimate")
+    void estimateOne(
+        @CommandLine.Parameters(
+            paramLabel = "procedure",
+            description = "The procedure to estimate, e.g. gds.pagerank.stream.",
+            converter = ProcedureNameNormalizer.class
+        )
+            String procedureName,
+
+        @CommandLine.Mixin
+            CountOptions counts,
+
+        @CommandLine.ArgGroup(exclusive = true)
+            PrintOptions printOptions
+
+    ) throws Exception {
+        GdsEdition.instance().setToEnterpriseEdition();
+        var procedure = findProcedure(procedureName);
+        var actualConfig = counts.updateConfig(procedureName);
+        var memoryEstimation = runProcedure(procedure, actualConfig);
+        if (printOptions == null) {
+            printOptions = new PrintOptions();
+        }
+        var result = renderResult(procedureName, counts, printOptions, memoryEstimation);
+        System.out.println(result);
+    }
 
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.graphalgo",
         "org.neo4j.gds.embeddings"
     );
 
-    @CommandLine.ArgGroup(exclusive = true, multiplicity = "1")
-    private RunOrListOptions options = new RunOrListOptions();
-
-    static class RunOrListOptions {
-        @CommandLine.Option(
-            names = {"--list-available"},
-            description = "List all available procedures.",
-            required = true
-        )
-        boolean list;
-
-        @CommandLine.ArgGroup(exclusive = false, multiplicity = "1")
-        RunOptions runOptions = new RunOptions();
-    }
-
-    static final class PrintOptions {
-        @CommandLine.Option(
-            names = {"--tree"},
-            description = "Print estimated memory as human readable tree view.",
-            required = true
-        )
-        boolean printTree;
-
-        @CommandLine.Option(
-            names = {"--json"},
-            description = "Print estimated memory in json format.",
-            required = true
-        )
-        boolean printJson;
-    }
-
-    static class RunOptions {
-
-        @CommandLine.Spec
-        CommandLine.Model.CommandSpec spec;
-
-        private String procedureName;
-        private Method procedure;
-
-        @CommandLine.Parameters(
-            index = "0",
-            description = "The procedure to estimate, e.g. gds.pagerank.stream.",
-            converter = ProcedureNameNormalizer.class
-        )
-        void setProcedure(String procedure) {
-            this.procedureName = procedure;
-            this.procedure = findProcedure(procedure);
-        }
-
+    static final class CountOptions {
         @CommandLine.Option(
             names = {"-n", "--nodes"},
             description = "Number of nodes in the fictitious graph.",
@@ -178,38 +180,8 @@ public class EstimationCli implements Callable<Integer> {
         )
         private Map<String, Number> config;
 
-        // explicit default value to avoid null field if no print option is specified
-        @CommandLine.ArgGroup(exclusive = true)
-        private PrintOptions printOptions = new PrintOptions();
-
-        private Method findProcedure(String procedure) {
-            return PACKAGES_TO_SCAN.stream()
-                .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
-                .map(reflections -> findProcedure(reflections, procedure))
-                .flatMap(Optional::stream)
-                .findFirst()
-                .orElseThrow(() -> new CommandLine.ParameterException(
-                    spec.commandLine(),
-                    formatWithLocale("Procedure not found: %s", procedure),
-                    spec.findOption("procedure"),
-                    procedure
-                ));
-        }
-
-        private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
-            return reflections
-                .getMethodsAnnotatedWith(Procedure.class)
-                .stream()
-                .filter(method -> {
-                    var annotation = method.getDeclaredAnnotation(Procedure.class);
-                    return annotation.value().equalsIgnoreCase(procedureName) ||
-                           annotation.name().equalsIgnoreCase(procedureName);
-                })
-                .findFirst();
-        }
-
         @NotNull
-        private Map<String, Object> updateConfig() {
+        private Map<String, Object> updateConfig(String procedureName) {
             HashMap<String, Object> actualConfig;
             if (config != null) {
                 actualConfig = new HashMap<>(config);
@@ -247,51 +219,66 @@ public class EstimationCli implements Callable<Integer> {
         }
     }
 
+    static final class PrintOptions {
+        @CommandLine.Option(
+            names = {"--tree"},
+            description = "Print estimated memory as human readable tree view.",
+            required = true
+        )
+        boolean printTree;
+
+        @CommandLine.Option(
+            names = {"--json"},
+            description = "Print estimated memory in json format.",
+            required = true
+        )
+        boolean printJson;
+    }
+
     public static void main(String... args) {
-        int exitCode = run(args);
+        int exitCode = runWithArgs(args);
         System.exit(exitCode);
     }
 
-    static int run(String... args) {
+    @Override
+    public void run() {
+        throw new CommandLine.ParameterException(spec.commandLine(), "Specify a subcommand");
+    }
+
+    static int runWithArgs(String... args) {
         return new CommandLine(new EstimationCli())
             .registerConverter(Number.class, new NumberParser())
             .execute(args);
     }
 
-    @Override
-    public Integer call() throws Exception {
-        System.out.println(runForOutput());
-        return 0;
+    private Method findProcedure(String procedure) {
+        return PACKAGES_TO_SCAN.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+            .map(reflections -> findProcedure(reflections, procedure))
+            .flatMap(Optional::stream)
+            .findFirst()
+            .orElseThrow(() -> new CommandLine.ParameterException(
+                spec.commandLine(),
+                formatWithLocale("Procedure not found: %s", procedure),
+                spec.findOption("procedure"),
+                procedure
+            ));
     }
 
-    private String runForOutput() throws Exception {
-        if (options.list) {
-            return PACKAGES_TO_SCAN.stream()
-                .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
-                .flatMap(reflections -> reflections
-                    .getMethodsAnnotatedWith(Procedure.class)
-                    .stream())
-                .flatMap(method -> {
-                    var annotation = method.getAnnotation(Procedure.class);
-                    var valueName = annotation.value();
-                    var definedName = annotation.name();
-                    var procName = definedName.trim().isEmpty() ? valueName : definedName;
-                    return Optional.of(procName).filter(s -> s.endsWith(".estimate")).stream();
-                })
-                .filter(not(isEqual("gds.testProc.test.estimate")))
-                .sorted(String.CASE_INSENSITIVE_ORDER)
-                .collect(Collectors.joining(System.lineSeparator()));
-        } else {
-            GdsEdition.instance().setToEnterpriseEdition();
-
-            var actualConfig = options.runOptions.updateConfig();
-            var memoryEstimation = runProcedure(actualConfig);
-            return renderResult(memoryEstimation);
-        }
+    private Optional<Method> findProcedure(Reflections reflections, String procedureName) {
+        return reflections
+            .getMethodsAnnotatedWith(Procedure.class)
+            .stream()
+            .filter(method -> {
+                var annotation = method.getDeclaredAnnotation(Procedure.class);
+                return annotation.value().equalsIgnoreCase(procedureName) ||
+                       annotation.name().equalsIgnoreCase(procedureName);
+            })
+            .findFirst();
     }
 
-    private MemoryEstimateResult runProcedure(Map<String, Object> config) throws Exception {
-        var parameters = options.runOptions.procedure.getParameters();
+    private static MemoryEstimateResult runProcedure(Method procedure, Map<String, Object> config) throws Exception {
+        var parameters = procedure.getParameters();
         var args = new Object[parameters.length];
         var foundConfigParam = false;
         for (int i = 0; i < parameters.length; i++) {
@@ -337,28 +324,33 @@ public class EstimationCli implements Callable<Integer> {
             }
         }
 
-        var procInstance = options.runOptions.procedure.getDeclaringClass().getConstructor().newInstance();
-        var procResultStream = (Stream<?>) options.runOptions.procedure.invoke(procInstance, args);
+        var procInstance = procedure.getDeclaringClass().getConstructor().newInstance();
+        var procResultStream = (Stream<?>) procedure.invoke(procInstance, args);
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 
-    private String renderResult(MemoryEstimateResult memoryEstimation) throws JsonProcessingException {
-        if (options.runOptions.printOptions.printTree) {
+    private static String renderResult(
+        String procedureName,
+        CountOptions countOptions,
+        PrintOptions printOptions,
+        MemoryEstimateResult memoryEstimation
+    ) throws JsonProcessingException {
+        if (printOptions.printTree) {
             return memoryEstimation.treeView;
         }
-        if (options.runOptions.printOptions.printJson) {
+        if (printOptions.printJson) {
             var json = ImmutableJsonOutput.builder()
                 .bytesMin(memoryEstimation.bytesMin)
                 .minMemory(humanReadable(memoryEstimation.bytesMin))
                 .bytesMax(memoryEstimation.bytesMax)
                 .maxMemory(humanReadable(memoryEstimation.bytesMax))
-                .procedure(options.runOptions.procedureName)
-                .nodeCount(options.runOptions.nodeCount)
-                .relationshipCount(options.runOptions.relationshipCount)
-                .labelCount(options.runOptions.labelCount)
-                .relationshipTypeCount(options.runOptions.relationshipTypes)
-                .nodePropertyCount(options.runOptions.nodePropertyCount)
-                .relationshipPropertyCount(options.runOptions.relationshipPropertyCount)
+                .procedure(procedureName)
+                .nodeCount(countOptions.nodeCount)
+                .relationshipCount(countOptions.relationshipCount)
+                .labelCount(countOptions.labelCount)
+                .relationshipTypeCount(countOptions.relationshipTypes)
+                .nodePropertyCount(countOptions.nodePropertyCount)
+                .relationshipPropertyCount(countOptions.relationshipPropertyCount)
                 .build();
 
             var mapper = new ObjectMapper();

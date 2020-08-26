@@ -56,7 +56,7 @@ final class EstimationCliTest {
         "-n, -r",
     })
     void runsEstimation(String nodeArg, String relArg) {
-        var actual = run(PR_ESTIMATE, nodeArg, 42, relArg, 1337);
+        var actual = run("estimate", PR_ESTIMATE, nodeArg, 42, relArg, 1337);
         var expected = pageRankEstimate(42, 1337);
 
         assertEquals(expected.bytesMin + "," + expected.bytesMax, actual);
@@ -65,7 +65,7 @@ final class EstimationCliTest {
     @ParameterizedTest
     @ValueSource(strings = {"--labels", "-l"})
     void runsEstimationWithLabels(String labelsArg) {
-        var actual = run(PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, labelsArg, 21);
+        var actual = run("estimate", PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, labelsArg, 21);
         var expected = pageRankEstimate(
             42, 1337,
             "nodeProjection", listOfIdentifiers(21)
@@ -77,7 +77,7 @@ final class EstimationCliTest {
     @ParameterizedTest
     @ValueSource(strings = {"--node-properties", "-np"})
     void runsEstimationWithNodeProperties(String nodePropsArg) {
-        var actual = run(PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, nodePropsArg, 21);
+        var actual = run("estimate", PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, nodePropsArg, 21);
         var expected = pageRankEstimate(
             42, 1337,
             "nodeProperties", listOfIdentifiers(21)
@@ -89,7 +89,7 @@ final class EstimationCliTest {
     @ParameterizedTest
     @ValueSource(strings = {"--relationship-properties", "-rp"})
     void runsEstimationWithRelationshipProperties(String relPropsArg) {
-        var actual = run(PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, relPropsArg, 21);
+        var actual = run("estimate", PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, relPropsArg, 21);
         var expected = pageRankEstimate(
             42, 1337,
             "relationshipProperties", listOfIdentifiers(21)
@@ -100,7 +100,7 @@ final class EstimationCliTest {
 
     @Test
     void runsEstimationWithConcurrency() {
-        var actual = run(PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, "-c", "readConcurrency=21");
+        var actual = run("estimate", PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, "-c", "readConcurrency=21");
         var expected = pageRankEstimate(
             42, 1337,
             "readConcurrency", 21
@@ -111,7 +111,7 @@ final class EstimationCliTest {
 
     @Test
     void estimatesGraphCreate() {
-        var actual = run("gds.graph.create", "--nodes", 42, "--relationships", 1337);
+        var actual = run("estimate", "gds.graph.create", "--nodes", 42, "--relationships", 1337);
         var expected = graphCreateEstimate(42, 1337, false);
 
         assertEquals(expected.bytesMin + "," + expected.bytesMax, actual);
@@ -119,7 +119,7 @@ final class EstimationCliTest {
 
     @Test
     void estimatesGraphCreateCypher() {
-        var actual = run("gds.graph.create.cypher", "--nodes", 42, "--relationships", 1337);
+        var actual = run("estimate", "gds.graph.create.cypher", "--nodes", 42, "--relationships", 1337);
         var expected = graphCreateEstimate(42, 1337, true);
 
         assertEquals(expected.bytesMin + "," + expected.bytesMax, actual);
@@ -127,7 +127,7 @@ final class EstimationCliTest {
 
     @Test
     void printsTree() {
-        var actual = run(PR_ESTIMATE, "-n", 42, "-r", 1337, "--tree");
+        var actual = run("estimate", PR_ESTIMATE, "-n", 42, "-r", 1337, "--tree");
         var expected = pageRankEstimate(42, 1337);
 
         assertEquals(expected.treeView.strip(), actual);
@@ -135,7 +135,7 @@ final class EstimationCliTest {
 
     @Test
     void printsJson() {
-        var actual = run(PR_ESTIMATE, "-n", 42, "-r", 1337, "--json");
+        var actual = run("estimate", PR_ESTIMATE, "-n", 42, "-r", 1337, "--json");
         var expected = pageRankEstimate(42, 1337);
 
         var expectedJsonTemplate =
@@ -165,30 +165,30 @@ final class EstimationCliTest {
 
     @Test
     void procIsMandatory() {
-        var actual = assertThrows(ExecutionFailed.class, () -> run("-n", 42, "-r", 1337));
+        var actual = assertThrows(ExecutionFailed.class, () -> run("estimate", "-n", 42, "-r", 1337));
 
         assertEquals(2, actual.exitCode);
-        assertEquals("Error: Missing required argument(s): <procedure>", actual.stderr.lines().iterator().next());
+        assertEquals("Missing required parameter: 'procedure'", actual.stderr.lines().iterator().next());
     }
 
     @Test
     void nodeCountIsMandatory() {
-        var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "-r", 1337));
+        var actual = assertThrows(ExecutionFailed.class, () -> run("estimate", PR_ESTIMATE, "-r", 1337));
 
         assertEquals(2, actual.exitCode);
         assertEquals(
-            "Error: Missing required argument(s): --nodes=<nodeCount>",
+            "Missing required option: '--nodes=<nodeCount>'",
             actual.stderr.lines().iterator().next()
         );
     }
 
     @Test
     void relationshipCountIsMandatory() {
-        var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "-n", 42));
+        var actual = assertThrows(ExecutionFailed.class, () -> run("estimate", PR_ESTIMATE, "-n", 42));
 
         assertEquals(2, actual.exitCode);
         assertEquals(
-            "Error: Missing required argument(s): --relationships=<relationshipCount>",
+            "Missing required option: '--relationships=<relationshipCount>'",
             actual.stderr.lines().iterator().next()
         );
     }
@@ -197,12 +197,13 @@ final class EstimationCliTest {
     void cannotPrintTreeAndJson() {
         var actual = assertThrows(
             ExecutionFailed.class,
-            () -> run(PR_ESTIMATE, "-n", 42, "-r", 1337, "--json", "--tree")
+            () -> run("estimate", PR_ESTIMATE, "-n", 42, "-r", 1337, "--json", "--tree")
         );
 
         assertEquals(2, actual.exitCode);
-        assertTrue(
-            actual.stderr.lines().iterator().next().startsWith("Error: expected only one match but got")
+        assertEquals(
+            "Error: --tree, --json are mutually exclusive (specify only one)",
+            actual.stderr.lines().iterator().next()
         );
     }
 
@@ -262,7 +263,7 @@ final class EstimationCliTest {
 
     @Test
     void listAllAvailableProcedures() {
-        var actual = run("--list-available");
+        var actual = run("list-available");
         var expected = PROCEDURES.stream().collect(joining(System.lineSeparator()));
 
         assertEquals(expected, actual);
@@ -298,7 +299,7 @@ final class EstimationCliTest {
             System.setOut(new PrintStream(stdout, true, StandardCharsets.UTF_8));
             System.setErr(new PrintStream(stderr, true, StandardCharsets.UTF_8));
 
-            exitCode = EstimationCli.run(arguments);
+            exitCode = EstimationCli.runWithArgs(arguments);
 
         } finally {
             System.setErr(originalErr);
