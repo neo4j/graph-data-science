@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.traverse;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -189,38 +188,6 @@ class TraverseTest extends AlgoTestBase {
             (s, t, w) -> w + 1.
         ).compute().resultNodes();
         assertContains(new String[]{"a", "b", "c", "d"}, nodes);
-    }
-
-    @Test
-    void testBfsMaxCostOut() {
-        long source = naturalGraph.toMappedNodeId("a");
-        double maxCost = 3.;
-        long[] nodes = Traverse.bfs(
-            naturalGraph,
-            source,
-            (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
-            (s, t, w) -> {
-                final double v = naturalGraph.relationshipProperty(s, t, Double.NaN);
-                return w + v;
-            }
-        ).compute().resultNodes();
-        assertEquals(4, nodes.length);
-    }
-
-    @Test
-    void testDfsMaxCostOut() {
-        long source = naturalGraph.toMappedNodeId("a");
-        double maxCost = 3.;
-        long[] nodes = Traverse.dfs(
-            naturalGraph,
-            source,
-            (s, t, w) -> w > maxCost ? Result.CONTINUE : Result.FOLLOW,
-            (s, t, w) -> {
-                final double v = ((Graph) naturalGraph).relationshipProperty(s, t, Double.NaN);
-                return w + v;
-            }
-        ).compute().resultNodes();
-        assertEquals(4, nodes.length);
     }
 
     @Test

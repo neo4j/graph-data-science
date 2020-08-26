@@ -137,21 +137,11 @@ public final class Traverse extends Algorithm<Traverse, Traverse> {
             graph.forEachRelationship(
                 node,
                 longToIntConsumer((s, t) -> {
-                    // remove from the visited nodes to allow revisiting in case the node is accessible via more than one path.
-                    // ! does not work in combination with loops
-                    double aggregatedWeight = aggregatorFunction.apply(s, t, weight);
-                    final ExitPredicate.Result test = exitPredicate.test(s, t, aggregatedWeight);
-                    // TODO: this is just a tmp fix but messes up maxCost test
-//                    if (test == ExitPredicate.Result.FOLLOW && visited.get(t)) {
-//                        visited.clear(t);
-//                    }
-
                     if (!visited.get(t)) {
                         visited.set(t);
-
                         nodeFunc.accept(sources, s);
                         nodeFunc.accept(nodes, t);
-                        weightFunc.accept(weights, aggregatedWeight);
+                        weightFunc.accept(weights, aggregatorFunction.apply(s, t, weight));
                     }
                     return running();
                 })

@@ -49,11 +49,6 @@ public interface TraverseConfig extends AlgoBaseConfig, RelationshipWeightConfig
         return -1L;
     }
 
-    @Value.Default
-    default double maxCost() {
-        return Double.NaN;
-    }
-
     static TraverseConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

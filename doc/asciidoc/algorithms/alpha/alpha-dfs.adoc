@@ -52,7 +52,6 @@ include::../common-configuration/common-configuration.adoc[]
 | startNodeId | Integer   | n/a        | no       | The node id of the node where to start the traversal.
 | targetNodes | Integer[] | empty list | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
 | maxDepth    | Integer   | -1         | yes      | The maximum distance from the start node at which nodes are visited.
-| maxCost     | Integer   | NaN        | yes      | The maximum accumulated cost of any path from start node to a node that should be visited.
 |===
 
 .Results
@@ -172,30 +171,3 @@ ORDER BY tags
 --
 
 In the above case, nodes d and e were not visited since they are at distance 2 from a.
-
-[role=query-example]
---
-.Running the Depth First Search algorithm with maxCost:
-[source, cypher]
-----
-MATCH (a:Node{tag:'a'})
-WITH id(a) AS startNode
-CALL gds.alpha.dfs.stream('myGraph', {startNode: startNode, maxCost: 10, relationshipWeightProperty: 'cost'})
-YIELD path
-UNWIND [ n in nodes(path) | n.tag ] AS tags
-RETURN tags
-ORDER BY tags
-----
-
-.Results
-[opts="header"]
-|===
-| tags
-| "a"
-| "b"
-| "c"
-| "e"
-|===
---
-
-Due to the max cost limit of 10, node d cannot be reached since the total cost of the path from a to d is 14.
