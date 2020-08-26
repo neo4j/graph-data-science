@@ -68,7 +68,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
 
         if (context.isInitialSuperstep() || newComponentId != oldComponentId) {
             context.setNodeValue(COMPONENT, newComponentId);
-            context.sendMessages(newComponentId);
+            context.sendToNeighbors(newComponentId);
         }
     }
 }

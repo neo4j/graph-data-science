@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,6 +75,27 @@ class PregelTest {
 
         var nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
+    }
+
+    @Test
+    void sendMessageToSpecificTarget() {
+        var config = ImmutablePregelConfig.builder()
+            .maxIterations(2)
+            .concurrency(1)
+            .build();
+
+        var pregelJob = Pregel.create(
+            graph,
+            config,
+            new TestSendTo(),
+            Pools.DEFAULT,
+            AllocationTracker.EMPTY
+        );
+
+        var nodeValues = pregelJob.run().nodeValues();
+        assertEquals(2.0, nodeValues.doubleProperties(KEY).get(0L));
+        assertEquals(Double.NaN, nodeValues.doubleProperties(KEY).get(1L));
+        assertEquals(Double.NaN, nodeValues.doubleProperties(KEY).get(2L));
     }
 
     @Test
@@ -164,7 +186,7 @@ class PregelTest {
         public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.setNodeValue(KEY, 0.0);
-                context.sendMessages(1.0);
+                context.sendToNeighbors(1.0);
             } else {
                 double messageSum = 0.0;
                 for (Double message : messages) {
@@ -181,6 +203,26 @@ class PregelTest {
         @Override
         public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
             return nodeValue * relationshipWeight;
+        }
+    }
+
+    public static class TestSendTo implements PregelComputation<PregelConfig> {
+
+        static final String KEY = "value";
+
+        @Override
+        public Pregel.NodeSchema nodeSchema() {
+            return new NodeSchemaBuilder().putElement(KEY, ValueType.DOUBLE).build();
+        }
+
+        @Override
+        public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+            if (context.nodeId() == 0) {
+                var sum = StreamSupport.stream(messages.spliterator(), false).mapToDouble(d -> d).sum();
+                context.setNodeValue(KEY, sum);
+            } else {
+                context.sendTo(0L, 1);
+            }
         }
     }
 
@@ -224,7 +266,10 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext.ComputeContext<CompositeTestComputationConfig> context, Pregel.Messages messages) {
+        public void compute(
+            PregelContext.ComputeContext<CompositeTestComputationConfig> context,
+            Pregel.Messages messages
+        ) {
             if (!context.isInitialSuperstep()) {
                 context.setNodeValue(LONG_KEY, context.longNodeValue(LONG_KEY) * 2);
                 context.setNodeValue(DOUBLE_KEY, context.doubleNodeValue(DOUBLE_KEY) * 2);
@@ -235,7 +280,7 @@ class PregelTest {
                 var doubleArray = context.doubleArrayNodeValue(DOUBLE_ARRAY_KEY);
                 context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleArray[0] * 2L});
             }
-            context.sendMessages(42.0);
+            context.sendToNeighbors(42.0);
         }
     }
 }

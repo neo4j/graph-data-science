@@ -117,12 +117,12 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         ComputeContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
             super(computeStep, config);
-            this.sendMessageFunction = config.relationshipWeightProperty() == null
-                ? computeStep::sendMessages
-                : computeStep::sendWeightedMessages;
+            this.sendMessagesFunction = config.relationshipWeightProperty() == null
+                ? computeStep::sendToNeighbors
+                : computeStep::sendToNeighborsWeighted;
         }
 
-        private final SendMessageFunction sendMessageFunction;
+        private final SendMessagesFunction sendMessagesFunction;
 
         public double doubleNodeValue(String key) {
             return computeStep.doubleNodeValue(key, nodeId);
@@ -152,15 +152,17 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
             return computeStep.getIteration();
         }
 
-        public void sendMessages(double message) {
-            sendMessageFunction.sendMessage(nodeId, message);
+        public void sendToNeighbors(double message) {
+            sendMessagesFunction.sendToNeighbors(nodeId, message);
+        }
+
+        public void sendTo(long targetNodeId, double message) {
+            computeStep.sendTo(targetNodeId, message);
         }
 
         @FunctionalInterface
-        interface SendMessageFunction {
-
-            void sendMessage(long nodeId, double message);
+        interface SendMessagesFunction {
+            void sendToNeighbors(long sourceNodeId, double message);
         }
-
     }
 }

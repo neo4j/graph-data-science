@@ -51,7 +51,7 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
         if (context.isInitialSuperstep()) {
             if (nodeId == context.getConfig().startNode()) {
                 context.setNodeValue(PARENT, nodeId);
-                context.sendMessages(nodeId);
+                context.sendToNeighbors(nodeId);
                 context.voteToHalt();
             } else {
                 context.setNodeValue(PARENT, NOT_FOUND);
@@ -65,7 +65,7 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
                 }
 
                 context.setNodeValue(PARENT, currentParent);
-                context.sendMessages(nodeId);
+                context.sendToNeighbors(nodeId);
             }
             context.voteToHalt();
         }

@@ -352,16 +352,20 @@ public final class Pregel<CONFIG extends PregelConfig> {
             voteBits.set(nodeId);
         }
 
-        void sendMessages(long nodeId, double message) {
-            relationshipIterator.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
-                messageQueues.get(targetNodeId).add(message);
-                senderBits.set(targetNodeId);
+        void sendToNeighbors(long sourceNodeId, double message) {
+            relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+                sendTo(targetNodeId, message);
                 return true;
             });
         }
 
-        void sendWeightedMessages(long nodeId, double message) {
-            relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
+        void sendTo(long targetNodeId, double message) {
+            messageQueues.get(targetNodeId).add(message);
+            senderBits.set(targetNodeId);
+        }
+
+        void sendToNeighborsWeighted(long sourceNodeId, double message) {
+            relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
                 messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
                 senderBits.set(target);
                 return true;

@@ -48,7 +48,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
         if (context.isInitialSuperstep()) {
             if (context.nodeId() == context.getConfig().startNode()) {
                 context.setNodeValue(LEVEL, 0);
-                context.sendMessages(1);
+                context.sendToNeighbors(1);
                 context.voteToHalt();
             } else {
                 context.setNodeValue(LEVEL, NOT_FOUND);
@@ -59,7 +59,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
                 level = messages.iterator().next().longValue();
 
                 context.setNodeValue(LEVEL, level);
-                context.sendMessages(level + 1);
+                context.sendToNeighbors(level + 1);
             }
             context.voteToHalt();
         }

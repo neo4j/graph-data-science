@@ -60,7 +60,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             if (context.nodeId() == context.getConfig().startNode()) {
-                context.sendMessages(1);
+                context.sendToNeighbors(1);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)
@@ -76,7 +76,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
             if (hasChanged) {
                 context.setNodeValue(DISTANCE, newDistance);
-                context.sendMessages(newDistance + 1);
+                context.sendToNeighbors(newDistance + 1);
             }
 
             context.voteToHalt();

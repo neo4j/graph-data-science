@@ -51,7 +51,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     @Override
     public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            context.sendMessages(context.nodeId());
+            context.sendToNeighbors(context.nodeId());
         } else {
             if (messages != null) {
                 long oldValue = context.longNodeValue(LABEL_KEY);
@@ -92,7 +92,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
                 if (newValue != oldValue) {
                     context.setNodeValue(LABEL_KEY, newValue);
-                    context.sendMessages(newValue);
+                    context.sendToNeighbors(newValue);
                 }
             }
         }

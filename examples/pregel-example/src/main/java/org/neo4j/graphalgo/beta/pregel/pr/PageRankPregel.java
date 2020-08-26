@@ -76,7 +76,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         }
 
         // send new rank to neighbors
-        context.sendMessages(newRank / context.getDegree());
+        context.sendToNeighbors(newRank / context.getDegree());
     }
 
     @ValueClass
