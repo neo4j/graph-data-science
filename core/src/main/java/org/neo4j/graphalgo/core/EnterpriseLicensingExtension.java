@@ -27,6 +27,10 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 @ServiceProvider
 public final class EnterpriseLicensingExtension extends ExtensionFactory<EnterpriseLicensingExtension.Dependencies> {
 
@@ -39,14 +43,26 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                String enterpriseLicenseKey = dependencies
+                String enterpriseLicenseKeyFile = dependencies
                     .config()
                     .get(Settings.enterpriseLicenseKey());
                 GdsEdition gdsEdition = GdsEdition.instance();
                 gdsEdition.setToCommunityEdition();
 
-                if (enterpriseLicenseKey != null && !enterpriseLicenseKey.isBlank()) {
-                    SignatureTool.LicenseCheckResult checkResult = SignatureTool.verify(enterpriseLicenseKey);
+                if (enterpriseLicenseKeyFile != null && !enterpriseLicenseKeyFile.isBlank()) {
+                    var keyPath = Path.of(enterpriseLicenseKeyFile);
+                    if (!keyPath.isAbsolute()) {
+                       throw new RuntimeException("The path to the GDS license key must be absolute.");
+                    }
+
+                    String licenseKey;
+                    try {
+                        licenseKey = Files.readString(keyPath);
+                    } catch (IOException e) {
+                        throw new RuntimeException("Could not read GDS license key", e);
+                    }
+
+                    SignatureTool.LicenseCheckResult checkResult = SignatureTool.verify(licenseKey);
                     if (checkResult.isValid()) {
                         gdsEdition.setToEnterpriseEdition();
                     } else {

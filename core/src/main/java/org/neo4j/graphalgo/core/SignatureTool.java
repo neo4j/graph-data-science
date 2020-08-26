@@ -51,7 +51,7 @@ public final class SignatureTool {
 
             Date now = new Date();
             // TODO teach the UI to generate keys for GDS
-            if (!claims.getSubject().equals("neo4j-desktop")) {
+            if (!claims.getSubject().equals("neo4j-gds")) {
                 return ImmutableLicenseCheckResult.of(
                     false,
                     "License is not valid for the Graph Data Science library. Please contact your system administrator."
