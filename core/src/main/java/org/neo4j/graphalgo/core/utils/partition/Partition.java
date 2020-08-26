@@ -33,4 +33,8 @@ public interface Partition {
     default boolean fits(int otherPartitionsCount) {
         return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount();
     }
+
+    static Partition of(long startNode, long nodeCount) {
+        return ImmutablePartition.of(startNode, nodeCount);
+    }
 }

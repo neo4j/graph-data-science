@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.partition.ImmutablePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -93,19 +92,19 @@ class PartitionUtilsTest {
     //@formatter:off
     static Stream<Arguments> ranges() {
         return Stream.of(
-            Arguments.of(1, 42, List.of(ImmutablePartition.of(0, 42))),
-            Arguments.of(1, 42_000, List.of(ImmutablePartition.of(0, 42_000))),
+            Arguments.of(1, 42, List.of(Partition.of(0, 42))),
+            Arguments.of(1, 42_000, List.of(Partition.of(0, 42_000))),
             Arguments.of(4, 40_000, List.of(
-                ImmutablePartition.of(0, ParallelUtil.DEFAULT_BATCH_SIZE),
-                ImmutablePartition.of(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                ImmutablePartition.of(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                ImmutablePartition.of(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
+                Partition.of(0, ParallelUtil.DEFAULT_BATCH_SIZE),
+                Partition.of(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                Partition.of(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                Partition.of(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
             )),
             Arguments.of(4, 42_000, List.of(
-                ImmutablePartition.of(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                ImmutablePartition.of(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                ImmutablePartition.of(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                ImmutablePartition.of(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
+                Partition.of(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                Partition.of(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                Partition.of(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                Partition.of(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
             ))
         );
     }

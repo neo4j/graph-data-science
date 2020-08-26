@@ -38,7 +38,7 @@ public final class PartitionUtils {
         List<Partition> partitions = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            partitions.add(ImmutablePartition.of(i, actualBatchSize));
+            partitions.add(Partition.of(i, actualBatchSize));
         }
 
         return partitions;
@@ -55,7 +55,7 @@ public final class PartitionUtils {
         List<Partition> partitions = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += adjustedBatchSize) {
             long actualBatchSize = i + adjustedBatchSize < nodeCount ? adjustedBatchSize : nodeCount - i;
-            partitions.add(ImmutablePartition.of(i, actualBatchSize));
+            partitions.add(Partition.of(i, actualBatchSize));
         }
 
         return partitions;
@@ -82,7 +82,7 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            partitions.add(ImmutablePartition.of(start, end - start));
+            partitions.add(Partition.of(start, end - start));
             start = end;
         }
         return partitions;
