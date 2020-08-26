@@ -36,9 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -166,7 +168,7 @@ final class EstimationCliTest {
         var actual = assertThrows(ExecutionFailed.class, () -> run("-n", 42, "-r", 1337));
 
         assertEquals(2, actual.exitCode);
-        assertEquals("Missing required parameter: '<procedure>'", actual.stderr.lines().iterator().next());
+        assertEquals("Error: Missing required argument(s): <procedure>", actual.stderr.lines().iterator().next());
     }
 
     @Test
@@ -174,7 +176,7 @@ final class EstimationCliTest {
         var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "-r", 1337));
 
         assertEquals(2, actual.exitCode);
-        assertEquals("Missing required option: '--nodes=<nodeCount>'", actual.stderr.lines().iterator().next());
+        assertEquals("Error: Missing required argument(s): --nodes=<nodeCount>", actual.stderr.lines().iterator().next());
     }
 
     @Test
@@ -183,7 +185,7 @@ final class EstimationCliTest {
 
         assertEquals(2, actual.exitCode);
         assertEquals(
-            "Missing required option: '--relationships=<relationshipCount>'",
+            "Error: Missing required argument(s): --relationships=<relationshipCount>",
             actual.stderr.lines().iterator().next()
         );
     }
@@ -196,10 +198,73 @@ final class EstimationCliTest {
         );
 
         assertEquals(2, actual.exitCode);
-        assertEquals(
-            "Error: --tree, --json are mutually exclusive (specify only one)",
-            actual.stderr.lines().iterator().next()
+        assertTrue(
+            actual.stderr.lines().iterator().next().startsWith("Error: expected only one match but got")
         );
+    }
+
+    private static final List<String> PROCEDURES = List.of(
+        "gds.beta.k1coloring.mutate.estimate",
+        "gds.beta.k1coloring.stats.estimate",
+        "gds.beta.k1coloring.stream.estimate",
+        "gds.beta.k1coloring.write.estimate",
+
+        "gds.beta.modularityOptimization.mutate.estimate",
+        "gds.beta.modularityOptimization.stream.estimate",
+        "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.betweenness.mutate.estimate",
+        "gds.betweenness.stats.estimate",
+        "gds.betweenness.stream.estimate",
+        "gds.betweenness.write.estimate",
+
+        "gds.graph.create.cypher.estimate",
+        "gds.graph.create.estimate",
+
+        "gds.labelPropagation.mutate.estimate",
+        "gds.labelPropagation.stats.estimate",
+        "gds.labelPropagation.stream.estimate",
+        "gds.labelPropagation.write.estimate",
+
+        "gds.localClusteringCoefficient.mutate.estimate",
+        "gds.localClusteringCoefficient.stats.estimate",
+        "gds.localClusteringCoefficient.stream.estimate",
+        "gds.localClusteringCoefficient.write.estimate",
+
+        "gds.louvain.mutate.estimate",
+        "gds.louvain.stats.estimate",
+        "gds.louvain.stream.estimate",
+        "gds.louvain.write.estimate",
+
+        "gds.nodeSimilarity.mutate.estimate",
+        "gds.nodeSimilarity.stats.estimate",
+        "gds.nodeSimilarity.stream.estimate",
+        "gds.nodeSimilarity.write.estimate",
+
+        "gds.pageRank.mutate.estimate",
+        "gds.pageRank.stats.estimate",
+        "gds.pageRank.stream.estimate",
+        "gds.pageRank.write.estimate",
+
+        "gds.testProc.test.estimate",
+
+        "gds.triangleCount.mutate.estimate",
+        "gds.triangleCount.stats.estimate",
+        "gds.triangleCount.stream.estimate",
+        "gds.triangleCount.write.estimate",
+
+        "gds.wcc.mutate.estimate",
+        "gds.wcc.stats.estimate",
+        "gds.wcc.stream.estimate",
+        "gds.wcc.write.estimate"
+    );
+
+    @Test
+    void listAllAvailableProcedures() {
+        var actual = run("--list-available");
+        var expected = PROCEDURES.stream().collect(joining(System.lineSeparator()));
+
+        assertEquals(expected, actual);
     }
 
     private static final class ExecutionFailed extends RuntimeException {
