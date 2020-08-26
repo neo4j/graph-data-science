@@ -81,18 +81,22 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
 
     @Override
     protected Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<Louvain, Louvain, LouvainStreamConfig> computationResult) {
-        Graph graph = computationResult.graph();
+        return runWithExceptionLogging("Graph streaming failed", () -> {
+            Graph graph = computationResult.graph();
 
-        return LongStream
-            .range(0, graph.nodeCount())
-            .boxed()
-            .map((nodeId) -> {
-                boolean includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-                Louvain louvain = computationResult.result();
-                long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
+            return LongStream
+                .range(0, graph.nodeCount())
+                .boxed()
+                .map((nodeId) -> {
+                    boolean includeIntermediateCommunities = computationResult
+                        .config()
+                        .includeIntermediateCommunities();
+                    Louvain louvain = computationResult.result();
+                    long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
 
-                return new StreamResult(graph.toOriginalNodeId(nodeId), communities, louvain.getCommunity(nodeId));
-            });
+                    return new StreamResult(graph.toOriginalNodeId(nodeId), communities, louvain.getCommunity(nodeId));
+                });
+        });
     }
 
     @Override

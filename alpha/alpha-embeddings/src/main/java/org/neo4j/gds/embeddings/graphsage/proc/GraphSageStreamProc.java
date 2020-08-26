@@ -54,18 +54,20 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig> computationResult) {
-        var graph = computationResult.graph();
-        var result = computationResult.result();
+        return runWithExceptionLogging("GraphSage streaming failed", () -> {
+            var graph = computationResult.graph();
+            var result = computationResult.result();
 
-        if (result == null) {
-            return Stream.empty();
-        }
+            if (result == null) {
+                return Stream.empty();
+            }
 
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(i -> new GraphSageStreamResult(
-                graph.toOriginalNodeId(i),
-                result.embeddings().get(i)
-            ));
+            return LongStream.range(0, graph.nodeCount())
+                .mapToObj(i -> new GraphSageStreamResult(
+                    graph.toOriginalNodeId(i),
+                    result.embeddings().get(i)
+                ));
+        });
     }
 
 

@@ -69,14 +69,16 @@ public class TriangleCountStreamProc
 
     @Override
     protected Stream<Result> stream(ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult) {
-        var graph = computationResult.graph();
-        var result = computationResult.result();
+        return runWithExceptionLogging("Graph streaming failed", () -> {
+            var graph = computationResult.graph();
+            var result = computationResult.result();
 
-        return LongStream.range(0, graph.nodeCount())
-            .mapToObj(i -> new Result(
-                graph.toOriginalNodeId(i),
-                result.localTriangles().get(i)
-            ));
+            return LongStream.range(0, graph.nodeCount())
+                .mapToObj(i -> new Result(
+                    graph.toOriginalNodeId(i),
+                    result.localTriangles().get(i)
+                ));
+        });
     }
 
     @Override

@@ -33,13 +33,13 @@ public abstract class StatsProc<
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
     protected Stream<PROC_RESULT> stats(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
-        return Stream.of(
+        return runWithExceptionLogging("Stats call failed", () -> Stream.of(
             resultBuilder(computeResult)
                 .withCreateMillis(computeResult.createMillis())
                 .withComputeMillis(computeResult.computeMillis())
                 .withNodeCount(computeResult.graph().nodeCount())
                 .withConfig(computeResult.config())
                 .build()
-        );
+        ));
     }
 }
