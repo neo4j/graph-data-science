@@ -54,8 +54,6 @@ class ExamplePregelComputationAlgoTest {
     
     @Test
     void runExamplePregelComputation() {
-
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableExampleConfig.builder()
@@ -66,7 +64,6 @@ class ExamplePregelComputationAlgoTest {
             graph,
             config,
             new ExamplePregelComputation(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

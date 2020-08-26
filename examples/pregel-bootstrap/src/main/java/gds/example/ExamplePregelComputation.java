@@ -22,7 +22,11 @@ package gds.example;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.*;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -42,13 +46,13 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     }
 
     @Override
-    public void init(PregelContext.InitContext<ExamplePregelComputation.ExampleConfig> context, long nodeId) {
+    public void init(PregelContext.InitContext<ExamplePregelComputation.ExampleConfig> context) {
         // Set node identifier as initial node value
-        context.setNodeValue(KEY, nodeId, nodeId);
+        context.setNodeValue(KEY, context.nodeId());
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<ExamplePregelComputation.ExampleConfig> context, long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<ExamplePregelComputation.ExampleConfig> context, Pregel.Messages messages) {
         // Silence is golden
     }
 
