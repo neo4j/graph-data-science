@@ -19,43 +19,22 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
-import java.util.Objects;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-public class Partition {
+@ValueClass
+public interface Partition {
 
-    public static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
+    int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
 
-    public final long startNode;
-    public final long nodeCount;
+    long startNode();
 
-    public Partition(long startNode, long nodeCount) {
-        this.startNode = startNode;
-        this.nodeCount = nodeCount;
+    long nodeCount();
+
+    default boolean fits(int otherPartitionsCount) {
+        return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount();
     }
 
-    public boolean fits(int otherPartitionsCount) {
-        return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Partition partition = (Partition) o;
-        return startNode == partition.startNode &&
-               nodeCount == partition.nodeCount;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(startNode, nodeCount);
-    }
-
-    @Override
-    public String toString() {
-        return "Partition{" +
-               "startNode=" + startNode +
-               ", nodeCount=" + nodeCount +
-               '}';
+    static Partition of(long startNode, long nodeCount) {
+        return ImmutablePartition.of(startNode, nodeCount);
     }
 }

@@ -195,8 +195,8 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             colors,
             nodesToColor,
             nodeCount,
-            partition.startNode,
-            partition.nodeCount,
+            partition.startNode(),
+            partition.nodeCount(),
             getProgressLogger()
         )).collect(Collectors.toList());
 
@@ -215,8 +215,8 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             nodesToColor,
             nextNodesToColor,
             nodeCount,
-            partition.startNode,
-            partition.nodeCount,
+            partition.startNode(),
+            partition.nodeCount(),
             getProgressLogger()
         )).collect(Collectors.toList());
 

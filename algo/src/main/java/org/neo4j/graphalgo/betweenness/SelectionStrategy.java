@@ -92,8 +92,8 @@ public interface SelectionStrategy {
 
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
-                    var fromNode = partition.startNode;
-                    var toNode = partition.startNode + partition.nodeCount;
+                    var fromNode = partition.startNode();
+                    var toNode = partition.startNode() + partition.nodeCount();
 
                     for (long nodeId = fromNode; nodeId < toNode; nodeId++) {
                         int degree = graph.degree(nodeId);
@@ -125,8 +125,8 @@ public interface SelectionStrategy {
             var tasks = partitions.stream()
                 .map(partition -> (Runnable) () -> {
                     var threadLocalRandom = random.split();
-                    var fromNode = partition.startNode;
-                    var toNode = partition.startNode + partition.nodeCount;
+                    var fromNode = partition.startNode();
+                    var toNode = partition.startNode() + partition.nodeCount();
 
                     for (long nodeId = fromNode; nodeId < toNode; nodeId++) {
                         var currentSelectionSize = selectionSize.get();

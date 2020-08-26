@@ -36,10 +36,9 @@ public final class PartitionUtils {
     public static List<Partition> rangePartition(int concurrency, long nodeCount) {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
         List<Partition> partitions = new ArrayList<>(concurrency);
-
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            partitions.add(new Partition(i, actualBatchSize));
+            partitions.add(Partition.of(i, actualBatchSize));
         }
 
         return partitions;
@@ -53,11 +52,10 @@ public final class PartitionUtils {
         final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
         final long remainder = initialBatchSize % alignTo;
         final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
-
         List<Partition> partitions = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += adjustedBatchSize) {
             long actualBatchSize = i + adjustedBatchSize < nodeCount ? adjustedBatchSize : nodeCount - i;
-            partitions.add(new Partition(i, actualBatchSize));
+            partitions.add(Partition.of(i, actualBatchSize));
         }
 
         return partitions;
@@ -84,7 +82,7 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            partitions.add(new Partition(start, end - start));
+            partitions.add(Partition.of(start, end - start));
             start = end;
         }
         return partitions;
