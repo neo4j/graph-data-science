@@ -145,10 +145,10 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         }
 
         public boolean isInitialSuperstep() {
-            return getSuperstep() == 0;
+            return superstep() == 0;
         }
 
-        public int getSuperstep() {
+        public int superstep() {
             return computeStep.getIteration();
         }
 
