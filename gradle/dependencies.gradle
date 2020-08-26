@@ -16,6 +16,7 @@ ext {
             ],
             'auto-common':                  '0.11',
             'auto-service':                 '1.0-rc6',
+            'bouncy-castle':                '1.66',
             'commons-compress':             '1.19',
             'commons-io':                   '2.7',
             'commons-math3':                '3.6.1',
@@ -31,6 +32,7 @@ ext {
             'javapoet':                     '1.11.1',
             'jctools-core':                 '3.1.0',
             'jetbrains-annotations':        '18.0.0',
+            'jjwt':                         '0.11.2',
             'jol':                          '0.10',
             'jqwik':                        '1.2.0',
             'junit5':                       '5.6.2',
@@ -40,7 +42,7 @@ ext {
             'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.1'),
             'picocli':                      '4.5.0',
             'qala-datagen':                 '2.3.0',
-            'RoaringBitmap':                '0.7.45',
+            'RoaringBitmap':                '0.9.0',
             'spotbugsToolVersion':          '4.0.6',
     ]
     dep = [
