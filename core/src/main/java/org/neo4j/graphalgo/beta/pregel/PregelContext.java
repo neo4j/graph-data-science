@@ -32,7 +32,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
     long nodeId;
 
-    public static <CONFIG extends PregelConfig> InitContext<CONFIG> initContext(
+    static <CONFIG extends PregelConfig> InitContext<CONFIG> initContext(
         Pregel.ComputeStep<CONFIG> computeStep,
         CONFIG config,
         NodePropertyContainer nodePropertyContainer
@@ -40,7 +40,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         return new InitContext<>(computeStep, config, nodePropertyContainer);
     }
 
-    public static <CONFIG extends PregelConfig> ComputeContext<CONFIG> computeContext(
+    static <CONFIG extends PregelConfig> ComputeContext<CONFIG> computeContext(
         Pregel.ComputeStep<CONFIG> computeStep,
         CONFIG config
     ) {
@@ -52,47 +52,95 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         this.config = config;
     }
 
-    public long nodeId() {
-        return nodeId;
-    }
-
+    /**
+     * Used internally by the framework to set the currently processed node.
+     */
     void setNodeId(long nodeId) {
         this.nodeId = nodeId;
     }
 
+    /**
+     * The identifier of the node that is currently processed.
+     */
+    public long nodeId() {
+        return nodeId;
+    }
+
+    /**
+     * Allows access to the user-defined Pregel configuration.
+     */
     public CONFIG getConfig() {
         return config;
     }
 
+    /**
+     * Sets a node double value for given the node schema key.
+     *
+     * @param key node schema key
+     * @param value property value
+     */
     public void setNodeValue(String key, double value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
+    /**
+     * Sets a node long value for given the node schema key.
+     *
+     * @param key node schema key
+     * @param value property value
+     */
     public void setNodeValue(String key, long value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
+    /**
+     * Sets a node long value for given the node schema key.
+     *
+     * @param key node schema key
+     * @param value property value
+     */
     public void setNodeValue(String key, long[] value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
+    /**
+     * Sets a node long value for given the node schema key.
+     *
+     * @param key node schema key
+     * @param value property value
+     */
     public void setNodeValue(String key, double[] value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
+    /**
+     * Number of nodes in the input graph.
+     */
     public long getNodeCount() {
         return computeStep.getNodeCount();
     }
 
+    /**
+     * Number of relationships in the input graph.
+     */
     public long getRelationshipCount() {
         return computeStep.getRelationshipCount();
     }
 
+    /**
+     * Returns the degree (number of relationships) of the currently processed node.
+     */
     public int getDegree() {
         return computeStep.getDegree(nodeId);
     }
 
-    public static class InitContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
+    /**
+     * A context that is used during the initialization phase, which is before the
+     * first superstep is being executed. The init context allows accessing node
+     * properties from the input graph which can be used to set initial node values
+     * for the Pregel computation.
+     */
+    public static final class InitContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
         private final NodePropertyContainer nodePropertyContainer;
 
         InitContext(
@@ -104,16 +152,31 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
             this.nodePropertyContainer = nodePropertyContainer;
         }
 
+        /**
+         * Returns the node property keys stored in the input graph.
+         * These properties can be the result of previous computations
+         * or part of node projections when creating the graph.
+         */
         public Set<String> nodePropertyKeys() {
             return this.nodePropertyContainer.availableNodeProperties();
         }
 
+        /**
+         * Returns the property values for the given property key.
+         * Property values can be used to access individual node
+         * property values by using their node identifier.
+         */
         public NodeProperties nodeProperties(String key) {
             return this.nodePropertyContainer.nodeProperties(key);
         }
     }
 
-    public static class ComputeContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
+    /**
+     * A context that is used during the computation. It allows an implementation
+     * to send messages to other nodes and change the state of the currently
+     * processed node.
+     */
+    public static final class ComputeContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
         ComputeContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
             super(computeStep, config);
@@ -124,38 +187,70 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         private final SendMessagesFunction sendMessagesFunction;
 
+        /**
+         * Returns the node value for the given node schema key.
+         */
         public double doubleNodeValue(String key) {
             return computeStep.doubleNodeValue(key, nodeId);
         }
 
+        /**
+         * Returns the node value for the given node schema key.
+         */
         public long longNodeValue(String key) {
             return computeStep.longNodeValue(key, nodeId);
         }
 
+        /**
+         * Returns the node value for the given node schema key.
+         */
         public long[] longArrayNodeValue(String key) {
             return computeStep.longArrayNodeValue(key, nodeId);
         }
 
+        /**
+         * Returns the node value for the given node schema key.
+         */
         public double[] doubleArrayNodeValue(String key) {
             return computeStep.doubleArrayNodeValue(key, nodeId);
         }
 
+        /**
+         * Notify the execution framework that this node intends
+         * to stop the computation. If the node voted to halt
+         * and has not received new messages in the next superstep,
+         * the compute method will not be called for that node.
+         * If a node receives messages, the vote to halt flag will
+         * be ignored.
+         */
         public void voteToHalt() {
             computeStep.voteToHalt(nodeId);
         }
 
+        /**
+         * Indicates if the current superstep is the first superstep.
+         */
         public boolean isInitialSuperstep() {
             return superstep() == 0;
         }
 
+        /**
+         * Returns the current superstep (0-based).
+         */
         public int superstep() {
-            return computeStep.getIteration();
+            return computeStep.iteration();
         }
 
+        /**
+         * Sends the given message to all neighbors of the node.
+         */
         public void sendToNeighbors(double message) {
             sendMessagesFunction.sendToNeighbors(nodeId, message);
         }
 
+        /**
+         * Sends the given message to the target node.
+         */
         public void sendTo(long targetNodeId, double message) {
             computeStep.sendTo(targetNodeId, message);
         }
