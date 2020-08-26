@@ -25,6 +25,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
 final class ProcedureNameNormalizer implements CommandLine.ITypeConverter<String> {
     public String convert(String value) {
+        if (value.isBlank()) {
+            return "";
+        }
         String procedure = toLowerCaseWithLocale(value);
         if (!procedure.endsWith(".estimate")) {
             procedure += ".estimate";

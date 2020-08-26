@@ -20,6 +20,8 @@
 package org.neo4j.gds.estimation.cli;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,5 +50,11 @@ class ProcedureNameNormalizerTest {
         assertEquals("gds.foo.estimate", run("gds.foo.estimate"));
         assertEquals("gds.gds-foo.estimate", run("gds-foo.estimate"));
         assertEquals("gds.foo.gds.bar.estimate", run("foo.gds.bar.estimate"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "    ",  "\t"})
+    void convertIgnoresAndTrimsBlankInput(String input) {
+        assertEquals("", run(input));
     }
 }
