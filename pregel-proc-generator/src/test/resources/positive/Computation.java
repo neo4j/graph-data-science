@@ -40,7 +40,7 @@ public class Computation implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
 
     }
 }

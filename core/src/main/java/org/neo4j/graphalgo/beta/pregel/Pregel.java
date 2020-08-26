@@ -72,7 +72,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
 
-    private final int batchSize;
     private final int concurrency;
     private final ExecutorService executor;
 
@@ -80,7 +79,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             Graph graph,
             CONFIG config,
             PregelComputation<CONFIG> computation,
-            int batchSize,
             ExecutorService executor,
             AllocationTracker tracker
     ) {
@@ -89,7 +87,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 config,
                 computation,
                 CompositeNodeValue.of(computation.nodeSchema(), graph.nodeCount(), config.concurrency(), tracker),
-                batchSize,
                 executor,
                 tracker
         );
@@ -124,14 +121,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
             final CONFIG config,
             final PregelComputation<CONFIG> computation,
             final CompositeNodeValue initialNodeValues,
-            final int batchSize,
             final ExecutorService executor,
             final AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValues;
-        this.batchSize = batchSize;
         this.concurrency = config.concurrency();
         this.executor = executor;
 
@@ -319,24 +314,22 @@ public final class Pregel<CONFIG extends PregelConfig> {
             for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
                 if (computeContext.isInitialSuperstep()) {
-                    computation.init(initContext, nodeId);
+                    initContext.setNodeId(nodeId);
+                    computation.init(initContext);
                 }
 
                 if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
+                    computeContext.setNodeId(nodeId);
 
                     messageIterator.init(receiveMessages(nodeId));
-                    computation.compute(computeContext, nodeId, messages);
+                    computation.compute(computeContext, messages);
                 }
             }
         }
 
         BitSet getSenders() {
             return senderBits;
-        }
-
-        BitSet getVotes() {
-            return voteBits;
         }
 
         public int getIteration() {

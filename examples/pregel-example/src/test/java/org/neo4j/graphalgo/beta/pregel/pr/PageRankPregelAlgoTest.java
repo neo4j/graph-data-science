@@ -75,7 +75,6 @@ class PageRankPregelAlgoTest {
 
     @Test
     void runPR() {
-        int batchSize = 10;
         int maxIterations = 10;
         float dampingFactor = 0.85f;
 
@@ -89,7 +88,6 @@ class PageRankPregelAlgoTest {
             graph,
             config,
             new PageRankPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

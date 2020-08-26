@@ -27,7 +27,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
@@ -90,16 +89,11 @@ class AlgorithmGenerator extends PregelGenerator {
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
             .addStatement(
-                "var batchSize = (int) $T.adjustedBatchSize(graph.nodeCount(), configuration.concurrency())",
-                ParallelUtil.class
-            )
-            .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.create(" +
                     "graph, " +
                     "configuration, " +
                     "new $computation:T(), " +
-                    "batchSize, " +
                     "$pools:T.DEFAULT," +
                     "tracker" +
                     ")",

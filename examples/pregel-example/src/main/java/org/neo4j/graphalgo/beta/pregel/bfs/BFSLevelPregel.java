@@ -44,24 +44,24 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            if (nodeId == context.getConfig().startNode()) {
-                context.setNodeValue(LEVEL, nodeId, 0);
-                context.sendMessages(nodeId, 1);
-                context.voteToHalt(nodeId);
+            if (context.nodeId() == context.getConfig().startNode()) {
+                context.setNodeValue(LEVEL, 0);
+                context.sendMessages(1);
+                context.voteToHalt();
             } else {
-                context.setNodeValue(LEVEL, nodeId, NOT_FOUND);
+                context.setNodeValue(LEVEL, NOT_FOUND);
             }
         } else if (messages.iterator().hasNext()) {
-            Long level = context.longNodeValue(LEVEL, nodeId);
+            long level = context.longNodeValue(LEVEL);
             if (level == NOT_FOUND) {
                 level = messages.iterator().next().longValue();
 
-                context.setNodeValue(LEVEL, nodeId, level);
-                context.sendMessages(nodeId, level + 1);
+                context.setNodeValue(LEVEL, level);
+                context.sendMessages(level + 1);
             }
-            context.voteToHalt(nodeId);
+            context.voteToHalt();
         }
     }
 }

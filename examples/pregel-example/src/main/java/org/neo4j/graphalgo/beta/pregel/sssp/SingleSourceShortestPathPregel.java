@@ -48,23 +48,23 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void init(PregelContext.InitContext<SingleSourceShortestPathPregelConfig> context, long nodeId) {
-        if (nodeId == context.getConfig().startNode()) {
-            context.setNodeValue(DISTANCE, nodeId, 0);
+    public void init(PregelContext.InitContext<SingleSourceShortestPathPregelConfig> context) {
+        if (context.nodeId() == context.getConfig().startNode()) {
+            context.setNodeValue(DISTANCE, 0);
         } else {
-            context.setNodeValue(DISTANCE, nodeId, Long.MAX_VALUE);
+            context.setNodeValue(DISTANCE, Long.MAX_VALUE);
         }
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            if (nodeId == context.getConfig().startNode()) {
-                context.sendMessages(nodeId, 1);
+            if (context.nodeId() == context.getConfig().startNode()) {
+                context.sendMessages(1);
             }
         } else {
             // This is basically the same message passing as WCC (except the new message)
-            long newDistance = context.longNodeValue(DISTANCE, nodeId);
+            long newDistance = context.longNodeValue(DISTANCE);
             boolean hasChanged = false;
 
             for (var message : messages) {
@@ -75,11 +75,11 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
             }
 
             if (hasChanged) {
-                context.setNodeValue(DISTANCE, nodeId, newDistance);
-                context.sendMessages(nodeId, newDistance + 1);
+                context.setNodeValue(DISTANCE, newDistance);
+                context.sendMessages(newDistance + 1);
             }
 
-            context.voteToHalt(nodeId);
+            context.voteToHalt();
         }
 
     }

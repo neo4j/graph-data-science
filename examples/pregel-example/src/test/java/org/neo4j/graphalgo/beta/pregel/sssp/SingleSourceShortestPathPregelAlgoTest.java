@@ -67,7 +67,6 @@ class SingleSourceShortestPathPregelAlgoTest {
 
     @Test
     void runSSSP() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableSingleSourceShortestPathPregelConfig.builder()
@@ -80,7 +79,6 @@ class SingleSourceShortestPathPregelAlgoTest {
             graph,
             config,
             new SingleSourceShortestPathPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

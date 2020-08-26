@@ -65,7 +65,6 @@ class LabelPropagationPregelAlgoTest {
 
     @Test
     void runLP() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutablePregelConfig.builder()
@@ -76,7 +75,6 @@ class LabelPropagationPregelAlgoTest {
             graph,
             config,
             new LabelPropagationPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -97,7 +95,6 @@ class LabelPropagationPregelAlgoTest {
 
     @Test
     void runWeightedLP() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         PregelConfig config = ImmutablePregelConfig.builder()
@@ -112,11 +109,10 @@ class LabelPropagationPregelAlgoTest {
             }
         };
 
-        Pregel pregelJob = Pregel.create(
+        var pregelJob = Pregel.create(
             graph,
             config,
             weightedLabelPropagation,
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

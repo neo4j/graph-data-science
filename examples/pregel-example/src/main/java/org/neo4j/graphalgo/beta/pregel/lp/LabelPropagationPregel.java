@@ -44,22 +44,22 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void init(PregelContext.InitContext<PregelConfig> context, long nodeId) {
-        context.setNodeValue(LABEL_KEY, nodeId, nodeId);
+    public void init(PregelContext.InitContext<PregelConfig> context) {
+        context.setNodeValue(LABEL_KEY, context.nodeId());
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            context.sendMessages(nodeId, nodeId);
+            context.sendMessages(context.nodeId());
         } else {
             if (messages != null) {
-                long oldValue = context.longNodeValue(LABEL_KEY, nodeId);
+                long oldValue = context.longNodeValue(LABEL_KEY);
                 long newValue = oldValue;
 
                 // TODO: could be shared across compute functions per thread
                 // We receive at most |degree| messages
-                long[] buffer = new long[context.getDegree(nodeId)];
+                long[] buffer = new long[context.getDegree()];
 
                 int messageCount = 0;
 
@@ -91,11 +91,11 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
                 }
 
                 if (newValue != oldValue) {
-                    context.setNodeValue(LABEL_KEY, nodeId, newValue);
-                    context.sendMessages(nodeId, newValue);
+                    context.setNodeValue(LABEL_KEY, newValue);
+                    context.sendMessages(newValue);
                 }
             }
         }
-        context.voteToHalt(nodeId);
+        context.voteToHalt();
     }
 }

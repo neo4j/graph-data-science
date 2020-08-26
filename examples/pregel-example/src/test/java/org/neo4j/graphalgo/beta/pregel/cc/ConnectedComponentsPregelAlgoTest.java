@@ -80,7 +80,6 @@ class ConnectedComponentsPregelAlgoTest {
 
     @Test
     void directedSCC() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableConnectedComponentsConfig.builder()
@@ -91,7 +90,6 @@ class ConnectedComponentsPregelAlgoTest {
             directedGraph,
             config,
             new ConnectedComponentsPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );
@@ -118,7 +116,6 @@ class ConnectedComponentsPregelAlgoTest {
 
     @Test
     void undirectedWCC() {
-        int batchSize = 10;
         int maxIterations = 10;
 
         var config = ImmutableConnectedComponentsConfig.builder()
@@ -130,7 +127,6 @@ class ConnectedComponentsPregelAlgoTest {
             undirectedGraph,
             config,
             new ConnectedComponentsPregel(),
-            batchSize,
             Pools.DEFAULT,
             AllocationTracker.EMPTY
         );

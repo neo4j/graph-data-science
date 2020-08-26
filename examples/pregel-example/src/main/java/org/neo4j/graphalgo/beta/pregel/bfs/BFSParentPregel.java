@@ -45,27 +45,29 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, long nodeId, Pregel.Messages messages) {
+    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
+        long nodeId = context.nodeId();
+
         if (context.isInitialSuperstep()) {
             if (nodeId == context.getConfig().startNode()) {
-                context.setNodeValue(PARENT, nodeId, nodeId);
-                context.sendMessages(nodeId, nodeId);
-                context.voteToHalt(nodeId);
+                context.setNodeValue(PARENT, nodeId);
+                context.sendMessages(nodeId);
+                context.voteToHalt();
             } else {
-                context.setNodeValue(PARENT, nodeId, NOT_FOUND);
+                context.setNodeValue(PARENT, NOT_FOUND);
             }
         } else {
-            long currentParent = context.longNodeValue(PARENT, nodeId);
+            long currentParent = context.longNodeValue(PARENT);
 
             if (currentParent == NOT_FOUND) {
                 for (var msg : messages) {
                     currentParent = Long.min(currentParent, msg.longValue());
                 }
 
-                context.setNodeValue(PARENT, nodeId, currentParent);
-                context.sendMessages(nodeId, nodeId);
+                context.setNodeValue(PARENT, currentParent);
+                context.sendMessages(nodeId);
             }
-            context.voteToHalt(nodeId);
+            context.voteToHalt();
         }
     }
 }

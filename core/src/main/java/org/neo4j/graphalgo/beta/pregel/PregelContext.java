@@ -26,8 +26,11 @@ import java.util.Set;
 
 public abstract class PregelContext<CONFIG extends PregelConfig> {
 
-    final Pregel.ComputeStep<CONFIG> computeStep;
     private final CONFIG config;
+
+    final Pregel.ComputeStep<CONFIG> computeStep;
+
+    long nodeId;
 
     public static <CONFIG extends PregelConfig> InitContext<CONFIG> initContext(
         Pregel.ComputeStep<CONFIG> computeStep,
@@ -49,15 +52,23 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         this.config = config;
     }
 
+    public long nodeId() {
+        return nodeId;
+    }
+
+    void setNodeId(long nodeId) {
+        this.nodeId = nodeId;
+    }
+
     public CONFIG getConfig() {
         return config;
     }
 
-    public void setNodeValue(String key, long nodeId, double value) {
+    public void setNodeValue(String key, double value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
-    public void setNodeValue(String key, long nodeId, long value) {
+    public void setNodeValue(String key, long value) {
         computeStep.setNodeValue(key, nodeId, value);
     }
 
@@ -69,7 +80,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         return computeStep.getRelationshipCount();
     }
 
-    public int getDegree(long nodeId) {
+    public int getDegree() {
         return computeStep.getDegree(nodeId);
     }
 
@@ -105,15 +116,15 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         private final SendMessageFunction sendMessageFunction;
 
-        public double doubleNodeValue(String key, long nodeId) {
+        public double doubleNodeValue(String key) {
             return computeStep.doubleNodeValue(key, nodeId);
         }
 
-        public long longNodeValue(String key, long nodeId) {
+        public long longNodeValue(String key) {
             return computeStep.longNodeValue(key, nodeId);
         }
 
-        public void voteToHalt(long nodeId) {
+        public void voteToHalt() {
             computeStep.voteToHalt(nodeId);
         }
 
@@ -125,7 +136,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
             return computeStep.getIteration();
         }
 
-        public void sendMessages(long nodeId, double message) {
+        public void sendMessages(double message) {
             sendMessageFunction.sendMessage(nodeId, message);
         }
 
