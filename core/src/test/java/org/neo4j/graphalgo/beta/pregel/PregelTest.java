@@ -40,6 +40,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
+import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
+import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
+import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.TestPregelComputation.KEY;
 
 @GdlExtension
@@ -48,9 +52,9 @@ class PregelTest {
     @GdlGraph
     private static final String TEST_GRAPH =
         "CREATE" +
-        "  (alice:Node { a_seed: 42.0, b_seed: 23 })" +
-        ", (bob:Node { a_seed: 43.0, b_seed: 24 })" +
-        ", (eve:Node { a_seed: 44.0, b_seed: 25 })" +
+        "  (alice:Node { doubleSeed: 42.0, longSeed: 23 })" +
+        ", (bob:Node { doubleSeed: 43.0, longSeed: 24 })" +
+        ", (eve:Node { doubleSeed: 44.0, longSeed: 25 })" +
         ", (alice)-[:REL {prop: 2.0}]->(bob)" +
         ", (alice)-[:REL {prop: 1.0}]->(eve)";
 
@@ -77,8 +81,8 @@ class PregelTest {
         var config = ImmutableCompositeTestComputationConfig.builder()
             .maxIterations(2)
             .concurrency(1)
-            .aProperty("a_seed")
-            .bProperty("b_seed")
+            .longProperty("longSeed")
+            .doubleProperty("doubleSeed")
             .build();
 
         var pregelJob = Pregel.create(
@@ -91,14 +95,20 @@ class PregelTest {
 
         var result = pregelJob.run().nodeValues();
 
-        assertEquals(84.0D, result.doubleValue("a", graph.toOriginalNodeId("alice")));
-        assertEquals(46L, result.longValue("b", graph.toOriginalNodeId("alice")));
+        assertEquals(46L, result.longValue(LONG_KEY, graph.toOriginalNodeId("alice")));
+        assertEquals(84.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("alice")));
+        assertArrayEquals(new long[]{46L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("alice")));
+        assertArrayEquals(new double[]{84.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("alice")));
 
-        assertEquals(86.0D, result.doubleValue("a", graph.toOriginalNodeId("bob")));
-        assertEquals(48L, result.longValue("b", graph.toOriginalNodeId("bob")));
+        assertEquals(48L, result.longValue(LONG_KEY, graph.toOriginalNodeId("bob")));
+        assertEquals(86.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("bob")));
+        assertArrayEquals(new long[]{48L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("bob")));
+        assertArrayEquals(new double[]{86.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("bob")));
 
-        assertEquals(88.0D, result.doubleValue("a", graph.toOriginalNodeId("eve")));
-        assertEquals(50L, result.longValue("b", graph.toOriginalNodeId("eve")));
+        assertEquals(50L, result.longValue(LONG_KEY, graph.toOriginalNodeId("eve")));
+        assertEquals(88.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("eve")));
+        assertArrayEquals(new long[]{50L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("eve")));
+        assertArrayEquals(new double[]{88.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve")));
     }
 
     @Test
@@ -179,34 +189,51 @@ class PregelTest {
     @SuppressWarnings("immutables:subtype")
     public interface CompositeTestComputationConfig extends PregelConfig {
         @Value
-        String aProperty();
+        String doubleProperty();
 
         @Value
-        String bProperty();
+        String longProperty();
     }
 
-    private static class CompositeTestComputation implements PregelComputation<CompositeTestComputationConfig> {
+    static class CompositeTestComputation implements PregelComputation<CompositeTestComputationConfig> {
+        static final String LONG_KEY = "long";
+        static final String DOUBLE_KEY = "double";
+        static final String LONG_ARRAY_KEY = "long_array";
+        static final String DOUBLE_ARRAY_KEY = "double_array";
 
         @Override
         public Pregel.NodeSchema nodeSchema() {
             return new NodeSchemaBuilder()
-                .putElement("a", ValueType.DOUBLE)
-                .putElement("b", ValueType.LONG)
+                .putElement(LONG_KEY, ValueType.LONG)
+                .putElement(DOUBLE_KEY, ValueType.DOUBLE)
+                .putElement(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
+                .putElement(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                 .build();
         }
 
         @Override
         public void init(PregelContext.InitContext<CompositeTestComputationConfig> context) {
             long nodeId = context.nodeId();
-            context.setNodeValue("a", context.nodeProperties(context.getConfig().aProperty()).doubleValue(nodeId));
-            context.setNodeValue("b", context.nodeProperties(context.getConfig().bProperty()).longValue(nodeId));
+            long longValue = context.nodeProperties(context.getConfig().longProperty()).longValue(nodeId);
+            double doubleValue = context.nodeProperties(context.getConfig().doubleProperty()).doubleValue(nodeId);
+
+            context.setNodeValue(LONG_KEY, longValue);
+            context.setNodeValue(DOUBLE_KEY, doubleValue);
+            context.setNodeValue(LONG_ARRAY_KEY, new long[]{longValue});
+            context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleValue});
         }
 
         @Override
         public void compute(PregelContext.ComputeContext<CompositeTestComputationConfig> context, Pregel.Messages messages) {
             if (!context.isInitialSuperstep()) {
-                context.setNodeValue("a", context.doubleNodeValue("a") * 2);
-                context.setNodeValue("b", context.longNodeValue("b") * 2);
+                context.setNodeValue(LONG_KEY, context.longNodeValue(LONG_KEY) * 2);
+                context.setNodeValue(DOUBLE_KEY, context.doubleNodeValue(DOUBLE_KEY) * 2);
+
+                var longArray = context.longArrayNodeValue(LONG_ARRAY_KEY);
+                context.setNodeValue(LONG_ARRAY_KEY, new long[]{longArray[0] * 2L});
+
+                var doubleArray = context.doubleArrayNodeValue(DOUBLE_ARRAY_KEY);
+                context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleArray[0] * 2L});
             }
             context.sendMessages(42.0);
         }
