@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.function.Predicate.isEqual;
+import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -276,6 +278,7 @@ public class EstimationCli implements Callable<Integer> {
                     var procName = definedName.trim().isEmpty() ? valueName : definedName;
                     return Optional.of(procName).filter(s -> s.endsWith(".estimate")).stream();
                 })
+                .filter(not(isEqual("gds.testProc.test.estimate")))
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .collect(Collectors.joining(System.lineSeparator()));
         } else {

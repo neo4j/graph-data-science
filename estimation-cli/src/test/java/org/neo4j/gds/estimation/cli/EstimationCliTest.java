@@ -176,7 +176,10 @@ final class EstimationCliTest {
         var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "-r", 1337));
 
         assertEquals(2, actual.exitCode);
-        assertEquals("Error: Missing required argument(s): --nodes=<nodeCount>", actual.stderr.lines().iterator().next());
+        assertEquals(
+            "Error: Missing required argument(s): --nodes=<nodeCount>",
+            actual.stderr.lines().iterator().next()
+        );
     }
 
     @Test
@@ -245,8 +248,6 @@ final class EstimationCliTest {
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream.estimate",
         "gds.pageRank.write.estimate",
-
-        "gds.testProc.test.estimate",
 
         "gds.triangleCount.mutate.estimate",
         "gds.triangleCount.stats.estimate",
