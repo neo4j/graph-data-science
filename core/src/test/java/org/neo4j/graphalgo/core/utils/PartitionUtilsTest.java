@@ -21,12 +21,17 @@ package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,6 +87,33 @@ class PartitionUtilsTest {
             tasks.stream().anyMatch((t) -> t.start == 128 && t.nodeCount == 72),
             formatWithLocale("Expected task with start %d and nodeCount %d, but found %s", 128, 72, tasks)
         );
+    }
+
+    //@formatter:off
+    static Stream<Arguments> ranges() {
+        return Stream.of(
+            Arguments.of(1, 42, List.of(new Partition(0, 42))),
+            Arguments.of(1, 42_000, List.of(new Partition(0, 42_000))),
+            Arguments.of(4, 40_000, List.of(
+                new Partition(0, ParallelUtil.DEFAULT_BATCH_SIZE),
+                new Partition(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                new Partition(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
+                new Partition(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
+            )),
+            Arguments.of(4, 42_000, List.of(
+                new Partition(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                new Partition(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                new Partition(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
+                new Partition(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
+            ))
+        );
+    }
+    //@formatter:on
+
+    @ParameterizedTest
+    @MethodSource("ranges")
+    void testRangePartitioning(int concurrency, long nodeCount, List<Partition> expectedPartitions) {
+        assertEquals(expectedPartitions, PartitionUtils.rangePartition(concurrency, nodeCount));
     }
 
     @Test
