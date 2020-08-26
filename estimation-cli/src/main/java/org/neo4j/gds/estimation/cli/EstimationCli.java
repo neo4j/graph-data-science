@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.estimation.cli;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -36,10 +35,14 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,6 +51,7 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.isEqual;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.joining;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -59,6 +63,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP
 import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.graphalgo.utils.CheckedFunction.function;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "DefaultAnnotationParam"})
@@ -75,21 +80,9 @@ public class EstimationCli implements Runnable {
 
     @CommandLine.Command(name = "list-available")
     void listAvailable() {
-        var availableProcedures = PACKAGES_TO_SCAN.stream()
-            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
-            .flatMap(reflections -> reflections
-                .getMethodsAnnotatedWith(Procedure.class)
-                .stream())
-            .flatMap(method -> {
-                var annotation = method.getAnnotation(Procedure.class);
-                var valueName = annotation.value();
-                var definedName = annotation.name();
-                var procName = definedName.trim().isEmpty() ? valueName : definedName;
-                return Optional.of(procName).filter(s -> s.endsWith(".estimate")).stream();
-            })
-            .filter(not(isEqual("gds.testProc.test.estimate")))
-            .sorted(String.CASE_INSENSITIVE_ORDER)
-            .collect(Collectors.joining(System.lineSeparator()));
+        var availableProcedures = findAvailableMethods()
+            .map(ProcedureMethod::name)
+            .collect(joining(System.lineSeparator()));
 
         System.out.println(availableProcedures);
     }
@@ -99,7 +92,8 @@ public class EstimationCli implements Runnable {
         @CommandLine.Parameters(
             paramLabel = "procedure",
             description = "The procedure to estimate, e.g. gds.pagerank.stream.",
-            converter = ProcedureNameNormalizer.class
+            converter = ProcedureNameNormalizer.class,
+            defaultValue = ""
         )
             String procedureName,
 
@@ -111,20 +105,17 @@ public class EstimationCli implements Runnable {
 
     ) throws Exception {
         GdsEdition.instance().setToEnterpriseEdition();
-        var procedure = findProcedure(procedureName);
-        var actualConfig = counts.updateConfig(procedureName);
-        var memoryEstimation = runProcedure(procedure, actualConfig);
-        if (printOptions == null) {
-            printOptions = new PrintOptions();
-        }
-        var result = renderResult(procedureName, counts, printOptions, memoryEstimation);
-        System.out.println(result);
-    }
+        var printOpts = printOptions == null ? new PrintOptions() : printOptions;
 
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.graphalgo",
-        "org.neo4j.gds.embeddings"
-    );
+        var procedureMethods = procedureName.isBlank()
+            ? findAvailableMethods()
+            : Stream.of(ImmutableProcedureMethod.of(procedureName, findProcedure(procedureName)));
+
+        var estimations = procedureMethods
+            .map(function(proc -> estimateProcedure(proc.name(), proc.method(), counts)))
+            .collect(Collectors.toList());
+        renderResults(counts, printOpts, estimations);
+    }
 
     static final class CountOptions {
         @CommandLine.Option(
@@ -181,7 +172,7 @@ public class EstimationCli implements Runnable {
         private Map<String, Number> config;
 
         @NotNull
-        private Map<String, Object> updateConfig(String procedureName) {
+        private Map<String, Object> procedureConfig(String procedureName) {
             HashMap<String, Object> actualConfig;
             if (config != null) {
                 actualConfig = new HashMap<>(config);
@@ -208,6 +199,12 @@ public class EstimationCli implements Runnable {
             }
             if (procedureName.endsWith(".mutate.estimate")) {
                 actualConfig.put(MUTATE_PROPERTY_KEY, "ESTIMATE_FAKE_MUTATE_PROPERTY");
+            }
+            if (procedureName.equals("gds.nodeSimilarity.write.estimate")) {
+                actualConfig.put("writeRelationshipType", "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
+            }
+            if (procedureName.equals("gds.nodeSimilarity.mutate.estimate")) {
+                actualConfig.put("mutateRelationshipType", "ESTIMATE_FAKE_MUTATE_RELATIONSHIP_PROPERTY");
             }
             return actualConfig;
         }
@@ -266,6 +263,11 @@ public class EstimationCli implements Runnable {
         return commandLine.execute(args);
     }
 
+    private static final List<String> PACKAGES_TO_SCAN = List.of(
+        "org.neo4j.graphalgo",
+        "org.neo4j.gds.embeddings"
+    );
+
     private Method findProcedure(String procedure) {
         return PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
@@ -290,6 +292,35 @@ public class EstimationCli implements Runnable {
                        annotation.name().equalsIgnoreCase(procedureName);
             })
             .findFirst();
+    }
+
+    private Stream<ProcedureMethod> findAvailableMethods() {
+        return PACKAGES_TO_SCAN.stream()
+            .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+            .flatMap(reflections -> reflections
+                .getMethodsAnnotatedWith(Procedure.class)
+                .stream())
+            .flatMap(method -> {
+                var annotation = method.getAnnotation(Procedure.class);
+                var valueName = annotation.value();
+                var definedName = annotation.name();
+                var procName = definedName.trim().isEmpty() ? valueName : definedName;
+                return Stream.of(procName)
+                    .filter(s -> s.endsWith(".estimate"))
+                    .filter(not(isEqual("gds.testProc.test.estimate")))
+                    .map(name -> ImmutableProcedureMethod.of(name, method));
+            })
+            .sorted(Comparator.comparing(ProcedureMethod::name, String.CASE_INSENSITIVE_ORDER));
+    }
+
+    private EstimatedProcedure estimateProcedure(
+        String procedureName,
+        Method procedure,
+        CountOptions counts
+    ) throws Exception {
+        var config = counts.procedureConfig(procedureName);
+        var estimateResult = runProcedure(procedure, config);
+        return ImmutableEstimatedProcedure.of(procedureName, estimateResult);
     }
 
     private static MemoryEstimateResult runProcedure(Method procedure, Map<String, Object> config) throws Exception {
@@ -344,39 +375,82 @@ public class EstimationCli implements Runnable {
         return (MemoryEstimateResult) procResultStream.findFirst().orElseThrow();
     }
 
-    private static String renderResult(
-        String procedureName,
+    private static void renderResults(
         CountOptions countOptions,
         PrintOptions printOptions,
-        MemoryEstimateResult memoryEstimation
-    ) throws JsonProcessingException {
+        Collection<EstimatedProcedure> estimatedProcedures
+    ) throws IOException {
         if (printOptions.printTree) {
-            return memoryEstimation.treeView;
-        }
-        if (printOptions.printJson) {
-            var json = ImmutableJsonOutput.builder()
-                .bytesMin(memoryEstimation.bytesMin)
-                .minMemory(humanReadable(memoryEstimation.bytesMin))
-                .bytesMax(memoryEstimation.bytesMax)
-                .maxMemory(humanReadable(memoryEstimation.bytesMax))
-                .procedure(procedureName)
-                .nodeCount(countOptions.nodeCount)
-                .relationshipCount(countOptions.relationshipCount)
-                .labelCount(countOptions.labelCount)
-                .relationshipTypeCount(countOptions.relationshipTypes)
-                .nodePropertyCount(countOptions.nodePropertyCount)
-                .relationshipPropertyCount(countOptions.relationshipPropertyCount)
-                .build();
-
+            for (EstimatedProcedure estimatedProcedure : estimatedProcedures) {
+                System.out.printf(
+                    Locale.ENGLISH,
+                    "%s,%s%n",
+                    estimatedProcedure.name(),
+                    estimatedProcedure.estimation().treeView
+                );
+            }
+        } else if (!printOptions.printJson) {
+            for (EstimatedProcedure estimatedProcedure : estimatedProcedures) {
+                var estimation = estimatedProcedure.estimation();
+                System.out.printf(
+                    Locale.ENGLISH,
+                    "%s,%d,%d%n",
+                    estimatedProcedure.name(),
+                    estimation.bytesMin,
+                    estimation.bytesMax
+                );
+            }
+        } else {
             var mapper = new ObjectMapper();
             // Primary target consumes this from Python, snake_case is more pythonic.
             mapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
             // Pretty print output is nicer to read and any possible overhead from having to parse
             // some whitespace is not important to our use-case
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            return mapper.writeValueAsString(json);
+            mapper.enable(SerializationFeature.WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED);
+
+            var jsons = estimatedProcedures
+                .stream()
+                .map(p -> toJson(p.name(), countOptions, p.estimation()))
+                .collect(Collectors.toList());
+
+            mapper.writeValue(System.out, jsons);
+
         }
-        return formatWithLocale("%d,%d", memoryEstimation.bytesMin, memoryEstimation.bytesMax);
+    }
+
+    private static JsonOutput toJson(
+        String procedureName,
+        CountOptions countOptions,
+        MemoryEstimateResult memoryEstimation
+    ) {
+        return ImmutableJsonOutput.builder()
+            .bytesMin(memoryEstimation.bytesMin)
+            .minMemory(humanReadable(memoryEstimation.bytesMin))
+            .bytesMax(memoryEstimation.bytesMax)
+            .maxMemory(humanReadable(memoryEstimation.bytesMax))
+            .procedure(procedureName)
+            .nodeCount(countOptions.nodeCount)
+            .relationshipCount(countOptions.relationshipCount)
+            .labelCount(countOptions.labelCount)
+            .relationshipTypeCount(countOptions.relationshipTypes)
+            .nodePropertyCount(countOptions.nodePropertyCount)
+            .relationshipPropertyCount(countOptions.relationshipPropertyCount)
+            .build();
+    }
+
+    @ValueClass
+    interface ProcedureMethod {
+        String name();
+
+        Method method();
+    }
+
+    @ValueClass
+    interface EstimatedProcedure {
+        String name();
+
+        MemoryEstimateResult estimation();
     }
 
     @JsonSerialize
