@@ -36,7 +36,7 @@ public abstract class StreamProc<
     protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
 
     protected Stream<PROC_RESULT> stream(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
+        return runWithExceptionLogging("Result streaming failed", () -> {
             if (computationResult.isGraphEmpty()) {
                 return Stream.empty();
             }

@@ -54,7 +54,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
 
     @Override
     protected Stream<GraphSageStreamResult> stream(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageStreamConfig> computationResult) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
+        return runWithExceptionLogging("GraphSage streaming failed", () -> {
             var graph = computationResult.graph();
             var result = computationResult.result();
 

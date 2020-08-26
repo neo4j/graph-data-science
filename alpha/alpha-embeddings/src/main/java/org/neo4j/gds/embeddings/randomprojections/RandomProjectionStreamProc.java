@@ -72,7 +72,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
 
     @Override
     protected Stream<StreamResult> stream(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
-        return runWithExceptionLogging("Graph streaming failed", () -> {
+        return runWithExceptionLogging("RandomProjection streaming failed", () -> {
             Graph graph = computationResult.graph();
 
             return LongStream
