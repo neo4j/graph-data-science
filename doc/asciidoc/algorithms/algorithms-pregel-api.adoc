@@ -27,7 +27,7 @@ For more information about Pregel, have a look at https://kowshik.github.io/JPre
 
 To implement your own Pregel algorithm, the Graph Data Science library provides a Java API, which is described below.
 
-For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo-technology/graph-analytics/blob/1.3/public/examples/PregelK1Coloring/src/main/java/gds/example/K1ColoringProc.java[K1-Coloring example].
+For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo-technology/graph-analytics/tree/1.3/public/examples/PregelK1Coloring/src/main/java/gds/example[K1-Coloring example].
 
 
 == Pregel API
