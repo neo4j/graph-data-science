@@ -95,7 +95,7 @@ class ModelCatalogTest {
         Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
             TestTrainConfig.of()
         );
-        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME,"testModel2", "testAlgo2", 1337L,
+        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME, "testModel2", "testAlgo2", 1337L,
             TestTrainConfig.of()
         );
 
