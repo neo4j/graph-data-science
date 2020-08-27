@@ -45,7 +45,7 @@ class AlgorithmGenerator extends PregelGenerator {
     }
 
     TypeSpec typeSpec() {
-        ClassName algorithmClassName = className(pregelSpec, ALGORITHM_SUFFIX);
+        ClassName algorithmClassName = computationClassName(pregelSpec, ALGORITHM_SUFFIX);
 
         var typeSpecBuilder = TypeSpec
             .classBuilder(algorithmClassName)
@@ -99,7 +99,7 @@ class AlgorithmGenerator extends PregelGenerator {
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
-                        "computation", className(pregelSpec, ""),
+                        "computation", computationClassName(pregelSpec, ""),
                         "pools", Pools.class
                     )
                 )

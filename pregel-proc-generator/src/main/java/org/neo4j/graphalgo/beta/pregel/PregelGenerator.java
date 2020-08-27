@@ -70,7 +70,7 @@ class PregelGenerator {
         generatedAnnotationSpec.ifPresent(typeSpecBuilder::addAnnotation);
     }
 
-    ClassName className(PregelValidation.Spec pregelSpec, String suffix) {
+    ClassName computationClassName(PregelValidation.Spec pregelSpec, String suffix) {
         return ClassName.get(pregelSpec.rootPackage(), pregelSpec.computationName() + suffix);
     }
 

@@ -93,7 +93,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     // TODO: adapt for composite node value
-    public static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation(NodeSchema nodeSchema) {
         return MemoryEstimations.builder(Pregel.class)
             .perNode("node values", HugeDoubleArray::memoryEstimation)
             .perNode("receiver bits", MemoryUsage::sizeOfBitset)
