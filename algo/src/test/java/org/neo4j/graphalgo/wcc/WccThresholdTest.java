@@ -83,7 +83,7 @@ class WccThresholdTest {
             DEFAULT_BATCH_SIZE,
             wccConfig,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
 
         long[] communityData = new long[(int) graph.nodeCount()];

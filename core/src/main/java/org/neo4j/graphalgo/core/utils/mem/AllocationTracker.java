@@ -32,10 +32,12 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 public interface AllocationTracker extends Supplier<String> {
 
-    AllocationTracker EMPTY = EmptyAllocationTracker.INSTANCE;
+    static AllocationTracker empty() {
+        return EmptyAllocationTracker.INSTANCE;
+    }
 
     static boolean isTracking(@Nullable AllocationTracker tracker) {
-        return tracker != null && tracker != EMPTY;
+        return tracker != null && tracker != empty();
     }
 
     AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(FeatureToggles.flag(
@@ -56,7 +58,7 @@ public interface AllocationTracker extends Supplier<String> {
         return kernelProxy
             .fold(
                 AllocationTracker::create,
-                () -> AllocationTracker.EMPTY,
+                AllocationTracker::empty,
                 useKernelTracker() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
             );
     }

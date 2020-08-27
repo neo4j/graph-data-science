@@ -45,7 +45,9 @@ public interface PageRankAlgorithm extends Assessable {
         LongStream sourceNodeIds,
         ProgressLogger progressLogger
     ) {
-        return create(graph, sourceNodeIds, algoConfig, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger, AllocationTracker.EMPTY);
+        return create(graph, sourceNodeIds, algoConfig, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger,
+            AllocationTracker.empty()
+        );
     }
 
     default PageRank create(

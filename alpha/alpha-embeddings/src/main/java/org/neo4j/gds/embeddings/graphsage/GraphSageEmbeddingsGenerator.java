@@ -50,7 +50,7 @@ public class GraphSageEmbeddingsGenerator {
         HugeObjectArray<double[]> result = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         parallelStreamConsume(

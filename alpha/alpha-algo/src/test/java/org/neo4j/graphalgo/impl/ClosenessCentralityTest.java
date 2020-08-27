@@ -85,7 +85,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
         loadGraph();
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false
@@ -103,7 +103,7 @@ class ClosenessCentralityTest extends AlgoTestBase {
 
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT,
             false

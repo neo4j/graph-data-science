@@ -239,7 +239,7 @@ class ModularityOptimizationTest {
             minBatchSize,
             Pools.DEFAULT,
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
     }
 

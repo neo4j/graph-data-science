@@ -144,7 +144,7 @@ public abstract class PageAllocator<T> {
         T newPage(AllocationTracker tracker);
 
         default T newPage() {
-            return newPage(AllocationTracker.EMPTY);
+            return newPage(AllocationTracker.empty());
         }
     }
 

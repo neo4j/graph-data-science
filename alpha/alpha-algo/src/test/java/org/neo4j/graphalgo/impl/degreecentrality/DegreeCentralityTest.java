@@ -125,7 +125,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
             .aggregation(Aggregation.NONE)
             .orientation(Orientation.NATURAL)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -134,7 +134,7 @@ final class DegreeCentralityTest extends AlgoTestBase {
             Pools.DEFAULT,
             2,
             true,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         DegreeCentrality centrality = degreeCentrality.compute();
@@ -176,11 +176,12 @@ final class DegreeCentralityTest extends AlgoTestBase {
             .graph();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
-                graph,
-                Pools.DEFAULT,
-                4,
-                false,
-                AllocationTracker.EMPTY);
+            graph,
+            Pools.DEFAULT,
+            4,
+            false,
+            AllocationTracker.empty()
+        );
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -222,7 +223,13 @@ final class DegreeCentralityTest extends AlgoTestBase {
             .build()
             .graph();
 
-        DegreeCentrality degreeCentrality = new DegreeCentrality(graph, Pools.DEFAULT, 4, false, AllocationTracker.EMPTY);
+        DegreeCentrality degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            4,
+            false,
+            AllocationTracker.empty()
+        );
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {
@@ -266,11 +273,12 @@ final class DegreeCentralityTest extends AlgoTestBase {
             .graph();
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
-                graph,
-                Pools.DEFAULT,
-                4,
-                false,
-                AllocationTracker.EMPTY);
+            graph,
+            Pools.DEFAULT,
+            4,
+            false,
+            AllocationTracker.empty()
+        );
         degreeCentrality.compute();
 
         IntStream.range(0, expected.size()).forEach(i -> {

@@ -96,7 +96,7 @@ class LabelPropagationTest {
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         assertArrayEquals(
             new long[]{
@@ -123,7 +123,7 @@ class LabelPropagationTest {
                 .build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         assertArrayEquals(
@@ -161,7 +161,7 @@ class LabelPropagationTest {
             DEFAULT_CONFIG,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         lp.withBatchSize(batchSize);
         lp.compute();
@@ -249,7 +249,7 @@ class LabelPropagationTest {
             DEFAULT_CONFIG,
             Pools.DEFAULT,
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         lp.compute();

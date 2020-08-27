@@ -70,7 +70,7 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -89,7 +89,7 @@ class PregelTest {
             config,
             new TestSendTo(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -112,7 +112,7 @@ class PregelTest {
             config,
             new CompositeTestComputation(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run().nodeValues();

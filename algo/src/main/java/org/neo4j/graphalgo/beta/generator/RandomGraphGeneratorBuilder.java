@@ -36,7 +36,7 @@ public class RandomGraphGeneratorBuilder {
     private Aggregation aggregation = Aggregation.NONE;
     private Orientation orientation = Orientation.NATURAL;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
-    private AllocationTracker allocationTracker = AllocationTracker.EMPTY;
+    private AllocationTracker allocationTracker = AllocationTracker.empty();
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
         this.nodeCount = nodeCount;

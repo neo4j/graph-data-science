@@ -77,7 +77,7 @@ class AllocationTrackerTest {
     void testCheckForAllocationTracking() {
         var tracker = AllocationTracker.create();
         assertTrue(AllocationTracker.isTracking(tracker));
-        assertFalse(AllocationTracker.isTracking(AllocationTracker.EMPTY));
+        assertFalse(AllocationTracker.isTracking(AllocationTracker.empty()));
         assertFalse(AllocationTracker.isTracking(null));
     }
 
@@ -123,7 +123,7 @@ class AllocationTrackerTest {
 
     static Stream<AllocationTracker> emptyTrackers() {
         return Stream.concat(
-            Stream.of(AllocationTracker.EMPTY),
+            Stream.of(AllocationTracker.empty()),
             is40()
                 ? Stream.empty()
                 : Stream.of(AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker())))

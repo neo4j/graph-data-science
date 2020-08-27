@@ -63,12 +63,12 @@ class GraphSageModelTrainerTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build();
         graph = randomGraphGenerator.generate();
 
         long nodeCount = graph.nodeCount();
-        features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.EMPTY);
+        features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
 
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));

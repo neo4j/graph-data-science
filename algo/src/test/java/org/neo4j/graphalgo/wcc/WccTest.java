@@ -114,7 +114,7 @@ class WccTest {
             communitySize() / 4,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
 
         List<AtomicLong> progresses = testLogger.getProgresses();
@@ -241,7 +241,7 @@ class WccTest {
             communitySize() / concurrency,
             config,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
     }
 }

@@ -74,7 +74,7 @@ class ClosenessCentralityDiscoTest extends AlgoTestBase {
 
         final MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             2,
             Pools.DEFAULT,
             true

@@ -81,7 +81,7 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
     void shouldBinarySearchInASinglePageArray() {
         var array = HugeLongArray.newSingleArray(
             10,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         for (int i = 0; i < 10; i++) {
             array.set(i, i);
@@ -96,7 +96,7 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
     void shouldBinarySearchInAPagedArray() {
         var array = HugeLongArray.newPagedArray(
             HugeArrays.PAGE_SIZE * 3,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         for (int i = 0; i < HugeArrays.PAGE_SIZE * 3; i++) {
             array.set(i, i);
@@ -109,12 +109,12 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
 
     @Override
     HugeLongArray singleArray(final int size) {
-        return HugeLongArray.newSingleArray(size, AllocationTracker.EMPTY);
+        return HugeLongArray.newSingleArray(size, AllocationTracker.empty());
     }
 
     @Override
     HugeLongArray pagedArray(final int size) {
-        return HugeLongArray.newPagedArray(size, AllocationTracker.EMPTY);
+        return HugeLongArray.newPagedArray(size, AllocationTracker.empty());
     }
 
     @Override

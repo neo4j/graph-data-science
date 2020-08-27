@@ -185,7 +185,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.EMPTY);
+        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.empty());
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             newGraphIds.set(cursor, nodeId);
@@ -197,7 +197,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             nodeToGraphIds.getCapacity(),
             concurrency,
             IdMapBuilder.add(newGraphIds),
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels

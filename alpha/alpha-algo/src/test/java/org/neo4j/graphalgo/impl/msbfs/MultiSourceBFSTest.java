@@ -84,7 +84,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                     graph,
                     (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                     (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                    AllocationTracker.EMPTY,
+                    AllocationTracker.empty(),
                     0, 1
                 );
 
@@ -123,11 +123,11 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                    graph,
-                    graph,
-                    (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                    AllocationTracker.EMPTY,
-                    0, 1
+                graph,
+                graph,
+                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
+                AllocationTracker.empty(),
+                0, 1
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -150,7 +150,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                 graph,
                 (i, d, s) -> {},
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                AllocationTracker.EMPTY
+                AllocationTracker.empty()
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -199,10 +199,10 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
-                    graph,
-                    graph,
-                    (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                    AllocationTracker.EMPTY
+                graph,
+                graph,
+                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
+                AllocationTracker.empty()
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -251,7 +251,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                 );
                                 assertTrue(seen.add(Tuples.pair(i, d)), message);
                             },
-                            AllocationTracker.EMPTY
+                            AllocationTracker.empty()
                     );
                     msbfs.run(1, null);
                 });
@@ -276,7 +276,8 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                                     }
                                 }
                             },
-                            AllocationTracker.EMPTY);
+                            AllocationTracker.empty()
+                    );
                     msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
                 });
 
@@ -322,7 +323,8 @@ final class MultiSourceBFSTest extends AlgoTestBase {
 
                                 assertEquals(expectedSize, s.size());
                             },
-                            AllocationTracker.EMPTY);
+                            AllocationTracker.empty()
+                    );
                     // run sequentially to guarantee order
                     msbfs.run(1, null);
                 });
@@ -374,7 +376,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
                         }
                     }
                 },
-                AllocationTracker.EMPTY,
+                AllocationTracker.empty(),
                 sources);
         msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
 

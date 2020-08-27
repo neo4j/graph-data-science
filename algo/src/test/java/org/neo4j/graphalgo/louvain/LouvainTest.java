@@ -163,7 +163,7 @@ class LouvainTest {
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
@@ -203,7 +203,7 @@ class LouvainTest {
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
@@ -243,7 +243,7 @@ class LouvainTest {
             defaultConfigBuilder().seedProperty("seed").build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
@@ -285,7 +285,7 @@ class LouvainTest {
                 .build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
@@ -312,7 +312,7 @@ class LouvainTest {
                 .build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).withTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         algorithm.compute();
@@ -399,7 +399,7 @@ class LouvainTest {
             .nodeCount(100_000)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
@@ -409,7 +409,7 @@ class LouvainTest {
                 defaultConfigBuilder().concurrency(2).build(),
                 Pools.DEFAULT,
                 ProgressLogger.NULL_LOGGER,
-                AllocationTracker.EMPTY
+                AllocationTracker.empty()
             )
                 .withTerminationFlag(terminationFlag)
                 .compute(), 500, 1000
@@ -433,7 +433,7 @@ class LouvainTest {
             config,
             Pools.DEFAULT,
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         louvain.compute();

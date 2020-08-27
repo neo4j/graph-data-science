@@ -30,7 +30,7 @@ class CommunityHistogramTest {
 
     @Test
     void oneCommunityFromHugeMap() {
-        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
+        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.empty());
         communitySizeMap.addTo(1, 4);
 
         Histogram histogram = CommunityHistogram.buildFrom(communitySizeMap);
@@ -40,7 +40,7 @@ class CommunityHistogramTest {
 
     @Test
     void multipleCommunitiesFromHugeMap() {
-        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.EMPTY);
+        HugeLongLongMap communitySizeMap = new HugeLongLongMap(AllocationTracker.empty());
         communitySizeMap.addTo(1, 4);
         communitySizeMap.addTo(2, 10);
         communitySizeMap.addTo(3, 9);

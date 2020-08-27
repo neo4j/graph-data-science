@@ -79,7 +79,7 @@ public final class GraphSageHelper {
         HugeObjectArray<double[]> features = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         features.setAll(n -> {
             DoubleStream nodeFeatures = nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));

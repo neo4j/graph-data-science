@@ -75,7 +75,7 @@ class K1ColoringTest {
             1,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         k1Coloring.compute();
@@ -96,7 +96,7 @@ class K1ColoringTest {
             .averageDegree(5)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .seed(seed)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         RandomGraphGenerator inGenerator = RandomGraphGenerator.builder()
@@ -107,7 +107,7 @@ class K1ColoringTest {
             .aggregation(Aggregation.NONE)
             .orientation(Orientation.REVERSE)
             .allowSelfLoops(AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         var naturalGraph = outGenerator.generate();
@@ -121,7 +121,7 @@ class K1ColoringTest {
             8,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         k1Coloring.compute();
@@ -173,7 +173,7 @@ class K1ColoringTest {
             .nodeCount(100_000)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build();
 
         Graph graph = generator.generate();
@@ -185,7 +185,7 @@ class K1ColoringTest {
             8,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         k1Coloring.compute();
@@ -199,7 +199,7 @@ class K1ColoringTest {
             .nodeCount(100)
             .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .seed(42L)
             .build()
             .generate();
@@ -213,7 +213,7 @@ class K1ColoringTest {
             8,
             Pools.DEFAULT,
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         k1Coloring.compute();

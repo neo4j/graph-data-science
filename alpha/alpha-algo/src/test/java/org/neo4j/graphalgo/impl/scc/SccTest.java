@@ -73,7 +73,7 @@ class SccTest extends AlgoTestBase {
     @Test
     void testDirect() {
         loadGraph();
-        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.EMPTY);
+        SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.empty());
         HugeLongArray components = scc.compute();
 
         assertCC(components);
@@ -85,7 +85,7 @@ class SccTest extends AlgoTestBase {
     @Test
     void testHugeIterativeScc() {
         loadGraph();
-        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.EMPTY);
+        SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.empty());
         HugeLongArray components = algo.compute();
         assertCC(components);
     }

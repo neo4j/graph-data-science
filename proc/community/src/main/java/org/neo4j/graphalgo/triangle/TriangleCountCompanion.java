@@ -67,7 +67,7 @@ final class TriangleCountCompanion {
 
         @Override
         public HugeAtomicLongArray localTriangles() {
-            return HugeAtomicLongArray.newArray(0, AllocationTracker.EMPTY);
+            return HugeAtomicLongArray.newArray(0, AllocationTracker.empty());
         }
 
         @Override

@@ -75,7 +75,7 @@ public class CypherNodePropertyImporter {
                 propertyBuilders.computeIfAbsent(
                     property,
                     (ignore) -> NodePropertiesFromStoreBuilder.of(
-                        nodeCount, AllocationTracker.EMPTY, NO_PROPERTY_VALUE
+                        nodeCount, AllocationTracker.empty(), NO_PROPERTY_VALUE
                     )
                 );
             }

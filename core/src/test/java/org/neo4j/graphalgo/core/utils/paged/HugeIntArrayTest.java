@@ -73,12 +73,12 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
 
     @Override
     HugeIntArray singleArray(final int size) {
-        return HugeIntArray.newSingleArray(size, AllocationTracker.EMPTY);
+        return HugeIntArray.newSingleArray(size, AllocationTracker.empty());
     }
 
     @Override
     HugeIntArray pagedArray(final int size) {
-        return HugeIntArray.newPagedArray(size, AllocationTracker.EMPTY);
+        return HugeIntArray.newPagedArray(size, AllocationTracker.empty());
     }
 
     @Override

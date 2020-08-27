@@ -318,7 +318,7 @@ class LocalClusteringCoefficientTest {
         return new LocalClusteringCoefficient(
             graph,
             createConfig().build(),
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
         ).compute();
     }

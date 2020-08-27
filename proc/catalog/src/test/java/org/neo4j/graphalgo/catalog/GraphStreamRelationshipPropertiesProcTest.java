@@ -190,7 +190,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             true,
             Aggregation.NONE,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -297,7 +297,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             true,
             Aggregation.NONE,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         relImporter.addFromInternal(0, 1, 23D);

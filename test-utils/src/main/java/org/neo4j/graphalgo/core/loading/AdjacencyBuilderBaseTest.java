@@ -50,7 +50,7 @@ public abstract class AdjacencyBuilderBaseTest {
             globalBuilder,
             1,
             8,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             new LongAdder(),
             new int[0],
             new double[0],
@@ -66,7 +66,7 @@ public abstract class AdjacencyBuilderBaseTest {
             relationshipsBatchBuffer.add(i, nodeCount - i, -1);
         }
 
-        RelationshipImporter relationshipImporter = new RelationshipImporter(AllocationTracker.EMPTY, adjacencyBuilder);
+        RelationshipImporter relationshipImporter = new RelationshipImporter(AllocationTracker.empty(), adjacencyBuilder);
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 

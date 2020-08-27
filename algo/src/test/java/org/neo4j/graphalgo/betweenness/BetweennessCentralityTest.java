@@ -41,7 +41,7 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class BetweennessCentralityTest {
 
-    private static final AllocationTracker TRACKER = AllocationTracker.EMPTY;
+    private static final AllocationTracker TRACKER = AllocationTracker.empty();
 
     private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(
         "",

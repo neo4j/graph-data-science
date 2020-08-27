@@ -79,7 +79,7 @@ class MSBFSAllShortestPathsTest extends AlgoTestBase {
             .addRelationshipType(RELATIONSHIP)
             .build()
             .graph();
-        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.EMPTY, ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT));
+        testASP(new MSBFSAllShortestPaths(graph, AllocationTracker.empty(), ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT));
     }
 
     private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {

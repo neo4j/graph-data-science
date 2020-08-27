@@ -25,6 +25,6 @@ class HugeAtomicDisjointSetStructTest extends DisjointSetStructTest {
 
     @Override
     DisjointSetStruct newSet(int capacity) {
-        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.EMPTY, 4);
+        return new HugeAtomicDisjointSetStruct(capacity, AllocationTracker.empty(), 4);
     }
 }

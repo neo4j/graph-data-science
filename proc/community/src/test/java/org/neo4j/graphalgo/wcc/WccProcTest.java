@@ -204,7 +204,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         applyOnProcedure(proc -> {
             WccBaseConfig config = proc.newConfig(Optional.empty(), userInput);
-            WccProc.algorithmFactory().build(graph, config, AllocationTracker.EMPTY, testLog);
+            WccProc.algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog);
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
         String actual = testLog.getMessages("warn").get(0);

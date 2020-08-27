@@ -74,7 +74,7 @@ class Node2VecTest extends AlgoTestBase {
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingSize(embeddingSize).build(),
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
 
         graph.forEachNode(node -> {
@@ -102,7 +102,7 @@ class Node2VecTest extends AlgoTestBase {
             graph,
             config,
             testLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
 
         List<AtomicLong> progresses = testLogger.getProgresses();

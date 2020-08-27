@@ -217,13 +217,13 @@ public abstract class BaseProc {
                 .maxRelCount(Math.max(config.relationshipCount(), 0))
                 .build();
 
-            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(config, AllocationTracker.empty());
             graphStoreFactory = loader
                 .createConfig()
                 .graphStoreFactory()
                 .getWithDimension(loader.context(), estimateDimensions);
         } else {
-            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(config, AllocationTracker.empty());
             graphStoreFactory = loader.graphStoreFactory();
             estimateDimensions = graphStoreFactory.estimationDimensions();
         }

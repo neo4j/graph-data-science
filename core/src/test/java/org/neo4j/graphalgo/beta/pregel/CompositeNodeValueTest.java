@@ -40,7 +40,7 @@ class CompositeNodeValueTest {
         BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
     ) {
         var schema = new NodeSchemaBuilder().putElement("KEY", valueType).build();
-        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.EMPTY);
+        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
 
         var ex = assertThrows(
             IllegalArgumentException.class,
@@ -59,7 +59,7 @@ class CompositeNodeValueTest {
         BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
     ) {
         var schema = new NodeSchemaBuilder().putElement("KEY", valueType).build();
-        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.EMPTY);
+        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
 
         var ex = assertThrows(
             IllegalArgumentException.class,

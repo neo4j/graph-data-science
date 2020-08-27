@@ -47,7 +47,7 @@ class GraphSageHelperTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.EMPTY)
+            .allocationTracker(AllocationTracker.empty())
             .build();
         var graph = randomGraphGenerator.generate();
         HugeObjectArray<double[]> properties = GraphSageHelper.initializeFeatures(

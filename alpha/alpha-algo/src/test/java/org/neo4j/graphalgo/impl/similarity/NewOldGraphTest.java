@@ -39,7 +39,7 @@ class NewOldGraphTest {
 
     private static final IdMap ID_MAP = idMap(5);
     private static final int CONCURRENCY = 1;
-    private static final AllocationTracker TRACKER = AllocationTracker.EMPTY;
+    private static final AllocationTracker TRACKER = AllocationTracker.empty();
 
     @Test
     void allRelationshipsNewByDefault() {
@@ -92,7 +92,7 @@ class NewOldGraphTest {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             numberOfNodes,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         for (int i = 0; i < numberOfNodes; i++) {
             idMapBuilder.addNode(i);

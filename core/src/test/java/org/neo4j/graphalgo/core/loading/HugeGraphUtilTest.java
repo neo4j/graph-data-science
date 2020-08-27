@@ -75,7 +75,7 @@ class HugeGraphUtilTest {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         for (int i = 0; i < nodeCount; i++) {
@@ -89,7 +89,7 @@ class HugeGraphUtilTest {
             false,
             Aggregation.SUM,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         for (int i = 0; i < nodeCount; i++) {
@@ -97,7 +97,7 @@ class HugeGraphUtilTest {
         }
         Graph graph = HugeGraphUtil.create(
             idMap,
-            relationshipsBuilder.build(), AllocationTracker.EMPTY
+            relationshipsBuilder.build(), AllocationTracker.empty()
         );
         assertGraphEquals(expectedUnweighted(orientation), graph);
         assertEquals(nodeCount, graph.relationshipCount());
@@ -137,7 +137,7 @@ class HugeGraphUtilTest {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         for (int i = 0; i < nodeCount; i++) {
@@ -151,13 +151,13 @@ class HugeGraphUtilTest {
             true,
             aggregation,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         for (int i = 0; i < nodeCount; i++) {
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
         }
-        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), AllocationTracker.EMPTY);
+        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), AllocationTracker.empty());
     }
 }

@@ -130,7 +130,7 @@ class IncrementalWccTest {
             COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
             config,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
     }
 

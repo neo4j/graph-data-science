@@ -96,7 +96,7 @@ final class LocalClusteringCoefficientCompanion {
 
         @Override
         public HugeDoubleArray localClusteringCoefficients() {
-            return HugeDoubleArray.newArray(0, AllocationTracker.EMPTY);
+            return HugeDoubleArray.newArray(0, AllocationTracker.empty());
         }
 
         @Override

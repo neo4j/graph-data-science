@@ -155,7 +155,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphLoader loader = newLoader(config, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(config, AllocationTracker.empty());
             GraphStore graphStore = loader.graphStore();
 
             builder

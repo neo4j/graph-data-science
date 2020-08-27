@@ -76,7 +76,7 @@ class LabelPropagationPregelAlgoTest {
             config,
             new LabelPropagationPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var nodeValues = pregelJob.run()
@@ -114,7 +114,7 @@ class LabelPropagationPregelAlgoTest {
             config,
             weightedLabelPropagation,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var nodeValues = pregelJob.run()

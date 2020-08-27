@@ -132,7 +132,7 @@ final class PageRankTest {
                 null,
                 1,
                 ProgressLogger.NULL_LOGGER,
-                AllocationTracker.EMPTY
+                AllocationTracker.empty()
             )
             .compute();
         // should not throw

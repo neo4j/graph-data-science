@@ -28,7 +28,7 @@ class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
     @Test
     void test() throws Exception {
         testAdjacencyList(
-            TransientAdjacencyListBuilder.builderFactory(AllocationTracker.EMPTY),
+            TransientAdjacencyListBuilder.builderFactory(AllocationTracker.empty()),
             TransientAdjacencyOffsets.forPageSize(8)
         );
     }

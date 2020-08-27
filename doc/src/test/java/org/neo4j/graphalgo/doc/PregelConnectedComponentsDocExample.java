@@ -17,47 +17,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.nodesim;
+package org.neo4j.graphalgo.doc;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel;
+import org.neo4j.graphalgo.beta.pregel.cc.ImmutableConnectedComponentsConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
-import static org.neo4j.graphalgo.nodesim.NodeSimilarityTest.configBuilder;
+import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 
-class NodeSimilarityTerminationTest extends AlgoTestBase {
-
-    @Timeout(value = 10)
+class PregelConnectedComponentsDocExample {
     @Test
-    void shouldTerminate() {
-        HugeGraph graph = RandomGraphGenerator.builder()
-            .nodeCount(10)
-            .averageDegree(2)
+    void testDoc() {
+        int maxIterations = 10;
+
+        var config = ImmutableConnectedComponentsConfig.builder()
+            .maxIterations(maxIterations)
+            .isAsynchronous(true)
+            .build();
+
+        var randomGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(100)
+            .averageDegree(10)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .allocationTracker(AllocationTracker.empty())
             .build()
             .generate();
 
-        NodeSimilarity nodeSimilarity = new NodeSimilarity(
-            graph,
-            configBuilder().concurrency(1).build(),
+        var pregelJob = Pregel.create(
+            randomGraph,
+            config,
+            new ConnectedComponentsPregel(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 
-        assertAlgorithmTermination(
-            db,
-            nodeSimilarity,
-            nhs -> nodeSimilarity.computeToStream(),
-            100
-        );
+        HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(COMPONENT);
+        System.out.println(nodeValues.toString());
     }
 }

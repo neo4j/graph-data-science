@@ -39,7 +39,7 @@ class NegativeSampleProducerTest {
             new long[]{1}
         );
 
-        var probabilityComputer = new ProbabilityComputer(walks, 2, 0.001, 0.75, 4, AllocationTracker.EMPTY);
+        var probabilityComputer = new ProbabilityComputer(walks, 2, 0.001, 0.75, 4, AllocationTracker.empty());
 
         var sampler = new NegativeSampleProducer(probabilityComputer.getContextNodeDistribution());
 

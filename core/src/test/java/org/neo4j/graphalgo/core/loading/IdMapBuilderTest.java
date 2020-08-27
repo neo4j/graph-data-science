@@ -34,7 +34,7 @@ class IdMapBuilderTest {
             nodeId,
             1,
             builder -> (start, end) -> builder.set(nodeId, 0L),
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         assertTrue(hugeSparseLongArray.contains(nodeId));

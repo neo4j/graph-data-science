@@ -91,7 +91,7 @@ class ConnectedComponentsPregelAlgoTest {
             config,
             new ConnectedComponentsPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run();
@@ -128,7 +128,7 @@ class ConnectedComponentsPregelAlgoTest {
             config,
             new ConnectedComponentsPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run();

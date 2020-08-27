@@ -74,7 +74,7 @@ class BFSPregelAlgoTest {
             config,
             new BFSLevelPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run();
@@ -110,7 +110,7 @@ class BFSPregelAlgoTest {
             config,
             new BFSParentPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run();

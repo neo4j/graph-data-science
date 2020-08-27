@@ -157,7 +157,7 @@ public abstract class HugeAtomicDoubleArray {
         long size,
         final DoublePageCreator pageFiller
     ) {
-        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.PagedHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.empty());
     }
 
     @TestOnly
@@ -165,7 +165,7 @@ public abstract class HugeAtomicDoubleArray {
         int size,
         final DoublePageCreator pageFiller
     ) {
-        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.EMPTY);
+        return HugeAtomicDoubleArray.SingleHugeAtomicDoubleArray.of(size, pageFiller, AllocationTracker.empty());
     }
 
     private static final class SingleHugeAtomicDoubleArray extends HugeAtomicDoubleArray {

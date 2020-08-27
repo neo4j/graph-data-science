@@ -266,7 +266,7 @@ public class GraphStoreExport {
             var nodeLabels = graphStore.nodes();
 
             if (!nodeLabels.containsOnlyAllNodesLabel()) {
-                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.EMPTY);
+                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.empty());
                 labelCounts.setAll(i -> {
                     int labelCount = 0;
                     for (var nodeLabel : nodeLabels.availableNodeLabels()) {

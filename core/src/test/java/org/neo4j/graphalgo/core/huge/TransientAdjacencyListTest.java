@@ -213,7 +213,11 @@ class TransientAdjacencyListTest {
 
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
         long sourceNodeId = targets[0];
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(targets[targets.length - 1], Pools.DEFAULT, AllocationTracker.EMPTY);
+        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+            targets[targets.length - 1],
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
         for (long target : targets) {
             idMapBuilder.addNode(target);
         }
@@ -224,7 +228,7 @@ class TransientAdjacencyListTest {
             false,
             Aggregation.NONE,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         for (long target : targets) {
             relationshipsBuilder.add(sourceNodeId, target);

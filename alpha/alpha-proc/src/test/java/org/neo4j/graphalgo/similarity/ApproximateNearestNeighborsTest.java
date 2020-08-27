@@ -85,7 +85,7 @@ class ApproximateNearestNeighborsTest extends AlgoTestBase {
             db,
             new TestLog(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         SimilarityAlgorithmResult result = ann.compute();

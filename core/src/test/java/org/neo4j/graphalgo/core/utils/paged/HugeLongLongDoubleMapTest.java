@@ -37,7 +37,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void canReadFromAddTo() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         map.addTo(1L, 1L, 1.0);
 
         double actual = map.getOrDefault(1L, 1L, 0.0);
@@ -58,7 +58,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void supportsTwoKeys() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         map.addTo(1L, 1L, 1.0);
         map.addTo(1L, 2L, 2.0);
         map.addTo(2L, 1L, 3.0);
@@ -79,7 +79,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void supportsZeroKeys() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
 
         map.addTo(0L, 0L, 1.0);
         double actual = map.getOrDefault(0L, 0L, 0.0);
@@ -102,7 +102,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void addToAddsValues() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         map.addTo(1L, 1L, 1.0);
         map.addTo(1L, 1L, 2.0);
         map.addTo(1L, 1L, 3.0);
@@ -140,7 +140,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void hasSize() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         assertEquals(0L, map.size());
 
         map.addTo(1L, 1L, 1.0);
@@ -156,7 +156,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void hasIsEmpty() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         assertTrue(map.isEmpty());
         map.addTo(1L, 1L, 1.0);
         assertFalse(map.isEmpty());
@@ -199,7 +199,7 @@ final class HugeLongLongDoubleMapTest {
 
     @Test
     void hasStringRepresentation() {
-        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.EMPTY);
+        HugeLongLongDoubleMap map = new HugeLongLongDoubleMap(AllocationTracker.empty());
         ObjectDoubleHashMap<Pr> compare = new ObjectDoubleHashMap<>();
 
         assertEquals("[]", map.toString());

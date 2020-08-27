@@ -237,7 +237,7 @@ public abstract class AlgoBaseProc<
             graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            GraphLoader loader = newLoader(createConfig, AllocationTracker.EMPTY);
+            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
             GraphStore graphStore = loader.graphStore();
 
             graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
@@ -473,7 +473,7 @@ public abstract class AlgoBaseProc<
         return builder
             .graph(graph)
             .graphStore(graphStore)
-            .tracker(AllocationTracker.EMPTY)
+            .tracker(AllocationTracker.empty())
             .algorithm(algo)
             .result(result)
             .config(config)

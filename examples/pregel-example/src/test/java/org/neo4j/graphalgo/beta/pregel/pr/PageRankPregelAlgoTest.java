@@ -89,7 +89,7 @@ class PageRankPregelAlgoTest {
             config,
             new PageRankPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         HugeDoubleArray nodeValues = pregelJob.run().nodeValues().doubleProperties(PAGE_RANK);

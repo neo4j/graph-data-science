@@ -123,7 +123,7 @@ final class WeightedDegreeCentralityTest {
             1,
             true,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute().weights();
 
         expected.forEach((originalNodeId, expectedPageRank) -> {
@@ -150,7 +150,7 @@ final class WeightedDegreeCentralityTest {
                 1,
                 false,
                 Pools.DEFAULT,
-                AllocationTracker.EMPTY
+                AllocationTracker.empty()
             );
         });
 
@@ -238,7 +238,7 @@ final class WeightedDegreeCentralityTest {
             concurrency,
             false,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute().degrees();
 
         expected.forEach((originalNodeId, expectedPageRank) -> {

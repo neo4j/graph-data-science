@@ -337,7 +337,7 @@ class IntersectingTriangleCountTest {
             graph,
             config,
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
     }
 }

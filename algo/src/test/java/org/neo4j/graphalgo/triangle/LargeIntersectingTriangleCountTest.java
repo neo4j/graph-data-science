@@ -76,7 +76,7 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
             graph,
             defaultConfigBuilder().build(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());
@@ -89,7 +89,7 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
             graph,
             defaultConfigBuilder().concurrency(4).build(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());

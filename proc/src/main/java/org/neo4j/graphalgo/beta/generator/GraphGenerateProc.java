@@ -101,7 +101,7 @@ public final class GraphGenerateProc extends BaseProc {
                 DUMMY_RELATIONSHIP_NAME,
                 relationshipProperty,
                 config.readConcurrency(),
-                AllocationTracker.EMPTY
+                AllocationTracker.empty()
             );
 
             stats.nodes = graphStore.nodeCount();
@@ -120,7 +120,7 @@ public final class GraphGenerateProc extends BaseProc {
             .aggregation(config.aggregation())
             .orientation(config.orientation())
             .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()))
-            .allocationTracker(AllocationTracker.EMPTY);
+            .allocationTracker(AllocationTracker.empty());
        if (config.relationshipSeed() != null) {
            builder.seed(config.relationshipSeed());
        }

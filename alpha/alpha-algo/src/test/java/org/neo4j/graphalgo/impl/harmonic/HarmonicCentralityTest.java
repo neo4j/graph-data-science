@@ -56,7 +56,7 @@ public class HarmonicCentralityTest extends AlgoTestBase {
 
         var harmonicCentrality = new HarmonicCentrality(
             graph,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             1,
             Pools.DEFAULT
         );

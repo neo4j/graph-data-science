@@ -32,7 +32,7 @@ class HugeLongArrayQueueTest {
 
     @Test
     void testAdd() {
-        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.empty());
         q.add(42);
         q.add(1337);
         assertEquals(2, q.size());
@@ -41,7 +41,7 @@ class HugeLongArrayQueueTest {
     @Test
     void testAddContinuously() {
         var capacity = 10;
-        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.empty());
         for (int i = 0; i < capacity * 10; i++) {
             q.add(i);
             assertEquals(1, q.size());
@@ -53,7 +53,7 @@ class HugeLongArrayQueueTest {
     @Test
     void testRemoveFromFullQueue() {
         var capacity = 10;
-        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(capacity, AllocationTracker.empty());
         // fill up queue
         for (int i = 0; i < capacity; i++) {
             q.add(i);
@@ -67,7 +67,7 @@ class HugeLongArrayQueueTest {
 
     @Test
     void testRemove() {
-        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.empty());
         q.add(42);
         q.add(1337);
         assertEquals(42, q.remove());
@@ -77,7 +77,7 @@ class HugeLongArrayQueueTest {
 
     @Test
     void testIsEmpty() {
-        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.empty());
         assertTrue(q.isEmpty());
         q.add(42);
         assertFalse(q.isEmpty());
@@ -87,14 +87,14 @@ class HugeLongArrayQueueTest {
 
     @Test
     void throwWhenEmpty() {
-        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(10, AllocationTracker.empty());
         var ex = assertThrows(IndexOutOfBoundsException.class, q::remove);
         assertEquals("Queue is empty.", rootCause(ex).getMessage());
     }
 
     @Test
     void throwWhenFull() {
-        var q = HugeLongArrayQueue.newQueue(0, AllocationTracker.EMPTY);
+        var q = HugeLongArrayQueue.newQueue(0, AllocationTracker.empty());
         var ex = assertThrows(IndexOutOfBoundsException.class, () -> q.add(42));
         assertEquals("Queue is full.", rootCause(ex).getMessage());
     }

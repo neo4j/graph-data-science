@@ -170,7 +170,7 @@ public final class GraphLoaderBuilders {
                 .api(api)
                 .transaction(transaction)
                 .executor(executorService.orElse(Pools.DEFAULT))
-                .tracker(tracker.orElse(AllocationTracker.EMPTY))
+                .tracker(tracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .log(log.orElse(NullLog.getInstance()))
                 .build())

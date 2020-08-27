@@ -53,7 +53,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void testEmptyDoubleProperties() {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             DefaultValue.of(42.0D)
         ).build();
 
@@ -66,7 +66,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void testEmptyLongProperties() {
         var properties = NodePropertiesFromStoreBuilder.of(
             100_000,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             DefaultValue.of(42L)
         ).build();
 
@@ -225,7 +225,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldHandleNullValues() {
         var builder = NodePropertiesFromStoreBuilder.of(
             100,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             DefaultValue.DEFAULT
         );
 
@@ -243,7 +243,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void threadSafety() throws InterruptedException {
         var pool = Executors.newFixedThreadPool(2);
         var nodeSize = 100_000;
-        var builder = NodePropertiesFromStoreBuilder.of(nodeSize, AllocationTracker.EMPTY, DefaultValue.of(Double.NaN));
+        var builder = NodePropertiesFromStoreBuilder.of(nodeSize, AllocationTracker.empty(), DefaultValue.of(Double.NaN));
 
         var phaser = new Phaser(3);
         pool.execute(() -> {
@@ -289,7 +289,7 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
-        var builder = NodePropertiesFromStoreBuilder.of(size, AllocationTracker.EMPTY, DefaultValue.of(defaultValue));
+        var builder = NodePropertiesFromStoreBuilder.of(size, AllocationTracker.empty(), DefaultValue.of(defaultValue));
         buildBlock.accept(builder);
         return builder.build();
     }

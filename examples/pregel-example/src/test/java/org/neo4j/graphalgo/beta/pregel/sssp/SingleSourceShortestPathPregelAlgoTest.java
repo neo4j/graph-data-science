@@ -80,7 +80,7 @@ class SingleSourceShortestPathPregelAlgoTest {
             config,
             new SingleSourceShortestPathPregel(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(DISTANCE);

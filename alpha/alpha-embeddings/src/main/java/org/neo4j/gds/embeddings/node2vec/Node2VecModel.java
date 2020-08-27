@@ -86,7 +86,11 @@ public class Node2VecModel {
     }
 
     private HugeObjectArray<Vector> initializeEmbeddings(long nodeCount, int embeddingDimensions) {
-        HugeObjectArray<Vector> embeddings = HugeObjectArray.newArray(Vector.class, nodeCount, AllocationTracker.EMPTY);
+        HugeObjectArray<Vector> embeddings = HugeObjectArray.newArray(
+            Vector.class,
+            nodeCount,
+            AllocationTracker.empty()
+        );
         for (var i = 0L; i < nodeCount; i++) {
             var data = new Random()
                 .doubles(embeddingDimensions, -1, 1)

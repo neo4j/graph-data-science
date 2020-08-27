@@ -59,7 +59,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
             // 1-based not 0-based.  heap[0] is unused.
             heapSize = initialCapacity + 1;
         }
-        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES), AllocationTracker.EMPTY);
+        this.heap = HugeIntArray.newArray(HugeArrays.oversize(heapSize, Integer.BYTES), AllocationTracker.empty());
     }
 
     /**
@@ -245,7 +245,7 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
     private void ensureCapacityForInsert() {
         if (size >= heap.size()) {
             long oversize = HugeArrays.oversize(size + 1, Integer.BYTES);
-            heap = heap.copyOf(oversize, AllocationTracker.EMPTY);
+            heap = heap.copyOf(oversize, AllocationTracker.empty());
         }
     }
 

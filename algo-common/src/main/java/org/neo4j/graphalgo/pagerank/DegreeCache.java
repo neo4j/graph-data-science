@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 public class DegreeCache {
 
     public static final DegreeCache EMPTY = new DegreeCache(
-            HugeDoubleArray.newArray(0, AllocationTracker.EMPTY),
-            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.EMPTY),
+            HugeDoubleArray.newArray(0, AllocationTracker.empty()),
+            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.empty()),
             0.0);
 
     private final HugeDoubleArray aggregatedDegrees;

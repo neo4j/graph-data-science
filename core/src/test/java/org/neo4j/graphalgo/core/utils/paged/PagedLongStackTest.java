@@ -40,13 +40,13 @@ final class PagedLongStackTest {
 
     @Test
     void shouldCreateEmptyStack() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.EMPTY);
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
         assertEmpty(stack);
     }
 
     @Test
     void shouldPopValuesInLIFOOrder() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.EMPTY);
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
         long values[] = IntStream.range(0, between(1, 42).integer())
                 .mapToLong(i -> between(42L, 1337L).Long())
                 .toArray();
@@ -69,7 +69,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldPeekLastAddedValue() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.EMPTY);
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
         int repetitions = between(1, 42).integer();
         List<Executable> assertions = new ArrayList<>();
         for (int i = 0; i < repetitions; i++) {
@@ -84,7 +84,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldClearToAnEmptyStack() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.EMPTY);
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
         IntStream.range(0, between(13, 37).integer())
                 .mapToLong(i -> between(42L, 1337L).Long())
                 .forEach(stack::push);
@@ -94,7 +94,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldGrowAsNecessary() {
-        PagedLongStack stack = new PagedLongStack(0L, AllocationTracker.EMPTY);
+        PagedLongStack stack = new PagedLongStack(0L, AllocationTracker.empty());
         // something large enough to spill over one page
         int valuesToAdd = between(10_000, 20_000).integer();
         long[] values = IntStream.range(0, valuesToAdd)

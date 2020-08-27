@@ -72,11 +72,11 @@ class RandomProjectionTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         randomProjection.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.EMPTY);
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.empty());
         randomProjection.currentEmbedding(-1).copyTo(randomVectors, 2);
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
@@ -102,11 +102,11 @@ class RandomProjectionTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         randomProjection.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.EMPTY);
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
         randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
@@ -140,11 +140,11 @@ class RandomProjectionTest extends AlgoTestBase {
             graph,
             weightedConfig,
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         randomProjection.initRandomVectors();
-        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.EMPTY);
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
         randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
@@ -174,7 +174,7 @@ class RandomProjectionTest extends AlgoTestBase {
                 .maxIterations(1)
                 .build(),
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         randomProjection.initRandomVectors();
@@ -217,7 +217,7 @@ class RandomProjectionTest extends AlgoTestBase {
                 .maxIterations(4)
                 .build(),
             progressLogger,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         RandomProjection computeResult = randomProjection.compute();

@@ -33,7 +33,7 @@ class HugeLongMatrixTest {
             @ForAll @LongRange(min = 0, max = 999) long x,
             @ForAll @LongRange(min = 0, max = 999) long y,
             @ForAll @LongRange(min = 0, max = 10000) long v) {
-        HugeLongMatrix array = new HugeLongMatrix(1000, 1000, AllocationTracker.EMPTY);
+        HugeLongMatrix array = new HugeLongMatrix(1000, 1000, AllocationTracker.empty());
         array.set(x, y, v);
         assertEquals(v, array.get(x, y));
     }

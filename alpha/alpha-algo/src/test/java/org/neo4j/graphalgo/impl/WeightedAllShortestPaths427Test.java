@@ -426,7 +426,7 @@ class WeightedAllShortestPaths427Test extends AlgoTestBase {
         List<Result> expectedNonWeighted = calculateExpected(graph, false);
         MSBFSAllShortestPaths shortestPaths = new MSBFSAllShortestPaths(
             graph,
-            AllocationTracker.EMPTY,
+            AllocationTracker.empty(),
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             Pools.DEFAULT
         );

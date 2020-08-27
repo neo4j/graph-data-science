@@ -65,7 +65,7 @@ class NonStabilizingLabelPropagationTest {
             ImmutableLabelPropagationStreamConfig.builder().build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
         LabelPropagation compute = labelPropagation.compute();
         compute.labels();

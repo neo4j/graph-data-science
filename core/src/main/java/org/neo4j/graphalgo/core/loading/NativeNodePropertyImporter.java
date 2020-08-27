@@ -152,7 +152,7 @@ public final class NativeNodePropertyImporter {
         private long nodeCount;
         private Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
         private GraphDimensions dimensions;
-        private AllocationTracker tracker = AllocationTracker.EMPTY;
+        private AllocationTracker tracker = AllocationTracker.empty();
 
 
         private Builder() {
