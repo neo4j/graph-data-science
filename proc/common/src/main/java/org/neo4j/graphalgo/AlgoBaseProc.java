@@ -163,9 +163,7 @@ public abstract class AlgoBaseProc<
         boolean releaseTopology
     ) {
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder = ImmutableComputationResult.builder();
-        var memoryTracker = Neo4jProxy.memoryTracker(transaction);
-        var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
-        var tracker = AllocationTracker.create(memoryTrackerProxy);
+        var tracker = allocationTracker();
 
         Pair<CONFIG, Optional<String>> input = processInput(graphNameOrConfig, configuration);
         CONFIG config = input.getOne();
