@@ -19,30 +19,11 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.memory.MemoryTracker;
+public interface AllocationTrackerAdapter {
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+    void add(long delta);
 
-final class MemoryTrackerProxy42 implements MemoryTrackerProxy {
+    void remove(long delta);
 
-    private final MemoryTracker memoryTracker;
-
-    MemoryTrackerProxy42(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
-    }
-
-    @Override
-    public <R> R fold(
-        Supplier<R> onUnsupported,
-        Supplier<R> onEmpty,
-        Function<AllocationTrackerAdapter, R> onSupported
-    ) {
-        if (memoryTracker instanceof EmptyMemoryTracker) {
-            return onEmpty.get();
-        } else {
-            return onSupported.apply(new AllocationTrackerAdapter42(memoryTracker));
-        }
-    }
+    long tracked();
 }

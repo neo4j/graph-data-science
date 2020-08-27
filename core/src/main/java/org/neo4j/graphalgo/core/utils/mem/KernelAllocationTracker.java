@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
 
-public final class KernelAllocationTracker extends AllocationTracker {
+public final class KernelAllocationTracker implements AllocationTracker {
 
-    private final MemoryTrackerProxy tracker;
+    private final AllocationTrackerAdapter tracker;
 
-    private KernelAllocationTracker(MemoryTrackerProxy tracker) {
+    private KernelAllocationTracker(AllocationTrackerAdapter tracker) {
         this.tracker = tracker;
     }
 
@@ -44,7 +44,7 @@ public final class KernelAllocationTracker extends AllocationTracker {
         return tracker.tracked();
     }
 
-    public static AllocationTracker create(MemoryTrackerProxy tracker) {
+    public static AllocationTracker create(AllocationTrackerAdapter tracker) {
         return new KernelAllocationTracker(tracker);
     }
 }

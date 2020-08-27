@@ -72,7 +72,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -146,7 +145,7 @@ public interface Neo4jProxyApi {
 
     MemoryTracker limitedMemoryTracker(long limitInBytes);
 
-    Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker);
+    MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker);
 
     LogService logProviderForStoreAndRegister(
         Path storeLogPath,

@@ -80,7 +80,7 @@ class AllocationTrackerTest {
 
     @Test
     void shouldUseInMemoryTrackerWhenFeatureIsToggledOff() {
-        var memoryTracker = Neo4jProxy.emptyMemoryTracker();
+        var memoryTracker = Neo4jProxy.limitedMemoryTracker(42);
         var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
         var allocationTracker = AllocationTracker.create(trackerProxy);
         assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
@@ -89,10 +89,10 @@ class AllocationTrackerTest {
     @Test
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         // There is no KernelTracker in 4.0
-        Assumptions.assumeTrue(GraphDatabaseApiProxy.neo4jVersion() != GraphDatabaseApiProxy.Neo4jVersion.V_4_0);
+        Assumptions.assumeTrue(!is40());
         AllocationTracker.whileUsingKernelTracker(
             () -> {
-                var memoryTracker = Neo4jProxy.emptyMemoryTracker();
+                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337);
                 var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
                 var allocationTracker = AllocationTracker.create(trackerProxy);
                 assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
@@ -100,10 +100,30 @@ class AllocationTrackerTest {
         );
     }
 
+    @Test
+    void shouldIgnoreFeatureToggleOn40() {
+        // There is no KernelTracker in 4.0
+        Assumptions.assumeTrue(is40());
+        AllocationTracker.whileUsingKernelTracker(
+            () -> {
+                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337);
+                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+                var allocationTracker = AllocationTracker.create(trackerProxy);
+                assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
+            }
+        );
+    }
+
+    private static boolean is40() {
+        return GraphDatabaseApiProxy.neo4jVersion() == GraphDatabaseApiProxy.Neo4jVersion.V_4_0;
+    }
+
     static Stream<AllocationTracker> emptyTrackers() {
-        return Stream.of(
-            AllocationTracker.EMPTY,
-            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker()))
+        return Stream.concat(
+            Stream.of(AllocationTracker.EMPTY),
+            is40()
+                ? Stream.empty()
+                : Stream.of(AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker())))
         );
     }
 

@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryAllocationTracker extends AllocationTracker {
+public class InMemoryAllocationTracker implements AllocationTracker {
 
     private final AtomicLong count = new AtomicLong();
 
@@ -42,5 +44,9 @@ public class InMemoryAllocationTracker extends AllocationTracker {
 
     public static AllocationTracker create() {
         return new InMemoryAllocationTracker();
+    }
+
+    public static AllocationTracker ignoring(AllocationTrackerAdapter ignored) {
+        return create();
     }
 }

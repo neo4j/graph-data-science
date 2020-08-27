@@ -19,19 +19,10 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.memory.MemoryTracker;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-final class MemoryTrackerProxy42 implements MemoryTrackerProxy {
-
-    private final MemoryTracker memoryTracker;
-
-    MemoryTrackerProxy42(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
-    }
+class MemoryTrackerProxy40 implements MemoryTrackerProxy {
 
     @Override
     public <R> R fold(
@@ -39,10 +30,6 @@ final class MemoryTrackerProxy42 implements MemoryTrackerProxy {
         Supplier<R> onEmpty,
         Function<AllocationTrackerAdapter, R> onSupported
     ) {
-        if (memoryTracker instanceof EmptyMemoryTracker) {
-            return onEmpty.get();
-        } else {
-            return onSupported.apply(new AllocationTrackerAdapter42(memoryTracker));
-        }
+        return onUnsupported.get();
     }
 }

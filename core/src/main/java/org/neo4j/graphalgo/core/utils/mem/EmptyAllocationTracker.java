@@ -17,32 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.memory.MemoryTracker;
+enum EmptyAllocationTracker implements AllocationTracker {
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+    INSTANCE;
 
-final class MemoryTrackerProxy42 implements MemoryTrackerProxy {
-
-    private final MemoryTracker memoryTracker;
-
-    MemoryTrackerProxy42(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
+    @Override
+    public void add(long delta) {
     }
 
     @Override
-    public <R> R fold(
-        Supplier<R> onUnsupported,
-        Supplier<R> onEmpty,
-        Function<AllocationTrackerAdapter, R> onSupported
-    ) {
-        if (memoryTracker instanceof EmptyMemoryTracker) {
-            return onEmpty.get();
-        } else {
-            return onSupported.apply(new AllocationTrackerAdapter42(memoryTracker));
-        }
+    public void remove(long delta) {
+    }
+
+    @Override
+    public long tracked() {
+        return 0L;
+    }
+
+    @Override
+    public String get() {
+        return "";
+    }
+
+    @Override
+    public String getUsageString() {
+        return "";
+    }
+
+    @Override
+    public String getUsageString(String label) {
+        return "";
     }
 }

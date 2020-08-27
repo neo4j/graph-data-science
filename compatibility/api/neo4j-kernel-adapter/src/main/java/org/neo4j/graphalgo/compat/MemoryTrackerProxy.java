@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public interface MemoryTrackerProxy {
 
-    void add(long delta);
+    <R> R fold(Supplier<R> onUnsupported, Supplier<R> onEmpty, Function<AllocationTrackerAdapter, R> onSupported);
 
-    void remove(long delta);
-
-    long tracked();
 }

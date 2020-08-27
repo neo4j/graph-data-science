@@ -72,7 +72,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
 
 public final class Neo4jProxy {
@@ -205,7 +204,7 @@ public final class Neo4jProxy {
         return IMPL.limitedMemoryTracker(limitInBytes);
     }
 
-    public static Optional<MemoryTrackerProxy> memoryTrackerProxy(MemoryTracker memoryTracker) {
+    public static MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker) {
         return IMPL.memoryTrackerProxy(memoryTracker);
     }
 
