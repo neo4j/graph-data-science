@@ -3,8 +3,21 @@
 
 [abstract]
 --
-This chapter provides explanations and examples for using the Pregel API in the Neo4j Graph Data Science library.
+This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library.
 --
+
+This topic includes:
+
+* <<algorithms-pregel-api-intro, Introduction>>
+* <<algorithms-pregel-api-java, Pregel Java API>>
+** <<algorithms-pregel-api-java-computation, Computation>>
+** <<algorithms-pregel-api-java-context, Init and computation context>>
+** <<algorithms-pregel-api-java-config, Configuration>>
+** <<algorithms-pregel-api-java-framework,Execution>>
+* <<algorithms-pregel-api-procedure, Custom procedures>>
+** <<algorithms-pregel-api-procedure-generation, Procedure generation>>
+** <<algorithms-pregel-api-plugin, Building a Neo4j plugin>>
+* <<algorithms-pregel-api-example, Example: Connected Components>>
 
 [[algorithms-pregel-api-intro]]
 == Introduction
@@ -13,12 +26,12 @@ Pregel is a vertex-centric computation model to define your own algorithms via a
 Node values can be updated within the compute function and represent the algorithm result.
 The input graph contains default node values or node values from a graph projection.
 
-The compute function is executed in multiple iterations, also called _super-steps_.
-In each super-step the compute function is executed for each node in the graph.
-Within that function, a node can receive messages from its neighbor nodes.
+The compute function is executed in multiple iterations, also called _supersteps_.
+In each superstep, the compute function runs for each node in the graph.
+Within that function, a node can receive messages from other nodes, typically its neighbors.
 Based on the received messages and its currently stored value, a node can compute a new value.
-A node can also send messages to all of its neighbors which are received in the next super-step.
-The algorithm terminates after a fixed number of super-steps or if no messages are being sent between nodes.
+A node can also send messages to other nodes, typically its neighbors, which are received in the next superstep.
+The algorithm terminates after a fixed number of supersteps or if no messages are being sent between nodes.
 
 A Pregel computation is executed in parallel.
 Each thread executes the compute function for a batch of nodes.
@@ -27,30 +40,130 @@ For more information about Pregel, have a look at https://kowshik.github.io/JPre
 
 To implement your own Pregel algorithm, the Graph Data Science library provides a Java API, which is described below.
 
+The introduction of a new Pregel algorithm can be separated in two main steps.
+First, we need to implement the algorithm using the Pregel Java API.
+Second, we need to expose the algorithm via a Cypher procedure to make use of it.
+
 For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo-technology/graph-analytics/tree/master/public/examples/pregel-example/src/main/java/org/neo4j/graphalgo/beta/pregel[Pregel examples].
 
+[[algorithms-pregel-api-java]]
+== Pregel Java API
 
-== Pregel API
-.Initializing Pregel
+The Pregel Java API allows us to easily build our own algorithm by implementing well-defined interfaces.
+
+[[algorithms-pregel-api-java-computation]]
+=== Computation
+
+The first step is to implement the `https://github.com/neo-technology/graph-analytics/blob/6179f0cfef50d41af376aa6dcab4d5142ab3f8e9/public/core/src/main/java/org/neo4j/graphalgo/beta/pregel/PregelComputation.java[PregelComputation]` interface.
+It is the main interface to express user-defined logic using the Pregel framework.
+
+.The Pregel computation
 [source, java]
 ----
-package org.neo4j.graphalgo.beta.pregel;
-
-public final class Pregel {
-    // constructing an instance of Pregel
-    public static Pregel withDefaultNodeValues(
-        final Graph graph,
-        final PregelConfig config,
-        final PregelComputation computation,
-        final int batchSize,
-        final ExecutorService executor,
-        final AllocationTracker tracker
-    ) {...}
-
-    // running the Pregel instance to get node values as result
-    public HugeDoubleArray run(final int maxIterations) {...}
+public interface PregelComputation<C extends PregelConfig> {
+    // The node schema describes the node property layout.
+    Pregel.NodeSchema nodeSchema();
+    // Called in the first superstep and allows initializing node state.
+    default void init(PregelContext.InitContext<C> context) {}
+    // Called in each superstep for each node and contains the main logic.
+    void compute(PregelContext.ComputeContext<C> context, Pregel.Messages messages);
+    // Used to apply a relationship weight on a message.
+    default double applyRelationshipWeight(double message, double relationshipWeight);
 }
 ----
+
+The `nodeSchema` describes the node property layout.
+A node property can be composed of multiple primitive values, such as double or long, as well as arrays of those.
+Each part of that composite schema is named by a unique key.
+
+The `init` method is called in the beginning of the first superstep of the Pregel computation and allows initializing node values.
+The interface defines an abstract `compute` method, which is called for each node in every superstep.
+Algorithm-specific logic is expressed within the `compute` method.
+The context parameter provides access to node properties of the in-memory graph and the algorithm configuration.
+
+The `compute` method is called individually for each node in every superstep as long as the node receives messages or has not voted to halt yet.
+Since a Pregel computation is state-less, a node can only communicate with other nodes via messages.
+In each superstep, a node receives messages via the input parameter and can send new messages via the context parameter.
+Messages can be sent to neighbor nodes or any node if the identifier is known.
+
+The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
+If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
+
+[[algorithms-pregel-api-java-context]]
+=== Init context and compute context
+
+The main purpose of the two context objects is to enable the computation to communicate with the Pregel framework.
+A context is stateful, all its methods are subject to the current superstep and the currently processed node.
+Both context objects share a set of methods, e.g., to access the config and node state, and add context-specific methods.
+
+The https://github.com/neo-technology/graph-analytics/blob/518a05bf285666c862e9a9db8280e686faeba618/public/core/src/main/java/org/neo4j/graphalgo/beta/pregel/PregelContext.java#L95-L114[InitContext] is available in the `init` method of a Pregel computation.
+It provides access to node properties stored in the in-memory graph.
+We can set the initial node state to a fixed value, e.g. the node id, or use graph properties and the user-defined configuration to initialize a context-dependent state.
+
+.The InitContext
+[source, java]
+----
+public final class InitContext {
+    // The currently processed node id.
+    public long nodeId();
+    // User-defined Pregel configuration
+    public PregelConfig getConfig();
+    // Sets a double node value for the given schema key.
+    public void setNodeValue(String key, double value);
+    // Sets a long node value for the given schema key.
+    public void setNodeValue(String key, long value);
+    // Number of nodes in the input graph.
+    public long getNodeCount();
+    // Number of relationships in the input graph.
+    public long getRelationshipCount();
+    // Number of relationships of the current node.
+    public int getDegree();
+    // Available node property keys in the input graph.
+    public Set<String> nodePropertyKeys();
+    // Node properties stored in the input graph.
+    public NodeProperties nodeProperties(String key);
+}
+----
+
+In contrast, the https://github.com/neo-technology/graph-analytics/blob/518a05bf285666c862e9a9db8280e686faeba618/public/core/src/main/java/org/neo4j/graphalgo/beta/pregel/PregelContext.java#L116-L165[ComputeContext] can be accessed inside the `compute` method.
+The context provides methods to access the computation state, e.g. the current superstep, and to send messages to other nodes in the graph.
+
+.The ComputeContext
+[source, java]
+----
+public final class ComputeContext {
+    // The currently processed node id.
+    public long nodeId();
+    // User-defined Pregel configuration
+    public PregelConfig getConfig();
+    // Sets a double node value for the given schema key.
+    public void setNodeValue(String key, double value);
+    // Sets a long node value for the given schema key.
+    public void setNodeValue(String key, long value);
+    // Number of nodes in the input graph.
+    public long getNodeCount();
+    // Number of relationships in the input graph.
+    public long getRelationshipCount();
+    // Number of relationships of the current node.
+    public int getDegree();
+    // Double value for the given node schema key.
+    public double doubleNodeValue(String key);
+    // Double value for the given node schema key.
+    public long longNodeValue(String key);
+    // Notify the framework that the node intends to stop its computation.
+    public void voteToHalt();
+    // Indicates whether this is the first superstep.
+    public boolean isInitialSuperstep();
+    // Zero-based superstep identifier.
+    public int getSuperstep();
+    // Send message to all neighbors of the currently processed node.
+    public void sendMessages(double message);
+}
+----
+
+
+[[algorithms-pregel-api-java-config]]
+=== Configuration
 
 To build a PregelConfig you can use the `ImmutablePregelConfig.builder()`.
 
@@ -59,48 +172,47 @@ To build a PregelConfig you can use the `ImmutablePregelConfig.builder()`.
 |===
 | Name                      | Type      | Default Value | Description
 | initialNodeValue          | Double    | -1            | Initial value of the node in the Pregel context.
-| isAsynchronous            | Boolean   | false         | Flag indicating if messages can be sent and received in the same super-step.
+| isAsynchronous            | Boolean   | false         | Flag indicating if messages can be sent and received in the same superstep.
 | relationshipWeightProperty| String    | null          | Name of the relationship property that represents weight.
 | concurrency               | Integer   | 4             | Concurrency used when executing the Pregel computation.
 |===
 
-To implement your own algorithm, you need to implement the `PregelComputation` interface.
 
-.The Pregel computation
+[[algorithms-pregel-api-java-framework]]
+=== Execution
+
+.Initializing Pregel
 [source, java]
 ----
-@FunctionalInterface
-public interface PregelComputation {
-    // specifying the algorithm logic.
-    void compute(PregelContext context, long nodeId, Queue<Double> messages);
-    // how relationship weights should be applied on the message
-    default double applyRelationshipWeight(double nodeValue, double relationshipWeight) { return nodeValue; }
+package org.neo4j.graphalgo.beta.pregel;
+
+public final class Pregel<CONFIG extends PregelConfig> {
+    // constructing an instance of Pregel
+    public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
+            Graph graph,
+            CONFIG config,
+            PregelComputation<CONFIG> computation,
+            ExecutorService executor,
+            AllocationTracker tracker
+    ) {...}
+
+    // running the Pregel instance to get node values as result
+    public HugeDoubleArray run(final int maxIterations) {...}
 }
 ----
 
-The compute function takes a context, the node id for which the method is being executed for, and the messages that were sent to that node.
-Using the context and the node id, one can access the current super-step, read and update the node value, send messages or vote to halt the computation.
+[[algorithms-pregel-api-procedure]]
+== Custom procedures
 
-.The Pregel context
-[source, java]
-----
-public final class PregelContext {
-    // nodes voting to halt will be inactive and accept no new messages
-    public void voteToHalt(long nodeId) {...};
-    // if its the first iteration
-    public boolean isInitialSuperStep() {...};
-    // get the number of the current iteration
-    public int getSuperstep() {...};
-    public double getNodeValue(long nodeId) {...};
-    public void setNodeValue(long nodeId, double value) {...};
-    // sending a message to the neighbours of a node
-    public void sendMessages(long nodeId, double message) {...};
-    public int getDegree(long nodeId) {...};
-    // get the inital node value given by the PregelConfig
-    public double getInitialNodeValue() {...};
-}
-----
+[[algorithms-pregel-api-procedure-generation]]
+=== Procedure generation
 
+// TODO
+
+[[algorithms-pregel-api-plugin]]
+=== Custom Neo4j plugin>>
+
+// TODO
 
 [[algorithms-pregel-api-example]]
 == Example
@@ -108,90 +220,57 @@ public final class PregelContext {
 .The following provides an example of Pregel computation:
 [source, java]
 ----
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Queue;
+import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.MUTATE;
+import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STATS;
+import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;
+import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.WRITE;
 
-public class ConnectedComponentsPregel implements PregelComputation {
+@PregelProcedure(
+    name = "example.pregel.cc",
+    description = "Connected Components",
+    modes = {STREAM, WRITE, MUTATE, STATS}
+)
+public class ConnectedComponentsPregel implements PregelComputation<ConnectedComponentsConfig> {
 
-   @Override
-   public void compute(PregelContext context, long nodeId, Queue<Double> messages) {
-        // get the current componentId for the node from the context
-        // if we are on the first iteration, the value is the default value from the PregelConfig
-        // which we do not use
-        double oldComponentId = context.getNodeValue(nodeId);
-        double newComponentId = oldComponentId;
-        if (context.isInitialSuperStep()) {
-            // In the first round, we use use the nodeId as component instead of the default -1
-            newComponentId = nodeId;
-        // need to check if there are any messages for this node
-        } else if (messages != null && !messages.isEmpty()){
-                // the componentId is updated to the smallest componentId of its neighbors including itself
-                Double nextComponentId;
-                while ((nextComponentId = messages.poll()) != null) {
-                    if (nextComponentId.longValue() < newComponentId) {
-                        newComponentId = nextComponentId.longValue();
-                    }
-                }
-        }
+    public static final String COMPONENT = "component";
 
-        // update the node's componentId, both in the context and notify neighbors
-        if (newComponentId != oldComponentId) {
-            context.setNodeValue(nodeId, newComponentId);
-            // send the new componentId to neighbors so that they also can be updated
-            context.sendMessages(nodeId, newComponentId);
-        }
-   }
-}
-----
-
-.The following runs Pregel, using `ConnectedComponentsPregel`
-[source, java]
-----
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-
-import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-
-
-public class PregelExample {
-    public static void main(String[] args) {
-        int batchSize = 10;
-        int maxIterations = 10;
-
-        PregelConfig config = ImmutablePregelConfig.builder()
-            .isAsynchronous(true)
+    @Override
+    public Pregel.NodeSchema nodeSchema() {
+        return new NodeSchemaBuilder()
+            .putElement(COMPONENT, ValueType.LONG)
             .build();
+    }
 
-        // generate a random graph with 100 nodes and average degree 10
-        HugeGraph graph = RandomGraphGenerator.builder()
-            .nodeCount(100)
-            .averageDegree(10)
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .allocationTracker(AllocationTracker.EMPTY)
-            .build()
-            .generate();
+    @Override
+    public void init(PregelContext.InitContext<ConnectedComponentsConfig> context) {
+        var initialValue = context.getConfig().seedProperty() != null
+            ? context.nodeProperties(context.getConfig().seedProperty()).longValue(context.nodeId())
+            : context.nodeId();
+        context.setNodeValue(COMPONENT, initialValue);
+    }
 
-        Pregel pregelJob = Pregel.withDefaultNodeValues(
-            graph,
-            config,
-            new ConnectedComponentsPregel(),
-            batchSize,
-            // run on the default GDS ExecutorService
-            Pools.DEFAULT,
-            // disable memory allocation tracking
-            AllocationTracker.EMPTY
-        );
+    @Override
+    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, Pregel.Messages messages) {
+        long oldComponentId = context.longNodeValue(COMPONENT);
+        long newComponentId = oldComponentId;
 
-        // the index in the nodeValues array is the nodeId from the graph
-        HugeDoubleArray nodeValues = pregelJob.run(maxIterations);
-        System.out.println(nodeValues.toString());
+        for (var nextComponentId : messages) {
+            if (nextComponentId.longValue() < newComponentId) {
+                newComponentId = nextComponentId.longValue();
+            }
+        }
+
+        if (context.isInitialSuperstep() || newComponentId != oldComponentId) {
+            context.setNodeValue(COMPONENT, newComponentId);
+            context.sendMessages(newComponentId);
+        }
     }
 }
 ----
