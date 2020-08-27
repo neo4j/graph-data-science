@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -155,7 +154,7 @@ public class GraphCreateProc extends CatalogProc {
             : new GraphCreateNativeResult.Builder((GraphCreateFromStoreConfig) config);
 
         try (ProgressTimer ignored = ProgressTimer.start(builder::withCreateMillis)) {
-            GraphLoader loader = newLoader(config, AllocationTracker.empty());
+            GraphLoader loader = newLoader(config, allocationTracker());
             GraphStore graphStore = loader.graphStore();
 
             builder
