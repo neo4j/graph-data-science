@@ -256,8 +256,8 @@ class PregelTest {
         @Override
         public void init(PregelContext.InitContext<CompositeTestComputationConfig> context) {
             long nodeId = context.nodeId();
-            long longValue = context.nodeProperties(context.getConfig().longProperty()).longValue(nodeId);
-            double doubleValue = context.nodeProperties(context.getConfig().doubleProperty()).doubleValue(nodeId);
+            long longValue = context.nodeProperties(context.config().longProperty()).longValue(nodeId);
+            double doubleValue = context.nodeProperties(context.config().doubleProperty()).doubleValue(nodeId);
 
             context.setNodeValue(LONG_KEY, longValue);
             context.setNodeValue(DOUBLE_KEY, doubleValue);

@@ -49,8 +49,8 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
 
     @Override
     public void init(PregelContext.InitContext<ConnectedComponentsConfig> context) {
-        var initialValue = context.getConfig().seedProperty() != null
-            ? context.nodeProperties(context.getConfig().seedProperty()).longValue(context.nodeId())
+        var initialValue = context.config().seedProperty() != null
+            ? context.nodeProperties(context.config().seedProperty()).longValue(context.nodeId())
             : context.nodeId();
         context.setNodeValue(COMPONENT, initialValue);
     }

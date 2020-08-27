@@ -332,19 +332,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return senderBits;
         }
 
-        public int getIteration() {
+        public int iteration() {
             return iteration;
         }
 
-        long getNodeCount() {
+        long nodeCount() {
             return nodeCount;
         }
 
-        long getRelationshipCount() {
+        long relationshipCount() {
             return relationshipCount;
         }
 
-        int getDegree(long nodeId) {
+        int degree(long nodeId) {
             return degrees.degree(nodeId);
         }
 

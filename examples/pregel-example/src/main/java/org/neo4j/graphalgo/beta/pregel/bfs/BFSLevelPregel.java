@@ -46,7 +46,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
     @Override
     public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            if (context.nodeId() == context.getConfig().startNode()) {
+            if (context.nodeId() == context.config().startNode()) {
                 context.setNodeValue(LEVEL, 0);
                 context.sendToNeighbors(1);
                 context.voteToHalt();

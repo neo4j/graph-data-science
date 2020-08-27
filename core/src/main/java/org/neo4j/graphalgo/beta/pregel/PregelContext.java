@@ -69,7 +69,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
     /**
      * Allows access to the user-defined Pregel configuration.
      */
-    public CONFIG getConfig() {
+    public CONFIG config() {
         return config;
     }
 
@@ -116,22 +116,22 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
     /**
      * Number of nodes in the input graph.
      */
-    public long getNodeCount() {
-        return computeStep.getNodeCount();
+    public long nodeCount() {
+        return computeStep.nodeCount();
     }
 
     /**
      * Number of relationships in the input graph.
      */
-    public long getRelationshipCount() {
-        return computeStep.getRelationshipCount();
+    public long relationshipCount() {
+        return computeStep.relationshipCount();
     }
 
     /**
      * Returns the degree (number of relationships) of the currently processed node.
      */
-    public int getDegree() {
-        return computeStep.getDegree(nodeId);
+    public int degree() {
+        return computeStep.degree(nodeId);
     }
 
     /**

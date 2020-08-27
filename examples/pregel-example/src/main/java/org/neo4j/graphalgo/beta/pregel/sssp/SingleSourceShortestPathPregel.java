@@ -49,7 +49,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     @Override
     public void init(PregelContext.InitContext<SingleSourceShortestPathPregelConfig> context) {
-        if (context.nodeId() == context.getConfig().startNode()) {
+        if (context.nodeId() == context.config().startNode()) {
             context.setNodeValue(DISTANCE, 0);
         } else {
             context.setNodeValue(DISTANCE, Long.MAX_VALUE);
@@ -59,7 +59,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     @Override
     public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
-            if (context.nodeId() == context.getConfig().startNode()) {
+            if (context.nodeId() == context.config().startNode()) {
                 context.sendToNeighbors(1);
             }
         } else {

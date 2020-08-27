@@ -50,9 +50,9 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
     @Override
     public void init(PregelContext.InitContext<PageRankPregelConfig> context) {
-        var initialValue = context.getConfig().seedProperty() != null
-            ? context.nodeProperties(context.getConfig().seedProperty()).doubleValue(context.nodeId())
-            : 1.0 / context.getNodeCount();
+        var initialValue = context.config().seedProperty() != null
+            ? context.nodeProperties(context.config().seedProperty()).doubleValue(context.nodeId())
+            : 1.0 / context.nodeCount();
         context.setNodeValue(PAGE_RANK, initialValue);
     }
 
@@ -67,16 +67,16 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
                 sum += message;
             }
 
-            var dampingFactor = context.getConfig().dampingFactor();
+            var dampingFactor = context.config().dampingFactor();
             var jumpProbability = 1 - dampingFactor;
 
-            newRank = (jumpProbability / context.getNodeCount()) + dampingFactor * sum;
+            newRank = (jumpProbability / context.nodeCount()) + dampingFactor * sum;
 
             context.setNodeValue(PAGE_RANK, newRank);
         }
 
         // send new rank to neighbors
-        context.sendToNeighbors(newRank / context.getDegree());
+        context.sendToNeighbors(newRank / context.degree());
     }
 
     @ValueClass

@@ -59,7 +59,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
                 // TODO: could be shared across compute functions per thread
                 // We receive at most |degree| messages
-                long[] buffer = new long[context.getDegree()];
+                long[] buffer = new long[context.degree()];
 
                 int messageCount = 0;
 
