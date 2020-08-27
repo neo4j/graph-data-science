@@ -120,7 +120,7 @@ class AllocationTrackerTest {
     @Test
     void shouldTerminateTransactionWhenOverallocating() {
         Assumptions.assumeTrue(!is40());
-        AllocationTracker.whileUsingKernelTracker(
+        USE_KERNEL_TRACKER.enableAndRun(
             () -> {
                 var memoryTracker = Neo4jProxy.limitedMemoryTracker(42, GRAB_SIZE_1KB);
                 var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);

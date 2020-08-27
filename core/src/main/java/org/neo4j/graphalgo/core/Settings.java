@@ -117,6 +117,10 @@ public final class Settings {
         return GraphDatabaseSettings.load_csv_file_url_root;
     }
 
+    public static Setting<Long> memoryTransactionMaxSize() {
+        return GraphDatabaseSettings.memory_transaction_max_size;
+    }
+
     private Settings() {
         throw new UnsupportedOperationException();
     }

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
