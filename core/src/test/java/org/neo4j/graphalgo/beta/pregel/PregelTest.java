@@ -133,21 +133,40 @@ class PregelTest {
         assertArrayEquals(new double[]{88.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve")));
     }
 
-    @Test
-    void memoryEstimation() {
+    static Stream<Arguments> estimations() {
+        return Stream.of(
+            Arguments.of(1, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_064L),
+            Arguments.of(10, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_896_448L),
+            Arguments.of(1, new NodeSchemaBuilder()
+                    .putElement("key1", ValueType.LONG)
+                    .putElement("key2", ValueType.DOUBLE)
+                    .putElement("key3", ValueType.LONG_ARRAY)
+                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                6_884_136L
+            ),
+            Arguments.of(10, new NodeSchemaBuilder()
+                    .putElement("key1", ValueType.LONG)
+                    .putElement("key2", ValueType.DOUBLE)
+                    .putElement("key3", ValueType.LONG_ARRAY)
+                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                6_896_520L
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("estimations")
+    void memoryEstimation(int concurrency, Pregel.NodeSchema nodeSchema, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
             .build();
 
         assertEquals(
-            MemoryRange.of(4_884_064L),
-            Pregel.memoryEstimation().estimate(dimensions, 1).memoryUsage()
-        );
-
-        assertEquals(
-            MemoryRange.of(4_896_448L),
-            Pregel.memoryEstimation().estimate(dimensions, 10).memoryUsage()
+            MemoryRange.of(expectedBytes),
+            Pregel.memoryEstimation(nodeSchema).estimate(dimensions, concurrency).memoryUsage()
         );
     }
 
