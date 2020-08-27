@@ -27,12 +27,14 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.io.ByteUnit;
+import org.neo4j.memory.MemoryLimitExceededException;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
@@ -113,6 +115,25 @@ class AllocationTrackerTest {
             var allocationTracker = AllocationTracker.create(trackerProxy);
             assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
         });
+    }
+
+    @Test
+    void shouldTerminateTransactionWhenOverallocating() {
+        Assumptions.assumeTrue(!is40());
+        AllocationTracker.whileUsingKernelTracker(
+            () -> {
+                var memoryTracker = Neo4jProxy.limitedMemoryTracker(42, GRAB_SIZE_1KB);
+                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+                var allocationTracker = AllocationTracker.create(trackerProxy);
+                allocationTracker.add(42);
+                assertEquals(42L, allocationTracker.trackedBytes());
+                MemoryLimitExceededException exception = assertThrows(
+                    MemoryLimitExceededException.class,
+                    () -> allocationTracker.add(1)
+                );
+                assertThat(exception.getMessage()).startsWith("The allocation of an extra 1 B would use more than the limit 42 B.");
+            }
+        );
     }
 
     private static boolean is40() {
