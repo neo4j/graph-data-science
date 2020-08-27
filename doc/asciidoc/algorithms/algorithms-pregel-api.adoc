@@ -173,7 +173,7 @@ This is equivalent to all the other algorithms within the GDS library.
 [opts="header",cols="1,1,1,6"]
 |===
 | Name                      | Type      | Default Value | Description
-| maxIterations             | Integer   | false         | Maximum number of supersteps after which the computation will terminate.
+| maxIterations             | Integer   | -             | Maximum number of supersteps after which the computation will terminate.
 | isAsynchronous            | Boolean   | false         | Flag indicating if messages can be sent and received in the same superstep.
 | relationshipWeightProperty| String    | null          | Name of the relationship property that represents a relationship weight.
 | concurrency               | Integer   | 4             | Concurrency used when executing the Pregel computation.
@@ -229,18 +229,57 @@ public class CustomComputation implements PregelComputation<CustomConfig> {
 [[algorithms-pregel-api-procedure]]
 == Exposing a Pregel algorithm via Cypher
 
+To make a custom Pregel computation accessible via Cypher, it needs to be exposed via the procedure API.
+The Pregel framework in GDS provides an easy way to generate procedures for all the default modes.
+
 [[algorithms-pregel-api-procedure-generation]]
 === Procedure generation
 
-// TODO
+To generate procedures for a computation, it needs to be annotated with the `@PregelProcedure` annotation.
+
+.Using the `@PregelProcedure` annotation to configure code generation.
+[source, java]
+----
+@PregelProcedure(
+    name = "custom.pregel.proc",
+    modes = {GDSMode.STREAM, GDSMode.WRITE},
+    description = "My custom Pregel algorithm"
+)
+public class CustomComputation implements PregelComputation<PregelConfig> {
+    // ...
+}
+----
+
+The annotation provides a number of configuration options for the code generation.
+
+.Configuration
+[opts="header",cols="1,1,1,6"]
+|===
+| Name                      | Type      | Default Value                     | Description
+| name                      | String    | -                                 | The prefix of the generated procedure name. It is appended by the mode.
+| modes                     | List      | `[STREAM, WRITE, MUTATE, STATS]`  | A procedure is generated for each of the specified modes.
+| description               | String    | `""`                              | Procedure description that is printed in `dbms.listProcedures()`.
+|===
+
+For the above Code snippet, we generate four procedures:
+
+* `custom.pregel.proc.stream`
+* `custom.pregel.proc.stream.estimate`
+* `custom.pregel.proc.write`
+* `custom.pregel.proc.write.estimate`
+
+
+
 
 [[algorithms-pregel-api-plugin]]
-=== Building and installing a Neo4j plugin>>
+=== Building and installing a Neo4j plugin
 
-// TODO
+// TODO talk about the pregel-bootstrap module and the required dependencies
 
 [[algorithms-pregel-api-example]]
 == Example
+
+// TODO talk about the example module
 
 .The following provides an example of Pregel computation:
 [source, java]
