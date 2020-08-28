@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -50,6 +51,20 @@ class HugeAtomicBitSetTest {
         assertTrue(bitSet.get(41));
         bitSet.flip(41);
         assertFalse(bitSet.get(41));
+    }
+
+    @Test
+    void testCardinality() {
+        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        assertEquals(0L, bitSet.cardinality());
+
+        bitSet.set(41);
+        assertEquals(1L, bitSet.cardinality());
+
+        for (long i = 0; i < bitSet.size(); i++) {
+            bitSet.set(i);
+        }
+        assertEquals(42L, bitSet.cardinality());
     }
 
     @Test
