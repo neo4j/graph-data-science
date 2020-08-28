@@ -68,7 +68,8 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
 
             @Override
             public MemoryEstimation memoryEstimation(PregelConfig configuration) {
-                return Pregel.memoryEstimation();
+                var nodeSchema = new Computation().nodeSchema();
+                return Pregel.memoryEstimation(nodeSchema);
             }
         };
     }

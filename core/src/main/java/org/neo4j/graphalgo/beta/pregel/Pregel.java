@@ -92,10 +92,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         );
     }
 
-    // TODO: adapt for composite node value
-    public static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation(NodeSchema nodeSchema) {
         return MemoryEstimations.builder(Pregel.class)
-            .perNode("node values", HugeDoubleArray::memoryEstimation)
             .perNode("receiver bits", MemoryUsage::sizeOfBitset)
             .perNode("vote bits", MemoryUsage::sizeOfBitset)
             .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class)
@@ -105,13 +103,49 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .add(
                 "message queues",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    MemoryEstimations.builder(HugeObjectArray.class)
+                    MemoryEstimations.builder()
+                        .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
                         .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
                             .fixed("messages", dimensions.averageDegree() * Double.BYTES)
                             .build()
                         )
                         .build()
                 )
+            )
+            .add(
+                "composite node value",
+                MemoryEstimations.setup("", (dimensions, concurrency) -> {
+                    var builder = MemoryEstimations.builder();
+
+                    nodeSchema.elements().forEach(element -> {
+                        var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
+
+                        switch (element.propertyType()) {
+                            case LONG:
+                                builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
+                                break;
+                            case DOUBLE:
+                                builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
+                                break;
+                            case LONG_ARRAY:
+                                builder.add(entry, MemoryEstimations.builder()
+                                    .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
+                                    .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
+                                    .build());
+                                break;
+                            case DOUBLE_ARRAY:
+                                builder.add(entry, MemoryEstimations.builder()
+                                    .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
+                                    .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
+                                    .build());
+                                break;
+                            default:
+                                builder.add(entry, MemoryEstimations.empty());
+                        }
+                    });
+
+                    return builder.build();
+                })
             )
             .build();
     }

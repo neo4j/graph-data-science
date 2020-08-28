@@ -85,6 +85,18 @@ class PregelProcessorTest {
     }
 
     @Test
+    void baseClassMustHaveEmptyConstructor() {
+        runNegativeTest(
+            "BaseClassHasNoEmptyConstructor",
+            e(
+                "The annotated Pregel computation must have an empty constructor.",
+                34,
+                8
+            )
+        );
+    }
+
+    @Test
     void baseClassMustImplementPregelComputation() {
         runNegativeTest(
             "BaseClassIsNotAPregelComputation",

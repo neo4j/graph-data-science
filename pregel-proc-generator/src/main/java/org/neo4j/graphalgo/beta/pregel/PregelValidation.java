@@ -66,6 +66,7 @@ final class PregelValidation {
         if (
             !isClass(pregelElement) ||
             !isPregelComputation(pregelElement) ||
+            !hasEmptyConstructor(pregelElement) ||
             !configHasFactoryMethod(pregelElement)
         ) {
             return Optional.empty();
@@ -123,6 +124,24 @@ final class PregelValidation {
             );
         }
         return isPregelComputation;
+    }
+
+    private boolean hasEmptyConstructor(Element pregelElement) {
+        var pregelTypeElement = MoreElements.asType(pregelElement);
+        var constructors = ElementFilter.constructorsIn(pregelElement.getEnclosedElements());
+
+        var hasDefaultConstructor = constructors.isEmpty() || constructors
+            .stream()
+            .anyMatch(constructor -> constructor.getParameters().isEmpty());
+
+        if (!hasDefaultConstructor) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "The annotated Pregel computation must have an empty constructor.",
+                pregelTypeElement
+            );
+        }
+        return hasDefaultConstructor;
     }
 
     private boolean configHasFactoryMethod(Element pregelElement) {
