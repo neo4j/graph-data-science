@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -116,6 +117,12 @@ public abstract class HugeAtomicLongArray {
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
     public abstract long sizeOf();
+
+    /**
+     * Set all entries in the array to the given value.
+     * This method is not atomic!
+     */
+    public abstract void setAll(long value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -244,6 +251,11 @@ public abstract class HugeAtomicLongArray {
         }
 
         @Override
+        public void setAll(long value) {
+            Arrays.fill(page, value);
+        }
+
+        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -332,6 +344,13 @@ public abstract class HugeAtomicLongArray {
         @Override
         public long sizeOf() {
             return memoryUsed;
+        }
+
+        @Override
+        public void setAll(long value) {
+            for (long[] page : pages) {
+                Arrays.fill(page, value);
+            }
         }
 
         @Override
