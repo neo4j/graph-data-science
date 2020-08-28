@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
-public class HugeAtomicBitSet {
+public final class HugeAtomicBitSet {
     private static final int NUM_BITS = 64;
 
     private final HugeAtomicLongArray bits;
@@ -37,18 +37,24 @@ public class HugeAtomicBitSet {
         this.numBits = numBits;
     }
 
+    /**
+     * Returns the state of the bit at the given index.
+     */
     public boolean get(long index) {
         assert(index < numBits);
-        int wordIndex = (int) (index / NUM_BITS);
+        long wordIndex = index / NUM_BITS;
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = 1L << bitIndex;
         return (bits.get(wordIndex) & bitmask) != 0;
     }
 
+    /**
+     * Sets the bit at the given index to true.
+     */
     public void set(long index) {
         assert(index < numBits);
 
-        int wordIndex = (int) (index / NUM_BITS);
+        long wordIndex = index / NUM_BITS;
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = 1L << bitIndex;
 
@@ -61,10 +67,13 @@ public class HugeAtomicBitSet {
         }
     }
 
+    /**
+     * Toggles the bit at the given index.
+     */
     public void flip(long index) {
         assert(index < numBits);
 
-        int wordIndex = (int) (index / NUM_BITS);
+        long wordIndex = index / NUM_BITS;
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = 1L << bitIndex;
 
@@ -77,6 +86,10 @@ public class HugeAtomicBitSet {
         }
     }
 
+    /**
+     * Returns the number of set bits in the bit set.
+     * @apiNote This method is not atomic.
+     */
     public long cardinality() {
         long setBitCount = 0;
 
@@ -87,14 +100,21 @@ public class HugeAtomicBitSet {
         return setBitCount;
     }
 
+    /**
+     * Resets all bits in the bit set.
+     * @apiNote This method is not atomic.
+     */
     public void clear() {
         bits.setAll(0);
     }
 
+    /**
+     * Resets the bit at the given index.
+     */
     public void clear(long index) {
         assert(index < numBits);
 
-        int wordIndex = (int) (index / NUM_BITS);
+        long wordIndex = index / NUM_BITS;
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = ~(1L << bitIndex);
 
@@ -107,6 +127,9 @@ public class HugeAtomicBitSet {
         }
     }
 
+    /**
+     * Returns the number of bits in the bitset.
+     */
     public long size() {
         return numBits;
     }
