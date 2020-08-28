@@ -189,6 +189,8 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         /**
          * Returns the node value for the given node schema key.
+         *
+         * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a double
          */
         public double doubleNodeValue(String key) {
             return computeStep.doubleNodeValue(key, nodeId);
@@ -196,6 +198,8 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         /**
          * Returns the node value for the given node schema key.
+         *
+         * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a long
          */
         public long longNodeValue(String key) {
             return computeStep.longNodeValue(key, nodeId);
@@ -203,6 +207,8 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         /**
          * Returns the node value for the given node schema key.
+         *
+         * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a long array
          */
         public long[] longArrayNodeValue(String key) {
             return computeStep.longArrayNodeValue(key, nodeId);
@@ -210,6 +216,8 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 
         /**
          * Returns the node value for the given node schema key.
+         *
+         * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a double array
          */
         public double[] doubleArrayNodeValue(String key) {
             return computeStep.doubleArrayNodeValue(key, nodeId);
@@ -249,7 +257,10 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         }
 
         /**
-         * Sends the given message to the target node.
+         * Sends the given message to the target node. The target
+         * node can be any existing node id in the graph.
+         *
+         * @throws ArrayIndexOutOfBoundsException if the node is in the not in id space
          */
         public void sendTo(long targetNodeId, double message) {
             computeStep.sendTo(targetNodeId, message);
