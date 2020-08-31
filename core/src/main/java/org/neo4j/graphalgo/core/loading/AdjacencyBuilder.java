@@ -138,7 +138,7 @@ final class AdjacencyBuilder {
      * @param targets        slice of batch on second position; all targets in source-sorted order
      * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
      * @param offsets        offsets into targets; every offset position indicates a source node group
-     * @param length         how far we can read in the offsets array (how many source tuples to import)
+     * @param length         length of offsets array (how many source tuples to import)
      * @param tracker
      */
     void addAll(
