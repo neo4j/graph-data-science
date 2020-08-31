@@ -55,7 +55,7 @@ public interface AllocationTracker extends Supplier<String> {
     static AllocationTracker create(MemoryTrackerProxy kernelProxy) {
         return kernelProxy
             .fold(
-                InMemoryAllocationTracker::create,
+                AllocationTracker::create,
                 () -> AllocationTracker.EMPTY,
                 useKernelTracker() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
             );
