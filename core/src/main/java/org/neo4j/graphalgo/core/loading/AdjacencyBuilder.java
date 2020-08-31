@@ -284,33 +284,33 @@ final class AdjacencyBuilder {
 
     //TODO: consider only calling this method if `end-start` is sufficiently large
     static int aggregate(
-        long[] values,
+        long[] targetIds,
         long[][] propertiesList,
         int startOffset,
         int endOffset,
         Aggregation[] aggregations
     ) {
-        // Step 1: Sort the values (indirectly)
-        var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(values));
+        // Step 1: Sort the targetIds (indirectly)
+        var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(targetIds));
 
 
         // Step 2: Aggregate the properties into the first property list of each distinct value
         //         Every subsequent instance of any value is set to LONG.MIN_VALUE
         int targetIndex = order[0];
-        long lastSeenValue = values[targetIndex];
+        long lastSeenTargetId = targetIds[targetIndex];
         var distinctValues = 1;
 
         for (int orderIndex = 1; orderIndex < order.length; orderIndex++) {
             int currentIndex = order[orderIndex];
 
-            if (values[currentIndex] != lastSeenValue) {
+            if (targetIds[currentIndex] != lastSeenTargetId) {
                 targetIndex = currentIndex;
-                lastSeenValue = values[currentIndex];
+                lastSeenTargetId = targetIds[currentIndex];
                 distinctValues++;
             } else {
                 for (int propertyId = 0; propertyId < propertiesList.length; propertyId++) {
-                    long[] longs = propertiesList[propertyId];
-                    double runningTotal = Double.longBitsToDouble(longs[targetIndex]);
+                    long[] properties = propertiesList[propertyId];
+                    double runningTotal = Double.longBitsToDouble(properties[targetIndex]);
                     double value = Double.longBitsToDouble(propertiesList[propertyId][currentIndex]);
 
                     double updatedProperty = aggregations[propertyId].merge(
@@ -320,7 +320,7 @@ final class AdjacencyBuilder {
                     propertiesList[propertyId][targetIndex] = Double.doubleToLongBits(updatedProperty);
                 }
 
-                values[currentIndex] = IGNORE_VALUE;
+                targetIds[currentIndex] = IGNORE_VALUE;
             }
         }
 
