@@ -28,17 +28,17 @@ public class InMemoryAllocationTracker implements AllocationTracker {
     private final AtomicLong count = new AtomicLong();
 
     @Override
-    public void add(long delta) {
-        count.addAndGet(delta);
+    public void add(long bytes) {
+        count.addAndGet(bytes);
     }
 
     @Override
-    public void remove(long delta) {
-        count.addAndGet(-delta);
+    public void remove(long bytes) {
+        count.addAndGet(-bytes);
     }
 
     @Override
-    public long tracked() {
+    public long trackedBytes() {
         return count.get();
     }
 

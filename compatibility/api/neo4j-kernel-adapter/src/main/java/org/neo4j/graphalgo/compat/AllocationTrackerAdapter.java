@@ -21,9 +21,18 @@ package org.neo4j.graphalgo.compat;
 
 public interface AllocationTrackerAdapter {
 
-    void add(long delta);
+    /**
+     * Add the given number of bytes to the total tracked amount.
+     */
+    void add(long bytes);
 
-    void remove(long delta);
+    /**
+     * Remove the given number of bytes from the total tracked amount.
+     */
+    void remove(long bytes);
 
-    long tracked();
+    /**
+     * Return the current total of tracked bytes.
+     */
+    long trackedBytes();
 }

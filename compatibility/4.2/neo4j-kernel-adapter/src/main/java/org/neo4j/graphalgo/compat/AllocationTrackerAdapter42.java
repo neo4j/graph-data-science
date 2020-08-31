@@ -30,17 +30,17 @@ final class AllocationTrackerAdapter42 implements AllocationTrackerAdapter {
     }
 
     @Override
-    public void add(long delta) {
-        memoryTracker.allocateHeap(delta);
+    public void add(long bytes) {
+        memoryTracker.allocateHeap(bytes);
     }
 
     @Override
-    public void remove(long delta) {
-        memoryTracker.releaseHeap(delta);
+    public void remove(long bytes) {
+        memoryTracker.releaseHeap(bytes);
     }
 
     @Override
-    public long tracked() {
+    public long trackedBytes() {
         return memoryTracker.estimatedHeapMemory();
     }
 }

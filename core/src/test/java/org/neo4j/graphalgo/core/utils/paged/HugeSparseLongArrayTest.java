@@ -168,7 +168,7 @@ final class HugeSparseLongArrayTest {
             assertNull(page);
         }
 
-        long tracked = tracker.tracked();
+        long tracked = tracker.trackedBytes();
         // allow some bytes for the container type and
         assertEquals(sizeOfObjectArray(2), tracked);
     }
@@ -191,7 +191,7 @@ final class HugeSparseLongArrayTest {
             }
         }
 
-        long tracked = tracker.tracked();
+        long tracked = tracker.trackedBytes();
         assertEquals(sizeOfObjectArray(2) + sizeOfLongArray(PS), tracked);
     }
 

@@ -30,18 +30,18 @@ public final class KernelAllocationTracker implements AllocationTracker {
     }
 
     @Override
-    public void add(long delta) {
-        tracker.add(delta);
+    public void add(long bytes) {
+        tracker.add(bytes);
     }
 
     @Override
-    public void remove(long delta) {
-        tracker.remove(delta);
+    public void remove(long bytes) {
+        tracker.remove(bytes);
     }
 
     @Override
-    public long tracked() {
-        return tracker.tracked();
+    public long trackedBytes() {
+        return tracker.trackedBytes();
     }
 
     public static AllocationTracker create(AllocationTrackerAdapter tracker) {

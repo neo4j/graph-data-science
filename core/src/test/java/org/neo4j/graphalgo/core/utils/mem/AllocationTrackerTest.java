@@ -43,7 +43,7 @@ class AllocationTrackerTest {
     void testAddForInMemoryTracking() {
         var tracker = AllocationTracker.create();
         tracker.add(42);
-        assertEquals(42, tracker.tracked());
+        assertEquals(42, tracker.trackedBytes());
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ class AllocationTrackerTest {
         var tracker = AllocationTracker.create();
         tracker.add(1337);
         tracker.remove(42);
-        assertEquals(1337 - 42, tracker.tracked());
+        assertEquals(1337 - 42, tracker.trackedBytes());
     }
 
     @Test
@@ -68,9 +68,9 @@ class AllocationTrackerTest {
     @MethodSource("emptyTrackers")
     void testAddForEmptyTracking(AllocationTracker tracker) {
         tracker.add(1337);
-        assertEquals(0, tracker.tracked());
+        assertEquals(0, tracker.trackedBytes());
         tracker.remove(42);
-        assertEquals(0, tracker.tracked());
+        assertEquals(0, tracker.trackedBytes());
     }
 
     @Test

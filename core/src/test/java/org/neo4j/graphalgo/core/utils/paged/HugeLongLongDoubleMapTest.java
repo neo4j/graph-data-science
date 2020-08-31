@@ -121,13 +121,13 @@ final class HugeLongLongDoubleMapTest {
         AllocationTracker tracker = AllocationTracker.create();
         new HugeLongLongDoubleMap(0L, tracker);
         // minimum buffer size is 4
-        assertEquals(minimumSize, tracker.tracked());
+        assertEquals(minimumSize, tracker.trackedBytes());
 
         tracker = AllocationTracker.create();
         // 3 * load_factor -> buffer size of 4
         new HugeLongLongDoubleMap(3L, tracker);
         // minimum buffer size is 4
-        assertEquals(minimumSize, tracker.tracked());
+        assertEquals(minimumSize, tracker.trackedBytes());
 
         tracker = AllocationTracker.create();
         new HugeLongLongDoubleMap(100L, tracker);
@@ -135,7 +135,7 @@ final class HugeLongLongDoubleMapTest {
         long expectedSize = sizeOfDoubleArray(256)
                 // double the buffer size for keys, as we have two keys
                 + 2L * sizeOfLongArray(256);
-        assertEquals(expectedSize, tracker.tracked());
+        assertEquals(expectedSize, tracker.trackedBytes());
     }
 
     @Test
@@ -173,15 +173,15 @@ final class HugeLongLongDoubleMapTest {
 
         for (long i = 0L; i < 6L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(firstSize, tracker.tracked());
+            assertEquals(firstSize, tracker.trackedBytes());
         }
         for (long i = 6L; i < 12L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(secondSize, tracker.tracked());
+            assertEquals(secondSize, tracker.trackedBytes());
         }
         for (long i = 12L; i < 24L; i++) {
             map.addTo(i, i * 42L, (double) i * 13.37);
-            assertEquals(thirdSize, tracker.tracked());
+            assertEquals(thirdSize, tracker.trackedBytes());
         }
     }
 
@@ -194,7 +194,7 @@ final class HugeLongLongDoubleMapTest {
             map.addTo(i, i * 42L, (double) i * 13.37);
         }
         map.release();
-        assertEquals(0L, tracker.tracked());
+        assertEquals(0L, tracker.trackedBytes());
     }
 
     @Test

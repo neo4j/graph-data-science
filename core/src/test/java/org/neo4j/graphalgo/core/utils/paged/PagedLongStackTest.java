@@ -123,7 +123,7 @@ final class PagedLongStackTest {
         int valuesToAdd = between(10_000, 20_000).integer();
         AllocationTracker tracker = AllocationTracker.create();
         PagedLongStack stack = new PagedLongStack(valuesToAdd, tracker);
-        long tracked = tracker.tracked();
+        long tracked = tracker.trackedBytes();
         List<Executable> assertions = new ArrayList<>();
         assertions.add(() -> assertEquals(stack.release(), tracked));
         assertions.add(() -> assertTrue(stack.isEmpty(), "released stack is empty"));

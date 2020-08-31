@@ -24,15 +24,15 @@ enum EmptyAllocationTracker implements AllocationTracker {
     INSTANCE;
 
     @Override
-    public void add(long delta) {
+    public void add(long bytes) {
     }
 
     @Override
-    public void remove(long delta) {
+    public void remove(long bytes) {
     }
 
     @Override
-    public long tracked() {
+    public long trackedBytes() {
         return 0L;
     }
 

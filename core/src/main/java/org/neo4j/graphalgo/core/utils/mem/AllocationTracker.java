@@ -71,14 +71,23 @@ public interface AllocationTracker extends Supplier<String> {
         }
     }
 
-    void add(long delta);
+    /**
+     * Add the given number of bytes to the total tracked amount.
+     */
+    void add(long bytes);
 
-    void remove(long delta);
+    /**
+     * Remove the given number of bytes from the total tracked amount.
+     */
+    void remove(long bytes);
 
-    long tracked();
+    /**
+     * Return the current total of tracked bytes.
+     */
+    long trackedBytes();
 
     default String getUsageString() {
-        return humanReadable(tracked());
+        return humanReadable(trackedBytes());
     }
 
     default String getUsageString(String label) {

@@ -125,15 +125,15 @@ final class HugeLongLongMapTest {
 
         for (long i = 0L; i < 6L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(firstSize, tracker.tracked());
+            assertEquals(firstSize, tracker.trackedBytes());
         }
         for (long i = 6L; i < 12L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(secondSize, tracker.tracked());
+            assertEquals(secondSize, tracker.trackedBytes());
         }
         for (long i = 12L; i < 24L; i++) {
             map.addTo(i, i + 42L);
-            assertEquals(thirdSize, tracker.tracked());
+            assertEquals(thirdSize, tracker.trackedBytes());
         }
     }
 
@@ -146,7 +146,7 @@ final class HugeLongLongMapTest {
             map.addTo(i, i + 42L);
         }
         map.release();
-        assertEquals(0L, tracker.tracked());
+        assertEquals(0L, tracker.trackedBytes());
     }
 
     @Test
