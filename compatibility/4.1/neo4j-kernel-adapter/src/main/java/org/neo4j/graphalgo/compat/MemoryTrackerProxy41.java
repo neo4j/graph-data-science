@@ -27,10 +27,17 @@ import java.util.function.Supplier;
 
 final class MemoryTrackerProxy41 implements MemoryTrackerProxy {
 
-    private final MemoryTracker memoryTracker;
+    private final AllocationTrackerAdapter allocationTracker;
 
-    MemoryTrackerProxy41(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
+    static MemoryTrackerProxy of(MemoryTracker memoryTracker) {
+        if (memoryTracker instanceof EmptyMemoryTracker) {
+            return MemoryTrackerProxy.EMPTY;
+        }
+        return new MemoryTrackerProxy41(new AllocationTrackerAdapter41(memoryTracker));
+    }
+
+    private MemoryTrackerProxy41(AllocationTrackerAdapter allocationTracker) {
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -39,10 +46,6 @@ final class MemoryTrackerProxy41 implements MemoryTrackerProxy {
         Supplier<R> onEmpty,
         Function<AllocationTrackerAdapter, R> onSupported
     ) {
-        if (memoryTracker instanceof EmptyMemoryTracker) {
-            return onEmpty.get();
-        } else {
-            return onSupported.apply(new AllocationTrackerAdapter41(memoryTracker));
-        }
+        return onSupported.apply(allocationTracker);
     }
 }

@@ -24,6 +24,35 @@ import java.util.function.Supplier;
 
 public interface MemoryTrackerProxy {
 
-    <R> R fold(Supplier<R> onUnsupported, Supplier<R> onEmpty, Function<AllocationTrackerAdapter, R> onSupported);
+    <R> R fold(
+        Supplier<R> onUnsupported,
+        Supplier<R> onEmpty,
+        Function<AllocationTrackerAdapter, R> onSupported
+    );
 
+    MemoryTrackerProxy UNSUPPORTED = new UnsupportedMemoryTrackerProxy();
+
+    MemoryTrackerProxy EMPTY = new EmptyMemoryTrackerProxy();
+}
+
+final class UnsupportedMemoryTrackerProxy implements MemoryTrackerProxy {
+    @Override
+    public <R> R fold(
+        Supplier<R> onUnsupported,
+        Supplier<R> onEmpty,
+        Function<AllocationTrackerAdapter, R> onSupported
+    ) {
+        return onUnsupported.get();
+    }
+}
+
+final class EmptyMemoryTrackerProxy implements MemoryTrackerProxy {
+    @Override
+    public <R> R fold(
+        Supplier<R> onUnsupported,
+        Supplier<R> onEmpty,
+        Function<AllocationTrackerAdapter, R> onSupported
+    ) {
+        return onEmpty.get();
+    }
 }

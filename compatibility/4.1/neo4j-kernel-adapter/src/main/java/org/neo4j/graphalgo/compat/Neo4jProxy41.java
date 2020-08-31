@@ -222,7 +222,7 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
 
     @Override
     public MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker) {
-        return new MemoryTrackerProxy41(memoryTracker);
+        return MemoryTrackerProxy41.of(memoryTracker);
     }
 
     @Override
