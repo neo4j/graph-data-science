@@ -296,16 +296,6 @@ public final class HugeGraphUtil {
         private void flushBuffer() {
             RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
 
-            // aggregate the buffer here
-            if (aggregation == Aggregation.SUM) {
-
-            }
-
-//            relationshipBuffer.sortBySourceAndTarget();
-            // 0, 1, ..
-            // 0, 2, ..
-            // 1, 0, ..
-
             long newImportedInOut = imports.importRelationships(relationshipBuffer, propertyReader);
             importedRelationships += RawValues.getHead(newImportedInOut);
             relationshipBuffer.reset();
