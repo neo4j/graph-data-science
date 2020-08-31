@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.memory.MemoryTracker;
 
-class AllocationTrackerAdapter41 implements AllocationTrackerAdapter {
+final class AllocationTrackerAdapter41 implements AllocationTrackerAdapter {
 
     private final MemoryTracker memoryTracker;
 
