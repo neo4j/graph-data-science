@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport;
@@ -46,12 +45,11 @@ public class GraphStoreExportProc extends BaseProc {
         var exportConfig = GraphStoreExportConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
-        var neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
-
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
-                var graphStoreExport = new GraphStoreExport(graphStore, neo4jHome, exportConfig);
+
+                var graphStoreExport = new GraphStoreExport(graphStore, api, exportConfig);
 
                 var start = System.nanoTime();
                 var importedProperties = graphStoreExport.run();
