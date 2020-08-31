@@ -193,6 +193,7 @@ final class AdjacencyBuilder {
                     compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
                 } else {
                     if (aggregations[0] != Aggregation.NONE) {
+                        //TODO: consider only calling this method if `end-start` is sufficiently large
                         targetsToImport = aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
 
@@ -282,7 +283,6 @@ final class AdjacencyBuilder {
         globalBuilder.setGlobalPropertyOffsets(globalPropertiesOffsets);
     }
 
-    //TODO: consider only calling this method if `end-start` is sufficiently large
     static int aggregate(
         long[] targetIds,
         long[][] propertiesList,
