@@ -215,9 +215,8 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
-    public MemoryTracker limitedMemoryTracker(long limitInBytes) {
-        var oneKiloByte = 1024;
-        return new LocalMemoryTracker(MemoryPools.NO_TRACKING, limitInBytes, oneKiloByte, "setting");
+    public MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
+        return new LocalMemoryTracker(MemoryPools.NO_TRACKING, limitInBytes, grabSizeInBytes, "setting");
     }
 
     @Override

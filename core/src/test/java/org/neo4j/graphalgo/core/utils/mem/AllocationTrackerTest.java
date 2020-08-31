@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
 
@@ -34,6 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AllocationTrackerTest {
+
+    private static final long GRAB_SIZE_1KB = ByteUnit.kibiBytes(1);
 
     @ParameterizedTest
     @MethodSource("allocationTrackers")
@@ -80,7 +83,7 @@ class AllocationTrackerTest {
 
     @Test
     void shouldUseInMemoryTrackerWhenFeatureIsToggledOff() {
-        var memoryTracker = Neo4jProxy.limitedMemoryTracker(42);
+        var memoryTracker = Neo4jProxy.limitedMemoryTracker(42, GRAB_SIZE_1KB);
         var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
         var allocationTracker = AllocationTracker.create(trackerProxy);
         assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
@@ -92,7 +95,7 @@ class AllocationTrackerTest {
         Assumptions.assumeTrue(!is40());
         AllocationTracker.whileUsingKernelTracker(
             () -> {
-                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337);
+                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
                 var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
                 var allocationTracker = AllocationTracker.create(trackerProxy);
                 assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
@@ -106,7 +109,7 @@ class AllocationTrackerTest {
         Assumptions.assumeTrue(is40());
         AllocationTracker.whileUsingKernelTracker(
             () -> {
-                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337);
+                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
                 var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
                 var allocationTracker = AllocationTracker.create(trackerProxy);
                 assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
@@ -130,7 +133,7 @@ class AllocationTrackerTest {
     static Stream<AllocationTracker> allocationTrackers() {
         return Stream.of(
             AllocationTracker.create(),
-            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.limitedMemoryTracker(Long.MAX_VALUE)))
+            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.limitedMemoryTracker(Long.MAX_VALUE, GRAB_SIZE_1KB)))
         );
     }
 }

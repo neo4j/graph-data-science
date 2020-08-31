@@ -220,7 +220,7 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public MemoryTracker limitedMemoryTracker(long limitInBytes) {
+    public MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
         return MemoryTracker.NONE;
     }
 

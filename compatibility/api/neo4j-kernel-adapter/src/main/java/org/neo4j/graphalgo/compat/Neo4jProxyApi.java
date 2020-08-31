@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.config.Setting;
@@ -143,7 +144,8 @@ public interface Neo4jProxyApi {
 
     MemoryTracker emptyMemoryTracker();
 
-    MemoryTracker limitedMemoryTracker(long limitInBytes);
+    @TestOnly
+    MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes);
 
     MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker);
 
