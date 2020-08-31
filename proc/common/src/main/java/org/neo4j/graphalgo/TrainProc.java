@@ -87,33 +87,31 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             TRAIN_CONFIG trainConfig
         ) {
             final AtomicReference<GraphCreateResult> anonymousGraphBuilder = new AtomicReference<>();
-            trainConfig.implicitCreateConfig().ifPresent(graphCreateConfig -> {
-                graphCreateConfig.accept(
-                    new GraphCreateConfig.Visitor() {
-                        @Override
-                        public void visit(GraphCreateFromStoreConfig storeConfig) {
-                            var result = GraphCreateNativeResult.builder().
-                                nodeCount(nodeCount)
-                                .relationshipCount(relationshipCount)
-                                .nodeProjection(storeConfig.nodeProjections().toObject())
-                                .relationshipProjection(storeConfig.relationshipProjections().toObject())
-                                .build();
-                            anonymousGraphBuilder.set(result);
-                        }
-
-                        @Override
-                        public void visit(GraphCreateFromCypherConfig cypherConfig) {
-                            var result = GraphCreateCypherResult.builder().
-                                nodeCount(nodeCount)
-                                .relationshipCount(relationshipCount)
-                                .nodeQuery(cypherConfig.nodeQuery())
-                                .relationshipQuery(cypherConfig.relationshipQuery())
-                                .build();
-                            anonymousGraphBuilder.set(result);
-                        }
+            trainConfig.implicitCreateConfig().ifPresent(graphCreateConfig -> graphCreateConfig.accept(
+                new GraphCreateConfig.Visitor() {
+                    @Override
+                    public void visit(GraphCreateFromStoreConfig storeConfig) {
+                        var result = GraphCreateNativeResult.builder()
+                            .nodeCount(nodeCount)
+                            .relationshipCount(relationshipCount)
+                            .nodeProjection(storeConfig.nodeProjections().toObject())
+                            .relationshipProjection(storeConfig.relationshipProjections().toObject())
+                            .build();
+                        anonymousGraphBuilder.set(result);
                     }
-                );
-            });
+
+                    @Override
+                    public void visit(GraphCreateFromCypherConfig cypherConfig) {
+                        var result = GraphCreateCypherResult.builder()
+                            .nodeCount(nodeCount)
+                            .relationshipCount(relationshipCount)
+                            .nodeQuery(cypherConfig.nodeQuery())
+                            .relationshipQuery(cypherConfig.relationshipQuery())
+                            .build();
+                        anonymousGraphBuilder.set(result);
+                    }
+                }
+            ));
             return Optional
                 .ofNullable(anonymousGraphBuilder.get())
                 .map(GraphCreateResult::toMap)
