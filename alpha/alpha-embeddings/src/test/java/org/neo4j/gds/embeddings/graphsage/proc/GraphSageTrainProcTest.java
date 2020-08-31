@@ -135,7 +135,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             train,
             Collections.singletonList(
                 map(
-                    "graphName", "",
+                    "graphName", null,
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)
@@ -168,7 +168,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             ),
             Collections.singletonList(
                 map(
-                    "graphName", "",
+                    "graphName", null,
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)

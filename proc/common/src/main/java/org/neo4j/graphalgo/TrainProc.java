@@ -68,7 +68,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
 
             TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
 
-            this.graphName = trainConfig.graphName().orElse("");
+            this.graphName = trainConfig.graphName().orElse(null);
             this.graphCreateConfig = anonymousGraphResult(
                 nodeCount,
                 relationshipCount,
