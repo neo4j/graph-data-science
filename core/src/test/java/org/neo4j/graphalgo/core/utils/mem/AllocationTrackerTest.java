@@ -92,7 +92,7 @@ class AllocationTrackerTest {
     @Test
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         // There is no KernelTracker in 4.0
-        Assumptions.assumeTrue(!is40());
+        Assumptions.assumeFalse(is40());
         AllocationTracker.whileUsingKernelTracker(
             () -> {
                 var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
