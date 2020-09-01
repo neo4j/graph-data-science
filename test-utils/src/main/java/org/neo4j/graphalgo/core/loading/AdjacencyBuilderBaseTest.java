@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -29,10 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
-public class AdjacencyBuilderBaseTest {
+public abstract class AdjacencyBuilderBaseTest {
 
     protected void testAdjacencyList(
         AdjacencyListBuilderFactory listBuilderFactory,
@@ -84,5 +87,36 @@ public class AdjacencyBuilderBaseTest {
             }
             assertTrue(relationships.isEmpty());
         }
+    }
+
+    @Test
+    // TODO test single case
+    // TODO add testcase that sets a range
+    void testAggregation() {
+        var values = new long[]{3, 1, 2, 2, 3, 1};
+
+        var properties = new long[2][values.length];
+        properties[0] = new long[]{1, 1, 1, 1, 1, 1};
+        properties[1] = new long[]{1, 2, 3, 4, 5, 6};
+
+
+        var aggregations = new Aggregation[]{Aggregation.SUM, Aggregation.MAX};
+
+        AdjacencyBuilder.aggregate(values, properties, 0, values.length, aggregations);
+
+        assertArrayEquals(
+            new long[]{3, 1, 2, IGNORE_VALUE, IGNORE_VALUE, IGNORE_VALUE},
+            values
+        );
+
+        assertArrayEquals(
+            new long[]{2, 2, 2, 1, 1, 1},
+            properties[0]
+        );
+
+        assertArrayEquals(
+            new long[]{5, 6, 4, 4, 5, 6},
+            properties[1]
+        );
     }
 }

@@ -33,7 +33,7 @@ allprojects {
         }
 
         test {
-            maxHeapSize = "1G"
+            maxHeapSize = "4G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
             }

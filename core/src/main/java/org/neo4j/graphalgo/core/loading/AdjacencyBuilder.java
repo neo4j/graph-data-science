@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
@@ -35,6 +38,8 @@ import static org.neo4j.graphalgo.utils.ExceptionUtil.unchecked;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 final class AdjacencyBuilder {
+
+    public static final long IGNORE_VALUE = Long.MIN_VALUE;
 
     static AdjacencyBuilder compressing(
         @NotNull RelationshipsBuilder globalBuilder,
@@ -128,10 +133,18 @@ final class AdjacencyBuilder {
         this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
     }
 
+    /**
+     * @param batch          four-tuple values sorted by source (source, target, rel?, property?)
+     * @param targets        slice of batch on second position; all targets in source-sorted order
+     * @param propertyValues index-synchronised with targets. the list for each index are the properties for that source-target combo. null if no props
+     * @param offsets        offsets into targets; every offset position indicates a source node group
+     * @param length         length of offsets array (how many source tuples to import)
+     * @param tracker
+     */
     void addAll(
         long[] batch,
         long[] targets,
-        long[][] propertyValues,
+        @Nullable long[][] propertyValues,
         int[] offsets,
         int length,
         AllocationTracker tracker
@@ -175,10 +188,16 @@ final class AdjacencyBuilder {
                     this.compressedAdjacencyLists[pageIndex][localId] = compressedTargets;
                 }
 
+                var targetsToImport = endOffset - startOffset;
                 if (propertyValues == null) {
-                    compressedTargets.add(targets, startOffset, endOffset);
+                    compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
                 } else {
-                    compressedTargets.add(targets, propertyValues, startOffset, endOffset);
+                    if (aggregations[0] != Aggregation.NONE) {
+                        //TODO: consider only calling this method if `end-start` is sufficiently large
+                        targetsToImport = aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
+                    }
+
+                    compressedTargets.add(targets, propertyValues, startOffset, endOffset, targetsToImport);
                 }
 
                 startOffset = endOffset;
@@ -262,5 +281,49 @@ final class AdjacencyBuilder {
     private void finishPreparation() {
         globalBuilder.setGlobalAdjacencyOffsets(globalAdjacencyOffsets);
         globalBuilder.setGlobalPropertyOffsets(globalPropertiesOffsets);
+    }
+
+    static int aggregate(
+        long[] targetIds,
+        long[][] propertiesList,
+        int startOffset,
+        int endOffset,
+        Aggregation[] aggregations
+    ) {
+        // Step 1: Sort the targetIds (indirectly)
+        var order = IndirectSort.mergesort(startOffset, endOffset - startOffset, new AscendingLongComparator(targetIds));
+
+
+        // Step 2: Aggregate the properties into the first property list of each distinct value
+        //         Every subsequent instance of any value is set to LONG.MIN_VALUE
+        int targetIndex = order[0];
+        long lastSeenTargetId = targetIds[targetIndex];
+        var distinctValues = 1;
+
+        for (int orderIndex = 1; orderIndex < order.length; orderIndex++) {
+            int currentIndex = order[orderIndex];
+
+            if (targetIds[currentIndex] != lastSeenTargetId) {
+                targetIndex = currentIndex;
+                lastSeenTargetId = targetIds[currentIndex];
+                distinctValues++;
+            } else {
+                for (int propertyId = 0; propertyId < propertiesList.length; propertyId++) {
+                    long[] properties = propertiesList[propertyId];
+                    double runningTotal = Double.longBitsToDouble(properties[targetIndex]);
+                    double value = Double.longBitsToDouble(propertiesList[propertyId][currentIndex]);
+
+                    double updatedProperty = aggregations[propertyId].merge(
+                        runningTotal,
+                        value
+                    );
+                    propertiesList[propertyId][targetIndex] = Double.doubleToLongBits(updatedProperty);
+                }
+
+                targetIds[currentIndex] = IGNORE_VALUE;
+            }
+        }
+
+        return distinctValues;
     }
 }

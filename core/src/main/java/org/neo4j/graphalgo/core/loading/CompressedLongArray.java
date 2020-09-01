@@ -24,12 +24,14 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 
+import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.loading.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArray {
 
@@ -59,13 +61,17 @@ public final class CompressedLongArray {
      * @param start  start index in values
      * @param end    end index in values
      */
-    public void add(long[] values, int start, int end) {
+    public void add(long[] values, int start, int end, int valuesToAdd) {
         // not inlined to avoid field access
         long currentLastValue = this.lastValue;
         long delta;
         long compressedValue;
         int requiredBytes = 0;
         for (int i = start; i < end; i++) {
+            if(values[i] == IGNORE_VALUE) {
+                continue;
+            }
+
             delta = values[i] - currentLastValue;
             compressedValue = zigZag(delta);
             currentLastValue = values[i];
@@ -76,7 +82,7 @@ public final class CompressedLongArray {
         this.pos = encodeVLongs(values, start, end, this.storage, this.pos);
 
         this.lastValue = currentLastValue;
-        this.length += (end - start);
+        this.length += valuesToAdd;
     }
 
     /**
@@ -86,27 +92,44 @@ public final class CompressedLongArray {
      * @param allWeights    weights to write
      * @param start         start index in values and weights
      * @param end           end index in values and weights
+     * @param valuesToAdd  the actual number of targets to import from this range
      */
-    public void add(long[] values, long[][] allWeights, int start, int end) {
+    public void add(long[] values, long[][] allWeights, int start, int end, int valuesToAdd) {
         // write weights
         for (int i = 0; i < allWeights.length; i++) {
             long[] weights = allWeights[i];
-            addWeights(weights, start, end, i);
+            addWeights(values, weights, start, end, i, valuesToAdd);
         }
 
         // write values
-        add(values, start, end);
+        add(values, start, end, valuesToAdd);
     }
 
-    private void addWeights(long[] weights, int start, int end, int weightIndex) {
-        int targetCount = end - start;
-        ensureCapacity(length, targetCount, weightIndex);
-        System.arraycopy(weights, start, this.weights[weightIndex], this.length, targetCount);
+    private void addWeights(long[] values, long[] weights, int start, int end, int weightIndex, int weightsToAdd) {
+        ensureCapacity(length, weightsToAdd, weightIndex);
+
+        if (weightsToAdd == end - start) {
+            System.arraycopy(weights, start, this.weights[weightIndex], this.length, weightsToAdd);
+        } else {
+            var writePos = length;
+            for (int i = 0; i < (end - start); i++) {
+                if (values[start + i] != IGNORE_VALUE) {
+                    this.weights[weightIndex][writePos++] = weights[start + i];
+                }
+            }
+        }
     }
 
-    private void ensureCapacity(int pos, int required, byte[] storage) {
-        if (storage.length <= pos + required) {
-            int newLength = ArrayUtil.oversize(pos + required, Byte.BYTES);
+    void ensureCapacity(int pos, int required, byte[] storage) {
+        int targetLength = pos + required;
+        if (targetLength < 0) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
+                pos,
+                required
+            ));
+        } else if (storage.length <= targetLength) {
+            int newLength = ArrayUtil.oversize(targetLength, Byte.BYTES);
             tracker.remove(sizeOfByteArray(storage.length));
             tracker.add(sizeOfByteArray(newLength));
             this.storage = Arrays.copyOf(storage, newLength);
@@ -114,7 +137,14 @@ public final class CompressedLongArray {
     }
 
     private void ensureCapacity(int pos, int required, int weightIndex) {
-        if (weights[weightIndex].length <= pos + required) {
+        int targetLength = pos + required;
+        if (targetLength < 0) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Encountered numeric overflow in internal buffer. Was at position %d and needed to grow by %d.",
+                pos,
+                required
+            ));
+        } else if (weights[weightIndex].length <= pos + required) {
             int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
             tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
             tracker.add(sizeOfDoubleArray(newLength));

@@ -106,8 +106,10 @@ class HugeGraphUtilTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validProjections")
     void weightedWithAggregation(Orientation orientation) {
+        var expected = expectedWithAggregation(orientation);
+
         Graph graph = generateGraph(orientation, Aggregation.SUM);
-        assertGraphEquals(expectedWithAggregation(orientation), graph);
+        assertGraphEquals(expected, graph);
     }
 
     @ParameterizedTest(name = "{0}")
