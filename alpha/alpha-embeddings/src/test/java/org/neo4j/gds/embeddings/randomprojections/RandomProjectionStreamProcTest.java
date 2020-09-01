@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,5 +95,31 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             List<Double> embeddings = (List<Double>) row.get("embedding");
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
+    }
+
+    @Test
+    void shouldComputeWithWeight() {
+        int embeddingSize = 128;
+        int maxIterations = 1;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withNodeLabel("Node2")
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("weight")
+            .algo("gds.alpha.randomProjection")
+            .streamMode()
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("maxIterations", maxIterations)
+            .addParameter("relationshipWeightProperty", "weight")
+            .yields();
+
+        List<List<Double>> embeddings = new ArrayList<>(3);
+        runQueryWithRowConsumer(query, row -> {
+            embeddings.add((List<Double>) row.get("embedding"));
+        });
+
+        for (int i = 0; i < 128; i++) {
+            assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
+        }
     }
 }

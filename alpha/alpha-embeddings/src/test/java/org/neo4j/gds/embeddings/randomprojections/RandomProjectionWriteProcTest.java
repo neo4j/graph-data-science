@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -27,7 +28,9 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,5 +95,35 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             }
             assertFalse(allMatch);
         });
+    }
+
+    @Test
+    void shouldComputeAndWriteWithWeight() {
+        int embeddingSize = 128;
+        int maxIterations = 1;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withNodeLabel("Node2")
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("weight")
+            .algo("gds.alpha.randomProjection")
+            .writeMode()
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("maxIterations", maxIterations)
+            .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("writeProperty", "embedding")
+            .yields();
+
+        runQuery(query);
+
+        String retrieveQuery = "MATCH (n) WHERE n:Node OR n:Node2 RETURN n.name as name, n.embedding as embedding";
+        Map<String, double[]> embeddings = new HashMap<>(3);
+        runQueryWithRowConsumer(retrieveQuery, row -> {
+            embeddings.put(row.getString("name"), (double[]) row.get("embedding"));
+        });
+
+        for (int i = 0; i < 128; i++) {
+            assertEquals(embeddings.get("b")[i], embeddings.get("e")[i] * 2);
+        }
     }
 }

@@ -44,11 +44,16 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node)" +
-        ", (b:Node)" +
-        ", (c:Isolated)" +
-        ", (d:Isolated)" +
-        ", (a)-[:REL]->(b)";
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Isolated {name: 'c'})" +
+        ", (d:Isolated {name: 'd'})" +
+        ", (a)-[:REL]->(b)" +
+
+        // Used for the weighted case
+        ", (e:Node2 {name: 'e'})" +
+        ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
+        ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
     @Override
     public String createQuery() {
