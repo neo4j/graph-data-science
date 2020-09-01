@@ -23,7 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -45,12 +47,12 @@ class RandomProjectionTest extends AlgoTestBase {
         ", (c:Node2)" +
         ", (d:Isolated)" +
         ", (e:Isolated)" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(a)" +
-        ", (a)-[:REL]->(c)" +
-        ", (c)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(b)";
+        ", (a)-[:REL {weight: 2.0}]->(b)" +
+        ", (b)-[:REL {weight: 1.0}]->(a)" +
+        ", (a)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(a)" +
+        ", (b)-[:REL {weight: 1.0}]->(c)" +
+        ", (c)-[:REL {weight: 1.0}]->(b)";
 
     @BeforeEach
     void setupGraphDb() {
@@ -113,6 +115,45 @@ class RandomProjectionTest extends AlgoTestBase {
         for (int i = 0; i < 128; i++) {
             isEqual &= embeddings.get(0)[i] == (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
         }
+        assertTrue(isEqual);
+    }
+
+    @Test
+    void shouldAverageNeighborsWeighted() {
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
+            .addRelationshipProperty("weight", "weight", DefaultValue.of(1.0), Aggregation.NONE)
+            .build();
+
+        Graph graph = graphLoader.graph();
+
+        var weightedConfig = ImmutableRandomProjectionBaseConfig
+            .builder()
+            .from(DEFAULT_CONFIG)
+            .relationshipWeightProperty("weight")
+            .embeddingSize(2)
+            .build();
+
+        RandomProjection randomProjection = new RandomProjection(
+            graph,
+            weightedConfig,
+            progressLogger,
+            AllocationTracker.EMPTY
+        );
+
+        randomProjection.initRandomVectors();
+        HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.EMPTY);
+        randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
+        randomProjection.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
+
+        boolean isEqual = true;
+        for (int i = 0; i < 2; i++) {
+            isEqual &= embeddings.get(0)[i] == (2.0 * randomVectors.get(1)[i] +  1 * randomVectors.get(2)[i]) / 2.0f;
+        }
+
         assertTrue(isEqual);
     }
 

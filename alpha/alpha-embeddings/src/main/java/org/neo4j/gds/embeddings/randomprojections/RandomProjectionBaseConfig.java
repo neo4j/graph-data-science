@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig {
+public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig, RelationshipWeightConfig {
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
