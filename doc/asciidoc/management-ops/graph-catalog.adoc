@@ -226,6 +226,15 @@ Once we have finished using the named graph we can remove it from the catalog to
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
 
+If we want the procedure to fail silently on non-existing graphs, we can set a boolean flag as the second parameter to false.
+This will yield an empty result for non-existing graphs.
+
+.Try removing a graph from the catalog:
+[source,cypher]
+----
+CALL gds.graph.drop('my-fictive-graph', false) YIELD graphName;
+----
+
 
 [[catalog-graph-stream-node-properties]]
 == Stream node properties

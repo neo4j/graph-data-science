@@ -35,14 +35,17 @@ public class GraphDropProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphInfo> drop(@Name(value = "graphName") String graphName) {
+    public Stream<GraphInfo> drop(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
+    ) {
         validateGraphName(graphName);
 
         AtomicReference<GraphInfo> result = new AtomicReference<>();
         GraphStoreCatalog.remove(username(), databaseId(), graphName, (graphStoreWithConfig) ->
-            result.set(GraphInfo.of(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore()))
+            result.set(GraphInfo.of(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore())), failIfMissing
         );
 
-        return Stream.of(result.get());
+        return Stream.ofNullable(result.get());
     }
 }

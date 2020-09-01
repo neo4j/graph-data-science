@@ -73,20 +73,25 @@ public final class GraphStoreCatalog {
         String username,
         NamedDatabaseId databaseId,
         String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        boolean failOnMissing
     ) {
         UserCatalog.UserCatalogKey userCatalogKey = UserCatalog.UserCatalogKey.of(databaseId, graphName);
 
-        GraphStoreWithConfig graphStoreWithConfig = Optional
+        Optional
             .ofNullable(getUserCatalog(username).remove(userCatalogKey))
-            .orElseThrow(failOnNonExistentGraph(userCatalogKey.graphName()));
-
-        removedGraphConsumer.accept(graphStoreWithConfig);
-        GraphStore graphStore = graphStoreWithConfig.graphStore();
-        graphStore.canRelease(true);
-        graphStore.release();
-
-        getUserCatalog(username).removeDegreeDistribution(userCatalogKey);
+            .ifPresentOrElse(
+                graphStoreWithConfig -> {
+                    removedGraphConsumer.accept(graphStoreWithConfig);
+                    GraphStore graphStore = graphStoreWithConfig.graphStore();
+                    graphStore.canRelease(true);
+                    graphStore.release();
+                    getUserCatalog(username).removeDegreeDistribution(userCatalogKey);
+                },
+                () -> {
+                    if (failOnMissing) throw failOnNonExistentGraph(userCatalogKey.graphName()).get();
+                }
+            );
     }
 
     public static int graphStoresCount() {

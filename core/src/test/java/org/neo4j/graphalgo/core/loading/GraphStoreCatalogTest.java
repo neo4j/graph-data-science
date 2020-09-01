@@ -69,7 +69,7 @@ class GraphStoreCatalogTest {
     void remove() {
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
-        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
+        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
         assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
@@ -78,7 +78,7 @@ class GraphStoreCatalogTest {
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
-        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {});
+        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
     }
 
