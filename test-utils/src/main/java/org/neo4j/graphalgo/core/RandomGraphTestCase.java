@@ -19,18 +19,20 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestWatcher;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -39,25 +41,43 @@ public abstract class RandomGraphTestCase extends BaseTest {
 
     static final int NODE_COUNT = 100;
 
-    static class TestWatcherExtension implements TestWatcher {
+    static class TestWatcherExtension implements AfterEachCallback {
+
+        // taken from org.neo4j.test.extension.DbmsSupportController
+        private static final ExtensionContext.Namespace DBMS_NAMESPACE = ExtensionContext.Namespace.create(
+            "org",
+            "neo4j",
+            "dbms"
+        );
+
+        // taken from org.neo4j.test.extension.DbmsSupportController
+        private static final String DBMS_KEY = "service";
 
         TestWatcherExtension() {}
 
         @Override
-        public void testFailed(
-            ExtensionContext context,
-            Throwable e
-        ) {
+        public void afterEach(ExtensionContext context) {
+            var executionException = context.getExecutionException();
+            executionException.flatMap(throwable -> getDbms(context))
+                .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
+                .ifPresent(this::dumpGraph);
+        }
+
+        Optional<DatabaseManagementService> getDbms(ExtensionContext context) {
+            return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
+        }
+
+        void dumpGraph(GraphDatabaseService db) {
             try {
-                var markFailure = context.getRequiredTestClass().getMethod("dumpGraph");
-                markFailure.invoke(context.getRequiredTestInstance());
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignored) {
-                ignored.printStackTrace();
+                PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
+                pw.println("Generated graph to reproduce any errors:");
+                pw.println();
+                CypherExporter.export(pw, db);
+            } catch (Exception e) {
+                System.err.println("Error exporting graph " + e.getMessage());
             }
         }
     }
-
-    private boolean hasFailures;
 
     private static final String RANDOM_GRAPH_TPL =
             "FOREACH (x IN range(1, %d) | CREATE (:Label)) " +
@@ -70,15 +90,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
 
     @BeforeEach
     void setupGraph() {
-        hasFailures = false;
         buildGraph(NODE_COUNT);
-    }
-
-    @AfterEach
-    void shutdownGraph() {
-        if (hasFailures) {
-            dumpGraph();
-        }
     }
 
     void buildGraph(int nodeCount) {
@@ -86,27 +98,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
         List<String> cyphers = Arrays.asList(createGraph, RANDOM_LABELS);
 
         for (String cypher : cyphers) {
-            try {
-                runQuery(cypher);
-            } catch (Exception e) {
-                markFailure();
-                throw e;
-            }
+            runQuery(cypher);
         }
-    }
-
-    public void dumpGraph() {
-        try {
-            PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
-            pw.println("Generated graph to reproduce any errors:");
-            pw.println();
-            CypherExporter.export(pw, db);
-        } catch (Exception e) {
-            System.err.println("Error exporting graph " + e.getMessage());
-        }
-    }
-
-    void markFailure() {
-        hasFailures = true;
     }
 }

@@ -181,16 +181,13 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     private GraphStore load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {
-        final ExecutorService pool = Executors.newFixedThreadPool(3);
+        ExecutorService pool = Executors.newFixedThreadPool(3);
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
             .api(db)
             .executorService(pool);
         block.accept(loader);
         try {
             return loader.build().graphStore();
-        } catch (Exception e) {
-            markFailure();
-            throw e;
         } finally {
             pool.shutdown();
         }
