@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.TestWatcher;
 import org.neo4j.graphalgo.BaseTest;
 
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +37,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase extends BaseTest {
 
-    private static boolean hasFailures = false;
-
     static final int NODE_COUNT = 100;
 
     static class TestWatcherExtension implements TestWatcher {
@@ -46,11 +45,19 @@ public abstract class RandomGraphTestCase extends BaseTest {
 
         @Override
         public void testFailed(
-                ExtensionContext context,
-                final Throwable e) {
-            hasFailures = true;
+            ExtensionContext context,
+            Throwable e
+        ) {
+            try {
+                var markFailure = context.getRequiredTestClass().getMethod("dumpGraph");
+                markFailure.invoke(context.getRequiredTestInstance());
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ignored) {
+                ignored.printStackTrace();
+            }
         }
     }
+
+    private boolean hasFailures;
 
     private static final String RANDOM_GRAPH_TPL =
             "FOREACH (x IN range(1, %d) | CREATE (:Label)) " +
@@ -63,20 +70,14 @@ public abstract class RandomGraphTestCase extends BaseTest {
 
     @BeforeEach
     void setupGraph() {
+        hasFailures = false;
         buildGraph(NODE_COUNT);
     }
 
     @AfterEach
     void shutdownGraph() {
         if (hasFailures) {
-            try {
-                PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
-                pw.println("Generated graph to reproduce any errors:");
-                pw.println();
-                CypherExporter.export(pw, db);
-            } catch (Exception e) {
-                System.err.println("Error exporting graph "+e.getMessage());
-            }
+            dumpGraph();
         }
     }
 
@@ -94,7 +95,18 @@ public abstract class RandomGraphTestCase extends BaseTest {
         }
     }
 
-    static void markFailure() {
+    public void dumpGraph() {
+        try {
+            PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
+            pw.println("Generated graph to reproduce any errors:");
+            pw.println();
+            CypherExporter.export(pw, db);
+        } catch (Exception e) {
+            System.err.println("Error exporting graph " + e.getMessage());
+        }
+    }
+
+    void markFailure() {
         hasFailures = true;
     }
 }
