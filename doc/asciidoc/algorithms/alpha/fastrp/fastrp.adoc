@@ -8,8 +8,8 @@ This section describes the Random Projection node embedding algorithm in the Neo
 --
 
 Random Projection (fastrp), is a node embedding algorithm that uses very sparse random projections.
-It iteratively constructs _intermediate_ embeddings by combining neighboring embeddings.
-Therefore, each node's embedding depends on a neighborhood of configurable diameter.
+It iteratively constructs _intermediate_ embeddings by averaging neighboring embeddings.
+Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way Random Projection exploits higher-order relationships in the graph while still being highly scalable.
 
 There are two aggregation methods that the algorithm can use.
@@ -17,6 +17,7 @@ The computed embeddings are aggregated from intermediate embeddings computed dur
 One aggregation simply concatenates all the intermediate embeddings node by node.
 The other aggregation computes the embeddings as a weighted sum of the intermediate embeddings.
 The choice of aggregation method is made by specifying `iterationWeights` configuration parameters either as an empty list or containing the desired weights for the iterations.
+In order to instead compute weighted averages of neighbouring embeddings, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
 
 NOTE: The algorithm is defined only for UNDIRECTED graphs.
 
@@ -28,7 +29,7 @@ For more information on this algorithm see:
 [[algorithms-embeddings-random-projection-syntax]]
 == Syntax
 
-.WCC syntax per mode
+.Random Projection syntax per mode
 [.tabbed-example]
 ====
 
