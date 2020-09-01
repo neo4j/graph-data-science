@@ -59,13 +59,13 @@ class TraverseTest extends AlgoTestBase {
                                          ", (f:Node)" +
                                          ", (g:Node)" +
                                          "," +
-                                         " (a)-[:REL {cost:2.0}]->(b)," +
-                                         " (a)-[:REL {cost:1.0}]->(c)," +
-                                         " (b)-[:REL {cost:1.0}]->(d)," +
-                                         " (c)-[:REL {cost:2.0}]->(d)," +
-                                         " (d)-[:REL {cost:1.0}]->(e)," +
-                                         " (d)-[:REL {cost:2.0}]->(f)," +
-                                         " (e)-[:REL {cost:2.0}]->(g)," +
+                                         ", (a)-[:REL {cost:2.0}]->(b)" +
+                                         ", (a)-[:REL {cost:1.0}]->(c)" +
+                                         ", (b)-[:REL {cost:1.0}]->(d)" +
+                                         ", (c)-[:REL {cost:2.0}]->(d)" +
+                                         ", (d)-[:REL {cost:1.0}]->(e)" +
+                                         ", (d)-[:REL {cost:2.0}]->(f)" +
+                                         ", (e)-[:REL {cost:2.0}]->(g)" +
                                          " (f)-[:REL {cost:1.0}]->(g)";
 
     @GdlGraph(graphNamePrefix = "loop")
