@@ -195,7 +195,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
     private void addArrayValues(float[] lhs, float[] rhs, double weight) {
         for (int i = 0; i < lhs.length; i++) {
-            lhs[i] += rhs[i] * weight;
+            lhs[i] = (float) Math.fma(rhs[i], weight, lhs[i]);
         }
     }
 
