@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
@@ -156,8 +157,34 @@ class CompressedLongArrayTest {
         CompressedLongArray longArray = new CompressedLongArray(AllocationTracker.EMPTY);
         var e = assertThrows(
             IllegalArgumentException.class,
-            () -> longArray.ensureCapacity(2147483622, 100, new byte[2147483622])
+            () -> longArray.ensureCapacity(2147483622, 100, unsafeFakeByteArray(2147483622))
         );
         assertTrue(e.getMessage().contains("numeric overflow in internal buffer"));
+    }
+
+    private byte[] unsafeFakeByteArray(int length) {
+        /*
+        byte[] B = new byte[14];
+        [B object internals:
+         OFFSET  SIZE   TYPE DESCRIPTION                               VALUE
+              0     4        (object header)                           01 00 00 00 (00000001 00000000 00000000 00000000) (1)
+              4     4        (object header)                           00 00 00 00 (00000000 00000000 00000000 00000000) (0)
+              8     4        (object header)                           20 08 00 00 (00100000 00001000 00000000 00000000) (2080)
+             12     4        (object header)                           0e 00 00 00 (00001110 00000000 00000000 00000000) (14)
+             16    14   byte [B.<elements>                             N/A
+             30     2        (loss due to the next object alignment)
+        Instance size: 32 bytes
+        Space losses: 0 bytes internal + 2 bytes external = 2 bytes total
+         */
+        // Offset 16 where the array elements start
+        int arrayBaseOffset = UnsafeUtil.arrayBaseOffset(byte[].class);
+        // Offset 12 which is the `length` field in the array object header
+        int arrayLengthOffset = arrayBaseOffset - Integer.BYTES;
+
+        byte[] bytes = {};
+        // Override the internal `length` field to be the requested `length`
+        UnsafeUtil.putInt(bytes, arrayLengthOffset, length);
+        assertEquals(length, bytes.length);
+        return bytes;
     }
 }
