@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
-
+import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -32,7 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * The iterator can be reset, but not re-sized.
  * The iteration order does not change after resetting.
  */
-public final class RandomLongIterator implements PrimitiveLongIterator {
+public final class RandomLongIterator implements PrimitiveIterator.OfLong {
     private static final long multiplier = 0x5DEECE66DL;
     private static final long addend = 0xBL;
 
@@ -86,7 +85,7 @@ public final class RandomLongIterator implements PrimitiveLongIterator {
     }
 
     @Override
-    public long next() {
+    public long nextLong() {
         next = internalNext(next, mask, range/*, seen*/);
         if (next == seed) {
             hasNext = false;
