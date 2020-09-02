@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
@@ -157,12 +158,17 @@ class CompressedLongArrayTest {
         CompressedLongArray longArray = new CompressedLongArray(AllocationTracker.EMPTY);
         var e = assertThrows(
             IllegalArgumentException.class,
-            () -> longArray.ensureCapacity(2147483622, 100, unsafeFakeByteArray(2147483622))
+            () -> {
+                int almostIntMax = 2147483622;
+                givenAnByteArrayOfUnsafeFakeLength(almostIntMax, data -> {
+                    longArray.ensureCapacity(almostIntMax, 100, data);
+                });
+            }
         );
         assertTrue(e.getMessage().contains("numeric overflow in internal buffer"));
     }
 
-    private byte[] unsafeFakeByteArray(int length) {
+    private void givenAnByteArrayOfUnsafeFakeLength(int length, Consumer<byte[]> code) {
         /*
         byte[] B = new byte[14];
         [B object internals:
@@ -185,6 +191,12 @@ class CompressedLongArrayTest {
         // Override the internal `length` field to be the requested `length`
         UnsafeUtil.putInt(bytes, arrayLengthOffset, length);
         assertEquals(length, bytes.length);
-        return bytes;
+
+        try {
+            code.accept(bytes);
+        } finally {
+            // Set it back to 0 to avoid shenanigans when it is cleaned up
+            UnsafeUtil.putInt(bytes, arrayLengthOffset, 0);
+        }
     }
 }
