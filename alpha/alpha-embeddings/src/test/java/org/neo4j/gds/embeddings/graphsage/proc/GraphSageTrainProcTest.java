@@ -26,17 +26,29 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.NodeProjection;
+import org.neo4j.graphalgo.NodeProjections;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
@@ -88,6 +100,81 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingSize());
         assertTrue(trainConfig.degreeAsProperty());
+    }
+
+    @Test
+    void runsTrainingOnAnonymousNativeGraph() {
+        String train = GdsCypher.call().implicitCreation(
+            ImmutableGraphCreateFromStoreConfig.builder()
+                .graphName("implicitWeightedGraph")
+                .nodeProjections(NodeProjections
+                    .builder()
+                    .putProjection(
+                        NodeLabel.of("King"),
+                        NodeProjection.of(
+                            "King",
+                            PropertyMappings.of(
+                                PropertyMapping.of("age", 1.0D),
+                                PropertyMapping.of("birth_year", 1.0D),
+                                PropertyMapping.of("death_year", 1.0D)
+                            )
+                        )
+                    )
+                    .build())
+                .relationshipProjections(RelationshipProjections.fromString("REL")
+                ).build()
+        )
+            .algo("gds.alpha.graphSage")
+            .trainMode()
+            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
+            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        assertCypherResult(
+            train,
+            Collections.singletonList(
+                map(
+                    "graphName", null,
+                    "graphCreateConfig", aMapWithSize(4),
+                    "configuration", isA(Map.class),
+                    "trainMillis", greaterThan(0L)
+                )
+            )
+        );
+    }
+
+    @Test
+    void runsTrainingOnAnonymousCypherGraph() {
+        var nodeQuery = "MATCH (n:King) RETURN id(n) AS id, n.age AS age, n.birth_year AS birth_year, n.death_year AS death_year";
+        var relationshipQuery = "MATCH (n:King)-[:REL]-(k:King) RETURN id(n) AS source, id(k) AS target";
+
+        var train =
+            "CALL gds.alpha.graphSage.train({" +
+            "   modelName: $modelName," +
+            "   nodeQuery: $nodeQuery," +
+            "   relationshipQuery: $relationshipQuery," +
+            "   nodePropertyNames: ['age', 'birth_year', 'death_year']," +
+            "   degreeAsProperty: true" +
+            "})";
+
+
+        assertCypherResult(
+            train,
+            Map.of(
+                "modelName", modelName,
+                "nodeQuery", nodeQuery,
+                "relationshipQuery", relationshipQuery
+            ),
+            Collections.singletonList(
+                map(
+                    "graphName", null,
+                    "graphCreateConfig", aMapWithSize(4),
+                    "configuration", isA(Map.class),
+                    "trainMillis", greaterThan(0L)
+                )
+            )
+        );
     }
 
     @Test
