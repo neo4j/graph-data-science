@@ -22,12 +22,16 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
@@ -202,6 +206,36 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     /* test-only */
     static <T> HugeObjectArray<T> newSingleArray(Class<T> componentClass, int size, AllocationTracker tracker) {
         return SingleHugeObjectArray.of(componentClass, size, tracker);
+    }
+
+    public static MemoryEstimation memoryEstimation(long objectEstimation) {
+        return memoryEstimation(
+            MemoryEstimations.of("instance", (dimensions, concurrency) -> MemoryRange.of(objectEstimation))
+        );
+    }
+
+    public static MemoryEstimation memoryEstimation(MemoryEstimation objectEstimation) {
+        var builder = MemoryEstimations.builder();
+
+        builder.perNode("instance", nodeCount -> {
+            if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
+                return sizeOfInstance(SingleHugeObjectArray.class);
+            } else {
+                return sizeOfInstance(PagedHugeObjectArray.class);
+            }
+        });
+
+        builder.perNode("data", objectEstimation);
+
+        builder.perNode("pages", nodeCount -> {
+            if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
+                return 0;
+            } else {
+                int numPages = numberOfPages(nodeCount);
+                return sizeOfObjectArray(numPages);
+            }
+        });
+        return builder.build();
     }
 
     private static final class SingleHugeObjectArray<T> extends HugeObjectArray<T> {

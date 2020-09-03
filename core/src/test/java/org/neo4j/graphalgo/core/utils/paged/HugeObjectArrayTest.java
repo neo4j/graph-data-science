@@ -19,8 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
 
@@ -52,5 +57,16 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
     @Override
     String primitiveNull() {
         return null;
+    }
+
+    @Test
+    void shouldComputeMemoryEstimation() {
+        var estimation = HugeObjectArray.memoryEstimation(sizeOfLongArray(10));
+
+        var dim0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
+        assertEquals(24, estimation.estimate(dim0, 1).memoryUsage().min);
+
+        var dim10000 = ImmutableGraphDimensions.builder().nodeCount(10000).build();
+        assertEquals(960024, estimation.estimate(dim10000, 1).memoryUsage().min);
     }
 }
