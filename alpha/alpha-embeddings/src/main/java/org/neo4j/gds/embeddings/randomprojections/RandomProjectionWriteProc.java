@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,12 +34,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class RandomProjectionWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
-    @Description(RandomProjectionCompanion.DESCRIPTION)
+    @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -48,6 +51,15 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
             configuration
         );
         return write(computationResult);
+    }
+
+    @Procedure(value = "gds.alpha.randomProjection.write.estimate", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

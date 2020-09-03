@@ -24,6 +24,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
@@ -49,6 +52,17 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final int sparsity;
     private final int iterations;
     private final List<Double> iterationWeights;
+
+    static MemoryEstimation memoryEstimation(RandomProjectionBaseConfig config) {
+        var embeddingSize = config.iterationWeights().isEmpty() ? config.embeddingSize() * config.maxIterations() : config.embeddingSize();
+
+        return MemoryEstimations
+            .builder(RandomProjection.class)
+            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(embeddingSize)))
+            .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
+            .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
+            .build();
+    }
 
     public RandomProjection(
         Graph graph,

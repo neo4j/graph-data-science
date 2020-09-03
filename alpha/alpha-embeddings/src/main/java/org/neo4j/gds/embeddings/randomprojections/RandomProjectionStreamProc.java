@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
@@ -49,6 +51,15 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
             configuration
         );
         return stream(computationResult);
+    }
+
+    @Procedure(value = "gds.alpha.randomProjection.stream.estimate", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
