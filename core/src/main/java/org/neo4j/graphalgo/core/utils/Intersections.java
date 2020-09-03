@@ -178,6 +178,14 @@ public class Intersections {
         return dotProduct * dotProduct / xLength / yLength;
     }
 
+    public static double cosineSquareScalar(double scalar1, double scalar2) {
+        double dotProduct = scalar1 * scalar2;
+        double xLength = scalar1 * scalar1;
+        double yLength = scalar2 * scalar2;
+        if (xLength == 0D || yLength == 0D) return 0D;
+        return dotProduct * dotProduct / xLength / yLength;
+    }
+
     public static double cosineSquareSkip(double[] vector1, double[] vector2, int len, double skipValue) {
         boolean skipNan = Double.isNaN(skipValue);
 
