@@ -89,4 +89,33 @@ class BoundedLongPriorityQueueTest {
         List<Long> actual = queue.elements().boxed().collect(Collectors.toList());
         assertEquals(expected, actual);
     }
+
+    @Test
+    void testContains() {
+
+        BoundedLongPriorityQueue queue = BoundedLongPriorityQueue.max(3);
+
+        queue.offer(0, 0.0);
+        queue.offer(1, 1.0);
+        queue.offer(2, 2.0);
+        queue.offer(3, 3.0);
+        queue.offer(4, 4.0);
+        queue.offer(5, 5.0);
+        queue.offer(6, 6.0);
+
+        // Doesn't contain these because they were moved out in favor of higher priority elements
+        assertFalse(queue.contains(0));
+        assertFalse(queue.contains(1));
+        assertFalse(queue.contains(2));
+        assertFalse(queue.contains(3));
+
+        // These should be the only elements in the queue
+        assertTrue(queue.contains(4));
+        assertTrue(queue.contains(5));
+        assertTrue(queue.contains(6));
+
+        // Doesn't contain these because we have never added them
+        assertFalse(queue.contains(7));
+        assertFalse(queue.contains(10));
+    }
 }
