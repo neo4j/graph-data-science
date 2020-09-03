@@ -73,20 +73,37 @@ public final class GraphStoreCatalog {
         String username,
         NamedDatabaseId databaseId,
         String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        boolean failOnMissing
     ) {
         UserCatalog.UserCatalogKey userCatalogKey = UserCatalog.UserCatalogKey.of(databaseId, graphName);
 
-        GraphStoreWithConfig graphStoreWithConfig = Optional
+        Optional
             .ofNullable(getUserCatalog(username).remove(userCatalogKey))
-            .orElseThrow(failOnNonExistentGraph(userCatalogKey.graphName()));
+            .ifPresentOrElse(
+                dropGraph(username, removedGraphConsumer, userCatalogKey),
+                () -> handleMissingGraph(userCatalogKey, failOnMissing)
+            );
+    }
 
-        removedGraphConsumer.accept(graphStoreWithConfig);
-        GraphStore graphStore = graphStoreWithConfig.graphStore();
-        graphStore.canRelease(true);
-        graphStore.release();
+    private static void handleMissingGraph(UserCatalog.UserCatalogKey userCatalogKey, boolean failOnMissing) {
+        if (failOnMissing) {
+            throw failOnNonExistentGraph(userCatalogKey.graphName()).get();
+        }
+    }
 
-        getUserCatalog(username).removeDegreeDistribution(userCatalogKey);
+    private static Consumer<@Nullable GraphStoreWithConfig> dropGraph(
+        String username,
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        UserCatalog.UserCatalogKey userCatalogKey
+    ) {
+        return graphStoreWithConfig -> {
+            removedGraphConsumer.accept(graphStoreWithConfig);
+            GraphStore graphStore = graphStoreWithConfig.graphStore();
+            graphStore.canRelease(true);
+            graphStore.release();
+            getUserCatalog(username).removeDegreeDistribution(userCatalogKey);
+        };
     }
 
     public static int graphStoresCount() {

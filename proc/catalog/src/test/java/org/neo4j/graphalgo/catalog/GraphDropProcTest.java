@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -174,6 +175,23 @@ class GraphDropProcTest extends BaseProcTest {
             singletonList(
                 map("graphName", GRAPH_NAME, "exists", false)
             )
+        );
+    }
+
+    @Test
+    void considerFailIfMissingFlag() {
+        assertCypherResult(
+            "CALL gds.graph.exists($graphName)",
+            map("graphName", GRAPH_NAME),
+            singletonList(
+                map("graphName", GRAPH_NAME, "exists", false)
+            )
+        );
+
+        assertCypherResult(
+            "CALL gds.graph.drop($graphName, false)",
+            map("graphName", GRAPH_NAME, "failIfMissing", false),
+            Collections.emptyList()
         );
     }
 

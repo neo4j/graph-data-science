@@ -187,7 +187,7 @@ abstract class SimilarityProc
     }
 
     private void removeGraph() {
-        GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {});
+        GraphStoreCatalog.remove(username(), databaseId(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
