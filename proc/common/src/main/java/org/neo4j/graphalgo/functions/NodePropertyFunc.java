@@ -31,6 +31,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.DoubleArray;
+import org.neo4j.values.storable.FloatArray;
 import org.neo4j.values.storable.LongArray;
 
 import java.util.Objects;
@@ -105,6 +106,9 @@ public class NodePropertyFunc {
         } else if (propertyValues.valueType() == ValueType.LONG_ARRAY) {
             long[] longArray = ((LongArray)propertyValues.value(internalId)).asObjectCopy();
             return longArray == null ? new long[] {} : longArray;
+        } else if (propertyValues.valueType() == ValueType.FLOAT_ARRAY) {
+            float[] floatArray = ((FloatArray)propertyValues.value(internalId)).asObjectCopy();
+            return floatArray == null ? new float[] {} : floatArray;
         } else if (propertyValues.valueType() == ValueType.DOUBLE_ARRAY) {
             double[] doubleArray = ((DoubleArray)propertyValues.value(internalId)).asObjectCopy();
             return doubleArray == null ? new double[] {} : doubleArray;
