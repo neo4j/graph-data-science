@@ -43,6 +43,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final HugeObjectArray<float[]> embeddings;
     private final HugeObjectArray<float[]> embeddingA;
     private final HugeObjectArray<float[]> embeddingB;
+    private final EmbeddingCombiner embeddingCombiner;
 
     private final int embeddingSize;
     private final int sparsity;
@@ -69,6 +70,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.normalizationStrength = config.normalizationStrength();
         this.normalizeL2 = config.normalizeL2();
         this.concurrency = config.concurrency();
+        this.embeddingCombiner = graph.hasRelationshipProperty()
+            ? this::addArrayValuesWeighted
+            : (lhs, rhs, ignoreWeight) -> addArrayValues(lhs, rhs);
 
         int embeddingSize = iterationWeights.isEmpty() ? this.embeddingSize * iterations : this.embeddingSize;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
@@ -136,7 +140,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                     float[] currentEmbedding = new float[embeddingSize];
                     localCurrent.set(nodeId, currentEmbedding);
                     concurrentGraphCopy.get().forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
-                        addArrayValues(currentEmbedding, localPrevious.get(target), weight);
+                        embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
                         return true;
                     });
                     progressLogger.logProgress(graph.degree(nodeId));
@@ -193,7 +197,13 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
     }
 
-    private void addArrayValues(float[] lhs, float[] rhs, double weight) {
+    private void addArrayValues(float[] lhs, float[] rhs) {
+        for (int i = 0; i < lhs.length; i++) {
+            lhs[i] += rhs[i];
+        }
+    }
+
+    private void addArrayValuesWeighted(float[] lhs, float[] rhs, double weight) {
         for (int i = 0; i < lhs.length; i++) {
             lhs[i] = (float) Math.fma(rhs[i], weight, lhs[i]);
         }
@@ -259,5 +269,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         protected int next(int bits) {
             return (int) (nextLong() >>> (64-bits));
         }
+    }
+
+    private interface EmbeddingCombiner {
+        void combine(float[] into, float[] add, double weight);
     }
 }
