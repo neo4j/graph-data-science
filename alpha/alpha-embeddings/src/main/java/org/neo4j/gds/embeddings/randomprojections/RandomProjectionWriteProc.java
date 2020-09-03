@@ -22,10 +22,8 @@ package org.neo4j.gds.embeddings.randomprojections;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class RandomProjectionWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
-    @Description("Random Projection produces node embeddings via the fastrp algorithm")
+    @Description(RandomProjectionCompanion.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -69,7 +67,7 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
 
     @Override
     protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
-        return (DoubleArrayNodeProperties) (nodeId) -> ArrayUtil.floatToDoubleArray(computationResult.result().embeddings().get(nodeId));
+        return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override

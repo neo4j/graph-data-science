@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.randomprojections;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -39,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class RandomProjectionMutateProc extends MutateProc<RandomProjection, RandomProjection, RandomProjectionMutateProc.MutateResult, RandomProjectionMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
-    @Description("Random Projection produces node embeddings via the fastrp algorithm")
+    @Description(RandomProjectionCompanion.DESCRIPTION)
     public Stream<RandomProjectionMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -53,7 +52,7 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
 
     @Override
     protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult) {
-        return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
+        return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override

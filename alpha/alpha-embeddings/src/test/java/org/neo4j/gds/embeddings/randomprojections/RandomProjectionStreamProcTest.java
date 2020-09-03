@@ -68,7 +68,7 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             ? embeddingSize * maxIterations
             : embeddingSize;
         runQueryWithRowConsumer(query, row -> {
-            List<Double> embeddings = (List<Double>) row.get("embedding");
+            List<Float> embeddings = (List<Float>) row.get("embedding");
             assertEquals(expectedEmbeddingsDimension, embeddings.size());
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
@@ -92,7 +92,7 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            List<Double> embeddings = (List<Double>) row.get("embedding");
+            List<Float> embeddings = (List<Float>) row.get("embedding");
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
     }
@@ -113,9 +113,9 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             .addParameter("relationshipWeightProperty", "weight")
             .yields();
 
-        List<List<Double>> embeddings = new ArrayList<>(3);
+        List<List<Float>> embeddings = new ArrayList<>(3);
         runQueryWithRowConsumer(query, row -> {
-            embeddings.add((List<Double>) row.get("embedding"));
+            embeddings.add((List<Float>) row.get("embedding"));
         });
 
         for (int i = 0; i < 128; i++) {

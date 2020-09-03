@@ -84,11 +84,11 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             ? embeddingSize * maxIterations
             : embeddingSize;
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
-            double[] embeddings = (double[]) row.get("embedding");
+            float[] embeddings = (float[]) row.get("embedding");
             assertEquals(expectedEmbeddingsDimension, embeddings.length);
             boolean allMatch = true;
-            for (double embedding : embeddings) {
-                if (Double.compare(embedding, 0.0D) != 0) {
+            for (float embedding : embeddings) {
+                if (Float.compare(embedding, 0.0F) != 0) {
                     allMatch = false;
                     break;
                 }
@@ -117,9 +117,9 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
         runQuery(query);
 
         String retrieveQuery = "MATCH (n) WHERE n:Node OR n:Node2 RETURN n.name as name, n.embedding as embedding";
-        Map<String, double[]> embeddings = new HashMap<>(3);
+        Map<String, float[]> embeddings = new HashMap<>(3);
         runQueryWithRowConsumer(retrieveQuery, row -> {
-            embeddings.put(row.getString("name"), (double[]) row.get("embedding"));
+            embeddings.put(row.getString("name"), (float[]) row.get("embedding"));
         });
 
         for (int i = 0; i < 128; i++) {

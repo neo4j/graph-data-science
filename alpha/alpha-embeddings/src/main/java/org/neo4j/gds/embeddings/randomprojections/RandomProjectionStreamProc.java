@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.randomprojections;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -33,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -41,7 +39,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
-    @Description("Random Projection produces node embeddings via the fastrp algorithm")
+    @Description(RandomProjectionCompanion.DESCRIPTION)
     public Stream<RandomProjectionStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -54,10 +52,15 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
+    protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
+        return RandomProjectionCompanion.getNodeProperties(computationResult);
+    }
+
+    @Override
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        throw new UnsupportedOperationException("RandomProjection handles result building individually.");
+        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
     }
 
     @Override
@@ -71,41 +74,25 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
-        return runWithExceptionLogging("RandomProjection streaming failed", () -> {
-            Graph graph = computationResult.graph();
-
-            return LongStream
-                .range(0, graph.nodeCount())
-                .boxed()
-                .map((nodeId) -> {
-                    RandomProjection randomProjection = computationResult.result();
-
-                    return new StreamResult(graph.toOriginalNodeId(nodeId), randomProjection.embeddings().get(nodeId));
-                });
-        });
-    }
-
-    @Override
     protected AlgorithmFactory<RandomProjection, RandomProjectionStreamConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 
     public static final class StreamResult {
         public final long nodeId;
-        public final List<Double> embedding;
+        public final List<Number> embedding;
 
         StreamResult(long nodeId, float[] embedding) {
             this.nodeId = nodeId;
-            this.embedding = floatsToDoubleList(embedding);
+            this.embedding = arrayToList(embedding);
         }
 
-        static List<Double> floatsToDoubleList(float[] values) {
-            var doubles = new ArrayList<Double>(values.length);
+        static List<Number> arrayToList(float[] values) {
+            var floats = new ArrayList<Number>(values.length);
             for (float value : values) {
-                doubles.add((double) value);
+                floats.add(value);
             }
-            return doubles;
+            return floats;
         }
     }
 }
