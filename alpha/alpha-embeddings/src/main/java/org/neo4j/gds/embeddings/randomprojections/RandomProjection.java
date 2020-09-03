@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.Lock;
@@ -138,6 +139,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             float entryValue = scaling * sqrtSparsity / sqrtEmbeddingSize;
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
+            embeddingA.set(nodeId, new float[this.embeddingSize]);
         });
     }
 
@@ -151,8 +153,8 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                    float[] currentEmbedding = new float[embeddingSize];
-                    localCurrent.set(nodeId, currentEmbedding);
+                    float[] currentEmbedding = localCurrent.get(nodeId);
+                    Arrays.fill(currentEmbedding, 0.0f);
                     concurrentGraphCopy.get().forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
                         embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
                         return true;
