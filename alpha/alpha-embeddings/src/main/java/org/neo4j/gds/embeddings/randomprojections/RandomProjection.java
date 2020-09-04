@@ -128,8 +128,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
         progressLogger.logMessage("Computing random vectors");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-            progressLogger.logProgress();
-
             ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
@@ -140,6 +138,8 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
             embeddingA.set(nodeId, new float[this.embeddingSize]);
+
+            progressLogger.logProgress();
         });
     }
 
@@ -150,40 +150,41 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
+            int offset = embeddingSize * i;
+            double iterationWeight = iterationWeights.isEmpty()
+                ? Double.NaN
+                : iterationWeights.get(i);
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
+                    float[] embedding = embeddings.get(nodeId);
                     float[] currentEmbedding = localCurrent.get(nodeId);
                     Arrays.fill(currentEmbedding, 0.0f);
+
+                    // Collect and combine the neighbour embeddings
                     concurrentGraphCopy.get().forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
                         embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
                         return true;
                     });
-                    progressLogger.logProgress(graph.degree(nodeId));
 
+                    // Normalize neighbour embeddings
                     int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
                     double degreeScale = 1.0f / degree;
                     multiplyArrayValues(currentEmbedding, degreeScale);
+                    if (normalizeL2) {
+                        l2Normalize(currentEmbedding);
+                    }
+
+                    // Update the result embedding
+                    if (iterationWeights.isEmpty()) {
+                        System.arraycopy(currentEmbedding, 0, embedding, offset, embeddingSize);
+                    } else {
+                        updateEmbeddings(iterationWeight, embedding, currentEmbedding);
+                    }
+
+                    progressLogger.logProgress(graph.degree(nodeId));
                 });
             }
-
-            int offset = embeddingSize * i;
-            double weight = iterationWeights.isEmpty()
-                ? Double.NaN
-                : iterationWeights.get(i);
-            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                float[] embedding = embeddings.get(nodeId);
-
-                float[] newEmbedding = localCurrent.get(nodeId);
-                if (normalizeL2) {
-                    l2Normalize(newEmbedding);
-                }
-                if (iterationWeights.isEmpty()) {
-                    System.arraycopy(newEmbedding, 0, embedding, offset, embeddingSize);
-                } else {
-                    updateEmbeddings(weight, embedding, newEmbedding);
-                }
-            });
         }
     }
 
