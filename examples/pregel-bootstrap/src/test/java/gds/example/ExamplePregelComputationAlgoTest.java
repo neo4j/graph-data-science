@@ -65,7 +65,7 @@ class ExamplePregelComputationAlgoTest {
             config,
             new ExamplePregelComputation(),
             Pools.DEFAULT,
-            AllocationTracker.EMPTY
+            AllocationTracker.empty()
         );
 
         var result = pregelJob.run();
