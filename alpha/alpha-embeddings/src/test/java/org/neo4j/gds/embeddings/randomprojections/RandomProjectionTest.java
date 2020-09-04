@@ -27,8 +27,11 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -228,5 +231,36 @@ class RandomProjectionTest extends AlgoTestBase {
                 assertEquals(0.0f, embeddingValue);
             }
         }
+    }
+
+    @Test
+    void testMemoryEstimationWithoutIterationWeights() {
+        var config = ImmutableRandomProjectionBaseConfig
+            .builder()
+            .maxIterations(2)
+            .embeddingSize(128)
+            .build();
+
+        var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
+
+        var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
+        assertEquals(estimate.min, estimate.max);
+        assertEquals(209744, estimate.min);
+    }
+
+    @Test
+    void testMemoryEstimationWithIterationWeights() {
+        var config = ImmutableRandomProjectionBaseConfig
+            .builder()
+            .maxIterations(2)
+            .embeddingSize(128)
+            .iterationWeights(List.of(1.0D, 2.0D))
+            .build();
+
+        var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
+
+        var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
+        assertEquals(estimate.min, estimate.max);
+        assertEquals(158544, estimate.min);
     }
 }

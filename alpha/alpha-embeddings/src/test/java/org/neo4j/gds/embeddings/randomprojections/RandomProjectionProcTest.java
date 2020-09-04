@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,7 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
-public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection> {
+public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection>,
+    MemoryEstimateTest<RandomProjection, CONFIG, RandomProjection> {
 
     private static final String DB_CYPHER =
         "CREATE" +

@@ -19,71 +19,86 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProjectionWriteConfig>
-    implements WritePropertyConfigTest<RandomProjection, RandomProjectionWriteConfig, RandomProjection> {
+class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProjectionMutateConfig>{
 
-    @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionWriteConfig>> getProcedureClazz() {
-        return RandomProjectionWriteProc.class;
+    @BeforeEach
+    void setupNodePropertyFunc() throws Exception {
+        registerFunctions(
+            NodePropertyFunc.class
+        );
     }
 
     @Override
-    public RandomProjectionWriteConfig createConfig(CypherMapWrapper userInput) {
-        return RandomProjectionWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionMutateConfig>> getProcedureClazz() {
+        return RandomProjectionMutateProc.class;
+    }
+
+    @Override
+    public RandomProjectionMutateConfig createConfig(CypherMapWrapper userInput) {
+        return RandomProjectionMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
         CypherMapWrapper minimalConfig = super.createMinimalConfig(userInput);
 
-        if (!minimalConfig.containsKey("writeProperty")) {
-            return minimalConfig.withString("writeProperty", "embedding");
+        if (!minimalConfig.containsKey("mutateProperty")) {
+            return minimalConfig.withString("mutateProperty", "embedding");
         }
         return minimalConfig;
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
-    void shouldComputeNonZeroEmbeddings(List<Float> weights) {
+    void shouldMutateNonZeroEmbeddings(List<Float> weights) {
+        String loadedGraphName = "loadGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .graphCreate(loadedGraphName)
+            .yields();
+
+        System.out.println(graphCreateQuery);
+        runQuery(graphCreateQuery);
+
+
         int embeddingSize = 128;
         int maxIterations = 4;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .explicitCreation(loadedGraphName)
             .algo("gds.alpha.randomProjection")
-            .writeMode()
+            .mutateMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("maxIterations", maxIterations)
-            .addParameter("writeProperty", "embedding");
+            .addParameter("mutateProperty", "embedding");
 
         if (!weights.isEmpty()) {
             queryBuilder.addParameter("iterationWeights", weights);
         }
-        String writeQuery = queryBuilder.yields();
+        String query = queryBuilder.yields();
 
-        runQuery(writeQuery);
+        runQuery(query);
 
         int expectedEmbeddingsDimension = weights.isEmpty()
             ? embeddingSize * maxIterations
             : embeddingSize;
-        runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
+        runQueryWithRowConsumer("MATCH (n:Node) RETURN gds.util.nodeProperty('loadGraph', id(n), 'embedding') as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
             assertEquals(expectedEmbeddingsDimension, embeddings.length);
             boolean allMatch = true;
@@ -95,35 +110,5 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             }
             assertFalse(allMatch);
         });
-    }
-
-    @Test
-    void shouldComputeAndWriteWithWeight() {
-        int embeddingSize = 128;
-        int maxIterations = 1;
-        String query = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withNodeLabel("Node2")
-            .withRelationshipType("REL2")
-            .withRelationshipProperty("weight")
-            .algo("gds.alpha.randomProjection")
-            .writeMode()
-            .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations)
-            .addParameter("relationshipWeightProperty", "weight")
-            .addParameter("writeProperty", "embedding")
-            .yields();
-
-        runQuery(query);
-
-        String retrieveQuery = "MATCH (n) WHERE n:Node OR n:Node2 RETURN n.name as name, n.embedding as embedding";
-        Map<String, float[]> embeddings = new HashMap<>(3);
-        runQueryWithRowConsumer(retrieveQuery, row -> {
-            embeddings.put(row.getString("name"), (float[]) row.get("embedding"));
-        });
-
-        for (int i = 0; i < 128; i++) {
-            assertEquals(embeddings.get("b")[i], embeddings.get("e")[i] * 2);
-        }
     }
 }
