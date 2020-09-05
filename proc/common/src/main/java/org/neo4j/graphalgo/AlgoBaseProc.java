@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -78,6 +79,8 @@ public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends AlgoBaseConfig> extends BaseProc {
+
+    public static final String SIGNATURE_PROPERTY = "gds.procedure.signature";
 
     protected static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
@@ -114,6 +117,9 @@ public abstract class AlgoBaseProc<
             config = configWithoutCreateKeys;
         }
         CONFIG algoConfig = newConfig(username(), graphName, maybeImplicitCreate, config);
+        var signature = new TreeMap<>(algoConfig.toMap()).toString();
+        // TODO: find a better way to communicate this
+        System.setProperty(SIGNATURE_PROPERTY, signature);
         allowedKeys.addAll(algoConfig.configKeys());
         validateConfig(config, allowedKeys);
         return algoConfig;
