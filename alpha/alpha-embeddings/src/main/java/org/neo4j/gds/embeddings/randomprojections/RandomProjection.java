@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -30,10 +31,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -103,6 +103,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         return this.embeddings;
     }
 
+    @TestOnly
     HugeObjectArray<float[]> currentEmbedding(int iteration) {
         return iteration % 2 == 0
             ? this.embeddingA
@@ -127,8 +128,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
         progressLogger.logMessage("Computing random vectors");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-            progressLogger.logProgress();
-
             ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
@@ -138,6 +137,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             float entryValue = scaling * sqrtSparsity / sqrtEmbeddingSize;
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
+            embeddingA.set(nodeId, new float[this.embeddingSize]);
+
+            progressLogger.logProgress();
         });
     }
 
@@ -148,40 +150,41 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
+            int offset = embeddingSize * i;
+            double iterationWeight = iterationWeights.isEmpty()
+                ? Double.NaN
+                : iterationWeights.get(i);
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                    float[] currentEmbedding = new float[embeddingSize];
-                    localCurrent.set(nodeId, currentEmbedding);
+                    float[] embedding = embeddings.get(nodeId);
+                    float[] currentEmbedding = localCurrent.get(nodeId);
+                    Arrays.fill(currentEmbedding, 0.0f);
+
+                    // Collect and combine the neighbour embeddings
                     concurrentGraphCopy.get().forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
                         embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
                         return true;
                     });
-                    progressLogger.logProgress(graph.degree(nodeId));
 
+                    // Normalize neighbour embeddings
                     int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
                     double degreeScale = 1.0f / degree;
                     multiplyArrayValues(currentEmbedding, degreeScale);
+                    if (normalizeL2) {
+                        l2Normalize(currentEmbedding);
+                    }
+
+                    // Update the result embedding
+                    if (iterationWeights.isEmpty()) {
+                        System.arraycopy(currentEmbedding, 0, embedding, offset, embeddingSize);
+                    } else {
+                        updateEmbeddings(iterationWeight, embedding, currentEmbedding);
+                    }
+
+                    progressLogger.logProgress(graph.degree(nodeId));
                 });
             }
-
-            int offset = embeddingSize * i;
-            double weight = iterationWeights.isEmpty()
-                ? Double.NaN
-                : iterationWeights.get(i);
-            ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                float[] embedding = embeddings.get(nodeId);
-
-                float[] newEmbedding = localCurrent.get(nodeId);
-                if (normalizeL2) {
-                    l2Normalize(newEmbedding);
-                }
-                if (iterationWeights.isEmpty()) {
-                    System.arraycopy(newEmbedding, 0, embedding, offset, embeddingSize);
-                } else {
-                    updateEmbeddings(weight, embedding, newEmbedding);
-                }
-            });
         }
     }
 
@@ -241,8 +244,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
     }
 
-    public class HighQualityRandom extends Random {
-        private Lock l = new ReentrantLock();
+    private static class HighQualityRandom extends Random {
         private long u;
         private long v = 4101842887655102017L;
         private long w = 1;
@@ -252,32 +254,24 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
 
         public HighQualityRandom(long seed) {
-            l.lock();
             u = seed ^ v;
             nextLong();
             v = u;
             nextLong();
             w = v;
             nextLong();
-            l.unlock();
         }
 
         public long nextLong() {
-            l.lock();
-            try {
-                u = u * 2862933555777941757L + 7046029254386353087L;
-                v ^= v >>> 17;
-                v ^= v << 31;
-                v ^= v >>> 8;
-                w = 4294957665L * (w & 0xffffffff) + (w >>> 32);
-                long x = u ^ (u << 21);
-                x ^= x >>> 35;
-                x ^= x << 4;
-                long ret = (x + v) ^ w;
-                return ret;
-            } finally {
-                l.unlock();
-            }
+            u = u * 2862933555777941757L + 7046029254386353087L;
+            v ^= v >>> 17;
+            v ^= v << 31;
+            v ^= v >>> 8;
+            w = 4294957665L * w + (w >>> 32);
+            long x = u ^ (u << 21);
+            x ^= x >>> 35;
+            x ^= x << 4;
+            return (x + v) ^ w;
         }
 
         protected int next(int bits) {
