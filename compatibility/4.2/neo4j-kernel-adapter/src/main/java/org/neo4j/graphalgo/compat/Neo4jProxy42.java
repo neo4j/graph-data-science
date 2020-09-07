@@ -85,7 +85,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -94,7 +97,110 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class Neo4jProxy42 implements Neo4jProxyApi {
+
+    private static final MethodHandle CREATE_LOG_BUILDER;
+
+    static {
+        // signature changed midway through drop04 but we need to keep it compatible with drop03 at least
+        // for as long as Aura runs on drop03
+
+        var expectedParameters = new Class<?>[]{
+            FileSystemAbstraction.class,
+            Path.class,
+            Level.class
+        };
+        var methodName = "createBuilder";
+
+        var lookup = MethodHandles.lookup();
+        MethodHandle createBuilder;
+        try {
+            try {
+                // drop03 / early drop04
+                var signature = MethodType.methodType(
+                    LogConfig.Builder.class,
+                    Path.class,
+                    Level.class
+                );
+                var oldHandle = lookup.findStatic(LogConfig.class, methodName, signature);
+                // we call the handle with an additional fs parameter in it's first position
+                // on older versions that do not support that parameter, we need to drop it
+                // before calling the actual method
+                createBuilder = MethodHandles.dropArguments(oldHandle, 0, FileSystemAbstraction.class);
+            } catch (NoSuchMethodException e) {
+                // late drop04; weirdness in the methodType API prevents us from using `expectedParameters` here :/
+                var signature = MethodType.methodType(
+                    LogConfig.Builder.class,
+                    /* added parameter in drop04 */ FileSystemAbstraction.class,
+                    Path.class,
+                    Level.class
+                );
+                // already correct signature
+                createBuilder = lookup.findStatic(LogConfig.class, methodName, signature);
+            }
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            // instead of failing at class initialization (which would fail the whole db)
+            // we fail only when the method is accessed (which may be never)
+            // so that we can still run every other operation.
+            // At the time of this writing, only graph export with enableDebugLog will execute this code.
+            var error = new LinkageError(
+                formatWithLocale(
+                    "Could not find suitable method `%s` on %s. Expected a static method with parameters %s.",
+                    methodName,
+                    LogConfig.class,
+                    Arrays.toString(expectedParameters)
+                ), e);
+            var throwError = MethodHandles.throwException(LogConfig.Builder.class, LinkageError.class);
+            throwError = throwError.bindTo(error);
+            // Need to align the handle to the expected signature, so that can call it the same way as working handles
+            createBuilder = MethodHandles.dropArguments(
+                throwError,
+                0,
+                expectedParameters
+            );
+        }
+
+        var methodType = createBuilder.type();
+        if (methodType.returnType() != LogConfig.Builder.class) {
+            failCreateBuilderHandle(
+                "Expected the handle to return `%s`, but it returns `%s` instead.",
+                LogConfig.Builder.class,
+                methodType.returnType()
+            );
+        }
+        if (methodType.parameterCount() != expectedParameters.length) {
+            failCreateBuilderHandle(
+                "Expected the handle to accept %d parameters, but it accepts `%d` instead.",
+                expectedParameters.length,
+                methodType.parameterCount()
+            );
+        }
+        for (int i = 0; i < expectedParameters.length; i++) {
+            Class<?> expectedParameter = expectedParameters[i];
+            if (methodType.parameterType(i) != expectedParameter) {
+                failCreateBuilderHandle(
+                    "Expected the handle to accept `%s` at its parameter #%d, but it accepts `%s` instead.",
+                    expectedParameter,
+                    i,
+                    methodType.parameterType(i)
+                );
+            }
+        }
+        CREATE_LOG_BUILDER = createBuilder;
+    }
+
+    private static void failCreateBuilderHandle(String message, Object... args) {
+        throw new LinkageError(
+            formatWithLocale(
+                "Illegal method handle created. " +
+                message +
+                " This is a hard error, please file a bug report.",
+                args
+            )
+        );
+    }
 
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
@@ -236,7 +342,23 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         FileSystemAbstraction fs,
         LifeSupport lifeSupport
     ) {
-        var neo4jLoggerContext = LogConfig.createBuilder(storeLogPath, Level.INFO).build();
+        LogConfig.Builder builder;
+        try {
+            builder = (LogConfig.Builder) CREATE_LOG_BUILDER.invoke(fs, storeLogPath, Level.INFO);
+        } catch (Throwable throwable) {
+            // this is taken from ExceptionUtil, but don't have a dependency on that module here
+            if (throwable instanceof Error) {
+                throw (Error) throwable;
+            }
+            if (throwable instanceof RuntimeException) {
+                throw (RuntimeException) throwable;
+            }
+            if (throwable instanceof IOException) {
+                throw new UncheckedIOException((IOException) throwable);
+            }
+            throw new RuntimeException(throwable);
+        }
+        var neo4jLoggerContext = builder.build();
         var simpleLogService = new SimpleLogService(
             NullLogProvider.getInstance(),
             new Log4jLogProvider(neo4jLoggerContext)
