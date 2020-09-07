@@ -250,7 +250,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         private long w = 1;
 
         public HighQualityRandom() {
-            this(System.nanoTime());
+            this(System.nanoTime() * Thread.currentThread().getId());
         }
 
         public HighQualityRandom(long seed) {
@@ -262,6 +262,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             nextLong();
         }
 
+        @Override
         public long nextLong() {
             u = u * 2862933555777941757L + 7046029254386353087L;
             v ^= v >>> 17;
