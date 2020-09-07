@@ -119,7 +119,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         try {
             try {
                 // drop03 / early drop04
-                var signature = MethodType.methodType(LogConfig.Builder.class, Path.class, Level.class);
+                var signature = MethodType.methodType(
+                    LogConfig.Builder.class,
+                    Path.class,
+                    Level.class
+                );
                 var oldHandle = lookup.findStatic(LogConfig.class, methodName, signature);
                 // we call the handle with an additional fs parameter in it's first position
                 // on older versions that do not support that parameter, we need to drop it
