@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -106,26 +105,21 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogEveryPercentageOnlyOnce() {
-        var loggedPercentages = performLogging(400, 4).getMessages(TestLog.INFO);
-        assertEquals(101, loggedPercentages.size());
-        assertEquals(101, new HashSet<>(loggedPercentages).size());
+        var loggedPercentages = performLogging(400, 4);
+        var expected = loggedPercentages.stream().distinct().collect(Collectors.toList());
+
+        assertEquals(expected.size(), loggedPercentages.size());
     }
 
     @Test
     void shouldLogPercentagesSequentially() {
-        var loggedPercentages = performLogging(400, 4)
-            .getMessages(TestLog.INFO)
-            .stream()
-            .map(progress -> progress.split(" ")[2].replace("%", ""))
-            .map(Integer::parseInt)
-            .collect(Collectors.toList());
-
+        var loggedPercentages = performLogging(400, 4);
         var expected = loggedPercentages.stream().sorted().collect(Collectors.toList());
 
         assertEquals(expected, loggedPercentages);
     }
 
-    private static TestProgressLogger performLogging(long taskVolume, int concurrency) {
+    private static List<Integer> performLogging(long taskVolume, int concurrency) {
         var logger = new TestProgressLogger(taskVolume, "Test", concurrency);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);
@@ -135,7 +129,7 @@ class BatchingProgressLoggerTest {
             .mapToObj(i -> (Runnable) () ->
                 IntStream.range(0, batchSize).forEach(ignore -> {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -144,7 +138,12 @@ class BatchingProgressLoggerTest {
 
         ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
 
-        return logger;
+        return logger
+            .getMessages(TestLog.INFO)
+            .stream()
+            .map(progress -> progress.split(" ")[2].replace("%", ""))
+            .map(Integer::parseInt)
+            .collect(Collectors.toList());
     }
 
 }
