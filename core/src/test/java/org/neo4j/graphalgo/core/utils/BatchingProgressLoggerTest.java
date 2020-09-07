@@ -129,5 +129,35 @@ class BatchingProgressLoggerTest {
         assertEquals(101, new HashSet<>(loggedPercentages).size());
     }
 
+    @Test
+    void shouldLogPercentagesSequentially() {
+        var log = new TestLog();
+        var logger = new BatchingProgressLogger(log, 400, "Test", 4);
+
+        var tasks = IntStream
+            .range(0, 4)
+            .mapToObj(i -> {
+                Runnable runnable = () -> IntStream.range(0, 100).forEach(ignore -> {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    logger.logProgress();
+                });
+                return runnable;
+            }).collect(Collectors.toList());
+
+        ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
+
+        var loggedPercentages = log.getMessages(TestLog.INFO).stream()
+            .map(progress -> progress.split(" ")[2].replace("%", ""))
+            .map(Integer::parseInt)
+            .collect(Collectors.toList());
+        var expected = loggedPercentages.stream().sorted().collect(Collectors.toList());
+
+        assertEquals(expected, loggedPercentages);
+    }
+
 
 }
