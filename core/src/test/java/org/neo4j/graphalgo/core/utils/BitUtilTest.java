@@ -222,4 +222,21 @@ final class BitUtilTest {
         assertEquals(1L, ceilDiv(Long.MAX_VALUE - 1L, Long.MAX_VALUE));
         assertEquals(1L, ceilDiv(Long.MAX_VALUE, Long.MAX_VALUE));
     }
+
+    @Test
+    void ceilDivForIntsRoundsTowardsPositiveInfinity() {
+        assertEquals(0, ceilDiv(0, 1));
+        assertEquals(1, ceilDiv(1, 1));
+        assertEquals(1, ceilDiv(1, 2));
+        assertEquals(1, ceilDiv(1, 3));
+        assertEquals(1, ceilDiv(1, Integer.MAX_VALUE));
+        assertEquals(42, ceilDiv(42, 1));
+        assertEquals(21, ceilDiv(42, 2));
+        assertEquals(14, ceilDiv(42, 3));
+        assertEquals(11, ceilDiv(42, 4));
+        assertEquals(9, ceilDiv(42, 5));
+        assertEquals(7, ceilDiv(42, 6));
+        assertEquals(1, ceilDiv(Integer.MAX_VALUE - 1, Integer.MAX_VALUE));
+        assertEquals(1, ceilDiv(Integer.MAX_VALUE, Integer.MAX_VALUE));
+    }
 }

@@ -104,6 +104,10 @@ public final class BitUtil {
         return 1L + (-1L + dividend) / divisor;
     }
 
+    public static int ceilDiv(int dividend, int divisor) {
+        return 1 + (-1 + dividend) / divisor;
+    }
+
     private BitUtil() {
         throw new UnsupportedOperationException("No instances");
     }
