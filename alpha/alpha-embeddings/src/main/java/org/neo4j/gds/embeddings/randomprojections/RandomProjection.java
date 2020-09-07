@@ -94,8 +94,10 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
     @Override
     public RandomProjection compute() {
+        progressLogger.logMessage(":: Start");
         initRandomVectors();
         propagateEmbeddings();
+        progressLogger.logMessage(":: Finished");
         return me();
     }
 
@@ -127,7 +129,8 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
-        progressLogger.logMessage("Computing random vectors");
+        progressLogger.reset(graph.nodeCount());
+        progressLogger.logMessage("Initialising Random Vectors :: Start");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
@@ -138,15 +141,15 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
             embeddingA.set(nodeId, new float[this.embeddingSize]);
-
             progressLogger.logProgress();
         });
+        progressLogger.logMessage("Initialising Random Vectors :: Finished");
     }
 
     void propagateEmbeddings() {
         for (int i = 0; i < iterations; i++) {
             progressLogger.reset(graph.relationshipCount());
-            progressLogger.logMessage(formatWithLocale("Start iteration %s", i));
+            progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
@@ -168,8 +171,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                     });
 
                     // Normalize neighbour embeddings
-                    int degree = graph.degree(nodeId) == 0 ? 1 : graph.degree(nodeId);
-                    double degreeScale = 1.0f / degree;
+                    var degree = graph.degree(nodeId);
+                    int adjustedDegree = degree == 0 ? 1 : degree;
+                    double degreeScale = 1.0f / adjustedDegree;
                     multiplyArrayValues(currentEmbedding, degreeScale);
                     if (normalizeL2) {
                         l2Normalize(currentEmbedding);
@@ -177,14 +181,17 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
                     // Update the result embedding
                     if (iterationWeights.isEmpty()) {
+                        // TODO this only needs to happen in the last iteration
                         System.arraycopy(currentEmbedding, 0, embedding, offset, embeddingSize);
                     } else {
                         updateEmbeddings(iterationWeight, embedding, currentEmbedding);
                     }
 
-                    progressLogger.logProgress(graph.degree(nodeId));
+                    progressLogger.logProgress(degree);
                 });
             }
+
+            progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));
         }
     }
 

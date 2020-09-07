@@ -22,9 +22,13 @@ package org.neo4j.gds.embeddings.randomprojections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -263,5 +267,47 @@ class RandomProjectionTest extends AlgoTestBase {
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
         assertEquals(158544, estimate.min);
+    }
+
+    @Test
+    void testProgressLogging() {
+        var graph = RandomGraphGenerator
+            .builder()
+            .nodeCount(100)
+            .averageDegree(5)
+            .orientation(Orientation.UNDIRECTED)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .build()
+            .generate();
+
+        var config = ImmutableRandomProjectionBaseConfig
+            .builder()
+            .maxIterations(2)
+            .embeddingSize(128)
+            .iterationWeights(List.of(1.0D, 2.0D))
+            .concurrency(1)
+            .build();
+
+        var logger = new TestProgressLogger(
+            graph.nodeCount(),
+            RandomProjection.class.getSimpleName(),
+            config.concurrency()
+        );
+
+        new RandomProjection(graph, config, logger, AllocationTracker.empty()).compute();
+
+        logger.getMessages(TestProgressLogger.INFO).forEach(System.out::println);
+
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Start"));
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Start"));
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Finished"));
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Start"));
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Finished"));
+        assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Finished"));
+
+        assertEquals(
+            3,
+            logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
+        );
     }
 }
