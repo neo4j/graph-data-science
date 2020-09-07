@@ -85,7 +85,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -95,6 +98,47 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Neo4jProxy42 implements Neo4jProxyApi {
+
+    private static final MethodHandle CREATE_LOG_BUILDER;
+
+    static {
+        // signature changed midway through drop04 but we need to keep it compatible with drop03 at least
+        // for as long as Aura runs on drop03
+        var lookup = MethodHandles.lookup();
+        MethodHandle createBuilder;
+        try {
+            try {
+                // drop03 / early drop04
+                var signature = MethodType.methodType(LogConfig.Builder.class, Path.class, Level.class);
+                var oldHandle = lookup.findStatic(LogConfig.class, "createBuilder", signature);
+                // we call the handle with an additional fs parameter in it's first position
+                // on older versions that do not support that parameter, we need to drop it
+                // before calling the actual method
+                createBuilder = MethodHandles.dropArguments(oldHandle, 0, FileSystemAbstraction.class);
+            } catch (NoSuchMethodException e) {
+                // late drop04
+                var signature = MethodType.methodType(
+                    LogConfig.Builder.class,
+                    /* added parameter in drop04 */ FileSystemAbstraction.class,
+                    Path.class,
+                    Level.class
+                );
+                // already correct signature
+                createBuilder = lookup.findStatic(LogConfig.class, "createBuilder", signature);
+            }
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            // instead of failing at class initialization (which would fail the whole db)
+            // we fail only when the method is accessed (which may be never)
+            // so that we can still run on the
+            var error = new LinkageError("Could not find suitable method `createBuilder` on " + LogConfig.class, e);
+            var throwError = MethodHandles.throwException(LogConfig.Builder.class, LinkageError.class);
+            createBuilder = throwError.bindTo(error);
+        }
+
+        System.out.println("createBuilder.type() = " + createBuilder.type());
+
+        CREATE_LOG_BUILDER = createBuilder;
+    }
 
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
@@ -236,7 +280,23 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         FileSystemAbstraction fs,
         LifeSupport lifeSupport
     ) {
-        var neo4jLoggerContext = LogConfig.createBuilder(storeLogPath, Level.INFO).build();
+        LogConfig.Builder builder;
+        try {
+            builder = (LogConfig.Builder) CREATE_LOG_BUILDER.invoke(fs, storeLogPath, Level.INFO);
+        } catch (Throwable throwable) {
+            // this is taken from ExceptionUtil, but don't have a dependency on that module here
+            if (throwable instanceof Error) {
+                throw (Error) throwable;
+            }
+            if (throwable instanceof RuntimeException) {
+                throw (RuntimeException) throwable;
+            }
+            if (throwable instanceof IOException) {
+                throw new UncheckedIOException((IOException) throwable);
+            }
+            throw new RuntimeException(throwable);
+        }
+        var neo4jLoggerContext = builder.build();
         var simpleLogService = new SimpleLogService(
             NullLogProvider.getInstance(),
             new Log4jLogProvider(neo4jLoggerContext)
