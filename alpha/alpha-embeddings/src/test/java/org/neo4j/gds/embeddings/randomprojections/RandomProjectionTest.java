@@ -136,7 +136,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
-            .embeddingSize(2)
+            .embeddingSize(128)
             .build();
 
         RandomProjection randomProjection = new RandomProjection(
@@ -152,12 +152,13 @@ class RandomProjectionTest extends AlgoTestBase {
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
-        boolean isEqual = true;
         for (int i = 0; i < 2; i++) {
-            isEqual &= embeddings.get(0)[i] == (2.0 * randomVectors.get(1)[i] +  1 * randomVectors.get(2)[i]) / 2.0f;
+            assertEquals(
+                embeddings.get(0)[i],
+                (2.0 * randomVectors.get(1)[i] + 1 * randomVectors.get(2)[i]) / 2.0f,
+                0.001
+            );
         }
-
-        assertTrue(isEqual);
     }
 
     @Test
