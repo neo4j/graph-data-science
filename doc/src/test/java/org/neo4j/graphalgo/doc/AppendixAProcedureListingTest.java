@@ -65,6 +65,22 @@ class AppendixAProcedureListingTest extends BaseProcTest {
     }
 
     @Test
+    void countShouldMatch() {
+        var registeredProcedures = new LinkedList<>();
+        runQueryWithRowConsumer("CALL gds.list() YIELD name", row -> {
+            registeredProcedures.add(row.getString("name"));
+        });
+        registeredProcedures.add("gds.list");
+
+        int expectedCount = 179;
+        assertEquals(
+            expectedCount,
+            registeredProcedures.size(),
+            "The expected and registered procedures don't match. Please also update the SmokeTest counts."
+        );
+    }
+
+    @Test
     void shouldListAll() {
         AppendixAProcedureListingProcessor procedureListingProcessor = new AppendixAProcedureListingProcessor();
         asciidoctor.javaExtensionRegistry().treeprocessor(procedureListingProcessor);
