@@ -139,7 +139,8 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         } catch (IllegalAccessException | NoSuchMethodException e) {
             // instead of failing at class initialization (which would fail the whole db)
             // we fail only when the method is accessed (which may be never)
-            // so that we can still run on the
+            // so that we can still run every other operation.
+            // At the time of this writing, only graph export with enableDebugLog will execute this code.
             var error = new LinkageError(
                 formatWithLocale(
                     "Could not find suitable method `%s` on %s. Expected a static method with parameters %s.",
@@ -149,6 +150,7 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
                 ), e);
             var throwError = MethodHandles.throwException(LogConfig.Builder.class, LinkageError.class);
             throwError = throwError.bindTo(error);
+            // Need to align the handle to the expected signature, so that can call it the same way as working handles
             createBuilder = MethodHandles.dropArguments(
                 throwError,
                 0,
