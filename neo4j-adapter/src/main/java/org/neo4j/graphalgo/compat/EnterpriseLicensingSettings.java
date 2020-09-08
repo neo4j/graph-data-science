@@ -30,11 +30,11 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 @ServiceProvider
 public class EnterpriseLicensingSettings implements SettingsDeclaration {
 
-    private static final String ENTERPRISE_LICENSE_KEY = "gds.enterprise.licenseKey";
+    private static final String ENTERPRISE_LICENSE_FILE = "gds.enterprise.licenseFile";
 
     @Description("Sets the location of the file that contains the key to unlock the Enterprise Edition of the Neo4j Graph Data Science library")
-    public static Setting<String> enterpriseLicenseKey = newBuilder(
-        ENTERPRISE_LICENSE_KEY,
+    public static Setting<String> enterpriseLicenseFile = newBuilder(
+        ENTERPRISE_LICENSE_FILE,
         SettingValueParsers.STRING,
         null
     ).build();

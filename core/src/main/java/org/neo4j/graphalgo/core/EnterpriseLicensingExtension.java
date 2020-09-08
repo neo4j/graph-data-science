@@ -45,12 +45,12 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                String enterpriseLicenseKeyFile = dependencies.config().get(Settings.enterpriseLicenseKey());
+                String enterpriseLicenseFile = dependencies.config().get(Settings.enterpriseLicenseFile());
                 GdsEdition gdsEdition = GdsEdition.instance();
                 gdsEdition.setToCommunityEdition();
 
-                if (enterpriseLicenseKeyFile != null && !enterpriseLicenseKeyFile.isBlank()) {
-                    var keyPath = Path.of(enterpriseLicenseKeyFile);
+                if (enterpriseLicenseFile != null && !enterpriseLicenseFile.isBlank()) {
+                    var keyPath = Path.of(enterpriseLicenseFile);
                     if (!keyPath.isAbsolute()) {
                         gdsEdition.setToInvalidLicense("The path to the GDS license key must be absolute.");
                         return;
