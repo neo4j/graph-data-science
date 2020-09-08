@@ -50,7 +50,6 @@ public final class SignatureTool {
             Claims claims = token.getBody();
 
             Date now = new Date();
-            // TODO teach the UI to generate keys for GDS
             if (!claims.getSubject().equals("neo4j-gds")) {
                 return ImmutableLicenseCheckResult.of(
                     false,
