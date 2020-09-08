@@ -301,6 +301,13 @@ public abstract class GdsCypher {
     }
 
     public interface ImplicitCreationBuildStage extends ImplicitCreationInlineBuilder, QueryBuilder {
+        default ImplicitCreationBuildStage withNodeProperties(List<String> nodeProperties, DefaultValue defaultValue) {
+            var stage = this;
+            for (String property : nodeProperties) {
+                stage = stage.withNodeProperty(property, defaultValue);
+            }
+            return stage;
+        }
     }
 
     public interface ModeBuildStage {
