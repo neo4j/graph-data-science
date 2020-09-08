@@ -125,10 +125,10 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         double probability = 1.0f / (2.0f * sparsity);
         float sqrtSparsity = (float) Math.sqrt(sparsity);
         float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
+        ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
         progressLogger.logMessage("Computing random vectors");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-            ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
             int degree = graph.degree(nodeId);
             float scaling = degree == 0
                 ? 1.0f
@@ -250,7 +250,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         private long w = 1;
 
         public HighQualityRandom() {
-            this(System.nanoTime());
+            this(System.nanoTime() + (13 * Thread.currentThread().getId()));
         }
 
         public HighQualityRandom(long seed) {
@@ -262,6 +262,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
             nextLong();
         }
 
+        @Override
         public long nextLong() {
             u = u * 2862933555777941757L + 7046029254386353087L;
             v ^= v >>> 17;
