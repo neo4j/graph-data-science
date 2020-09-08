@@ -93,15 +93,9 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        var withDimensions = userInput.containsKey("embeddingSize")
+        return userInput.containsKey("embeddingSize")
             ? userInput
             : userInput.withEntry("embeddingSize", 128);
-
-        var withMaxIterations = withDimensions.containsKey("maxIterations")
-            ? withDimensions
-            : withDimensions.withEntry("maxIterations", 10);
-
-        return withMaxIterations;
     }
 
     @Test

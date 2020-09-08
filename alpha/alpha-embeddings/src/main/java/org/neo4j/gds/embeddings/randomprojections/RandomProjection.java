@@ -87,8 +87,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addArrayValues(lhs, rhs);
-
-        int embeddingSize = iterationWeights.isEmpty() ? this.embeddingSize * iterations : this.embeddingSize;
         this.embeddings.setAll((i) -> new float[embeddingSize]);
     }
 
@@ -150,10 +148,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
-            int offset = embeddingSize * i;
-            double iterationWeight = iterationWeights.isEmpty()
-                ? Double.NaN
-                : iterationWeights.get(i);
+            double iterationWeight = iterationWeights.get(i);
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
@@ -176,11 +171,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                     }
 
                     // Update the result embedding
-                    if (iterationWeights.isEmpty()) {
-                        System.arraycopy(currentEmbedding, 0, embedding, offset, embeddingSize);
-                    } else {
-                        updateEmbeddings(iterationWeight, embedding, currentEmbedding);
-                    }
+                    updateEmbeddings(iterationWeight, embedding, currentEmbedding);
 
                     progressLogger.logProgress(graph.degree(nodeId));
                 });

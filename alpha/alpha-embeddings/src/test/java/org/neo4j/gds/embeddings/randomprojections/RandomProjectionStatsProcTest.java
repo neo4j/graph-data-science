@@ -51,7 +51,6 @@ class RandomProjectionStatsProcTest extends RandomProjectionProcTest<RandomProje
             .algo("gds.alpha.randomProjection")
             .statsMode()
             .addParameter("embeddingSize", 2)
-            .addParameter("maxIterations", 2)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(

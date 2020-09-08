@@ -63,29 +63,26 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
     @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingSize = 128;
-        int maxIterations = 4;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .algo("gds.alpha.randomProjection")
             .writeMode()
             .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations)
             .addParameter("writeProperty", "embedding");
 
         if (!weights.isEmpty()) {
-            queryBuilder.addParameter("iterationWeights", weights);
+            queryBuilder
+                .addParameter("iterationWeights", weights)
+                .addParameter("maxIterations", weights.size());
         }
         String writeQuery = queryBuilder.yields();
 
         runQuery(writeQuery);
 
-        int expectedEmbeddingsDimension = weights.isEmpty()
-            ? embeddingSize * maxIterations
-            : embeddingSize;
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(expectedEmbeddingsDimension, embeddings.length);
+            assertEquals(embeddingSize, embeddings.length);
             boolean allMatch = true;
             for (float embedding : embeddings) {
                 if (Float.compare(embedding, 0.0F) != 0) {
@@ -100,7 +97,7 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
     @Test
     void shouldComputeAndWriteWithWeight() {
         int embeddingSize = 128;
-        int maxIterations = 1;
+
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
@@ -109,7 +106,6 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             .algo("gds.alpha.randomProjection")
             .writeMode()
             .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations)
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("writeProperty", "embedding")
             .yields();

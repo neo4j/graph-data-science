@@ -56,20 +56,17 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .algo("gds.alpha.randomProjection")
             .streamMode()
-            .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations);
+            .addParameter("embeddingSize", embeddingSize);
 
         if (!weights.isEmpty()) {
+            queryBuilder.addParameter("maxIterations", weights.size());
             queryBuilder.addParameter("iterationWeights", weights);
         }
         String query = queryBuilder.yields();
 
-        int expectedEmbeddingsDimension = weights.isEmpty()
-            ? embeddingSize * maxIterations
-            : embeddingSize;
         runQueryWithRowConsumer(query, row -> {
             List<Float> embeddings = (List<Float>) row.get("embedding");
-            assertEquals(expectedEmbeddingsDimension, embeddings.size());
+            assertEquals(embeddingSize, embeddings.size());
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
     }
@@ -100,7 +97,6 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
     @Test
     void shouldComputeWithWeight() {
         int embeddingSize = 128;
-        int maxIterations = 1;
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withNodeLabel("Node2")
@@ -109,7 +105,6 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
             .algo("gds.alpha.randomProjection")
             .streamMode()
             .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations)
             .addParameter("relationshipWeightProperty", "weight")
             .yields();
 

@@ -74,33 +74,28 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
             .graphCreate(loadedGraphName)
             .yields();
 
-        System.out.println(graphCreateQuery);
         runQuery(graphCreateQuery);
 
-
         int embeddingSize = 128;
-        int maxIterations = 4;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(loadedGraphName)
             .algo("gds.alpha.randomProjection")
             .mutateMode()
             .addParameter("embeddingSize", embeddingSize)
-            .addParameter("maxIterations", maxIterations)
             .addParameter("mutateProperty", "embedding");
 
         if (!weights.isEmpty()) {
-            queryBuilder.addParameter("iterationWeights", weights);
+            queryBuilder
+                .addParameter("iterationWeights", weights)
+                .addParameter("maxIterations", weights.size());
         }
         String query = queryBuilder.yields();
 
         runQuery(query);
 
-        int expectedEmbeddingsDimension = weights.isEmpty()
-            ? embeddingSize * maxIterations
-            : embeddingSize;
         runQueryWithRowConsumer("MATCH (n:Node) RETURN gds.util.nodeProperty('loadGraph', id(n), 'embedding') as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(expectedEmbeddingsDimension, embeddings.length);
+            assertEquals(embeddingSize, embeddings.length);
             boolean allMatch = true;
             for (float embedding : embeddings) {
                 if (Float.compare(embedding, 0.0F) != 0) {

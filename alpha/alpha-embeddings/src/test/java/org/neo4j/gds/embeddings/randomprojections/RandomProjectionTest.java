@@ -41,6 +41,7 @@ class RandomProjectionTest extends AlgoTestBase {
     static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
         .embeddingSize(128)
         .maxIterations(1)
+        .addIterationWeight(1.0D)
         .build();
 
     private static final String DB_CYPHER =
@@ -176,6 +177,7 @@ class RandomProjectionTest extends AlgoTestBase {
             ImmutableRandomProjectionBaseConfig.builder()
                 .embeddingSize(512)
                 .maxIterations(1)
+                .addIterationWeight(1.0D)
                 .build(),
             progressLogger,
             AllocationTracker.empty()
@@ -219,6 +221,7 @@ class RandomProjectionTest extends AlgoTestBase {
             ImmutableRandomProjectionBaseConfig.builder()
                 .embeddingSize(64)
                 .maxIterations(4)
+                .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
             progressLogger,
             AllocationTracker.empty()
@@ -239,6 +242,7 @@ class RandomProjectionTest extends AlgoTestBase {
         var config = ImmutableRandomProjectionBaseConfig
             .builder()
             .maxIterations(2)
+            .addIterationWeights(1.0D, 1.0D)
             .embeddingSize(128)
             .build();
 
@@ -246,7 +250,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(209744, estimate.min);
+        assertEquals(158_544, estimate.min);
     }
 
     @Test

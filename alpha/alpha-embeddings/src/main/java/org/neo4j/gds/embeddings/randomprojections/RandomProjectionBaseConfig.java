@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -36,6 +35,8 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
+    List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 0.0D, 1.0D);
+
     int embeddingSize();
 
     @Value.Default
@@ -43,10 +44,16 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
         return 3;
     }
 
+    @Override
+    @Value.Default
+    default int maxIterations() {
+        return DEFAULT_ITERATION_WEIGHTS.size();
+    }
+
     @Configuration.Key(ITERATION_WEIGHTS_KEY)
     @Value.Default
     default List<Double> iterationWeights() {
-        return Collections.emptyList();
+        return DEFAULT_ITERATION_WEIGHTS;
     }
 
     @Value.Default
@@ -61,21 +68,19 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
 
     @Value.Check
     default void validate() {
-        if (!iterationWeights().isEmpty()) {
-            var numberOfIterationWeights = iterationWeights().size();
-            if (numberOfIterationWeights != maxIterations()) {
-                var message = formatWithLocale(
-                    "The value of `%1$s` must be a list where its length is the " +
-                    "same value as the configured value for `%2$s`.%n" +
-                    "`%2$s` is defined as `%3$d` but `%1$s` contains `%4$d` %5$s.",
-                    ITERATION_WEIGHTS_KEY,
-                    MAX_ITERATIONS_KEY,
-                    maxIterations(),
-                    numberOfIterationWeights,
-                    numberOfIterationWeights == 1 ? "entry" : "entries"
-                );
-                throw new IllegalArgumentException(message);
-            }
+        var numberOfIterationWeights = iterationWeights().size();
+        if (numberOfIterationWeights != maxIterations()) {
+            var message = formatWithLocale(
+                "The value of `%1$s` must be a list where its length is the " +
+                "same value as the configured value for `%2$s`.%n" +
+                "`%2$s` is defined as `%3$d` but `%1$s` contains `%4$d` %5$s.",
+                ITERATION_WEIGHTS_KEY,
+                MAX_ITERATIONS_KEY,
+                maxIterations(),
+                numberOfIterationWeights,
+                numberOfIterationWeights == 1 ? "entry" : "entries"
+            );
+            throw new IllegalArgumentException(message);
         }
     }
 }
