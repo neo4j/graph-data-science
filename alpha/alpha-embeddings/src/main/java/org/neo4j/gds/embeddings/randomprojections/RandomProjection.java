@@ -250,7 +250,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         private long w = 1;
 
         public HighQualityRandom() {
-            this(System.nanoTime() * Thread.currentThread().getId());
+            this(System.nanoTime() + (13 * Thread.currentThread().getId()));
         }
 
         public HighQualityRandom(long seed) {
