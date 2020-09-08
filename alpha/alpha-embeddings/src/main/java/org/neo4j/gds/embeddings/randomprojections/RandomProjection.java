@@ -129,7 +129,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
-        progressLogger.reset(graph.nodeCount());
         progressLogger.logMessage("Initialising Random Vectors :: Start");
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             int degree = graph.degree(nodeId);

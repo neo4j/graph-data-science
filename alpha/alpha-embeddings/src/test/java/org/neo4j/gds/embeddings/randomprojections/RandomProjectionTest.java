@@ -274,7 +274,7 @@ class RandomProjectionTest extends AlgoTestBase {
         var graph = RandomGraphGenerator
             .builder()
             .nodeCount(100)
-            .averageDegree(5)
+            .averageDegree(2)
             .orientation(Orientation.UNDIRECTED)
             .relationshipDistribution(RelationshipDistribution.RANDOM)
             .build()
@@ -283,9 +283,9 @@ class RandomProjectionTest extends AlgoTestBase {
         var config = ImmutableRandomProjectionBaseConfig
             .builder()
             .maxIterations(2)
-            .embeddingSize(128)
+            .embeddingSize(2)
             .iterationWeights(List.of(1.0D, 2.0D))
-            .concurrency(1)
+            .concurrency(4)
             .build();
 
         var logger = new TestProgressLogger(
@@ -296,8 +296,6 @@ class RandomProjectionTest extends AlgoTestBase {
 
         new RandomProjection(graph, config, logger, AllocationTracker.empty()).compute();
 
-        logger.getMessages(TestProgressLogger.INFO).forEach(System.out::println);
-
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Start"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Start"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Finished"));
@@ -305,6 +303,9 @@ class RandomProjectionTest extends AlgoTestBase {
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Finished"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Finished"));
 
+        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(0).get());
+        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(1).get());
+        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(2).get());
         assertEquals(
             3,
             logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
