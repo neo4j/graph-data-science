@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     private static StoreScanner.Factory<NodeReference> scannerFactory(
         GraphDimensions dimensions
     ) {
-        if (!USE_KERNEL_CURSORS.get()) {
+        if (!GdsFeatureToggles.USE_KERNEL_CURSORS.get()) {
             return NodeRecordBasedScanner.FACTORY;
         }
 

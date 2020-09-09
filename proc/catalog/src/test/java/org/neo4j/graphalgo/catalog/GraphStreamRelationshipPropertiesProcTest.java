@@ -189,6 +189,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             Orientation.NATURAL,
             true,
             Aggregation.NONE,
+            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -296,6 +297,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             Orientation.NATURAL,
             true,
             Aggregation.NONE,
+            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

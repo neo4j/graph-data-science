@@ -25,13 +25,11 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
-import org.neo4j.util.FeatureToggles;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.graphalgo.core.loading.AbstractRecordBasedScanner.DEFAULT_PREFETCH_SIZE;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -39,14 +37,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 public abstract class ScanningRecordsImporter<Record, T> {
 
     private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
-
-    private static final boolean USE_KERNEL_CURSORS_DEFAULT_SETTING = true;
-    private static final boolean USE_KERNEL_CURSORS_FLAG = FeatureToggles.flag(
-        ScanningRecordsImporter.class,
-        "useKernelCursors",
-        USE_KERNEL_CURSORS_DEFAULT_SETTING
-    );
-    protected static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
 
     private final StoreScanner.Factory<Record> factory;
     private final String label;

@@ -586,6 +586,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 Orientation.NATURAL,
                 false,
                 Aggregation.NONE,
+                false,
                 executorService,
                 tracker
             );
@@ -595,6 +596,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 Orientation.REVERSE,
                 false,
                 Aggregation.NONE,
+                false,
                 executorService,
                 tracker
             );

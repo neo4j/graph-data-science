@@ -88,6 +88,7 @@ class HugeGraphUtilTest {
             orientation,
             false,
             Aggregation.SUM,
+            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -150,6 +151,7 @@ class HugeGraphUtilTest {
             orientation,
             true,
             aggregation,
+            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

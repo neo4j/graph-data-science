@@ -160,6 +160,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 Orientation.NATURAL,
                 true,
                 Aggregation.NONE,
+                false,
                 Pools.DEFAULT,
                 computationResult.tracker()
             );

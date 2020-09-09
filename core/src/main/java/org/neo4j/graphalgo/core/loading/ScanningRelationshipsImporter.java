@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         int concurrency
     ) {
         super(
-            USE_KERNEL_CURSORS.get() ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
+            GdsFeatureToggles.USE_KERNEL_CURSORS.get() ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
             "Relationship",
             loadingContext,
             dimensions,
@@ -143,7 +144,8 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             relationshipCounter,
             propertyKeyIds,
             defaultValues,
-            aggregations
+            aggregations,
+            GdsFeatureToggles.USE_PRE_AGGREGATION.get()
         );
 
         RelationshipImporter importer = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);

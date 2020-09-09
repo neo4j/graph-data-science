@@ -49,7 +49,8 @@ final class AdjacencyBuilder {
         LongAdder relationshipCounter,
         int[] propertyKeyIds,
         double[] defaultValues,
-        Aggregation[] aggregations
+        Aggregation[] aggregations,
+        boolean preAggregate
     ) {
         tracker.add(sizeOfObjectArray(numPages) << 2);
         ThreadLocalRelationshipsBuilder[] localBuilders = new ThreadLocalRelationshipsBuilder[numPages];
@@ -75,7 +76,8 @@ final class AdjacencyBuilder {
             propertyKeyIds,
             defaultValues,
             aggregations,
-            atLeastOnePropertyToLoad
+            atLeastOnePropertyToLoad,
+            preAggregate
         );
         for (int idx = 0; idx < numPages; idx++) {
             compressingPagedAdjacency.addAdjacencyImporter(tracker, idx);
@@ -100,6 +102,7 @@ final class AdjacencyBuilder {
     private final double[] defaultValues;
     private final Aggregation[] aggregations;
     private final boolean atLeastOnePropertyToLoad;
+    private final boolean preAggregate;
 
     private AdjacencyBuilder(
         RelationshipsBuilder globalBuilder,
@@ -113,7 +116,8 @@ final class AdjacencyBuilder {
         int[] propertyKeyIds,
         double[] defaultValues,
         Aggregation[] aggregations,
-        boolean atLeastOnePropertyToLoad
+        boolean atLeastOnePropertyToLoad,
+        boolean preAggregate
     ) {
         this.globalBuilder = globalBuilder;
         this.localBuilders = localBuilders;
@@ -131,6 +135,7 @@ final class AdjacencyBuilder {
         this.defaultValues = defaultValues;
         this.aggregations = aggregations;
         this.atLeastOnePropertyToLoad = atLeastOnePropertyToLoad;
+        this.preAggregate = preAggregate;
     }
 
     /**
@@ -192,8 +197,7 @@ final class AdjacencyBuilder {
                 if (propertyValues == null) {
                     compressedTargets.add(targets, startOffset, endOffset, targetsToImport);
                 } else {
-                    if (aggregations[0] != Aggregation.NONE) {
-                        //TODO: consider only calling this method if `end-start` is sufficiently large
+                    if (preAggregate && aggregations[0] != Aggregation.NONE) {
                         targetsToImport = aggregate(targets, propertyValues, startOffset, endOffset, aggregations);
                     }
 
