@@ -23,9 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 import org.neo4j.graphalgo.utils.CheckedRunnable;
-import org.neo4j.util.FeatureToggles;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -40,14 +39,8 @@ public interface AllocationTracker extends Supplier<String> {
         return tracker != null && tracker != empty();
     }
 
-    AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(FeatureToggles.flag(
-        AllocationTracker.class,
-        "useKernelTracker",
-        false
-    ));
-
     static boolean useKernelTracker() {
-        return USE_KERNEL_TRACKER.get();
+        return GdsFeatureToggles.USE_KERNEL_TRACKER.get();
     }
 
     static AllocationTracker create() {
@@ -65,11 +58,11 @@ public interface AllocationTracker extends Supplier<String> {
 
     @TestOnly
     static <E extends Exception> void whileUsingKernelTracker(CheckedRunnable<E> code) throws E {
-        var useKernelTracker = USE_KERNEL_TRACKER.getAndSet(true);
+        var useKernelTracker = GdsFeatureToggles.USE_KERNEL_TRACKER.getAndSet(true);
         try {
             code.checkedRun();
         } finally {
-            USE_KERNEL_TRACKER.set(useKernelTracker);
+            GdsFeatureToggles.USE_KERNEL_TRACKER.set(useKernelTracker);
         }
     }
 

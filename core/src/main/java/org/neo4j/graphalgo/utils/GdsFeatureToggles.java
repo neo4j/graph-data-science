@@ -19,17 +19,56 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.neo4j.util.FeatureToggles;
+
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class GdsFeatureToggles {
 
     private static final boolean USE_PRE_AGGREGATION_DEFAULT_SETTING = false;
-    private static final boolean USE_PRE_AGGREGATION_FLAG = org.neo4j.util.FeatureToggles.flag(
+    private static final boolean USE_PRE_AGGREGATION_FLAG = FeatureToggles.flag(
         GdsFeatureToggles.class,
         "usePreAggregation",
         USE_PRE_AGGREGATION_DEFAULT_SETTING
     );
     public static final AtomicBoolean USE_PRE_AGGREGATION = new AtomicBoolean(USE_PRE_AGGREGATION_FLAG);
+
+
+    private static final boolean SKIP_ORPHANS_DEFAULT_SETTING = false;
+    private static final boolean SKIP_ORPHANS_FLAG = FeatureToggles.flag(
+        GdsFeatureToggles.class,
+        "skipOrphans",
+        SKIP_ORPHANS_DEFAULT_SETTING
+    );
+    public static final AtomicBoolean SKIP_ORPHANS = new AtomicBoolean(SKIP_ORPHANS_FLAG);
+
+    private static final boolean USE_KERNEL_CURSORS_DEFAULT_SETTING = true;
+    private static final boolean USE_KERNEL_CURSORS_FLAG = FeatureToggles.flag(
+        GdsFeatureToggles.class,
+        "useKernelCursors",
+        USE_KERNEL_CURSORS_DEFAULT_SETTING
+    );
+    public static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
+
+    // Prevents full GC more often as not so much consecutive memory is allocated in one go as
+    // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
+    // Feature toggle is there for testing: org.neo4j.graphalgo.core.huge.loader.HugeGraphLoadingTest#testPropertyLoading
+    private static final int MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING = 28;
+    private static final int MAX_ARRAY_LENGTH_SHIFT_FLAG = FeatureToggles.getInteger(
+        GdsFeatureToggles.class,
+        "maxArrayLengthShift",
+        MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING
+    );
+    public static final AtomicInteger MAX_ARRAY_LENGTH_SHIFT = new AtomicInteger(MAX_ARRAY_LENGTH_SHIFT_FLAG);
+
+    private static final boolean USE_KERNEL_TRACKER_DEFAULT_SETTING = false;
+    private static final boolean USE_KERNEL_TRACKER_FLAG = FeatureToggles.flag(
+        GdsFeatureToggles.class,
+        "useKernelTracker",
+        USE_KERNEL_TRACKER_DEFAULT_SETTING
+    );
+    public static final AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(USE_KERNEL_TRACKER_FLAG);
 
     private GdsFeatureToggles() {}
 }

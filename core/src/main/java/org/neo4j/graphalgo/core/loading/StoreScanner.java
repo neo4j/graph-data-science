@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public interface StoreScanner<Reference> extends AutoCloseable {
@@ -27,7 +28,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     int DEFAULT_PREFETCH_SIZE = 100;
 
     static void useKernelCursors(boolean flag) {
-        ScanningRecordsImporter.USE_KERNEL_CURSORS.set(flag);
+        GdsFeatureToggles.USE_KERNEL_CURSORS.set(flag);
     }
 
     interface RecordConsumer<Reference> {
