@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.loading.StoreScanner;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,4 +31,15 @@ import org.neo4j.procedure.Procedure;
  */
 public final class FeatureToggleProc {
 
+    @Procedure("gds.features.importer.skipOrphanNodes")
+    @Description("Toggle whether orphan nodes should be skipped during import")
+    public void skipOrphanNodes(@Name(value = "skipOrphanNodes") boolean skipOrphanNodes) {
+        GdsFeatureToggles.SKIP_ORPHANS.set(skipOrphanNodes);
+    }
+
+    @Procedure("gds.features.useKernelTracker")
+    @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used")
+    public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
+        GdsFeatureToggles.USE_KERNEL_TRACKER.set(useKernelTracker);
+    }
 }

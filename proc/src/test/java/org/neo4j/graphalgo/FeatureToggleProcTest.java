@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.loading.StoreScanner;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Map;
 
@@ -32,5 +32,23 @@ class FeatureToggleProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(FeatureToggleProc.class);
+    }
+
+    @Test
+    void toggleSkippingOrphanNodes() {
+        var skipOrphanNodes = GdsFeatureToggles.SKIP_ORPHANS.get();
+        runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", !skipOrphanNodes));
+        assertEquals(!skipOrphanNodes, GdsFeatureToggles.SKIP_ORPHANS.get());
+        runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", skipOrphanNodes));
+        assertEquals(skipOrphanNodes, GdsFeatureToggles.SKIP_ORPHANS.get());
+    }
+
+    @Test
+    void toggleUseKernelTracker() {
+        var useKernelTracker = GdsFeatureToggles.USE_KERNEL_TRACKER.get();
+        runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", !useKernelTracker));
+        assertEquals(!useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+        runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
+        assertEquals(useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
     }
 }
