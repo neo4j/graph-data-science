@@ -60,7 +60,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         int concurrency
     ) {
         super(
-            GdsFeatureToggles.USE_KERNEL_CURSORS.get() ? RelationshipScanCursorBasedScanner.FACTORY : RelationshipRecordBasedScanner.FACTORY,
+            RelationshipScanCursorBasedScanner.FACTORY,
             "Relationship",
             loadingContext,
             dimensions,
