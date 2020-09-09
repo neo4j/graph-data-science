@@ -43,14 +43,6 @@ public final class GdsFeatureToggles {
     );
     public static final AtomicBoolean SKIP_ORPHANS = new AtomicBoolean(SKIP_ORPHANS_FLAG);
 
-    private static final boolean USE_KERNEL_CURSORS_DEFAULT_SETTING = true;
-    private static final boolean USE_KERNEL_CURSORS_FLAG = FeatureToggles.flag(
-        GdsFeatureToggles.class,
-        "useKernelCursors",
-        USE_KERNEL_CURSORS_DEFAULT_SETTING
-    );
-    public static final AtomicBoolean USE_KERNEL_CURSORS = new AtomicBoolean(USE_KERNEL_CURSORS_FLAG);
-
     // Prevents full GC more often as not so much consecutive memory is allocated in one go as
     // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
     // Feature toggle is there for testing: org.neo4j.graphalgo.core.huge.loader.HugeGraphLoadingTest#testPropertyLoading
