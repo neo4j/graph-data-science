@@ -29,13 +29,16 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
 
 public class NodeFilteredGraph extends CSRFilterGraph {
 
@@ -44,6 +47,18 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     public NodeFilteredGraph(CSRGraph graph, IdMap filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
+    }
+
+    @Override
+    public NodeSchema nodeSchema() {
+        var filteredSchemaElements = graph.nodeSchema()
+            .properties()
+            .entrySet()
+            .stream()
+            .filter(entry -> filteredIdMap.availableNodeLabels().contains(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return NodeSchema.of(filteredSchemaElements);
     }
 
     @Override

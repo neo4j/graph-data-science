@@ -500,6 +500,7 @@ public final class CSRGraphStore implements GraphStore {
 
                 HugeGraph initialGraph = HugeGraph.create(
                     nodes,
+                    schema().nodeSchema(),
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties

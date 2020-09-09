@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -91,9 +92,22 @@ public final class HugeGraphUtil {
         );
     }
 
-    public static HugeGraph create(IdMap idMap, Map<String, NodeProperties> nodeProperties, Relationships relationships, AllocationTracker tracker) {
+    public static HugeGraph create(
+        IdMap idMap,
+        Map<String, NodeProperties> nodeProperties,
+        Relationships relationships,
+        AllocationTracker tracker
+    ) {
+        var nodeSchemaBuilder = NodeSchema.builder();
+        nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addPropertyAndTypeForLabel(
+            NodeLabel.ALL_NODES,
+            propertyName,
+            property.valueType()
+        ));
+
         return HugeGraph.create(
             idMap,
+            nodeSchemaBuilder.build(),
             nodeProperties,
             relationships.topology(),
             relationships.properties(),
@@ -245,14 +259,18 @@ public final class HugeGraphUtil {
         }
 
         public void add(long source, long target, double relationshipPropertyValue) {
-            addFromInternal(idMapping.toMappedNodeId(source), idMapping.toMappedNodeId(target), relationshipPropertyValue);
+            addFromInternal(
+                idMapping.toMappedNodeId(source),
+                idMapping.toMappedNodeId(target),
+                relationshipPropertyValue
+            );
         }
 
         public <T extends Relationship> void add(Stream<T> relationshipStream) {
             relationshipStream.forEach(this::add);
         }
 
-        public synchronized <T extends Relationship>  void add(T relationship) {
+        public synchronized <T extends Relationship> void add(T relationship) {
             add(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
         }
 
@@ -306,7 +324,9 @@ public final class HugeGraphUtil {
 
     public interface Relationship {
         long sourceNodeId();
+
         long targetNodeId();
+
         double property();
     }
 }
