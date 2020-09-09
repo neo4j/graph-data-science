@@ -78,7 +78,7 @@ YIELD nodeCount, loadDuration, evalDuration, writeDuration
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-CALL gds.shortestPath.deltaStepping.stream(configuration: Map)
+CALL gds.alpha.shortestPath.deltaStepping.stream(configuration: Map)
 YIELD nodeId, distance
 ----
 
@@ -87,8 +87,8 @@ YIELD nodeId, distance
 |===
 | Name                       | Type   | Default  | Optional | Description
 | startNode                  | Node   | null     | no       | The start node
+| delta                      | Float  | null     | no       | The grade of concurrency to use.
 | relationshipWeightProperty | String | null     | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| delta                      | Float  | null     | yes      | The grade of concurrency to use.
 |===
 
 .Results
@@ -106,14 +106,14 @@ YIELD nodeId, distance
 image::sssp.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
-CREATE (a:Loc {name: 'A'}),
-       (b:Loc {name: 'B'}),
-       (c:Loc {name: 'C'}),
-       (d:Loc {name: 'D'}),
-       (e:Loc {name: 'E'}),
-       (f:Loc {name: 'F'}),
+CREATE (a:Loc {name: "A"}),
+       (b:Loc {name: "B"}),
+       (c:Loc {name: "C"}),
+       (d:Loc {name: "D"}),
+       (e:Loc {name: "E"}),
+       (f:Loc {name: "F"}),
        (a)-[:ROAD {cost: 50}]->(b),
        (a)-[:ROAD {cost: 50}]->(c),
        (a)-[:ROAD {cost: 100}]->(d),
@@ -129,6 +129,8 @@ CREATE (a:Loc {name: 'A'}),
 [[algorithms-single-source-shortest-path-delta]]
 === Delta stepping algorithm
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
@@ -146,23 +148,26 @@ CALL gds.alpha.shortestPath.deltaStepping.stream({
   delta: 3.0
 })
 YIELD nodeId, distance
-RETURN gds.util.asNode(nodeId).name AS destination, distance
+RETURN gds.util.asNode(nodeId).name AS Name, distance AS Cost
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
 | Name | Cost
-| A    | 0
-| B    | 50
-| C    | 50
-| D    | 90
-| E    | 120
-| F    | 160
+| "A"    | 0.0
+| "B"    | 50.0
+| "C"    | 50.0
+| "D"    | 90.0
+| "E"    | 120.0
+| "F"    | 160.0
 |===
+--
 
 The above table shows the cost of going from A to each of the other nodes, including itself at a cost of 0.
 
+[role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -180,28 +185,31 @@ CALL gds.alpha.shortestPath.deltaStepping.write({
   delta: 3.0,
   writeProperty: 'sssp'
 })
-YIELD nodeCount, loadDuration, evalDuration, writeDuration
-RETURN nodeCount, loadDuration, evalDuration, writeDuration
+YIELD nodeCount
+RETURN nodeCount
 ----
+
 .Results
 [opts="header",cols="1"]
 |===
 | nodeCount
 | 6
 |===
-
+--
 
 [[algorithms-single-source-shortest-path-cp]]
 ==== Cypher projection
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
+[role=query-example]
+--
 [source, cypher]
 ----
 MATCH (start:Loc {name: 'A'})
 CALL gds.alpha.shortestPath.deltaStepping.write({
-  nodeQuery:'MATCH(n:Loc) WHERE not n.name = "c" RETURN id(n) AS id',
-  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
+  nodeQuery:'MATCH(n:Loc) WHERE not n.name = "C" RETURN id(n) AS id',
+  relationshipQuery:'MATCH(n:Loc)-[r:ROAD]->(m:Loc) WHERE not (n.name = "C" OR m.name = "C")  RETURN id(n) AS source, id(m) AS target, r.cost AS weight',
   startNode: start,
   relationshipWeightProperty: 'weight',
   delta: 3.0,
@@ -210,3 +218,11 @@ CALL gds.alpha.shortestPath.deltaStepping.write({
 YIELD nodeCount
 RETURN nodeCount
 ----
+
+.Results
+[opts="header",cols="1"]
+|===
+| nodeCount
+| 5
+|===
+--
