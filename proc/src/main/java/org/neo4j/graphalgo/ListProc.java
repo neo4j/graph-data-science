@@ -40,7 +40,10 @@ public class ListProc {
     private static final String QUERY =
             " CALL dbms.procedures() " +
             " YIELD name, signature, description " +
-            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND name <> 'gds.list' AND ($name IS NULL OR name CONTAINS $name) " +
+            " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.')" +
+            " AND name <> 'gds.list'" +
+            " AND NOT name STARTS WITH 'gds.features.'" +
+            " AND ($name IS NULL OR name CONTAINS $name) " +
             " RETURN name, signature, description, 'procedure' AS type " +
             " ORDER BY name UNION " +
             " CALL dbms.functions() " +

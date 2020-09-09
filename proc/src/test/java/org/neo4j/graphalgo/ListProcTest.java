@@ -218,6 +218,8 @@ class ListProcTest extends BaseProcTest {
             BetweennessCentralityWriteProc.class,
             BetweennessCentralityMutateProc.class,
             BetweennessCentralityStatsProc.class,
+            // We register it to check that all of those procedures will not be listed
+            FeatureToggleProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,
