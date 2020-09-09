@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -77,6 +78,12 @@ public abstract class BaseProc {
 
     @Context
     public ProcedureCallContext callContext;
+
+    protected BaseProc() {
+        if (GdsEdition.instance().isInvalidLicense()) {
+            throw new RuntimeException(GdsEdition.instance().errorMessage().get());
+        }
+    }
 
     protected String username() {
         return transaction != null

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core;
 
+import java.util.Optional;
+
 public final class GdsEdition {
 
     private static final GdsEdition INSTANCE = new GdsEdition();
@@ -29,10 +31,13 @@ public final class GdsEdition {
 
     private enum State {
         ENTERPRISE,
-        COMMUNITY
+        COMMUNITY,
+        INVALID_LICENSE
     }
 
     private State currentState;
+
+    private Optional<String> errorMessage;
 
     private GdsEdition() {
         this.currentState = State.COMMUNITY;
@@ -43,15 +48,30 @@ public final class GdsEdition {
     }
 
     public boolean isOnCommunityEdition() {
-        return !isOnEnterpriseEdition();
+        return get() == State.COMMUNITY;
+    }
+
+    public boolean isInvalidLicense() {
+        return get() == State.INVALID_LICENSE;
+    }
+
+    public Optional<String> errorMessage() {
+        return errorMessage;
     }
 
     public void setToEnterpriseEdition() {
         set(State.ENTERPRISE);
+        this.errorMessage = Optional.empty();
     }
 
     public void setToCommunityEdition() {
         set(State.COMMUNITY);
+        this.errorMessage = Optional.empty();
+    }
+
+    public void setToInvalidLicense(String errorMessage) {
+        set(State.INVALID_LICENSE);
+        this.errorMessage = Optional.of(errorMessage);
     }
 
     private void set(State state) {

@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ServiceProvider
 public final class EnterpriseLicensingExtension extends ExtensionFactory<EnterpriseLicensingExtension.Dependencies> {
 
@@ -43,30 +45,33 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
         return new LifecycleAdapter() {
             @Override
             public void init() {
-                String enterpriseLicenseKeyFile = dependencies
-                    .config()
-                    .get(Settings.enterpriseLicenseKey());
+                String enterpriseLicenseFile = dependencies.config().get(Settings.enterpriseLicenseFile());
                 GdsEdition gdsEdition = GdsEdition.instance();
                 gdsEdition.setToCommunityEdition();
 
-                if (enterpriseLicenseKeyFile != null && !enterpriseLicenseKeyFile.isBlank()) {
-                    var keyPath = Path.of(enterpriseLicenseKeyFile);
+                if (enterpriseLicenseFile != null && !enterpriseLicenseFile.isBlank()) {
+                    var keyPath = Path.of(enterpriseLicenseFile);
                     if (!keyPath.isAbsolute()) {
-                       throw new RuntimeException("The path to the GDS license key must be absolute.");
+                        gdsEdition.setToInvalidLicense("The path to the GDS license key must be absolute.");
+                        return;
                     }
 
                     String licenseKey;
                     try {
                         licenseKey = Files.readString(keyPath);
                     } catch (IOException e) {
-                        throw new RuntimeException("Could not read GDS license key", e);
+                        gdsEdition.setToInvalidLicense(formatWithLocale(
+                            "Could not read GDS license key from path '%s'.",
+                            keyPath
+                        ));
+                        return;
                     }
 
                     SignatureTool.LicenseCheckResult checkResult = SignatureTool.verify(licenseKey);
                     if (checkResult.isValid()) {
                         gdsEdition.setToEnterpriseEdition();
                     } else {
-                        throw new RuntimeException(checkResult.message());
+                        gdsEdition.setToInvalidLicense(checkResult.message());
                     }
                 }
             }

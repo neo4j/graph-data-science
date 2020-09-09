@@ -22,9 +22,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.GdsEdition;
 
 import java.util.function.Supplier;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,6 +63,13 @@ class BaseProcUnitTest {
 
         assertThrows(RuntimeException.class, () -> baseProc.runWithExceptionLogging("test message", supplier));
         assertTrue(log.containsMessage("warn", "test message - Exception when using Supplier"));
+    }
+
+    @Test
+    void testRunWithInvalidLicense() {
+        GdsEdition.instance().setToInvalidLicense("foobar");
+        var ex = assertThrows(RuntimeException.class, () -> new BaseProc() {});
+        assertEquals("foobar", ex.getMessage());
     }
 
 }
