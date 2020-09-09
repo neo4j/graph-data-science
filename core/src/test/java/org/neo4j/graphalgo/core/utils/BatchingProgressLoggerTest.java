@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.core.utils;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -105,29 +105,45 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogEveryPercentageOnlyOnce() {
-        var log = new TestLog();
-        var logger = new BatchingProgressLogger(log, 400, "Test", 4);
+        var loggedPercentages = performLogging(400, 4);
+        var expected = loggedPercentages.stream().distinct().collect(Collectors.toList());
+
+        assertEquals(expected.size(), loggedPercentages.size());
+    }
+
+    @Test
+    void shouldLogPercentagesSequentially() {
+        var loggedPercentages = performLogging(400, 4);
+        var expected = loggedPercentages.stream().sorted().collect(Collectors.toList());
+
+        assertEquals(expected, loggedPercentages);
+    }
+
+    private static List<Integer> performLogging(long taskVolume, int concurrency) {
+        var logger = new TestProgressLogger(taskVolume, "Test", concurrency);
+
+        var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);
 
         var tasks = IntStream
-            .range(0, 4)
-            .mapToObj(i -> {
-                Runnable runnable = () -> IntStream.range(0, 100).forEach(ignore -> {
+            .range(0, concurrency)
+            .mapToObj(i -> (Runnable) () ->
+                IntStream.range(0, batchSize).forEach(ignore -> {
                     try {
-                        Thread.sleep(10);
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    logger.logProgress();
-                });
-                return runnable;
-            }).collect(Collectors.toList());
+                logger.logProgress();
+            })).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
 
-        var loggedPercentages = log.getMessages(TestLog.INFO);
-        assertEquals(101, loggedPercentages.size());
-        assertEquals(101, new HashSet<>(loggedPercentages).size());
+        return logger
+            .getMessages(TestLog.INFO)
+            .stream()
+            .map(progress -> progress.split(" ")[2].replace("%", ""))
+            .map(Integer::parseInt)
+            .collect(Collectors.toList());
     }
-
 
 }
