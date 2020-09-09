@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
@@ -258,10 +257,6 @@ public abstract class AlgoBaseProc<
     private void validate(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {
         GraphStore graphStore = graphStoreWithConfig.graphStore();
         GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
-
-        if (graphCreateConfig instanceof GraphCreateFromCypherConfig) {
-            return;
-        }
 
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
         if (config instanceof SeedConfig) {
