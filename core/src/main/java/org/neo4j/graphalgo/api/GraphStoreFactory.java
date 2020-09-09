@@ -20,23 +20,16 @@
 package org.neo4j.graphalgo.api;
 
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.CSRGraphStore;
-import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * The Abstract Factory defines the construction of the graph
@@ -82,64 +75,6 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     };
 
     protected abstract ProgressLogger initProgressLogger();
-
-    protected GraphStore createGraphStore(
-        IdsAndProperties idsAndProperties,
-        RelationshipImportResult relationshipImportResult,
-        AllocationTracker tracker,
-        GraphDimensions dimensions
-    ) {
-        int relTypeCount = dimensions.relationshipTypeTokens().size();
-        Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
-
-        relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
-            AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
-            AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
-            long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipType, 0L);
-
-            RelationshipProjection projection = relationshipsBuilder.projection();
-
-            relationships.put(
-                relationshipType,
-                ImmutableTopology.of(
-                    adjacencyList,
-                    adjacencyOffsets,
-                    relationshipCount,
-                    projection.orientation(),
-                    projection.isMultiGraph()
-                )
-            );
-
-            PropertyMappings propertyMappings = projection.properties();
-            if (!propertyMappings.isEmpty()) {
-                Map<String, Relationships.Properties> propertyMap = propertyMappings
-                    .enumerate()
-                    .collect(Collectors.toMap(
-                        propertyIndexAndMapping -> propertyIndexAndMapping.getTwo().propertyKey(),
-                        propertyIndexAndMapping -> ImmutableProperties.of(
-                            relationshipsBuilder.properties(propertyIndexAndMapping.getOne()),
-                            relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),
-                            relationshipCount,
-                            projection.orientation(),
-                            projection.isMultiGraph(),
-                            propertyIndexAndMapping.getTwo().defaultValue().doubleValue() // This is fine because relationships currently only support doubles
-                        )
-                    ));
-                relationshipProperties.put(relationshipType, propertyMap);
-            }
-        });
-
-        return CSRGraphStore.of(
-            loadingContext.api().databaseId(),
-            idsAndProperties.idMap(),
-            idsAndProperties.properties(),
-            relationships,
-            relationshipProperties,
-            graphCreateConfig.readConcurrency(),
-            tracker
-        );
-    }
 
     @ValueClass
     public interface ImportResult<STORE extends GraphStore> {

@@ -25,9 +25,9 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromGdlConfig> {
+public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
     private final NamedDatabaseId databaseId;

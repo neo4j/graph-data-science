@@ -28,10 +28,9 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -56,7 +55,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromCypherConfig> {
+public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherConfig> {
 
     private final GraphCreateFromCypherConfig cypherConfig;
     private EstimationResult nodeEstimation;
@@ -128,7 +127,7 @@ public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateF
     }
 
     @Override
-    public ImportResult build() {
+    public ImportResult<CSRGraphStore> build() {
         // Temporarily override the security context to enforce read-only access during load
         return readOnlyTransaction().apply((tx, ktx) -> {
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
@@ -155,7 +154,7 @@ public class CypherFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateF
                 tx
             );
 
-            GraphStore graphStore = createGraphStore(
+            CSRGraphStore graphStore = createGraphStore(
                 nodes.idsAndProperties(),
                 relationships,
                 loadingContext.tracker(),

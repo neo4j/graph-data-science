@@ -26,9 +26,8 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
@@ -48,7 +47,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphCreateFromStoreConfig> {
+public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromStoreConfig> {
 
     private final GraphCreateFromStoreConfig storeConfig;
 
@@ -143,14 +142,14 @@ public final class NativeFactory extends GraphStoreFactory<CSRGraphStore, GraphC
     }
 
     @Override
-    public ImportResult build() {
+    public ImportResult<CSRGraphStore> build() {
         validate(dimensions, storeConfig);
 
         int concurrency = graphCreateConfig.readConcurrency();
         AllocationTracker tracker = loadingContext.tracker();
         IdsAndProperties nodes = loadNodes(concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
-        GraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
+        CSRGraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
         progressLogger.logMessage(tracker);
 
         return ImportResult.of(dimensions, graphStore);
