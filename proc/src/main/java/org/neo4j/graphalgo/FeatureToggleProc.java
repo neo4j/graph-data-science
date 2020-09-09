@@ -37,6 +37,12 @@ public final class FeatureToggleProc {
         GdsFeatureToggles.SKIP_ORPHANS.set(skipOrphanNodes);
     }
 
+    @Procedure("gds.features.importer.usePreAggregation")
+    @Description("Toggle whether the importer should pre-aggregate relationships")
+    public void usePreAggregation(@Name(value = "usePreAggregation") boolean usePreAggregation) {
+        GdsFeatureToggles.USE_PRE_AGGREGATION.set(usePreAggregation);
+    }
+
     @Procedure("gds.features.useKernelTracker")
     @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used")
     public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {

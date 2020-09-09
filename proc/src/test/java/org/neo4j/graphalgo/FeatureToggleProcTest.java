@@ -44,6 +44,15 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
+    void toggleUsingPreAggregation() {
+        var usePreAggregation = GdsFeatureToggles.USE_PRE_AGGREGATION.get();
+        runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", !usePreAggregation));
+        assertEquals(!usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+        runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", usePreAggregation));
+        assertEquals(usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+    }
+
+    @Test
     void toggleUseKernelTracker() {
         var useKernelTracker = GdsFeatureToggles.USE_KERNEL_TRACKER.get();
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", !useKernelTracker));
