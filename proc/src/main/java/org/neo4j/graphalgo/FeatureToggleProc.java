@@ -24,6 +24,8 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 /**
  * General heap of feature toggles we have and procedures to toggle them
  * Please make sure to use the `gds.features.` prefix so that the
@@ -47,5 +49,17 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used")
     public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
         GdsFeatureToggles.USE_KERNEL_TRACKER.set(useKernelTracker);
+    }
+
+    @Procedure("gds.features.maxArrayLengthShift")
+    @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two")
+    public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {
+        if (maxArrayLengthShift <= 0 || maxArrayLengthShift >= Integer.SIZE) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Invalid value for maxArrayLengthShift, must be in (0, %d)",
+                Integer.SIZE
+            ));
+        }
+        GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set((int) maxArrayLengthShift);
     }
 }

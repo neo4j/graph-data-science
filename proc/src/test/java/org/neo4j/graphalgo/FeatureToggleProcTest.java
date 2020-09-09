@@ -22,10 +22,13 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FeatureToggleProcTest extends BaseProcTest {
 
@@ -59,5 +62,27 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(!useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
         assertEquals(useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+    }
+
+    @Test
+    void toggleMaxArrayLengthShift() {
+        var maxArrayLengthShift = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
+        runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", maxArrayLengthShift + 1));
+        assertEquals(maxArrayLengthShift + 1, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
+        runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", maxArrayLengthShift));
+        assertEquals(maxArrayLengthShift, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
+    }
+
+    @Test
+    void toggleMaxArrayLengthShiftValidation() {
+        var maxArrayLengthShift = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", 42))
+        );
+        assertThat(exception)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage("Invalid value for maxArrayLengthShift, must be in (0, 32)");
+        assertEquals(maxArrayLengthShift, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
     }
 }
