@@ -122,3 +122,5 @@ task distZip(type: Zip) {
 
 ci.finalizedBy shadowCopy, versionsJson, docsVersionsJson, distZip
 cipr.finalizedBy shadowCopy, versionsJson, docsVersionsJson, distZip
+
+libraryArtifacts.finalizedBy shadowCopy, versionsJson, docsVersionsJson, distZip
