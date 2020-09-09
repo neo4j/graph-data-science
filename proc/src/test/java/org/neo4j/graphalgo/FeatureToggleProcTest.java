@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,7 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
-    void toggleSkippingOrphanNodes() {
+    void toggleSkipOrphanNodes() {
         var skipOrphanNodes = GdsFeatureToggles.SKIP_ORPHANS.get();
         runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", !skipOrphanNodes));
         assertEquals(!skipOrphanNodes, GdsFeatureToggles.SKIP_ORPHANS.get());
@@ -47,12 +48,34 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
-    void toggleUsingPreAggregation() {
+    void resetSkipOrphanNodes() {
+        var defaultValue = GdsFeatureToggles.SKIP_ORPHANS_DEFAULT_SETTING;
+        GdsFeatureToggles.SKIP_ORPHANS.set(!defaultValue);
+        assertCypherResult(
+            "CALL gds.features.importer.skipOrphanNodes.reset()",
+            List.of(Map.of("enabled", defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.SKIP_ORPHANS.get());
+    }
+
+    @Test
+    void toggleusePreAggregation() {
         var usePreAggregation = GdsFeatureToggles.USE_PRE_AGGREGATION.get();
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", !usePreAggregation));
         assertEquals(!usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", usePreAggregation));
         assertEquals(usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+    }
+
+    @Test
+    void resetUsePreAggregation() {
+        var defaultValue = GdsFeatureToggles.USE_PRE_AGGREGATION_DEFAULT_SETTING;
+        GdsFeatureToggles.USE_PRE_AGGREGATION.set(!defaultValue);
+        assertCypherResult(
+            "CALL gds.features.importer.usePreAggregation.reset()",
+            List.of(Map.of("enabled", defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
     }
 
     @Test
@@ -62,6 +85,17 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(!useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
         assertEquals(useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+    }
+
+    @Test
+    void resetUseKernelTracker() {
+        var defaultValue = GdsFeatureToggles.USE_KERNEL_TRACKER_DEFAULT_SETTING;
+        GdsFeatureToggles.USE_KERNEL_TRACKER.set(!defaultValue);
+        assertCypherResult(
+            "CALL gds.features.useKernelTracker.reset()",
+            List.of(Map.of("enabled", defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
     }
 
     @Test
@@ -84,5 +118,16 @@ class FeatureToggleProcTest extends BaseProcTest {
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
             .hasRootCauseMessage("Invalid value for maxArrayLengthShift, must be in (0, 32)");
         assertEquals(maxArrayLengthShift, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
+    }
+
+    @Test
+    void resetMaxArrayLengthShift() {
+        var defaultValue = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING;
+        GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set(defaultValue + 1);
+        assertCypherResult(
+            "CALL gds.features.maxArrayLengthShift.reset()",
+            List.of(Map.of("value", (long) defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get());
     }
 }
