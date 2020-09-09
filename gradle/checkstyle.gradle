@@ -15,6 +15,7 @@ subprojects { proj ->
     }
 
     proj.tasks.withType(Checkstyle) {
+        proj.tasks.checkstyle.dependsOn(it)
         def fileName = "${proj.name}-${name}"
         reports {
             xml {

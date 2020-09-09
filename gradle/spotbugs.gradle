@@ -18,6 +18,8 @@ allprojects { proj ->
         }
 
         proj.tasks.withType(SpotBugsTask) {
+            proj.tasks.spotbugs.dependsOn(it)
+
             def taskName = it.name
             it.reports {
                 html {
