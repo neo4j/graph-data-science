@@ -200,6 +200,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             orientation,
             true,
             Aggregation.SUM,
+            true,
             executorService,
             tracker
         );

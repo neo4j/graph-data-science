@@ -262,6 +262,7 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                     graphCreateConfig.orientation(),
                     relTypeAndProperty.getValue().isPresent(),
                     Aggregation.NONE,
+                    false,
                     loadingContext.executor(),
                     loadingContext.tracker()
                 )
@@ -290,6 +291,7 @@ public final class GdlFactory extends GraphStoreFactory<CSRGraphStore, GraphCrea
                 graphCreateConfig.orientation(),
                 false,
                 Aggregation.NONE,
+                false,
                 loadingContext.executor(),
                 loadingContext.tracker()
             ));

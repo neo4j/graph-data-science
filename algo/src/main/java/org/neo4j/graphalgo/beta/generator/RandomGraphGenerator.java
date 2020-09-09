@@ -97,6 +97,7 @@ public final class RandomGraphGenerator {
             orientation,
             maybeRelationshipPropertyProducer.isPresent(),
             aggregation,
+            false,
             Pools.DEFAULT,
             allocationTracker
         );

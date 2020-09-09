@@ -68,6 +68,7 @@ public final class HugeGraphUtil {
         Orientation orientation,
         boolean loadRelationshipProperty,
         Aggregation aggregation,
+        boolean preAggregate,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
@@ -76,6 +77,7 @@ public final class HugeGraphUtil {
             orientation,
             loadRelationshipProperty,
             aggregation,
+            preAggregate,
             executorService,
             tracker
         );
@@ -190,6 +192,7 @@ public final class HugeGraphUtil {
             Orientation orientation,
             boolean loadRelationshipProperty,
             Aggregation aggregation,
+            boolean preAggregate,
             ExecutorService executorService,
             AllocationTracker tracker
         ) {
@@ -229,7 +232,8 @@ public final class HugeGraphUtil {
                 new LongAdder(),
                 propertyKeyIds,
                 defaultValues,
-                new Aggregation[]{aggregation}
+                new Aggregation[]{aggregation},
+                preAggregate
             );
 
             this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);

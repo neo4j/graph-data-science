@@ -61,7 +61,8 @@ public final class CompressedLongArray {
      * @param start  start index in values
      * @param end    end index in values
      */
-    public void add(long[] values, int start, int end, int valuesToAdd) {
+    public void
+    add(long[] values, int start, int end, int valuesToAdd) {
         // not inlined to avoid field access
         long currentLastValue = this.lastValue;
         long delta;

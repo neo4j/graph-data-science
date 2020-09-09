@@ -54,7 +54,8 @@ public abstract class AdjacencyBuilderBaseTest {
             new LongAdder(),
             new int[0],
             new double[0],
-            new Aggregation[]{Aggregation.NONE}
+            new Aggregation[]{Aggregation.NONE},
+            false
         );
         long nodeCount = 6;
         DirectIdMapping idMapping = new DirectIdMapping(nodeCount);
