@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public final class GdsFeatureToggles {
 
-    private static final boolean USE_PRE_AGGREGATION_DEFAULT_SETTING = false;
+    public static final boolean USE_PRE_AGGREGATION_DEFAULT_SETTING = false;
     private static final boolean USE_PRE_AGGREGATION_FLAG = FeatureToggles.flag(
         GdsFeatureToggles.class,
         "usePreAggregation",
@@ -35,7 +35,7 @@ public final class GdsFeatureToggles {
     public static final AtomicBoolean USE_PRE_AGGREGATION = new AtomicBoolean(USE_PRE_AGGREGATION_FLAG);
 
 
-    private static final boolean SKIP_ORPHANS_DEFAULT_SETTING = false;
+    public static final boolean SKIP_ORPHANS_DEFAULT_SETTING = false;
     private static final boolean SKIP_ORPHANS_FLAG = FeatureToggles.flag(
         GdsFeatureToggles.class,
         "skipOrphans",
@@ -46,7 +46,7 @@ public final class GdsFeatureToggles {
     // Prevents full GC more often as not so much consecutive memory is allocated in one go as
     // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
     // Feature toggle is there for testing: org.neo4j.graphalgo.core.huge.loader.HugeGraphLoadingTest#testPropertyLoading
-    private static final int MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING = 28;
+    public static final int MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING = 28;
     private static final int MAX_ARRAY_LENGTH_SHIFT_FLAG = FeatureToggles.getInteger(
         GdsFeatureToggles.class,
         "maxArrayLengthShift",
@@ -54,7 +54,7 @@ public final class GdsFeatureToggles {
     );
     public static final AtomicInteger MAX_ARRAY_LENGTH_SHIFT = new AtomicInteger(MAX_ARRAY_LENGTH_SHIFT_FLAG);
 
-    private static final boolean USE_KERNEL_TRACKER_DEFAULT_SETTING = false;
+    public static final boolean USE_KERNEL_TRACKER_DEFAULT_SETTING = false;
     private static final boolean USE_KERNEL_TRACKER_FLAG = FeatureToggles.flag(
         GdsFeatureToggles.class,
         "useKernelTracker",
