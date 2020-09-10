@@ -30,6 +30,7 @@ import org.neo4j.procedure.Procedure;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -70,10 +71,10 @@ public class DebugProc {
         values.add(value("gdsEdition", editionString(gdsEdition)));
         values.add(value("neo4jVersion", Version.getNeo4jVersion()));
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
-        features().forEach(values::add);
-        buildInfo(buildInfo).forEach(values::add);
+        features(values);
+        buildInfo(buildInfo, values);
         values.add(value("availableCPUs", runtime.availableProcessors()));
-        memoryInfo(runtime).forEach(values::add);
+        memoryInfo(values);
         systemDiagnostics().forEach(values::add);
         return values.build();
     }
@@ -91,43 +92,54 @@ public class DebugProc {
         return "Unknown";
     }
 
-    private static List<DebugValue> features() {
-        return List.of(
-            value("pre-aggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.get()),
-            value("skip-orphan-nodes", GdsFeatureToggles.SKIP_ORPHANS.get()),
-            value("max-array-length-shift", (long) GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()),
-            value("kernel-tracker", GdsFeatureToggles.USE_KERNEL_TRACKER.get())
-        );
+    private static void features(Stream.Builder<DebugValue> builder) {
+        builder
+            .add(value("pre-aggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.get()))
+            .add(value("skip-orphan-nodes", GdsFeatureToggles.SKIP_ORPHANS.get()))
+            .add(value("max-array-length-shift", (long) GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
+            .add(value("kernel-tracker", GdsFeatureToggles.USE_KERNEL_TRACKER.get()));
     }
 
-    private static List<DebugValue> buildInfo(BuildInfoProperties properties) {
-        return List.of(
-            value("buildDate", properties.buildDate()),
-            value("buildJdk", properties.buildJdk()),
-            value("buildJavaVersion", properties.buildJavaVersion()),
-            value("buildHash", properties.buildHash())
-        );
+    private static void buildInfo(BuildInfoProperties properties, Stream.Builder<DebugValue> builder) {
+        builder
+            .add(value("buildDate", properties.buildDate()))
+            .add(value("buildJdk", properties.buildJdk()))
+            .add(value("buildJavaVersion", properties.buildJavaVersion()))
+            .add(value("buildHash", properties.buildHash()));
     }
 
-    private static List<DebugValue> memoryInfo(Runtime runtime) {
-        var totalHeapInBytes = runtime.totalMemory();
-        var maxHeapInBytes = runtime.maxMemory();
-        var freeHeapInBytes = runtime.freeMemory();
+    private static void memoryInfo(Stream.Builder<DebugValue> builder) {
         var availableHeapInBytes = GcListenerExtension.freeMemory();
         MemoryMXBean memBean = ManagementFactory.getMemoryMXBean();
-        return List.of(
-            value("totalHeapInBytes", totalHeapInBytes),
-            value("totalHeap", humanReadable(totalHeapInBytes)),
-            value("maxHeapInBytes", maxHeapInBytes),
-            value("maxHeap", humanReadable(maxHeapInBytes)),
-            value("freeHeapInBytes", freeHeapInBytes),
-            value("freeHeap", humanReadable(freeHeapInBytes)),
-            value("availableHeapInBytes", availableHeapInBytes),
-            value("availableHeap", humanReadable(availableHeapInBytes)),
+        builder
+            .add(value("availableHeapInBytes", availableHeapInBytes))
+            .add(value("availableHeap", humanReadable(availableHeapInBytes)));
+        onHeapInfo(memBean.getHeapMemoryUsage(), builder);
+        offHeapInfo(memBean.getNonHeapMemoryUsage(), builder);
+    }
 
-            value("heapUsage", memBean.getHeapMemoryUsage().toString()),
-            value("nonHeapUsage", memBean.getNonHeapMemoryUsage().toString())
-        );
+    private static void onHeapInfo(MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
+        var maxHeapInBytes = memUsage.getMax();
+        var totalHeapInBytes = memUsage.getCommitted();
+        var freeHeapInBytes = memUsage.getCommitted() - memUsage.getUsed();
+
+        builder
+            .add(value("freeHeapInBytes", freeHeapInBytes))
+            .add(value("freeHeap", humanReadable(freeHeapInBytes)))
+            .add(value("totalHeapInBytes", totalHeapInBytes))
+            .add(value("totalHeap", humanReadable(totalHeapInBytes)))
+            .add(value("maxHeapInBytes", maxHeapInBytes))
+            .add(value("maxHeap", humanReadable(maxHeapInBytes)));
+    }
+
+    private static void offHeapInfo(MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
+        var totalOffHeapInBytes = memUsage.getCommitted();
+        var usedOffHeapInBytes = memUsage.getUsed();
+        builder
+            .add(value("usedOffHeapInBytes", usedOffHeapInBytes))
+            .add(value("usedOffHeap", humanReadable(usedOffHeapInBytes)))
+            .add(value("totalOffHeapInBytes", totalOffHeapInBytes))
+            .add(value("totalOffHeap", humanReadable(totalOffHeapInBytes)));
     }
 
     // classpath for duplicate entries or other plugins
