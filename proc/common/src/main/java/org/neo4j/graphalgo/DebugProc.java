@@ -33,11 +33,8 @@ import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.MapValueBuilder;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
@@ -47,13 +44,14 @@ public class DebugProc {
 
     @Procedure("gds.debug")
     public Stream<DebugValue> version() throws IOException {
-        var properties = LoadInfoProperties.infoProperties();
+        var properties = BuildInfoProperties.get();
         var debugInfo = new DebugInfo(properties);
 
         return Stream.of(
             value("gdsVersion", debugInfo.gdsVersion),
             value("gdsEdition", debugInfo.gdsEdition),
             value("neo4jVersion", debugInfo.neo4jVersion),
+            value("minimumRequiredJavaVersion", debugInfo.minimumRequiredJavaVersion),
             value("features", debugInfo.features),
             value("buildInfo", debugInfo.buildInfo),
             value("availableCPUs", debugInfo.availableCPUs),
@@ -85,16 +83,18 @@ public class DebugProc {
         public final String gdsVersion;
         public final String gdsEdition;
         public final String neo4jVersion;
+        public final String minimumRequiredJavaVersion;
         public final MapValue features;
         public final MapValue buildInfo;
         public final long availableCPUs;
         public final MapValue memoryInfo;
         public final ListValue systemDiagnostics;
 
-        DebugInfo(Properties properties) {
-            this.gdsVersion = properties.getProperty("Implementation-Version");
+        DebugInfo(BuildInfoProperties properties) {
+            this.gdsVersion = properties.gdsVersion();
             this.gdsEdition = editionString(GdsEdition.instance());
             this.neo4jVersion = Version.getNeo4jVersion();
+            this.minimumRequiredJavaVersion = properties.minimumRequiredJavaVersion();
             this.features = features();
             this.buildInfo = buildInfo(properties);
             var runtime = Runtime.getRuntime();
@@ -125,12 +125,12 @@ public class DebugProc {
             return builder.build();
         }
 
-        private static MapValue buildInfo(Properties properties) {
+        private static MapValue buildInfo(BuildInfoProperties properties) {
             var builder = new MapValueBuilder(4);
-            builder.add("buildDate", Values.stringValue(properties.getProperty("Build-Date")));
-            builder.add("buildJdk", Values.stringValue(properties.getProperty("Created-By")));
-            builder.add("buildJavaVersion", Values.stringValue(properties.getProperty("Build-Java-Version")));
-            builder.add("buildHash", Values.stringValue(properties.getProperty("Full-Change")));
+            builder.add("buildDate", Values.stringValue(properties.buildDate()));
+            builder.add("buildJdk", Values.stringValue(properties.buildJdk()));
+            builder.add("buildJavaVersion", Values.stringValue(properties.buildJavaVersion()));
+            builder.add("buildHash", Values.stringValue(properties.buildHash()));
             return builder.build();
         }
 
@@ -166,37 +166,6 @@ public class DebugProc {
                 SystemDiagnostics.CONTAINER
             ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
             return builder.build();
-        }
-    }
-
-    // nested static class so that we don't load the properties when the proc class
-    // is initialized, but only on first request, and then we cache it
-    private static final class LoadInfoProperties {
-
-        static Properties infoProperties() throws IOException {
-            var properties = INFO_PROPERTIES;
-            if (properties instanceof Properties) {
-                return (Properties) properties;
-            }
-            throw (IOException) properties;
-        }
-
-        private static final String INFO_FILE = "META-INF/info.properties";
-        private static final Object INFO_PROPERTIES = loadProperties();
-
-        private static Object loadProperties() {
-            var properties = new Properties();
-            var classLoader = Thread.currentThread().getContextClassLoader();
-            try (var infoStream = classLoader.getResourceAsStream(INFO_FILE)) {
-                if (infoStream != null) {
-                    try (var infoReader = new InputStreamReader(infoStream, StandardCharsets.UTF_8)) {
-                        properties.load(infoReader);
-                    }
-                }
-            } catch (IOException exception) {
-                return exception;
-            }
-            return properties;
         }
     }
 }
