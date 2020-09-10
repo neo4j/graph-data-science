@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -230,5 +232,33 @@ class RandomGraphGeneratorTest {
         HugeGraph graph2 = otherRandomGenerator.generate();
 
         TestSupport.assertGraphEquals(graph1, graph2);
+    }
+
+    @Test
+    void shouldHaveTheCorrectRelCount() {
+        // ! aggregation is considered, but not for the relCount
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(8)
+            .averageDegree(4)
+            .seed(42L)
+            .aggregation(Aggregation.SINGLE)
+            .allocationTracker(AllocationTracker.empty())
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .orientation(Orientation.UNDIRECTED)
+            .build().generate();
+
+        AtomicInteger actualRelCount = new AtomicInteger();
+        graph.forEachNode(node -> {
+                graph.forEachRelationship(node, (src, trg) -> {
+                    //System.out.printf("%d, %d \n", src, trg);
+                    actualRelCount.getAndIncrement();
+                    return true;
+                });
+                return true;
+            }
+        );
+
+        Assertions.assertEquals(actualRelCount.longValue(), graph.relationshipCount());
     }
 }

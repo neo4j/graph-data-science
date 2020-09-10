@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -185,8 +184,6 @@ public final class HugeGraphUtil {
         private final ExecutorService executorService;
         private final Aggregation aggregation;
 
-        private long importedRelationships = 0;
-
         public RelationshipsBuilder(
             IdMapping idMapping,
             Orientation orientation,
@@ -286,7 +283,7 @@ public final class HugeGraphUtil {
 
             ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
             return Relationships.of(
-                importedRelationships,
+                relationshipImporter.relationshipCount(),
                 orientation,
                 Aggregation.equivalentToNone(aggregation),
                 relationshipsBuilder.adjacencyList(),
@@ -300,8 +297,7 @@ public final class HugeGraphUtil {
         private void flushBuffer() {
             RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
 
-            long newImportedInOut = imports.importRelationships(relationshipBuffer, propertyReader);
-            importedRelationships += RawValues.getHead(newImportedInOut);
+            imports.importRelationships(relationshipBuffer, propertyReader);
             relationshipBuffer.reset();
         }
     }

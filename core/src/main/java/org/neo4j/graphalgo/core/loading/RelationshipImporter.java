@@ -47,6 +47,10 @@ class RelationshipImporter {
         this.adjacencyBuilder = adjacencyBuilder;
     }
 
+    public long relationshipCount() {
+        return adjacencyBuilder.relationshipCount();
+    }
+
     public interface Imports {
         long importRelationships(RelationshipsBatchBuffer batches, PropertyReader propertyReader);
     }
