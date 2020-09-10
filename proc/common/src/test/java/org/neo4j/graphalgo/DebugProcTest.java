@@ -47,7 +47,6 @@ class DebugProcTest extends BaseProcTest {
             "CALL gds.debug() YIELD key, value WITH key, value WHERE key = 'gdsVersion' RETURN value as gdsVersion",
             cypherResult -> cypherResult.<String>columnAs("gdsVersion").stream().collect(toList())
         );
-        // TODO: load this from properties as well
-        assertThat(result).containsExactly("1.4.0-alpha04");
+        assertThat(result).containsExactly(BuildInfoProperties.get().gdsVersion());
     }
 }

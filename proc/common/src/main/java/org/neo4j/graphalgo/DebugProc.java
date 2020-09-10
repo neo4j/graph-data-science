@@ -26,15 +26,13 @@ import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.kernel.diagnostics.providers.SystemDiagnostics;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.Values;
-import org.neo4j.values.virtual.ListValue;
-import org.neo4j.values.virtual.ListValueBuilder;
-import org.neo4j.values.virtual.MapValue;
-import org.neo4j.values.virtual.MapValueBuilder;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
@@ -45,19 +43,7 @@ public class DebugProc {
     @Procedure("gds.debug")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
-        var debugInfo = new DebugInfo(properties);
-
-        return Stream.of(
-            value("gdsVersion", debugInfo.gdsVersion),
-            value("gdsEdition", debugInfo.gdsEdition),
-            value("neo4jVersion", debugInfo.neo4jVersion),
-            value("minimumRequiredJavaVersion", debugInfo.minimumRequiredJavaVersion),
-            value("features", debugInfo.features),
-            value("buildInfo", debugInfo.buildInfo),
-            value("availableCPUs", debugInfo.availableCPUs),
-            value("memoryInfo", debugInfo.memoryInfo),
-            value("systemDiagnostics", debugInfo.systemDiagnostics)
-        );
+        return debugValues(properties, Runtime.getRuntime(), GdsEdition.instance());
     }
 
     public static final class DebugValue {
@@ -69,103 +55,93 @@ public class DebugProc {
             this.value = value;
         }
 
-        public static DebugValue of(String key, Object value) {
-            return new DebugValue(key, value);
-        }
-
         public static DebugValue value(String key, Object value) {
             return new DebugValue(key, value);
         }
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public static final class DebugInfo {
-        public final String gdsVersion;
-        public final String gdsEdition;
-        public final String neo4jVersion;
-        public final String minimumRequiredJavaVersion;
-        public final MapValue features;
-        public final MapValue buildInfo;
-        public final long availableCPUs;
-        public final MapValue memoryInfo;
-        public final ListValue systemDiagnostics;
+    private static Stream<DebugValue> debugValues(
+        BuildInfoProperties buildInfo,
+        Runtime runtime,
+        GdsEdition gdsEdition
+    ) {
+        var values = Stream.<DebugValue>builder();
+        values.add(value("gdsVersion", buildInfo.gdsVersion()));
+        values.add(value("gdsEdition", editionString(gdsEdition)));
+        values.add(value("neo4jVersion", Version.getNeo4jVersion()));
+        values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
+        features().forEach(values::add);
+        buildInfo(buildInfo).forEach(values::add);
+        values.add(value("availableCPUs", runtime.availableProcessors()));
+        memoryInfo(runtime).forEach(values::add);
+        systemDiagnostics().forEach(values::add);
+        return values.build();
+    }
 
-        DebugInfo(BuildInfoProperties properties) {
-            this.gdsVersion = properties.gdsVersion();
-            this.gdsEdition = editionString(GdsEdition.instance());
-            this.neo4jVersion = Version.getNeo4jVersion();
-            this.minimumRequiredJavaVersion = properties.minimumRequiredJavaVersion();
-            this.features = features();
-            this.buildInfo = buildInfo(properties);
-            var runtime = Runtime.getRuntime();
-            this.availableCPUs = runtime.availableProcessors();
-            this.memoryInfo = memoryInfo(runtime);
-            this.systemDiagnostics = systemDiagnostics();
+    private static String editionString(GdsEdition edition) {
+        if (edition.isInvalidLicense()) {
+            return "Enterprise (invalid license)";
         }
+        if (edition.isOnEnterpriseEdition()) {
+            return "Enterprise";
+        }
+        if (edition.isOnCommunityEdition()) {
+            return "Community";
+        }
+        return "Unknown";
+    }
 
-        private static String editionString(GdsEdition edition) {
-            if (edition.isInvalidLicense()) {
-                return "Enterprise (invalid license)";
-            }
-            if (edition.isOnEnterpriseEdition()) {
-                return "Enterprise";
-            }
-            if (edition.isOnCommunityEdition()) {
-                return "Community";
-            }
-            return "Unknown";
-        }
+    private static List<DebugValue> features() {
+        return List.of(
+            value("pre-aggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.get()),
+            value("skip-orphan-nodes", GdsFeatureToggles.SKIP_ORPHANS.get()),
+            value("max-array-length-shift", (long) GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()),
+            value("kernel-tracker", GdsFeatureToggles.USE_KERNEL_TRACKER.get())
+        );
+    }
 
-        private static MapValue features() {
-            var builder = new MapValueBuilder(4);
-            builder.add("pre-aggregation", Values.booleanValue(GdsFeatureToggles.USE_PRE_AGGREGATION.get()));
-            builder.add("skip-orphan-nodes", Values.booleanValue(GdsFeatureToggles.SKIP_ORPHANS.get()));
-            builder.add("max-array-length-shift", Values.intValue(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()));
-            builder.add("kernel-tracker", Values.booleanValue(GdsFeatureToggles.USE_KERNEL_TRACKER.get()));
-            return builder.build();
-        }
+    private static List<DebugValue> buildInfo(BuildInfoProperties properties) {
+        return List.of(
+            value("buildDate", properties.buildDate()),
+            value("buildJdk", properties.buildJdk()),
+            value("buildJavaVersion", properties.buildJavaVersion()),
+            value("buildHash", properties.buildHash())
+        );
+    }
 
-        private static MapValue buildInfo(BuildInfoProperties properties) {
-            var builder = new MapValueBuilder(4);
-            builder.add("buildDate", Values.stringValue(properties.buildDate()));
-            builder.add("buildJdk", Values.stringValue(properties.buildJdk()));
-            builder.add("buildJavaVersion", Values.stringValue(properties.buildJavaVersion()));
-            builder.add("buildHash", Values.stringValue(properties.buildHash()));
-            return builder.build();
-        }
+    private static List<DebugValue> memoryInfo(Runtime runtime) {
+        var totalHeapInBytes = runtime.totalMemory();
+        var maxHeapInBytes = runtime.maxMemory();
+        var freeHeapInBytes = runtime.freeMemory();
+        var availableHeapInBytes = GcListenerExtension.freeMemory();
+        MemoryMXBean memBean = ManagementFactory.getMemoryMXBean();
+        return List.of(
+            value("totalHeapInBytes", totalHeapInBytes),
+            value("totalHeap", humanReadable(totalHeapInBytes)),
+            value("maxHeapInBytes", maxHeapInBytes),
+            value("maxHeap", humanReadable(maxHeapInBytes)),
+            value("freeHeapInBytes", freeHeapInBytes),
+            value("freeHeap", humanReadable(freeHeapInBytes)),
+            value("availableHeapInBytes", availableHeapInBytes),
+            value("availableHeap", humanReadable(availableHeapInBytes)),
 
-        private static MapValue memoryInfo(Runtime runtime) {
-            var totalHeapInBytes = runtime.totalMemory();
-            var maxHeapInBytes = runtime.maxMemory();
-            var freeHeapInBytes = runtime.freeMemory();
-            var availableHeapInBytes = GcListenerExtension.freeMemory();
-            var builder = new MapValueBuilder(10);
-            builder.add("totalHeapInBytes", Values.longValue(totalHeapInBytes));
-            builder.add("totalHeap", Values.stringValue(humanReadable(totalHeapInBytes)));
-            builder.add("maxHeapInBytes", Values.longValue(maxHeapInBytes));
-            builder.add("maxHeap", Values.stringValue(humanReadable(maxHeapInBytes)));
-            builder.add("freeHeapInBytes", Values.longValue(freeHeapInBytes));
-            builder.add("freeHeap", Values.stringValue(humanReadable(freeHeapInBytes)));
-            builder.add("availableHeapInBytes", Values.longValue(availableHeapInBytes));
-            builder.add("availableHeap", Values.stringValue(humanReadable(availableHeapInBytes)));
-            MemoryMXBean memBean = ManagementFactory.getMemoryMXBean();
-            builder.add("heapUsage", Values.stringValue(memBean.getHeapMemoryUsage().toString()));
-            builder.add("nonHeapUsage", Values.stringValue(memBean.getNonHeapMemoryUsage().toString()));
-            return builder.build();
-        }
+            value("heapUsage", memBean.getHeapMemoryUsage().toString()),
+            value("nonHeapUsage", memBean.getNonHeapMemoryUsage().toString())
+        );
+    }
 
-        // classpath for duplicate entries or other plugins
-        private static ListValue systemDiagnostics() {
-            var builder = ListValueBuilder.newListBuilder();
-            DiagnosticsLogger collectDiagnostics = line -> builder.add(Values.stringValue(line));
-            Stream.of(
-                SystemDiagnostics.SYSTEM_MEMORY,
-                SystemDiagnostics.JAVA_MEMORY,
-                SystemDiagnostics.OPERATING_SYSTEM,
-                SystemDiagnostics.JAVA_VIRTUAL_MACHINE,
-                SystemDiagnostics.CONTAINER
-            ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
-            return builder.build();
-        }
+    // classpath for duplicate entries or other plugins
+    private static List<DebugValue> systemDiagnostics() {
+        var values = new ArrayList<DebugValue>();
+        var index = new AtomicInteger();
+        DiagnosticsLogger collectDiagnostics = line -> values.add(value("sp" + index.getAndIncrement(), line));
+        Stream.of(
+            SystemDiagnostics.SYSTEM_MEMORY,
+            SystemDiagnostics.JAVA_MEMORY,
+            SystemDiagnostics.OPERATING_SYSTEM,
+            SystemDiagnostics.JAVA_VIRTUAL_MACHINE,
+            SystemDiagnostics.CONTAINER
+        ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
+        return values;
     }
 }
