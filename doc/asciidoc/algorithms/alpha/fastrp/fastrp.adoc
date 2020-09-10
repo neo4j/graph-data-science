@@ -175,7 +175,6 @@ NOTE: The algorithm is defined only for UNDIRECTED graphs.
 CALL gds.alpha.randomProjection.stream(
   'persons',
   {
-    maxIterations: 3,
     iterationWeights: [1.0, 1.0, 4.0],
     embeddingSize: 3,
     normalizeL2: true,

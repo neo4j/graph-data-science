@@ -115,7 +115,6 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .algo("gds.alpha.randomProjection")
             .writeMode()
             .addParameter("embeddingSize", rpEmbeddingSize)
-            .addParameter("maxIterations", 2)
             .addParameter("iterationWeights", List.of(1D, 1D))
             .addParameter("writeProperty", "rp")
             .yields();
