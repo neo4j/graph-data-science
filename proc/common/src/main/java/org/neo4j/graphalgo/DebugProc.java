@@ -95,10 +95,10 @@ public class DebugProc {
 
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
-            .add(value("pre-aggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.get()))
-            .add(value("skip-orphan-nodes", GdsFeatureToggles.SKIP_ORPHANS.get()))
-            .add(value("max-array-length-shift", (long) GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
-            .add(value("kernel-tracker", GdsFeatureToggles.USE_KERNEL_TRACKER.get()));
+            .add(value("featurePreAggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.get()))
+            .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.get()))
+            .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
+            .add(value("featureKernelTracker", GdsFeatureToggles.USE_KERNEL_TRACKER.get()));
     }
 
     private static void buildInfo(BuildInfoProperties properties, Stream.Builder<DebugValue> builder) {
