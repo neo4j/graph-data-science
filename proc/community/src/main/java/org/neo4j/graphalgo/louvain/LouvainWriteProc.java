@@ -64,7 +64,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
     }
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
         return LouvainProc.nodeProperties(computationResult, computationResult.config().writeProperty());
     }
 

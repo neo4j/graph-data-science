@@ -85,7 +85,7 @@ public class TriangleCountMutateProc extends MutateProc<IntersectingTriangleCoun
     }
 
     @Override
-    protected NodeProperties nodeProperty(
+    protected NodeProperties nodeProperties(
         ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateConfig> computationResult
     ) {
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);

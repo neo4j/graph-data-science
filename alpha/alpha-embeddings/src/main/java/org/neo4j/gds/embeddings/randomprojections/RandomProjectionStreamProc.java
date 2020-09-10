@@ -63,7 +63,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 

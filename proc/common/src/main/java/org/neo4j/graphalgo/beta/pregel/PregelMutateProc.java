@@ -31,7 +31,7 @@ public abstract class PregelMutateProc<
     extends MutateProc<ALGO, Pregel.PregelResult, PregelMutateResult, CONFIG> {
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
     }
 }

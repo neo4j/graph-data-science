@@ -42,12 +42,12 @@ public abstract class MutateProc<
     CONFIG extends MutatePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperty` or `nodeProperties`.");
+    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperty(computationResult)));
+    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperties(computationResult)));
     }
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
@@ -78,7 +78,7 @@ public abstract class MutateProc<
     ) {
         Graph graph = computationResult.graph();
 
-        var nodeProperties = nodeProperties(computationResult);
+        var nodeProperties = nodePropertyList(computationResult);
 
         if (graph instanceof NodeFilteredGraph) {
             nodeProperties = nodeProperties.stream().map(nodeProperty ->

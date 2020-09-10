@@ -484,7 +484,7 @@ public abstract class AlgoBaseProc<
     /**
      * Returns a single node property that has been produced by the procedure.
      */
-    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         throw new UnsupportedOperationException("Procedure must implement org.neo4j.graphalgo.AlgoBaseProc.nodeProperty");
     }
 

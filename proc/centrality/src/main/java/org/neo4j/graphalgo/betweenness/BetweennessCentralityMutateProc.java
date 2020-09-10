@@ -80,7 +80,7 @@ public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentr
     }
 
     @Override
-    protected NodeProperties nodeProperty(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult) {
         return BetweennessCentralityProc.nodeProperties(computationResult);
     }
 

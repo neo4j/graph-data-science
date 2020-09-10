@@ -95,7 +95,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected NodeProperties nodeProperty(
+    protected NodeProperties nodeProperties(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig> computationResult
     ) {
         return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);

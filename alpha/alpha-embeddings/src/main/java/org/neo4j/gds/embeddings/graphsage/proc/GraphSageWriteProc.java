@@ -66,7 +66,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
         return (DoubleArrayNodeProperties) computationResult.result().embeddings()::get;
     }
 

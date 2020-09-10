@@ -91,7 +91,7 @@ public class WccStreamProc extends StreamProc<
     }
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         DisjointSetStruct dss = computationResult.result();
         LongNodeProperties simpleNodeProperties = dss::setIdOf;
 

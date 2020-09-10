@@ -60,7 +60,7 @@ public class ModularityOptimizationMutateProc extends MutateProc<ModularityOptim
     }
 
     @Override
-    protected NodeProperties nodeProperty(
+    protected NodeProperties nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult
     ) {
         return ModularityOptimizationProc.nodeProperties(computationResult);

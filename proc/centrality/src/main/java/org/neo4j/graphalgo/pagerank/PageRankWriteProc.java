@@ -64,7 +64,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
     }
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 

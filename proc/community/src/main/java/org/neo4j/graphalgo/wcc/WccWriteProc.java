@@ -82,7 +82,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected NodeProperties nodeProperty(
+    protected NodeProperties nodeProperties(
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
     ) {
         return WccProc.nodeProperties(computationResult, computationResult.config().writeProperty());

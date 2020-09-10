@@ -42,7 +42,7 @@ public abstract class StreamProc<
             }
 
             Graph graph = computationResult.graph();
-            NodeProperties nodeProperties = nodeProperty(computationResult);
+            NodeProperties nodeProperties = nodeProperties(computationResult);
 
             return LongStream
                 .range(IdMapping.START_NODE_ID, graph.nodeCount())

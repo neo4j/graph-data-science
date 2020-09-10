@@ -41,12 +41,12 @@ public abstract class WriteProc<
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
     @Override
-    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException("Write procedures must implement either `nodeProperty` or `nodeProperties`.");
+    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        throw new UnsupportedOperationException("Write procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), nodeProperty(computationResult)));
+    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), nodeProperties(computationResult)));
     }
 
     protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
@@ -82,7 +82,7 @@ public abstract class WriteProc<
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();
 
-            exporter.write(nodeProperties(computationResult));
+            exporter.write(nodePropertyList(computationResult));
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
