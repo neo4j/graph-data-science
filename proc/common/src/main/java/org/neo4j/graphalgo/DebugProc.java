@@ -77,6 +77,7 @@ public class DebugProc {
         values.add(value("physicalCPUs", ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors()));
         memoryInfo(values);
         systemResources(values);
+        vmInfo(values);
         systemDiagnostics(values);
         return values.build();
     }
@@ -185,12 +186,21 @@ public class DebugProc {
         builder.add(value("maxFileDescriptors", OsBeanUtil.getMaxFileDescriptors()));
     }
 
+    private static void vmInfo(Stream.Builder<DebugValue> builder) {
+        var runtime = ManagementFactory.getRuntimeMXBean();
+        var compiler = ManagementFactory.getCompilationMXBean();
+
+        builder
+            .add(value("vmName", runtime.getVmName()))
+            .add(value("vmVersion", runtime.getVmVersion()))
+            .add(value("vmCompiler", compiler == null ? "unknown" : compiler.getName()));
+    }
+
     // classpath for duplicate entries or other plugins
     private static void systemDiagnostics(Stream.Builder<DebugValue> builder) {
         var index = new AtomicInteger();
         DiagnosticsLogger collectDiagnostics = line -> builder.add(value("sp" + index.getAndIncrement(), line));
         Stream.of(
-            SystemDiagnostics.JAVA_VIRTUAL_MACHINE,
             SystemDiagnostics.CONTAINER
         ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
     }
