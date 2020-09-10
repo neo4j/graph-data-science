@@ -40,14 +40,44 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 public class DebugProc {
 
     @Procedure("gds.debug")
-    public Stream<DebugInfo> version() throws IOException {
+    public Stream<DebugValue> version() throws IOException {
         var properties = LoadInfoProperties.infoProperties();
-        return Stream.of(new DebugInfo(properties));
+        var debugInfo = new DebugInfo(properties);
+
+        return Stream.of(
+            value("gdsVersion", debugInfo.gdsVersion),
+            value("gdsEdition", debugInfo.gdsEdition),
+            value("neo4jVersion", debugInfo.neo4jVersion),
+            value("features", debugInfo.features),
+            value("buildInfo", debugInfo.buildInfo),
+            value("availableCPUs", debugInfo.availableCPUs),
+            value("memoryInfo", debugInfo.memoryInfo),
+            value("systemDiagnostics", debugInfo.systemDiagnostics)
+        );
+    }
+
+    public static final class DebugValue {
+        public final String key;
+        public final Object value;
+
+        private DebugValue(String key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public static DebugValue of(String key, Object value) {
+            return new DebugValue(key, value);
+        }
+
+        public static DebugValue value(String key, Object value) {
+            return new DebugValue(key, value);
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -124,6 +154,7 @@ public class DebugProc {
             return builder.build();
         }
 
+        // classpath for duplicate entries or other plugins
         private static ListValue systemDiagnostics() {
             var builder = ListValueBuilder.newListBuilder();
             DiagnosticsLogger collectDiagnostics = line -> builder.add(Values.stringValue(line));

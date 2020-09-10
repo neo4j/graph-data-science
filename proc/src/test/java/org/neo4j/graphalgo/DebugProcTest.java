@@ -24,6 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DebugProcTest extends BaseProcTest {
 
@@ -33,8 +37,18 @@ class DebugProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldReturnGradleVersion() throws IOException {
+    void runDebug() throws IOException {
         var result = runQuery("CALL gds.debug()", Result::resultAsString);
         System.out.println(result);
+    }
+
+    @Test
+    void shouldReturnGradleVersion() throws IOException {
+        var result = runQuery(
+            "CALL gds.debug() YIELD key, value WITH key, value WHERE key = 'gdsVersion' RETURN value as gdsVersion",
+            cypherResult -> cypherResult.<String>columnAs("gdsVersion").stream().collect(toList())
+        );
+        // TODO: load this from properties as well
+        assertThat(result).containsExactly("1.4.0-alpha04");
     }
 }
