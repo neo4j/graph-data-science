@@ -44,12 +44,11 @@ public class BatchingProgressLogger implements ProgressLogger {
         // split batchSize into thread-local chunks
         batchSize /= concurrency;
         // batchSize needs to be a power of two
-        return BitUtil.nextHighestPowerOfTwo(batchSize);
+        return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
     public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
         this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency);
-
     }
 
     public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
