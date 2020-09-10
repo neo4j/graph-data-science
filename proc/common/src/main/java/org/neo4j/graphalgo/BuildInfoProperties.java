@@ -45,11 +45,11 @@ public abstract class BuildInfoProperties {
     public static BuildInfoProperties from(Properties properties) {
         return ImmutableBuildInfoProperties.builder()
             .gdsVersion(properties.getProperty("Implementation-Version"))
-            .buildDate(properties.getProperty("Build-Date"))
-            .buildJdk(properties.getProperty("Created-By"))
-            .buildJavaVersion(properties.getProperty("Build-Java-Version"))
-            .buildHash(properties.getProperty("Full-Change"))
-            .minimumRequiredJavaVersion(properties.getProperty("X-Compile-Target-JDK"))
+            .buildDate(properties.getProperty("Build-Date", "unknown"))
+            .buildJdk(properties.getProperty("Created-By", "unknown"))
+            .buildJavaVersion(properties.getProperty("Build-Java-Version", "unknown"))
+            .buildHash(properties.getProperty("Full-Change", "unknown"))
+            .minimumRequiredJavaVersion(properties.getProperty("X-Compile-Target-JDK", "unknown"))
             .build();
     }
 
