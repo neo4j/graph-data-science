@@ -49,42 +49,45 @@ public final class CanonicalAdjacencyMatrix {
                 .sorted()
                 .collect(Collectors.joining(":"));
 
-            String sortedProperties = g.availableNodeProperties().stream()
-                    .map(propertyKey -> {
-                        var nodeProperties = g.nodeProperties(propertyKey);
+            String sortedProperties = g.nodeLabels(nodeId)
+                .stream()
+                .flatMap(label -> g.schema().nodeSchema().properties().get(label).keySet().stream())
+                .distinct()
+                .map(propertyKey -> {
+                    var nodeProperties = g.nodeProperties(propertyKey);
 
-                        switch (nodeProperties.valueType()) {
-                            case DOUBLE:
-                                return formatWithLocale("%s: %f", propertyKey, nodeProperties.doubleValue(nodeId));
-                            case LONG:
-                                return formatWithLocale("%s: %d", propertyKey, nodeProperties.longValue(nodeId));
-                            case DOUBLE_ARRAY:
-                                return formatWithLocale(
-                                    "%s: %s",
-                                    propertyKey,
-                                    Arrays.toString(nodeProperties.doubleArrayValue(nodeId))
-                                );
-                            case LONG_ARRAY:
-                                return formatWithLocale(
-                                    "%s: %s",
-                                    propertyKey,
-                                    Arrays.toString(nodeProperties.longArrayValue(nodeId))
-                                );
-                            case FLOAT_ARRAY:
-                                return formatWithLocale(
-                                    "%s: %s",
-                                    propertyKey,
-                                    Arrays.toString(nodeProperties.floatArrayValue(nodeId))
-                                );
-                            default:
-                                throw new IllegalArgumentException(formatWithLocale(
-                                    "Unsupported type: %s",
-                                    nodeProperties.valueType()
-                                ));
-                        }
-                    })
-                    .sorted()
-                    .collect(Collectors.joining(", "));
+                    switch (nodeProperties.valueType()) {
+                        case DOUBLE:
+                            return formatWithLocale("%s: %f", propertyKey, nodeProperties.doubleValue(nodeId));
+                        case LONG:
+                            return formatWithLocale("%s: %d", propertyKey, nodeProperties.longValue(nodeId));
+                        case DOUBLE_ARRAY:
+                            return formatWithLocale(
+                                "%s: %s",
+                                propertyKey,
+                                Arrays.toString(nodeProperties.doubleArrayValue(nodeId))
+                            );
+                        case LONG_ARRAY:
+                            return formatWithLocale(
+                                "%s: %s",
+                                propertyKey,
+                                Arrays.toString(nodeProperties.longArrayValue(nodeId))
+                            );
+                        case FLOAT_ARRAY:
+                            return formatWithLocale(
+                                "%s: %s",
+                                propertyKey,
+                                Arrays.toString(nodeProperties.floatArrayValue(nodeId))
+                            );
+                        default:
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "Unsupported type: %s",
+                                nodeProperties.valueType()
+                            ));
+                    }
+                })
+                .sorted()
+                .collect(Collectors.joining(", "));
 
             String canonicalNode = formatWithLocale("(%s%s)",
                 sortedLabels.isEmpty() ? "" : formatWithLocale(":%s", sortedLabels),
@@ -100,11 +103,11 @@ public final class CanonicalAdjacencyMatrix {
         g.forEachNode(nodeId -> {
             g.forEachRelationship(nodeId, 1.0, (sourceId, targetId, propertyValue) -> {
                 outAdjacencies.compute(
-                        sourceId,
-                        canonicalRelationship(canonicalLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
+                    sourceId,
+                    canonicalRelationship(canonicalLabels.get(targetId), propertyValue, "()-[w: %f]->%s"));
                 inAdjacencies.compute(
-                        targetId,
-                        canonicalRelationship(canonicalLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
+                    targetId,
+                    canonicalRelationship(canonicalLabels.get(sourceId), propertyValue, "()<-[w: %f]-%s"));
                 return true;
             });
             return true;
@@ -114,29 +117,29 @@ public final class CanonicalAdjacencyMatrix {
 
         // canonical matrix
         return canonicalLabels.entrySet().stream()
-                .map(entry -> formatWithLocale(
-                        "%s => out: %s in: %s",
-                        entry.getValue(),
-                        canonicalOutAdjacencies.getOrDefault(entry.getKey(), ""),
-                        canonicalInAdjacencies.getOrDefault(entry.getKey(), "")))
-                .sorted()
-                .collect(Collectors.joining(System.lineSeparator()));
+            .map(entry -> formatWithLocale(
+                "%s => out: %s in: %s",
+                entry.getValue(),
+                canonicalOutAdjacencies.getOrDefault(entry.getKey(), ""),
+                canonicalInAdjacencies.getOrDefault(entry.getKey(), "")))
+            .sorted()
+            .collect(Collectors.joining(System.lineSeparator()));
     }
 
     private static Map<Long, String> canonicalAdjacencies(Map<Long, List<String>> outAdjacencies) {
         return outAdjacencies
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> join(entry.getValue(), ", ")
-                ));
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> join(entry.getValue(), ", ")
+            ));
     }
 
     private static BiFunction<Long, List<String>, List<String>> canonicalRelationship(
-            String canonicalNodeLabel,
-            double relationshipProperty,
-            String pattern) {
+        String canonicalNodeLabel,
+        double relationshipProperty,
+        String pattern) {
         return (unused, list) -> {
             if (list == null) {
                 list = Lists.newArrayList();
