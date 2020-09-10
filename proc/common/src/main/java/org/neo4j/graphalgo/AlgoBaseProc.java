@@ -294,7 +294,6 @@ public abstract class AlgoBaseProc<
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
     }
 
-    // TODO make AlgorithmFactory have a constructor that accepts CONFIG
     private ALGO newAlgorithm(
         final Graph graph,
         final CONFIG config,
