@@ -47,8 +47,8 @@ class NativeFactoryTest {
         );
 
         MemoryTree estimate = memoryEstimation.estimate(dimensions, 1);
-        assertEquals(3_405_981_456L, estimate.memoryUsage().min);
-        assertEquals(4_606_168_248L, estimate.memoryUsage().max);
+        assertEquals(3_405_981_464L, estimate.memoryUsage().min);
+        assertEquals(4_606_168_256L, estimate.memoryUsage().max);
     }
 
     @Test
@@ -60,7 +60,6 @@ class NativeFactoryTest {
             .build();
 
         NodeProjections nodeProjections = NodeProjections.all();
-
         RelationshipProjections relationshipProjections = RelationshipProjections
             .builder()
             .putProjection(RelationshipType.of("TYPE1"), RelationshipProjection.of("TYPE1", Orientation.NATURAL))
@@ -71,7 +70,7 @@ class NativeFactoryTest {
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 72;
 
-        assertEquals(3_205_950_320L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
-        assertEquals(6_011_568_224L, estimate.memoryUsage().max);
+        assertEquals(3_205_950_324L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
+        assertEquals(6_011_568_232L, estimate.memoryUsage().max);
     }
 }

@@ -35,8 +35,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -322,12 +322,12 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414145, 23941600),
-            arguments(1, 10, 6414145, 31141960),
-            arguments(4, 1, 6417433, 29745976),
-            arguments(4, 10, 6417433, 36946336),
-            arguments(42, 1, 6459081, 105719464),
-            arguments(42, 10, 6459081, 112919824)
+            arguments(1, 1, 6414145, 23941608),
+            arguments(1, 10, 6414145, 31141968),
+            arguments(4, 1, 6417433, 29745984),
+            arguments(4, 10, 6417433, 36946344),
+            arguments(42, 1, 6459081, 105719472),
+            arguments(42, 10, 6459081, 112919832)
         );
     }
 

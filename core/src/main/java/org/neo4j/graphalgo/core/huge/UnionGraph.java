@@ -74,7 +74,7 @@ public final class UnionGraph implements CSRGraph {
         var relationshipSchemaMap = graphs
             .stream()
             .flatMap(graph -> graph.schema().relationshipSchema().properties().entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (lhs, rhs) -> lhs));
 
         return GraphStoreSchema.of(nodeSchema, RelationshipSchema.of(relationshipSchemaMap));
     }

@@ -90,37 +90,58 @@ public final class HugeGraphUtil {
     }
 
     public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker tracker) {
+        var nodeSchemaBuilder = NodeSchema.builder();
+        idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addEmptyMapForLabelWithoutProperties);
         return create(
             idMap,
+            nodeSchemaBuilder.build(),
             Collections.emptyMap(),
             relationships,
             tracker
         );
     }
 
+    public static HugeGraph create(IdMap idMap, Map<String, NodeProperties> nodeProperties, Relationships relationships, AllocationTracker tracker) {
+        if (nodeProperties.isEmpty()) {
+            return create(idMap, relationships, tracker);
+        } else {
+            var nodeSchemaBuilder = NodeSchema.builder();
+            nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addPropertyAndTypeForLabel(
+                NodeLabel.ALL_NODES,
+                propertyName,
+                property.valueType()
+            ));
+            return create(
+                idMap,
+                nodeSchemaBuilder.build(),
+                nodeProperties,
+                relationships,
+                tracker
+            );
+        }
+    }
+
     public static HugeGraph create(
         IdMap idMap,
+        NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
         Relationships relationships,
         AllocationTracker tracker
     ) {
-        var nodeSchemaBuilder = NodeSchema.builder();
-        nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addPropertyAndTypeForLabel(
-            NodeLabel.ALL_NODES,
-            propertyName,
-            property.valueType()
-        ));
-
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
-            relationshipSchemaBuilder.addPropertyAndTypeForRelationshipType(RelationshipType.of("REL"), "property", ValueType.DOUBLE);
+            relationshipSchemaBuilder.addPropertyAndTypeForRelationshipType(
+                RelationshipType.of("REL"),
+                "property",
+                ValueType.DOUBLE
+            );
         } else {
             relationshipSchemaBuilder.addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType.of("REL"));
         }
 
         return HugeGraph.create(
             idMap,
-            GraphStoreSchema.of(nodeSchemaBuilder.build(), relationshipSchemaBuilder.build()),
+            GraphStoreSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
             nodeProperties,
             relationships.topology(),
             relationships.properties(),
