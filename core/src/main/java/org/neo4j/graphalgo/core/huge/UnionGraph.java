@@ -32,10 +32,12 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -68,7 +70,13 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public GraphStoreSchema schema() {
-        return first.schema();
+        var nodeSchema = first.schema().nodeSchema();
+        var relationshipSchemaMap = graphs
+            .stream()
+            .flatMap(graph -> graph.schema().relationshipSchema().properties().entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return GraphStoreSchema.of(nodeSchema, RelationshipSchema.of(relationshipSchemaMap));
     }
 
     @Override
