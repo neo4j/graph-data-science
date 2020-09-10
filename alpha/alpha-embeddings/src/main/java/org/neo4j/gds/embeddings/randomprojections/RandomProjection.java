@@ -180,7 +180,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
                     // Update the result embedding
                     if (iterationWeights.isEmpty()) {
-                        // TODO this only needs to happen in the last iteration
                         System.arraycopy(currentEmbedding, 0, embedding, offset, embeddingSize);
                     } else {
                         updateEmbeddings(iterationWeight, embedding, currentEmbedding);

@@ -302,10 +302,6 @@ class RandomProjectionTest extends AlgoTestBase {
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Start"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Finished"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Finished"));
-
-        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(0).get());
-        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(1).get());
-        System.out.println("logger.getProgresses().get(0).get() = " + logger.getProgresses().get(2).get());
         assertEquals(
             3,
             logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
