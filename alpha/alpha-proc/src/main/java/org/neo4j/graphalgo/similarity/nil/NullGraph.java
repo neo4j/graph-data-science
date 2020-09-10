@@ -27,6 +27,9 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -142,6 +145,11 @@ public class NullGraph implements Graph {
     @Override
     public Set<NodeLabel> availableNodeLabels() {
         return Set.of();
+    }
+
+    @Override
+    public GraphStoreSchema schema() {
+        return GraphStoreSchema.of(NodeSchema.builder().build(), RelationshipSchema.builder().build());
     }
 
     @Override

@@ -498,9 +498,26 @@ public final class CSRGraphStore implements GraphStore {
             .map(relTypeAndCSR -> {
                 Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
+                RelationshipSchema relationshipSchema;
+                if (maybeRelationshipProperty.isPresent()) {
+                    relationshipSchema = RelationshipSchema
+                        .builder()
+                        .addPropertyAndTypeForRelationshipType(
+                            relTypeAndCSR.getKey(),
+                            maybeRelationshipProperty.get(),
+                            ValueType.DOUBLE
+                        )
+                        .build();
+                } else {
+                    relationshipSchema = RelationshipSchema
+                        .builder()
+                        .addEmptyMapForRelationshipTypeWithoutProperties(relTypeAndCSR.getKey())
+                        .build();
+                }
+
                 HugeGraph initialGraph = HugeGraph.create(
                     nodes,
-                    schema().nodeSchema(),
+                    GraphStoreSchema.of(schema().nodeSchema(), relationshipSchema),
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties

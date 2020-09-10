@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
@@ -88,7 +88,7 @@ public class HugeGraph implements CSRGraph {
 
     private final IdMap idMapping;
     private final AllocationTracker tracker;
-    private final NodeSchema nodeSchema;
+    private final GraphStoreSchema schema;
 
     private final Map<String, NodeProperties> nodeProperties;
 
@@ -112,7 +112,7 @@ public class HugeGraph implements CSRGraph {
 
     public static HugeGraph create(
         IdMap nodes,
-        NodeSchema nodeSchema,
+        GraphStoreSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
         Optional<Relationships.Properties> maybeProperties,
@@ -120,7 +120,7 @@ public class HugeGraph implements CSRGraph {
     ) {
         return new HugeGraph(
             nodes,
-            nodeSchema,
+            schema,
             nodeProperties,
             topology.elementCount(),
             castOrThrow(topology.list(), TransientAdjacencyList.class),
@@ -137,7 +137,7 @@ public class HugeGraph implements CSRGraph {
 
     public HugeGraph(
         IdMap idMapping,
-        NodeSchema nodeSchema,
+        GraphStoreSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
         TransientAdjacencyList adjacencyList,
@@ -151,7 +151,7 @@ public class HugeGraph implements CSRGraph {
         AllocationTracker tracker
     ) {
         this.idMapping = idMapping;
-        this.nodeSchema = nodeSchema;
+        this.schema = schema;
         this.isMultiGraph = isMultiGraph;
         this.tracker = tracker;
         this.nodeProperties = nodeProperties;
@@ -177,8 +177,8 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public NodeSchema nodeSchema() {
-        return nodeSchema;
+    public GraphStoreSchema schema() {
+        return schema;
     }
 
     @Override
@@ -324,7 +324,7 @@ public class HugeGraph implements CSRGraph {
     public HugeGraph concurrentCopy() {
         return new HugeGraph(
             idMapping,
-            nodeSchema,
+            schema,
             nodeProperties,
             relationshipCount,
             adjacencyList,

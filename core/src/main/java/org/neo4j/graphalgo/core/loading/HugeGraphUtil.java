@@ -24,11 +24,15 @@ import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -44,6 +48,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
+
+;
 
 public final class HugeGraphUtil {
 
@@ -105,9 +111,16 @@ public final class HugeGraphUtil {
             property.valueType()
         ));
 
+        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        if (relationships.properties().isPresent()) {
+            relationshipSchemaBuilder.addPropertyAndTypeForRelationshipType(RelationshipType.of("REL"), "property", ValueType.DOUBLE);
+        } else {
+            relationshipSchemaBuilder.addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType.of("REL"));
+        }
+
         return HugeGraph.create(
             idMap,
-            nodeSchemaBuilder.build(),
+            GraphStoreSchema.of(nodeSchemaBuilder.build(), relationshipSchemaBuilder.build()),
             nodeProperties,
             relationships.topology(),
             relationships.properties(),

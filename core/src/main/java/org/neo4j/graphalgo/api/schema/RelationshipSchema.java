@@ -58,14 +58,16 @@ public interface RelationshipSchema {
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public void addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, ValueType relationshipProperty) {
+        public Builder addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, ValueType relationshipProperty) {
             this.properties
                 .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);
+            return this;
         }
 
-        public void addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType type) {
+        public Builder addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType type) {
             this.properties.putIfAbsent(type, Collections.emptyMap());
+            return this;
         }
     }
 }

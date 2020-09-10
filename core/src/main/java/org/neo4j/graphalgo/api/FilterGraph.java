@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -118,8 +118,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public NodeSchema nodeSchema() {
-        return graph.nodeSchema();
+    public GraphStoreSchema schema() {
+        return graph.schema();
     }
 
     @Override
