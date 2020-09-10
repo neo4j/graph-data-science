@@ -77,7 +77,7 @@ public interface EntitySchema<SELF extends EntitySchema<SELF, I>, I extends Elem
                 (leftType, rightType) -> {
                     if (leftType != rightType) {
                         throw new IllegalArgumentException(formatWithLocale(
-                            "Combining schema entries with value type %s and %s is not supported",
+                            "Combining schema entries with value type %s and %s is not supported.",
                             left,
                             right
                         ));
