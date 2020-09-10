@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -263,29 +262,20 @@ public abstract class AlgoBaseProc<
                 databaseId(),
                 graphName
             );
-            GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
             GraphStore graphStore = graphStoreWithConfig.graphStore();
 
-            // TODO get the dimensions from the graph itself.
-            if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
-                estimateDimensions = ImmutableGraphDimensions.builder()
-                    .nodeCount(graphCreateConfig.nodeCount())
-                    .maxRelCount(((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * graphCreateConfig.nodeCount())
-                    .build();
-            } else {
-                Graph filteredGraph = graphStore.getGraph(
-                    config.nodeLabelIdentifiers(graphStore),
-                    config.internalRelationshipTypes(graphStore),
-                    Optional.empty()
-                );
-                long relCount = filteredGraph.relationshipCount();
+            Graph filteredGraph = graphStore.getGraph(
+                config.nodeLabelIdentifiers(graphStore),
+                config.internalRelationshipTypes(graphStore),
+                Optional.empty()
+            );
+            long relCount = filteredGraph.relationshipCount();
 
-                estimateDimensions = ImmutableGraphDimensions.builder()
-                    .nodeCount(filteredGraph.nodeCount())
-                    .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
-                    .maxRelCount(relCount)
-                    .build();
-            }
+            estimateDimensions = ImmutableGraphDimensions.builder()
+                .nodeCount(filteredGraph.nodeCount())
+                .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
+                .maxRelCount(relCount)
+                .build();
         }
 
         estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
