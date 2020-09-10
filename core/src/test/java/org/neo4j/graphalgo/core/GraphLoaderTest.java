@@ -221,8 +221,6 @@ class GraphLoaderTest extends BaseTest {
         var log = new TestLog();
         Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).withLog(log).graph(factoryType);
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
-        log.getMessages(TestLog.INFO).forEach(System.out::println);
-
         log.containsMessage(TestLog.INFO, "Actual memory usage of the loaded graph:");
     }
 }
