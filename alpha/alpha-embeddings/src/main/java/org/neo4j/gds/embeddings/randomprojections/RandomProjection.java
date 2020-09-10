@@ -54,11 +54,9 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final List<Double> iterationWeights;
 
     static MemoryEstimation memoryEstimation(RandomProjectionBaseConfig config) {
-        var embeddingSize = config.iterationWeights().isEmpty() ? config.embeddingSize() * config.maxIterations() : config.embeddingSize();
-
         return MemoryEstimations
             .builder(RandomProjection.class)
-            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(embeddingSize)))
+            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .build();
@@ -79,7 +77,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
         this.embeddingSize = config.embeddingSize();
         this.sparsity = config.sparsity();
-        this.iterations = config.maxIterations();
+        this.iterations = config.iterations();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
         this.normalizeL2 = config.normalizeL2();

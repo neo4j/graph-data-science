@@ -51,7 +51,7 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
 
     @Configuration.Ignore
     @Value.Derived
-    default int maxIterations() {
+    default int iterations() {
         return iterationWeights().size();
     }
 
