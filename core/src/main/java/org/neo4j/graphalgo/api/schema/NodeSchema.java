@@ -27,24 +27,19 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @ValueClass
-public interface NodeSchema {
+public interface NodeSchema extends EntitySchema<NodeSchema, NodeLabel> {
     Map<NodeLabel, Map<String, ValueType>> properties();
 
-    default Map<String, Object> toMap() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> entry
-                .getValue()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphStoreSchema.forValueType(innerEntry.getValue()))
-                )
-        ));
+    default NodeSchema filter(Set<NodeLabel> labelsToKeep) {
+        return of(filterProperties(labelsToKeep));
+    }
+
+    @Override
+    default NodeSchema union(NodeSchema other) {
+        return of(unionProperties(other.properties()));
     }
 
     static NodeSchema of(Map<NodeLabel, Map<String, ValueType>> properties) {

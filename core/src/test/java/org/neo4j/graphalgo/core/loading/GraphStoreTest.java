@@ -38,8 +38,6 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -52,9 +50,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
@@ -110,19 +106,13 @@ class GraphStoreTest extends BaseTest {
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
 
         assertEquals(graphStore.schema().nodeSchema(), filteredGraph.schema().nodeSchema());
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
-        relTypes.forEach(relType -> {
-            if (relProperty.isEmpty()) {
-                relationshipSchemaBuilder.addEmptyMapForRelationshipTypeWithoutProperties(relType);
-            } else {
-                relationshipSchemaBuilder.addPropertyAndTypeForRelationshipType(
-                    relType,
-                    relProperty.get(),
-                    ValueType.DOUBLE
-                );
-            }
-        });
-        assertEquals(relationshipSchemaBuilder.build(), filteredGraph.schema().relationshipSchema());
+
+        var expectedRelationshipSchema = relTypes
+            .stream()
+            .map(relType -> graphStore.schema().relationshipSchema().singleTypeAndProperty(relType, relProperty))
+            .reduce(RelationshipSchema::union)
+            .get();
+        assertEquals(expectedRelationshipSchema, filteredGraph.schema().relationshipSchema());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -141,15 +131,7 @@ class GraphStoreTest extends BaseTest {
 
         assertGraphEquals(fromGdl(expectedGraph), filteredGraph);
 
-        var nodeSchemaMap = graphStore
-            .schema()
-            .nodeSchema()
-            .properties()
-            .entrySet()
-            .stream()
-            .filter(entry -> labels.contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        assertEquals(NodeSchema.of(nodeSchemaMap), filteredGraph.schema().nodeSchema());
+        assertEquals(graphStore.schema().filterNodeLabels(new HashSet<>(labels)), filteredGraph.schema());
     }
 
     @Test

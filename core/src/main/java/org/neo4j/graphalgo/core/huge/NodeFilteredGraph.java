@@ -29,17 +29,14 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
 public class NodeFilteredGraph extends CSRFilterGraph {
 
@@ -51,18 +48,8 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public GraphStoreSchema schema() {
-        var filteredSchemaElements = graph.schema()
-            .nodeSchema()
-            .properties()
-            .entrySet()
-            .stream()
-            .filter(entry -> filteredIdMap.availableNodeLabels().contains(entry.getKey()))
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        var nodeSchema = NodeSchema.of(filteredSchemaElements);
-
-        return GraphStoreSchema.of(nodeSchema, graph.schema().relationshipSchema());
+    public GraphSchema schema() {
+        return graph.schema().filterNodeLabels(filteredIdMap.availableNodeLabels());
     }
 
     @Override

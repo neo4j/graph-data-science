@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -101,7 +101,12 @@ public final class HugeGraphUtil {
         );
     }
 
-    public static HugeGraph create(IdMap idMap, Map<String, NodeProperties> nodeProperties, Relationships relationships, AllocationTracker tracker) {
+    public static HugeGraph create(
+        IdMap idMap,
+        Map<String, NodeProperties> nodeProperties,
+        Relationships relationships,
+        AllocationTracker tracker
+    ) {
         if (nodeProperties.isEmpty()) {
             return create(idMap, relationships, tracker);
         } else {
@@ -141,7 +146,7 @@ public final class HugeGraphUtil {
 
         return HugeGraph.create(
             idMap,
-            GraphStoreSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
+            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
             nodeProperties,
             relationships.topology(),
             relationships.properties(),

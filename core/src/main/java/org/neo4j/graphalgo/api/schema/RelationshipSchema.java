@@ -27,24 +27,57 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RelationshipSchema {
+public interface RelationshipSchema extends EntitySchema<RelationshipSchema, RelationshipType> {
     Map<RelationshipType, Map<String, ValueType>> properties();
 
-    default Map<String, Object> toMap() {
-        return properties().entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name,
-            entry -> entry
-                .getValue()
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    innerEntry -> GraphStoreSchema.forValueType(innerEntry.getValue()))
-                )
-        ));
+    @Override
+    default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
+        return of(filterProperties(relationshipTypesToKeep));
+    }
+
+    @Override
+    default RelationshipSchema union(RelationshipSchema other) {
+        return of(unionProperties(other.properties()));
+    }
+
+    default RelationshipSchema singleTypeAndProperty(
+        RelationshipType relationshipType,
+        Optional<String> maybeProperty
+    ) {
+        if (!properties().containsKey(relationshipType)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship schema does not contain relationship type '%s'",
+                relationshipType.name
+            ));
+        }
+
+        maybeProperty.ifPresent(property -> {
+            if (!properties().get(relationshipType).containsKey(property)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Relationship schema does not contain relationship type '%s' and property '%s",
+                    relationshipType.name,
+                    property
+                ));
+            }
+        });
+
+        if (maybeProperty.isPresent()) {
+            return RelationshipSchema
+                .builder()
+                .addPropertyAndTypeForRelationshipType(relationshipType, maybeProperty.get(), ValueType.DOUBLE)
+                .build();
+        } else {
+            return RelationshipSchema
+                .builder()
+                .addEmptyMapForRelationshipTypeWithoutProperties(relationshipType)
+                .build();
+        }
     }
 
     static RelationshipSchema of(Map<RelationshipType, Map<String, ValueType>> properties) {
@@ -58,7 +91,11 @@ public interface RelationshipSchema {
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public Builder addPropertyAndTypeForRelationshipType(RelationshipType type, String propertyName, ValueType relationshipProperty) {
+        public Builder addPropertyAndTypeForRelationshipType(
+            RelationshipType type,
+            String propertyName,
+            ValueType relationshipProperty
+        ) {
             this.properties
                 .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
                 .put(propertyName, relationshipProperty);

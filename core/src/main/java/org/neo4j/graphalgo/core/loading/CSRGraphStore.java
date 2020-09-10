@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.ProcedureConstants;
@@ -185,8 +185,8 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public GraphStoreSchema schema() {
-        return GraphStoreSchema.of(nodeSchema(), relationshipTypeSchema());
+    public GraphSchema schema() {
+        return GraphSchema.of(nodeSchema(), relationshipTypeSchema());
     }
 
     @Override
@@ -498,26 +498,16 @@ public final class CSRGraphStore implements GraphStore {
             .map(relTypeAndCSR -> {
                 Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
-                RelationshipSchema relationshipSchema;
-                if (maybeRelationshipProperty.isPresent()) {
-                    relationshipSchema = RelationshipSchema
-                        .builder()
-                        .addPropertyAndTypeForRelationshipType(
-                            relTypeAndCSR.getKey(),
-                            maybeRelationshipProperty.get(),
-                            ValueType.DOUBLE
-                        )
-                        .build();
-                } else {
-                    relationshipSchema = RelationshipSchema
-                        .builder()
-                        .addEmptyMapForRelationshipTypeWithoutProperties(relTypeAndCSR.getKey())
-                        .build();
-                }
+                var graphSchema = GraphSchema.of(
+                    schema().nodeSchema(),
+                    schema()
+                        .relationshipSchema()
+                        .singleTypeAndProperty(relTypeAndCSR.getKey(), maybeRelationshipProperty)
+                );
 
                 HugeGraph initialGraph = HugeGraph.create(
                     nodes,
-                    GraphStoreSchema.of(schema().nodeSchema(), relationshipSchema),
+                    graphSchema,
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
@@ -99,7 +99,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
 
-        GraphStoreSchema schema = graphStore.schema();
+        GraphSchema schema = graphStore.schema();
         boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
         boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema().properties());
         assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);

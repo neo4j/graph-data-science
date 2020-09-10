@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 
 import java.util.Set;
 
 public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties, RelationshipAccess {
 
-    GraphStoreSchema schema();
+    GraphSchema schema();
 
     NodeMapping nodeMapping();
 

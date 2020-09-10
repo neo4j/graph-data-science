@@ -19,15 +19,18 @@
  */
 package org.neo4j.graphalgo.api.schema;
 
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
+import java.util.Set;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 @ValueClass
-public interface GraphStoreSchema {
+public interface GraphSchema {
 
     NodeSchema nodeSchema();
 
@@ -40,8 +43,23 @@ public interface GraphStoreSchema {
         );
     }
 
-    static GraphStoreSchema of(NodeSchema nodeSchema, RelationshipSchema relationshipSchema) {
-        return ImmutableGraphStoreSchema.builder()
+    default GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
+        return of(nodeSchema().filter(labelsToKeep), relationshipSchema());
+    }
+
+    default GraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
+        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep));
+    }
+
+    default GraphSchema union(GraphSchema other) {
+        return GraphSchema.of(
+            nodeSchema().union(other.nodeSchema()),
+            relationshipSchema().union(other.relationshipSchema())
+        );
+    }
+
+    static GraphSchema of(NodeSchema nodeSchema, RelationshipSchema relationshipSchema) {
+        return ImmutableGraphSchema.builder()
             .nodeSchema(nodeSchema)
             .relationshipSchema(relationshipSchema)
             .build();

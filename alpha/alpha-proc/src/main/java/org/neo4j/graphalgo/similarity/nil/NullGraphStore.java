@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphStoreSchema;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
@@ -64,7 +64,7 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public GraphStoreSchema schema() {
+    public GraphSchema schema() {
         throw new NullGraphException();
     }
 
