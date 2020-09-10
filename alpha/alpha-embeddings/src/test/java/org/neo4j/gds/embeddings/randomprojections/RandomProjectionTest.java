@@ -281,7 +281,6 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var config = ImmutableRandomProjectionBaseConfig
             .builder()
-            .maxIterations(2)
             .embeddingSize(2)
             .iterationWeights(List.of(1.0D, 2.0D))
             .concurrency(4)
