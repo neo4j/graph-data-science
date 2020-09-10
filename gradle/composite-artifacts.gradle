@@ -1,0 +1,72 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+def docsProjects = [
+    "doc"
+]
+
+def toolsProjects = [
+    'pregel-example',
+]
+
+def estimationCliProjects = [
+    'estimation-cli'
+]
+
+def notLibraryProjects =
+    docsProjects +
+    toolsProjects +
+    estimationCliProjects
+
+def artifactsTask(Set<Project> subprojects, List<String>projectList, String taskName) {
+    subprojects
+            .findAll { projectList.contains(it.name) }
+            .forEach {
+                def artifactTask = it.tasks.create(taskName)
+                def rootTask = rootProject.tasks.findByPath(taskName)
+                rootTask.dependsOn artifactTask
+
+                def maybeTestTask = it.tasks.findByPath(":${it.name}:test")
+                if(maybeTestTask != null) {
+                    rootTask.dependsOn maybeTestTask
+                }
+            }
+}
+
+task libraryArtifacts {
+    def libs = subprojects.findAll { !notLibraryProjects.contains(it.name) }.collect { it.name }
+    artifactsTask(subprojects, libs, "libraryArtifacts")
+}
+
+task docsArtifacts {
+    artifactsTask(subprojects, docsProjects, 'docsArtifacts')
+}
+
+task toolsArtifacts {
+    artifactsTask(subprojects, toolsProjects, 'toolsArtifacts')
+}
+
+task estimationCliArtifacts {
+    artifactsTask(subprojects, estimationCliProjects, 'estimationCliArtifacts')
+}
+
+task allArtifacts {
+    dependsOn libraryArtifacts, docsArtifacts, toolsArtifacts, estimationCliArtifacts
+}

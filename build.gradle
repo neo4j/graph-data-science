@@ -46,6 +46,16 @@ allprojects {
     task cipr {
         dependsOn tasks.check
     }
+
+    task checkstyle {
+        group = "verification"
+        description = "Run all checkstyle related tasks"
+    }
+
+    task spotbugs {
+        group = "verification"
+        description = "Run all spotbugs related tasks"
+    }
 }
 
 apply from: 'gradle/licensing.gradle'
@@ -55,3 +65,4 @@ apply from: 'gradle/forbidden-apis.gradle'
 apply from: 'gradle/checkstyle.gradle'
 apply from: 'gradle/spotbugs.gradle'
 apply from: 'gradle/pregel-bootstrap.gradle'
+apply from: 'gradle/composite-artifacts.gradle'
