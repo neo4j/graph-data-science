@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
@@ -31,7 +30,7 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsConfig, RelationshipWeightConfig {
+public interface RandomProjectionBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
@@ -44,16 +43,16 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
         return 3;
     }
 
-    @Override
-    @Value.Default
-    default int maxIterations() {
-        return DEFAULT_ITERATION_WEIGHTS.size();
-    }
-
     @Configuration.Key(ITERATION_WEIGHTS_KEY)
     @Value.Default
     default List<Double> iterationWeights() {
         return DEFAULT_ITERATION_WEIGHTS;
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default int maxIterations() {
+        return iterationWeights().size();
     }
 
     @Value.Default
@@ -68,19 +67,11 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, IterationsCo
 
     @Value.Check
     default void validate() {
-        var numberOfIterationWeights = iterationWeights().size();
-        if (numberOfIterationWeights != maxIterations()) {
-            var message = formatWithLocale(
-                "The value of `%1$s` must be a list where its length is the " +
-                "same value as the configured value for `%2$s`.%n" +
-                "`%2$s` is defined as `%3$d` but `%1$s` contains `%4$d` %5$s.",
-                ITERATION_WEIGHTS_KEY,
-                MAX_ITERATIONS_KEY,
-                maxIterations(),
-                numberOfIterationWeights,
-                numberOfIterationWeights == 1 ? "entry" : "entries"
-            );
-            throw new IllegalArgumentException(message);
+        if (iterationWeights().isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of `%s` must not be empty.",
+                ITERATION_WEIGHTS_KEY
+            ));
         }
     }
 }

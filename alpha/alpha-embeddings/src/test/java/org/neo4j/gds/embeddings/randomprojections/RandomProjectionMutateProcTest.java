@@ -85,9 +85,7 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
             .addParameter("mutateProperty", "embedding");
 
         if (!weights.isEmpty()) {
-            queryBuilder
-                .addParameter("iterationWeights", weights)
-                .addParameter("maxIterations", weights.size());
+            queryBuilder.addParameter("iterationWeights", weights);
         }
         String query = queryBuilder.yields();
 

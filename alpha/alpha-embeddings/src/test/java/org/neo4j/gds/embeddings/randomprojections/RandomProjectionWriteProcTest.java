@@ -72,9 +72,7 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
             .addParameter("writeProperty", "embedding");
 
         if (!weights.isEmpty()) {
-            queryBuilder
-                .addParameter("iterationWeights", weights)
-                .addParameter("maxIterations", weights.size());
+            queryBuilder.addParameter("iterationWeights", weights);
         }
         String writeQuery = queryBuilder.yields();
 

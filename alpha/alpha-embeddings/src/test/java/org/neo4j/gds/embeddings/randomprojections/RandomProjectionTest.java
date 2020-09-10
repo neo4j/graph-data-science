@@ -40,7 +40,6 @@ class RandomProjectionTest extends AlgoTestBase {
 
     static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
         .embeddingSize(128)
-        .maxIterations(1)
         .addIterationWeight(1.0D)
         .build();
 
@@ -176,7 +175,6 @@ class RandomProjectionTest extends AlgoTestBase {
             graph,
             ImmutableRandomProjectionBaseConfig.builder()
                 .embeddingSize(512)
-                .maxIterations(1)
                 .addIterationWeight(1.0D)
                 .build(),
             progressLogger,
@@ -220,7 +218,6 @@ class RandomProjectionTest extends AlgoTestBase {
             graph,
             ImmutableRandomProjectionBaseConfig.builder()
                 .embeddingSize(64)
-                .maxIterations(4)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
             progressLogger,
@@ -241,7 +238,6 @@ class RandomProjectionTest extends AlgoTestBase {
     void testMemoryEstimationWithoutIterationWeights() {
         var config = ImmutableRandomProjectionBaseConfig
             .builder()
-            .maxIterations(2)
             .addIterationWeights(1.0D, 1.0D)
             .embeddingSize(128)
             .build();
@@ -257,7 +253,6 @@ class RandomProjectionTest extends AlgoTestBase {
     void testMemoryEstimationWithIterationWeights() {
         var config = ImmutableRandomProjectionBaseConfig
             .builder()
-            .maxIterations(2)
             .embeddingSize(128)
             .iterationWeights(List.of(1.0D, 2.0D))
             .build();

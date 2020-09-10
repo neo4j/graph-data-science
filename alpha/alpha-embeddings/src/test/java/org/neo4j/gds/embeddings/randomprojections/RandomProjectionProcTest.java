@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.randomprojections;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -31,15 +30,11 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection>,
@@ -96,36 +91,6 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
         return userInput.containsKey("embeddingSize")
             ? userInput
             : userInput.withEntry("embeddingSize", 128);
-    }
-
-    @Test
-    void shouldFailWhenWeightsLengthUnequalToIterations() {
-        int embeddingSize = 128;
-        int maxIterations = 4;
-
-        applyOnProcedure(proc -> {
-            getProcedureMethods(proc).forEach(method -> {
-                CypherMapWrapper configWrapper = CypherMapWrapper.empty()
-                    .withEntry("embeddingSize", embeddingSize)
-                    .withEntry("maxIterations", maxIterations)
-                    .withEntry("iterationWeights", List.of(1.0f, 1.0f));
-
-                Map<String, Object> config = createMinimalImplicitConfig(configWrapper).toMap();
-
-                InvocationTargetException ex = assertThrows(
-                    InvocationTargetException.class,
-                    () -> method.invoke(proc, config, Collections.emptyMap())
-                );
-
-                var rootMessage = rootCause(ex).getMessage();
-                assertEquals(
-                    "The value of `iterationWeights` must be a list where its length is the " +
-                    "same value as the configured value for `maxIterations`." + System.lineSeparator() +
-                    "`maxIterations` is defined as `4` but `iterationWeights` contains `2` entries.",
-                    rootMessage
-                );
-            });
-        });
     }
 
     @Override
