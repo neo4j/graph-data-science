@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateOrientationCombinations;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {

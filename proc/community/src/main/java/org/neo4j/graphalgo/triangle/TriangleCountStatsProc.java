@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.procedure.Mode.READ;
 
 public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountStatsProc.StatsResult, TriangleCountStatsConfig> {
@@ -57,9 +58,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected void validateConfigs(
-        GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config
-    ) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 

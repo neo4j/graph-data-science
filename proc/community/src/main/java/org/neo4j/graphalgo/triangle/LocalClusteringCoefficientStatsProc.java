@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -61,9 +62,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected void validateConfigs(
-        GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config
-    ) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
         warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
     }

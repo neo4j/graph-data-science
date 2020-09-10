@@ -26,20 +26,14 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
-import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
@@ -54,25 +48,18 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_KEY;
 import static org.neo4j.graphalgo.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.READ_CONCURRENCY_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AlgoBaseProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
@@ -86,13 +73,6 @@ public abstract class AlgoBaseProc<
     public String algoName() {
         return this.getClass().getSimpleName();
     }
-
-    protected abstract CONFIG newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    );
 
     public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
@@ -124,67 +104,14 @@ public abstract class AlgoBaseProc<
         return algoConfig;
     }
 
-    // TODO make AlgorithmFactory have a constructor that accepts CONFIG
-    protected final ALGO newAlgorithm(
-        final Graph graph,
-        final CONFIG config,
-        final AllocationTracker tracker
-    ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return algorithmFactory()
-            .build(graph, config, tracker, log)
-            .withTerminationFlag(terminationFlag);
-    }
+    protected abstract CONFIG newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    );
 
     protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
-
-    protected MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
-        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-        GraphDimensions estimateDimensions;
-
-        if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            var memoryTreeWithDimensions = estimateGraphCreate(createConfig);
-            estimateDimensions = memoryTreeWithDimensions.graphDimensions();
-            estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
-        } else {
-            String graphName = config.graphName().orElseThrow(IllegalStateException::new);
-
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
-                username(),
-                databaseId(),
-                graphName
-            );
-            GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
-            GraphStore graphStore = graphStoreWithConfig.graphStore();
-
-            // TODO get the dimensions from the graph itself.
-            if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
-                estimateDimensions = ImmutableGraphDimensions.builder()
-                    .nodeCount(graphCreateConfig.nodeCount())
-                    .maxRelCount(((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * graphCreateConfig.nodeCount())
-                    .build();
-            } else {
-                Graph filteredGraph = graphStore.getGraph(
-                    config.nodeLabelIdentifiers(graphStore),
-                    config.internalRelationshipTypes(graphStore),
-                    Optional.empty()
-                );
-                long relCount = filteredGraph.relationshipCount();
-
-                estimateDimensions = ImmutableGraphDimensions.builder()
-                    .nodeCount(filteredGraph.nodeCount())
-                    .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
-                    .maxRelCount(relCount)
-                    .build();
-            }
-        }
-
-        estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
-
-        MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
-        return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
-    }
 
     protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         CONFIG config;
@@ -221,191 +148,7 @@ public abstract class AlgoBaseProc<
         return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
     }
 
-    private Graph createGraph(GraphStore graphStore, CONFIG config) {
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
-        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
-
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
-    }
-
-    private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
-        CONFIG config = configAndName.getOne();
-        Optional<String> maybeGraphName = configAndName.getTwo();
-
-        GraphStoreWithConfig graphCandidate;
-
-        if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
-        } else if (config.implicitCreateConfig().isPresent()) {
-            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
-            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
-            GraphStore graphStore = loader.graphStore();
-
-            graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
-        } else {
-            throw new IllegalStateException("There must be either a graph name or an implicit create config");
-        }
-
-        validate(graphCandidate, config);
-        return graphCandidate.graphStore();
-    }
-
-    private void validate(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {
-        GraphStore graphStore = graphStoreWithConfig.graphStore();
-        GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
-
-        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
-        if (config instanceof SeedConfig) {
-            String seedProperty = ((SeedConfig) config).seedProperty();
-            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Seed property `%s` not found in graph with node properties: %s",
-                    seedProperty,
-                    graphStore.nodePropertyKeys().values()
-                ));
-            }
-        }
-        if (config instanceof ConfigurableSeedConfig) {
-            ConfigurableSeedConfig configurableSeedConfig = (ConfigurableSeedConfig) config;
-            String seedProperty = configurableSeedConfig.seedProperty();
-            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "`%s`: `%s` not found in graph with node properties: %s",
-                    configurableSeedConfig.propertyNameOverride(),
-                    seedProperty,
-                    graphStore.nodePropertyKeys().values()
-                ));
-            }
-        }
-        if (config instanceof NodePropertiesConfig) {
-            List<String> weightProperties = ((NodePropertiesConfig) config).nodePropertyNames();
-            List<String> missingProperties = weightProperties
-                .stream()
-                .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
-                .collect(Collectors.toList());
-            if (!missingProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Node properties %s not found in graph with node properties: %s in all node labels: %s",
-                    missingProperties,
-                    graphStore.nodePropertyKeys(filterLabels),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
-                ));
-            }
-        }
-        if (config instanceof NodeWeightConfig) {
-            String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
-            if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Node weight property `%s` not found in graph with node properties: %s in all node labels: %s",
-                    weightProperty,
-                    graphStore.nodePropertyKeys(filterLabels),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
-                ));
-            }
-        }
-        if (config instanceof RelationshipWeightConfig) {
-
-            String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
-            Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
-            if (weightProperty != null && !graphStore.hasRelationshipProperty(internalRelationshipTypes, weightProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship weight property `%s` not found in graph with relationship properties: %s in all relationship types: %s",
-                    weightProperty,
-                    graphStore.relationshipPropertyKeys(internalRelationshipTypes),
-                    StringJoining.join(internalRelationshipTypes.stream().map(RelationshipType::name))
-                ));
-            }
-        }
-
-        if (config instanceof MutatePropertyConfig) {
-            MutatePropertyConfig mutateConfig = (MutatePropertyConfig) config;
-            String mutateProperty = mutateConfig.mutateProperty();
-
-            if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Node property `%s` already exists in the in-memory graph.",
-                    mutateProperty
-                ));
-            }
-        }
-
-        if (config instanceof MutateRelationshipConfig) {
-            String mutateRelationshipType = ((MutateRelationshipConfig) config).mutateRelationshipType();
-            if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship type `%s` already exists in the in-memory graph.",
-                    mutateRelationshipType
-                ));
-            }
-        }
-
-        validateConfigs(graphCreateConfig, config);
-    }
-
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
-
-    protected void validateIsUndirectedGraph(GraphCreateConfig graphCreateConfig, CONFIG config) {
-        graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
-            @Override
-            public void visit(GraphCreateFromStoreConfig storeConfig) {
-                storeConfig.relationshipProjections().projections().entrySet().stream()
-                    .filter(entry -> config.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                     config.relationshipTypes().contains(entry.getKey().name()))
-                    .filter(entry -> entry.getValue().orientation() != Orientation.UNDIRECTED)
-                    .forEach(entry -> {
-                        throw new IllegalArgumentException(formatWithLocale(
-                            "Procedure requires relationship projections to be UNDIRECTED. Projection for `%s` uses orientation `%s`",
-                            entry.getKey().name,
-                            entry.getValue().orientation()
-                        ));
-                    });
-
-            }
-        });
-    }
-
-    /**
-     * Validates that {@link Orientation#UNDIRECTED} is not mixed with {@link Orientation#NATURAL}
-     * and {@link Orientation#REVERSE}. If a relationship type filter is present in the algorithm
-     * config, only those relationship projections are considered in the validation.
-     */
-    protected void validateOrientationCombinations(GraphCreateConfig graphCreateConfig, CONFIG algorithmConfig) {
-        graphCreateConfig.accept(new GraphCreateConfig.Visitor() {
-            @Override
-            public void visit(GraphCreateFromStoreConfig storeConfig) {
-                var filteredProjections = storeConfig
-                    .relationshipProjections()
-                    .projections()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> algorithmConfig.relationshipTypes().equals(Collections.singletonList(PROJECT_ALL)) ||
-                                     algorithmConfig.relationshipTypes().contains(entry.getKey().name()))
-                    .collect(toList());
-
-                boolean allUndirected = filteredProjections
-                    .stream()
-                    .allMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
-
-                boolean anyUndirected = filteredProjections
-                    .stream()
-                    .anyMatch(entry -> entry.getValue().orientation() == Orientation.UNDIRECTED);
-
-                if (anyUndirected && !allUndirected) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
-                        StringJoining.join(filteredProjections
-                            .stream()
-                            .map(entry -> formatWithLocale("%s (%s)", entry.getKey().name, entry.getValue().orientation()))
-                            .sorted())
-                    ));
-                }
-            }
-        });
-    }
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -488,17 +231,6 @@ public abstract class AlgoBaseProc<
         throw new UnsupportedOperationException("Procedure must implement org.neo4j.graphalgo.AlgoBaseProc.nodeProperty");
     }
 
-    private void validateMemoryUsageIfImplemented(CONFIG config) {
-        var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);
-
-        if (sudoImplicitCreate) {
-            log.debug("Sudo mode: Won't check for available memory.");
-            return;
-        }
-
-        tryValidateMemoryUsage(config, this::memoryEstimation);
-    }
-
     protected Stream<MemoryEstimateResult> computeEstimate(
         Object graphNameOrConfig,
         Map<String, Object> configuration
@@ -512,6 +244,111 @@ public abstract class AlgoBaseProc<
         return Stream.of(
             new MemoryEstimateResult(memoryTreeWithDimensions)
         );
+    }
+
+    MemoryTreeWithDimensions memoryEstimation(CONFIG config) {
+        MemoryEstimations.Builder estimationBuilder = MemoryEstimations.builder("Memory Estimation");
+        GraphDimensions estimateDimensions;
+
+        if (config.implicitCreateConfig().isPresent()) {
+            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+            var memoryTreeWithDimensions = estimateGraphCreate(createConfig);
+            estimateDimensions = memoryTreeWithDimensions.graphDimensions();
+            estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
+        } else {
+            String graphName = config.graphName().orElseThrow(IllegalStateException::new);
+
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
+                username(),
+                databaseId(),
+                graphName
+            );
+            GraphCreateConfig graphCreateConfig = graphStoreWithConfig.config();
+            GraphStore graphStore = graphStoreWithConfig.graphStore();
+
+            // TODO get the dimensions from the graph itself.
+            if (graphCreateConfig instanceof RandomGraphGeneratorConfig) {
+                estimateDimensions = ImmutableGraphDimensions.builder()
+                    .nodeCount(graphCreateConfig.nodeCount())
+                    .maxRelCount(((RandomGraphGeneratorConfig) graphCreateConfig).averageDegree() * graphCreateConfig.nodeCount())
+                    .build();
+            } else {
+                Graph filteredGraph = graphStore.getGraph(
+                    config.nodeLabelIdentifiers(graphStore),
+                    config.internalRelationshipTypes(graphStore),
+                    Optional.empty()
+                );
+                long relCount = filteredGraph.relationshipCount();
+
+                estimateDimensions = ImmutableGraphDimensions.builder()
+                    .nodeCount(filteredGraph.nodeCount())
+                    .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
+                    .maxRelCount(relCount)
+                    .build();
+            }
+        }
+
+        estimationBuilder.add("algorithm", algorithmFactory().memoryEstimation(config));
+
+        MemoryTree memoryTree = estimationBuilder.build().estimate(estimateDimensions, config.concurrency());
+        return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
+    }
+
+    // TODO make AlgorithmFactory have a constructor that accepts CONFIG
+    private ALGO newAlgorithm(
+        final Graph graph,
+        final CONFIG config,
+        final AllocationTracker tracker
+    ) {
+        TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
+        return algorithmFactory()
+            .build(graph, config, tracker, log)
+            .withTerminationFlag(terminationFlag);
+    }
+
+    private Graph createGraph(GraphStore graphStore, CONFIG config) {
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            : Optional.empty();
+
+        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
+
+        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
+    }
+
+    private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
+        CONFIG config = configAndName.getOne();
+        Optional<String> maybeGraphName = configAndName.getTwo();
+
+        GraphStoreWithConfig graphCandidate;
+
+        if (maybeGraphName.isPresent()) {
+            graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
+        } else if (config.implicitCreateConfig().isPresent()) {
+            GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+            GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
+            GraphStore graphStore = loader.graphStore();
+
+            graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
+        } else {
+            throw new IllegalStateException("There must be either a graph name or an implicit create config");
+        }
+
+        GraphStoreValidation.validate(graphCandidate, config);
+        validateConfigs(graphCandidate.config(), config);
+        return graphCandidate.graphStore();
+    }
+
+    private void validateMemoryUsageIfImplemented(CONFIG config) {
+        var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);
+
+        if (sudoImplicitCreate) {
+            log.debug("Sudo mode: Won't check for available memory.");
+            return;
+        }
+
+        tryValidateMemoryUsage(config, this::memoryEstimation);
     }
 
     @ValueClass
