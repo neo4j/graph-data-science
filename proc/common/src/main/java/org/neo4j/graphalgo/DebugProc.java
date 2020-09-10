@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
+import org.neo4j.io.os.OsBeanUtil;
 import org.neo4j.kernel.diagnostics.providers.SystemDiagnostics;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.procedure.Procedure;
@@ -31,8 +32,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -74,8 +73,10 @@ public class DebugProc {
         features(values);
         buildInfo(buildInfo, values);
         values.add(value("availableCPUs", runtime.availableProcessors()));
+        values.add(value("physicalCPUs", ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors()));
         memoryInfo(values);
-        systemDiagnostics().forEach(values::add);
+        systemResources(values);
+        systemDiagnostics(values);
         return values.build();
     }
 
@@ -113,7 +114,7 @@ public class DebugProc {
         MemoryMXBean memBean = ManagementFactory.getMemoryMXBean();
         builder
             .add(value("availableHeapInBytes", availableHeapInBytes))
-            .add(value("availableHeap", humanReadable(availableHeapInBytes)));
+            .add(value("availableHeap", safeHumanReadable(availableHeapInBytes)));
         onHeapInfo(memBean.getHeapMemoryUsage(), builder);
         offHeapInfo(memBean.getNonHeapMemoryUsage(), builder);
     }
@@ -125,11 +126,11 @@ public class DebugProc {
 
         builder
             .add(value("freeHeapInBytes", freeHeapInBytes))
-            .add(value("freeHeap", humanReadable(freeHeapInBytes)))
+            .add(value("freeHeap", safeHumanReadable(freeHeapInBytes)))
             .add(value("totalHeapInBytes", totalHeapInBytes))
-            .add(value("totalHeap", humanReadable(totalHeapInBytes)))
+            .add(value("totalHeap", safeHumanReadable(totalHeapInBytes)))
             .add(value("maxHeapInBytes", maxHeapInBytes))
-            .add(value("maxHeap", humanReadable(maxHeapInBytes)));
+            .add(value("maxHeap", safeHumanReadable(maxHeapInBytes)));
     }
 
     private static void offHeapInfo(MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
@@ -137,23 +138,47 @@ public class DebugProc {
         var usedOffHeapInBytes = memUsage.getUsed();
         builder
             .add(value("usedOffHeapInBytes", usedOffHeapInBytes))
-            .add(value("usedOffHeap", humanReadable(usedOffHeapInBytes)))
+            .add(value("usedOffHeap", safeHumanReadable(usedOffHeapInBytes)))
             .add(value("totalOffHeapInBytes", totalOffHeapInBytes))
-            .add(value("totalOffHeap", humanReadable(totalOffHeapInBytes)));
+            .add(value("totalOffHeap", safeHumanReadable(totalOffHeapInBytes)));
+    }
+
+    private static void systemResources(Stream.Builder<DebugValue> builder) {
+        var freePhysicalMemory = OsBeanUtil.getFreePhysicalMemory();
+        var committedVirtualMemory = OsBeanUtil.getCommittedVirtualMemory();
+        var totalPhysicalMemory = OsBeanUtil.getTotalPhysicalMemory();
+        var freeSwapSpace = OsBeanUtil.getFreeSwapSpace();
+        var totalSwapSpace = OsBeanUtil.getTotalSwapSpace();
+
+        builder.add(value("freePhysicalMemoryInBytes", freePhysicalMemory));
+        builder.add(value("freePhysicalMemory", safeHumanReadable(freePhysicalMemory)));
+        builder.add(value("committedVirtualMemoryInBytes", committedVirtualMemory));
+        builder.add(value("committedVirtualMemory", safeHumanReadable(committedVirtualMemory)));
+        builder.add(value("totalPhysicalMemoryInBytes", totalPhysicalMemory));
+        builder.add(value("totalPhysicalMemory", safeHumanReadable(totalPhysicalMemory)));
+        builder.add(value("freeSwapSpaceInBytes", freeSwapSpace));
+        builder.add(value("freeSwapSpace", safeHumanReadable(freeSwapSpace)));
+        builder.add(value("totalSwapSpaceInBytes", totalSwapSpace));
+        builder.add(value("totalSwapSpace", safeHumanReadable(totalSwapSpace)));
+        builder.add(value("openFileDescriptors", OsBeanUtil.getOpenFileDescriptors()));
+        builder.add(value("maxFileDescriptors", OsBeanUtil.getMaxFileDescriptors()));
     }
 
     // classpath for duplicate entries or other plugins
-    private static List<DebugValue> systemDiagnostics() {
-        var values = new ArrayList<DebugValue>();
+    private static void systemDiagnostics(Stream.Builder<DebugValue> builder) {
         var index = new AtomicInteger();
-        DiagnosticsLogger collectDiagnostics = line -> values.add(value("sp" + index.getAndIncrement(), line));
+        DiagnosticsLogger collectDiagnostics = line -> builder.add(value("sp" + index.getAndIncrement(), line));
         Stream.of(
-            SystemDiagnostics.SYSTEM_MEMORY,
             SystemDiagnostics.JAVA_MEMORY,
-            SystemDiagnostics.OPERATING_SYSTEM,
             SystemDiagnostics.JAVA_VIRTUAL_MACHINE,
             SystemDiagnostics.CONTAINER
         ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
-        return values;
+    }
+
+    private static String safeHumanReadable(long bytes) {
+        if (bytes < 0) {
+            return "N/A";
+        }
+        return humanReadable(bytes);
     }
 }
