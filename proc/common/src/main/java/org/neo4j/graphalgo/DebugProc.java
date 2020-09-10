@@ -23,9 +23,7 @@ import org.apache.commons.text.WordUtils;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
-import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.os.OsBeanUtil;
-import org.neo4j.kernel.diagnostics.providers.SystemDiagnostics;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.procedure.Procedure;
 
@@ -33,7 +31,8 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
@@ -77,7 +76,7 @@ public class DebugProc {
         memoryInfo(values);
         systemResources(values);
         vmInfo(values);
-        systemDiagnostics(values);
+        containerInfo(values);
         return values.build();
     }
 
@@ -200,13 +199,28 @@ public class DebugProc {
             .add(value("vmCompiler", compiler == null ? "unknown" : compiler.getName()));
     }
 
-    // classpath for duplicate entries or other plugins
-    private static void systemDiagnostics(Stream.Builder<DebugValue> builder) {
-        var index = new AtomicInteger();
-        DiagnosticsLogger collectDiagnostics = line -> builder.add(value("sp" + index.getAndIncrement(), line));
-        Stream.of(
-            SystemDiagnostics.CONTAINER
-        ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
+    private static void containerInfo(Stream.Builder<DebugValue> builder) {
+        boolean containerized = false;
+
+        // test for Docker
+        try (Stream<String> stream = Files.lines(Paths.get("/proc/1/cgroup"))) {
+            if (stream.anyMatch(line -> line.contains("/docker"))) {
+                containerized = true;
+            }
+        } catch (IOException ignored) {
+        }
+
+        // test for LXC
+        if (!containerized) {
+            containerized = "lxc".equals(System.getProperty("container"));
+        }
+
+        // test for Kubernetes
+        if (!containerized) {
+            containerized = System.getProperty("KUBERNETES_SERVICE_HOST") != null;
+        }
+
+        builder.add(value("containerized", containerized));
     }
 
     private static String safeHumanReadable(long bytes) {
