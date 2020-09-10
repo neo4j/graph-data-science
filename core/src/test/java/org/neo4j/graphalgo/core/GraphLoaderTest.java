@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestGraphLoader;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
@@ -213,5 +214,14 @@ class GraphLoaderTest extends BaseTest {
                 .build()
                 .graph()
         );
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testLoggingActualGraphSize(TestSupport.FactoryType factoryType) {
+        var log = new TestLog();
+        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).withLog(log).graph(factoryType);
+        assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
+
+        log.containsMessage(TestLog.INFO, "Actual memory usage of the loaded graph:");
     }
 }

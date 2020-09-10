@@ -161,7 +161,8 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
                 relationships.dimensions()
             );
 
-            progressLogger.logMessage(loadingContext.tracker());
+            logLoadingSummary(graphStore, Optional.empty());
+
             return ImportResult.of(relationships.dimensions(), graphStore);
         });
     }
