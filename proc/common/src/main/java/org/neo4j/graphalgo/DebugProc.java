@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.apache.commons.text.WordUtils;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
@@ -115,32 +116,52 @@ public class DebugProc {
         builder
             .add(value("availableHeapInBytes", availableHeapInBytes))
             .add(value("availableHeap", safeHumanReadable(availableHeapInBytes)));
-        onHeapInfo(memBean.getHeapMemoryUsage(), builder);
-        offHeapInfo(memBean.getNonHeapMemoryUsage(), builder);
+        onHeapInfo("heap", memBean.getHeapMemoryUsage(), builder);
+        offHeapInfo("offHeap", memBean.getNonHeapMemoryUsage(), builder);
+
+        for (var pool : ManagementFactory.getMemoryPoolMXBeans()) {
+            var usage = pool.getUsage();
+            if (usage == null) {
+                continue;
+            }
+            var name = "pool" + WordUtils
+                .capitalizeFully(pool.getName(), ' ', '\'', '-')
+                .replaceAll("[ '-]", "");
+            switch (pool.getType()) {
+                case HEAP:
+                    onHeapInfo(name, usage, builder);
+                    break;
+                case NON_HEAP:
+                    offHeapInfo(name, usage, builder);
+                    break;
+                default:
+                    // do nothing
+            }
+        }
     }
 
-    private static void onHeapInfo(MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
+    private static void onHeapInfo(String name, MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
         var maxHeapInBytes = memUsage.getMax();
         var totalHeapInBytes = memUsage.getCommitted();
         var freeHeapInBytes = memUsage.getCommitted() - memUsage.getUsed();
 
         builder
-            .add(value("freeHeapInBytes", freeHeapInBytes))
-            .add(value("freeHeap", safeHumanReadable(freeHeapInBytes)))
-            .add(value("totalHeapInBytes", totalHeapInBytes))
-            .add(value("totalHeap", safeHumanReadable(totalHeapInBytes)))
-            .add(value("maxHeapInBytes", maxHeapInBytes))
-            .add(value("maxHeap", safeHumanReadable(maxHeapInBytes)));
+            .add(value(name + "FreeInBytes", freeHeapInBytes))
+            .add(value(name + "Free", safeHumanReadable(freeHeapInBytes)))
+            .add(value(name + "TotalInBytes", totalHeapInBytes))
+            .add(value(name + "Total", safeHumanReadable(totalHeapInBytes)))
+            .add(value(name + "MaxInBytes", maxHeapInBytes))
+            .add(value(name + "Max", safeHumanReadable(maxHeapInBytes)));
     }
 
-    private static void offHeapInfo(MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
+    private static void offHeapInfo(String name, MemoryUsage memUsage, Stream.Builder<DebugValue> builder) {
         var totalOffHeapInBytes = memUsage.getCommitted();
         var usedOffHeapInBytes = memUsage.getUsed();
         builder
-            .add(value("usedOffHeapInBytes", usedOffHeapInBytes))
-            .add(value("usedOffHeap", safeHumanReadable(usedOffHeapInBytes)))
-            .add(value("totalOffHeapInBytes", totalOffHeapInBytes))
-            .add(value("totalOffHeap", safeHumanReadable(totalOffHeapInBytes)));
+            .add(value(name + "UsedInBytes", usedOffHeapInBytes))
+            .add(value(name + "Used", safeHumanReadable(usedOffHeapInBytes)))
+            .add(value(name + "TotalInBytes", totalOffHeapInBytes))
+            .add(value(name + "Total", safeHumanReadable(totalOffHeapInBytes)));
     }
 
     private static void systemResources(Stream.Builder<DebugValue> builder) {
@@ -169,7 +190,6 @@ public class DebugProc {
         var index = new AtomicInteger();
         DiagnosticsLogger collectDiagnostics = line -> builder.add(value("sp" + index.getAndIncrement(), line));
         Stream.of(
-            SystemDiagnostics.JAVA_MEMORY,
             SystemDiagnostics.JAVA_VIRTUAL_MACHINE,
             SystemDiagnostics.CONTAINER
         ).forEach(diagnostics -> diagnostics.dump(collectDiagnostics));
