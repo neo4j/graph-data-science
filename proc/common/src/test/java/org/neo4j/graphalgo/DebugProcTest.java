@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Result;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
