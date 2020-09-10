@@ -73,8 +73,7 @@ public class DebugProc {
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
         features(values);
         buildInfo(buildInfo, values);
-        values.add(value("availableCPUs", runtime.availableProcessors()));
-        values.add(value("physicalCPUs", ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors()));
+        cpuInfo(runtime, values);
         memoryInfo(values);
         systemResources(values);
         vmInfo(values);
@@ -109,6 +108,11 @@ public class DebugProc {
             .add(value("buildJdk", properties.buildJdk()))
             .add(value("buildJavaVersion", properties.buildJavaVersion()))
             .add(value("buildHash", properties.buildHash()));
+    }
+
+    private static void cpuInfo(Runtime runtime, Stream.Builder<DebugValue> values) {
+        values.add(value("availableCPUs", runtime.availableProcessors()));
+        values.add(value("physicalCPUs", ManagementFactory.getOperatingSystemMXBean().getAvailableProcessors()));
     }
 
     private static void memoryInfo(Stream.Builder<DebugValue> builder) {
