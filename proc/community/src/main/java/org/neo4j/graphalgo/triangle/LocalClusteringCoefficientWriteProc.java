@@ -90,7 +90,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected NodeProperties getNodeProperties(
+    protected NodeProperties nodeProperty(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computationResult
     ) {
         return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);

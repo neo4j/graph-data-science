@@ -41,7 +41,14 @@ public abstract class MutateProc<
     PROC_RESULT,
     CONFIG extends MutatePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    protected abstract NodeProperties getNodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
+    @Override
+    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperty` or `nodeProperties`.");
+    }
+
+    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperty(computationResult)));
+    }
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
@@ -63,10 +70,6 @@ public abstract class MutateProc<
                 return Stream.of(builder.build());
             }
         });
-    }
-
-    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), getNodeProperties(computationResult)));
     }
 
     private void updateGraphStore(

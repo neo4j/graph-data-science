@@ -109,7 +109,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected NodeProperties getNodeProperties(
+    protected NodeProperties nodeProperty(
         ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult
     ) {
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);

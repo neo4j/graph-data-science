@@ -62,7 +62,7 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 

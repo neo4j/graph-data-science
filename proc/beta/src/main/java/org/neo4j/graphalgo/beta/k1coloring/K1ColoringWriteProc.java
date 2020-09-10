@@ -64,7 +64,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computationResult) {
         return K1ColoringProc.nodeProperties(computationResult);
     }
 

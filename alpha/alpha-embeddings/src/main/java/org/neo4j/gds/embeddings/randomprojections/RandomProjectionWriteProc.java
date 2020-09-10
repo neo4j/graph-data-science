@@ -78,7 +78,7 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 

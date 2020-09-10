@@ -79,7 +79,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computationResult) {
         return BetweennessCentralityProc.nodeProperties(computationResult);
     }
 

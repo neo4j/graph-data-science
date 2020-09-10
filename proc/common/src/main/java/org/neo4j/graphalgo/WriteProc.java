@@ -38,11 +38,16 @@ public abstract class WriteProc<
     PROC_RESULT,
     CONFIG extends WritePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
-    // TODO remove and use nodeProperties() instead
-    @Deprecated
-    protected abstract NodeProperties getNodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult);
-
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
+
+    @Override
+    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        throw new UnsupportedOperationException("Write procedures must implement either `nodeProperty` or `nodeProperties`.");
+    }
+
+    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), nodeProperty(computationResult)));
+    }
 
     protected Stream<PROC_RESULT> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
@@ -60,10 +65,6 @@ public abstract class WriteProc<
             }
             return Stream.of(builder.build());
         });
-    }
-
-    protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), getNodeProperties(computationResult)));
     }
 
     private void writeToNeo(

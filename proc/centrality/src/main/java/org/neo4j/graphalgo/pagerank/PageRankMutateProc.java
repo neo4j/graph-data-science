@@ -78,7 +78,7 @@ public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankM
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 

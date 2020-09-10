@@ -84,7 +84,7 @@ public class PageRankStreamProc extends StreamProc<PageRank, PageRank, Centralit
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<PageRank, PageRank, PageRankStreamConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 }

@@ -51,7 +51,7 @@ public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM,
 
         applyOnProcedure((proc) -> {
             var computationResult = proc.compute(graphName, consecutiveIdsConfig);
-            var nodeProperties = proc.getNodeProperties(computationResult);
+            var nodeProperties = proc.nodeProperty(computationResult);
 
             assertTrue(nodeProperties instanceof LongNodeProperties);
 

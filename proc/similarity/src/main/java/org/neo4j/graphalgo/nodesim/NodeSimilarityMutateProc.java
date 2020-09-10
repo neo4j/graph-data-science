@@ -87,7 +87,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected NodeProperties getNodeProperties(
+    protected NodeProperties nodeProperty(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
     ) {
         throw new UnsupportedOperationException("NodeSimilarity does not mutate node properties.");

@@ -89,7 +89,7 @@ public class LocalClusteringCoefficientMutateProc extends MutateProc<LocalCluste
     }
 
     @Override
-    protected NodeProperties getNodeProperties(
+    protected NodeProperties nodeProperty(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig> computationResult
     ) {
         return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);

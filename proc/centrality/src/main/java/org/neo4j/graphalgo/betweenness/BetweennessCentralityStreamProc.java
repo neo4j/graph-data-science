@@ -70,7 +70,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
         return BetweennessCentralityProc.nodeProperties(computationResult);
     }
 

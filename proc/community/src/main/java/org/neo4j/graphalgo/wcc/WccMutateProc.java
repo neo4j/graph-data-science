@@ -82,7 +82,7 @@ public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateP
     }
 
     @Override
-    protected NodeProperties getNodeProperties(
+    protected NodeProperties nodeProperty(
         ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
     ) {
         return WccProc.nodeProperties(computationResult, computationResult.config().mutateProperty());

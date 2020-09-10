@@ -81,7 +81,7 @@ public class K1ColoringMutateProc extends MutateProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computationResult) {
         return K1ColoringProc.nodeProperties(computationResult);
     }
 

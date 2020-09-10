@@ -86,7 +86,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountWriteConfig> computationResult) {
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);
     }
 

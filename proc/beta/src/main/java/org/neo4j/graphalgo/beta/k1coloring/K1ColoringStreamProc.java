@@ -80,7 +80,7 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult) {
         return K1ColoringProc.nodeProperties(computationResult);
     }
 

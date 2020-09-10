@@ -62,8 +62,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -94,7 +94,7 @@ public abstract class AlgoBaseProc<
         CypherMapWrapper config
     );
 
-    public final CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
+    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
         Optional<GraphCreateConfig> maybeImplicitCreate = Optional.empty();
         Collection<String> allowedKeys = new HashSet<>();
         // implicit loading
@@ -481,11 +481,11 @@ public abstract class AlgoBaseProc<
             .build();
     }
 
-    protected NodeProperties getNodeProperties(
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        throw new UnsupportedOperationException(
-            "Procedure needs to implement org.neo4j.graphalgo.BaseAlgoProc.nodePropertyTranslator");
+    /**
+     * Returns a single node property that has been produced by the procedure.
+     */
+    protected NodeProperties nodeProperty(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+        throw new UnsupportedOperationException("Procedure must implement org.neo4j.graphalgo.AlgoBaseProc.nodeProperty");
     }
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {

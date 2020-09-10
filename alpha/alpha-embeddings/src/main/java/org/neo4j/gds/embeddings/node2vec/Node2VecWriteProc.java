@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -112,7 +112,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
     }
 
     @Override
-    protected NodeProperties getNodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
+    protected NodeProperties nodeProperty(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
         return (DoubleArrayNodeProperties) (nodeId) -> ArrayUtil.floatToDoubleArray(computationResult.result().get(nodeId).data());
     }
 

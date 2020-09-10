@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.MutateProc;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
 import java.util.List;
@@ -34,10 +33,5 @@ public abstract class PregelMutateProc<
     @Override
     protected List<NodePropertyExporter.NodeProperty<?>> nodeProperties(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
-    }
-
-    @Override
-    protected NodeProperties getNodeProperties(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
-        throw new UnsupportedOperationException();
     }
 }
