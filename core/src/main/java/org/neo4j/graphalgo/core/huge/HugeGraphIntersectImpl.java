@@ -72,12 +72,10 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
             return;
         }
 
-        AdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
+        AdjacencyList.DecompressingCursor cursorToAdvance, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
 
         long CfromB;
         long CfromA;
-        long s;
-        long t;
 
         long lastNodeB;
         long lastNodeC;
@@ -102,20 +100,42 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                         lastNodeC = CfromB;
                     }
 
-                    if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
-                        lead = decompressingCursorA;
-                        follow = decompressingCursorB;
+                    // we choose which cursor to advance
+                    if (CfromA > CfromB) {
+                        cursorToAdvance = decompressingCursorB;
                     } else {
-                        lead = decompressingCursorB;
-                        follow = decompressingCursorA;
+                        // Mainly an optimization .. maybe benchmark ?
+                        if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
+                            cursorToAdvance = decompressingCursorB;
+                        } else {
+                            cursorToAdvance = decompressingCursorA;
+                        }
                     }
 
-                    while (lead.hasNextVLong() && follow.hasNextVLong()) {
-                        s = lead.nextVLong();
-                        t = follow.advance(s);
-                        if (t == s && t > lastNodeC) {
-                            consumer.accept(nodeIdA, nodeIdB, s);
-                            lastNodeC = t;
+                    // we now advance the chosen cursor while we can
+                    while (cursorToAdvance.hasNextVLong()) {
+                        // we will switch cursor to advance the one with a lower value
+                        if (cursorToAdvance == decompressingCursorB) {
+                            // find the next neighbour of B with id >= C'
+                            CfromB = cursorToAdvance.advance(CfromA);
+                            cursorToAdvance = decompressingCursorA;
+                        } else {
+                            // find the next neighbour of A with id >= C
+                            CfromA = cursorToAdvance.advance(CfromB);
+                            cursorToAdvance = decompressingCursorB;
+                        }
+
+                        // if C = C' we have found a triangle
+                        if (CfromA == CfromB && CfromB > lastNodeC) {
+                            consumer.accept(nodeIdA, nodeIdB, CfromB);
+                            lastNodeC = CfromB;
+
+                            // Mainly an optimization .. maybe benchmark ?
+                            if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
+                                cursorToAdvance = decompressingCursorB;
+                            } else {
+                                cursorToAdvance = decompressingCursorA;
+                            }
                         }
                     }
                 }
