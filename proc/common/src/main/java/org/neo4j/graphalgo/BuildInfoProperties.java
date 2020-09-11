@@ -87,13 +87,12 @@ public abstract class BuildInfoProperties {
                 if (infoStream != null) {
                     try (var infoReader = new InputStreamReader(infoStream, StandardCharsets.UTF_8)) {
                         properties.load(infoReader);
-                        return from(properties);
                     }
                 }
             } catch (IOException exception) {
                 return exception;
             }
-            return properties;
+            return from(properties);
         }
     }
 }
