@@ -22,9 +22,14 @@ package org.neo4j.graphalgo;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.kernel.internal.Version;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
@@ -37,6 +42,21 @@ class DebugProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(DebugProc.class);
+    }
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder
+            // add another unrestricted to test string concatenation in debug output
+            .setConfig(Settings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
+            .setConfig(Settings.pagecacheMemory(), "42M")
+            .setConfig(
+                Settings.transactionStateAllocation(),
+                GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
+            )
+            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L);
     }
 
     @Test
@@ -52,9 +72,12 @@ class DebugProcTest extends BaseProcTest {
         var isTrue = new Condition<>(Boolean.TRUE::equals, "true");
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
+        var maxOffHeap40 = new Condition<>("dbms.tx_state.max_off_heap_memory"::equals, "max off-heap setting on 4.0");
+        var maxOffHeap41 = new Condition<>("dbms.memory.off_heap.max_size"::equals, "max off-heap setting on 4.1");
+        var is1337 = new Condition<>(Long.valueOf(1337L)::equals, "1337");
 
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(38)
+            .hasSizeGreaterThanOrEqualTo(42) // this is actually the min number of entries :)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())
@@ -92,7 +115,11 @@ class DebugProcTest extends BaseProcTest {
             .hasEntrySatisfying("vmName", isNotNull)
             .hasEntrySatisfying("vmVersion", isNotNull)
             .hasEntrySatisfying("vmCompiler", isNotNull)
-            .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse));
+            .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
+            .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
+            .containsEntry("dbms.memory.pagecache.size", "42M")
+            .containsEntry("dbms.tx_state.memory_allocation", "ON_HEAP")
+            .hasEntrySatisfying(anyOf(maxOffHeap40, maxOffHeap41), is1337);
     }
 
     @Test

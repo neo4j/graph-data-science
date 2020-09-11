@@ -81,6 +81,14 @@ public final class Settings {
         return GraphDatabaseSettings.pagecache_memory;
     }
 
+    public static Setting<GraphDatabaseSettings.TransactionStateMemoryAllocation> transactionStateAllocation() {
+        return GraphDatabaseSettings.tx_state_memory_allocation;
+    }
+
+    public static Setting<Long> transactionStateMaxOffHeapMemory() {
+        return GraphDatabaseSettings.tx_state_max_off_heap_memory;
+    }
+
     public static Setting<Boolean> allowUpgrade() {
         return GraphDatabaseSettings.allow_upgrade;
     }

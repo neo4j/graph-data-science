@@ -20,11 +20,18 @@
 package org.neo4j.graphalgo;
 
 import org.apache.commons.text.WordUtils;
+import org.neo4j.configuration.Config;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.config.Configuration;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.io.os.OsBeanUtil;
 import org.neo4j.kernel.internal.Version;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 
 import java.io.IOException;
@@ -33,17 +40,25 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
+// don't extend BaseProc and only inject GraphDatabaseService so that
+// we can run this procedure even if unrestricted=gds.* had not been configured
 public class DebugProc {
+
+    @Context
+    public GraphDatabaseService db;
 
     @Procedure("gds.debug")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
-        return debugValues(properties, Runtime.getRuntime(), GdsEdition.instance());
+        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+        return debugValues(properties, Runtime.getRuntime(), GdsEdition.instance(), config);
     }
 
     public static final class DebugValue {
@@ -63,7 +78,8 @@ public class DebugProc {
     private static Stream<DebugValue> debugValues(
         BuildInfoProperties buildInfo,
         Runtime runtime,
-        GdsEdition gdsEdition
+        GdsEdition gdsEdition,
+        Config config
     ) {
         var values = Stream.<DebugValue>builder();
         values.add(value("gdsVersion", buildInfo.gdsVersion()));
@@ -77,6 +93,7 @@ public class DebugProc {
         systemResources(values);
         vmInfo(values);
         containerInfo(values);
+        configInfo(config, values);
         return values.build();
     }
 
@@ -223,10 +240,44 @@ public class DebugProc {
         builder.add(value("containerized", containerized));
     }
 
+    private static void configInfo(Config config, Stream.Builder<DebugValue> builder) {
+        builder.accept(configVal(config, Settings.procedureUnrestricted(), s -> String.join(",", s)));
+        builder.accept(configVal(config, Settings.pagecacheMemory()));
+        builder.accept(configVal(config, Settings.transactionStateAllocation(), Enum::name));
+
+        // the following keys are different on different Neo4j versions, we add those that are available
+        DebugProc.<Long>safeGetSetting("dbms.tx_state.max_off_heap_memory", config)
+            .ifPresent(s -> builder.accept(configVal(config, s)));
+        DebugProc.<Long>safeGetSetting("dbms.memory.off_heap.max_size", config)
+            .ifPresent(s -> builder.accept(configVal(config, s)));
+        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.global_max_size", config)
+            .ifPresent(s -> builder.accept(configVal(config, s)));
+        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.datababase_max_size", config)
+            .ifPresent(s -> builder.accept(configVal(config, s)));
+        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.max_size", config)
+            .ifPresent(s -> builder.accept(configVal(config, s)));
+    }
+
+    private static DebugValue configVal(Configuration config, Setting<?> setting) {
+        return value(setting.name(), config.get(setting));
+    }
+
+    private static <T, U> DebugValue configVal(Configuration config, Setting<T> setting, Function<T, U> convert) {
+        return value(setting.name(), convert.apply(config.get(setting)));
+    }
+
     private static String safeHumanReadable(long bytes) {
         if (bytes < 0) {
             return "N/A";
         }
         return humanReadable(bytes);
+    }
+
+    private static <T> Optional<Setting<T>> safeGetSetting(String name, Config config) {
+        try {
+            return Optional.of((Setting<T>) config.getSetting(name));
+        } catch (IllegalArgumentException notFound) {
+            return Optional.empty();
+        }
     }
 }
