@@ -225,6 +225,75 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
+    void triangleNotOnFirstPath() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n0)-[:REL]->(n3)" +
+            ", (n1)-[:REL]->(n3)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(4, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(1, result.localTriangles().get(3));
+    }
+
+    @Test
+    void triangleNotOnFirstPath2() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n0)-[:REL]->(n3)" +
+            ", (n0)-[:REL]->(n4)" +
+            ", (n1)-[:REL]->(n3)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(1, result.localTriangles().get(3));
+        assertEquals(0, result.localTriangles().get(4));
+    }
+
+    @Test
+    void triangleNotOnFirstPath3() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n0)-[:REL]->(n3)" +
+            ", (n0)-[:REL]->(n4)" +
+            ", (n0)-[:REL]->(n5)" +
+            ", (n1)-[:REL]->(n3)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(6, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(1, result.localTriangles().get(3));
+        assertEquals(0, result.localTriangles().get(4));
+        assertEquals(0, result.localTriangles().get(5));
+    }
+
+    @Test
     void manyTrianglesAndOtherThings() {
         var graph = fromGdl(
             "CREATE" +
