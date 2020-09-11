@@ -57,7 +57,8 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        if(!degreeFilter.test(nodeIdA)) {
+        // skip high-degree nodes
+        if (!degreeFilter.test(nodeIdA)) {
             return;
         }
 
@@ -65,28 +66,40 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         AdjacencyList adjacency = this.adjacency;
 
         AdjacencyList.DecompressingCursor mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
+        // find first neighbour B of A id > A
         long nodeIdB = mainDecompressingCursor.skipUntil(nodeIdA);
-        if (nodeIdB <= nodeIdA) {
+        if (nodeIdA > nodeIdB) {
             return;
         }
 
         AdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
-        long nodeIdC, currentA, s, t;
+
+        long CfromB;
+        long CfromA;
+        long s;
+        long t;
 
         long lastNodeB;
         long lastNodeC;
+
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
+            // again, skip high-degree nodes
             if (degreeFilter.test(nodeIdB)) {
                 decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
-                nodeIdC = decompressingCursorB.skipUntil(nodeIdB);
-                if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
+                // find first neighbour C of B with id > B
+                CfromB = decompressingCursorB.skipUntil(nodeIdB);
+                if (CfromB > nodeIdB && degreeFilter.test(CfromB)) {
+                    // copy the state of A's cursor
                     decompressingCursorA.copyFrom(mainDecompressingCursor);
-                    currentA = decompressingCursorA.advance(nodeIdC);
+                    // find the first neighbour C' of A with id >= C
+                    CfromA = decompressingCursorA.advance(CfromB);
 
-                    if (currentA == nodeIdC && nodeIdC > lastNodeC) {
-                        consumer.accept(nodeIdA, nodeIdB, nodeIdC);
-                        lastNodeC = nodeIdC;
+                    // if C' = C we have found a triangle
+                    // we only submit one triangle per parallel relationship
+                    if (CfromA == CfromB && CfromB > lastNodeC) {
+                        consumer.accept(nodeIdA, nodeIdB, CfromB);
+                        lastNodeC = CfromB;
                     }
 
                     if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
