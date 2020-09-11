@@ -58,13 +58,15 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        if(!degreeFilter.test(nodeIdA)) {
+        // skip high-degree nodes
+        if (!degreeFilter.test(nodeIdA)) {
             return;
         }
 
         CURSOR mainDecompressingCursor = cursor(nodeIdA, cache);
+        // find first neighbour B of A id > A
         long nodeIdB = skipUntil(mainDecompressingCursor, nodeIdA);
-        if (nodeIdB <= nodeIdA) {
+        if (nodeIdA > nodeIdB) {
             return;
         }
 
@@ -73,25 +75,33 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         CURSOR decompressingCursorA = cacheA;
         CURSOR decompressingCursorB = cacheB;
 
-        long nodeIdC;
-        long currentA;
+        long CfromB;
+        long CfromA;
         long s;
         long t;
 
         long lastNodeB;
         long lastNodeC;
+
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
+            // again, skip high-degree nodes
             if (degreeFilter.test(nodeIdB)) {
                 decompressingCursorB = cursor(nodeIdB, decompressingCursorB);
-                nodeIdC = skipUntil(decompressingCursorB, nodeIdB);
-                if (nodeIdC > nodeIdB && degreeFilter.test(nodeIdC)) {
-                    copyFrom(mainDecompressingCursor, decompressingCursorA);
-                    currentA = advance(decompressingCursorA, nodeIdC);
+                // find first neighbour C of B with id > B
+                CfromB = skipUntil(decompressingCursorB, nodeIdB);
 
-                    if (currentA == nodeIdC && nodeIdC > lastNodeC) {
-                        consumer.accept(nodeIdA, nodeIdB, nodeIdC);
-                        lastNodeC = nodeIdC;
+                if (CfromB > nodeIdB && degreeFilter.test(CfromB)) {
+                    // copy the state of A's cursor
+                    copyFrom(mainDecompressingCursor, decompressingCursorA);
+                    // find the first neighbour C' of A with id >= C
+                    CfromA = advance(decompressingCursorA, CfromB);
+
+                    // if C' = C we have found a triangle
+                    // we only submit one triangle per parallel relationship
+                    if (CfromA == CfromB && CfromB > lastNodeC) {
+                        consumer.accept(nodeIdA, nodeIdB, CfromB);
+                        lastNodeC = CfromB;
                     }
 
                     if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
