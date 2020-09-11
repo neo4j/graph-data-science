@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;

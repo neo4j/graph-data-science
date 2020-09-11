@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
@@ -31,9 +32,14 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
+public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, NodePropertiesConfig {
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
+
+    @Value.Default
+    default int nodeFeatureDimension() {
+        return 0;
+    }
 
     @Value.Default
     default List<Number> iterationWeights() {
@@ -68,6 +74,13 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
                     weight == null ? "null" : weight.getClass().getSimpleName()
                 ));
             }
+        }
+        if (nodeFeatureDimension() > embeddingDimension()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of nodeFeatureDimension %s may not exceed embeddingDimension %s.",
+                nodeFeatureDimension(),
+                embeddingDimension()
+            ));
         }
     }
 

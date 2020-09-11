@@ -50,8 +50,8 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name: 'a'})" +
-        ", (b:Node {name: 'b'})" +
+        "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
+        ", (b:Node {name: 'b', f1: 2.1, f2: 0.5})" +
         ", (c:Isolated {name: 'c'})" +
         ", (d:Isolated {name: 'd'})" +
         ", (a)-[:REL]->(b)" +

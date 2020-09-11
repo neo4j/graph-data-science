@@ -252,7 +252,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_784, estimate.min);
+        assertEquals(159_808, estimate.min);
     }
 
     @Test
@@ -267,7 +267,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_784, estimate.min);
+        assertEquals(159_808, estimate.min);
     }
 
     @Test

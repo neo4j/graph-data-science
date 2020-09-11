@@ -43,18 +43,24 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private final Graph graph;
     private final int concurrency;
     private final float normalizationStrength;
+    private final List<String> nodePropertyNames;
+    private final float[][] propertyVectors;
     private final HugeObjectArray<float[]> embeddings;
     private final HugeObjectArray<float[]> embeddingA;
     private final HugeObjectArray<float[]> embeddingB;
     private final EmbeddingCombiner embeddingCombiner;
 
     private final int embeddingDimension;
-    private final int iterations;
+    private final int baseEmbeddingDimension;
     private final List<Number> iterationWeights;
 
     static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
             .builder(FastRP.class)
+            .fixed(
+                "propertyVectors",
+                MemoryUsage.sizeOfFloatArray(config.nodePropertyNames().size() * config.nodeFeatureDimension())
+            )
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
@@ -69,13 +75,15 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     ) {
         this.graph = graph;
         this.progressLogger = progressLogger;
+        this.nodePropertyNames = config.nodePropertyNames();
 
+        this.propertyVectors = new float[nodePropertyNames.size()][config.nodeFeatureDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
         this.embeddingDimension = config.embeddingDimension();
-        this.iterations = config.iterations();
+        this.baseEmbeddingDimension = config.embeddingDimension() - config.nodeFeatureDimension();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
         this.concurrency = config.concurrency();
@@ -88,6 +96,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     @Override
     public FastRP compute() {
         progressLogger.logMessage(":: Start");
+        initPropertyVectors();
         initRandomVectors();
         propagateEmbeddings();
         progressLogger.logMessage(":: Finished");
@@ -116,10 +125,23 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         this.embeddingB.release();
     }
 
+    private void initPropertyVectors() {
+        int nodeFeatureDimension = embeddingDimension - baseEmbeddingDimension;
+        float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(nodeFeatureDimension);
+        double probability = 1.0f / (2.0f * SPARSITY);
+        ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
+        for (int i = 0; i < nodePropertyNames.size(); i++) {
+            this.propertyVectors[i] = new float[nodeFeatureDimension];
+            for (int d = 0; d < nodeFeatureDimension; d++) {
+                this.propertyVectors[i][d] = computeRandomEntry(random.get(), probability, entryValue);
+            }
+        }
+    }
+
     void initRandomVectors() {
         double probability = 1.0f / (2.0f * SPARSITY);
         float sqrtSparsity = (float) Math.sqrt(SPARSITY);
-        float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
+        float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
         progressLogger.logMessage("Initialising Random Vectors :: Start");
@@ -130,7 +152,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
                 : (float) Math.pow(degree, normalizationStrength);
 
             float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-            float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
+            float[] randomVector = computeRandomVector(nodeId, random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
             embeddingA.set(nodeId, new float[this.embeddingDimension]);
             progressLogger.logProgress();
@@ -139,7 +161,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     void propagateEmbeddings() {
-        for (int i = 0; i < iterations; i++) {
+        for (int i = 0; i < iterationWeights.size(); i++) {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
 
@@ -177,10 +199,17 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         }
     }
 
-    private float[] computeRandomVector(Random random, double probability, float entryValue) {
+    private float[] computeRandomVector(long nodeId, Random random, double probability, float entryValue) {
         float[] randomVector = new float[embeddingDimension];
         for (int i = 0; i < embeddingDimension; i++) {
             randomVector[i] = computeRandomEntry(random, probability, entryValue);
+        }
+        for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
+            for (int j = 0; j < nodePropertyNames.size(); j++) {
+                String feature = nodePropertyNames.get(j);
+                double featureValue = graph.nodeProperties(feature).doubleValue(nodeId);
+                randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
+            }
         }
         return randomVector;
     }
