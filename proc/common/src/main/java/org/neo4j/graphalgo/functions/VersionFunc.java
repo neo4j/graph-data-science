@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.functions;
 
+import org.neo4j.graphalgo.BuildInfoProperties;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.UserFunction;
 
@@ -27,6 +28,6 @@ public class VersionFunc {
     @UserFunction("gds.version")
     @Description("RETURN gds.version() | Return the installed graph data science library version.")
     public String version() {
-        return "1.4.0-alpha04";
+        return BuildInfoProperties.require().gdsVersion();
     }
 }

@@ -22,18 +22,11 @@ package org.neo4j.graphalgo.functions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.BuildInfoProperties;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.util.Collections.singletonList;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import java.util.List;
+import java.util.Map;
 
 class VersionFuncTest extends BaseProcTest {
 
@@ -44,30 +37,9 @@ class VersionFuncTest extends BaseProcTest {
 
     @Test
     void shouldReturnGradleVersion() throws IOException {
-        // we find the current version in the gradle file
-        File file = new File("../../gradle/version.gradle");
-        Optional<String> maybeVersion = findVersion(file);
-
-        if (!maybeVersion.isPresent()) {
-            fail("Could not find version in file: " + file.getAbsolutePath());
-        }
         assertCypherResult(
-                "RETURN gds.version() AS v",
-                singletonList(map("v", maybeVersion.get())));
-    }
-
-    private Optional<String> findVersion(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        Pattern pattern = Pattern.compile(".*gdsVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
-
-        String version = null;
-        while (reader.ready()) {
-            String line = reader.readLine();
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.matches()) {
-                version = matcher.group(1);
-            }
-        }
-        return Optional.ofNullable(version);
+            "RETURN gds.version() AS v",
+            List.of(Map.of("v", BuildInfoProperties.get().gdsVersion()))
+        );
     }
 }
