@@ -82,6 +82,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
             ExecutorService executor,
             AllocationTracker tracker
     ) {
+        // This prevents users from disabling concurrency
+        // validation in custom PregelConfig implementations.
+        // Creating a copy of the user config triggers the
+        // concurrency validations.
+        ImmutablePregelConfig.copyOf(config);
+
         return new Pregel<>(
                 graph,
                 config,

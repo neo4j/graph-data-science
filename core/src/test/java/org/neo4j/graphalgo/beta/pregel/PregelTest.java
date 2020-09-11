@@ -41,6 +41,7 @@ import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
@@ -188,6 +189,35 @@ class PregelTest {
                 new double[]{0.0, 2.0, 1.0}
             )
         );
+    }
+
+    @ValueClass
+    interface HackerManConfig extends PregelConfig {
+        @Override
+        default void validateConcurrency() {
+            // haha, h4ck3rm4n, so smart, much wow
+        }
+
+        @Override
+        default void validateWriteConcurrency() {
+            // and he strikes again, HAHA
+        }
+    }
+
+    @Test
+    void preventIllegalConcurrencyConfiguration() {
+        var config = ImmutableHackerManConfig.builder()
+            .maxIterations(1337)
+            .concurrency(42)
+            .build();
+
+        assertThrows(IllegalArgumentException.class, () -> Pregel.create(
+            graph,
+            config,
+            new TestSendTo(),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        ));
     }
 
     public static class TestPregelComputation implements PregelComputation<PregelConfig> {
