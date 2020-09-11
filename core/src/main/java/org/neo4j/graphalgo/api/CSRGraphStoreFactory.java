@@ -27,10 +27,14 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
 
@@ -98,5 +102,13 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             graphCreateConfig.readConcurrency(),
             tracker
         );
+    }
+
+    protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> tracker) {
+        tracker.ifPresent(progressLogger::logMessage);
+
+        var sizeInBytes = MemoryUsage.sizeOf(graphStore);
+        var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+        progressLogger.logMessage(formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage));
     }
 }

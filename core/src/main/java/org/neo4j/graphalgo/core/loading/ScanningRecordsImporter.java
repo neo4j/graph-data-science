@@ -88,8 +88,9 @@ public abstract class ScanningRecordsImporter<Record, T> {
                 .longValueExact();
 
             log.info(
-                    "%s Store Scan: Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
+                    "%s Store Scan (%s): Imported %,d records and %,d properties from %s (%,d bytes); took %.3f s, %,.2f %1$ss/s, %s/s (%,d bytes/s) (per thread: %,.2f %1$ss/s, %s/s (%,d bytes/s))",
                     label,
+                    scanner.getClass().getSimpleName(),
                     recordsImported,
                     propertiesImported,
                     humanReadable(requiredBytes),

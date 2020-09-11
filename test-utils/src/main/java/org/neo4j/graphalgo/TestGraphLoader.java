@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -55,6 +56,7 @@ public final class TestGraphLoader {
     private boolean addRelationshipPropertiesToLoader;
 
     private Optional<Aggregation> maybeAggregation = Optional.empty();
+    private Optional<Log> maybeLog = Optional.empty();
 
     public static TestGraphLoader from(@NotNull GraphDatabaseAPI db) {
         return new TestGraphLoader(db);
@@ -97,6 +99,11 @@ public final class TestGraphLoader {
 
     public TestGraphLoader withDefaultAggregation(Aggregation aggregation) {
         this.maybeAggregation = Optional.of(aggregation);
+        return this;
+    }
+
+    public TestGraphLoader withLog(Log log) {
+        this.maybeLog = Optional.of(log);
         return this;
     }
 
@@ -160,6 +167,8 @@ public final class TestGraphLoader {
 
         cypherLoaderBuilder.validateRelationships(false);
 
+        cypherLoaderBuilder.log(maybeLog);
+
         return cypherLoaderBuilder.build();
     }
 
@@ -184,6 +193,9 @@ public final class TestGraphLoader {
         storeLoaderBuilder.globalAggregation(maybeAggregation.orElse(DEFAULT));
         if (!nodeProperties.mappings().isEmpty()) storeLoaderBuilder.nodeProperties(nodeProperties);
         if (addRelationshipPropertiesToLoader) storeLoaderBuilder.relationshipProperties(relProperties);
+
+        storeLoaderBuilder.log(maybeLog);
+
         return storeLoaderBuilder.build();
     }
 

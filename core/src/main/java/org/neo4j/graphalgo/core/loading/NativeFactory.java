@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensionsValidation.validate;
@@ -150,7 +151,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         IdsAndProperties nodes = loadNodes(concurrency);
         RelationshipImportResult relationships = loadRelationships(tracker, nodes, concurrency);
         CSRGraphStore graphStore = createGraphStore(nodes, relationships, tracker, dimensions);
-        progressLogger.logMessage(tracker);
+
+        logLoadingSummary(graphStore, Optional.of(tracker));
 
         return ImportResult.of(dimensions, graphStore);
     }
