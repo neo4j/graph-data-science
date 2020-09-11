@@ -183,6 +183,7 @@ public final class HugeGraphUtil {
         private final boolean loadRelationshipProperty;
         private final ExecutorService executorService;
         private final Aggregation aggregation;
+        private final LongAdder relationshipCounter;
 
         public RelationshipsBuilder(
             IdMapping idMapping,
@@ -198,6 +199,7 @@ public final class HugeGraphUtil {
             this.executorService = executorService;
             this.idMapping = idMapping;
             this.aggregation = aggregation;
+            this.relationshipCounter = new LongAdder();
 
             ImportSizing importSizing = ImportSizing.of(1, idMapping.nodeCount());
             int pageSize = importSizing.pageSize();
@@ -226,7 +228,7 @@ public final class HugeGraphUtil {
                 numberOfPages,
                 pageSize,
                 tracker,
-                new LongAdder(),
+                relationshipCounter,
                 propertyKeyIds,
                 defaultValues,
                 new Aggregation[]{aggregation},
@@ -283,7 +285,7 @@ public final class HugeGraphUtil {
 
             ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
             return Relationships.of(
-                relationshipImporter.relationshipCount(),
+                relationshipCounter.longValue(),
                 orientation,
                 Aggregation.equivalentToNone(aggregation),
                 relationshipsBuilder.adjacencyList(),

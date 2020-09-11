@@ -138,10 +138,6 @@ final class AdjacencyBuilder {
         this.preAggregate = preAggregate;
     }
 
-    public long relationshipCount() {
-        return relationshipCounter.longValue();
-    }
-
     /**
      * @param batch          four-tuple values sorted by source (source, target, rel?, property?)
      * @param targets        slice of batch on second position; all targets in source-sorted order

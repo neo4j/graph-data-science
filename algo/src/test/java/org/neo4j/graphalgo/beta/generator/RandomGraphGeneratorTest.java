@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RandomGraphGeneratorTest {
@@ -51,8 +52,8 @@ class RandomGraphGeneratorTest {
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
-        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
-        Assertions.assertEquals(nbrNodes * avgDeg, graph.relationshipCount());
+        assertEquals(graph.nodeCount(), nbrNodes);
+        assertEquals(nbrNodes * avgDeg, graph.relationshipCount());
 
         graph.forEachNode((nodeId) -> {
             long[] degree = {0L};
@@ -62,7 +63,7 @@ class RandomGraphGeneratorTest {
                 return true;
             });
 
-            Assertions.assertEquals(avgDeg, degree[0]);
+            assertEquals(avgDeg, degree[0]);
             return true;
         });
     }
@@ -80,8 +81,8 @@ class RandomGraphGeneratorTest {
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
-        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
-        Assertions.assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1000D);
+        assertEquals(graph.nodeCount(), nbrNodes);
+        assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1000D);
     }
 
     @Test
@@ -122,7 +123,7 @@ class RandomGraphGeneratorTest {
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
-        Assertions.assertEquals(graph.nodeCount(), nbrNodes);
+        assertEquals(graph.nodeCount(), nbrNodes);
 
         List<Long> degrees = new ArrayList<Long>();
         graph.forEachNode((nodeId) -> {
@@ -138,7 +139,7 @@ class RandomGraphGeneratorTest {
         });
 
         double actualAverage = degrees.stream().reduce(Long::sum).orElseGet(() -> 0L) / (double) degrees.size();
-        Assertions.assertEquals((double) avgDeg, actualAverage, 1D);
+        assertEquals((double) avgDeg, actualAverage, 1D);
     }
 
     @Test
@@ -157,7 +158,7 @@ class RandomGraphGeneratorTest {
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
-                Assertions.assertEquals(42D, p);
+                assertEquals(42D, p);
                 return true;
             });
             return true;
@@ -235,8 +236,7 @@ class RandomGraphGeneratorTest {
     }
 
     @Test
-    void shouldHaveTheCorrectRelCount() {
-        // ! aggregation is considered, but not for the relCount
+    void shouldProduceCorrectRelationshipCountWithAggregation() {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(8)
             .averageDegree(4)
@@ -246,12 +246,12 @@ class RandomGraphGeneratorTest {
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .orientation(Orientation.UNDIRECTED)
-            .build().generate();
+            .build()
+            .generate();
 
         AtomicInteger actualRelCount = new AtomicInteger();
         graph.forEachNode(node -> {
                 graph.forEachRelationship(node, (src, trg) -> {
-                    //System.out.printf("%d, %d \n", src, trg);
                     actualRelCount.getAndIncrement();
                     return true;
                 });
@@ -259,6 +259,6 @@ class RandomGraphGeneratorTest {
             }
         );
 
-        Assertions.assertEquals(actualRelCount.longValue(), graph.relationshipCount());
+        assertEquals(actualRelCount.longValue(), graph.relationshipCount());
     }
 }
