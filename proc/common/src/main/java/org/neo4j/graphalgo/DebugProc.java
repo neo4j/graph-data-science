@@ -83,7 +83,7 @@ public class DebugProc {
     ) {
         var values = Stream.<DebugValue>builder();
         values.add(value("gdsVersion", buildInfo.gdsVersion()));
-        values.add(value("gdsEdition", editionString(gdsEdition)));
+        editionInfo(gdsEdition, values);
         values.add(value("neo4jVersion", Version.getNeo4jVersion()));
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
         features(values);
@@ -95,6 +95,11 @@ public class DebugProc {
         containerInfo(values);
         configInfo(config, values);
         return values.build();
+    }
+
+    private static void editionInfo(GdsEdition edition, Stream.Builder<DebugValue> builder) {
+        builder.add(value("gdsEdition", editionString(edition)));
+        edition.errorMessage().ifPresent(error -> builder.add(value("gdsLicenseError", error)));
     }
 
     private static String editionString(GdsEdition edition) {
