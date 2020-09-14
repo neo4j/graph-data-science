@@ -218,7 +218,7 @@ public class SysInfoProc {
         builder
             .add(value("vmName", runtime.getVmName()))
             .add(value("vmVersion", runtime.getVmVersion()))
-            .add(value("vmCompiler", compiler == null ? "unknown" : compiler.getName()));
+            .add(value("vmCompiler", compiler == null ? "Unknown" : compiler.getName()));
     }
 
     private static void containerInfo(Stream.Builder<DebugValue> builder) {
