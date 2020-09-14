@@ -270,6 +270,90 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
+    void triangleWhenSecondMemberAtEndOfRelChain() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n0)-[:REL]->(n3)" +
+            ", (n0)-[:REL]->(n4)" +
+            ", (n1)-[:REL]->(n4)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(5, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(0, result.localTriangles().get(3));
+        assertEquals(1, result.localTriangles().get(4));
+    }
+
+    @Test
+    void triangleWhenFirstMemberHasMoreNeighbours() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n0)-[:REL]->(n3)" +
+            ", (n0)-[:REL]->(n4)" +
+            ", (n0)-[:REL]->(n5)" +
+            ", (n1)-[:REL]->(n4)" +
+            ", (n1)-[:REL]->(n6)",
+            UNDIRECTED
+        );
+
+        TriangleCountResult result = compute(graph);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(7, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(0, result.localTriangles().get(2));
+        assertEquals(0, result.localTriangles().get(3));
+        assertEquals(1, result.localTriangles().get(4));
+        assertEquals(0, result.localTriangles().get(5));
+        assertEquals(0, result.localTriangles().get(6));
+    }
+
+    @Test
+    void filterMaxDegreeSecondCNode() {
+        var graph = fromGdl(
+            "CREATE " +
+            "  (n0)-[:REL]->(n1)" +
+            ", (n1)-[:REL]->(n2)" +
+            ", (n2)-[:REL]->(n0)" +
+            ", (n1)-[:REL]->(n3)" +
+            ", (n3)-[:REL]->(n0)" +
+            ", (n3)-[:REL]->(n4)" +
+            ", (n3)-[:REL]->(n5)" +
+            ", (n3)-[:REL]->(n6)",
+            UNDIRECTED
+        );
+
+        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
+            .builder()
+            .maxDegree(3)
+            .build();
+
+        TriangleCountResult result = compute(graph, config);
+
+        assertEquals(1, result.globalTriangles());
+        assertEquals(7, result.localTriangles().size());
+        assertEquals(1, result.localTriangles().get(0));
+        assertEquals(1, result.localTriangles().get(1));
+        assertEquals(1, result.localTriangles().get(2));
+        assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(3));
+        assertEquals(0, result.localTriangles().get(4));
+        assertEquals(0, result.localTriangles().get(5));
+        assertEquals(0, result.localTriangles().get(6));
+
+    }
+
+    @Test
     void manyTrianglesAndOtherThings() {
         var graph = fromGdl(
             "CREATE" +

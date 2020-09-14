@@ -72,13 +72,15 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
             return;
         }
 
-        AdjacencyList.DecompressingCursor cursorToAdvance, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
+        AdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
 
         long CfromB;
         long CfromA;
 
         long lastNodeB;
         long lastNodeC;
+
+        long s,t;
 
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
@@ -100,47 +102,37 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                         lastNodeC = CfromB;
                     }
 
-                    // we choose which cursor to advance
-                    if (CfromA > CfromB) {
-                        cursorToAdvance = decompressingCursorB;
-                    } else {
-                        // Mainly an optimization .. maybe benchmark ?
-                        if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
-                            cursorToAdvance = decompressingCursorB;
-                        } else {
-                            cursorToAdvance = decompressingCursorA;
+                    lead = decompressingCursorB;
+                    s = CfromB;
+                    follow = decompressingCursorA;
+                    t = CfromA;
+
+                    while (lead.hasNextVLong() && follow.hasNextVLong()) {
+                        s = lead.nextVLong();
+                        if (s > t) {
+                            t = follow.advance(s);
+                        }
+                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
+                            consumer.accept(nodeIdA, nodeIdB, s);
+                            lastNodeC = s;
                         }
                     }
 
-                    // we now advance the chosen cursor while we can
-                    while (cursorToAdvance.hasNextVLong()) {
-                        // we will switch cursor to advance the one with a lower value
-                        if (cursorToAdvance == decompressingCursorB) {
-                            // find the next neighbour of B with id >= C'
-                            CfromB = cursorToAdvance.advance(CfromA);
-                            cursorToAdvance = decompressingCursorA;
-                        } else {
-                            // find the next neighbour of A with id >= C
-                            CfromA = cursorToAdvance.advance(CfromB);
-                            cursorToAdvance = decompressingCursorB;
+                    if (lead.hasNextVLong()) {
+                        s = lead.advance(t);
+                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
+                            consumer.accept(nodeIdA, nodeIdB, s);
                         }
-
-                        // if C = C' we have found a triangle
-                        if (CfromA == CfromB && CfromB > lastNodeC) {
-                            consumer.accept(nodeIdA, nodeIdB, CfromB);
-                            lastNodeC = CfromB;
-
-                            // Mainly an optimization .. maybe benchmark ?
-                            if (decompressingCursorA.remaining() <= decompressingCursorB.remaining()) {
-                                cursorToAdvance = decompressingCursorB;
-                            } else {
-                                cursorToAdvance = decompressingCursorA;
-                            }
+                    } else if (follow.hasNextVLong()) {
+                        t = follow.advance(s);
+                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
+                            consumer.accept(nodeIdA, nodeIdB, s);
                         }
                     }
                 }
             }
 
+            // TODO: use skipUntil?
             lastNodeB = nodeIdB;
             while (mainDecompressingCursor.hasNextVLong() && nodeIdB == lastNodeB) {
                 nodeIdB = mainDecompressingCursor.nextVLong();
