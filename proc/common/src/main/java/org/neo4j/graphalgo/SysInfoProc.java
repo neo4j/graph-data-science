@@ -70,7 +70,7 @@ public class SysInfoProc {
             this.value = value;
         }
 
-        public static DebugValue value(String key, Object value) {
+        static DebugValue value(String key, Object value) {
             return new DebugValue(key, value);
         }
     }
