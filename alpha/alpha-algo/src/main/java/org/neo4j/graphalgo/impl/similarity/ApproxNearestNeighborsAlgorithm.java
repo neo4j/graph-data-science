@@ -274,7 +274,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .max().orElse(0L);
 
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
-            maxNeoId, executor, tracker
+            maxNeoId,
+            false,
+            config.concurrency(),
+            tracker
         );
 
         for (INPUT input : inputs) {

@@ -155,7 +155,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     private IdsAndProperties loadNodes() {
         var idMapBuilder = HugeGraphUtil.idMapBuilder(
             dimensions.highestNeoId(),
-            loadingContext.executor(),
+            true,
+            1,
             loadingContext.tracker()
         );
 

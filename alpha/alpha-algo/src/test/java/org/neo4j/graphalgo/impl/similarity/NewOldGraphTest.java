@@ -91,7 +91,8 @@ class NewOldGraphTest {
     private static IdMap idMap(int numberOfNodes) {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             numberOfNodes,
-            Pools.DEFAULT,
+            false,
+            1,
             AllocationTracker.empty()
         );
         for (int i = 0; i < numberOfNodes; i++) {

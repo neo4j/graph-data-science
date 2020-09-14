@@ -180,7 +180,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     ) {
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             maxCommunityId,
-            executorService,
+            false,
+            config.concurrency(),
             tracker
         );
 
