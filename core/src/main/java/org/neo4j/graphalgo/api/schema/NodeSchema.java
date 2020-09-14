@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @ValueClass
-public interface NodeSchema extends EntitySchema<NodeSchema, NodeLabel> {
+public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
     Map<NodeLabel, Map<String, ValueType>> properties();
 
     default NodeSchema filter(Set<NodeLabel> labelsToKeep) {

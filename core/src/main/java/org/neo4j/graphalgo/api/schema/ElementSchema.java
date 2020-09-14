@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface EntitySchema<SELF extends EntitySchema<SELF, I>, I extends ElementIdentifier> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, I>, I extends ElementIdentifier> {
 
     Map<I, Map<String, ValueType>> properties();
 
