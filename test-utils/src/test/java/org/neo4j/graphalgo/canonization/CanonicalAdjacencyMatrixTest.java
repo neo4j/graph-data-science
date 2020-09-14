@@ -102,4 +102,11 @@ class CanonicalAdjacencyMatrixTest {
             "(a {v:1}), (b {v:1}), (c {v:1}), (b)<--(a)-->(b), (a)<--(b)-->(c), (a)<--(c)-->(b)");
         assertNotEquals(canonicalize(g1), canonicalize(g2));
     }
+
+    @Test
+    void testRespectNodeSchema() {
+        Graph g1 = fromGdl("(a:A {aV:1.0}), (b:B {bV:2.0}), (c:V {cV:3.0})");
+        Graph g2 = fromGdl("(a:A {aV:1.0, bV:NaN, cV:NaN}), (b:B {aV:NaN, bV:2.0, cV:NaN}), (c:V {aV:NaN, bV:NaN, cV:3.0})");
+        assertNotEquals(canonicalize(g1), canonicalize(g2));
+    }
 }
