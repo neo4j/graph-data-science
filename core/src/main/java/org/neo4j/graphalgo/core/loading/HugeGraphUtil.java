@@ -91,7 +91,7 @@ public final class HugeGraphUtil {
 
     public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker tracker) {
         var nodeSchemaBuilder = NodeSchema.builder();
-        idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addEmptyMapForLabelWithoutProperties);
+        idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         return create(
             idMap,
             nodeSchemaBuilder.build(),
@@ -111,7 +111,7 @@ public final class HugeGraphUtil {
             return create(idMap, relationships, tracker);
         } else {
             var nodeSchemaBuilder = NodeSchema.builder();
-            nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addPropertyAndTypeForLabel(
+            nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addProperty(
                 NodeLabel.ALL_NODES,
                 propertyName,
                 property.valueType()
@@ -135,13 +135,13 @@ public final class HugeGraphUtil {
     ) {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
-            relationshipSchemaBuilder.addPropertyAndTypeForRelationshipType(
+            relationshipSchemaBuilder.addProperty(
                 RelationshipType.of("REL"),
                 "property",
                 ValueType.DOUBLE
             );
         } else {
-            relationshipSchemaBuilder.addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType.of("REL"));
+            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"));
         }
 
         return HugeGraph.create(

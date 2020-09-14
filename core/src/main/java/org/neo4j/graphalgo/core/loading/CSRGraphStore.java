@@ -593,11 +593,11 @@ public final class CSRGraphStore implements GraphStore {
 
         nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
-                nodePropsBuilder.addPropertyAndTypeForLabel(label, propertyName, nodeProperty.type());
+                nodePropsBuilder.addProperty(label, propertyName, nodeProperty.type());
             }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
-            nodePropsBuilder.addEmptyMapForLabelWithoutProperties(nodeLabel);
+            nodePropsBuilder.addLabel(nodeLabel);
         }
         return nodePropsBuilder.build();
     }
@@ -607,7 +607,7 @@ public final class CSRGraphStore implements GraphStore {
 
         relationshipProperties.forEach((type, propertyStore) -> {
             propertyStore.relationshipProperties().forEach((propertyName, relationshipProperty) -> {
-                relationshipPropsBuilder.addPropertyAndTypeForRelationshipType(
+                relationshipPropsBuilder.addProperty(
                     type,
                     propertyName,
                     ValueType.fromNumberType(relationshipProperty.type())
@@ -616,7 +616,7 @@ public final class CSRGraphStore implements GraphStore {
         });
 
         for (RelationshipType type : relationshipTypes()) {
-            relationshipPropsBuilder.addEmptyMapForRelationshipTypeWithoutProperties(type);
+            relationshipPropsBuilder.addRelationshipType(type);
         }
         return relationshipPropsBuilder.build();
     }

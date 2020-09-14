@@ -37,16 +37,16 @@ class NodeSchemaTest {
         var label2 = NodeLabel.of("Bar");
 
         var nodeSchema = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForLabel(label1, "baz", ValueType.DOUBLE)
-            .addPropertyAndTypeForLabel(label2, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(nodeSchema, nodeSchema.filter(Set.of(label1, label2)));
 
         var expected = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForLabel(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, nodeSchema.filter(Set.of(label1)));
@@ -58,16 +58,16 @@ class NodeSchemaTest {
         var label2 = NodeLabel.of("Bar");
 
         var nodeSchema1 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var nodeSchema2 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label2, "bar", ValueType.DOUBLE)
+            .addProperty(label2, "bar", ValueType.DOUBLE)
             .build();
 
         var expected = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForLabel(label2, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label2, "bar", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, nodeSchema1.union(nodeSchema2));
@@ -78,16 +78,16 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
 
         var nodeSchema1 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var nodeSchema2 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         var expected = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForLabel(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, nodeSchema1.union(nodeSchema2));
@@ -98,11 +98,11 @@ class NodeSchemaTest {
         var label1 = NodeLabel.of("Foo");
 
         var nodeSchema1 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var nodeSchema2 = NodeSchema.builder()
-            .addPropertyAndTypeForLabel(label1, "bar", ValueType.LONG)
+            .addProperty(label1, "bar", ValueType.LONG)
             .build();
 
 

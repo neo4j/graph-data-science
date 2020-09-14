@@ -53,7 +53,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
     @AccessibleFields
     class Builder extends ImmutableNodeSchema.Builder {
 
-        public Builder addPropertyAndTypeForLabel(NodeLabel key, String propertyName, ValueType type) {
+        public Builder addProperty(NodeLabel key, String propertyName, ValueType type) {
             this.properties
                 .computeIfAbsent(key, ignore -> new LinkedHashMap<>())
                 .put(propertyName, type);
@@ -61,7 +61,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
             return this;
         }
 
-        public Builder addEmptyMapForLabelWithoutProperties(NodeLabel key) {
+        public Builder addLabel(NodeLabel key) {
             this.properties.putIfAbsent(key, Collections.emptyMap());
             return this;
         }

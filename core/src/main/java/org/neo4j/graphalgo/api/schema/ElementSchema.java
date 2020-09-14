@@ -59,9 +59,8 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I>, I extends El
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     }
-    default Map<I, Map<String, ValueType>> unionProperties(
-        Map<I, Map<String, ValueType>> rightProperties
-    ) {
+
+    default Map<I, Map<String, ValueType>> unionProperties(Map<I, Map<String, ValueType>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()

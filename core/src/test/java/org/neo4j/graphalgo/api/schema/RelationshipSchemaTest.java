@@ -37,16 +37,16 @@ class RelationshipSchemaTest {
         var label2 = RelationshipType.of("Bar");
 
         var relationshipSchema = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForRelationshipType(label1, "baz", ValueType.DOUBLE)
-            .addPropertyAndTypeForRelationshipType(label2, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(relationshipSchema, relationshipSchema.filter(Set.of(label1, label2)));
 
         var expected = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForRelationshipType(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, relationshipSchema.filter(Set.of(label1)));
@@ -58,16 +58,16 @@ class RelationshipSchemaTest {
         var label2 = RelationshipType.of("Bar");
 
         var relationshipSchema1 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var relationshipSchema2 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label2, "bar", ValueType.DOUBLE)
+            .addProperty(label2, "bar", ValueType.DOUBLE)
             .build();
 
         var expected = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForRelationshipType(label2, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label2, "bar", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, relationshipSchema1.union(relationshipSchema2));
@@ -78,16 +78,16 @@ class RelationshipSchemaTest {
         var label1 = RelationshipType.of("Foo");
 
         var relationshipSchema1 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var relationshipSchema2 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         var expected = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
-            .addPropertyAndTypeForRelationshipType(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, relationshipSchema1.union(relationshipSchema2));
@@ -98,11 +98,11 @@ class RelationshipSchemaTest {
         var label1 = RelationshipType.of("Foo");
 
         var relationshipSchema1 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.DOUBLE)
+            .addProperty(label1, "bar", ValueType.DOUBLE)
             .build();
 
         var relationshipSchema2 = RelationshipSchema.builder()
-            .addPropertyAndTypeForRelationshipType(label1, "bar", ValueType.LONG)
+            .addProperty(label1, "bar", ValueType.LONG)
             .build();
 
 

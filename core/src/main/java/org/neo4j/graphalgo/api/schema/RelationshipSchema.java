@@ -70,12 +70,12 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         if (maybeProperty.isPresent()) {
             return RelationshipSchema
                 .builder()
-                .addPropertyAndTypeForRelationshipType(relationshipType, maybeProperty.get(), ValueType.DOUBLE)
+                .addProperty(relationshipType, maybeProperty.get(), ValueType.DOUBLE)
                 .build();
         } else {
             return RelationshipSchema
                 .builder()
-                .addEmptyMapForRelationshipTypeWithoutProperties(relationshipType)
+                .addRelationshipType(relationshipType)
                 .build();
         }
     }
@@ -91,7 +91,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
-        public Builder addPropertyAndTypeForRelationshipType(
+        public Builder addProperty(
             RelationshipType type,
             String propertyName,
             ValueType relationshipProperty
@@ -102,7 +102,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
             return this;
         }
 
-        public Builder addEmptyMapForRelationshipTypeWithoutProperties(RelationshipType type) {
+        public Builder addRelationshipType(RelationshipType type) {
             this.properties.putIfAbsent(type, Collections.emptyMap());
             return this;
         }
