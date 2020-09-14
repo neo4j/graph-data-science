@@ -136,6 +136,7 @@ If a query returns additional columns, those columns are used as node and relati
 The values stored in property columns need to be numeric.
 If a value is `null` a default value (`Double.NaN`) is loaded instead.
 If we want to use a different default value, the `coalesce` function can be used.
+For more information about the supported property types see <<node-properties, Node Properties>>.
 
 The following Cypher projection loads multiple node and relationship properties:
 

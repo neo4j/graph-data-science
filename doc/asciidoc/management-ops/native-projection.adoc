@@ -186,6 +186,7 @@ A typical scenario is running different seedable algorithms on the same graph, b
 We can load multiple node properties for each node projection using node property mappings.
 A node property mapping maps a user-defined property key to a property key in the Neo4j database.
 Any algorithm that supports node properties can refer to these user-defined property keys.
+For more information about the supported property types see <<node-properties, Node Properties>>.
 
 [source]
 ----
@@ -195,16 +196,16 @@ Any algorithm that supports node properties can refer to these user-defined prop
         properties: {
             <property-key-1>: {
                 property: <neo-property-key>,
-                defaultValue: <numeric-value>
+                defaultValue: <fallback-value>
             },
             <property-key-2>: {
                 property: <neo-property-key>,
-                defaultValue: <numeric-value>
+                defaultValue: <fallback-value>
             },
             // ...
             <property-key-n>: {
                 property: <neo-property-key>,
-                defaultValue: <numeric-value>
+                defaultValue: <fallback-value>
             }
         }
     }
@@ -215,8 +216,8 @@ Any algorithm that supports node properties can refer to these user-defined prop
 ** `neo-property-key` denotes the property key in the Neo4j graph
 *** The property key must exist in the Neo4j database
 *** If not specified, `neo-property-key` defaults to `property-key-i`
-** `numeric-value` is used if the property does not exist for a node
-*** If not specified, `numeric-value` defaults to `NaN`
+** `fallback-value` is used if the property does not exist for a node
+*** If not specified, `fallback-value` defaults to the respective fallback value of the properties type.
 
 
 For the following example, let's assume that each `City` node stores two properties: the `population` of the city and an optional `stateId` that identifies the state in which the city is located.
