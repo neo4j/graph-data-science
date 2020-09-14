@@ -76,18 +76,22 @@ class NodeSchemaTest {
     @Test
     void testUnionProperties() {
         var label1 = NodeLabel.of("Foo");
+        var label2 = NodeLabel.of("Bar");
 
         var nodeSchema1 = NodeSchema.builder()
             .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addLabel(label2)
             .build();
 
         var nodeSchema2 = NodeSchema.builder()
             .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         var expected = NodeSchema.builder()
             .addProperty(label1, "bar", ValueType.DOUBLE)
             .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, nodeSchema1.union(nodeSchema2));

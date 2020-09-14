@@ -76,18 +76,22 @@ class RelationshipSchemaTest {
     @Test
     void testUnionProperties() {
         var label1 = RelationshipType.of("Foo");
+        var label2 = RelationshipType.of("Bar");
 
         var relationshipSchema1 = RelationshipSchema.builder()
             .addProperty(label1, "bar", ValueType.DOUBLE)
+            .addRelationshipType(label2)
             .build();
 
         var relationshipSchema2 = RelationshipSchema.builder()
             .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         var expected = RelationshipSchema.builder()
             .addProperty(label1, "bar", ValueType.DOUBLE)
             .addProperty(label1, "baz", ValueType.DOUBLE)
+            .addProperty(label2, "baz", ValueType.DOUBLE)
             .build();
 
         assertEquals(expected, relationshipSchema1.union(relationshipSchema2));
