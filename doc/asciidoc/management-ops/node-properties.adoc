@@ -27,9 +27,10 @@ The following table lists the supported property types, as well as, their corres
 
 == Defining the type of a node property
 
-When creating a graph projection that specifies a set of node properties, the type of these properties is automatically determined using the first property value that is seen by the loader for any specified property.
+When creating a graph projection that specifies a set of node properties, the type of these properties is automatically determined using the first property value that is read by the loader for any specified property.
 All integral numerical types are interpreted as `Long` values, all floating point values are interpreted as `Double` values.
 Array values are explicitly defined by the type of the values that the array contains, i.e. a conversion of, for example, an `Integer Array` into a `Long Array` is not supported.
+Arrays with mixed content types are not supported.
 
 == Automatic type conversion
 
