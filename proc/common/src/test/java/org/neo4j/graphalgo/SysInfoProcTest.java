@@ -37,11 +37,11 @@ import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.condition.AnyOf.anyOf;
 
-class DebugProcTest extends BaseProcTest {
+class SysInfoProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(DebugProc.class);
+        registerProcedures(SysInfoProc.class);
     }
 
     @Override
@@ -60,8 +60,8 @@ class DebugProcTest extends BaseProcTest {
     }
 
     @Test
-    void testDebugProc() throws IOException {
-        var result = runQuery("CALL gds.debug()", res -> res.stream().collect(
+    void testSysInfoProc() throws IOException {
+        var result = runQuery("CALL gds.debug.sysInfo()", res -> res.stream().collect(
             toMap(m -> String.valueOf(m.get("key")), m -> m.get("value"))
         ));
         var buildInfoProperties = BuildInfoProperties.get();
@@ -125,7 +125,7 @@ class DebugProcTest extends BaseProcTest {
     @Test
     void shouldReturnGradleVersion() throws IOException {
         var result = runQuery(
-            "CALL gds.debug() YIELD key, value WITH key, value WHERE key = 'gdsVersion' RETURN value as gdsVersion",
+            "CALL gds.debug.sysInfo() YIELD key, value WITH key, value WHERE key = 'gdsVersion' RETURN value as gdsVersion",
             cypherResult -> cypherResult.<String>columnAs("gdsVersion").stream().collect(toList())
         );
         assertThat(result).containsExactly(BuildInfoProperties.get().gdsVersion());

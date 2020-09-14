@@ -44,17 +44,17 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.DebugProc.DebugValue.value;
+import static org.neo4j.graphalgo.SysInfoProc.DebugValue.value;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 
 // don't extend BaseProc and only inject GraphDatabaseService so that
 // we can run this procedure even if unrestricted=gds.* had not been configured
-public class DebugProc {
+public class SysInfoProc {
 
     @Context
     public GraphDatabaseService db;
 
-    @Procedure("gds.debug")
+    @Procedure("gds.debug.sysInfo")
     public Stream<DebugValue> version() throws IOException {
         var properties = BuildInfoProperties.get();
         var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
@@ -251,15 +251,15 @@ public class DebugProc {
         builder.accept(configVal(config, Settings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available
-        DebugProc.<Long>safeGetSetting("dbms.tx_state.max_off_heap_memory", config)
+        SysInfoProc.<Long>safeGetSetting("dbms.tx_state.max_off_heap_memory", config)
             .ifPresent(s -> builder.accept(configVal(config, s)));
-        DebugProc.<Long>safeGetSetting("dbms.memory.off_heap.max_size", config)
+        SysInfoProc.<Long>safeGetSetting("dbms.memory.off_heap.max_size", config)
             .ifPresent(s -> builder.accept(configVal(config, s)));
-        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.global_max_size", config)
+        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.global_max_size", config)
             .ifPresent(s -> builder.accept(configVal(config, s)));
-        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.datababase_max_size", config)
+        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.datababase_max_size", config)
             .ifPresent(s -> builder.accept(configVal(config, s)));
-        DebugProc.<Long>safeGetSetting("dbms.memory.transaction.max_size", config)
+        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.max_size", config)
             .ifPresent(s -> builder.accept(configVal(config, s)));
     }
 

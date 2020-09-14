@@ -274,7 +274,7 @@ The following table lists all functions in the GDS library:
 |Group | Function
 .3+<.^| Miscellaneous
 | `<<utility-functions, gds.version>>`
-| `gds.debug`
+| `gds.debug.sysInfo`
 | `gds.list`
 |Graph Operations | `gds.graph.exists`
 .7+<.^| Utilities
