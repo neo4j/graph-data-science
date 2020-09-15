@@ -57,7 +57,7 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        // skip high-degree nodes
+        // check the first node's degree
         if (!degreeFilter.test(nodeIdA)) {
             return;
         }
@@ -82,20 +82,21 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
         long s,t;
 
+        // for all neighbours of A
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
-            // again, skip high-degree nodes
+            // check the second node's degree
             if (degreeFilter.test(nodeIdB)) {
                 decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
-                // find first neighbour C of B with id > B
-                CfromB = decompressingCursorB.skipUntil(nodeIdB);
+                // find first neighbour Cb of B with id > B
+                CfromB = decompressingCursorB.skipUntil(nodeIdB);// check the third node's degree
                 if (CfromB > nodeIdB && degreeFilter.test(CfromB)) {
                     // copy the state of A's cursor
                     decompressingCursorA.copyFrom(mainDecompressingCursor);
-                    // find the first neighbour C' of A with id >= C
+                    // find the first neighbour Ca of A with id >= Cb
                     CfromA = decompressingCursorA.advance(CfromB);
 
-                    // if C' = C we have found a triangle
+                    // if Ca = Cb we have found a triangle
                     // we only submit one triangle per parallel relationship
                     if (CfromA == CfromB && CfromB > lastNodeC) {
                         consumer.accept(nodeIdA, nodeIdB, CfromB);
@@ -107,6 +108,7 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                     follow = decompressingCursorA;
                     t = CfromA;
 
+                    // while both A and B have more neighbours
                     while (lead.hasNextVLong() && follow.hasNextVLong()) {
                         s = lead.nextVLong();
                         if (s > t) {
