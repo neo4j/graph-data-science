@@ -101,7 +101,12 @@ final class EstimationCliTest {
         "  \"label_count\" : 0,\n" +
         "  \"relationship_type_count\" : 0,\n" +
         "  \"node_property_count\" : 0,\n" +
-        "  \"relationship_property_count\" : 0\n" +
+        "  \"relationship_property_count\" : 0,\n" +
+        "  \"memory_adjustment_factor\" : %.1f,\n" +
+        "  \"bytes_min_recommended\" : %d,\n" +
+        "  \"min_memory_recommended\" : \"%s\",\n" +
+        "  \"bytes_max_recommended\" : %d,\n" +
+        "  \"max_memory_recommended\" : \"%s\"\n" +
         "}";
 
     private static final List<String> PROCEDURES = List.of(
@@ -323,13 +328,21 @@ final class EstimationCliTest {
     }
 
     private String expectedJson(MemoryEstimateResult expected, String procName) {
+        double padding = procName.startsWith("gds.graph.create") ? 1.5 : 1.0;
+        long paddedMinBytes = (long) (expected.bytesMin * padding);
+        long paddedMaxBytes = (long) (expected.bytesMax * padding);
         return formatWithLocale(
             EXPECTED_JSON_TEMPLATE,
             expected.bytesMin,
             expected.bytesMax,
             humanReadable(expected.bytesMin),
             humanReadable(expected.bytesMax),
-            procName
+            procName,
+            padding,
+            paddedMinBytes,
+            humanReadable(paddedMinBytes),
+            paddedMaxBytes,
+            humanReadable(paddedMaxBytes)
         );
     }
 

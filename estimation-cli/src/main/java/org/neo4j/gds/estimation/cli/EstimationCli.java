@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -477,5 +478,30 @@ public class EstimationCli implements Runnable {
         int nodePropertyCount();
 
         int relationshipPropertyCount();
+
+        @JsonProperty("memory_adjustment_factor")
+        default double bytesPadding() {
+            return procedure().startsWith("gds.graph.create") ? 1.5 : 1.0;
+        }
+
+        @JsonProperty("bytes_min_recommended")
+        default long bytesMinPadded() {
+            return (long) (bytesMin() * bytesPadding());
+        }
+
+    @JsonProperty("min_memory_recommended")
+        default String minMemoryPadded() {
+            return humanReadable(bytesMinPadded());
+        }
+
+        @JsonProperty("bytes_max_recommended")
+        default long bytesMaxPadded() {
+            return (long) (bytesMax() * bytesPadding());
+        }
+
+        @JsonProperty("max_memory_recommended")
+        default String maxMemoryPadded() {
+            return humanReadable(bytesMaxPadded());
+        }
     }
 }
