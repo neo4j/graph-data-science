@@ -73,16 +73,23 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
             return;
         }
 
-        AdjacencyList.DecompressingCursor neighboursA = cacheA, neighboursB = cacheB;
-
+        // iterates over neighbours of A
+        AdjacencyList.DecompressingCursor neighboursA = cacheA;
+        // current neighbour of A
         long nodeCa;
+        // iterates over neighbours of B
+        AdjacencyList.DecompressingCursor neighboursB = cacheB;
+        // current neighbour of B
         long nodeCb;
-        long lastNodeB;
-        long lastNodeC;
+
+        // last node where Ca = Cb
+        // prevents counting a new triangle for parallel relationships
+        long triangleC;
 
         // for all neighbours of A
         while (neighboursAMain.hasNextVLong()) {
-            lastNodeC = -1;
+            // we have not yet seen a triangle
+            triangleC = -1;
             // check the second node's degree
             if (degreeFilter.test(nodeB)) {
                 neighboursB = cursor(nodeB, neighboursB, offsets, adjacency);
@@ -98,9 +105,9 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
 
                     // if Ca = Cb we have found a triangle
                     // we only submit one triangle per parallel relationship
-                    if (nodeCa == nodeCb && nodeCb > lastNodeC) {
-                        consumer.accept(nodeA, nodeB, nodeCb);
-                        lastNodeC = nodeCb;
+                    if (nodeCa == nodeCb && nodeCa > triangleC) {
+                        consumer.accept(nodeA, nodeB, nodeCa);
+                        triangleC = nodeCa;
                     }
 
                     // while both A and B have more neighbours
@@ -112,9 +119,9 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                             nodeCa = neighboursA.advance(nodeCb);
                         }
                         // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > lastNodeC && degreeFilter.test(nodeCb)) {
-                            consumer.accept(nodeA, nodeB, nodeCb);
-                            lastNodeC = nodeCb;
+                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
+                            consumer.accept(nodeA, nodeB, nodeCa);
+                            triangleC = nodeCa;
                         }
                     }
 
@@ -124,18 +131,15 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                         // we take the next neighbour Cb of B with id >= Ca
                         nodeCb = neighboursB.advance(nodeCa);
                         // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > lastNodeC && degreeFilter.test(nodeCb)) {
-                            consumer.accept(nodeA, nodeB, nodeCb);
+                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
+                            consumer.accept(nodeA, nodeB, nodeCa);
                         }
                     }
                 }
             }
 
-            // TODO: use skipUntil?
-            lastNodeB = nodeB;
-            while (neighboursAMain.hasNextVLong() && nodeB == lastNodeB) {
-                nodeB = neighboursAMain.nextVLong();
-            }
+            // skip until the next neighbour B of A with id > (current) B
+            nodeB = skipUntil(neighboursAMain, nodeB);
         }
     }
 
