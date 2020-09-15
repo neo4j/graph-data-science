@@ -253,19 +253,15 @@ public final class HugeGraphUtil {
             }
 
             public void addNode(long originalId, NodeLabel... nodeLabels) {
-                // TODO: needs to be thread safe
-                if (seenIds.get(originalId)) {
-                    return;
-                }
-                seenIds.set(originalId);
+                if(!seenIds.get(originalId) && seenIds.set(originalId)) {
+                    long[] labels = labelTokens(nodeLabels);
 
-                long[] labels = labelTokens(nodeLabels);
+                    buffer.add(originalId, -1, labels);
 
-                buffer.add(originalId, -1, labels);
-
-                if (buffer.isFull()) {
-                    flushBuffer();
-                    reset();
+                    if (buffer.isFull()) {
+                        flushBuffer();
+                        reset();
+                    }
                 }
             }
 

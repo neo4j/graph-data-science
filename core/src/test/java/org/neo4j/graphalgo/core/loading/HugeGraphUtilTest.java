@@ -133,7 +133,7 @@ class HugeGraphUtilTest {
         assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
     }
 
-    // TODO: add test for labels and add test for writing duplicate nodes (tests inner bitset)
+    // TODO: add test for labels
     @Test
     void parallelIdMapBuilder() {
         long nodeCount = 1_000_000_000L;
@@ -145,6 +145,20 @@ class HugeGraphUtilTest {
         var idMap = idMapBuilder.build();
 
         assertEquals(nodeCount, idMap.nodeCount());
+    }
+
+    @Test
+    void parallelIdMapBuilderWithDuplicateNodes() {
+        long attempts = 1000;
+        int concurrency = 4;
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(attempts, false, concurrency, AllocationTracker.empty());
+
+        ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
+            originalId -> idMapBuilder.addNode(0)));
+
+        var idMap = idMapBuilder.build();
+
+        assertEquals(1, idMap.nodeCount());
     }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
