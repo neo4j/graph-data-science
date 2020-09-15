@@ -146,8 +146,23 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         }
     }
 
+    /**
+     * Get the node id strictly greater than ({@literal >}) the provided {@code target}.
+     * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
+     * id that is large enough.
+     *
+     * @return the smallest node id in the cursor greater than the target.
+     */
     protected abstract long skipUntil(CURSOR cursor, long nodeId);
 
+    /**
+     * Get the node id greater than or equal ({@literal >=}) to the provided {@code target}.
+     * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
+     * id that is large enough.
+     * Will always take at least one step.
+     *
+     * @return the smallest node id in the cursor greater than or equal to the target.
+     */
     protected abstract long advance(CURSOR cursor, long nodeId);
 
     protected abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
