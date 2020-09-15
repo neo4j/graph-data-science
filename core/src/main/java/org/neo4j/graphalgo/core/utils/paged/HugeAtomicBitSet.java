@@ -51,7 +51,7 @@ public final class HugeAtomicBitSet {
     /**
      * Sets the bit at the given index to true.
      */
-    public void set(long index) {
+    public boolean set(long index) {
         assert(index < numBits);
 
         long wordIndex = index / NUM_BITS;
@@ -59,10 +59,14 @@ public final class HugeAtomicBitSet {
         long bitmask = 1L << bitIndex;
 
         while (true) {
-            var oldWord = bits.get(wordIndex);
-            var newWord = oldWord | bitmask;
-            if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
-                break;
+            if (!get(index)) {
+                var oldWord = bits.get(wordIndex);
+                var newWord = oldWord | bitmask;
+                if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
+                    return true;
+                }
+            } else {
+                return false;
             }
         }
     }
