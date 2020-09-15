@@ -39,18 +39,19 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.Function;
 import java.util.stream.Stream;
-
-;
 
 public final class HugeGraphUtil {
 
@@ -146,7 +147,6 @@ public final class HugeGraphUtil {
         } else {
             relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"));
         }
-
         return HugeGraph.create(
             idMap,
             GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
@@ -159,18 +159,19 @@ public final class HugeGraphUtil {
 
     public static class IdMapBuilder {
 
-        private final HugeLongArrayBuilder idMapBuilder;
-        private final NodesBatchBuffer buffer;
-        private final HugeNodeImporter nodeImporter;
-        private final BitSet seenIds;
-
-        private final AtomicInteger nextLabelId;
-        private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
-        private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
-
         private final long maxOriginalId;
         private final int concurrency;
         private final AllocationTracker tracker;
+
+        private final AtomicInteger nextLabelId;
+        private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
+        private final Map<NodeLabel, BitSet> nodeLabelBitSetMap;
+        private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+
+        private final ThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
+        private final HugeLongArrayBuilder hugeLongArrayBuilder;
+        private final HugeNodeImporter nodeImporter;
+        private final Set<ThreadLocalBuilder> localBuilderSet;
 
         IdMapBuilder(
             long maxOriginalId,
@@ -181,74 +182,115 @@ public final class HugeGraphUtil {
             this.maxOriginalId = maxOriginalId;
             this.concurrency = concurrency;
             this.tracker = tracker;
-
-            this.idMapBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
-
             this.nextLabelId = new AtomicInteger(0);
-            this.elementIdentifierLabelTokenMapping = new HashMap<>();
+            this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
+            this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
             this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
 
-            this.nodeImporter = new HugeNodeImporter(idMapBuilder, new HashMap<>(), labelTokenNodeLabelMapping);
+            this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
+            this.nodeImporter = new HugeNodeImporter(hugeLongArrayBuilder, nodeLabelBitSetMap, labelTokenNodeLabelMapping);
 
-            this.seenIds = new BitSet();
+            var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
 
-            this.buffer = new NodesBatchBufferBuilder()
-                .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
-                .hasLabelInformation(hasLabelInformation)
-                .readProperty(false)
-                .build();
+            this.localBuilderSet = ConcurrentHashMap.newKeySet();
+            this.threadLocalBuilder = ThreadLocal.withInitial(
+                () -> {
+                    var tlb = new ThreadLocalBuilder(nodeImporter, seenIds, hasLabelInformation, this::labelTokenId);
+                    localBuilderSet.add(tlb);
+                    return tlb;
+                }
+            );
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
-            if (seenIds.get(originalId)) {
-                return;
-            }
-            seenIds.set(originalId);
-
-            long[] labels = labelTokens(nodeLabels);
-
-            buffer.add(originalId, -1, labels);
-
-            if (buffer.isFull()) {
-                flushBuffer();
-                reset();
-            }
+            threadLocalBuilder.get().addNode(originalId, nodeLabels);
         }
 
         public IdMap build() {
-            flushBuffer();
+            for (ThreadLocalBuilder localBuilder : localBuilderSet) {
+                localBuilder.close();
+            }
 
             return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
-                idMapBuilder,
-                nodeImporter.nodeLabelBitSetMapping,
+                hugeLongArrayBuilder,
+                nodeLabelBitSetMap,
                 maxOriginalId,
                 concurrency,
                 tracker
             );
         }
 
-        private long[] labelTokens(NodeLabel... nodeLabels) {
-            long[] labelIds = new long[nodeLabels.length];
+        private int labelTokenId(NodeLabel nodeLabel) {
+            return elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, label -> {
+                int nextLabelId = this.nextLabelId.getAndIncrement();
+                labelTokenNodeLabelMapping.put(nextLabelId, Collections.singletonList(label));
+                return nextLabelId;
+            });
+        }
 
-            for (int i = 0; i < nodeLabels.length; i++) {
-                NodeLabel nodeLabel = nodeLabels[i];
-                long labelId = elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, (l) -> {
-                    int nextLabelId = this.nextLabelId.getAndIncrement();
-                    labelTokenNodeLabelMapping.put(nextLabelId, Collections.singletonList(nodeLabel));
-                    return nextLabelId;
-                });
-                labelIds[i] = labelId;
+        private static class ThreadLocalBuilder implements AutoCloseable {
+
+            private final HugeAtomicBitSet seenIds;
+            private final NodesBatchBuffer buffer;
+            private final Function<NodeLabel, Integer> labelTokenIdFn;
+            private final HugeNodeImporter nodeImporter;
+
+            ThreadLocalBuilder(
+                HugeNodeImporter nodeImporter,
+                HugeAtomicBitSet seenIds,
+                boolean hasLabelInformation,
+                Function<NodeLabel, Integer> labelTokenIdFn
+            ) {
+                this.seenIds = seenIds;
+                this.labelTokenIdFn = labelTokenIdFn;
+
+                this.buffer = new NodesBatchBufferBuilder()
+                    .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
+                    .hasLabelInformation(hasLabelInformation)
+                    .readProperty(false)
+                    .build();
+                this.nodeImporter = nodeImporter;
             }
 
-            return labelIds;
-        }
+            public void addNode(long originalId, NodeLabel... nodeLabels) {
+                // TODO: needs to be thread safe
+                if (seenIds.get(originalId)) {
+                    return;
+                }
+                seenIds.set(originalId);
 
-        private void flushBuffer() {
-            this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> 0);
-        }
+                long[] labels = labelTokens(nodeLabels);
 
-        private void reset() {
-            buffer.reset();
+                buffer.add(originalId, -1, labels);
+
+                if (buffer.isFull()) {
+                    flushBuffer();
+                    reset();
+                }
+            }
+
+            private long[] labelTokens(NodeLabel... nodeLabels) {
+                long[] labelIds = new long[nodeLabels.length];
+
+                for (int i = 0; i < nodeLabels.length; i++) {
+                    labelIds[i] = labelTokenIdFn.apply(nodeLabels[i]);
+                }
+
+                return labelIds;
+            }
+
+            private void flushBuffer() {
+                this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> 0);
+            }
+
+            private void reset() {
+                buffer.reset();
+            }
+
+            @Override
+            public void close() {
+                flushBuffer();
+            }
         }
     }
 

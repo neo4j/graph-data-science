@@ -26,9 +26,11 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,6 +131,20 @@ class HugeGraphUtilTest {
     void undirectedWithoutAggregation() {
         Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);
         assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
+    }
+
+    // TODO: add test for labels and add test for writing duplicate nodes (tests inner bitset)
+    @Test
+    void parallelIdMapBuilder() {
+        long nodeCount = 1_000_000_000L;
+        int concurrency = 8;
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
+
+        ParallelUtil.parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, stream -> stream.forEach(idMapBuilder::addNode));
+
+        var idMap = idMapBuilder.build();
+
+        assertEquals(nodeCount, idMap.nodeCount());
     }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
