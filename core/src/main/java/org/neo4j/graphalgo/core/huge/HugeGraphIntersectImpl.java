@@ -66,21 +66,19 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         AdjacencyList adjacency = this.adjacency;
 
         AdjacencyList.DecompressingCursor mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
+
         // find first neighbour B of A id > A
         long nodeIdB = mainDecompressingCursor.skipUntil(nodeIdA);
         if (nodeIdA > nodeIdB) {
             return;
         }
 
-        AdjacencyList.DecompressingCursor lead, follow, decompressingCursorA = cacheA, decompressingCursorB = cacheB;
+        AdjacencyList.DecompressingCursor decompressingCursorA = cacheA, decompressingCursorB = cacheB;
 
-        long CfromB;
         long CfromA;
-
+        long CfromB;
         long lastNodeB;
         long lastNodeC;
-
-        long s,t;
 
         // for all neighbours of A
         while (mainDecompressingCursor.hasNextVLong()) {
@@ -103,32 +101,29 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                         lastNodeC = CfromB;
                     }
 
-                    lead = decompressingCursorB;
-                    s = CfromB;
-                    follow = decompressingCursorA;
-                    t = CfromA;
-
                     // while both A and B have more neighbours
-                    while (lead.hasNextVLong() && follow.hasNextVLong()) {
-                        s = lead.nextVLong();
-                        if (s > t) {
-                            t = follow.advance(s);
+                    while (decompressingCursorB.hasNextVLong() && decompressingCursorA.hasNextVLong()) {
+                        // take the next neighbour Cb of B
+                        CfromB = decompressingCursorB.nextVLong();
+                        if (CfromB > CfromA) {
+                            // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
+                            CfromA = decompressingCursorA.advance(CfromB);
                         }
-                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
-                            consumer.accept(nodeIdA, nodeIdB, s);
-                            lastNodeC = s;
+                        // check for triangle
+                        if (CfromA == CfromB && CfromA > lastNodeC && degreeFilter.test(CfromB)) {
+                            consumer.accept(nodeIdA, nodeIdB, CfromB);
+                            lastNodeC = CfromB;
                         }
                     }
 
-                    if (lead.hasNextVLong()) {
-                        s = lead.advance(t);
-                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
-                            consumer.accept(nodeIdA, nodeIdB, s);
-                        }
-                    } else if (follow.hasNextVLong()) {
-                        t = follow.advance(s);
-                        if (t == s && t > lastNodeC && degreeFilter.test(s)) {
-                            consumer.accept(nodeIdA, nodeIdB, s);
+                    // it is possible that the last Ca > Cb, but there are no more neighbours Ca of A
+                    // so if there are more neighbours Cb of B
+                    if (decompressingCursorB.hasNextVLong()) {
+                        // we take the next neighbour Cb of B with id >= Ca
+                        CfromB = decompressingCursorB.advance(CfromA);
+                        // check for triangle
+                        if (CfromA == CfromB && CfromA > lastNodeC && degreeFilter.test(CfromB)) {
+                            consumer.accept(nodeIdA, nodeIdB, CfromB);
                         }
                     }
                 }
