@@ -58,17 +58,13 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        // skip high-degree nodes
+        // check the first node's degree
         if (!degreeFilter.test(nodeIdA)) {
             return;
         }
 
-        if (nodeIdA == 0) {
-            System.out.println("in-dev version");
-        }
-
         CURSOR mainDecompressingCursor = cursor(nodeIdA, cache);
-        // find first neighbour B of A id > A
+        // find first neighbour B of A with id > A
         long nodeIdB = skipUntil(mainDecompressingCursor, nodeIdA);
         if (nodeIdA > nodeIdB) {
             return;
@@ -87,21 +83,23 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
         long s,t;
 
+        // for all neighbours of A
         while (mainDecompressingCursor.hasNextVLong()) {
             lastNodeC = -1;
-            // again, skip high-degree nodes
+            // check the second node's degree
             if (degreeFilter.test(nodeIdB)) {
                 decompressingCursorB = cursor(nodeIdB, decompressingCursorB);
-                // find first neighbour C of B with id > B
+                // find first neighbour Cb of B with id > B
                 CfromB = skipUntil(decompressingCursorB, nodeIdB);
 
+                // check the third node's degree
                 if (CfromB > nodeIdB && degreeFilter.test(CfromB)) {
                     // copy the state of A's cursor
                     copyFrom(mainDecompressingCursor, decompressingCursorA);
-                    // find the first neighbour C' of A with id >= C
+                    // find the first neighbour Ca of A with id >= Cb
                     CfromA = advance(decompressingCursorA, CfromB);
 
-                    // if C' = C we have found a triangle
+                    // if Ca = Cb we have found a triangle
                     // we only submit one triangle per parallel relationship
                     if (CfromA == CfromB && CfromB > lastNodeC) {
                         consumer.accept(nodeIdA, nodeIdB, CfromB);
@@ -113,6 +111,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     follow = decompressingCursorA;
                     t = CfromA;
 
+                    // while both A and B have more neighbours
                     while (lead.hasNextVLong() && follow.hasNextVLong()) {
                         s = lead.nextVLong();
                         if (s > t) {
