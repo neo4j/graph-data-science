@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.NodeLabel;
@@ -108,32 +109,35 @@ public final class HugeGraphUtil {
         private final HugeLongArrayBuilder idMapBuilder;
         private final NodesBatchBuffer buffer;
         private final HugeNodeImporter nodeImporter;
+        private final BitSet seenIds;
 
         private final AtomicInteger nextLabelId;
         private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
         private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-        private final long nodeCount;
+        private final long maxOriginalId;
         private final int concurrency;
         private final AllocationTracker tracker;
 
         IdMapBuilder(
-            long nodeCount,
+            long maxOriginalId,
             boolean hasLabelInformation,
             int concurrency,
             AllocationTracker tracker
         ) {
-            this.nodeCount = nodeCount;
+            this.maxOriginalId = maxOriginalId;
             this.concurrency = concurrency;
             this.tracker = tracker;
 
-            this.idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
+            this.idMapBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
 
             this.nextLabelId = new AtomicInteger(0);
             this.elementIdentifierLabelTokenMapping = new HashMap<>();
             this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
 
             this.nodeImporter = new HugeNodeImporter(idMapBuilder, new HashMap<>(), labelTokenNodeLabelMapping);
+
+            this.seenIds = new BitSet();
 
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
@@ -143,6 +147,11 @@ public final class HugeGraphUtil {
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
+            if (seenIds.get(originalId)) {
+                return;
+            }
+            seenIds.set(originalId);
+
             long[] labels = labelTokens(nodeLabels);
 
             buffer.add(originalId, -1, labels);
@@ -159,7 +168,7 @@ public final class HugeGraphUtil {
             return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
                 idMapBuilder,
                 nodeImporter.nodeLabelBitSetMapping,
-                nodeCount,
+                maxOriginalId,
                 concurrency,
                 tracker
             );
