@@ -56,83 +56,85 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
     }
 
     @Override
-    public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
+    public void intersectAll(long nodeA, IntersectionConsumer consumer) {
         // check the first node's degree
-        if (!degreeFilter.test(nodeIdA)) {
+        if (!degreeFilter.test(nodeA)) {
             return;
         }
 
         AdjacencyOffsets offsets = this.offsets;
         AdjacencyList adjacency = this.adjacency;
+        AdjacencyList.DecompressingCursor neighboursAMain = cursor(nodeA, cache, offsets, adjacency);
 
-        AdjacencyList.DecompressingCursor mainDecompressingCursor = cursor(nodeIdA, cache, offsets, adjacency);
-
-        // find first neighbour B of A id > A
-        long nodeIdB = mainDecompressingCursor.skipUntil(nodeIdA);
-        if (nodeIdA > nodeIdB) {
+        // find first neighbour B of A with id > A
+        long nodeB = neighboursAMain.skipUntil(nodeA);
+        // if there is no such neighbour -> no triangle (or we already found it)
+        if (nodeA > nodeB) {
             return;
         }
 
-        AdjacencyList.DecompressingCursor decompressingCursorA = cacheA, decompressingCursorB = cacheB;
+        AdjacencyList.DecompressingCursor neighboursA = cacheA, neighboursB = cacheB;
 
-        long CfromA;
-        long CfromB;
+        long nodeCa;
+        long nodeCb;
         long lastNodeB;
         long lastNodeC;
 
         // for all neighbours of A
-        while (mainDecompressingCursor.hasNextVLong()) {
+        while (neighboursAMain.hasNextVLong()) {
             lastNodeC = -1;
             // check the second node's degree
-            if (degreeFilter.test(nodeIdB)) {
-                decompressingCursorB = cursor(nodeIdB, decompressingCursorB, offsets, adjacency);
+            if (degreeFilter.test(nodeB)) {
+                neighboursB = cursor(nodeB, neighboursB, offsets, adjacency);
                 // find first neighbour Cb of B with id > B
-                CfromB = decompressingCursorB.skipUntil(nodeIdB);// check the third node's degree
-                if (CfromB > nodeIdB && degreeFilter.test(CfromB)) {
+                nodeCb = neighboursB.skipUntil(nodeB);
+
+                // check the third node's degree
+                if (nodeCb > nodeB && degreeFilter.test(nodeCb)) {
                     // copy the state of A's cursor
-                    decompressingCursorA.copyFrom(mainDecompressingCursor);
+                    neighboursA.copyFrom(neighboursAMain);
                     // find the first neighbour Ca of A with id >= Cb
-                    CfromA = decompressingCursorA.advance(CfromB);
+                    nodeCa = neighboursA.advance(nodeCb);
 
                     // if Ca = Cb we have found a triangle
                     // we only submit one triangle per parallel relationship
-                    if (CfromA == CfromB && CfromB > lastNodeC) {
-                        consumer.accept(nodeIdA, nodeIdB, CfromB);
-                        lastNodeC = CfromB;
+                    if (nodeCa == nodeCb && nodeCb > lastNodeC) {
+                        consumer.accept(nodeA, nodeB, nodeCb);
+                        lastNodeC = nodeCb;
                     }
 
                     // while both A and B have more neighbours
-                    while (decompressingCursorB.hasNextVLong() && decompressingCursorA.hasNextVLong()) {
+                    while (neighboursB.hasNextVLong() && neighboursA.hasNextVLong()) {
                         // take the next neighbour Cb of B
-                        CfromB = decompressingCursorB.nextVLong();
-                        if (CfromB > CfromA) {
+                        nodeCb = neighboursB.nextVLong();
+                        if (nodeCb > nodeCa) {
                             // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
-                            CfromA = decompressingCursorA.advance(CfromB);
+                            nodeCa = neighboursA.advance(nodeCb);
                         }
                         // check for triangle
-                        if (CfromA == CfromB && CfromA > lastNodeC && degreeFilter.test(CfromB)) {
-                            consumer.accept(nodeIdA, nodeIdB, CfromB);
-                            lastNodeC = CfromB;
+                        if (nodeCa == nodeCb && nodeCa > lastNodeC && degreeFilter.test(nodeCb)) {
+                            consumer.accept(nodeA, nodeB, nodeCb);
+                            lastNodeC = nodeCb;
                         }
                     }
 
                     // it is possible that the last Ca > Cb, but there are no more neighbours Ca of A
                     // so if there are more neighbours Cb of B
-                    if (decompressingCursorB.hasNextVLong()) {
+                    if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
-                        CfromB = decompressingCursorB.advance(CfromA);
+                        nodeCb = neighboursB.advance(nodeCa);
                         // check for triangle
-                        if (CfromA == CfromB && CfromA > lastNodeC && degreeFilter.test(CfromB)) {
-                            consumer.accept(nodeIdA, nodeIdB, CfromB);
+                        if (nodeCa == nodeCb && nodeCa > lastNodeC && degreeFilter.test(nodeCb)) {
+                            consumer.accept(nodeA, nodeB, nodeCb);
                         }
                     }
                 }
             }
 
             // TODO: use skipUntil?
-            lastNodeB = nodeIdB;
-            while (mainDecompressingCursor.hasNextVLong() && nodeIdB == lastNodeB) {
-                nodeIdB = mainDecompressingCursor.nextVLong();
+            lastNodeB = nodeB;
+            while (neighboursAMain.hasNextVLong() && nodeB == lastNodeB) {
+                nodeB = neighboursAMain.nextVLong();
             }
         }
     }
