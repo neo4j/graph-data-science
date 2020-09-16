@@ -457,12 +457,16 @@ public class EstimationCli implements Runnable {
     @JsonSerialize
     @ValueClass
     interface JsonOutput {
+        @JsonProperty("bytes_min_resident")
         long bytesMin();
 
+        @JsonProperty("bytes_max_resident")
         long bytesMax();
 
+        @JsonProperty("min_memory_resident")
         String minMemory();
 
+        @JsonProperty("max_memory_resident")
         String maxMemory();
 
         String procedure();
@@ -479,29 +483,29 @@ public class EstimationCli implements Runnable {
 
         int relationshipPropertyCount();
 
-        @JsonProperty("memory_adjustment_factor")
-        default double bytesPadding() {
+        @JsonProperty("peak_memory_factor")
+        default double peakMemoryFactor() {
             return procedure().startsWith("gds.graph.create") ? 1.5 : 1.0;
         }
 
-        @JsonProperty("bytes_min_recommended")
-        default long bytesMinPadded() {
-            return (long) (bytesMin() * bytesPadding());
+        @JsonProperty("bytes_min_peak")
+        default long bytesMinPeak() {
+            return (long) (bytesMin() * peakMemoryFactor());
         }
 
-    @JsonProperty("min_memory_recommended")
-        default String minMemoryPadded() {
-            return humanReadable(bytesMinPadded());
+        @JsonProperty("min_memory_peak")
+        default String minMemoryPeak() {
+            return humanReadable(bytesMinPeak());
         }
 
-        @JsonProperty("bytes_max_recommended")
-        default long bytesMaxPadded() {
-            return (long) (bytesMax() * bytesPadding());
+        @JsonProperty("bytes_max_peak")
+        default long bytesMaxPeak() {
+            return (long) (bytesMax() * peakMemoryFactor());
         }
 
-        @JsonProperty("max_memory_recommended")
-        default String maxMemoryPadded() {
-            return humanReadable(bytesMaxPadded());
+        @JsonProperty("max_memory_peak")
+        default String maxMemoryPeak() {
+            return humanReadable(bytesMaxPeak());
         }
     }
 }

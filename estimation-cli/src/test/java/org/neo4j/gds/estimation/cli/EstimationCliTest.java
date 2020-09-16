@@ -91,10 +91,10 @@ final class EstimationCliTest {
 
     private static final String EXPECTED_JSON_TEMPLATE =
         "{\n" +
-        "  \"bytes_min\" : %d,\n" +
-        "  \"bytes_max\" : %d,\n" +
-        "  \"min_memory\" : \"%s\",\n" +
-        "  \"max_memory\" : \"%s\",\n" +
+        "  \"bytes_min_resident\" : %d,\n" +
+        "  \"bytes_max_resident\" : %d,\n" +
+        "  \"min_memory_resident\" : \"%s\",\n" +
+        "  \"max_memory_resident\" : \"%s\",\n" +
         "  \"procedure\" : \"%s\",\n" +
         "  \"node_count\" : 42,\n" +
         "  \"relationship_count\" : 1337,\n" +
@@ -102,11 +102,11 @@ final class EstimationCliTest {
         "  \"relationship_type_count\" : 0,\n" +
         "  \"node_property_count\" : 0,\n" +
         "  \"relationship_property_count\" : 0,\n" +
-        "  \"memory_adjustment_factor\" : %.1f,\n" +
-        "  \"bytes_min_recommended\" : %d,\n" +
-        "  \"min_memory_recommended\" : \"%s\",\n" +
-        "  \"bytes_max_recommended\" : %d,\n" +
-        "  \"max_memory_recommended\" : \"%s\"\n" +
+        "  \"peak_memory_factor\" : %.1f,\n" +
+        "  \"bytes_min_peak\" : %d,\n" +
+        "  \"min_memory_peak\" : \"%s\",\n" +
+        "  \"bytes_max_peak\" : %d,\n" +
+        "  \"max_memory_peak\" : \"%s\"\n" +
         "}";
 
     private static final List<String> PROCEDURES = List.of(
