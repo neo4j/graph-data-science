@@ -20,14 +20,14 @@
 package org.neo4j.graphalgo.utils.cypher;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 
 @ServiceProvider
 public final class CypherPrinter40Factory implements CypherPrinterFactory {
 
     @Override
-    public boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version) {
-        return version == GraphDatabaseApiProxy.Neo4jVersion.V_4_0;
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_4_0;
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.neo4j.annotations.service.Service;
 @Service
 public interface Neo4jProxyFactory {
 
-    boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version);
+    boolean canLoad(Neo4jVersion version);
 
     Neo4jProxyApi load();
 }
