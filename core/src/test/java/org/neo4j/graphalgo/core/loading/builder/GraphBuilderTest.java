@@ -26,13 +26,10 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.HashSet;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -135,76 +132,7 @@ class GraphBuilderTest {
         assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
     }
 
-    @Test
-    void parallelIdMapBuilder() {
-        long nodeCount = 100;
-        int concurrency = 4;
-        var idMapBuilder = GraphBuilder.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
 
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, nodeCount),
-            concurrency,
-            stream -> stream.forEach(idMapBuilder::addNode)
-        );
-
-        var idMap = idMapBuilder.build();
-
-        assertEquals(nodeCount, idMap.nodeCount());
-    }
-
-    @Test
-    void parallelIdMapBuilderWithDuplicateNodes() {
-        long attempts = 100;
-        int concurrency = 4;
-        var idMapBuilder = GraphBuilder.idMapBuilder(attempts, false, concurrency, AllocationTracker.empty());
-
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, attempts),
-            concurrency,
-            stream -> stream.forEach(originalId -> idMapBuilder.addNode(0))
-        );
-
-        var idMap = idMapBuilder.build();
-
-        assertEquals(1, idMap.nodeCount());
-    }
-
-    @Test
-    void parallelIdMapBuilderWithLabels() {
-        long attempts = 100;
-        int concurrency = 4;
-        var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
-        var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
-
-        var idMapBuilder = GraphBuilder.idMapBuilder(attempts, true, concurrency, AllocationTracker.empty());
-
-        ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
-            originalId -> {
-                var labels = originalId % 2 == 0
-                    ? labels1.toArray(NodeLabel[]::new)
-                    : labels2.toArray(NodeLabel[]::new);
-
-                idMapBuilder.addNode(originalId, labels);
-            })
-        );
-
-        var idMap = idMapBuilder.build();
-
-        var expectedLabels = new HashSet<NodeLabel>();
-        expectedLabels.addAll(labels1);
-        expectedLabels.addAll(labels2);
-        assertEquals(expectedLabels, idMap.availableNodeLabels());
-
-        idMap.forEachNode(nodeId -> {
-            var labels = idMap.toOriginalNodeId(nodeId) % 2 == 0
-                ? labels1
-                : labels2;
-
-            assertEquals(labels, idMap.nodeLabels(nodeId));
-
-            return true;
-        });
-    }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
