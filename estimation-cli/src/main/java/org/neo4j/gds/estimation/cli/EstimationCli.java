@@ -20,6 +20,7 @@
 package org.neo4j.gds.estimation.cli;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -455,6 +456,12 @@ public class EstimationCli implements Runnable {
     }
 
     @JsonSerialize
+    @JsonPropertyOrder(value = {
+        "bytesMin", "bytesMax", "minMemory", "maxMemory", "procedure", "nodeCount",
+        "relationshipCount", "labelCount", "relationshipTypeCount",
+        "nodePropertyCount", "relationshipPropertyCount", "peakMemoryFactor",
+        "bytesMinPeak", "minMemoryPeak", "bytesMaxPeak", "maxMemoryPeak"
+    })
     @ValueClass
     interface JsonOutput {
         @JsonProperty("bytes_min_resident")
