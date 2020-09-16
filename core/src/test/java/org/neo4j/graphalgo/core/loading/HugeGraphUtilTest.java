@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.HashSet;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -133,14 +134,17 @@ class HugeGraphUtilTest {
         assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
     }
 
-    // TODO: add test for labels
     @Test
     void parallelIdMapBuilder() {
-        long nodeCount = 1_000_000_000L;
-        int concurrency =  4;
+        long nodeCount = 100;
+        int concurrency = 4;
         var idMapBuilder = HugeGraphUtil.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
 
-        ParallelUtil.parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, stream -> stream.forEach(idMapBuilder::addNode));
+        ParallelUtil.parallelStreamConsume(
+            LongStream.range(0, nodeCount),
+            concurrency,
+            stream -> stream.forEach(idMapBuilder::addNode)
+        );
 
         var idMap = idMapBuilder.build();
 
@@ -149,16 +153,56 @@ class HugeGraphUtilTest {
 
     @Test
     void parallelIdMapBuilderWithDuplicateNodes() {
-        long attempts = 1000;
+        long attempts = 100;
         int concurrency = 4;
         var idMapBuilder = HugeGraphUtil.idMapBuilder(attempts, false, concurrency, AllocationTracker.empty());
 
-        ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
-            originalId -> idMapBuilder.addNode(0)));
+        ParallelUtil.parallelStreamConsume(
+            LongStream.range(0, attempts),
+            concurrency,
+            stream -> stream.forEach(originalId -> idMapBuilder.addNode(0))
+        );
 
         var idMap = idMapBuilder.build();
 
         assertEquals(1, idMap.nodeCount());
+    }
+
+    @Test
+    void parallelIdMapBuilderWithLabels() {
+        long attempts = 100;
+        int concurrency = 4;
+        var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
+        var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
+
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(attempts, true, concurrency, AllocationTracker.empty());
+
+        ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
+            originalId -> {
+                var labels = originalId % 2 == 0
+                    ? labels1.toArray(NodeLabel[]::new)
+                    : labels2.toArray(NodeLabel[]::new);
+
+                idMapBuilder.addNode(originalId, labels);
+            })
+        );
+
+        var idMap = idMapBuilder.build();
+
+        var expectedLabels = new HashSet<NodeLabel>();
+        expectedLabels.addAll(labels1);
+        expectedLabels.addAll(labels2);
+        assertEquals(expectedLabels, idMap.availableNodeLabels());
+
+        idMap.forEachNode(nodeId -> {
+            var labels = idMap.toOriginalNodeId(nodeId) % 2 == 0
+                ? labels1
+                : labels2;
+
+            assertEquals(labels, idMap.nodeLabels(nodeId));
+
+            return true;
+        });
     }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
