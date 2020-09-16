@@ -77,6 +77,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 )
 public class EstimationCli implements Runnable {
 
+    private static final double GRAPH_CREATE_PEAK_MEMORY_FACTOR = 1.5;
+    private static final double DEFAULT_PEAK_MEMORY_FACTOR = 1.0;
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
@@ -492,7 +495,9 @@ public class EstimationCli implements Runnable {
 
         @JsonProperty("peak_memory_factor")
         default double peakMemoryFactor() {
-            return procedure().startsWith("gds.graph.create") ? 1.5 : 1.0;
+            return procedure().startsWith("gds.graph.create") ?
+                GRAPH_CREATE_PEAK_MEMORY_FACTOR :
+                DEFAULT_PEAK_MEMORY_FACTOR;
         }
 
         @JsonProperty("bytes_min_peak")
