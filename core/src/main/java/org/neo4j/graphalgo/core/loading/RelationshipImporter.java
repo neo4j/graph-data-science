@@ -37,12 +37,12 @@ import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTI
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class RelationshipImporter {
+public class RelationshipImporter {
 
     private final AllocationTracker tracker;
     private final AdjacencyBuilder adjacencyBuilder;
 
-    RelationshipImporter(AllocationTracker tracker, AdjacencyBuilder adjacencyBuilder) {
+    public RelationshipImporter(AllocationTracker tracker, AdjacencyBuilder adjacencyBuilder) {
         this.tracker = tracker;
         this.adjacencyBuilder = adjacencyBuilder;
     }
@@ -51,7 +51,7 @@ class RelationshipImporter {
         long importRelationships(RelationshipsBatchBuffer batches, PropertyReader propertyReader);
     }
 
-    Imports imports(Orientation orientation, boolean loadProperties) {
+    public Imports imports(Orientation orientation, boolean loadProperties) {
         if (orientation == Orientation.UNDIRECTED) {
             return loadProperties
                 ? this::importUndirectedWithProperties
@@ -167,7 +167,7 @@ class RelationshipImporter {
         );
     }
 
-    Collection<Runnable> flushTasks() {
+    public Collection<Runnable> flushTasks() {
         return adjacencyBuilder.flushTasks();
     }
 
@@ -207,7 +207,7 @@ class RelationshipImporter {
     }
 
 
-    static PropertyReader preLoadedPropertyReader() {
+    public static PropertyReader preLoadedPropertyReader() {
         return (batch, batchLength, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
             long[] properties = new long[batchLength / BATCH_ENTRY_SIZE];
             for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {

@@ -26,8 +26,10 @@ import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -93,7 +95,7 @@ public final class RandomGraphGenerator {
         generateNodes(idMapBuilder);
 
         IdMap idMap = idMapBuilder.build();
-        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             idMap,
             orientation,
             maybeRelationshipPropertyProducer.isPresent(),
@@ -141,13 +143,13 @@ public final class RandomGraphGenerator {
         return maybeRelationshipPropertyProducer;
     }
 
-    private void generateNodes(HugeGraphUtil.IdMapBuilder idMapBuilder) {
+    private void generateNodes(IdMapBuilder idMapBuilder) {
         for (long i = 0; i < nodeCount; i++) {
             idMapBuilder.addNode(i);
         }
     }
 
-    private void generateRelationships(HugeGraphUtil.RelationshipsBuilder relationshipsImporter) {
+    private void generateRelationships(RelationshipsBuilder relationshipsImporter) {
         LongUnaryOperator degreeProducer = relationshipDistribution.degreeProducer(nodeCount, averageDegree, random);
         LongUnaryOperator relationshipProducer = relationshipDistribution.relationshipProducer(
             nodeCount,

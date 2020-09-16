@@ -118,7 +118,7 @@ public class RelationshipsBuilder {
     }
 
     // TODO: This returns only the first of possibly multiple properties
-    AdjacencyOffsets globalPropertyOffsets() {
+    public AdjacencyOffsets globalPropertyOffsets() {
         return globalPropertyOffsets(0);
     }
 

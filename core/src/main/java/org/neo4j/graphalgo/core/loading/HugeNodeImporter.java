@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
 public class HugeNodeImporter implements NodeImporter {
 
-    interface PropertyReader {
+    public interface PropertyReader {
         int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
     }
 
@@ -48,7 +48,7 @@ public class HugeNodeImporter implements NodeImporter {
 
     private final HugeLongArrayBuilder idMapBuilder;
 
-    HugeNodeImporter(
+    public HugeNodeImporter(
         HugeLongArrayBuilder idMapBuilder,
         Map<NodeLabel, BitSet> nodeLabelBitSetMapping,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping

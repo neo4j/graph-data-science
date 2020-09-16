@@ -30,8 +30,10 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -188,7 +190,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ModularityOptimization modularityOptimization,
         long maxCommunityId
     ) {
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             maxCommunityId,
             false,
             config.concurrency(),
@@ -206,7 +208,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = idMapBuilder.build();
-        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             idMap,
             orientation,
             true,

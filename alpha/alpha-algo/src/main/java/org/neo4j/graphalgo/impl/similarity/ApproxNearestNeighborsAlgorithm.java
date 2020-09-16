@@ -31,9 +31,11 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
+import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -273,7 +275,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
 
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             maxNeoId,
             false,
             config.concurrency(),
@@ -534,8 +536,8 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
     @ValueClass
     public interface RelationshipImporter {
-        HugeGraphUtil.RelationshipsBuilder outImporter();
-        HugeGraphUtil.RelationshipsBuilder inImporter();
+        RelationshipsBuilder outImporter();
+        RelationshipsBuilder inImporter();
 
         default void consume(AnnTopKConsumer[] topKConsumers) {
             for (AnnTopKConsumer consumer : topKConsumers) {
@@ -584,7 +586,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
-            HugeGraphUtil.RelationshipsBuilder outImporter = new HugeGraphUtil.RelationshipsBuilder(
+            RelationshipsBuilder outImporter = new RelationshipsBuilder(
                 idMap,
                 Orientation.NATURAL,
                 false,
@@ -594,7 +596,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 tracker
             );
 
-            HugeGraphUtil.RelationshipsBuilder inImporter = new HugeGraphUtil.RelationshipsBuilder(
+            RelationshipsBuilder inImporter = new RelationshipsBuilder(
                 idMap,
                 Orientation.REVERSE,
                 false,

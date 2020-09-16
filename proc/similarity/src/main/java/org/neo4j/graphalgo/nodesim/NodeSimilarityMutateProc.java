@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -155,7 +155,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
 
-            HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = new HugeGraphUtil.RelationshipsBuilder(
+            RelationshipsBuilder relationshipsBuilder = new RelationshipsBuilder(
                 topKGraph,
                 Orientation.NATURAL,
                 true,

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.core.loading.builder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
@@ -82,7 +83,7 @@ class HugeGraphUtilTest {
         idMapBuilder.addNode(3);
 
         IdMap idMap = idMapBuilder.build();
-        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             idMap,
             orientation,
             false,
@@ -220,7 +221,7 @@ class HugeGraphUtilTest {
         }
 
         IdMap idMap = idMapBuilder.build();
-        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             idMap,
             orientation,
             true,

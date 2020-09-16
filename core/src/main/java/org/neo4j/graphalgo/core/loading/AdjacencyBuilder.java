@@ -37,11 +37,11 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.unchecked;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-final class AdjacencyBuilder {
+public final class AdjacencyBuilder {
 
     public static final long IGNORE_VALUE = Long.MIN_VALUE;
 
-    static AdjacencyBuilder compressing(
+    public static AdjacencyBuilder compressing(
         @NotNull RelationshipsBuilder globalBuilder,
         int numPages,
         int pageSize,

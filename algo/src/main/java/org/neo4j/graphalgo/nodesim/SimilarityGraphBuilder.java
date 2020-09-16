@@ -25,8 +25,9 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.loading.HugeGraphUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -95,7 +96,7 @@ class SimilarityGraphBuilder {
 
     Graph build(Stream<SimilarityResult> stream) {
         Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
             baseIdMap,
             orientation,
             true,
