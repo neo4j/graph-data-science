@@ -215,7 +215,8 @@ class TransientAdjacencyListTest {
         long sourceNodeId = targets[0];
         HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
             targets[targets.length - 1],
-            Pools.DEFAULT,
+            false,
+            1,
             AllocationTracker.empty()
         );
         for (long target : targets) {

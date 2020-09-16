@@ -83,9 +83,10 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
-            Pools.DEFAULT,
+            false,
+            1,
             allocationTracker
         );
 

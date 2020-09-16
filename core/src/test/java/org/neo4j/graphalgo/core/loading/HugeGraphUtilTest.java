@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -49,19 +50,12 @@ class HugeGraphUtilTest {
         "(d)-[{w: 3.0}]->(a)" +
         "(d)-[{w: 3.0}]->(a)";
 
-    private static final String EXPECTED_UNWEIGHTED_GRAPH =
-        "(a)-->(b)-->(c)-->(d)-->(a)";
-
     private static Graph expectedWithAggregation(Orientation orientation) {
         return fromGdl(EXPECTED_WITH_AGGREGATION, orientation);
     }
 
     private static Graph expectedWithoutAggregation(Orientation orientation) {
         return fromGdl(EXPECTED_WITHOUT_AGGREGATION_GRAPH, orientation);
-    }
-
-    private static Graph expectedUnweighted(Orientation orientation) {
-        return fromGdl(EXPECTED_UNWEIGHTED_GRAPH, orientation);
     }
 
     static Stream<Orientation> validProjections() {
@@ -72,15 +66,17 @@ class HugeGraphUtilTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
-            Pools.DEFAULT,
+            true,
+            1,
             AllocationTracker.empty()
         );
 
-        for (int i = 0; i < nodeCount; i++) {
-            idMapBuilder.addNode(i);
-        }
+        idMapBuilder.addNode(0, NodeLabel.of("A"));
+        idMapBuilder.addNode(1, NodeLabel.of("A"), NodeLabel.of("B"));
+        idMapBuilder.addNode(2, NodeLabel.of("C"));
+        idMapBuilder.addNode(3);
 
         IdMap idMap = idMapBuilder.build();
         HugeGraphUtil.RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
@@ -100,7 +96,10 @@ class HugeGraphUtilTest {
             idMap,
             relationshipsBuilder.build(), AllocationTracker.empty()
         );
-        assertGraphEquals(expectedUnweighted(orientation), graph);
+
+        var expectedGraph = fromGdl("(a:A)-->(b:A:B)-->(c:C)-->(d)-->(a)", orientation);
+
+        assertGraphEquals(expectedGraph, graph);
         assertEquals(nodeCount, graph.relationshipCount());
     }
 
@@ -135,9 +134,10 @@ class HugeGraphUtilTest {
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
-        HugeGraphUtil.IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        var idMapBuilder = HugeGraphUtil.idMapBuilder(
             nodeCount,
-            Pools.DEFAULT,
+            false,
+            1,
             AllocationTracker.empty()
         );
 

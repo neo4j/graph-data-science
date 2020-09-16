@@ -157,7 +157,7 @@ public class HugeNodeImporter implements NodeImporter {
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
                     nodeLabelBitSetMapping
-                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))
+                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(idMapBuilder.size()))
                         .set(startIndex + i);
                 }
             }

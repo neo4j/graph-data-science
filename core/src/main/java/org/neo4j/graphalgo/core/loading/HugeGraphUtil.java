@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
@@ -37,15 +38,15 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
@@ -53,18 +54,20 @@ import java.util.stream.Stream;
 
 public final class HugeGraphUtil {
 
-    public static final String DUMMY_PROPERTY = "property";
+    private static final String DUMMY_PROPERTY = "property";
 
     private HugeGraphUtil() {}
 
     public static IdMapBuilder idMapBuilder(
         long maxOriginalId,
-        ExecutorService executorService,
+        boolean hasLabelInformation,
+        int concurrency,
         AllocationTracker tracker
     ) {
         return new IdMapBuilder(
             maxOriginalId,
-            executorService,
+            hasLabelInformation,
+            concurrency,
             tracker
         );
     }
@@ -156,71 +159,96 @@ public final class HugeGraphUtil {
 
     public static class IdMapBuilder {
 
-        final AllocationTracker tracker;
-        final ExecutorService executorService;
+        private final HugeLongArrayBuilder idMapBuilder;
+        private final NodesBatchBuffer buffer;
+        private final HugeNodeImporter nodeImporter;
+        private final BitSet seenIds;
 
-        private final BitSet seenOriginalIds;
-        private final HugeSparseLongArray.Builder originalToInternalBuilder;
-        private final Map<NodeLabel, BitSet> labelInformation;
+        private final AtomicInteger nextLabelId;
+        private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
+        private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-        private long nextAvailableId;
-        private IdMap idMap;
+        private final long maxOriginalId;
+        private final int concurrency;
+        private final AllocationTracker tracker;
 
         IdMapBuilder(
             long maxOriginalId,
-            ExecutorService executorService,
+            boolean hasLabelInformation,
+            int concurrency,
             AllocationTracker tracker
         ) {
-            this.executorService = executorService;
+            this.maxOriginalId = maxOriginalId;
+            this.concurrency = concurrency;
             this.tracker = tracker;
 
-            this.originalToInternalBuilder = HugeSparseLongArray.Builder.create(maxOriginalId + 1, tracker);
-            this.nextAvailableId = 0;
-            this.seenOriginalIds = new BitSet(maxOriginalId);
-            this.labelInformation = new HashMap<>();
-        }
+            this.idMapBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
 
-        public void addNode(long originalId) {
-            if (idMap != null) {
-                throw new UnsupportedOperationException("Cannot add new nodes after `idMap` has been called");
-            }
+            this.nextLabelId = new AtomicInteger(0);
+            this.elementIdentifierLabelTokenMapping = new HashMap<>();
+            this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
 
-            if (!seenOriginalIds.get(originalId)) {
-                originalToInternalBuilder.set(originalId, nextAvailableId++);
-                seenOriginalIds.set(originalId);
-            }
+            this.nodeImporter = new HugeNodeImporter(idMapBuilder, new HashMap<>(), labelTokenNodeLabelMapping);
+
+            this.seenIds = new BitSet();
+
+            this.buffer = new NodesBatchBufferBuilder()
+                .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
+                .hasLabelInformation(hasLabelInformation)
+                .readProperty(false)
+                .build();
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
-            if (idMap != null) {
-                throw new UnsupportedOperationException("Cannot add new nodes after `idMap` has been called");
+            if (seenIds.get(originalId)) {
+                return;
             }
-            if (!seenOriginalIds.get(originalId)) {
-                long internalNodeId = nextAvailableId++;
-                originalToInternalBuilder.set(originalId, internalNodeId);
-                seenOriginalIds.set(originalId);
+            seenIds.set(originalId);
 
-                for (NodeLabel nodeLabel : nodeLabels) {
-                    labelInformation
-                        .computeIfAbsent(nodeLabel, (ignore) -> new BitSet(seenOriginalIds.size()))
-                        .set(internalNodeId);
-                }
+            long[] labels = labelTokens(nodeLabels);
+
+            buffer.add(originalId, -1, labels);
+
+            if (buffer.isFull()) {
+                flushBuffer();
+                reset();
             }
         }
 
         public IdMap build() {
-            if (idMap == null) {
-                HugeSparseLongArray originalToInternal = originalToInternalBuilder.build();
+            flushBuffer();
 
-                HugeLongArray internalToNeo = HugeLongArray.newArray(nextAvailableId, tracker);
-                new SetBitsIterable(seenOriginalIds).forEach(nodeId -> internalToNeo.set(
-                    originalToInternal.get(nodeId),
-                    nodeId
-                ));
+            return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
+                idMapBuilder,
+                nodeImporter.nodeLabelBitSetMapping,
+                maxOriginalId,
+                concurrency,
+                tracker
+            );
+        }
 
-                idMap = new IdMap(internalToNeo, originalToInternal, labelInformation, internalToNeo.size());
+        private long[] labelTokens(NodeLabel... nodeLabels) {
+            long[] labelIds = new long[nodeLabels.length];
+
+            for (int i = 0; i < nodeLabels.length; i++) {
+                NodeLabel nodeLabel = nodeLabels[i];
+                long labelId = elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, (l) -> {
+                    int nextLabelId = this.nextLabelId.getAndIncrement();
+                    labelTokenNodeLabelMapping.put(nextLabelId, Collections.singletonList(nodeLabel));
+                    return nextLabelId;
+                });
+                labelIds[i] = labelId;
             }
-            return idMap;
+
+            return labelIds;
+        }
+
+        private void flushBuffer() {
+            this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> 0);
+        }
+
+        private void reset() {
+            buffer.reset();
         }
     }
 
