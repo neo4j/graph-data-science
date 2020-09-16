@@ -41,11 +41,11 @@ import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -168,10 +168,9 @@ public final class HugeGraphUtil {
         private final Map<NodeLabel, BitSet> nodeLabelBitSetMap;
         private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-        private final ThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
+        private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
         private final HugeLongArrayBuilder hugeLongArrayBuilder;
         private final HugeNodeImporter nodeImporter;
-        private final Set<ThreadLocalBuilder> localBuilderSet;
 
         IdMapBuilder(
             long maxOriginalId,
@@ -192,24 +191,17 @@ public final class HugeGraphUtil {
 
             var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
 
-            this.localBuilderSet = ConcurrentHashMap.newKeySet();
-            this.threadLocalBuilder = ThreadLocal.withInitial(
-                () -> {
-                    var tlb = new ThreadLocalBuilder(nodeImporter, seenIds, hasLabelInformation, this::labelTokenId);
-                    localBuilderSet.add(tlb);
-                    return tlb;
-                }
+            this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
+                () -> new ThreadLocalBuilder(nodeImporter, seenIds, hasLabelInformation, this::labelTokenId)
             );
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
-            threadLocalBuilder.get().addNode(originalId, nodeLabels);
+            this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
         }
 
         public IdMap build() {
-            for (ThreadLocalBuilder localBuilder : localBuilderSet) {
-                localBuilder.close();
-            }
+            this.threadLocalBuilder.close();
 
             return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
                 hugeLongArrayBuilder,

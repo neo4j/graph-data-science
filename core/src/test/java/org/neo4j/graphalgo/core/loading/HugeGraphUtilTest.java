@@ -137,7 +137,7 @@ class HugeGraphUtilTest {
     @Test
     void parallelIdMapBuilder() {
         long nodeCount = 1_000_000_000L;
-        int concurrency = 8;
+        int concurrency =  4;
         var idMapBuilder = HugeGraphUtil.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, stream -> stream.forEach(idMapBuilder::addNode));

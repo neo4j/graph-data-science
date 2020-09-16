@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.utils;
 
 import org.immutables.builder.Builder;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,11 +28,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements Supplier<T>, AutoCloseable {
+public final class AutoCloseableThreadLocal<T extends AutoCloseable> extends ThreadLocal<T> implements Supplier<T>, AutoCloseable {
 
     private final Consumer<? super T> destructor;
-    private final CloseableThreadLocal<T> locals;
     private final Set<T> copies;
+    private final Supplier<T> constructor;
 
     public static <T extends AutoCloseable> AutoCloseableThreadLocal<T> withInitial(CheckedSupplier<T, ?> initial) {
         return new AutoCloseableThreadLocal<>(initial, Optional.empty());
@@ -44,18 +43,16 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
         @Builder.Parameter Supplier<T> constructor,
         Optional<Consumer<? super T>> destructor
     ) {
+        this.constructor = constructor;
         this.destructor = destructor.orElse(doNothing -> {});
-        this.copies = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        this.locals = CloseableThreadLocal.withInitial(() -> {
-            var item = constructor.get();
-            copies.add(item);
-            return item;
-        });
+        this.copies = ConcurrentHashMap.newKeySet();
     }
 
     @Override
-    public T get() {
-        return locals.get();
+    protected T initialValue() {
+        var item = constructor.get();
+        copies.add(item);
+        return item;
     }
 
     @Override
@@ -71,7 +68,6 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
             }
             return true;
         });
-        locals.close();
         var errorWhileClosing = error.get();
         if (errorWhileClosing != null) {
             throw errorWhileClosing;
