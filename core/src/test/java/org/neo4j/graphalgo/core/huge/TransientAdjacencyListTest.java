@@ -215,7 +215,7 @@ class TransientAdjacencyListTest {
 
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
         long sourceNodeId = targets[0];
-        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
             targets[targets.length - 1],
             false,
             1,

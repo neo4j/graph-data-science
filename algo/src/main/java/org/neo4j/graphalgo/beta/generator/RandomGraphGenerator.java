@@ -85,7 +85,7 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        var idMapBuilder = GraphBuilder.idMapBuilder(
+        var idMapBuilder = GraphBuilder.createNodesBuilder(
             nodeCount,
             false,
             1,
@@ -95,7 +95,7 @@ public final class RandomGraphGenerator {
         generateNodes(idMapBuilder);
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             idMap,
             orientation,
             maybeRelationshipPropertyProducer.isPresent(),

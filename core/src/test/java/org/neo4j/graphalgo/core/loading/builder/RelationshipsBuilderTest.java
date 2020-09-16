@@ -43,7 +43,7 @@ class RelationshipsBuilderTest {
 
         var idMap = createIdMap(nodeCount);
 
-        var relationshipsBuilder = GraphBuilder.createRelImporter(
+        var relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             idMap,
             Orientation.NATURAL,
             importProperty,
@@ -89,7 +89,7 @@ class RelationshipsBuilderTest {
 
 
     private IdMap createIdMap(long nodeCount) {
-        var nodesBuilder = GraphBuilder.idMapBuilder(
+        var nodesBuilder = GraphBuilder.createNodesBuilder(
             nodeCount,
             false,
             1,

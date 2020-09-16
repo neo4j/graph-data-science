@@ -153,7 +153,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     private IdsAndProperties loadNodes() {
-        var idMapBuilder = GraphBuilder.idMapBuilder(
+        var idMapBuilder = GraphBuilder.createNodesBuilder(
             dimensions.highestNeoId(),
             true,
             1,
@@ -258,7 +258,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         var relTypeImporters = propertyKeysByRelType.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                relTypeAndProperty -> GraphBuilder.createRelImporter(
+                relTypeAndProperty -> GraphBuilder.createRelationshipsBuilder(
                     nodes,
                     graphCreateConfig.orientation(),
                     relTypeAndProperty.getValue().isPresent(),
@@ -287,7 +287,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         // Add fake relationship type since we do not
         // support GraphStores with zero relationships.
         if (relTypeImporters.isEmpty()) {
-            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphBuilder.createRelImporter(
+            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphBuilder.createRelationshipsBuilder(
                 nodes,
                 graphCreateConfig.orientation(),
                 false,

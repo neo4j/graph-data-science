@@ -43,7 +43,7 @@ public final class GraphBuilder {
 
     private GraphBuilder() {}
 
-    public static NodesBuilder idMapBuilder(
+    public static NodesBuilder createNodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
         int concurrency,
@@ -57,7 +57,7 @@ public final class GraphBuilder {
         );
     }
 
-    public static RelationshipsBuilder createRelImporter(
+    public static RelationshipsBuilder createRelationshipsBuilder(
         IdMap idMap,
         Orientation orientation,
         boolean loadRelationshipProperty,
@@ -66,7 +66,7 @@ public final class GraphBuilder {
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
-        return createRelImporter(
+        return createRelationshipsBuilder(
             idMap,
             orientation,
             loadRelationshipProperty,
@@ -78,8 +78,7 @@ public final class GraphBuilder {
         );
     }
 
-    // TODO RENAME
-    public static RelationshipsBuilder createRelImporter(
+    public static RelationshipsBuilder createRelationshipsBuilder(
         IdMap idMap,
         Orientation orientation,
         boolean loadRelationshipProperty,

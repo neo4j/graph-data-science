@@ -96,7 +96,7 @@ class SimilarityGraphBuilder {
 
     Graph build(Stream<SimilarityResult> stream) {
         Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             baseIdMap,
             orientation,
             true,

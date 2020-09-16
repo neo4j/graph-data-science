@@ -67,7 +67,7 @@ class GraphBuilderTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        var idMapBuilder = GraphBuilder.idMapBuilder(
+        var idMapBuilder = GraphBuilder.createNodesBuilder(
             nodeCount,
             true,
             1,
@@ -80,7 +80,7 @@ class GraphBuilderTest {
         idMapBuilder.addNode(3);
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             idMap,
             orientation,
             false,
@@ -137,7 +137,7 @@ class GraphBuilderTest {
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
-        var idMapBuilder = GraphBuilder.idMapBuilder(
+        var idMapBuilder = GraphBuilder.createNodesBuilder(
             nodeCount,
             false,
             1,
@@ -149,7 +149,7 @@ class GraphBuilderTest {
         }
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             idMap,
             orientation,
             true,

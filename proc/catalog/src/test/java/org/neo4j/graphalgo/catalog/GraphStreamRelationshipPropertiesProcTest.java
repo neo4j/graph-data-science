@@ -185,7 +185,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     void streamMutatedRelationshipProperties() {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
-        RelationshipsBuilder relImporter = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relImporter = GraphBuilder.createRelationshipsBuilder(
             (IdMap) graphStore.nodes(),
             Orientation.NATURAL,
             true,
@@ -293,7 +293,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     void streamMutatedNodeProperty() {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
-        RelationshipsBuilder relImporter = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relImporter = GraphBuilder.createRelationshipsBuilder(
             (IdMap) graphStore.nodes(),
             Orientation.NATURAL,
             true,

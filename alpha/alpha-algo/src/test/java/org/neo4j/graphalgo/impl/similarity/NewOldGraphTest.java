@@ -90,7 +90,7 @@ class NewOldGraphTest {
     }
 
     private static IdMap idMap(int numberOfNodes) {
-        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
             numberOfNodes,
             false,
             1,

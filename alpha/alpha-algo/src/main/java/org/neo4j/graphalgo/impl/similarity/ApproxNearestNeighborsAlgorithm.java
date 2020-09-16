@@ -275,7 +275,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
 
-        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
             maxNeoId,
             false,
             config.concurrency(),
@@ -586,7 +586,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
-            RelationshipsBuilder outImporter = new RelationshipsBuilder(
+            RelationshipsBuilder outImporter = GraphBuilder.createRelationshipsBuilder(
                 idMap,
                 Orientation.NATURAL,
                 false,
@@ -596,7 +596,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 tracker
             );
 
-            RelationshipsBuilder inImporter = new RelationshipsBuilder(
+            RelationshipsBuilder inImporter = GraphBuilder.createRelationshipsBuilder(
                 idMap,
                 Orientation.REVERSE,
                 false,

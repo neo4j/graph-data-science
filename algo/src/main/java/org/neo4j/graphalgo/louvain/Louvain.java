@@ -190,7 +190,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ModularityOptimization modularityOptimization,
         long maxCommunityId
     ) {
-        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
             maxCommunityId,
             false,
             config.concurrency(),
@@ -208,7 +208,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
             idMap,
             orientation,
             true,
