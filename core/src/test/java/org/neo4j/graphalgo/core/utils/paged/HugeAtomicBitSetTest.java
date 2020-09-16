@@ -30,7 +30,7 @@ class HugeAtomicBitSetTest {
 
     @Test
     void testGetSetClear() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
         assertFalse(bitSet.get(7));
         assertFalse(bitSet.get(8));
         assertFalse(bitSet.get(9));
@@ -60,7 +60,7 @@ class HugeAtomicBitSetTest {
 
     @Test
     void testFlipping() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
         bitSet.flip(41);
         assertTrue(bitSet.get(41));
         bitSet.flip(41);
@@ -69,7 +69,7 @@ class HugeAtomicBitSetTest {
 
     @Test
     void testCardinality() {
-        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
         assertEquals(0L, bitSet.cardinality());
 
         bitSet.set(41);
@@ -83,7 +83,7 @@ class HugeAtomicBitSetTest {
 
     @Test
     void testClearAll() {
-        var bitSet = HugeAtomicBitSet.create(100, AllocationTracker.EMPTY);
+        var bitSet = HugeAtomicBitSet.create(100, AllocationTracker.empty());
         for (long i = 0; i < bitSet.size(); i++) {
             bitSet.set(i);
         }
