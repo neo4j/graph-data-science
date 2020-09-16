@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -118,7 +119,7 @@ class AllocationTrackerTest {
     }
 
     private static boolean is40() {
-        return GraphDatabaseApiProxy.neo4jVersion() == GraphDatabaseApiProxy.Neo4jVersion.V_4_0;
+        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
     }
 
     static Stream<AllocationTracker> emptyTrackers() {

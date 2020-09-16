@@ -25,8 +25,8 @@ import org.neo4j.annotations.service.ServiceProvider;
 public final class Neo4jProxy42Factory implements Neo4jProxyFactory {
 
     @Override
-    public boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version) {
-        return version == GraphDatabaseApiProxy.Neo4jVersion.V_4_2;
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_4_2;
     }
 
     @Override

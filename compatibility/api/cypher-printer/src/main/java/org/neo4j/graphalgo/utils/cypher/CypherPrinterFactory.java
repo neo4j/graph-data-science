@@ -19,14 +19,13 @@
  */
 package org.neo4j.graphalgo.utils.cypher;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-
 import org.neo4j.annotations.service.Service;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 
 @Service
 public interface CypherPrinterFactory {
 
-    boolean canLoad(GraphDatabaseApiProxy.Neo4jVersion version);
+    boolean canLoad(Neo4jVersion version);
 
     CypherPrinterApi load();
 }
