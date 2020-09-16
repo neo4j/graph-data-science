@@ -142,8 +142,18 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrograms[level - 1].get(nodeId));
 
-            final long communityId = modularityOptimization.getCommunityId(prevId);
-            maxCommunityId.updateAndGet(currentMaxId -> Math.max(communityId, currentMaxId));
+            long communityId = modularityOptimization.getCommunityId(prevId);
+
+            boolean updatedMaxCurrentId;
+            do {
+                var currentMaxId = maxCommunityId.get();
+                if (communityId > currentMaxId) {
+                    updatedMaxCurrentId = maxCommunityId.compareAndSet(currentMaxId, communityId);
+                } else {
+                    updatedMaxCurrentId = true;
+                }
+            } while (!updatedMaxCurrentId);
+
             dendrograms[level].set(nodeId, communityId);
         });
 
