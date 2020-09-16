@@ -45,13 +45,13 @@ class HugeAtomicBitSetTest {
 
     @Test
     void setReturnsTrueIfTheBitWasUnset() {
-        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.empty());
+        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.EMPTY);
         assertTrue(bitSet.set(0));
     }
 
     @Test
     void setReturnsFalseIfTheBitWasSet() {
-        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.empty());
+        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.EMPTY);
         bitSet.set(0);
         assertFalse(bitSet.set(0));
     }

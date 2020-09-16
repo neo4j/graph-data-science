@@ -92,7 +92,8 @@ public final class HugeAtomicBitSet {
 
     /**
      * Returns the number of set bits in the bit set.
-     * @apiNote This method is not atomic.
+     * <p>
+     * Note: this method is not thread-safe.
      */
     public long cardinality() {
         long setBitCount = 0;
@@ -106,7 +107,8 @@ public final class HugeAtomicBitSet {
 
     /**
      * Resets all bits in the bit set.
-     * @apiNote This method is not atomic.
+     * <p>
+     * Note: this method is not thread-safe.
      */
     public void clear() {
         bits.setAll(0);
