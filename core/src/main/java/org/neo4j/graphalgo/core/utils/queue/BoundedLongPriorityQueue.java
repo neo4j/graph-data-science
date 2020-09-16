@@ -79,6 +79,14 @@ public abstract class BoundedLongPriorityQueue {
         return elements().anyMatch(el -> el == element);
     }
 
+    public long elementAt(int index) {
+        return elements[index];
+    }
+
+    public void updateElementAt(int index, long newElement) {
+        elements[index] = newElement;
+    }
+
     protected boolean add(long element, double priority) {
         if (elementCount < bound || Double.isNaN(minValue) || priority < minValue) {
             int idx = Arrays.binarySearch(priorities, 0, elementCount, priority);
