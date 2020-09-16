@@ -231,6 +231,7 @@ class TransientAdjacencyListTest {
             false,
             Aggregation.NONE,
             false,
+            1,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

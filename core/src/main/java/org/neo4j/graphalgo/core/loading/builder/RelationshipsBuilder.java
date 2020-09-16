@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
@@ -46,17 +47,19 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public class RelationshipsBuilder {
 
-    static final int DUMMY_PROPERTY_ID = -2;
+    private static final int DUMMY_PROPERTY_ID = -2;
+
     private final org.neo4j.graphalgo.core.loading.RelationshipsBuilder relationshipsBuilder;
     private final RelationshipImporter relationshipImporter;
     private final RelationshipImporter.Imports imports;
-    private final RelationshipsBatchBuffer relationshipBuffer;
     private final IdMapping idMapping;
     private final Orientation orientation;
     private final boolean loadRelationshipProperty;
+    private final int concurrency;
     private final ExecutorService executorService;
     private final Aggregation aggregation;
     private final LongAdder relationshipCounter;
+    private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
 
     public RelationshipsBuilder(
         IdMapping idMapping,
@@ -64,17 +67,20 @@ public class RelationshipsBuilder {
         boolean loadRelationshipProperty,
         Aggregation aggregation,
         boolean preAggregate,
+        int concurrency,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
+        this.idMapping = idMapping;
         this.orientation = orientation;
         this.loadRelationshipProperty = loadRelationshipProperty;
-        this.executorService = executorService;
-        this.idMapping = idMapping;
         this.aggregation = aggregation;
+        this.concurrency = concurrency;
+        this.executorService = executorService;
+
         this.relationshipCounter = new LongAdder();
 
-        ImportSizing importSizing = ImportSizing.of(1, idMapping.nodeCount());
+        ImportSizing importSizing = ImportSizing.of(concurrency, idMapping.nodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
@@ -110,11 +116,12 @@ public class RelationshipsBuilder {
 
         this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
         this.imports = relationshipImporter.imports(orientation, loadRelationshipProperty);
-        this.relationshipBuffer = new RelationshipsBatchBuffer(
+
+        this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
             idMapping,
-            NO_SUCH_RELATIONSHIP_TYPE,
-            ParallelUtil.DEFAULT_BATCH_SIZE
-        );
+            imports,
+            loadRelationshipProperty
+        ));
     }
 
     public void add(long source, long target) {
@@ -133,43 +140,30 @@ public class RelationshipsBuilder {
         relationshipStream.forEach(this::add);
     }
 
-    public synchronized <T extends Relationship> void add(T relationship) {
+    public <T extends Relationship> void add(T relationship) {
         add(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
-    }
-
-    public void addFromInternal(long source, long target) {
-        relationshipBuffer.add(source, target, NO_SUCH_RELATIONSHIP_TYPE, NO_SUCH_PROPERTY_KEY);
-        if (relationshipBuffer.isFull()) {
-            flushBuffer();
-            relationshipBuffer.reset();
-        }
-    }
-
-    public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-        relationshipBuffer.add(
-            source,
-            target,
-            NO_SUCH_RELATIONSHIP_TYPE,
-            Double.doubleToLongBits(relationshipPropertyValue)
-        );
-        if (relationshipBuffer.isFull()) {
-            flushBuffer();
-            relationshipBuffer.reset();
-        }
     }
 
     public <T extends Relationship> void addFromInternal(Stream<T> relationshipStream) {
         relationshipStream.forEach(this::addFromInternal);
     }
 
-    public synchronized <T extends Relationship> void addFromInternal(T relationship) {
+    public <T extends Relationship> void addFromInternal(T relationship) {
         addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
     }
 
-    public Relationships build() {
-        flushBuffer();
+    public void addFromInternal(long source, long target) {
+        threadLocalBuilders.get().addRelationship(source, target);
+    }
 
-        ParallelUtil.run(relationshipImporter.flushTasks(), executorService);
+    public void addFromInternal(long source, long target, double relationshipPropertyValue) {
+        threadLocalBuilders.get().addRelationship(source, target, relationshipPropertyValue);
+    }
+
+    public Relationships build() {
+        threadLocalBuilders.close();
+
+        ParallelUtil.runWithConcurrency(concurrency, relationshipImporter.flushTasks(), executorService);
         return Relationships.of(
             relationshipCounter.longValue(),
             orientation,
@@ -182,11 +176,49 @@ public class RelationshipsBuilder {
         );
     }
 
-    private void flushBuffer() {
-        RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
+    private static class ThreadLocalBuilder implements AutoCloseable {
 
-        imports.importRelationships(relationshipBuffer, propertyReader);
-        relationshipBuffer.reset();
+        private final RelationshipsBatchBuffer relationshipBuffer;
+        private final RelationshipImporter.Imports imports;
+        private final boolean loadRelationshipProperty;
+
+        ThreadLocalBuilder(
+            IdMapping idMap,
+            RelationshipImporter.Imports imports,
+            boolean loadRelationshipProperty
+        ) {
+            this.relationshipBuffer = new RelationshipsBatchBuffer(idMap, NO_SUCH_RELATIONSHIP_TYPE, ParallelUtil.DEFAULT_BATCH_SIZE);
+            this.imports = imports;
+            this.loadRelationshipProperty = loadRelationshipProperty;
+        }
+
+        void addRelationship(long source, long target) {
+            relationshipBuffer.add(source, target, NO_SUCH_PROPERTY_KEY);
+            if (relationshipBuffer.isFull()) {
+                flushBuffer();
+                relationshipBuffer.reset();
+            }
+        }
+
+        void addRelationship(long source, long target, double relationshipPropertyValue) {
+            relationshipBuffer.add(source, target, NO_SUCH_PROPERTY_KEY, Double.doubleToLongBits(relationshipPropertyValue));
+            if (relationshipBuffer.isFull()) {
+                flushBuffer();
+                relationshipBuffer.reset();
+            }
+        }
+
+        private void flushBuffer() {
+            RelationshipImporter.PropertyReader propertyReader = loadRelationshipProperty ? RelationshipImporter.preLoadedPropertyReader() : null;
+
+            imports.importRelationships(relationshipBuffer, propertyReader);
+            relationshipBuffer.reset();
+        }
+
+        @Override
+        public void close() {
+            flushBuffer();
+        }
     }
 
     public interface Relationship {
@@ -197,4 +229,3 @@ public class RelationshipsBuilder {
         double property();
     }
 }
-

@@ -66,12 +66,36 @@ public final class GraphBuilder {
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
+        return createRelImporter(
+            idMap,
+            orientation,
+            loadRelationshipProperty,
+            aggregation,
+            preAggregate,
+            1,
+            executorService,
+            tracker
+        );
+    }
+
+    // TODO RENAME
+    public static RelationshipsBuilder createRelImporter(
+        IdMap idMap,
+        Orientation orientation,
+        boolean loadRelationshipProperty,
+        Aggregation aggregation,
+        boolean preAggregate,
+        int concurrency,
+        ExecutorService executorService,
+        AllocationTracker tracker
+    ) {
         return new RelationshipsBuilder(
             idMap,
             orientation,
             loadRelationshipProperty,
             aggregation,
             preAggregate,
+            concurrency,
             executorService,
             tracker
         );
