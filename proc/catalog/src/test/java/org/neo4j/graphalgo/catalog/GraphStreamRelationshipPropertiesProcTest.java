@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
+import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
 import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
@@ -185,7 +185,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     void streamMutatedRelationshipProperties() {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
-        RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relImporter = GraphBuilder.createRelImporter(
             (IdMap) graphStore.nodes(),
             Orientation.NATURAL,
             true,
@@ -293,7 +293,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     void streamMutatedNodeProperty() {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
-        RelationshipsBuilder relImporter = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relImporter = GraphBuilder.createRelImporter(
             (IdMap) graphStore.nodes(),
             Orientation.NATURAL,
             true,

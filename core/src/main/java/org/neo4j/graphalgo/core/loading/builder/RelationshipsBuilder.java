@@ -39,7 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil.DUMMY_PROPERTY;
+import static org.neo4j.graphalgo.core.loading.builder.GraphBuilder.DUMMY_PROPERTY;
 
 public class RelationshipsBuilder {
 

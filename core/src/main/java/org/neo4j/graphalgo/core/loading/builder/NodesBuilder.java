@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-public class IdMapBuilder {
+public class NodesBuilder {
 
     private final long maxOriginalId;
     private final int concurrency;
@@ -54,7 +54,7 @@ public class IdMapBuilder {
     private final HugeLongArrayBuilder hugeLongArrayBuilder;
     private final HugeNodeImporter nodeImporter;
 
-    IdMapBuilder(
+    NodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
         int concurrency,

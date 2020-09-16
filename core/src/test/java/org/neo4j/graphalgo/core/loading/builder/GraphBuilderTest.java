@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class HugeGraphUtilTest {
+class GraphBuilderTest {
 
     private static final String EXPECTED_WITH_AGGREGATION =
         "(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)";
@@ -70,7 +70,7 @@ class HugeGraphUtilTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        var idMapBuilder = HugeGraphUtil.idMapBuilder(
+        var idMapBuilder = GraphBuilder.idMapBuilder(
             nodeCount,
             true,
             1,
@@ -83,7 +83,7 @@ class HugeGraphUtilTest {
         idMapBuilder.addNode(3);
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
             idMap,
             orientation,
             false,
@@ -96,7 +96,7 @@ class HugeGraphUtilTest {
         for (int i = 0; i < nodeCount; i++) {
             relationshipsBuilder.add(i, (i + 1) % nodeCount);
         }
-        Graph graph = HugeGraphUtil.create(
+        Graph graph = GraphBuilder.create(
             idMap,
             relationshipsBuilder.build(), AllocationTracker.empty()
         );
@@ -139,7 +139,7 @@ class HugeGraphUtilTest {
     void parallelIdMapBuilder() {
         long nodeCount = 100;
         int concurrency = 4;
-        var idMapBuilder = HugeGraphUtil.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphBuilder.idMapBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
@@ -156,7 +156,7 @@ class HugeGraphUtilTest {
     void parallelIdMapBuilderWithDuplicateNodes() {
         long attempts = 100;
         int concurrency = 4;
-        var idMapBuilder = HugeGraphUtil.idMapBuilder(attempts, false, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphBuilder.idMapBuilder(attempts, false, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, attempts),
@@ -176,7 +176,7 @@ class HugeGraphUtilTest {
         var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
         var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
 
-        var idMapBuilder = HugeGraphUtil.idMapBuilder(attempts, true, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphBuilder.idMapBuilder(attempts, true, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
             originalId -> {
@@ -209,7 +209,7 @@ class HugeGraphUtilTest {
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
-        var idMapBuilder = HugeGraphUtil.idMapBuilder(
+        var idMapBuilder = GraphBuilder.idMapBuilder(
             nodeCount,
             false,
             1,
@@ -221,7 +221,7 @@ class HugeGraphUtilTest {
         }
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
             idMap,
             orientation,
             true,
@@ -235,6 +235,6 @@ class HugeGraphUtilTest {
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
         }
-        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), AllocationTracker.empty());
+        return GraphBuilder.create(idMap, relationshipsBuilder.build(), AllocationTracker.empty());
     }
 }

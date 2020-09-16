@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
-import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
+import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -215,16 +215,16 @@ class TransientAdjacencyListTest {
 
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
         long sourceNodeId = targets[0];
-        IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
             targets[targets.length - 1],
             false,
             1,
             AllocationTracker.empty()
         );
         for (long target : targets) {
-            idMapBuilder.addNode(target);
+            nodesBuilder.addNode(target);
         }
-        IdMap idMap = idMapBuilder.build();
+        IdMap idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = new RelationshipsBuilder(
             idMap,
             Orientation.NATURAL,

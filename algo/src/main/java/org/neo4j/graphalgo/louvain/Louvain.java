@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
-import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
+import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -190,7 +190,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ModularityOptimization modularityOptimization,
         long maxCommunityId
     ) {
-        IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
             maxCommunityId,
             false,
             config.concurrency(),
@@ -200,15 +200,15 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         assertRunning();
 
         workingGraph.forEachNode((nodeId) -> {
-            idMapBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
+            nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
             return true;
         });
 
         assertRunning();
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = HugeGraphUtil.createRelImporter(
+        IdMap idMap = nodesBuilder.build();
+        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelImporter(
             idMap,
             orientation,
             true,
@@ -227,7 +227,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             return true;
         });
 
-        return HugeGraphUtil.create(idMap, relationshipsBuilder.build(), tracker);
+        return GraphBuilder.create(idMap, relationshipsBuilder.build(), tracker);
     }
 
     private boolean hasConverged() {

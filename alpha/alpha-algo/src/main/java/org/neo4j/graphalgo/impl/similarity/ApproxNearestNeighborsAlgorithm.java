@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.builder.HugeGraphUtil;
-import org.neo4j.graphalgo.core.loading.builder.IdMapBuilder;
+import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
+import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.results.SimilarityResult;
@@ -275,7 +275,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
 
-        IdMapBuilder idMapBuilder = HugeGraphUtil.idMapBuilder(
+        NodesBuilder nodesBuilder = GraphBuilder.idMapBuilder(
             maxNeoId,
             false,
             config.concurrency(),
@@ -283,10 +283,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         );
 
         for (INPUT input : inputs) {
-            idMapBuilder.addNode(input.getId());
+            nodesBuilder.addNode(input.getId());
         }
 
-        IdMap idMap = idMapBuilder.build();
+        IdMap idMap = nodesBuilder.build();
         return new IdsAndProperties(idMap, Collections.emptyMap());
     }
 

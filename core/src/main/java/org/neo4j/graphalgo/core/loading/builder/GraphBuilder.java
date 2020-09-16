@@ -37,19 +37,19 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public final class HugeGraphUtil {
+public final class GraphBuilder {
 
     static final String DUMMY_PROPERTY = "property";
 
-    private HugeGraphUtil() {}
+    private GraphBuilder() {}
 
-    public static IdMapBuilder idMapBuilder(
+    public static NodesBuilder idMapBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
         int concurrency,
         AllocationTracker tracker
     ) {
-        return new IdMapBuilder(
+        return new NodesBuilder(
             maxOriginalId,
             hasLabelInformation,
             concurrency,
