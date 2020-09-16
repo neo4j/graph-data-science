@@ -61,7 +61,7 @@ include::specific-configuration.adoc[]
 |===
 ======
 
-[.include-with-stream]
+[.include-with-write]
 ======
 .Run Random Projection in write mode on a graph stored in the catalog.
 [source, cypher]
