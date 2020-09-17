@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.LongPredicate;
 
+import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor.NOT_FOUND;
+
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
@@ -68,59 +70,61 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         // find first neighbour B of A with id > A
         long nodeB = skipUntil(neighboursAMain, nodeA);
         // if there is no such neighbour -> no triangle (or we already found it)
-        if (nodeA > nodeB) {
+        if (nodeB == NOT_FOUND) {
             return;
         }
 
         // iterates over neighbours of A
         CURSOR neighboursA = cacheA;
         // current neighbour of A
-        long nodeCa;
+        long nodeCfromA = NOT_FOUND;
         // iterates over neighbours of B
         CURSOR neighboursB = cacheB;
         // current neighbour of B
-        long nodeCb;
+        long nodeCfromB;
 
         // last node where Ca = Cb
         // prevents counting a new triangle for parallel relationships
         long triangleC;
 
-        // for all neighbours of A
+        // for all neighbors of A
         while (neighboursAMain.hasNextVLong()) {
             // we have not yet seen a triangle
-            triangleC = -1;
+            triangleC = NOT_FOUND;
             // check the second node's degree
             if (degreeFilter.test(nodeB)) {
                 neighboursB = cursor(nodeB, neighboursB);
                 // find first neighbour Cb of B with id > B
-                nodeCb = skipUntil(neighboursB, nodeB);
+                nodeCfromB = skipUntil(neighboursB, nodeB);
 
-                // check the third node's degree
-                if (nodeCb > nodeB && degreeFilter.test(nodeCb)) {
+                // if B had no neighbors, find a new B
+                if (nodeCfromB != NOT_FOUND) {
                     // copy the state of A's cursor
                     copyFrom(neighboursAMain, neighboursA);
-                    // find the first neighbour Ca of A with id >= Cb
-                    nodeCa = advance(neighboursA, nodeCb);
 
-                    // if Ca = Cb we have found a triangle
-                    // we only submit one triangle per parallel relationship
-                    if (nodeCa == nodeCb && nodeCa > triangleC) {
-                        consumer.accept(nodeA, nodeB, nodeCa);
-                        triangleC = nodeCa;
+                    if (degreeFilter.test(nodeCfromB)) {
+                        // find the first neighbour Ca of A with id >= Cb
+                        nodeCfromA = advance(neighboursA, nodeCfromB);
+                        triangleC = checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                     }
 
                     // while both A and B have more neighbours
-                    while (neighboursB.hasNextVLong() && neighboursA.hasNextVLong()) {
+                    while (neighboursA.hasNextVLong() && neighboursB.hasNextVLong()) {
                         // take the next neighbour Cb of B
-                        nodeCb = neighboursB.nextVLong();
-                        if (nodeCb > nodeCa) {
-                            // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
-                            nodeCa = advance(neighboursA, nodeCb);
-                        }
-                        // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
-                            consumer.accept(nodeA, nodeB, nodeCa);
-                            triangleC = nodeCa;
+                        nodeCfromB = neighboursB.nextVLong();
+                        if (degreeFilter.test(nodeCfromB)) {
+                            if (nodeCfromB > nodeCfromA) {
+                                // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
+                                nodeCfromA = advance(neighboursA, nodeCfromB);
+                            }
+                            triangleC = checkForAndEmitTriangle(
+                                consumer,
+                                nodeA,
+                                nodeB,
+                                nodeCfromA,
+                                nodeCfromB,
+                                triangleC
+                            );
                         }
                     }
 
@@ -128,10 +132,9 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     // so if there are more neighbours Cb of B
                     if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
-                        nodeCb = advance(neighboursB, nodeCa);
-                        // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
-                            consumer.accept(nodeA, nodeB, nodeCa);
+                        nodeCfromB = advance(neighboursB, nodeCfromA);
+                        if (degreeFilter.test(nodeCfromB)) {
+                            checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                         }
                     }
                 }
@@ -142,6 +145,23 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         }
     }
 
+    private long checkForAndEmitTriangle(
+        IntersectionConsumer consumer,
+        long nodeA,
+        long nodeB,
+        long nodeCa,
+        long nodeCb,
+        long triangleC
+    ) {
+        // if Ca = Cb there exists a triangle
+        // if Ca = triangleC we have already counted it
+        if (nodeCa == nodeCb && nodeCa > triangleC) {
+            consumer.accept(nodeA, nodeB, nodeCa);
+            return nodeCa;
+        }
+        return triangleC;
+    }
+
     /**
      * Get the node id strictly greater than ({@literal >}) the provided {@code target}.
      * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
@@ -149,7 +169,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
      *
      * @return the smallest node id in the cursor greater than the target.
      */
-    protected abstract long skipUntil(CURSOR cursor, long nodeId);
+    protected abstract long skipUntil(CURSOR cursor, long target);
 
     /**
      * Get the node id greater than or equal ({@literal >=}) to the provided {@code target}.
@@ -159,7 +179,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
      *
      * @return the smallest node id in the cursor greater than or equal to the target.
      */
-    protected abstract long advance(CURSOR cursor, long nodeId);
+    protected abstract long advance(CURSOR cursor, long target);
 
     protected abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
 
