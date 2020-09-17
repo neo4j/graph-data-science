@@ -66,6 +66,53 @@ public abstract class HugeAtomicDoubleArray {
     public abstract boolean compareAndSet(long index, double expect, double update);
 
     /**
+     * Atomically sets the element at position {@code index} to the given
+     * updated value if the current value, referred to as the <em>witness value</em>,
+     * {@code ==} the expected value.
+     *
+     * This operation works as if implemented as
+     *
+     * <pre>
+     *     if (this.compareAndSet(index, expect, update)) {
+     *         return expect;
+     *     } else {
+     *         return this.get(index);
+     *     }
+     * </pre>
+     *
+     * The actual implementation is done with a single atomic operation so that the
+     * returned witness value is the value that was failing the update, not one that
+     * needs be read again after the failed update.
+     *
+     * This allows one to write CAS-loops in a different way, which removes
+     * one volatile read per loop iteration
+     *
+     * <pre>
+     *     var oldValue = this.get(index);
+     *     while (true) {
+     *         var newValue = updateFunction(oldValue);
+     *         var witnessValue = this.compareAndExchange(index, oldValue, newValue);
+     *         if (witnessValue == oldValue) {
+     *             // update successful
+     *             break;
+     *         }
+     *         // update unsuccessful set, loop and try again.
+     *         // Here we already have the updated witness value and don't need to issue
+     *         // a new read
+     *         oldValue = witnessValue;
+     *     }
+     * </pre>
+     *
+     * @param index  the index
+     * @param expect the expected value
+     * @param update the new value
+     * @return the result that is the witness value,
+     *         which will be the same as the expected value if successful
+     *         or the new current value if unsuccessful.
+     */
+    public abstract double compareAndExchange(long index, double expect, double update);
+
+    /**
      * Atomically updates the element at index {@code index} with the results
      * of applying the given function, returning the updated value. The
      * function should be side-effect-free, since it may be re-applied
@@ -205,6 +252,11 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
+        public double compareAndExchange(long index, double expect, double update) {
+            return (double) ARRAY_HANDLE.compareAndExchange(page, (int) index, expect, update);
+        }
+
+        @Override
         public void update(long index, DoubleUnaryOperator updateFunction) {
             double prev, next;
             do {
@@ -290,6 +342,13 @@ public abstract class HugeAtomicDoubleArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             return ARRAY_HANDLE.compareAndSet(pages[pageIndex], indexInPage, expect, update);
+        }
+
+        @Override
+        public double compareAndExchange(long index, double expect, double update) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            return (double) ARRAY_HANDLE.compareAndExchange(pages[pageIndex], indexInPage, expect, update);
         }
 
         @Override
