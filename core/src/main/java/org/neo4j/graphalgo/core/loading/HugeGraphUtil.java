@@ -44,12 +44,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -163,7 +165,7 @@ public final class HugeGraphUtil {
         private final int concurrency;
         private final AllocationTracker tracker;
 
-        private final AtomicInteger nextLabelId;
+        private int nextLabelId;
         private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
         private final Map<NodeLabel, BitSet> nodeLabelBitSetMap;
         private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
@@ -171,6 +173,8 @@ public final class HugeGraphUtil {
         private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
         private final HugeLongArrayBuilder hugeLongArrayBuilder;
         private final HugeNodeImporter nodeImporter;
+
+        private final Lock lock;
 
         IdMapBuilder(
             long maxOriginalId,
@@ -181,10 +185,11 @@ public final class HugeGraphUtil {
             this.maxOriginalId = maxOriginalId;
             this.concurrency = concurrency;
             this.tracker = tracker;
-            this.nextLabelId = new AtomicInteger(0);
-            this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
+            this.nextLabelId = 0;
+            this.elementIdentifierLabelTokenMapping = new HashMap<>();
             this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
             this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
+            this.lock = new ReentrantLock(true);
 
             this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
             this.nodeImporter = new HugeNodeImporter(hugeLongArrayBuilder, nodeLabelBitSetMap, labelTokenNodeLabelMapping);
@@ -213,11 +218,18 @@ public final class HugeGraphUtil {
         }
 
         private int labelTokenId(NodeLabel nodeLabel) {
-            return elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, label -> {
-                int nextLabelId = this.nextLabelId.getAndIncrement();
-                labelTokenNodeLabelMapping.put(nextLabelId, Collections.singletonList(label));
-                return nextLabelId;
-            });
+            var token = elementIdentifierLabelTokenMapping.get(nodeLabel);
+            if (token == null) {
+                lock.lock();
+                token = elementIdentifierLabelTokenMapping.get(nodeLabel);
+                if (token == null) {
+                    token = nextLabelId++;
+                    labelTokenNodeLabelMapping.put(token, Collections.singletonList(nodeLabel));
+                    elementIdentifierLabelTokenMapping.put(nodeLabel, token);
+                }
+                lock.unlock();
+            }
+            return token;
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {
