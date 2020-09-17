@@ -149,7 +149,6 @@ public class HugeNodeImporter implements NodeImporter {
     private void setNodeLabelInformation(int batchLength, long startIndex, long[][] labelIds) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
-            int offset = i;
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
                 List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
@@ -157,11 +156,9 @@ public class HugeNodeImporter implements NodeImporter {
                     Collections.emptyList()
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
-                    nodeLabelBitSetMapping.compute(elementIdentifier, (nodeLabel, bitSet) -> {
-                        bitSet = bitSet == null ? new BitSet(idMapBuilder.size()) : bitSet;
-                        bitSet.set(startIndex + offset);
-                        return bitSet;
-                    });
+                    nodeLabelBitSetMapping
+                        .computeIfAbsent(elementIdentifier, (ignored) -> new BitSet(idMapBuilder.size()))
+                        .set(startIndex + i);
                 }
             }
         }
