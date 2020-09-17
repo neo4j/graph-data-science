@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,8 +29,10 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Collections;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
@@ -54,7 +56,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
     private HugeLongArrayBuilder idMapBuilder;
-    private Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
+    private Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
 
     ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
@@ -115,7 +117,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             new NodeImporter(
                 idMapBuilder,
                 nodeLabelBitSetMapping,
-                labelTokenNodeLabelMapping
+                labelTokenNodeLabelMapping,
+                tracker
             ),
             nodePropertyImporter,
             terminationFlag
@@ -140,17 +143,32 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     }
 
     @NotNull
-    private Map<NodeLabel, BitSet> initializeLabelBitSets(
+    private Map<NodeLabel, HugeAtomicBitSet> initializeLabelBitSets(
         long nodeCount,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        return StreamSupport.stream(
+        var nodeLabelBitSetMap = StreamSupport.stream(
             labelTokenNodeLabelMapping.values().spliterator(),
             false
         )
             .flatMap(cursor -> cursor.value.stream())
             .distinct()
-            .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
+            .collect(Collectors.toMap(
+                nodeLabel -> nodeLabel,
+                nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker))
+            );
+
+        // set the whole range for '*' projections
+        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+            var bitSet = nodeLabelBitSetMap.get(starLabel);
+            ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, nodeCount),
+                concurrency,
+                stream -> stream.forEach(bitSet::set)
+            );
+        }
+
+        return nodeLabelBitSetMap;
     }
 
     @Nullable

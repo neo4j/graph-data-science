@@ -103,7 +103,7 @@ class HugeAtomicBitSetTest {
 
     @Test
     void testToBitSet() {
-        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
         atomicBitSet.set(1);
         atomicBitSet.set(9);
         atomicBitSet.set(8);

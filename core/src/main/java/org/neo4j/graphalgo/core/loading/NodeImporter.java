@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
@@ -34,31 +35,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
-
 public class NodeImporter {
+
+    private final AllocationTracker tracker;
 
     interface PropertyReader {
         int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
     }
 
-    final Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
+    final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
     final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final HugeLongArrayBuilder idMapBuilder;
 
-    public NodeImporter(HugeLongArrayBuilder idMapBuilder) {
-        this(idMapBuilder, null, null);
-    }
-
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> nodeLabelBitSetMapping,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        AllocationTracker tracker
     ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
+        this.tracker = tracker;
     }
 
     long importNodes(
@@ -159,15 +158,13 @@ public class NodeImporter {
                 );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
                     nodeLabelBitSetMapping
-                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))
+                        .computeIfAbsent(
+                            elementIdentifier,
+                            (ignored) -> HugeAtomicBitSet.create(idMapBuilder.capacity(), tracker)
+                        )
                         .set(startIndex + i);
                 }
             }
-        }
-
-        // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            nodeLabelBitSetMapping.get(starLabel).set(startIndex, startIndex + batchLength);
         }
     }
 }

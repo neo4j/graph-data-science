@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
@@ -33,12 +33,13 @@ import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> labelInformation,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
@@ -51,12 +52,18 @@ public final class IdMapBuilder {
             add(graphIds),
             tracker
         );
-        return new IdMap(graphIds, nodeToGraphIds, labelInformation, idMapBuilder.size());
+
+        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().toBitSet()
+        ));
+
+        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size());
     }
 
     static IdMap buildChecked(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> labelInformation,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
@@ -69,7 +76,13 @@ public final class IdMapBuilder {
             addChecked(graphIds),
             tracker
         );
-        return new IdMap(graphIds, nodeToGraphIds, labelInformation, idMapBuilder.size());
+
+        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().toBitSet()
+        ));
+
+        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size());
     }
 
     @NotNull
