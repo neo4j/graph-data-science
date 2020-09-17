@@ -195,7 +195,7 @@ public abstract class HugeAtomicLongArray {
         return SingleHugeAtomicLongArray.of(size, pageFiller, tracker);
     }
 
-    private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
+    static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(long[].class);
 
@@ -214,6 +214,10 @@ public abstract class HugeAtomicLongArray {
         private SingleHugeAtomicLongArray(int size, long[] page) {
             this.size = size;
             this.page = page;
+        }
+
+        long[] page() {
+            return page;
         }
 
         @Override

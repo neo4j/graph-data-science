@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
+import static org.neo4j.graphalgo.core.utils.ArrayUtil.MAX_ARRAY_LENGTH;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class HugeAtomicBitSet {
     private static final int NUM_BITS = 64;
@@ -127,6 +131,20 @@ public final class HugeAtomicBitSet {
     }
 
     /**
+     * Returns the number of bits this bitset can hold.
+     */
+    public long capacity() {
+        return bits.size();
+    }
+
+    /**
+     * Returns the number of bits in the bitset.
+     */
+    public long size() {
+        return numBits;
+    }
+
+    /**
      * Resets all bits in the bit set.
      * <p>
      * Note: this method is not thread-safe.
@@ -154,10 +172,13 @@ public final class HugeAtomicBitSet {
         }
     }
 
-    /**
-     * Returns the number of bits in the bitset.
-     */
-    public long size() {
-        return numBits;
+    public BitSet toBitSet() {
+        if (bits.size() <= MAX_ARRAY_LENGTH) {
+            return new BitSet(((HugeAtomicLongArray.SingleHugeAtomicLongArray) bits).page(), (int) bits.size());
+        }
+        throw new UnsupportedOperationException(formatWithLocale(
+            "Cannot convert HugeAtomicBitSet with more than %s entries.",
+            MAX_ARRAY_LENGTH
+        ));
     }
 }
