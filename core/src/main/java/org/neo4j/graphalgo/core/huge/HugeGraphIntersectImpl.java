@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.LongPredicate;
 
+import static org.neo4j.graphalgo.core.huge.AdjacencyList.DecompressingCursor.NOT_FOUND;
+
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
@@ -69,59 +71,61 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
         // find first neighbour B of A with id > A
         long nodeB = neighboursAMain.skipUntil(nodeA);
         // if there is no such neighbour -> no triangle (or we already found it)
-        if (nodeA > nodeB) {
+        if (nodeB == NOT_FOUND) {
             return;
         }
 
         // iterates over neighbours of A
         AdjacencyList.DecompressingCursor neighboursA = cacheA;
         // current neighbour of A
-        long nodeCa;
+        long nodeCfromA = NOT_FOUND;
         // iterates over neighbours of B
         AdjacencyList.DecompressingCursor neighboursB = cacheB;
         // current neighbour of B
-        long nodeCb;
+        long nodeCfromB;
 
         // last node where Ca = Cb
         // prevents counting a new triangle for parallel relationships
         long triangleC;
 
-        // for all neighbours of A
+        // for all neighbors of A
         while (neighboursAMain.hasNextVLong()) {
             // we have not yet seen a triangle
-            triangleC = -1;
+            triangleC = NOT_FOUND;
             // check the second node's degree
             if (degreeFilter.test(nodeB)) {
                 neighboursB = cursor(nodeB, neighboursB, offsets, adjacency);
                 // find first neighbour Cb of B with id > B
-                nodeCb = neighboursB.skipUntil(nodeB);
+                nodeCfromB = neighboursB.skipUntil(nodeB);
 
-                // check the third node's degree
-                if (nodeCb > nodeB && degreeFilter.test(nodeCb)) {
+                // if B had no neighbors, find a new B
+                if (nodeCfromB != NOT_FOUND) {
                     // copy the state of A's cursor
                     neighboursA.copyFrom(neighboursAMain);
-                    // find the first neighbour Ca of A with id >= Cb
-                    nodeCa = neighboursA.advance(nodeCb);
 
-                    // if Ca = Cb we have found a triangle
-                    // we only submit one triangle per parallel relationship
-                    if (nodeCa == nodeCb && nodeCa > triangleC) {
-                        consumer.accept(nodeA, nodeB, nodeCa);
-                        triangleC = nodeCa;
+                    if (degreeFilter.test(nodeCfromB)) {
+                        // find the first neighbour Ca of A with id >= Cb
+                        nodeCfromA = neighboursA.advance(nodeCfromB);
+                        triangleC = checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                     }
 
                     // while both A and B have more neighbours
-                    while (neighboursB.hasNextVLong() && neighboursA.hasNextVLong()) {
+                    while (neighboursA.hasNextVLong() && neighboursB.hasNextVLong()) {
                         // take the next neighbour Cb of B
-                        nodeCb = neighboursB.nextVLong();
-                        if (nodeCb > nodeCa) {
-                            // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
-                            nodeCa = neighboursA.advance(nodeCb);
-                        }
-                        // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
-                            consumer.accept(nodeA, nodeB, nodeCa);
-                            triangleC = nodeCa;
+                        nodeCfromB = neighboursB.nextVLong();
+                        if (degreeFilter.test(nodeCfromB)) {
+                            if (nodeCfromB > nodeCfromA) {
+                                // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
+                                nodeCfromA = neighboursA.advance(nodeCfromB);
+                            }
+                            triangleC = checkForAndEmitTriangle(
+                                consumer,
+                                nodeA,
+                                nodeB,
+                                nodeCfromA,
+                                nodeCfromB,
+                                triangleC
+                            );
                         }
                     }
 
@@ -129,18 +133,34 @@ class HugeGraphIntersectImpl implements RelationshipIntersect {
                     // so if there are more neighbours Cb of B
                     if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
-                        nodeCb = neighboursB.advance(nodeCa);
-                        // check for triangle
-                        if (nodeCa == nodeCb && nodeCa > triangleC && degreeFilter.test(nodeCa)) {
-                            consumer.accept(nodeA, nodeB, nodeCa);
+                        nodeCfromB = neighboursB.advance(nodeCfromA);
+                        if (degreeFilter.test(nodeCfromB)) {
+                            checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                         }
                     }
                 }
             }
 
             // skip until the next neighbour B of A with id > (current) B
-            nodeB = skipUntil(neighboursAMain, nodeB);
+            nodeB = neighboursAMain.skipUntil(nodeB);
         }
+    }
+
+    private long checkForAndEmitTriangle(
+        IntersectionConsumer consumer,
+        long nodeA,
+        long nodeB,
+        long nodeCa,
+        long nodeCb,
+        long triangleC
+    ) {
+        // if Ca = Cb there exists a triangle
+        // if Ca = triangleC we have already counted it
+        if (nodeCa == nodeCb && nodeCa > triangleC) {
+            consumer.accept(nodeA, nodeB, nodeCa);
+            return nodeCa;
+        }
+        return triangleC;
     }
 
     private int degree(long node) {
