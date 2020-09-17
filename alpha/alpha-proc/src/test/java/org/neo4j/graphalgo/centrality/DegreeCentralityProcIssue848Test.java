@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.BaseProcTest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class DegreeCentralityProcIssue848Test extends BaseProcTest {
 
     private static final String DB_CYPHER =
@@ -53,7 +55,7 @@ class DegreeCentralityProcIssue848Test extends BaseProcTest {
              expected.put(i, 0.0);
         }
 
-        assertMapEquals(expected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
 }

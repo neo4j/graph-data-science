@@ -103,11 +103,6 @@ public class BaseProcTest extends BaseTest {
         return AuthSubject.ANONYMOUS.username();
     }
 
-    // TODO: inline
-    protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
-        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
-    }
-
     protected void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual, Double tolerance) {
         assertEquals(expected.size(), actual.size(), "number of elements");
         Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
