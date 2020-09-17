@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading.builder;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -50,7 +49,7 @@ public class NodesBuilder {
 
     private int nextLabelId;
     private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
-    private final Map<NodeLabel, BitSet> nodeLabelBitSetMap;
+    private final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
@@ -75,7 +74,12 @@ public class NodesBuilder {
         this.lock = new ReentrantLock(true);
 
         this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
-        this.nodeImporter = new HugeNodeImporter(hugeLongArrayBuilder, nodeLabelBitSetMap, labelTokenNodeLabelMapping);
+        this.nodeImporter = new HugeNodeImporter(
+            hugeLongArrayBuilder,
+            nodeLabelBitSetMap,
+            labelTokenNodeLabelMapping,
+            tracker
+        );
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
 
