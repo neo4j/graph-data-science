@@ -233,6 +233,8 @@ public final class TestSupport {
         assertEquals(expectedMaxBytes, actual.max);
     }
 
+    // TODO: retire this in favour of AssertJ
+    @Deprecated
     public static <K, V> Matcher<Map<K, ? extends V>> mapEquals(Map<K, V> expected) {
         return new BaseMatcher<>() {
             @Override

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.graphalgo.GdsCypher;
 
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -103,6 +105,7 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
             singletonList(
                 Map.of(
                     "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
+                    "creationTime", isA(ZonedDateTime.class),
                     "trainConfig", allOf(
                         aMapWithSize(18),
                         hasEntry("modelName", modelName),

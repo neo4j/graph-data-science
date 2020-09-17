@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,7 +104,9 @@ class GraphDropProcTest extends BaseProcTest {
                     "schema", map(
                         "nodes", map("A", emptyMap()),
                         "relationships", map("REL", emptyMap())
-                    )
+                    ),
+                    "density", new Condition<>(Double::isFinite, "a finite double"),
+                    "database", db.databaseName()
                 )
             )
         );

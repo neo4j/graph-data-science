@@ -98,6 +98,7 @@ class ModelListProcTest extends BaseProcTest {
             singletonList(
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "trainConfig", TestTrainConfig.of().toMap(),
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )

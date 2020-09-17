@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,7 +206,8 @@ class GraphListProcTest extends BaseProcTest {
                 "creationTime", isA(ZonedDateTime.class),
                 "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class)
+                "sizeInBytes", instanceOf(Long.class),
+                "density", new Condition<>(Double::isFinite, "a finite double")
             )
         ));
     }
@@ -264,7 +266,8 @@ class GraphListProcTest extends BaseProcTest {
                 "creationTime", isA(ZonedDateTime.class),
                 "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class)
+                "sizeInBytes", instanceOf(Long.class),
+                "density", new Condition<>(Double::isFinite, "a finite double")
             )
         ));
     }

@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -133,9 +132,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         assertCypherResult(
             train,
-            Collections.singletonList(
+            List.of(
                 map(
                     "graphName", null,
+                    "modelInfo", aMapWithSize(2),
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)
@@ -166,9 +166,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 "nodeQuery", nodeQuery,
                 "relationshipQuery", relationshipQuery
             ),
-            Collections.singletonList(
+            List.of(
                 map(
                     "graphName", null,
+                    "modelInfo", aMapWithSize(2),
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)
