@@ -44,18 +44,25 @@ class HugeAtomicBitSetTest {
     }
 
     @Test
-    void setReturnsTrueIfTheBitWasUnset() {
+    void getAndSetReturnsTrueIfTheBitWasSet() {
         var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.EMPTY);
-        assertTrue(bitSet.set(0));
+        bitSet.set(0);
+        assertTrue(bitSet.getAndSet(0));
     }
 
     @Test
-    void setReturnsFalseIfTheBitWasSet() {
+    void getAndSetReturnsFalseIfTheBitWasNotSet() {
         var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.EMPTY);
-        bitSet.set(0);
-        assertFalse(bitSet.set(0));
+        assertFalse(bitSet.getAndSet(0));
     }
 
+    @Test
+    void getAndSetSetsTheBit() {
+        var bitSet = HugeAtomicBitSet.create(1, AllocationTracker.EMPTY);
+        assertFalse(bitSet.get(0));
+        bitSet.getAndSet(0);
+        assertTrue(bitSet.get(0));
+    }
 
     @Test
     void testFlipping() {

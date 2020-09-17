@@ -51,23 +51,55 @@ public final class HugeAtomicBitSet {
     /**
      * Sets the bit at the given index to true.
      */
-    public boolean set(long index) {
+    public void set(long index) {
         assert(index < numBits);
 
         long wordIndex = index / NUM_BITS;
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = 1L << bitIndex;
 
+        long oldWord = bits.get(wordIndex);
         while (true) {
-            if (!get(index)) {
-                var oldWord = bits.get(wordIndex);
-                var newWord = oldWord | bitmask;
-                if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
-                    return true;
-                }
-            } else {
+            long newWord = oldWord | bitmask;
+            if (newWord == oldWord) {
+                // nothing to set
+                return;
+            }
+            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
+                return;
+            }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
+        }
+    }
+
+    /**
+     * Sets a bit and returns the previous value.
+     * The index should be less than the BitSet size.
+     */
+    public boolean getAndSet(long index) {
+        assert(index < numBits);
+
+        long wordIndex = index / NUM_BITS;
+        int bitIndex = (int) index % NUM_BITS;
+        long bitmask = 1L << bitIndex;
+
+        long oldWord = bits.get(wordIndex);
+        while (true) {
+            long newWord = oldWord | bitmask;
+            if (newWord == oldWord) {
+                // already set
+                return true;
+            }
+            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
                 return false;
             }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
         }
     }
 
@@ -81,12 +113,16 @@ public final class HugeAtomicBitSet {
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = 1L << bitIndex;
 
+        long oldWord = bits.get(wordIndex);
         while (true) {
-            var oldWord = bits.get(wordIndex);
-            var newWord = oldWord ^ bitmask;
-            if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
-                break;
+            long newWord = oldWord ^ bitmask;
+            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
+                return;
             }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
         }
     }
 
@@ -124,12 +160,20 @@ public final class HugeAtomicBitSet {
         int bitIndex = (int) index % NUM_BITS;
         long bitmask = ~(1L << bitIndex);
 
+        long oldWord = bits.get(wordIndex);
         while (true) {
-            var oldWord = bits.get(wordIndex);
-            var newWord = oldWord & bitmask;
-            if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
-                break;
+            long newWord = oldWord & bitmask;
+            if (newWord == oldWord) {
+                // already cleared
+                return;
             }
+            long currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAS successful
+                return;
+            }
+            // CAS unsuccessful, try again
+            oldWord = currentWord;
         }
     }
 

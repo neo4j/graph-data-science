@@ -141,7 +141,42 @@ final class HugeAtomicDoubleArrayTest {
             assertFalse(t.isAlive());
             assertEquals(3, a.get(0));
         });
+    }
 
+    @Test
+    void testCompareAndExchange() {
+        testArray(SIZE, aa -> {
+            for (int i = 0; i < SIZE; i++) {
+                aa.set(i, 1);
+                assertEquals(1D, aa.compareAndExchange(i, 1, 2));
+                assertEquals(2D, aa.compareAndExchange(i, 2, -4));
+                assertEquals(-4D, aa.get(i));
+                assertEquals(-4D, aa.compareAndExchange(i, -5, 7));
+                assertEquals(-4D, aa.get(i));
+                assertEquals(-4D, aa.compareAndExchange(i, -4, 7));
+                assertEquals(7D, aa.get(i));
+            }
+        });
+    }
+
+    @Test
+    void testCompareAndExchangeInMultipleThreads() throws InterruptedException {
+        testArray(1, a -> {
+            a.set(0, 1);
+            Thread t = new Thread(new HugeAtomicDoubleArrayTest.CheckedRunnable() {
+                public void realRun() {
+                    while (a.compareAndExchange(0, 2, 3) != 2) {
+                        Thread.yield();
+                    }
+                }
+            });
+
+            t.start();
+            assertEquals(1D, a.compareAndExchange(0, 1, 2));
+            t.join(LONG_DELAY_MS);
+            assertFalse(t.isAlive());
+            assertEquals(3D, a.get(0));
+        });
     }
 
     private static double addDouble17(double x) { return x + 17; }
