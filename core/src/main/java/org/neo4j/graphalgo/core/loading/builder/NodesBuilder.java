@@ -36,7 +36,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class NodesBuilder {
@@ -45,7 +46,7 @@ public class NodesBuilder {
     private final int concurrency;
     private final AllocationTracker tracker;
 
-    private final AtomicInteger nextLabelId;
+    private int nextLabelId;
     private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
     private final Map<NodeLabel, BitSet> nodeLabelBitSetMap;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
@@ -53,6 +54,8 @@ public class NodesBuilder {
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
     private final HugeLongArrayBuilder hugeLongArrayBuilder;
     private final HugeNodeImporter nodeImporter;
+
+    private final Lock lock;
 
     NodesBuilder(
         long maxOriginalId,
@@ -63,10 +66,11 @@ public class NodesBuilder {
         this.maxOriginalId = maxOriginalId;
         this.concurrency = concurrency;
         this.tracker = tracker;
-        this.nextLabelId = new AtomicInteger(0);
+        this.nextLabelId = 0;
         this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
         this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
+        this.lock = new ReentrantLock(true);
 
         this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
         this.nodeImporter = new HugeNodeImporter(hugeLongArrayBuilder, nodeLabelBitSetMap, labelTokenNodeLabelMapping);
@@ -100,11 +104,18 @@ public class NodesBuilder {
     }
 
     private int labelTokenId(NodeLabel nodeLabel) {
-        return elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, label -> {
-            int nextLabelId = this.nextLabelId.getAndIncrement();
-            labelTokenNodeLabelMapping.put(nextLabelId, Collections.singletonList(label));
-            return nextLabelId;
-        });
+        var token = elementIdentifierLabelTokenMapping.get(nodeLabel);
+        if (token == null) {
+            lock.lock();
+            token = elementIdentifierLabelTokenMapping.get(nodeLabel);
+            if (token == null) {
+                token = nextLabelId++;
+                labelTokenNodeLabelMapping.put(token, Collections.singletonList(nodeLabel));
+                elementIdentifierLabelTokenMapping.put(nodeLabel, token);
+            }
+            lock.unlock();
+        }
+        return token;
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {
@@ -132,7 +143,7 @@ public class NodesBuilder {
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
-            if (!seenIds.get(originalId) && seenIds.set(originalId)) {
+            if (!seenIds.getAndSet(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
                 buffer.add(originalId, -1, labels);
