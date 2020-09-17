@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.extension;
 
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
@@ -36,6 +37,8 @@ public @interface GdlGraph {
     String graphNamePrefix() default "";
 
     Orientation orientation() default Orientation.NATURAL;
+
+    Aggregation aggregation() default Aggregation.NONE;
 
     String username() default "";
 

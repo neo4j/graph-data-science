@@ -262,7 +262,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                     nodes,
                     graphCreateConfig.orientation(),
                     relTypeAndProperty.getValue().isPresent(),
-                    Aggregation.NONE,
+                    graphCreateConfig.aggregation(),
                     false,
                     loadingContext.executor(),
                     loadingContext.tracker()

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
@@ -35,6 +36,11 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
     @Value.Default
     default Orientation orientation() {
         return Orientation.NATURAL;
+    }
+
+    @Value.Default
+    default Aggregation aggregation() {
+        return Aggregation.NONE;
     }
 
     @Override

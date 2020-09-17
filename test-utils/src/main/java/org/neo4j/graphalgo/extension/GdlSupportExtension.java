@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -137,6 +138,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
                 gdl,
                 annotation.username(),
                 annotation.orientation(),
+                annotation.aggregation(),
                 annotation.addToCatalog()
             ));
     }
@@ -150,6 +152,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .graphName(graphName)
             .gdlGraph(gdlGraphSetup.gdlGraph())
             .orientation(gdlGraphSetup.orientation())
+            .aggregation(gdlGraphSetup.aggregation())
             .build();
 
         GdlFactory gdlFactory = GdlFactory.of(createConfig, DATABASE_ID);
@@ -205,6 +208,9 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         @Value.Auxiliary
         Orientation orientation();
+
+        @Value.Auxiliary
+        Aggregation aggregation();
 
         @Value.Auxiliary
         @Value.Default
