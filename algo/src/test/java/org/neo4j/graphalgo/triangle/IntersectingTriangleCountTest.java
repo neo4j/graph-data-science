@@ -225,7 +225,7 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
-    void triangleNotOnFirstPath() {
+    void triangleNotOnFirstPathAndFirstNodeHasNoMoreNeighbours() {
         var graph = fromGdl(
             "CREATE " +
             "  (n0)-[:REL]->(n1)" +
@@ -246,7 +246,7 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
-    void triangleNotOnFirstPath2() {
+    void triangleNotOnFirstPathAndFirstNodeHasAnotherNeighbours() {
         var graph = fromGdl(
             "CREATE " +
             "  (n0)-[:REL]->(n1)" +
@@ -269,7 +269,7 @@ class IntersectingTriangleCountTest {
     }
 
     @Test
-    void triangleNotOnFirstPath3() {
+    void triangleNotOnFirstPathAndFirstNodeHasTheMostNeighbours() {
         var graph = fromGdl(
             "CREATE " +
             "  (n0)-[:REL]->(n1)" +
