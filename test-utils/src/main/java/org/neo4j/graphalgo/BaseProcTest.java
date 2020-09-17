@@ -175,7 +175,7 @@ public class BaseProcTest extends BaseTest {
                 Map<String, Object> expectedRow = expected.get(i);
                 Map<String, Object> actualRow = actual.get(i);
 
-                assertThat(sortedListOf(expectedRow.keySet()), equalTo(sortedListOf(expectedRow.keySet())));
+                assertThat(sortedListOf(actualRow.keySet()), equalTo(sortedListOf(expectedRow.keySet())));
                 int rowNumber = i;
                 expectedRow.forEach((key, expectedValue) -> {
                     Matcher<Object> matcher;
