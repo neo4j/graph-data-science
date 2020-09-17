@@ -233,34 +233,6 @@ public final class TestSupport {
         assertEquals(expectedMaxBytes, actual.max);
     }
 
-    // TODO: retire this in favour of AssertJ
-    @Deprecated
-    public static <K, V> Matcher<Map<K, ? extends V>> mapEquals(Map<K, V> expected) {
-        return new BaseMatcher<>() {
-            @Override
-            public boolean matches(Object actual) {
-                if (!(actual instanceof Map)) {
-                    return false;
-                }
-                Map<K, V> actualMap = (Map<K, V>) actual;
-                if (!actualMap.keySet().equals(expected.keySet())) {
-                    return false;
-                }
-                for (Object key : expected.keySet()) {
-                    if (!expected.get(key).equals(actualMap.get(key))) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(expected.toString());
-            }
-        };
-    }
-
     /**
      * This method assumes that the given algorithm calls {@link Algorithm#assertRunning()} at least once.
      * When called, the algorithm will sleep for {@code sleepMillis} milliseconds before it checks the transaction state.

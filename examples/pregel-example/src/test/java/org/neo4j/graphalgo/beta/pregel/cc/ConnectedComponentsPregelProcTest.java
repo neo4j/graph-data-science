@@ -29,11 +29,10 @@ import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 
 class ConnectedComponentsPregelProcTest extends BaseProcTest {
@@ -121,7 +120,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             );
         });
 
-        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(EXPECTED_COMPONENTS);
     }
 
     @Test
@@ -160,7 +159,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             );
         });
 
-        assertThat(actual, mapEquals(EXPECTED_COMPONENTS_SEEDED));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(EXPECTED_COMPONENTS_SEEDED);
     }
 
     @Test
@@ -187,7 +186,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
         });
 
-        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(EXPECTED_COMPONENTS);
     }
 
     @Test
@@ -228,7 +227,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             actual.put(r.getNumber("nodeId").longValue(), r.getNumber("value").longValue());
         });
 
-        assertThat(actual, mapEquals(EXPECTED_COMPONENTS));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(EXPECTED_COMPONENTS);
     }
 
     @Test
