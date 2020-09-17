@@ -100,4 +100,22 @@ class HugeAtomicBitSetTest {
             assertFalse(bitSet.get(i));
         }
     }
+
+    @Test
+    void testToBitSet() {
+        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+        atomicBitSet.set(1);
+        atomicBitSet.set(9);
+        atomicBitSet.set(8);
+        atomicBitSet.set(4);
+
+        var bitSet = atomicBitSet.toBitSet();
+        assertEquals(atomicBitSet.cardinality(), bitSet.cardinality());
+        assertTrue(bitSet.get(1));
+        assertTrue(bitSet.get(9));
+        assertTrue(bitSet.get(8));
+        assertTrue(bitSet.get(4));
+
+        bitSet.set(43);
+    }
 }
