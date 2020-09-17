@@ -39,7 +39,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.core.loading.builder.GraphBuilder.DUMMY_PROPERTY;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public class RelationshipsBuilder {
 
@@ -107,7 +110,11 @@ public class RelationshipsBuilder {
 
         this.relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
         this.imports = relationshipImporter.imports(orientation, loadRelationshipProperty);
-        this.relationshipBuffer = new RelationshipsBatchBuffer(idMapping, -1, ParallelUtil.DEFAULT_BATCH_SIZE);
+        this.relationshipBuffer = new RelationshipsBatchBuffer(
+            idMapping,
+            NO_SUCH_RELATIONSHIP_TYPE,
+            ParallelUtil.DEFAULT_BATCH_SIZE
+        );
     }
 
     public void add(long source, long target) {
@@ -131,7 +138,7 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target) {
-        relationshipBuffer.add(source, target, -1L, -1L);
+        relationshipBuffer.add(source, target, NO_SUCH_RELATIONSHIP_TYPE, NO_SUCH_PROPERTY_KEY);
         if (relationshipBuffer.isFull()) {
             flushBuffer();
             relationshipBuffer.reset();
@@ -139,7 +146,12 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-        relationshipBuffer.add(source, target, -1L, Double.doubleToLongBits(relationshipPropertyValue));
+        relationshipBuffer.add(
+            source,
+            target,
+            NO_SUCH_RELATIONSHIP_TYPE,
+            Double.doubleToLongBits(relationshipPropertyValue)
+        );
         if (relationshipBuffer.isFull()) {
             flushBuffer();
             relationshipBuffer.reset();
@@ -166,7 +178,7 @@ public class RelationshipsBuilder {
             relationshipsBuilder.globalAdjacencyOffsets(),
             loadRelationshipProperty ? relationshipsBuilder.properties() : null,
             loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null,
-            Double.NaN
+            DOUBLE_DEFAULT_FALLBACK
         );
     }
 

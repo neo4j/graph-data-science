@@ -40,6 +40,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
+
 public class NodesBuilder {
 
     private final long maxOriginalId;
@@ -146,7 +148,7 @@ public class NodesBuilder {
             if (!seenIds.getAndSet(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
-                buffer.add(originalId, -1, labels);
+                buffer.add(originalId, NO_SUCH_PROPERTY_KEY, labels);
 
                 if (buffer.isFull()) {
                     flushBuffer();
