@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -39,7 +38,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class ModelListProcTest extends BaseProcTest {
+class ModelListProcTest extends ModelProcBaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -55,23 +54,55 @@ class ModelListProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
     void listsModel(String query) {
-        Model<String, TestTrainConfig> model1 = Model.of(getUsername(),"testModel1", "testAlgo1", "testData", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of(getUsername(),"testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
-        Model<Long, TestTrainConfig> otherUserModel = Model.of("anotherUser","testModel1337", "testAlgo1337", 3435L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(
+            getUsername(),
+            "testModel1",
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "testData",
+            TestTrainConfig.of()
+        );
+
+        Model<Long, TestTrainConfig> model2 = Model.of(
+            getUsername(),
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
+
+        Model<Long, TestTrainConfig> otherUserModel = Model.of(
+            "anotherUser",
+            "testModel1337",
+            "testAlgo1337",
+            GRAPH_SCHEMA,
+            3435L,
+            TestTrainConfig.of()
+        );
 
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
         ModelCatalog.set(otherUserModel);
 
         assertCypherResult(
-            formatWithLocale("CALL %s YIELD modelInfo, creationTime RETURN modelInfo, creationTime ORDER BY modelInfo.modelName", query),
+            formatWithLocale(
+                "CALL %s YIELD modelInfo, graphSchema, trainConfig, creationTime " +
+                "RETURN modelInfo, graphSchema, trainConfig, creationTime " +
+                "ORDER BY modelInfo.modelName",
+                query
+            ),
             List.of(
                 map(
                     "modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1"),
+                    "graphSchema", EXPECTED_SCHEMA,
+                    "trainConfig", TestTrainConfig.of().toMap(),
                     "creationTime", isA(ZonedDateTime.class)
                 ),
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
+                    "graphSchema", EXPECTED_SCHEMA,
+                    "trainConfig", TestTrainConfig.of().toMap(),
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )
@@ -88,8 +119,24 @@ class ModelListProcTest extends BaseProcTest {
 
     @Test
     void returnSpecificModel() {
-        Model<String, TestTrainConfig> model1 = Model.of(getUsername(),"testModel1", "testAlgo1", "testData", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of(getUsername(),"testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(
+            getUsername(),
+            "testModel1",
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "testData",
+            TestTrainConfig.of()
+        );
+
+        Model<Long, TestTrainConfig> model2 = Model.of(
+            getUsername(),
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
+
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
 
@@ -99,6 +146,7 @@ class ModelListProcTest extends BaseProcTest {
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
                     "trainConfig", TestTrainConfig.of().toMap(),
+                    "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.model.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
@@ -33,7 +32,7 @@ import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class ModelDropProcTest  extends BaseProcTest {
+class ModelDropProcTest extends ModelProcBaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -46,7 +45,16 @@ class ModelDropProcTest  extends BaseProcTest {
         String testModelType = "testAlgo";
 
         TestTrainConfig trainConfig = TestTrainConfig.of();
-        ModelCatalog.set(Model.of(getUsername(), existingModel, testModelType, "testData", trainConfig));
+        ModelCatalog.set(
+            Model.of(
+                getUsername(),
+                existingModel,
+                testModelType,
+                GRAPH_SCHEMA,
+                "testData",
+                trainConfig
+            )
+        );
 
         var dropQuery = "CALL gds.beta.model.drop($modelName)";
         assertCypherResult(
@@ -60,6 +68,7 @@ class ModelDropProcTest  extends BaseProcTest {
                         "modelName", trainConfig.modelName(),
                         "sudo", trainConfig.sudo()
                     ),
+                    "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )

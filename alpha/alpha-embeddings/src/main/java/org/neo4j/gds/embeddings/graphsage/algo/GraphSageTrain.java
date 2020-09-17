@@ -48,7 +48,15 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Layer[], Gra
             graph,
             initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
         );
-        return Model.of(config.username(), config.modelName(), GraphSage.MODEL_TYPE, trainResult.layers(), config);
+
+        return Model.of(
+            config.username(),
+            config.modelName(),
+            GraphSage.MODEL_TYPE,
+            graph.schema(),
+            trainResult.layers(),
+            config
+        );
     }
 
     @Override

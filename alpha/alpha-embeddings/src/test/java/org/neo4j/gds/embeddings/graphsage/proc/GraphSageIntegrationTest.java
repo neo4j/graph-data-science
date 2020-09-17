@@ -111,7 +111,8 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
                         hasEntry("modelName", modelName),
                         hasEntry("aggregator", "MEAN"),
                         hasEntry("activationFunction", "SIGMOID")
-                    )
+                    ),
+                    "graphSchema", isA(Map.class)
                 )
             )
         );

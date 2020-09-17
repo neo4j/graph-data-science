@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
@@ -35,13 +36,30 @@ public interface Model<DATA, CONFIG extends TrainConfig & BaseConfig> {
 
     String algoType();
 
+    GraphSchema graphSchema();
+
     DATA data();
 
     CONFIG trainConfig();
 
     ZonedDateTime creationTime();
 
-    static <D, C extends TrainConfig & BaseConfig> Model<D, C> of(String username, String name, String algoType, D modelData, C trainConfig) {
-        return ImmutableModel.of(username, name, algoType, modelData, trainConfig, TimeUtil.now());
+    static <D, C extends TrainConfig & BaseConfig> Model<D, C> of(
+        String username,
+        String name,
+        String algoType,
+        GraphSchema graphSchema,
+        D modelData,
+        C trainConfig
+    ) {
+        return ImmutableModel.of(
+            username,
+            name,
+            algoType,
+            graphSchema,
+            modelData,
+            trainConfig,
+            TimeUtil.now()
+        );
     }
 }

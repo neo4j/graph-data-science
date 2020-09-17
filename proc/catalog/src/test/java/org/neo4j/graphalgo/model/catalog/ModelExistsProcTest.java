@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.model.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
@@ -30,7 +29,7 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class ModelExistsProcTest  extends BaseProcTest {
+class ModelExistsProcTest extends ModelProcBaseTest {
 
     private static final String EXISTS_QUERY = "CALL gds.beta.model.exists($modelName)";
 
@@ -42,7 +41,14 @@ class ModelExistsProcTest  extends BaseProcTest {
     @Test
     void checksIfModelExists() {
         String existingModel = "testModel";
-        ModelCatalog.set(Model.of(getUsername(), existingModel, "testAlgo", "testData", TestTrainConfig.of()));
+        ModelCatalog.set(Model.of(
+            getUsername(),
+            existingModel,
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testData",
+            TestTrainConfig.of()
+        ));
 
         assertCypherResult(
             EXISTS_QUERY,

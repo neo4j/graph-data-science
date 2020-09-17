@@ -24,16 +24,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ModelCatalogTest {
 
     private static final String USERNAME = "testUser";
+    private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
 
     @BeforeEach
     void setUp() {
@@ -57,10 +59,20 @@ class ModelCatalogTest {
 
     @Test
     void shouldStoreModels() {
-        Model<String, TestTrainConfig> model = Model.of("user1", "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            "user1",
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
-        Model<String, TestTrainConfig> model2 = Model.of("user2", "testModel2", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model2 = Model.of(
+            "user2",
+            "testModel2",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -73,7 +85,12 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowWhenTryingToGetOtherUsersModel() {
-        Model<String, TestTrainConfig> model = Model.of("user1", "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            "user1",
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -92,10 +109,20 @@ class ModelCatalogTest {
     void shouldStoreModelsPerType() {
         GdsEdition.instance().setToCommunityEdition();
 
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
-        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME, "testModel2", "testAlgo2", 1337L,
+        Model<Long, TestTrainConfig> model2 = Model.of(
+            USERNAME,
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
             TestTrainConfig.of()
         );
 
@@ -110,7 +137,12 @@ class ModelCatalogTest {
     void onlyAllowOneCatalogInCE() {
         GdsEdition.instance().setToCommunityEdition();
 
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -121,12 +153,18 @@ class ModelCatalogTest {
                 USERNAME,
                 "testModel2",
                 "testAlgo2",
+                GRAPH_SCHEMA,
                 1337L,
                 TestTrainConfig.of()
             ));
         });
 
-        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME,"testModel2", "testAlgo", 1337L,
+        Model<Long, TestTrainConfig> model2 = Model.of(
+            USERNAME,
+            "testModel2",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            1337L,
             TestTrainConfig.of()
         );
 
@@ -151,7 +189,12 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelDataTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -171,7 +214,12 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelConfigTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "testTrainData",
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
             TestTrainConfig.of()
         );
 
@@ -192,7 +240,14 @@ class ModelCatalogTest {
 
     @Test
     void checksIfModelExists() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
 
         ModelCatalog.set(model);
 
@@ -207,6 +262,7 @@ class ModelCatalogTest {
             USERNAME,
             "testModel",
             "testAlgo",
+            GRAPH_SCHEMA,
             "testData",
             TestTrainConfig.of()
         );
@@ -225,7 +281,14 @@ class ModelCatalogTest {
 
     @Test
     void shouldDropModel() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME,  "testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
         ModelCatalog.set(model);
 
         assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
@@ -235,7 +298,14 @@ class ModelCatalogTest {
 
     @Test
     void cantDropOtherUsersModel() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME,  "testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
         ModelCatalog.set(model);
 
         IllegalArgumentException ex = assertThrows(
@@ -258,20 +328,31 @@ class ModelCatalogTest {
 
     @Test
     void shouldListModels() {
-        Model<String, TestTrainConfig> model1 = Model.of(USERNAME, "testModel1", "testAlgo1", "modelData1", TestTrainConfig.of());
-        Model<Long, TestTrainConfig> model2 = Model.of(USERNAME, "testModel2", "testAlgo2", 1337L, TestTrainConfig.of());
+        Model<String, TestTrainConfig> model1 = Model.of(
+            USERNAME,
+            "testModel1",
+            "testAlgo1",
+            GRAPH_SCHEMA,
+            "modelData1",
+            TestTrainConfig.of()
+        );
+
+        Model<Long, TestTrainConfig> model2 = Model.of(
+            USERNAME,
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
 
 
         Collection<Model<?, ?>> models = ModelCatalog.list(USERNAME);
         assertEquals(2, models.size());
-        Map<String, ? extends Model<?, ?>> modelsMap = models
-            .stream()
-            .collect(Collectors.toMap(Model::name, model -> model));
 
-        assertEquals(model1, modelsMap.get(model1.name()));
-        assertEquals(model2, modelsMap.get(model2.name()));
+        assertThat(models).containsExactlyInAnyOrder(model1, model2);
     }
 
     @Test
@@ -281,8 +362,17 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnOverridingModels() {
-        Model<String, TestTrainConfig> model = Model.of(USERNAME, "testModel", "testAlgo", "modelData", TestTrainConfig.of());
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
+
         ModelCatalog.set(model);
+
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
             () -> ModelCatalog.set(model)
