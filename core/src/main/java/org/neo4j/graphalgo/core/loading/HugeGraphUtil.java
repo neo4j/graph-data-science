@@ -257,7 +257,7 @@ public final class HugeGraphUtil {
             }
 
             public void addNode(long originalId, NodeLabel... nodeLabels) {
-                if(!seenIds.get(originalId) && seenIds.set(originalId)) {
+                if (!seenIds.getAndSet(originalId)) {
                     long[] labels = labelTokens(nodeLabels);
 
                     buffer.add(originalId, -1, labels);
