@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 
 import java.util.function.DoubleConsumer;
@@ -43,35 +43,29 @@ import static org.mockito.Mockito.verify;
  *   (c)
  *
  */
-class ClosenessCentralityDiscoTest extends AlgoTestBase {
+@GdlExtension
+class ClosenessCentralityDiscoTest {
 
-    @BeforeEach
-    void setup() {
-        String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
 
-                "CREATE" +
-                " (a)-[:TYPE]->(b),\n" +
-                " (a)-[:TYPE]->(c),\n" +
-                " (b)-[:TYPE]->(c),\n" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE]->(c)" +
+        ", (b)-[:TYPE]->(c)" +
 
-                " (d)-[:TYPE]->(e)";
+        ", (d)-[:TYPE]->(e)";
 
-        runQuery(cypher);
-    }
+    @Inject
+    private Graph graph;
 
     @Test
     void testHuge() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
-
         final MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.empty(),

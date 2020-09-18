@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -53,15 +53,18 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  *  ==|=============================
  * k/S| 0.4  0.57  0.67  0.57   0.4     // normalized centrality
  */
-class ClosenessCentralityTest extends AlgoTestBase {
+@GdlExtension
+class ClosenessCentralityTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE " +
-            "  (a:Node {name: 'a'})" +
-            ", (b:Node {name: 'b'})" +
-            ", (c:Node {name: 'c'})" +
-            ", (d:Node {name: 'd'})" +
-            ", (e:Node {name: 'e'})" +
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+
             ", (a)-[:TYPE]->(b)" +
             ", (b)-[:TYPE]->(a)" +
             ", (b)-[:TYPE]->(c)" +
@@ -73,16 +76,11 @@ class ClosenessCentralityTest extends AlgoTestBase {
 
     private static final double[] EXPECTED = new double[]{0.4, 0.57, 0.66, 0.57, 0.4};
 
-    @BeforeEach
-    void setupGraph() {
-        runQuery(DB_CYPHER);
-    }
-
+    @Inject
     private Graph graph;
 
     @Test
     void testGetCentrality() {
-        loadGraph();
         MSClosenessCentrality algo = new MSClosenessCentrality(
             graph,
             AllocationTracker.empty(),
@@ -98,7 +96,6 @@ class ClosenessCentralityTest extends AlgoTestBase {
 
     @Test
     void testStream() {
-        loadGraph();
         final double[] centrality = new double[(int) graph.nodeCount()];
 
         MSClosenessCentrality algo = new MSClosenessCentrality(
@@ -113,12 +110,5 @@ class ClosenessCentralityTest extends AlgoTestBase {
             .forEach(r -> centrality[Math.toIntExact(graph.toMappedNodeId(r.nodeId))] = r.centrality);
 
         assertArrayEquals(EXPECTED, centrality, 0.1);
-    }
-
-    private void loadGraph() {
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
     }
 }
