@@ -33,7 +33,7 @@ import java.util.Optional;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
-final class NodeSimilarityProc {
+public final class NodeSimilarityProc {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
         "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
@@ -42,7 +42,8 @@ final class NodeSimilarityProc {
 
     private NodeSimilarityProc() {}
 
-    static boolean shouldComputeHistogram(ProcedureCallContext callContext) {
+    // TODO move to common similarity code
+    public static boolean shouldComputeHistogram(ProcedureCallContext callContext) {
         return callContext
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("similarityDistribution"));
@@ -54,7 +55,6 @@ final class NodeSimilarityProc {
     ) {
         NodeSimilarityResult result = computationResult.result();
         SimilarityGraphResult graphResult = result.graphResult();
-
         procResultBuilder
             .withNodesCompared(graphResult.comparedNodes())
             .withRelationshipsWritten(graphResult.similarityGraph().relationshipCount())
@@ -65,7 +65,8 @@ final class NodeSimilarityProc {
         return procResultBuilder;
     }
 
-    static DoubleHistogram computeHistogram(Graph similarityGraph) {
+    // TODO move to common similarity code
+    public static DoubleHistogram computeHistogram(Graph similarityGraph) {
         DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         similarityGraph.forEachNode(nodeId -> {
             similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {
