@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 
 import java.util.Arrays;
@@ -124,7 +125,7 @@ final class AdjacencyDecompressingReader {
 
         // last block
         if(available <= 0) {
-            return TransientAdjacencyList.DecompressingCursor.NOT_FOUND;
+            return AdjacencyCursor.NOT_FOUND;
         }
 
         int targetPos = findPosStrictlyGreaterInBlock(target, pos, Math.min(pos + available, CHUNK_SIZE), block);

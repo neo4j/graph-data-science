@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.api;
 
 public interface AdjacencyCursor extends AutoCloseable {
 
+    long NOT_FOUND = -1;
+
     /**
      * Return how many targets can be decoded in total. This is equivalent to the degree.
      */

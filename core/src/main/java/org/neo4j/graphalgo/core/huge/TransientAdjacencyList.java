@@ -218,7 +218,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
     public static final class DecompressingCursor extends MutableIntValue implements AdjacencyCursor {
 
-        static final long NOT_FOUND = -1;
         private byte[][] pages;
         private final AdjacencyDecompressingReader decompress;
 
@@ -300,7 +299,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
         long advance(long target) {
             int targetsLeftToBeDecoded = remaining();
             if(targetsLeftToBeDecoded <= 0) {
-                return NOT_FOUND;
+                return AdjacencyCursor.NOT_FOUND;
             }
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
             this.currentPosition += this.value;

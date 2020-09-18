@@ -25,8 +25,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor.NOT_FOUND;
-
 public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
     private final PriorityQueue<AdjacencyCursor> cursorQueue;
@@ -109,7 +107,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
             }
         }
 
-        return cursorQueue.isEmpty() ? NOT_FOUND : nextVLong();
+        return cursorQueue.isEmpty() ? AdjacencyCursor.NOT_FOUND : nextVLong();
     }
 
     long advance(long target) {
@@ -125,6 +123,6 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
             }
         }
 
-        return cursorQueue.isEmpty() ? NOT_FOUND : nextVLong();
+        return cursorQueue.isEmpty() ? AdjacencyCursor.NOT_FOUND : nextVLong();
     }
 }

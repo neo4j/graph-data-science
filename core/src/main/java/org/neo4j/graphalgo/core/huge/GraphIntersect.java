@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.LongPredicate;
 
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.DecompressingCursor.NOT_FOUND;
+import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
