@@ -176,7 +176,7 @@ public final class SecureTransaction implements AutoCloseable {
      * of the same top-level {@code Transaction} within {@code this} instance. Closing it would also close {@code this}
      * instance's top-level transaction. To decouple the transaction, call {@link #fork()} on the returned instance.
      */
-    public SecureTransaction withRestrictedAccess(AccessMode accessMode) {
+    public SecureTransaction withRestrictedAccess(AccessMode.Static accessMode) {
         var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
         return new SecureTransaction(db, topTx, newContext);
