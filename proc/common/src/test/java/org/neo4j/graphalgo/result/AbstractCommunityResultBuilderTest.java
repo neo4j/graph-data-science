@@ -210,7 +210,7 @@ final class AbstractCommunityResultBuilderTest {
     }
 
     static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
-        return new ProcedureCallContext(outputFieldNames, false, "", false);
+        return new ProcedureCallContext(42, outputFieldNames, false, "", false);
     }
 
     private AbstractCommunityResultBuilder<Void> builder(
