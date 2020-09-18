@@ -91,6 +91,33 @@ abstract class SecureTransactionTestBase extends BaseTest {
             .graph();
     }
 
+    Graph noSourceNodeAccessAllowedGraph() throws Exception {
+        int labelTokenNode1 = SecureTransaction.of(db).apply((tx, ktx) ->
+            ktx.tokenWrite().labelGetOrCreateForName("Node1"));
+
+        AccessMode noNode1Allowed = new FilterAccessMode() {
+            @Override
+            public boolean allowsTraverseAllLabels() {
+                return false;
+            }
+
+            @Override
+            public boolean allowTraverseAllNodesWithLabel(long label) {
+                return !(label == labelTokenNode1);
+            }
+
+            @Override
+            public boolean allowsTraverseNode(long... labels) {
+                return Arrays.stream(labels).noneMatch(l -> l == labelTokenNode1);
+            }
+        }.toNeoAccessMode();
+
+        return storeLoaderBuilder()
+            .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNode1Allowed))
+            .build()
+            .graph();
+    }
+
     Graph noTargetNodeAccessAllowedGraph() throws Exception {
         int labelTokenNode2 = SecureTransaction.of(db).apply((tx, ktx) ->
             ktx.tokenWrite().labelGetOrCreateForName("Node2"));
@@ -99,6 +126,11 @@ abstract class SecureTransactionTestBase extends BaseTest {
             @Override
             public boolean allowsTraverseAllLabels() {
                 return false;
+            }
+
+            @Override
+            public boolean allowTraverseAllNodesWithLabel(long label) {
+                return !(label == labelTokenNode2);
             }
 
             @Override
