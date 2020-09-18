@@ -37,7 +37,7 @@ class FullAccessSecureTransactionTest extends SecureTransactionTestBase {
 
     @Test
     void noTargetNodeAccessAllowed() throws Exception {
-        var graph = noTargetNodeAccessAllowedGraph();
+        var graph = noNodeAccessAllowedGraph("Node2");
         assertFullGraph(graph);
     }
 

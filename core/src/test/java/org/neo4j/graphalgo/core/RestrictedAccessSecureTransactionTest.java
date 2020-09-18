@@ -53,7 +53,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
 
     @Test
     void noSourceNodeAccessAllowed() throws Exception {
-        var graph = noSourceNodeAccessAllowedGraph();
+        var graph = noNodeAccessAllowedGraph("Node1");
         assertGraphEquals(
             fromGdl("(:Node2 {prop1: 1, prop2: 1337})"),
             graph
@@ -62,7 +62,7 @@ class RestrictedAccessSecureTransactionTest extends SecureTransactionTestBase {
 
     @Test
     void noTargetNodeAccessAllowed() throws Exception {
-        var graph = noTargetNodeAccessAllowedGraph();
+        var graph = noNodeAccessAllowedGraph("Node2");
         assertGraphEquals(
             fromGdl("(a:Node1 {prop1: 42.0, prop2: 2.0})"),
             graph

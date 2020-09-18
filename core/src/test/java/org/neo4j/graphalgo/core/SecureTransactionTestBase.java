@@ -91,11 +91,11 @@ abstract class SecureTransactionTestBase extends BaseTest {
             .graph();
     }
 
-    Graph noSourceNodeAccessAllowedGraph() throws Exception {
-        int labelTokenNode1 = SecureTransaction.of(db).apply((tx, ktx) ->
-            ktx.tokenWrite().labelGetOrCreateForName("Node1"));
+    Graph noNodeAccessAllowedGraph(String label) throws Exception {
+        int forbiddenToken = SecureTransaction.of(db).apply((tx, ktx) ->
+            ktx.tokenWrite().labelGetOrCreateForName(label));
 
-        AccessMode noNode1Allowed = new FilterAccessMode() {
+        AccessMode accessMode = new FilterAccessMode() {
             @Override
             public boolean allowsTraverseAllLabels() {
                 return false;
@@ -103,44 +103,17 @@ abstract class SecureTransactionTestBase extends BaseTest {
 
             @Override
             public boolean allowTraverseAllNodesWithLabel(long label) {
-                return !(label == labelTokenNode1);
+                return label != forbiddenToken;
             }
 
             @Override
             public boolean allowsTraverseNode(long... labels) {
-                return Arrays.stream(labels).noneMatch(l -> l == labelTokenNode1);
+                return Arrays.stream(labels).noneMatch(l -> l == forbiddenToken);
             }
         }.toNeoAccessMode();
 
         return storeLoaderBuilder()
-            .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNode1Allowed))
-            .build()
-            .graph();
-    }
-
-    Graph noTargetNodeAccessAllowedGraph() throws Exception {
-        int labelTokenNode2 = SecureTransaction.of(db).apply((tx, ktx) ->
-            ktx.tokenWrite().labelGetOrCreateForName("Node2"));
-
-        AccessMode noNode2Allowed = new FilterAccessMode() {
-            @Override
-            public boolean allowsTraverseAllLabels() {
-                return false;
-            }
-
-            @Override
-            public boolean allowTraverseAllNodesWithLabel(long label) {
-                return !(label == labelTokenNode2);
-            }
-
-            @Override
-            public boolean allowsTraverseNode(long... labels) {
-                return Arrays.stream(labels).noneMatch(l -> l == labelTokenNode2);
-            }
-        }.toNeoAccessMode();
-
-        return storeLoaderBuilder()
-            .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, noNode2Allowed))
+            .securityContext(new SecurityContext(AuthSubject.ANONYMOUS, accessMode))
             .build()
             .graph();
     }
