@@ -28,8 +28,7 @@ import org.neo4j.graphalgo.Orientation;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
 
 class SingleSourceShortestPathPregelProcTest extends BaseProcTest {
@@ -96,6 +95,6 @@ class SingleSourceShortestPathPregelProcTest extends BaseProcTest {
             9L, Long.MAX_VALUE
         );
 
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

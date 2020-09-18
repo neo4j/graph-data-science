@@ -50,20 +50,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class GraphStoreTest extends BaseTest {
 
@@ -233,7 +231,7 @@ class GraphStoreTest extends BaseTest {
             .build()
             .graphStore();
 
-        assertThat(graphStore.relationshipCount(), equalTo(4L));
+        assertThat(graphStore.relationshipCount()).isEqualTo(4L);
 
         DeletionResult deletionResult = graphStore.deleteRelationships(RelationshipType.of("LER"));
 
@@ -242,7 +240,7 @@ class GraphStoreTest extends BaseTest {
         assertEquals(1, graphStore.relationshipCount());
 
         assertEquals(3, deletionResult.deletedRelationships());
-        assertThat(deletionResult.deletedProperties(), mapEquals(map("p", 3L, "q", 3L)));
+        assertThat(deletionResult.deletedProperties()).containsExactlyInAnyOrderEntriesOf(Map.of("p", 3L, "q", 3L));
     }
 
     @NotNull

@@ -30,9 +30,8 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
 
 @GdlExtension
 class GraphStatisticsTest {
@@ -64,7 +63,7 @@ class GraphStatisticsTest {
             "p99", 3L,
             "p999", 3L
         );
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
     @ParameterizedTest

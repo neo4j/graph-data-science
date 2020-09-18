@@ -28,8 +28,7 @@ import org.neo4j.graphalgo.Orientation;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BFSLevelPregelProcTest extends BaseProcTest {
 
@@ -85,6 +84,6 @@ class BFSLevelPregelProcTest extends BaseProcTest {
             7L, -1L
         );
 
-        assertThat(expected, mapEquals(actual));
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
     }
 }

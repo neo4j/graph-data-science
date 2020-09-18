@@ -25,9 +25,11 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
+import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -53,12 +55,12 @@ class ModelDropProcTest  extends BaseProcTest {
             singletonList(
                 map(
                     "modelInfo", map("modelName", existingModel, "modelType", testModelType),
-                    "trainConfig",
-                    map(
+                    "trainConfig", map(
                         "dummyConfigProperty", trainConfig.dummyConfigProperty(),
                         "modelName", trainConfig.modelName(),
                         "sudo", trainConfig.sudo()
-                    )
+                    ),
+                    "creationTime", isA(ZonedDateTime.class)
                 )
             )
         );

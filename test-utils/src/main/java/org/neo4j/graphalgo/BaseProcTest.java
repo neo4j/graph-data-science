@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
+import org.assertj.core.api.Condition;
+import org.assertj.core.api.HamcrestCondition;
+import org.assertj.core.api.ObjectAssert;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.api.Graph;
@@ -43,13 +46,11 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
@@ -57,7 +58,6 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessageRegex;
-import static org.neo4j.graphalgo.core.utils.ListUtil.sortedListOf;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class BaseProcTest extends BaseTest {
@@ -101,10 +101,6 @@ public class BaseProcTest extends BaseTest {
 
     protected String getUsername() {
         return AuthSubject.ANONYMOUS.username();
-    }
-
-    protected void assertMapEquals(Map<Long, Double> expected, Map<Long, Double> actual) {
-        assertThat(actual, mapEquals(expected));
     }
 
     protected void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual, Double tolerance) {
@@ -165,30 +161,35 @@ public class BaseProcTest extends BaseTest {
                     return true;
                 });
             });
-            String reason = formatWithLocale(
-                "Different amount of rows returned for actual result (%d) than expected (%d)",
-                actual.size(),
-                expected.size()
-            );
-            assertThat(reason, actual.size(), equalTo(expected.size()));
+            assertThat(actual)
+                .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
+                    actual.size(),
+                    expected.size()
+                )
+                .hasSize(expected.size());
+
             for (int i = 0; i < expected.size(); ++i) {
                 Map<String, Object> expectedRow = expected.get(i);
                 Map<String, Object> actualRow = actual.get(i);
 
-                assertThat(sortedListOf(expectedRow.keySet()), equalTo(sortedListOf(expectedRow.keySet())));
+                assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
+
                 int rowNumber = i;
                 expectedRow.forEach((key, expectedValue) -> {
-                    Matcher<Object> matcher;
-                    if (expectedValue instanceof Matcher) {
-                        matcher = (Matcher<Object>) expectedValue;
-                    } else {
-                        matcher = equalTo(expectedValue);
-                    }
                     Object actualValue = actualRow.get(key);
-                    assertThat(
-                        formatWithLocale("Different value for column '%s' of row %d", key, rowNumber),
-                        actualValue, matcher
+                    ObjectAssert<Object> assertion = assertThat(actualValue).withFailMessage(
+                        "Different value for column '%s' of row %d",
+                        key,
+                        rowNumber
                     );
+
+                    if (expectedValue instanceof Matcher) {
+                        assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
+                    } else if (expectedValue instanceof Condition) {
+                        assertion.is((Condition<Object>) expectedValue);
+                    } else {
+                        assertion.isEqualTo(expectedValue);
+                    }
                 });
             }
         });
@@ -233,7 +234,7 @@ public class BaseProcTest extends BaseTest {
             runQueryWithResultConsumer(query, queryParameters, BaseProcTest::consume);
             fail(formatWithLocale("Expected an exception to be thrown by query:\n%s", query));
         } catch (Throwable e) {
-            assertThat(e, matcher);
+            assertThat(e).has(new HamcrestCondition<>(matcher));
         }
     }
 

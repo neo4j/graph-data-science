@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -207,7 +208,7 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
             expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Hobbit").getId(), 0.029719049402046945);
         });
 
-        assertMapEquals(expectedResult, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expectedResult);
     }
 
     @Test

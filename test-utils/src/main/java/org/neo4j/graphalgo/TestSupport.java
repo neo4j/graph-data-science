@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -231,32 +228,6 @@ public final class TestSupport {
 
         assertEquals(expectedMinBytes, actual.min);
         assertEquals(expectedMaxBytes, actual.max);
-    }
-
-    public static <K, V> Matcher<Map<K, ? extends V>> mapEquals(Map<K, V> expected) {
-        return new BaseMatcher<>() {
-            @Override
-            public boolean matches(Object actual) {
-                if (!(actual instanceof Map)) {
-                    return false;
-                }
-                Map<K, V> actualMap = (Map<K, V>) actual;
-                if (!actualMap.keySet().equals(expected.keySet())) {
-                    return false;
-                }
-                for (Object key : expected.keySet()) {
-                    if (!expected.get(key).equals(actualMap.get(key))) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(expected.toString());
-            }
-        };
     }
 
     /**

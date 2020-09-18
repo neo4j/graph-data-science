@@ -28,6 +28,7 @@ import org.neo4j.graphdb.Label;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.getCypherAggregation;
@@ -104,7 +105,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(incomingExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(incomingExpected);
     }
 
     @Test
@@ -120,7 +121,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(INCOMING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(incomingWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(incomingWeightedExpected);
     }
 
     @Test
@@ -170,7 +171,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(bothExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(bothExpected);
     }
 
     @Test
@@ -186,7 +187,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(BOTH_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(bothWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(bothWeightedExpected);
     }
 
     @Test
@@ -236,7 +237,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("single","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(outgoingExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(outgoingExpected);
     }
 
     @Test
@@ -252,7 +253,7 @@ class DegreeProcCypherLoadingProcTest extends BaseProcTest {
             MapUtil.map("nodeQuery", NODES, "relQuery", formatWithLocale(OUTGOING_RELS, getCypherAggregation("sum","r.foo"))),
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(outgoingWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(outgoingWeightedExpected);
     }
 
     @Test

@@ -30,6 +30,7 @@ import org.neo4j.graphdb.Label;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -100,7 +101,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(incomingExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(incomingExpected);
     }
 
     @Test
@@ -114,7 +115,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(incomingWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(incomingWeightedExpected);
     }
 
     @Test
@@ -163,7 +164,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(bothExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(bothExpected);
     }
 
     @Test
@@ -177,7 +178,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(bothWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(bothWeightedExpected);
     }
 
     @Test
@@ -217,7 +218,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             query,
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(outgoingExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(outgoingExpected);
     }
 
     @Test
@@ -229,7 +230,7 @@ class DegreeCentralityProcTest extends BaseProcTest {
             .yields("nodeId", "score");
         runQueryWithRowConsumer(query, row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
-        assertMapEquals(outgoingWeightedExpected, actual);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(outgoingWeightedExpected);
     }
 
     @Test
