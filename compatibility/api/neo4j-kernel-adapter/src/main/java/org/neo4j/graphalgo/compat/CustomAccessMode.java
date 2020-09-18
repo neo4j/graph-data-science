@@ -28,6 +28,10 @@ public interface CustomAccessMode {
         return true;
     }
 
+    default boolean allowTraverseAllNodesWithLabel(long label) {
+        return true;
+    }
+
     default boolean allowsTraverseNode(long... labels) {
         return true;
     }
