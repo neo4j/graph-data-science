@@ -24,8 +24,12 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
@@ -209,8 +213,44 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
+    private static final MethodHandle NEW_PROCEDURE_CALL_CONTEXT;
+
+    static {
+        MethodHandle constructor;
+        var lookup = MethodHandles.lookup();
+        try {
+            try {
+                var ctor = lookup.findConstructor(
+                    ProcedureCallContext.class,
+                    MethodType.methodType(
+                        void.class,
+                        int.class,
+                        String[].class,
+                        boolean.class,
+                        String.class,
+                        boolean.class
+                    )
+                );
+                constructor = MethodHandles.insertArguments(ctor, 0, 42);
+            } catch (NoSuchMethodException e) {
+                constructor = lookup.findConstructor(
+                    ProcedureCallContext.class,
+                    MethodType.methodType(void.class, String[].class, boolean.class, String.class, boolean.class)
+                );
+            }
+        } catch (IllegalAccessException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+        NEW_PROCEDURE_CALL_CONTEXT = constructor;
+    }
+
     static ProcedureCallContext procedureCallContext(String... outputFieldNames) {
-        return new ProcedureCallContext(42, outputFieldNames, false, "", false);
+        try {
+            return (ProcedureCallContext) NEW_PROCEDURE_CALL_CONTEXT.invoke(outputFieldNames, false, "", false);
+        } catch (Throwable throwable) {
+            ExceptionUtil.throwIfUnchecked(throwable);
+            throw new RuntimeException(throwable);
+        }
     }
 
     private AbstractCommunityResultBuilder<Void> builder(
