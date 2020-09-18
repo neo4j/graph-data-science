@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Node;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -47,54 +47,49 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *   1\ 2/ 1\ 2/
  *    (c)   (f)
  */
-class DijkstraTest extends AlgoTestBase {
+@GdlExtension
+class DijkstraTest {
 
-    private static Graph graph;
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node) " +
+        ", (b:Node) " +
+        ", (c:Node) " +
+        ", (d:Node) " +
+        ", (e:Node) " +
+        ", (f:Node) " +
+        ", (g:Node) " +
+
+        "  (a)-[:TYPE {cost:2.0}]->(b)" +
+        ", (a)-[:TYPE {cost:1.0}]->(c)" +
+        ", (b)-[:TYPE {cost:1.0}]->(d)" +
+        ", (c)-[:TYPE {cost:2.0}]->(d)" +
+        ", (d)-[:TYPE {cost:1.0}]->(e)" +
+        ", (d)-[:TYPE {cost:2.0}]->(f)" +
+        ", (e)-[:TYPE {cost:2.0}]->(g)" +
+        ", (f)-[:TYPE {cost:1.0}]->(g)";
+
+    @Inject
+    private Graph graph;
+
+    @Inject
+    private IdFunction idFunction;
+
     private static LongArrayList edgeBlackList;
     private static YensKShortestPathsDijkstra dijkstra;
 
     @BeforeEach
     void setupGraph() {
-        String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE (g:Node {name:'g'})\n" +
-                "CREATE" +
-                " (a)-[:TYPE {cost:2.0}]->(b),\n" +
-                " (a)-[:TYPE {cost:1.0}]->(c),\n" +
-                " (b)-[:TYPE {cost:1.0}]->(d),\n" +
-                " (c)-[:TYPE {cost:2.0}]->(d),\n" +
-                " (d)-[:TYPE {cost:1.0}]->(e),\n" +
-                " (d)-[:TYPE {cost:2.0}]->(f),\n" +
-                " (e)-[:TYPE {cost:2.0}]->(g),\n" +
-                " (f)-[:TYPE {cost:1.0}]->(g)";
-
-        runQuery(cypher);
-
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
-
         edgeBlackList = new LongArrayList();
 
         dijkstra = new YensKShortestPathsDijkstra(graph)
                 .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }
 
+    // TODO: make this return long, see `testFilterABDE --> RawValues.combineIntInt`
     private int id(String name) {
-        Node[] node = new Node[1];
-        runQueryWithRowConsumer(
-            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
-            row -> node[0] = row.getNode("n")
-        );
-        return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
+        return Math.toIntExact(graph.toMappedNodeId(idFunction.of(name)));
     }
 
     @Test

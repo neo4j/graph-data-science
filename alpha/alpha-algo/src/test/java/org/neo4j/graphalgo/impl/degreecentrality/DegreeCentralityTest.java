@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.impl.degreecentrality;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -34,40 +32,35 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-final class DegreeCentralityTest extends AlgoTestBase {
+@GdlExtension
+final class DegreeCentralityTest {
 
+    @GdlGraph(graphNamePrefix = "natural", orientation = Orientation.NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
+    @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED, aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
+            "  (a:Label1)" +
+            ", (b:Label1)" +
+            ", (c:Label1)" +
+            ", (d:Label1)" +
+            ", (e:Label1)" +
+            ", (f:Label1)" +
+            ", (g:Label1)" +
+            ", (h:Label1)" +
+            ", (i:Label1)" +
+            ", (j:Label1)" +
 
             ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
             ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
@@ -80,36 +73,25 @@ final class DegreeCentralityTest extends AlgoTestBase {
             ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
 
             ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE1 {weight: 2.0}]->(e)" +
+            ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
 
-            ", (a)-[:TYPE3 {weight: -2.0}]->(b)" +
+    @Inject
+    private Graph naturalGraph;
 
-            ", (b)-[:TYPE3 {weight: 2.0}]->(c)" +
-            ", (c)-[:TYPE3 {weight: 2.0}]->(b)" +
+    @Inject
+    private IdFunction naturalIdFunction;
 
-            ", (d)-[:TYPE3 {weight: 2.0}]->(a)" +
-            ", (d)-[:TYPE3 {weight: 2.0}]->(b)" +
+    @Inject
+    private Graph reverseGraph;
 
-            ", (e)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(d)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(f)" +
+    @Inject
+    private IdFunction reverseIdFunction;
 
-            ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE3 {weight: 2.0}]->(e)" +
+    @Inject
+    private Graph undirectedGraph;
 
-            ", (g)-[:TYPE2]->(b)" +
-            ", (g)-[:TYPE2]->(e)" +
-            ", (h)-[:TYPE2]->(b)" +
-            ", (h)-[:TYPE2]->(e)" +
-            ", (i)-[:TYPE2]->(b)" +
-            ", (i)-[:TYPE2]->(e)" +
-            ", (j)-[:TYPE2]->(e)" +
-            ", (k)-[:TYPE2]->(e)";
-
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    private IdFunction undirectedIdFunction;
 
     @Test
     void shouldRunConcurrently() {
@@ -151,32 +133,21 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
     @Test
     void outgoingCentrality() {
-        final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 3.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-            }
-        );
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .build()
-            .graph();
+        expected.put(naturalIdFunction.of("a"), 0.0);
+        expected.put(naturalIdFunction.of("b"), 1.0);
+        expected.put(naturalIdFunction.of("c"), 1.0);
+        expected.put(naturalIdFunction.of("d"), 2.0);
+        expected.put(naturalIdFunction.of("e"), 3.0);
+        expected.put(naturalIdFunction.of("f"), 2.0);
+        expected.put(naturalIdFunction.of("g"), 0.0);
+        expected.put(naturalIdFunction.of("h"), 0.0);
+        expected.put(naturalIdFunction.of("i"), 0.0);
+        expected.put(naturalIdFunction.of("j"), 0.0);
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
-            graph,
+            naturalGraph,
             Pools.DEFAULT,
             4,
             false,
@@ -184,8 +155,9 @@ final class DegreeCentralityTest extends AlgoTestBase {
         );
         degreeCentrality.compute();
 
+        // FIXME: this will fail if there is node ids offset
         IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+            final long nodeId = naturalGraph.toOriginalNodeId(i);
             assertEquals(
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),
@@ -197,34 +169,21 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
     @Test
     void incomingCentrality() {
-        final Label label = Label.label("Label1");
         final Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "b").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "a").getId(), 1.0);
-            }
-        );
-
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .globalOrientation(Orientation.REVERSE)
-            .build()
-            .graph();
+        expected.put(reverseIdFunction.of("b"), 4.0);
+        expected.put(reverseIdFunction.of("c"), 1.0);
+        expected.put(reverseIdFunction.of("d"), 1.0);
+        expected.put(reverseIdFunction.of("e"), 1.0);
+        expected.put(reverseIdFunction.of("f"), 1.0);
+        expected.put(reverseIdFunction.of("g"), 0.0);
+        expected.put(reverseIdFunction.of("h"), 0.0);
+        expected.put(reverseIdFunction.of("i"), 0.0);
+        expected.put(reverseIdFunction.of("j"), 0.0);
+        expected.put(reverseIdFunction.of("a"), 1.0);
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
-            graph,
+            reverseGraph,
             Pools.DEFAULT,
             4,
             false,
@@ -232,8 +191,9 @@ final class DegreeCentralityTest extends AlgoTestBase {
         );
         degreeCentrality.compute();
 
+        // FIXME: this will fail if there is node ids offset
         IntStream.range(0, expected.size()).forEach(i -> {
-            final long nodeId = graph.toOriginalNodeId(i);
+            final long nodeId = reverseGraph.toOriginalNodeId(i);
             assertEquals(
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),
@@ -245,35 +205,23 @@ final class DegreeCentralityTest extends AlgoTestBase {
 
     @Test
     void totalCentrality() {
-        Label label = Label.label("Label1");
         Map<Long, Double> expected = new HashMap<>();
 
         // if there are 2 relationships between a pair of nodes these get squashed into a single relationship
         // when we use an undirected graph
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "b").getId(), 4.0);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.0);
-            expected.put(tx.findNode(label, "name", "d").getId(), 3.0);
-            expected.put(tx.findNode(label, "name", "e").getId(), 3.0);
-            expected.put(tx.findNode(label, "name", "f").getId(), 2.0);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.0);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.0);
-        });
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .globalOrientation(Orientation.UNDIRECTED)
-            .globalAggregation(Aggregation.SINGLE)
-            .build()
-            .graph();
+        expected.put(undirectedIdFunction.of("a"), 1.0);
+        expected.put(undirectedIdFunction.of("b"), 4.0);
+        expected.put(undirectedIdFunction.of("c"), 1.0);
+        expected.put(undirectedIdFunction.of("d"), 3.0);
+        expected.put(undirectedIdFunction.of("e"), 3.0);
+        expected.put(undirectedIdFunction.of("f"), 2.0);
+        expected.put(undirectedIdFunction.of("g"), 0.0);
+        expected.put(undirectedIdFunction.of("h"), 0.0);
+        expected.put(undirectedIdFunction.of("i"), 0.0);
+        expected.put(undirectedIdFunction.of("j"), 0.0);
 
         DegreeCentrality degreeCentrality = new DegreeCentrality(
-            graph,
+            undirectedGraph,
             Pools.DEFAULT,
             4,
             false,
@@ -281,8 +229,9 @@ final class DegreeCentralityTest extends AlgoTestBase {
         );
         degreeCentrality.compute();
 
+        // FIXME: this will fail if there is node ids offset
         IntStream.range(0, expected.size()).forEach(i -> {
-            long nodeId = graph.toOriginalNodeId(i);
+            long nodeId = undirectedGraph.toOriginalNodeId(i);
             assertEquals(
                     expected.get(nodeId),
                     degreeCentrality.result().score(i),

@@ -19,25 +19,19 @@
  */
 package org.neo4j.graphalgo.impl.shortestpaths;
 
+import com.carrotsearch.hppc.IntContainer;
 import com.carrotsearch.hppc.procedures.IntProcedure;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
-import java.util.Optional;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * expected path OUTGOING:  abcf
@@ -50,65 +44,56 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  *  |  1    1    1 |   (x) // unreachable
  * (a)<-(d)<-(e)<-´
  */
-public class DirectedDijkstraSPTest extends AlgoTestBase {
+@GdlExtension
+public class DirectedDijkstraSPTest {
 
+    @GdlGraph(graphNamePrefix = "natural", orientation = Orientation.NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
+    @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED, aggregation = Aggregation.SINGLE)
     public static final String DB_CYPHER =
-        "CREATE (d:Node {name:'d'})\n" +
-        "CREATE (a:Node {name:'a'})\n" +
-        "CREATE (c:Node {name:'c'})\n" +
-        "CREATE (b:Node {name:'b'})\n" +
-        "CREATE (f:Node {name:'f'})\n" +
-        "CREATE (e:Node {name:'e'})\n" +
-        "CREATE (x:Node {name:'x'})\n" +
+        "CREATE " +
+        "  (d:Node)" +
+        ", (a:Node)" +
+        ", (c:Node)" +
+        ", (b:Node)" +
+        ", (f:Node)" +
+        ", (e:Node)" +
+        ", (x:Node)" +
 
-        "CREATE\n" +
-            "  (a)-[:REL {cost:2}]->(b),\n" +
-            "  (b)-[:REL {cost:2}]->(c),\n" +
-            "  (c)-[:REL {cost:2}]->(f),\n" +
-            "  (f)-[:REL {cost:1}]->(e),\n" +
-            "  (e)-[:REL {cost:1}]->(d),\n" +
-            "  (d)-[:REL {cost:1}]->(a)\n";
+        "  (a)-[:REL {cost:2}]->(b)" +
+        ", (b)-[:REL {cost:2}]->(c)" +
+        ", (c)-[:REL {cost:2}]->(f)" +
+        ", (f)-[:REL {cost:1}]->(e)" +
+        ", (e)-[:REL {cost:1}]->(d)" +
+        ", (d)-[:REL {cost:1}]->(a)";
 
-    private GraphStore graphStore;
 
-    @BeforeEach
-    void setup() {
-        runQuery(DB_CYPHER);
+    @Inject
+    private Graph naturalGraph;
 
-        graphStore = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("Node")
-            .putRelationshipProjectionsWithIdentifier("REL_OUT", RelationshipProjection.of("REL", Orientation.NATURAL, Aggregation.NONE))
-            .putRelationshipProjectionsWithIdentifier("REL_IN", RelationshipProjection.of("REL", Orientation.REVERSE, Aggregation.NONE))
-            .putRelationshipProjectionsWithIdentifier("REL_BOTH", RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE))
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graphStore();
-    }
+    @Inject
+    private IdFunction naturalIdFunction;
 
-    private long id(String name) {
-        return applyInTransaction(db, tx -> tx.findNode(Label.label("Node"), "name", name).getId());
-    }
+    @Inject
+    private Graph reverseGraph;
 
-    private String name(long id) {
-        String[] name = {""};
-        runQueryWithRowConsumer(
-            formatWithLocale("MATCH (n:Node) WHERE id(n)=%d RETURN n.name as name", id),
-            row -> name[0] = row.getString("name")
-        );
-        return name[0];
-    }
+    @Inject
+    private IdFunction reverseIdFunction;
+
+    @Inject
+    private Graph undirectedGraph;
+
+    @Inject
+    private IdFunction undirectedIdFunction;
 
     @Test
     void testOutgoing() {
-        StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_OUT"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
+        DijkstraConfig config = DijkstraConfig.of(naturalIdFunction.of("a"), naturalIdFunction.of("f"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(naturalGraph, config);
         dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals("abcf", path.toString());
+        assertPath(dijkstra.getFinalPath(), naturalIdFunction, "a", "b", "c", "f");
+
         assertEquals(6.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());
     }
@@ -116,70 +101,69 @@ public class DirectedDijkstraSPTest extends AlgoTestBase {
     @Test
     void testIncoming() {
         StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_IN"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
+        DijkstraConfig config = DijkstraConfig.of(reverseIdFunction.of("a"), reverseIdFunction.of("f"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(reverseGraph, config);
         dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals("adef", path.toString());
+        assertPath(dijkstra.getFinalPath(), reverseIdFunction, "a", "d", "e", "f");
         assertEquals(3.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());
     }
 
     @Test
     void testBoth() {
-        StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("f"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_BOTH"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
-        dijkstra.compute(id("a"), id("f"));
+        DijkstraConfig config = DijkstraConfig.of(undirectedIdFunction.of("a"), undirectedIdFunction.of("f"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(undirectedGraph, config);
+        dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals("adef", path.toString());
+        assertPath(dijkstra.getFinalPath(), undirectedIdFunction, "a", "d", "e", "f");
         assertEquals(3.0, dijkstra.getTotalCost(), 0.1);
         assertEquals(4, dijkstra.getPathLength());
     }
 
     @Test
     void testUnreachableOutgoing() {
-        StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_OUT"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
+        DijkstraConfig config = DijkstraConfig.of(naturalIdFunction.of("a"), naturalIdFunction.of("x"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(naturalGraph, config);
         dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals(0, path.length());
+        assertThat(dijkstra.getFinalPath()).isEmpty();
         assertEquals(0, dijkstra.getPathLength());
         assertEquals(ShortestPathDijkstra.NO_PATH_FOUND, dijkstra.getTotalCost(), 0.1);
     }
 
     @Test
     void testUnreachableIncoming() {
-        StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_IN"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
+        DijkstraConfig config = DijkstraConfig.of(reverseIdFunction.of("a"), reverseIdFunction.of("x"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(reverseGraph, config);
         dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals(0, path.length());
+        assertThat(dijkstra.getFinalPath()).isEmpty();
         assertEquals(0, dijkstra.getPathLength());
         assertEquals(ShortestPathDijkstra.NO_PATH_FOUND, dijkstra.getTotalCost(), 0.1);
     }
 
     @Test
     void testUnreachableBoth() {
-        StringBuilder path = new StringBuilder();
-        DijkstraConfig config = DijkstraConfig.of(id("a"), id("x"));
-        Graph graph = graphStore.getGraph(RelationshipType.of("REL_BOTH"), Optional.of("cost"));
-        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(graph, config);
+        DijkstraConfig config = DijkstraConfig.of(undirectedIdFunction.of("a"), undirectedIdFunction.of("x"));
+        ShortestPathDijkstra dijkstra = new ShortestPathDijkstra(undirectedGraph, config);
         dijkstra.compute();
 
-        dijkstra.getFinalPath().forEach((IntProcedure) n -> path.append(name(n)));
-        assertEquals(0, path.length());
+        assertThat(dijkstra.getFinalPath()).isEmpty();
         assertEquals(0, dijkstra.getPathLength());
         assertEquals(ShortestPathDijkstra.NO_PATH_FOUND, dijkstra.getTotalCost(), 0.1);
     }
+
+
+    private void assertPath(IntContainer actualPath, IdFunction idFunction, String... nodes) {
+        StringBuilder actual = new StringBuilder();
+        actualPath.forEach((IntProcedure) actual::append);
+        StringBuilder expected = new StringBuilder();
+        for(var n: nodes) {
+            expected.append(idFunction.of(n));
+        }
+
+        assertThat(expected).isEqualToIgnoringCase(actual);
+    }
+
 }

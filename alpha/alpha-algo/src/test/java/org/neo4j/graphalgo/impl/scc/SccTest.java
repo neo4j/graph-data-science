@@ -19,15 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.scc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphdb.Node;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,19 +34,21 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class SccTest extends AlgoTestBase {
+@GdlExtension
+class SccTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name: 'a'})" +
-        ", (b:Node {name: 'b'})" +
-        ", (c:Node {name: 'c'})" +
-        ", (d:Node {name: 'd'})" +
-        ", (e:Node {name: 'e'})" +
-        ", (f:Node {name: 'f'})" +
-        ", (g:Node {name: 'g'})" +
-        ", (h:Node {name: 'h'})" +
-        ", (i:Node {name: 'i'})" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
 
         ", (a)-[:TYPE {cost: 5}]->(b)" +
         ", (b)-[:TYPE {cost: 5}]->(c)" +
@@ -63,16 +64,14 @@ class SccTest extends AlgoTestBase {
         ", (h)-[:TYPE {cost: 3}]->(i)" +
         ", (i)-[:TYPE {cost: 3}]->(g)";
 
+    @Inject
     private Graph graph;
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void testDirect() {
-        loadGraph();
         SccAlgorithm scc = new SccAlgorithm(graph, AllocationTracker.empty());
         HugeLongArray components = scc.compute();
 
@@ -84,22 +83,30 @@ class SccTest extends AlgoTestBase {
 
     @Test
     void testHugeIterativeScc() {
-        loadGraph();
         SccAlgorithm algo = new SccAlgorithm(graph, AllocationTracker.empty());
         HugeLongArray components = algo.compute();
         assertCC(components);
     }
 
-    private void loadGraph() {
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel("Node")
-            .addRelationshipType("TYPE")
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
+    private void assertCC(HugeLongArray connectedComponents) {
+        assertBelongSameSet(connectedComponents,
+            idFunction.of("a"),
+            idFunction.of("b"),
+            idFunction.of("c")
+        );
+        assertBelongSameSet(connectedComponents,
+            idFunction.of("d"),
+            idFunction.of("e"),
+            idFunction.of("f")
+        );
+        assertBelongSameSet(connectedComponents,
+            idFunction.of("g"),
+            idFunction.of("h"),
+            idFunction.of("i")
+        );
     }
 
+    // TODO: Try to get this working with AssertJ
     private void assertBelongSameSet(HugeLongArray data, Long... expected) {
         // check if all belong to same set
         final long needle = data.get(expected[0]);
@@ -117,28 +124,4 @@ class SccTest extends AlgoTestBase {
         }
     }
 
-    private long getMappedNodeId(String name) {
-        final Node[] node = new Node[1];
-
-        runQueryWithRowConsumer(
-            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
-            row -> node[0] = row.getNode("n")
-        );
-        return graph.toMappedNodeId(node[0].getId());
-    }
-
-    private void assertCC(HugeLongArray connectedComponents) {
-        assertBelongSameSet(connectedComponents,
-            getMappedNodeId("a"),
-            getMappedNodeId("b"),
-            getMappedNodeId("c"));
-        assertBelongSameSet(connectedComponents,
-            getMappedNodeId("d"),
-            getMappedNodeId("e"),
-            getMappedNodeId("f"));
-        assertBelongSameSet(connectedComponents,
-            getMappedNodeId("g"),
-            getMappedNodeId("h"),
-            getMappedNodeId("i"));
-    }
 }

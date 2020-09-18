@@ -20,18 +20,15 @@
 package org.neo4j.graphalgo.impl.shortestpaths;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.RawValues;
-import org.neo4j.graphdb.Node;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,53 +52,45 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *         \  /  \ /
  *         (3)---(2)
  */
-class YensTest extends AlgoTestBase {
+@GdlExtension
+class YensTest {
 
     private static final double DELTA = 0.001;
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+
+        ", (a)-[:REL {cost:1.0}]->(b)," +
+        " (b)-[:REL {cost:1.0}]->(c)," +
+        " (c)-[:REL {cost:1.0}]->(d)," +
+        " (e)-[:REL {cost:1.0}]->(d)," +
+        " (a)-[:REL {cost:1.0}]->(e)," +
+
+        " (a)-[:REL {cost:5.0}]->(f)," +
+        " (b)-[:REL {cost:4.0}]->(f)," +
+        " (c)-[:REL {cost:1.0}]->(f)," +
+        " (d)-[:REL {cost:1.0}]->(f)," +
+        " (e)-[:REL {cost:4.0}]->(f)";
+
+    @Inject
     private Graph graph;
 
-    @BeforeEach
-    void setupGraph() {
-        String cypher =
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE" +
-                " (a)-[:REL {cost:1.0}]->(b),\n" +
-                " (b)-[:REL {cost:1.0}]->(c),\n" +
-                " (c)-[:REL {cost:1.0}]->(d),\n" +
-                " (e)-[:REL {cost:1.0}]->(d),\n" +
-                " (a)-[:REL {cost:1.0}]->(e),\n" +
-
-                " (a)-[:REL {cost:5.0}]->(f),\n" +
-                " (b)-[:REL {cost:4.0}]->(f),\n" +
-                " (c)-[:REL {cost:1.0}]->(f),\n" +
-                " (d)-[:REL {cost:1.0}]->(f),\n" +
-                " (e)-[:REL {cost:4.0}]->(f)";
-
-        runQuery(cypher);
-
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .putRelationshipProjectionsWithIdentifier(
-                "REL",
-                RelationshipProjection.of("REL", Orientation.UNDIRECTED, Aggregation.NONE)
-            )
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
-    }
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void test() {
         YensKShortestPaths yens = new YensKShortestPaths(
             graph,
-            id("a"),
-            id("f"),
+            idOf("a"),
+            idOf("f"),
             42,
             10
         ).compute();
@@ -121,36 +110,36 @@ class YensTest extends AlgoTestBase {
     @Test
     void test04325() {
         final RelationshipConsumer filter04325 = filter(
-                id("a"), id("f"),
-                id("e"), id("f"),
-                id("d"), id("f"),
-                id("a"), id("b"));
+                idOf("a"), idOf("f"),
+                idOf("e"), idOf("f"),
+                idOf("d"), idOf("f"),
+                idOf("a"), idOf("b"));
         final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
                 .withFilter(filter04325)
-                .compute(id("a"), id("f"));
+                .compute(idOf("a"), idOf("f"));
         assertTrue(path.isPresent());
         final WeightedPath weightedPath = path.get();
         assertEquals(4., weightedPath.getCost(), DELTA);
         assertArrayEquals(
-                new int[]{id("a"), id("e"), id("d"), id("c"), id("f")},
+                new int[]{idOf("a"), idOf("e"), idOf("d"), idOf("c"), idOf("f")},
                 weightedPath.toArray());
     }
 
     @Test
     void test01235() {
         final RelationshipConsumer filter01235 = filter(
-                id("a"), id("f"),
-                id("b"), id("f"),
-                id("c"), id("f"),
-                id("a"), id("e"));
+                idOf("a"), idOf("f"),
+                idOf("b"), idOf("f"),
+                idOf("c"), idOf("f"),
+                idOf("a"), idOf("e"));
         final Optional<WeightedPath> path = new YensKShortestPathsDijkstra(graph)
                 .withFilter(filter01235)
-                .compute(id("a"), id("f"));
+                .compute(idOf("a"), idOf("f"));
         assertTrue(path.isPresent());
         final WeightedPath weightedPath = path.get();
         assertEquals(4., weightedPath.getCost(), DELTA);
         assertArrayEquals(
-                new int[]{id("a"), id("b"), id("c"), id("d"), id("f")},
+                new int[]{idOf("a"), idOf("b"), idOf("c"), idOf("d"), idOf("f")},
                 weightedPath.toArray());
     }
 
@@ -165,12 +154,7 @@ class YensTest extends AlgoTestBase {
         return longToIntConsumer((s, t) -> !list.contains(RawValues.combineIntInt(s, t)));
     }
 
-    private int id(String name) {
-        final Node[] node = new Node[1];
-        runQueryWithRowConsumer(
-            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
-            row -> node[0] = row.getNode("n")
-        );
-        return Math.toIntExact(graph.toMappedNodeId(node[0].getId()));
+    private int idOf(String node) {
+        return (int) idFunction.of(node);
     }
 }

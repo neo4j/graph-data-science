@@ -19,40 +19,43 @@
  */
 package org.neo4j.graphalgo.impl.harmonic;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-public class HarmonicCentralityTest extends AlgoTestBase {
+@GdlExtension
+public class HarmonicCentralityTest {
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     public static final String DB_CYPHER =
-        "CREATE (a:Node {name:'a'})" +
-        ",      (b:Node {name:'b'})" +
-        ",      (c:Node {name:'c'})" +
-        ",      (d:Node {name:'d'})" +
-        ",      (e:Node {name:'e'})" +
-        ",      (a)-[:TYPE]->(b)" +
-        ",      (b)-[:TYPE]->(c)" +
-        ",      (d)-[:TYPE]->(e)";
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (d)-[:TYPE]->(e)";
 
-    @BeforeEach
-    void loadGraph() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    private Graph graph;
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void shouldComputeHarmonicCentrality() {
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
 
         var harmonicCentrality = new HarmonicCentrality(
             graph,
@@ -63,10 +66,10 @@ public class HarmonicCentralityTest extends AlgoTestBase {
 
         harmonicCentrality.compute();
 
-        assertEquals(0.375, harmonicCentrality.getCentralityScore(0), 0.1);
-        assertEquals(0.5, harmonicCentrality.getCentralityScore(1), 0.1);
-        assertEquals(0.375, harmonicCentrality.getCentralityScore(2), 0.1);
-        assertEquals(0.25, harmonicCentrality.getCentralityScore(3), 0.1);
-        assertEquals(0.25, harmonicCentrality.getCentralityScore(4), 0.1);
+        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("a"))).isEqualTo(0.375, within(0.1));
+        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("b"))).isEqualTo(0.5, within(0.1));
+        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("c"))).isEqualTo(0.375, within(0.1));
+        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("d"))).isEqualTo(0.25, within(0.1));
+        assertThat(harmonicCentrality.getCentralityScore(idFunction.of("e"))).isEqualTo(0.25, within(0.1));
     }
 }

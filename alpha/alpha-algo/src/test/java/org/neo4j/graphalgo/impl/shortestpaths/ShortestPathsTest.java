@@ -21,12 +21,13 @@ package org.neo4j.graphalgo.impl.shortestpaths;
 
 import com.carrotsearch.hppc.IntDoubleMap;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphdb.Node;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import static java.lang.Math.toIntExact;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,66 +42,67 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * S->X: {S,G,H,I,X}:8, {S,D,E,F,X}:12, {S,A,B,C,X}:20
  */
-final class ShortestPathsTest extends AlgoTestBase {
+@GdlExtension
+final class ShortestPathsTest {
+
+    @GdlGraph
+    private static final String DB_CYPHER =
+        "CREATE " +
+        "  (s:Node)" +
+        ", (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        ", (x:Node)" +
+        ", (q:Node)" + // outstanding node
+
+        ", (s)-[:TYPE {cost:5}]->(a)" +
+        ", (a)-[:TYPE {cost:5}]->(b)" +
+        ", (b)-[:TYPE {cost:5}]->(c)" +
+        ", (c)-[:TYPE {cost:5}]->(x)" +
+
+        ", (a)-[:TYPE {cost:2}]->(g)" +
+        ", (b)-[:TYPE {cost:2}]->(h)" +
+        ", (c)-[:TYPE {cost:2}]->(i)" +
+
+        ", (s)-[:TYPE {cost:3}]->(d)" +
+        ", (d)-[:TYPE {cost:3}]->(e)" +
+        ", (e)-[:TYPE {cost:3}]->(f)" +
+        ", (f)-[:TYPE {cost:3}]->(x)" +
+
+        ", (d)-[:TYPE {cost:3}]->(g)" +
+        ", (e)-[:TYPE {cost:3}]->(h)" +
+        ", (f)-[:TYPE {cost:3}]->(i)" +
+
+        ", (s)-[:TYPE {cost:2}]->(g)" +
+        ", (g)-[:TYPE {cost:2}]->(h)" +
+        ", (h)-[:TYPE {cost:2}]->(i)" +
+        ", (i)-[:TYPE {cost:2}]->(x)" +
+
+        ", (x)-[:TYPE {cost:2}]->(s)"; // create cycle
+
+    @Inject
+    private Graph graph;
+
+    @Inject
+    private IdFunction idFunction;
 
     private long head, tail, outstanding;
 
     @BeforeEach
     void setup() {
-        String cypher =
-                "CREATE (s:Node {name:'s'})\n" +
-                "CREATE (a:Node {name:'a'})\n" +
-                "CREATE (b:Node {name:'b'})\n" +
-                "CREATE (c:Node {name:'c'})\n" +
-                "CREATE (d:Node {name:'d'})\n" +
-                "CREATE (e:Node {name:'e'})\n" +
-                "CREATE (f:Node {name:'f'})\n" +
-                "CREATE (g:Node {name:'g'})\n" +
-                "CREATE (h:Node {name:'h'})\n" +
-                "CREATE (i:Node {name:'i'})\n" +
-                "CREATE (x:Node {name:'x'})\n" +
-                "CREATE (q:Node {name:'q'})\n" + // outstanding node
-                "CREATE" +
-                " (s)-[:TYPE {cost:5}]->(a),\n" +
-                " (a)-[:TYPE {cost:5}]->(b),\n" +
-                " (b)-[:TYPE {cost:5}]->(c),\n" +
-                " (c)-[:TYPE {cost:5}]->(x),\n" +
-
-                " (a)-[:TYPE {cost:2}]->(g),\n" +
-                " (b)-[:TYPE {cost:2}]->(h),\n" +
-                " (c)-[:TYPE {cost:2}]->(i),\n" +
-
-                " (s)-[:TYPE {cost:3}]->(d),\n" +
-                " (d)-[:TYPE {cost:3}]->(e),\n" +
-                " (e)-[:TYPE {cost:3}]->(f),\n" +
-                " (f)-[:TYPE {cost:3}]->(x),\n" +
-
-                " (d)-[:TYPE {cost:3}]->(g),\n" +
-                " (e)-[:TYPE {cost:3}]->(h),\n" +
-                " (f)-[:TYPE {cost:3}]->(i),\n" +
-
-                " (s)-[:TYPE {cost:2}]->(g),\n" +
-                " (g)-[:TYPE {cost:2}]->(h),\n" +
-                " (h)-[:TYPE {cost:2}]->(i),\n" +
-                " (i)-[:TYPE {cost:2}]->(x),\n" +
-
-                " (x)-[:TYPE {cost:2}]->(s)"; // create cycle
-
-        runQuery(cypher);
-
-        head = getNode("s").getId();
-        tail = getNode("x").getId();
-        outstanding = getNode("q").getId();
+        head = idFunction.of("s");
+        tail = idFunction.of("x");
+        outstanding = idFunction.of("q");
     }
 
     @Test
     void testPaths() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
-
         ShortestPaths sssp = new ShortestPaths(graph, head);
         IntDoubleMap sp = sssp.compute().getShortestPaths();
 
@@ -108,26 +110,59 @@ final class ShortestPathsTest extends AlgoTestBase {
         assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))), 0.1);
     }
 
-    @Test
-    void testPathsWithDefaultCost() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
+    @Nested
+    class WithoutRelationshipProperties {
 
-        ShortestPaths sssp = new ShortestPaths(graph, head);
-        IntDoubleMap sp = sssp.compute().getShortestPaths();
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE " +
+            "  (s:Node)" +
+            ", (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+            ", (f:Node)" +
+            ", (g:Node)" +
+            ", (h:Node)" +
+            ", (i:Node)" +
+            ", (x:Node)" +
+            ", (q:Node)" + // outstanding node
 
-        assertEquals(4, sp.get(toIntExact(graph.toMappedNodeId(tail))), 0.1);
-        assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))), 0.1);
+            ", (s)-[:TYPE]->(a)" +
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(x)" +
+
+            ", (a)-[:TYPE]->(g)" +
+            ", (b)-[:TYPE]->(h)" +
+            ", (c)-[:TYPE]->(i)" +
+
+            ", (s)-[:TYPE]->(d)" +
+            ", (d)-[:TYPE]->(e)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(x)" +
+
+            ", (d)-[:TYPE]->(g)" +
+            ", (e)-[:TYPE]->(h)" +
+            ", (f)-[:TYPE]->(i)" +
+
+            ", (s)-[:TYPE]->(g)" +
+            ", (g)-[:TYPE]->(h)" +
+            ", (h)-[:TYPE]->(i)" +
+            ", (i)-[:TYPE]->(x)" +
+
+            ", (x)-[:TYPE]->(s)"; // create cycle
+
+        @Test
+        void testPathsWithDefaultCost() {
+
+            ShortestPaths sssp = new ShortestPaths(graph, head);
+            IntDoubleMap sp = sssp.compute().getShortestPaths();
+
+            assertEquals(4, sp.get(toIntExact(graph.toMappedNodeId(tail))), 0.1);
+            assertEquals(Double.POSITIVE_INFINITY, sp.get(toIntExact(graph.toMappedNodeId(outstanding))), 0.1);
+        }
     }
 
-    Node getNode(String name) {
-        final Node[] node = new Node[1];
-        runQueryWithRowConsumer(
-            "MATCH (n:Node) WHERE n.name = '" + name + "' RETURN n",
-            row -> node[0] = row.getNode("n")
-        );
-        return node[0];
-    }
 }
