@@ -35,7 +35,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-class SimilarityGraphBuilder {
+// TODO move to common similarity code
+public class SimilarityGraphBuilder {
 
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
@@ -78,7 +79,7 @@ class SimilarityGraphBuilder {
 
     private final IdMap baseIdMap;
 
-    SimilarityGraphBuilder(
+    public SimilarityGraphBuilder(
         Graph baseGraph,
         ExecutorService executorService,
         AllocationTracker tracker
@@ -94,7 +95,7 @@ class SimilarityGraphBuilder {
         }
     }
 
-    Graph build(Stream<SimilarityResult> stream) {
+    public Graph build(Stream<SimilarityResult> stream) {
         Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             baseIdMap,
