@@ -60,13 +60,13 @@ class TriangleStreamTest extends AlgoTestBase {
             .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
             .close();
         centerId = center.getId();
+
+        graph = loadGraph();
     }
 
     @Test
     void testSequential() {
-        graph = loadGraph();
-
-        final TripleConsumer mock = mock(TripleConsumer.class);
+        TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 1)
                 .compute()
@@ -77,9 +77,7 @@ class TriangleStreamTest extends AlgoTestBase {
 
     @Test
     void testParallel() {
-        graph = loadGraph();
-
-        final TripleConsumer mock = mock(TripleConsumer.class);
+        TripleConsumer mock = mock(TripleConsumer.class);
 
         new TriangleStream(graph, Pools.DEFAULT, 8)
                 .compute()
@@ -89,7 +87,6 @@ class TriangleStreamTest extends AlgoTestBase {
     }
 
     interface TripleConsumer {
-
         void consume(long nodeA, long nodeB, long nodeC);
     }
 

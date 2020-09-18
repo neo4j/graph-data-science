@@ -21,17 +21,16 @@ package org.neo4j.graphalgo.impl.spanningTree;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.impl.spanningTrees.Prim;
 import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
-import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 
 /**
@@ -46,17 +45,20 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
  *     |       |          |      |          |       |
  *     d --6-- e          d      e          d-------e
  */
-class PrimTest extends AlgoTestBase {
+@GdlExtension
+class PrimTest {
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name: 'a'})" +
-        ", (b:Node {name: 'b'})" +
-        ", (c:Node {name: 'c'})" +
-        ", (d:Node {name: 'd'})" +
-        ", (e:Node {name: 'e'})" +
-        ", (y:Node {name: 'y'})" +
-        ", (z:Node {name: 'z'})" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (y:Node)" +
+        ", (z:Node)" +
+
         ", (a)-[:TYPE {cost: 1.0}]->(b)" +
         ", (a)-[:TYPE {cost: 2.0}]->(c)" +
         ", (b)-[:TYPE {cost: 3.0}]->(c)" +
@@ -64,95 +66,73 @@ class PrimTest extends AlgoTestBase {
         ", (c)-[:TYPE {cost: 5.0}]->(e)" +
         ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
-    private static final Label label = Label.label("Node");
     private static int a, b, c, d, e, y, z;
 
+    @Inject
     private Graph graph;
 
+    @Inject
+    private IdFunction idFunction;
+
     @BeforeEach
-    void setupGraph() {
-        runQuery(DB_CYPHER);
+    void setUp() {
+        a = (int) idFunction.of("a");
+        b = (int) idFunction.of("b");
+        c = (int) idFunction.of("c");
+        d = (int) idFunction.of("d");
+        e = (int) idFunction.of("e");
+        y = (int) idFunction.of("y");
+        z = (int) idFunction.of("z");
     }
 
     @Test
     void testMaximumFromA() {
-        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, a).compute());
     }
 
     @Test
     void testMaximumFromB() {
-        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, b).compute());
     }
 
     @Test
     void testMaximumFromC() {
-        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, c).compute());
     }
 
     @Test
     void testMaximumFromD() {
-        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, d).compute());
     }
 
     @Test
     void testMaximumFromE() {
-        loadGraph();
         assertMaximum(new Prim(graph, graph, Prim.MAX_OPERATOR, e).compute());
     }
 
     @Test
     void testMinimumFromA() {
-        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, a).compute());
     }
 
     @Test
     void testMinimumFromB() {
-        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, b).compute());
     }
 
     @Test
     void testMinimumFromC() {
-        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, c).compute());
     }
 
     @Test
     void testMinimumFromD() {
-        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, d).compute());
     }
 
     @Test
     void testMinimumFromE() {
-        loadGraph();
         assertMinimum(new Prim(graph, graph, Prim.MIN_OPERATOR, e).compute());
-    }
-
-    private void loadGraph() {
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE")
-            .globalOrientation(Orientation.UNDIRECTED)
-            .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
-            .build()
-            .graph();
-
-        runInTransaction(db, tx -> {
-            a = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "a").getId()));
-            b = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "b").getId()));
-            c = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "c").getId()));
-            d = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "d").getId()));
-            e = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "e").getId()));
-            y = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "y").getId()));
-            z = Math.toIntExact(graph.toMappedNodeId(tx.findNode(label, "name", "z").getId()));
-        });
     }
 
     private void assertMinimum(SpanningTree mst) {

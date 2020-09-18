@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.impl.traverse;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -45,28 +44,29 @@ import static org.neo4j.graphalgo.impl.traverse.Traverse.DEFAULT_AGGREGATOR;
  *    (c)   (f)
  */
 @GdlExtension
-class TraverseTest extends AlgoTestBase {
+class TraverseTest {
 
 
     @GdlGraph(graphNamePrefix = "natural")
     @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
-    private static final String CYPHER = "CREATE (a:Node)" +
-                                         ", (b:Node)" +
-                                         ", (c:Node)" +
-                                         ", (d:Node)" +
-                                         ", (e:Node)" +
-                                         ", (f:Node)" +
-                                         ", (g:Node)" +
-                                         "," +
-                                         ", (a)-[:REL {cost:2.0}]->(b)" +
-                                         ", (a)-[:REL {cost:1.0}]->(c)" +
-                                         ", (b)-[:REL {cost:1.0}]->(d)" +
-                                         ", (c)-[:REL {cost:2.0}]->(d)" +
-                                         ", (d)-[:REL {cost:1.0}]->(e)" +
-                                         ", (d)-[:REL {cost:2.0}]->(f)" +
-                                         ", (e)-[:REL {cost:2.0}]->(g)" +
-                                         " (f)-[:REL {cost:1.0}]->(g)";
+    private static final String CYPHER =
+        "CREATE (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+
+        ", (a)-[:REL {cost:2.0}]->(b)" +
+        ", (a)-[:REL {cost:1.0}]->(c)" +
+        ", (b)-[:REL {cost:1.0}]->(d)" +
+        ", (c)-[:REL {cost:2.0}]->(d)" +
+        ", (d)-[:REL {cost:1.0}]->(e)" +
+        ", (d)-[:REL {cost:2.0}]->(f)" +
+        ", (e)-[:REL {cost:2.0}]->(g)" +
+        ", (f)-[:REL {cost:1.0}]->(g)";
 
     @GdlGraph(graphNamePrefix = "loop")
     private static final String LOOP_CYPHER =
