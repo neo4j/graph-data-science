@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.result.CentralityResult;
-import org.neo4j.graphdb.Label;
 import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
@@ -36,33 +36,23 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-final class EigenvectorCentralityTest extends AlgoTestBase {
+@GdlExtension
+final class EigenvectorCentralityTest {
 
+    @GdlGraph
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
+            "  (a:Label1)" +
+            ", (b:Label1)" +
+            ", (c:Label1)" +
+            ", (d:Label1)" +
+            ", (e:Label1)" +
+            ", (f:Label1)" +
+            ", (g:Label1)" +
+            ", (h:Label1)" +
+            ", (i:Label1)" +
+            ", (j:Label1)" +
 
             ",  (b)-[:TYPE1]->(c)" +
             ",  (c)-[:TYPE1]->(b)" +
@@ -75,16 +65,13 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
             ",  (e)-[:TYPE1]->(f)" +
 
             ",  (f)-[:TYPE1]->(b)" +
-            ",  (f)-[:TYPE1]->(e)" +
+            ",  (f)-[:TYPE1]->(e)";
 
-            ",  (g)-[:TYPE2]->(b)" +
-            ",  (g)-[:TYPE2]->(e)" +
-            ",  (h)-[:TYPE2]->(b)" +
-            ",  (h)-[:TYPE2]->(e)" +
-            ",  (i)-[:TYPE2]->(b)" +
-            ",  (i)-[:TYPE2]->(e)" +
-            ",  (j)-[:TYPE2]->(e)" +
-            ",  (k)-[:TYPE2]->(e)";
+    @Inject
+    private Graph graph;
+
+    @Inject
+    private IdFunction idFunction;
 
     private static final PageRankBaseConfig DEFAULT_EIGENVECTOR_CONFIG = ImmutableEigenvectorCentralityConfig
         .builder()
@@ -92,39 +79,22 @@ final class EigenvectorCentralityTest extends AlgoTestBase {
         .dampingFactor(1)
         .build();
 
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
-
     @Test
     void test() {
-        final Label label = Label.label("Label1");
-        final Map<Long, Double> expected = new HashMap<>();
+        Map<Long, Double> expected = new HashMap<>();
 
-        runInTransaction(db, tx -> {
-            expected.put(tx.findNode(label, "name", "a").getId(), 1.762540000000000);
-            expected.put(tx.findNode(label, "name", "b").getId(), 31.156790000000008);
-            expected.put(tx.findNode(label, "name", "c").getId(), 28.694439999999993);
-            expected.put(tx.findNode(label, "name", "d").getId(), 1.7625400000000004);
-            expected.put(tx.findNode(label, "name", "e").getId(), 1.7625400000000004);
-            expected.put(tx.findNode(label, "name", "f").getId(), 1.7625400000000004);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.1);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.1);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.1);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.1);
-        });
+        expected.put(idFunction.of("a"), 1.762540000000000);
+        expected.put(idFunction.of("b"), 31.156790000000008);
+        expected.put(idFunction.of("c"), 28.694439999999993);
+        expected.put(idFunction.of("d"), 1.7625400000000004);
+        expected.put(idFunction.of("e"), 1.7625400000000004);
+        expected.put(idFunction.of("f"), 1.7625400000000004);
+        expected.put(idFunction.of("g"), 0.1);
+        expected.put(idFunction.of("h"), 0.1);
+        expected.put(idFunction.of("i"), 0.1);
+        expected.put(idFunction.of("j"), 0.1);
 
-        final Graph graph;
-
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .build()
-            .graph();
-
-        final CentralityResult rankResult = LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
+        CentralityResult rankResult = LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
             .create(
                 graph,
                 DEFAULT_EIGENVECTOR_CONFIG,

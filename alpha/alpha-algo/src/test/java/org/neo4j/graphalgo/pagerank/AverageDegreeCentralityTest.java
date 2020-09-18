@@ -19,42 +19,35 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphdb.Label;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class AverageDegreeCentralityTest extends AlgoTestBase {
+@GdlExtension
+final class AverageDegreeCentralityTest {
 
+    @GdlGraph(graphNamePrefix = "natural", orientation = Orientation.NATURAL)
+    @GdlGraph(graphNamePrefix = "reverse", orientation = Orientation.REVERSE)
+    @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED, aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
             "CREATE" +
-            "  (_:Label0 {name: '_'})" +
-            ", (a:Label1 {name: 'a'})" +
-            ", (b:Label1 {name: 'b'})" +
-            ", (c:Label1 {name: 'c'})" +
-            ", (d:Label1 {name: 'd'})" +
-            ", (e:Label1 {name: 'e'})" +
-            ", (f:Label1 {name: 'f'})" +
-            ", (g:Label1 {name: 'g'})" +
-            ", (h:Label1 {name: 'h'})" +
-            ", (i:Label1 {name: 'i'})" +
-            ", (j:Label1 {name: 'j'})" +
-            ", (k:Label2 {name: 'k'})" +
-            ", (l:Label2 {name: 'l'})" +
-            ", (m:Label2 {name: 'm'})" +
-            ", (n:Label2 {name: 'n'})" +
-            ", (o:Label2 {name: 'o'})" +
-            ", (p:Label2 {name: 'p'})" +
-            ", (q:Label2 {name: 'q'})" +
-            ", (r:Label2 {name: 'r'})" +
-            ", (s:Label2 {name: 's'})" +
-            ", (t:Label2 {name: 't'})" +
+            "  (a:Label1)" +
+            ", (b:Label1)" +
+            ", (c:Label1)" +
+            ", (d:Label1)" +
+            ", (e:Label1)" +
+            ", (f:Label1)" +
+            ", (g:Label1)" +
+            ", (h:Label1)" +
+            ", (i:Label1)" +
+            ", (j:Label1)" +
 
             ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
             ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
@@ -67,49 +60,21 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
             ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
 
             ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE1 {weight: 2.0}]->(e)" +
+            ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
 
-            ", (a)-[:TYPE3 {weight: -2.0}]->(b)" +
 
-            ", (b)-[:TYPE3 {weight: 2.0}]->(c)" +
-            ", (c)-[:TYPE3 {weight: 2.0}]->(b)" +
+    @Inject
+    private Graph naturalGraph;
 
-            ", (d)-[:TYPE3 {weight: 2.0}]->(a)" +
-            ", (d)-[:TYPE3 {weight: 2.0}]->(b)" +
+    @Inject
+    private Graph reverseGraph;
 
-            ", (e)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(d)" +
-            ", (e)-[:TYPE3 {weight: 2.0}]->(f)" +
-
-            ", (f)-[:TYPE3 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE3 {weight: 2.0}]->(e)" +
-
-            ", (g)-[:TYPE2]->(b)" +
-            ", (g)-[:TYPE2]->(e)" +
-            ", (h)-[:TYPE2]->(b)" +
-            ", (h)-[:TYPE2]->(e)" +
-            ", (i)-[:TYPE2]->(b)" +
-            ", (i)-[:TYPE2]->(e)" +
-            ", (j)-[:TYPE2]->(e)" +
-            ", (k)-[:TYPE2]->(e)";
-
-    @BeforeEach
-    void setupGraphDb() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    private Graph undirectedGraph;
 
     @Test
     void averageOutgoingCentrality() {
-        final Label label = Label.label("Label1");
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .build()
-            .graph();
-
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(naturalGraph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(0.9, degreeCentrality.average(), 0.01);
@@ -117,17 +82,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
     @Test
     void averageIncomingCentrality() {
-        final Label label = Label.label("Label1");
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .globalOrientation(Orientation.REVERSE)
-            .build()
-            .graph();
-
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(reverseGraph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(0.9, degreeCentrality.average(), 0.01);
@@ -135,18 +90,7 @@ final class AverageDegreeCentralityTest extends AlgoTestBase {
 
     @Test
     void totalCentrality() {
-        final Label label = Label.label("Label1");
-
-        var graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(label.name())
-            .addRelationshipType("TYPE1")
-            .globalOrientation(Orientation.UNDIRECTED)
-            .globalAggregation(Aggregation.SINGLE)
-            .build()
-            .graph();
-
-        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(graph, Pools.DEFAULT, 4);
+        AverageDegreeCentrality degreeCentrality = new AverageDegreeCentrality(undirectedGraph, Pools.DEFAULT, 4);
         degreeCentrality.compute();
 
         assertEquals(1.4, degreeCentrality.average(), 0.01);
