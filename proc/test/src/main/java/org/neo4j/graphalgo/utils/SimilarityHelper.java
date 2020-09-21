@@ -19,29 +19,21 @@
  */
 package org.neo4j.graphalgo.utils;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.neo4j.graphalgo.nodesim.SimilarityResult;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public final class SimilarityHelper {
 
     private SimilarityHelper() {}
 
     public static void assertSimilarityStreamsAreEqual(Stream<SimilarityResult> result1, Stream<SimilarityResult> result2) {
-        Collection<Pair<SimilarityResult, SimilarityResult>> comparableResults = Iterate.zip(
-            result1.collect(Collectors.toList()),
-            result2.collect(Collectors.toList())
-        );
-        for (Pair<SimilarityResult, SimilarityResult> pair : comparableResults) {
-            SimilarityResult left = pair.getOne();
-            SimilarityResult right = pair.getTwo();
-            assertEquals(left, right);
-        }
+        Set<SimilarityResult> set1 = result1.collect(Collectors.toSet());
+        Set<SimilarityResult> set2 = result2.collect(Collectors.toSet());
+        assertThat(set1).containsExactlyInAnyOrderElementsOf(set2);
     }
 }
