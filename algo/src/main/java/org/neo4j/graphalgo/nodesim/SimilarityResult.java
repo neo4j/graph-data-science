@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Comparator;
 import java.util.Objects;

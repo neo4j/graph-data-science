@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading.factory;
+package org.neo4j.graphalgo.core.loading.construction;
 
 import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.Orientation;

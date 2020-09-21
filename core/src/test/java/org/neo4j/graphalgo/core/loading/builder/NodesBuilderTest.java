@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading.builder;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;

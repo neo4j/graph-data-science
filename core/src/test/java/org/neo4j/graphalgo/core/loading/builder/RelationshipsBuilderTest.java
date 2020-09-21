@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.LongStream;

@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
-import org.neo4j.graphalgo.core.loading.factory.NodesBuilder;
-import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
