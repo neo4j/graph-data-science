@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading.builder;
+package org.neo4j.graphalgo.core.loading.factory;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
@@ -37,13 +37,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public final class GraphBuilder {
+public final class GraphFactory {
 
     static final String DUMMY_PROPERTY = "property";
 
-    private GraphBuilder() {}
+    private GraphFactory() {}
 
-    public static NodesBuilder createNodesBuilder(
+    public static NodesBuilder nodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
         int concurrency,
@@ -57,7 +57,7 @@ public final class GraphBuilder {
         );
     }
 
-    public static RelationshipsBuilder createRelationshipsBuilder(
+    public static RelationshipsBuilder relationshipsBuilder(
         IdMap idMap,
         Orientation orientation,
         boolean loadRelationshipProperty,
@@ -66,7 +66,7 @@ public final class GraphBuilder {
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
-        return createRelationshipsBuilder(
+        return relationshipsBuilder(
             idMap,
             orientation,
             loadRelationshipProperty,
@@ -78,7 +78,7 @@ public final class GraphBuilder {
         );
     }
 
-    public static RelationshipsBuilder createRelationshipsBuilder(
+    public static RelationshipsBuilder relationshipsBuilder(
         IdMap idMap,
         Orientation orientation,
         boolean loadRelationshipProperty,

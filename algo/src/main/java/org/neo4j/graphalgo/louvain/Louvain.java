@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
-import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
-import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.factory.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -190,7 +190,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ModularityOptimization modularityOptimization,
         long maxCommunityId
     ) {
-        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
+        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
             maxCommunityId,
             false,
             config.concurrency(),
@@ -208,7 +208,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,
             true,
@@ -227,7 +227,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             return true;
         });
 
-        return GraphBuilder.create(idMap, relationshipsBuilder.build(), tracker);
+        return GraphFactory.create(idMap, relationshipsBuilder.build(), tracker);
     }
 
     private boolean hasConverged() {

@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
-import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
-import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.factory.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -85,7 +85,7 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        var idMapBuilder = GraphBuilder.createNodesBuilder(
+        var idMapBuilder = GraphFactory.nodesBuilder(
             nodeCount,
             false,
             1,
@@ -95,7 +95,7 @@ public final class RandomGraphGenerator {
         generateNodes(idMapBuilder);
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,
             maybeRelationshipPropertyProducer.isPresent(),
@@ -109,14 +109,14 @@ public final class RandomGraphGenerator {
         if (maybeNodePropertyProducer.isPresent()) {
             NodeProperties nodeProperties = generateNodeProperties();
             String propertyName = maybeNodePropertyProducer.get().getPropertyName();
-            return GraphBuilder.create(
+            return GraphFactory.create(
                 idMap,
                 Map.of(propertyName, nodeProperties),
                 relationshipsBuilder.build(),
                 allocationTracker
             );
         } else {
-            return GraphBuilder.create(
+            return GraphFactory.create(
                 idMap,
                 relationshipsBuilder.build(),
                 allocationTracker

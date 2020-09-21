@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.Stream;
@@ -36,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class GraphBuilderTest {
+class GraphFactoryTest {
 
     private static final String EXPECTED_WITH_AGGREGATION =
         "(a)-[{w: 0.0}]->(b)-[{w: 2.0}]->(c)-[{w: 4.0}]->(d)-[{w: 6.0}]->(a)";
@@ -67,7 +69,7 @@ class GraphBuilderTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        var idMapBuilder = GraphBuilder.createNodesBuilder(
+        var idMapBuilder = GraphFactory.nodesBuilder(
             nodeCount,
             true,
             1,
@@ -80,7 +82,7 @@ class GraphBuilderTest {
         idMapBuilder.addNode(3);
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,
             false,
@@ -93,7 +95,7 @@ class GraphBuilderTest {
         for (int i = 0; i < nodeCount; i++) {
             relationshipsBuilder.add(i, (i + 1) % nodeCount);
         }
-        Graph graph = GraphBuilder.create(
+        Graph graph = GraphFactory.create(
             idMap,
             relationshipsBuilder.build(), AllocationTracker.empty()
         );
@@ -137,7 +139,7 @@ class GraphBuilderTest {
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
 
-        var idMapBuilder = GraphBuilder.createNodesBuilder(
+        var idMapBuilder = GraphFactory.nodesBuilder(
             nodeCount,
             false,
             1,
@@ -149,7 +151,7 @@ class GraphBuilderTest {
         }
 
         IdMap idMap = idMapBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,
             true,
@@ -163,6 +165,6 @@ class GraphBuilderTest {
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);
         }
-        return GraphBuilder.create(idMap, relationshipsBuilder.build(), AllocationTracker.empty());
+        return GraphFactory.create(idMap, relationshipsBuilder.build(), AllocationTracker.empty());
     }
 }

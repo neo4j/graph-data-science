@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading.builder;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
@@ -35,7 +36,7 @@ class NodesBuilderTest {
     void parallelIdMapBuilder() {
         long nodeCount = 100;
         int concurrency = 4;
-        var idMapBuilder = GraphBuilder.createNodesBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphFactory.nodesBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
@@ -52,7 +53,7 @@ class NodesBuilderTest {
     void parallelIdMapBuilderWithDuplicateNodes() {
         long attempts = 100;
         int concurrency = 4;
-        var idMapBuilder = GraphBuilder.createNodesBuilder(attempts, false, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphFactory.nodesBuilder(attempts, false, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, attempts),
@@ -72,7 +73,7 @@ class NodesBuilderTest {
         var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
         var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
 
-        var idMapBuilder = GraphBuilder.createNodesBuilder(attempts, true, concurrency, AllocationTracker.empty());
+        var idMapBuilder = GraphFactory.nodesBuilder(attempts, true, concurrency, AllocationTracker.empty());
 
         ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
             originalId -> {

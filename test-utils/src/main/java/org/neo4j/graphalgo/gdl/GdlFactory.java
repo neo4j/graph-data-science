@@ -38,7 +38,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -153,7 +153,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     private IdsAndProperties loadNodes() {
-        var idMapBuilder = GraphBuilder.createNodesBuilder(
+        var idMapBuilder = GraphFactory.nodesBuilder(
             dimensions.highestNeoId(),
             true,
             1,
@@ -258,7 +258,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         var relTypeImporters = propertyKeysByRelType.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                relTypeAndProperty -> GraphBuilder.createRelationshipsBuilder(
+                relTypeAndProperty -> GraphFactory.relationshipsBuilder(
                     nodes,
                     graphCreateConfig.orientation(),
                     relTypeAndProperty.getValue().isPresent(),
@@ -287,7 +287,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         // Add fake relationship type since we do not
         // support GraphStores with zero relationships.
         if (relTypeImporters.isEmpty()) {
-            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphBuilder.createRelationshipsBuilder(
+            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphFactory.relationshipsBuilder(
                 nodes,
                 graphCreateConfig.orientation(),
                 false,

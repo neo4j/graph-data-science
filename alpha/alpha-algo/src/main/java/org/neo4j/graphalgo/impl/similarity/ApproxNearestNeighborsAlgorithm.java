@@ -33,9 +33,9 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
-import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
-import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.factory.GraphFactory;
+import org.neo4j.graphalgo.core.loading.factory.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.factory.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -275,7 +275,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
 
-        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
+        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
             maxNeoId,
             false,
             config.concurrency(),
@@ -586,7 +586,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
-            RelationshipsBuilder outImporter = GraphBuilder.createRelationshipsBuilder(
+            RelationshipsBuilder outImporter = GraphFactory.relationshipsBuilder(
                 idMap,
                 Orientation.NATURAL,
                 false,
@@ -596,7 +596,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
                 tracker
             );
 
-            RelationshipsBuilder inImporter = GraphBuilder.createRelationshipsBuilder(
+            RelationshipsBuilder inImporter = GraphFactory.relationshipsBuilder(
                 idMap,
                 Orientation.REVERSE,
                 false,

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading.builder;
+package org.neo4j.graphalgo.core.loading.factory;
 
 import org.neo4j.graphalgo.AbstractRelationshipProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.core.loading.builder.GraphBuilder.DUMMY_PROPERTY;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
@@ -93,7 +92,7 @@ public class RelationshipsBuilder {
             .orientation(orientation);
 
         if (loadRelationshipProperty) {
-            projectionBuilder.addProperty(DUMMY_PROPERTY, DUMMY_PROPERTY, DefaultValue.DEFAULT, aggregation);
+            projectionBuilder.addProperty(GraphFactory.DUMMY_PROPERTY, GraphFactory.DUMMY_PROPERTY, DefaultValue.DEFAULT, aggregation);
         }
 
         this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
