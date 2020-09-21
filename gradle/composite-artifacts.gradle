@@ -19,15 +19,15 @@
  */
 
 def docsProjects = [
-    "doc"
+    project(':doc')
 ]
 
 def toolsProjects = [
-    'pregel-example',
+    project(':pregel-example')
 ]
 
 def estimationCliProjects = [
-    'estimation-cli'
+    project(':estimation-cli')
 ]
 
 def notLibraryProjects =
@@ -35,36 +35,34 @@ def notLibraryProjects =
     toolsProjects +
     estimationCliProjects
 
-def artifactsTask(Set<Project> subprojects, List<String>projectList, String taskName) {
-    subprojects
-            .findAll { projectList.contains(it.name) }
-            .forEach {
-                def artifactTask = it.tasks.create(taskName)
-                def rootTask = rootProject.tasks.findByPath(taskName)
-                rootTask.dependsOn artifactTask
+def artifactsTask(Collection<Project>projectList, String taskName) {
+    configure (projectList) {
+        def artifactTask = project.tasks.create(taskName)
+        def rootTask = rootProject.tasks.findByPath(taskName)
+        rootTask.dependsOn artifactTask
 
-                def maybeTestTask = it.tasks.findByPath(":${it.name}:test")
-                if(maybeTestTask != null) {
-                    rootTask.dependsOn maybeTestTask
-                }
-            }
+        def maybeTestTask = project.tasks.findByName('test')
+        if(maybeTestTask != null) {
+            rootTask.dependsOn maybeTestTask
+        }
+    }
 }
 
 task libraryArtifacts {
-    def libs = subprojects.findAll { !notLibraryProjects.contains(it.name) }.collect { it.name }
-    artifactsTask(subprojects, libs, "libraryArtifacts")
+    def libs = subprojects - notLibraryProjects
+    artifactsTask(libs, "libraryArtifacts")
 }
 
 task docsArtifacts {
-    artifactsTask(subprojects, docsProjects, 'docsArtifacts')
+    artifactsTask(docsProjects, 'docsArtifacts')
 }
 
 task toolsArtifacts {
-    artifactsTask(subprojects, toolsProjects, 'toolsArtifacts')
+    artifactsTask(toolsProjects, 'toolsArtifacts')
 }
 
 task estimationCliArtifacts {
-    artifactsTask(subprojects, estimationCliProjects, 'estimationCliArtifacts')
+    artifactsTask(estimationCliProjects, 'estimationCliArtifacts')
 }
 
 task allArtifacts {
