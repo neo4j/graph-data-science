@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -54,7 +55,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private final NodeProperties seedingValues;
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
-
     // results
     private HugeLongArray[] dendrograms;
     private double[] modularities;
@@ -197,10 +197,9 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         assertRunning();
 
-        workingGraph.forEachNode((nodeId) -> {
-            nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
-            return true;
-        });
+        ParallelUtil.parallelForEachNode(workingGraph, config.concurrency(),
+            nodeId -> nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId))
+        );
 
         assertRunning();
 
@@ -216,13 +215,14 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .tracker(tracker)
             .build();
 
-        workingGraph.forEachNode((nodeId) -> {
+        var relationshipIterator = CloseableThreadLocal.withInitial(workingGraph::concurrentCopy);
+
+        ParallelUtil.parallelForEachNode(workingGraph, config.concurrency(), nodeId -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);
-            workingGraph.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
+            relationshipIterator.get().forEachRelationship(nodeId, 1.0, (source, target, property) -> {
                 relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
                 return true;
             });
-            return true;
         });
 
         return GraphFactory.create(idMap, relationshipsBuilder.build(), tracker);
