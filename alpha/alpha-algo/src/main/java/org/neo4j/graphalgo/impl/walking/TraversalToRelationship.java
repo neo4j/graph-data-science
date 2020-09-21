@@ -69,7 +69,10 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
             allocationTracker
         );
 
-        var traversalConsumer = new TraversalConsumer(relImporter, graphs.length);
+        var traversalConsumer = config.allowSelfLoops()
+            ? new TraversalConsumer(relImporter, graphs.length)
+            : new NoLoopTraversalConsumer(relImporter, graphs.length);
+
         AtomicLong batchOffset = new AtomicLong(0);
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () -> () -> {
@@ -92,6 +95,7 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
                 var multiSourceBFS = TraversalToEdgeMSBFSStrategy.initializeMultiSourceBFS(
                     localGraphs,
                     traversalConsumer,
+                    config.allowSelfLoops(),
                     allocationTracker,
                     startNodes
                 );
@@ -118,12 +122,13 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
 
     private static class TraversalToEdgeMSBFSStrategy extends ANPStrategy {
 
-        static MultiSourceBFS initializeMultiSourceBFS(Graph[] graphs, BfsConsumer perNodeAction, AllocationTracker tracker, long[] startNodes) {
+        static MultiSourceBFS initializeMultiSourceBFS(Graph[] graphs, BfsConsumer perNodeAction, boolean allowSelfLoops, AllocationTracker tracker, long[] startNodes) {
             return new MultiSourceBFS(
                 graphs[0],
                 graphs[0],
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
                 false,
+                allowSelfLoops,
                 tracker,
                 startNodes
             );
@@ -158,9 +163,9 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
         }
     }
 
-    private static final class TraversalConsumer implements BfsConsumer {
-        private final int targetDepth;
-        private final RelationshipsBuilder relImporter;
+    private static class TraversalConsumer implements BfsConsumer {
+        final int targetDepth;
+        final RelationshipsBuilder relImporter;
 
         private TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
             this.relImporter = relImporter;
@@ -172,6 +177,25 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
             if (depth == targetDepth) {
                 while (sourceNode.hasNext()) {
                     relImporter.addFromInternal(sourceNode.next(), targetNode);
+                }
+            }
+        }
+    }
+
+    private static final class NoLoopTraversalConsumer extends TraversalConsumer {
+
+        private NoLoopTraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
+            super(relImporter, targetDepth);
+        }
+
+        @Override
+        public void accept(long targetNode, int depth, BfsSources sourceNode) {
+            if (depth == targetDepth) {
+                while (sourceNode.hasNext()) {
+                    var sourceNodeId = sourceNode.next();
+                    if (sourceNodeId != targetNode) {
+                        relImporter.addFromInternal(sourceNodeId, targetNode);
+                    }
                 }
             }
         }

@@ -20,7 +20,7 @@
 
 package org.neo4j.graphalgo.impl.walking;
 
-import org.jetbrains.annotations.Nullable;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -36,9 +36,14 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface TraversalToRelationshipConfig extends AlgoBaseConfig, MutateRelationshipConfig {
 
-    @Nullable List<String> relationshipTypes();
+    List<String> relationshipTypes();
 
-    static TraversalToEdgeConfig of(
+    @Value.Default
+    default boolean allowSelfLoops() {
+        return false;
+    };
+
+    static TraversalToRelationshipConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,

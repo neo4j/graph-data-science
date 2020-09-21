@@ -71,6 +71,8 @@ class TraversalToRelationshipTest {
             .builder()
             .concurrency(2)
             .relationshipTypes(List.of("TOOK", "TOOK"))
+            .mutateRelationshipType("SAME_DRUG")
+            .allowSelfLoops(false)
             .build();
 
         Relationships relationships = new TraversalToRelationship(
@@ -101,6 +103,62 @@ class TraversalToRelationshipTest {
             ", (a)-[:SAME_DRUG]->(b)" +
             ", (b)-[:SAME_DRUG]->(a)" +
             ", (c)-[:SAME_DRUG]->(d)" +
+            ", (d)-[:SAME_DRUG]->(c)";
+
+
+        assertGraphEquals(
+            fromGdl(expected),
+            graphStore.getGraph(RelationshipType.of("SAME_DRUG"))
+        );
+    }
+
+    @Test
+    void testAllowCreatingSelfLoops() {
+        var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
+
+        var config = ImmutableTraversalToRelationshipConfig
+            .builder()
+            .concurrency(2)
+            .relationshipTypes(List.of("TOOK", "TOOK"))
+            .mutateRelationshipType("SAME_DRUG")
+            .allowSelfLoops(true)
+            .build();
+
+        Relationships relationships = new TraversalToRelationship(
+            new Graph[]{tookRel, tookRel},
+            config,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+
+        ).compute();
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("SAME_DRUG"),
+            Optional.empty(),
+            Optional.empty(),
+            relationships
+        );
+
+        String expected =
+            "CREATE" +
+            "  (a:Patient {id: 1})" +
+            "  (b:Patient {id: 2})" +
+            "  (c:Patient {id: 4})" +
+            "  (d:Patient {id: 5})" +
+
+            "  (e:Drug {id: 6})" +
+            "  (f:Drug {id: 7})" +
+
+            ", (e)-[:SAME_DRUG]->(e)" +
+            ", (f)-[:SAME_DRUG]->(f)" +
+
+            ", (a)-[:SAME_DRUG]->(a)" +
+            ", (a)-[:SAME_DRUG]->(b)" +
+            ", (b)-[:SAME_DRUG]->(b)" +
+            ", (b)-[:SAME_DRUG]->(a)" +
+            ", (c)-[:SAME_DRUG]->(c)" +
+            ", (c)-[:SAME_DRUG]->(d)" +
+            ", (d)-[:SAME_DRUG]->(d)" +
             ", (d)-[:SAME_DRUG]->(c)";
 
 
