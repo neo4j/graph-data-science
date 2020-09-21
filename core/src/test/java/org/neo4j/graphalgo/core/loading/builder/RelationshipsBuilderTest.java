@@ -90,12 +90,7 @@ class RelationshipsBuilderTest {
 
 
     private IdMap createIdMap(long nodeCount) {
-        var nodesBuilder = GraphFactory.nodesBuilder(
-            nodeCount,
-            false,
-            1,
-            AllocationTracker.empty()
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
 
         for (long i = 0; i < nodeCount; i++) {
             nodesBuilder.addNode(i);

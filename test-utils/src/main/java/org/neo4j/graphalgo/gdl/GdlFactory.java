@@ -153,14 +153,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     private IdsAndProperties loadNodes() {
-        var idMapBuilder = GraphFactory.nodesBuilder(
-            dimensions.highestNeoId(),
-            true,
-            1,
-            loadingContext.tracker()
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(dimensions.highestNeoId())
+            .hasLabelInformation(true)
+            .concurrency(1)
+            .tracker(loadingContext.tracker())
+            .build();
 
-        gdlHandler.getVertices().forEach(vertex -> idMapBuilder.addNode(
+        gdlHandler.getVertices().forEach(vertex -> nodesBuilder.addNode(
             vertex.getId(),
             vertex.getLabels().stream()
                 .map(NodeLabel::of)
@@ -168,7 +168,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                 .toArray(NodeLabel[]::new)
         ));
 
-        var idMap = idMapBuilder.build();
+        var idMap = nodesBuilder.build();
 
         return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
     }

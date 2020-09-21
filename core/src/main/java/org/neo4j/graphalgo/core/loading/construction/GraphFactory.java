@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
+import org.immutables.builder.Builder;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
@@ -37,13 +39,23 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+@Value.Style(
+    builderVisibility = Value.Style.BuilderVisibility.PUBLIC,
+    depluralize = true,
+    deepImmutablesDetection = true
+)
 public final class GraphFactory {
 
     static final String DUMMY_PROPERTY = "property";
 
     private GraphFactory() {}
 
-    public static NodesBuilder nodesBuilder(
+    public static NodesBuilderBuilder initNodesBuilder() {
+        return new NodesBuilderBuilder();
+    }
+
+    @Builder.Factory
+    static NodesBuilder nodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
         int concurrency,

@@ -69,19 +69,17 @@ class GraphFactoryTest {
     @MethodSource("validProjections")
     void unweighted(Orientation orientation) {
         int nodeCount = 4;
-        var idMapBuilder = GraphFactory.nodesBuilder(
-            nodeCount,
-            true,
-            1,
-            AllocationTracker.empty()
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(nodeCount)
+            .hasLabelInformation(true)
+            .build();
 
-        idMapBuilder.addNode(0, NodeLabel.of("A"));
-        idMapBuilder.addNode(1, NodeLabel.of("A"), NodeLabel.of("B"));
-        idMapBuilder.addNode(2, NodeLabel.of("C"));
-        idMapBuilder.addNode(3);
+        nodesBuilder.addNode(0, NodeLabel.of("A"));
+        nodesBuilder.addNode(1, NodeLabel.of("A"), NodeLabel.of("B"));
+        nodesBuilder.addNode(2, NodeLabel.of("C"));
+        nodesBuilder.addNode(3);
 
-        IdMap idMap = idMapBuilder.build();
+        IdMap idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,
@@ -138,19 +136,13 @@ class GraphFactoryTest {
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
-
-        var idMapBuilder = GraphFactory.nodesBuilder(
-            nodeCount,
-            false,
-            1,
-            AllocationTracker.empty()
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
 
         for (int i = 0; i < nodeCount; i++) {
-            idMapBuilder.addNode(i);
+            nodesBuilder.addNode(i);
         }
 
-        IdMap idMap = idMapBuilder.build();
+        IdMap idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,

@@ -215,12 +215,10 @@ class TransientAdjacencyListTest {
 
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
         long sourceNodeId = targets[0];
-        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
-            targets[targets.length - 1],
-            false,
-            1,
-            AllocationTracker.empty()
-        );
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(targets[targets.length - 1])
+            .build();
+
         for (long target : targets) {
             nodesBuilder.addNode(target);
         }

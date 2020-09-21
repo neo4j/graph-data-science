@@ -85,16 +85,14 @@ public final class RandomGraphGenerator {
     }
 
     public HugeGraph generate() {
-        var idMapBuilder = GraphFactory.nodesBuilder(
-            nodeCount,
-            false,
-            1,
-            allocationTracker
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(nodeCount)
+            .tracker(allocationTracker)
+            .build();
 
-        generateNodes(idMapBuilder);
+        generateNodes(nodesBuilder);
 
-        IdMap idMap = idMapBuilder.build();
+        IdMap idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             orientation,

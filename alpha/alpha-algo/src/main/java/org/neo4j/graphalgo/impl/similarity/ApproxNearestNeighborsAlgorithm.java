@@ -275,12 +275,11 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             .mapToLong(SimilarityInput::getId)
             .max().orElse(0L);
 
-        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
-            maxNeoId,
-            false,
-            config.concurrency(),
-            tracker
-        );
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(maxNeoId)
+            .concurrency(config.concurrency())
+            .tracker(tracker)
+            .build();
 
         for (INPUT input : inputs) {
             nodesBuilder.addNode(input.getId());

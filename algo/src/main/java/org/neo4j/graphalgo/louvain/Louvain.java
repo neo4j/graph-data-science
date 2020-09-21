@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -190,12 +189,11 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         ModularityOptimization modularityOptimization,
         long maxCommunityId
     ) {
-        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
-            maxCommunityId,
-            false,
-            config.concurrency(),
-            tracker
-        );
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(maxCommunityId)
+            .concurrency(config.concurrency())
+            .tracker(tracker)
+            .build();
 
         assertRunning();
 

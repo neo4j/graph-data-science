@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
 import java.util.stream.LongStream;
@@ -36,15 +35,18 @@ class NodesBuilderTest {
     void parallelIdMapBuilder() {
         long nodeCount = 100;
         int concurrency = 4;
-        var idMapBuilder = GraphFactory.nodesBuilder(nodeCount, false, concurrency, AllocationTracker.empty());
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(nodeCount)
+            .concurrency(concurrency)
+            .build();
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
             concurrency,
-            stream -> stream.forEach(idMapBuilder::addNode)
+            stream -> stream.forEach(nodesBuilder::addNode)
         );
 
-        var idMap = idMapBuilder.build();
+        var idMap = nodesBuilder.build();
 
         assertEquals(nodeCount, idMap.nodeCount());
     }
@@ -53,15 +55,18 @@ class NodesBuilderTest {
     void parallelIdMapBuilderWithDuplicateNodes() {
         long attempts = 100;
         int concurrency = 4;
-        var idMapBuilder = GraphFactory.nodesBuilder(attempts, false, concurrency, AllocationTracker.empty());
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(attempts)
+            .concurrency(concurrency)
+            .build();
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, attempts),
             concurrency,
-            stream -> stream.forEach(originalId -> idMapBuilder.addNode(0))
+            stream -> stream.forEach(originalId -> nodesBuilder.addNode(0))
         );
 
-        var idMap = idMapBuilder.build();
+        var idMap = nodesBuilder.build();
 
         assertEquals(1, idMap.nodeCount());
     }
@@ -73,7 +78,11 @@ class NodesBuilderTest {
         var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
         var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
 
-        var idMapBuilder = GraphFactory.nodesBuilder(attempts, true, concurrency, AllocationTracker.empty());
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(attempts)
+            .hasLabelInformation(true)
+            .concurrency(concurrency)
+            .build();
 
         ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
             originalId -> {
@@ -81,11 +90,11 @@ class NodesBuilderTest {
                     ? labels1.toArray(NodeLabel[]::new)
                     : labels2.toArray(NodeLabel[]::new);
 
-                idMapBuilder.addNode(originalId, labels);
+                nodesBuilder.addNode(originalId, labels);
             })
         );
 
-        var idMap = idMapBuilder.build();
+        var idMap = nodesBuilder.build();
 
         var expectedLabels = new HashSet<NodeLabel>();
         expectedLabels.addAll(labels1);
