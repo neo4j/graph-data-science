@@ -59,15 +59,15 @@ public final class GraphFactory {
     @Builder.Factory
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
-        boolean hasLabelInformation,
-        int concurrency,
-        AllocationTracker tracker
+        Optional<Boolean> hasLabelInformation,
+        Optional<Integer> concurrency,
+        Optional<AllocationTracker> tracker
     ) {
         return new NodesBuilder(
             maxOriginalId,
-            hasLabelInformation,
-            concurrency,
-            tracker
+            hasLabelInformation.orElse(false),
+            concurrency.orElse(1),
+            tracker.orElse(AllocationTracker.empty())
         );
     }
 
