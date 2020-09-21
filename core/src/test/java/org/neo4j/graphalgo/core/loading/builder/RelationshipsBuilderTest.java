@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.LongStream;
@@ -43,7 +44,7 @@ class RelationshipsBuilderTest {
 
         var idMap = createIdMap(nodeCount);
 
-        var relationshipsBuilder = GraphBuilder.createRelationshipsBuilder(
+        var relationshipsBuilder = GraphFactory.relationshipsBuilder(
             idMap,
             Orientation.NATURAL,
             importProperty,
@@ -70,7 +71,7 @@ class RelationshipsBuilderTest {
         assertEquals(relationshipCount, relationships.topology().elementCount());
         assertEquals(Orientation.NATURAL, relationships.topology().orientation());
 
-        var graph = GraphBuilder.create(idMap, relationships, AllocationTracker.empty());
+        var graph = GraphFactory.create(idMap, relationships, AllocationTracker.empty());
 
         graph.forEachNode(nodeId -> {
             assertEquals(10, graph.degree(nodeId));
@@ -89,7 +90,7 @@ class RelationshipsBuilderTest {
 
 
     private IdMap createIdMap(long nodeCount) {
-        var nodesBuilder = GraphBuilder.createNodesBuilder(
+        var nodesBuilder = GraphFactory.nodesBuilder(
             nodeCount,
             false,
             1,

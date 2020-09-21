@@ -23,8 +23,8 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
-import org.neo4j.graphalgo.core.loading.builder.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlSupportExtension;
 import org.roaringbitmap.RoaringBitmap;
@@ -90,7 +90,7 @@ class NewOldGraphTest {
     }
 
     private static IdMap idMap(int numberOfNodes) {
-        NodesBuilder nodesBuilder = GraphBuilder.createNodesBuilder(
+        NodesBuilder nodesBuilder = GraphFactory.nodesBuilder(
             numberOfNodes,
             false,
             1,
