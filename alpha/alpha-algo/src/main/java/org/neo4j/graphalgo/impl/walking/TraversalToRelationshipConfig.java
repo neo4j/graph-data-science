@@ -34,7 +34,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TraversalToEdgeConfig extends AlgoBaseConfig, MutateRelationshipConfig {
+public interface TraversalToRelationshipConfig extends AlgoBaseConfig, MutateRelationshipConfig {
 
     @Nullable List<String> relationshipTypes();
 
@@ -44,7 +44,7 @@ public interface TraversalToEdgeConfig extends AlgoBaseConfig, MutateRelationshi
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TraversalToEdgeConfigImpl(
+        return new TraversalToRelationshipConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

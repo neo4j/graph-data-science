@@ -25,18 +25,21 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 @GdlExtension
-class TraversalToEdgeTest {
+class TraversalToRelationshipTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
@@ -60,14 +63,30 @@ class TraversalToEdgeTest {
     @Inject
     private IdFunction idFunction;
 
-
     @Test
-    void foo() {
+    void testCreatingRelationships() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        Relationships relationships = new TraversalToEdge(new Graph[]{tookRel, tookRel}, 2).compute();
+        var config = ImmutableTraversalToRelationshipConfig
+            .builder()
+            .concurrency(2)
+            .relationshipTypes(List.of("TOOK", "TOOK"))
+            .build();
 
-        graphStore.addRelationshipType(RelationshipType.of("SAME_DRUG"), Optional.empty(), Optional.empty(), relationships);
+        Relationships relationships = new TraversalToRelationship(
+            new Graph[]{tookRel, tookRel},
+            config,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+
+        ).compute();
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("SAME_DRUG"),
+            Optional.empty(),
+            Optional.empty(),
+            relationships
+        );
 
         String expected =
             "CREATE" +

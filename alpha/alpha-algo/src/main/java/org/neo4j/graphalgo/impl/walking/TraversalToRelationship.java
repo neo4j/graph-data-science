@@ -34,18 +34,23 @@ import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.BfsSources;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TraversalToEdge extends Algorithm<TraversalToEdge, Relationships> {
+public class TraversalToRelationship extends Algorithm<TraversalToRelationship, Relationships> {
 
     private final Graph[] graphs;
     private final long nodeCount;
-    private final int concurrency;
+    private final TraversalToRelationshipConfig config;
+    private final ExecutorService executorService;
+    private final AllocationTracker allocationTracker;
 
-    public TraversalToEdge(Graph[] graphs, int concurrency) {
+    public TraversalToRelationship(Graph[] graphs, TraversalToRelationshipConfig config, ExecutorService executorService, AllocationTracker allocationTracker) {
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
-        this.concurrency = concurrency;
+        this.config = config;
+        this.executorService = executorService;
+        this.allocationTracker = allocationTracker;
     }
 
     @Override
@@ -56,15 +61,15 @@ public class TraversalToEdge extends Algorithm<TraversalToEdge, Relationships> {
             false,
             Aggregation.NONE,
             false,
-            concurrency,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            config.concurrency(),
+            executorService,
+            allocationTracker
         );
 
         TraversalConsumer traversalConsumer = new TraversalConsumer(relImporter);
         AtomicLong batchOffset = new AtomicLong(0);
 
-        var tasks = ParallelUtil.tasks(concurrency, () -> () -> {
+        var tasks = ParallelUtil.tasks(config.concurrency(), () -> () -> {
             var currentOffset = 0L;
             long[] startNodes = new long[64];
             var localGraphs = new Graph[graphs.length];
@@ -84,7 +89,7 @@ public class TraversalToEdge extends Algorithm<TraversalToEdge, Relationships> {
                 var multiSourceBFS = MultiSourceBFS.traversalToEdge(
                     localGraphs,
                     traversalConsumer,
-                    AllocationTracker.empty(),
+                    allocationTracker,
                     startNodes
                 );
 
@@ -93,13 +98,13 @@ public class TraversalToEdge extends Algorithm<TraversalToEdge, Relationships> {
 
         });
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
 
         return relImporter.build();
     }
 
     @Override
-    public TraversalToEdge me() {
+    public TraversalToRelationship me() {
         return this;
     }
 
