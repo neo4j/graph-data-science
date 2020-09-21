@@ -29,8 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static gds.example.ExamplePregelComputation.KEY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.neo4j.graphalgo.TestSupport.mapEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ExamplePregelComputationProcTest extends BaseProcTest {
 
@@ -73,10 +72,12 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
             );
         });
 
-        assertThat(actual, mapEquals(Map.of(
+        Map<Long, Long> expected = Map.of(
             0L, 0L,
             1L, 1L,
             2L, 2L
-        )));
+        );
+
+        assertThat(expected).containsExactlyInAnyOrderEntriesOf(actual);
     }
 }
