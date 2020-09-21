@@ -68,6 +68,6 @@ public class TopNList {
             }
         };
 
-        return StreamSupport.stream(iterable.spliterator(), false);
+        return StreamSupport.stream(iterable.spliterator(), true);
     }
 }

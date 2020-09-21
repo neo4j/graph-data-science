@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 // TODO move to common similarity code
 public class SimilarityGraphBuilder {
 
+    private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
 
@@ -80,9 +82,11 @@ public class SimilarityGraphBuilder {
 
     public SimilarityGraphBuilder(
         Graph baseGraph,
+        int concurrency,
         ExecutorService executorService,
         AllocationTracker tracker
     ) {
+        this.concurrency = concurrency;
         this.executorService = executorService;
         this.tracker = tracker;
         this.baseGraph = baseGraph;
@@ -100,10 +104,13 @@ public class SimilarityGraphBuilder {
             .nodes(baseIdMap)
             .orientation(orientation)
             .loadRelationshipProperty(true)
+            .concurrency(concurrency)
             .executorService(executorService)
             .tracker(tracker)
             .build();
-        relationshipsBuilder.addFromInternal(stream);
+
+        ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
+
         return GraphFactory.create(
             baseIdMap,
             relationshipsBuilder.build(),

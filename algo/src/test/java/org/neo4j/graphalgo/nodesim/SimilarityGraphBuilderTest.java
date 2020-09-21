@@ -67,6 +67,7 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
+            1,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -89,6 +90,7 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
+            1,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

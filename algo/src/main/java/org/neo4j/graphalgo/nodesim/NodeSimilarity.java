@@ -137,7 +137,12 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             similarityGraph = new TopKGraph(graph, topKMap);
         } else {
             Stream<SimilarityResult> similarities = computeToStream();
-            similarityGraph = new SimilarityGraphBuilder(graph, executorService, tracker).build(similarities);
+            similarityGraph = new SimilarityGraphBuilder(
+                graph,
+                config.concurrency(),
+                executorService,
+                tracker
+            ).build(similarities);
         }
         return new SimilarityGraphResult(similarityGraph, nodesToCompare, isTopKGraph);
     }
