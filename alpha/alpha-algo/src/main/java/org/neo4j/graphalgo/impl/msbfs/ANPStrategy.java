@@ -43,10 +43,13 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
  */
 public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
 
-    private final BfsConsumer perNodeAction;
+    protected int depth;
 
-    ANPStrategy(BfsConsumer perNodeAction) {
+    final BfsConsumer perNodeAction;
+
+    public ANPStrategy(BfsConsumer perNodeAction) {
         this.perNodeAction = perNodeAction;
+        this.depth = 0;
     }
 
     @Override
@@ -61,7 +64,6 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
     ) {
         HugeCursor<long[]> visitCursor = visitSet.newCursor();
         HugeCursor<long[]> nextCursor = visitNextSet.newCursor();
-        int depth = 0;
 
         while (true) {
             visitSet.initCursor(visitCursor);
@@ -100,7 +102,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 }
             }
 
-            if (!hasNext) {
+            if (stopTraversal(hasNext)) {
                 return;
             }
 
@@ -109,7 +111,11 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         }
     }
 
-    private void prepareNextVisit(RelationshipIterator relationships, long nodeVisit, long nodeId, HugeLongArray nextSet) {
+    protected boolean stopTraversal(boolean hasNext) {
+        return !hasNext;
+    }
+
+    protected void prepareNextVisit(RelationshipIterator relationships, long nodeVisit, long nodeId, HugeLongArray nextSet) {
         relationships.forEachRelationship(
             nodeId,
             (src, tgt) -> {

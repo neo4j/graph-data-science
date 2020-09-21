@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.impl.walking;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -30,6 +31,8 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
 import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.impl.msbfs.ANPStrategy;
 import org.neo4j.graphalgo.impl.msbfs.BfsConsumer;
 import org.neo4j.graphalgo.impl.msbfs.BfsSources;
 import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
@@ -66,7 +69,7 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
             allocationTracker
         );
 
-        TraversalConsumer traversalConsumer = new TraversalConsumer(relImporter);
+        var traversalConsumer = new TraversalConsumer(relImporter, graphs.length);
         AtomicLong batchOffset = new AtomicLong(0);
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () -> () -> {
@@ -86,7 +89,7 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
                     startNodes[(int) (j - currentOffset)] = j;
                 }
 
-                var multiSourceBFS = MultiSourceBFS.traversalToEdge(
+                var multiSourceBFS = TraversalToEdgeMSBFSStrategy.initializeMultiSourceBFS(
                     localGraphs,
                     traversalConsumer,
                     allocationTracker,
@@ -113,15 +116,63 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
 
     }
 
+    private static class TraversalToEdgeMSBFSStrategy extends ANPStrategy {
+
+        static MultiSourceBFS initializeMultiSourceBFS(Graph[] graphs, BfsConsumer perNodeAction, AllocationTracker tracker, long[] startNodes) {
+            return new MultiSourceBFS(
+                graphs[0],
+                graphs[0],
+                new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
+                false,
+                tracker,
+                startNodes
+            );
+        }
+
+        private final Graph[] graphs;
+
+        TraversalToEdgeMSBFSStrategy(Graph[] graphs, BfsConsumer perNodeAction) {
+            super(perNodeAction);
+            this.graphs = graphs;
+        }
+
+        @Override
+        protected boolean stopTraversal(boolean hasNext) {
+            return !hasNext || depth >= graphs.length;
+        }
+
+        @Override
+        protected void prepareNextVisit(
+            RelationshipIterator relationships,
+            long nodeVisit,
+            long nodeId,
+            HugeLongArray nextSet
+        ) {
+            graphs[depth].forEachRelationship(
+                nodeId,
+                (src, tgt) -> {
+                    nextSet.or(tgt, nodeVisit);
+                    return true;
+                }
+            );
+        }
+    }
+
     private static final class TraversalConsumer implements BfsConsumer {
+        private final int targetDepth;
         private final RelationshipsBuilder relImporter;
 
-        private TraversalConsumer(RelationshipsBuilder relImporter) {this.relImporter = relImporter;}
+        private TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
+            this.relImporter = relImporter;
+            this.targetDepth = targetDepth;
+        }
 
         @Override
         public void accept(long targetNode, int depth, BfsSources sourceNode) {
-            while (sourceNode.hasNext()) {
-                relImporter.addFromInternal(sourceNode.next(), targetNode);
+            if (depth == targetDepth) {
+                while (sourceNode.hasNext()) {
+                    relImporter.addFromInternal(sourceNode.next(), targetNode);
+                }
             }
         }
     }

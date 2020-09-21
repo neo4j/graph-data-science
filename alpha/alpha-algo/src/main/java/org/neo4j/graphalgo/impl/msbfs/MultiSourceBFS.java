@@ -96,17 +96,6 @@ public final class MultiSourceBFS implements Runnable {
     private int sourceNodeCount;
     private long nodeOffset;
 
-    public static MultiSourceBFS traversalToEdge(Graph[] graphs, BfsConsumer perNodeAction, AllocationTracker tracker, long[] startNodes) {
-        return new MultiSourceBFS(
-            graphs[0],
-            graphs[0],
-            new TraversalToEdgeStrategy(graphs, perNodeAction),
-            false,
-            tracker,
-            startNodes
-        );
-    }
-
     /**
      * Initializes MS-BFS prepared for executing the Aggregated Neighbor Processing strategy.
      * <p>
@@ -194,7 +183,7 @@ public final class MultiSourceBFS implements Runnable {
         );
     }
 
-    private MultiSourceBFS(
+    public MultiSourceBFS(
         IdMapping nodeIds,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
