@@ -65,7 +65,7 @@ class TraversalToEdgeTest {
     void foo() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        Relationships relationships = new TraversalToEdge(new Graph[]{tookRel, tookRel}).compute();
+        Relationships relationships = new TraversalToEdge(new Graph[]{tookRel, tookRel}, 2).compute();
 
         graphStore.addRelationshipType(RelationshipType.of("SAME_DRUG"), Optional.empty(), Optional.empty(), relationships);
 
