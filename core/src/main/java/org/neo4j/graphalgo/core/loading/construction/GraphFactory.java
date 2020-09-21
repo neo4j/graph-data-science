@@ -31,12 +31,14 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 @Value.Style(
@@ -69,46 +71,30 @@ public final class GraphFactory {
         );
     }
 
-    public static RelationshipsBuilder relationshipsBuilder(
-        IdMap idMap,
-        Orientation orientation,
-        boolean loadRelationshipProperty,
-        Aggregation aggregation,
-        boolean preAggregate,
-        ExecutorService executorService,
-        AllocationTracker tracker
-    ) {
-        return relationshipsBuilder(
-            idMap,
-            orientation,
-            loadRelationshipProperty,
-            aggregation,
-            preAggregate,
-            1,
-            executorService,
-            tracker
-        );
+    public static RelationshipsBuilderBuilder initRelationshipsBuilder() {
+        return new RelationshipsBuilderBuilder();
     }
 
-    public static RelationshipsBuilder relationshipsBuilder(
-        IdMap idMap,
-        Orientation orientation,
-        boolean loadRelationshipProperty,
-        Aggregation aggregation,
-        boolean preAggregate,
-        int concurrency,
-        ExecutorService executorService,
-        AllocationTracker tracker
+    @Builder.Factory
+    static RelationshipsBuilder relationshipsBuilder(
+        IdMap nodes,
+        Optional<Orientation> orientation,
+        Optional<Boolean> loadRelationshipProperty,
+        Optional<Aggregation> aggregation,
+        Optional<Boolean> preAggregate,
+        Optional<Integer> concurrency,
+        Optional<ExecutorService> executorService,
+        Optional<AllocationTracker> tracker
     ) {
         return new RelationshipsBuilder(
-            idMap,
-            orientation,
-            loadRelationshipProperty,
-            aggregation,
-            preAggregate,
-            concurrency,
-            executorService,
-            tracker
+            nodes,
+            orientation.orElse(Orientation.NATURAL),
+            loadRelationshipProperty.orElse(false),
+            aggregation.orElse(Aggregation.NONE),
+            preAggregate.orElse(false),
+            concurrency.orElse(1),
+            executorService.orElse(Pools.DEFAULT),
+            tracker.orElse(AllocationTracker.empty())
         );
     }
 

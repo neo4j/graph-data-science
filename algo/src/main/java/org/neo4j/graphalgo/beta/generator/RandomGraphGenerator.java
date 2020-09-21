@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
@@ -93,15 +92,13 @@ public final class RandomGraphGenerator {
         generateNodes(nodesBuilder);
 
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            idMap,
-            orientation,
-            maybeRelationshipPropertyProducer.isPresent(),
-            aggregation,
-            false,
-            Pools.DEFAULT,
-            allocationTracker
-        );
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(orientation)
+            .loadRelationshipProperty(maybeRelationshipPropertyProducer.isPresent())
+            .aggregation(aggregation)
+            .tracker(allocationTracker)
+            .build();
 
         generateRelationships(relationshipsBuilder);
         if (maybeNodePropertyProducer.isPresent()) {

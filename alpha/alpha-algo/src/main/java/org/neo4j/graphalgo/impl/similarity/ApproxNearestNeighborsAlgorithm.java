@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdMap;
@@ -585,25 +584,19 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
-            RelationshipsBuilder outImporter = GraphFactory.relationshipsBuilder(
-                idMap,
-                Orientation.NATURAL,
-                false,
-                Aggregation.NONE,
-                false,
-                executorService,
-                tracker
-            );
+            RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
+                .nodes(idMap)
+                .orientation(Orientation.NATURAL)
+                .executorService(executorService)
+                .tracker(tracker)
+                .build();
 
-            RelationshipsBuilder inImporter = GraphFactory.relationshipsBuilder(
-                idMap,
-                Orientation.REVERSE,
-                false,
-                Aggregation.NONE,
-                false,
-                executorService,
-                tracker
-            );
+            RelationshipsBuilder inImporter = GraphFactory.initRelationshipsBuilder()
+                .nodes(idMap)
+                .orientation(Orientation.REVERSE)
+                .executorService(executorService)
+                .tracker(tracker)
+                .build();
 
             return ImmutableRelationshipImporter.of(outImporter, inImporter);
         }

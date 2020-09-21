@@ -22,9 +22,7 @@ package org.neo4j.graphalgo.core.loading.builder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -44,16 +42,12 @@ class RelationshipsBuilderTest {
 
         var idMap = createIdMap(nodeCount);
 
-        var relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            idMap,
-            Orientation.NATURAL,
-            importProperty,
-            Aggregation.NONE,
-            false,
-            concurrency,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(Orientation.NATURAL)
+            .loadRelationshipProperty(importProperty)
+            .concurrency(concurrency)
+            .build();
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, relationshipCount),

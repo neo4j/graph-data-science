@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -80,15 +79,11 @@ class GraphFactoryTest {
         nodesBuilder.addNode(3);
 
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            idMap,
-            orientation,
-            false,
-            Aggregation.SUM,
-            false,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(orientation)
+            .aggregation(Aggregation.SUM)
+            .build();
 
         for (int i = 0; i < nodeCount; i++) {
             relationshipsBuilder.add(i, (i + 1) % nodeCount);
@@ -143,15 +138,12 @@ class GraphFactoryTest {
         }
 
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            idMap,
-            orientation,
-            true,
-            aggregation,
-            false,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(orientation)
+            .aggregation(aggregation)
+            .loadRelationshipProperty(true)
+            .build();
 
         for (int i = 0; i < nodeCount; i++) {
             relationshipsBuilder.add(i, (i + 1) % nodeCount, i);

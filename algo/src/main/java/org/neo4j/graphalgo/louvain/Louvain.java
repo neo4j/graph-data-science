@@ -206,15 +206,15 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            idMap,
-            orientation,
-            true,
-            Aggregation.SUM,
-            true,
-            executorService,
-            tracker
-        );
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(orientation)
+            .loadRelationshipProperty(true)
+            .aggregation(Aggregation.SUM)
+            .preAggregate(true)
+            .executorService(executorService)
+            .tracker(tracker)
+            .build();
 
         workingGraph.forEachNode((nodeId) -> {
             long communityId = modularityOptimization.getCommunityId(nodeId);

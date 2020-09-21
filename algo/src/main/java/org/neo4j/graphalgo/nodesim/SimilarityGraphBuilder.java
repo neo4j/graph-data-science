@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
@@ -97,15 +96,13 @@ public class SimilarityGraphBuilder {
 
     public Graph build(Stream<SimilarityResult> stream) {
         Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.relationshipsBuilder(
-            baseIdMap,
-            orientation,
-            true,
-            Aggregation.NONE,
-            false,
-            executorService,
-            tracker
-        );
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(baseIdMap)
+            .orientation(orientation)
+            .loadRelationshipProperty(true)
+            .executorService(executorService)
+            .tracker(tracker)
+            .build();
         relationshipsBuilder.addFromInternal(stream);
         return GraphFactory.create(
             baseIdMap,
