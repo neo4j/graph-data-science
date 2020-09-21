@@ -142,7 +142,7 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
         }
 
         @Override
-        protected boolean stopTraversal(boolean hasNext) {
+        protected boolean stopTraversal(boolean hasNext, int depth) {
             return !hasNext || depth >= graphs.length;
         }
 
@@ -151,7 +151,8 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
             RelationshipIterator relationships,
             long nodeVisit,
             long nodeId,
-            HugeLongArray nextSet
+            HugeLongArray nextSet,
+            int depth
         ) {
             graphs[depth].forEachRelationship(
                 nodeId,

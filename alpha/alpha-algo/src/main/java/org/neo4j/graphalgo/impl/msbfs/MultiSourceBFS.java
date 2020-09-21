@@ -369,17 +369,17 @@ public final class MultiSourceBFS implements Runnable {
                 @Override
                 MultiSourceBFS next(final long from, final int length) {
                     return new MultiSourceBFS(
-                            nodeIds,
-                            relationships.concurrentCopy(),
-                            strategy,
-                            sourceLength,
-                            from,
-                            length,
+                        nodeIds,
+                        relationships.concurrentCopy(),
+                        strategy,
+                        sourceLength,
+                        from,
+                        length,
                         allowSelfLoops,
-                            visits,
-                            visitsNext,
-                            seens,
-                            seensNext
+                        visits,
+                        visitsNext,
+                        seens,
+                        seensNext
                     );
                 }
             };
@@ -390,16 +390,16 @@ public final class MultiSourceBFS implements Runnable {
             @Override
             MultiSourceBFS next(final long from, final int length) {
                 return new MultiSourceBFS(
-                        nodeIds,
-                        relationships.concurrentCopy(),
-                        strategy,
-                        nodeCount,
+                    nodeIds,
+                    relationships.concurrentCopy(),
+                    strategy,
+                    nodeCount,
                     allowSelfLoops,
-                        visits,
-                        visitsNext,
-                        seens,
-                        seensNext,
-                        Arrays.copyOfRange(startNodes, (int) from, (int) (from + length))
+                    visits,
+                    visitsNext,
+                    seens,
+                    seensNext,
+                    Arrays.copyOfRange(startNodes, (int) from, (int) (from + length))
                 );
             }
         };

@@ -43,13 +43,10 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
  */
 public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
 
-    protected int depth;
-
     final BfsConsumer perNodeAction;
 
     public ANPStrategy(BfsConsumer perNodeAction) {
         this.perNodeAction = perNodeAction;
-        this.depth = 0;
     }
 
     @Override
@@ -65,6 +62,8 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         HugeCursor<long[]> visitCursor = visitSet.newCursor();
         HugeCursor<long[]> nextCursor = visitNextSet.newCursor();
 
+        var depth = 0;
+
         while (true) {
             visitSet.initCursor(visitCursor);
             while (visitCursor.next()) {
@@ -74,7 +73,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 long base = visitCursor.base;
                 for (int i = offset; i < limit; ++i) {
                     if (array[i] != 0L) {
-                        prepareNextVisit(relationships, array[i], base + i, visitNextSet);
+                        prepareNextVisit(relationships, array[i], base + i, visitNextSet, 0);
                     }
                 }
             }
@@ -102,7 +101,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 }
             }
 
-            if (stopTraversal(hasNext)) {
+            if (stopTraversal(hasNext, depth)) {
                 return;
             }
 
@@ -111,11 +110,17 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         }
     }
 
-    protected boolean stopTraversal(boolean hasNext) {
+    protected boolean stopTraversal(boolean hasNext, int depth) {
         return !hasNext;
     }
 
-    protected void prepareNextVisit(RelationshipIterator relationships, long nodeVisit, long nodeId, HugeLongArray nextSet) {
+    protected void prepareNextVisit(
+        RelationshipIterator relationships,
+        long nodeVisit,
+        long nodeId,
+        HugeLongArray nextSet,
+        int depth
+    ) {
         relationships.forEachRelationship(
             nodeId,
             (src, tgt) -> {
