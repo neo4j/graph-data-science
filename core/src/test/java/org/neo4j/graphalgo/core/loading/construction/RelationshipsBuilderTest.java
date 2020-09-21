@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading.builder;
+package org.neo4j.graphalgo.core.loading.construction;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.LongStream;
