@@ -87,7 +87,6 @@ class DijkstraTest {
                 .withFilter(longToIntConsumer((s, t) -> !edgeBlackList.contains(RawValues.combineIntInt(s, t))));
     }
 
-    // TODO: make this return long, see `testFilterABDE --> RawValues.combineIntInt`
     private int id(String name) {
         return Math.toIntExact(graph.toMappedNodeId(idFunction.of(name)));
     }
