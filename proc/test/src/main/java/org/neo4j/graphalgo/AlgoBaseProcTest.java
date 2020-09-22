@@ -57,8 +57,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,8 +76,9 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIO
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
+import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
@@ -214,7 +214,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             IllegalArgumentException.class,
             runnable::run
         );
-        assertTrue(exception.getMessage().contains(error));
+        assertThat(exception).hasMessageContaining(error);
     }
 
     @AllGraphStoreFactoryTypesTest
@@ -248,12 +248,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @Test
     default void testRunOnImplicitlyLoadedGraph() {
-        Map<String, Object> cypherConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+        Map<String, Object> cypherConfig = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_QUERY_KEY, ALL_NODES_QUERY,
             RELATIONSHIP_QUERY_KEY, relationshipQuery()
         ))).toMap();
 
-        Map<String, Object> storeConfig = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+        Map<String, Object> storeConfig = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_PROJECTION_KEY, Collections.singletonList("*"),
             RELATIONSHIP_PROJECTION_KEY, relationshipProjections()
         ))).toMap();
@@ -329,6 +329,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+                    configMap.remove(NODE_PROPERTIES_KEY);
+                    configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
+                    configMap.remove("nodeWeightProperty");
+                    configMap.remove("relationshipWeightProperty");
 
                     try {
                         Stream<?> result = (Stream<?>) method.invoke(proc, configMap, Collections.emptyMap());
@@ -402,15 +406,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         Exception.class,
                         () -> method.invoke(proc, configMap, Collections.emptyMap())
                     );
-                    Throwable rootCause = rootCause(ex);
-                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
-                    assertThat(
-                        rootCause.getMessage(),
-                        containsString(formatWithLocale(
+                    assertThat(ex)
+                        .getRootCause()
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessageContaining(formatWithLocale(
                             "Invalid node projection, one or more labels not found: '%s'",
                             missingLabel
-                        ))
-                    );
+                    ));
                 });
         });
     }
@@ -429,8 +431,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     InvocationTargetException.class,
                     () -> method.invoke(proc, configMap, Collections.emptyMap())
                 );
-                assertEquals(IllegalArgumentException.class, ex.getCause().getClass());
-                assertThat(ex.getCause().getMessage(), containsString("The configured `readConcurrency` value is too high"));
+                assertThat(ex)
+                    .getRootCause()
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("The configured `readConcurrency` value is too high");
             })
         );
     }
@@ -461,15 +465,13 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         Exception.class,
                         () -> method.invoke(proc, configMap, Collections.emptyMap())
                     );
-                    Throwable rootCause = rootCause(ex);
-                    assertEquals(IllegalArgumentException.class, rootCause.getClass());
-                    assertThat(
-                        rootCause.getMessage(),
-                        containsString(formatWithLocale(
+                    assertThat(ex)
+                        .getRootCause()
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessageContaining(formatWithLocale(
                             "Invalid relationship projection, one or more relationship types not found: '%s'",
                             missingRelType
-                        ))
-                    );
+                        ));
                 });
         });
     }
@@ -489,13 +491,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             ))
         );
 
-        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
+        assertThat(ex)
+            .hasMessageContaining("Query must be read only. Query: ");
     }
 
     // NOTE: this test needs at least one relationship in order to pass
     @Test
     default void failOnImplicitLoadingWithAlteringRelationshipQuery() {
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+        Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.create(MapUtil.map(
             NODE_QUERY_KEY, ALL_NODES_QUERY,
             RELATIONSHIP_QUERY_KEY, "MATCH (s)-->(t) SET s.foo=false RETURN id(s) AS source, id(t) as target"
         ))).toMap();
@@ -507,8 +510,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 Collections.emptyMap()
             ))
         );
-
-        assertThat(ex.getMessage(), containsString("Query must be read only. Query: "));
+        assertThat(ex)
+            .hasMessageContaining("Query must be read only. Query: ");
     }
 
     String FAIL_ANY_CONFIG = formatWithLocale(
@@ -535,6 +538,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     @MethodSource("failingConfigurationMaps")
     default void failOnImplicitLoadingWithoutProjectionsOrQueries(String expectedMessage, Map<String, Object> configurationMap) {
         Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(configurationMap)).toMap();
+        config.remove("nodeWeightProperty");
 
         applyOnProcedure((proc) -> {
             IllegalArgumentException ex = assertThrows(

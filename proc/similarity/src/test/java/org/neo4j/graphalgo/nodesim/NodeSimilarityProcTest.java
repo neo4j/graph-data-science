@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.nodesim;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.utility.Iterate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,9 +43,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -60,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
@@ -165,15 +162,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
                 maybeStream2.isPresent(),
                 "The two results are of different kind, left is a stream result, right is a graph result."
             );
-            Collection<Pair<SimilarityResult, SimilarityResult>> comparableResults = Iterate.zip(
-                maybeStream1.get().collect(Collectors.toList()),
-                maybeStream2.get().collect(Collectors.toList())
-            );
-            for (Pair<SimilarityResult, SimilarityResult> pair : comparableResults) {
-                SimilarityResult left = pair.getOne();
-                SimilarityResult right = pair.getTwo();
-                assertEquals(left, right);
-            }
+            assertSimilarityStreamsAreEqual(maybeStream1.get(), maybeStream2.get());
             return;
         }
         Optional<SimilarityGraphResult> maybeGraph1 = result1.maybeGraphResult();

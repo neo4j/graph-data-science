@@ -42,6 +42,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -51,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends NodeWeightConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
@@ -77,22 +80,22 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
 
     @Test
     default void testTrimmedToNullNodeWeightProperty() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", "  "));
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withString("nodeWeightProperty", "  "));
         assertNull(config.nodeWeightProperty());
     }
 
     @Test
     default void testNodeWeightPropertyFromConfig() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", "weight"));
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withString("nodeWeightProperty", "weight"));
         assertEquals("weight", config.nodeWeightProperty());
     }
 
     @Test
     default void testEmptyNodeWeightPropertyValues() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", null));
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
+        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withoutEntry("nodeWeightProperty"));
         assertNull(config.nodeWeightProperty());
     }
 
@@ -100,7 +103,6 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
     default void testNodeWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE (:A {a: 1})");
         Map<String, Object> tempConfig = MapUtil.map(
-            "nodeWeightProperty", "foo",
             "nodeProjection", MapUtil.map(
                 "A", MapUtil.map(
                     "properties", singletonList("a")
@@ -109,7 +111,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             "relationshipProjection", "*"
         );
 
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).withString("nodeWeightProperty", "foo").toMap();
 
         IllegalArgumentException e = assertThrows(
             IllegalArgumentException.class,
@@ -130,19 +132,30 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
             GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            configMap.put(
                 "nodeWeightProperty",
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
-            ));
-            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
-                           "with node properties: [] in all node labels: ['__ALL__']";
+            );
+            String nodePropertyKeys = graphStore
+                .nodePropertyKeys()
+                .values()
+                .stream()
+                .flatMap(Set::stream)
+                .collect(Collectors.joining(", "));
+            String error = formatWithLocale("Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
+                           "with node properties: [%s] in all node labels: ['__ALL__']", nodePropertyKeys);
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
             ));
 
             Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+            implicitConfigMap.put(
+                "nodeWeightProperty",
+                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
+            );
             assertMissingProperty(error, () -> proc.compute(
                 implicitConfigMap,
                 emptyMap()
@@ -174,11 +187,9 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
 
         applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map(
-                "nodeWeightProperty", "foo",
-                "nodeLabels", List.of("Node")
-            ));
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of("nodeLabels", List.of("Node")));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            configMap.put("nodeWeightProperty", "foo");
             String error = "Node weight property `foo` not found in graph with node properties: [] in all node labels: ['Node']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
@@ -186,6 +197,8 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             ));
 
             Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+            implicitConfigMap.put("nodeProperties", "foo");
+            implicitConfigMap.put("nodeWeightProperty", "foo");
             assertMissingProperty(error, () -> proc.compute(
                 implicitConfigMap,
                 emptyMap()
@@ -200,9 +213,11 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         applyOnProcedure((proc) -> {
             loadExplicitGraphWithNodeWeights(graphName, MULTI_PROPERTY_NODE_PROJECTION);
 
-            CypherMapWrapper weightConfig = CypherMapWrapper.create(MapUtil.map("nodeWeightProperty", propertyName));
-            CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
-            CONFIG config = proc.newConfig(Optional.of(graphName), algoConfig);
+            CypherMapWrapper algoConfig = createMinimalConfig(CypherMapWrapper.empty());
+            Map<String, Object> algoConfigMap = algoConfig.toMap();
+            algoConfigMap.put("nodeWeightProperty", propertyName);
+            CypherMapWrapper weightConfig = CypherMapWrapper.create(algoConfigMap);
+            CONFIG config = proc.newConfig(Optional.of(graphName), weightConfig);
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
