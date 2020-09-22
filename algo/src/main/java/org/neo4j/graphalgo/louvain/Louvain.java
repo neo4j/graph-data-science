@@ -197,9 +197,10 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         assertRunning();
 
-        ParallelUtil.parallelForEachNode(workingGraph, config.concurrency(),
-            nodeId -> nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId))
-        );
+        workingGraph.forEachNode((nodeId) -> {
+            nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
+            return true;
+        });
 
         assertRunning();
 

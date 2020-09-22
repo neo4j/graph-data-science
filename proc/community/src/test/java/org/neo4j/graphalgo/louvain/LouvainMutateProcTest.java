@@ -60,12 +60,12 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     @Override
     public String expectedMutatedGraph() {
         return
-            "  (a:Node { communityId: 3, seed: 1 })" +
-            ", (b:Node { communityId: 3, seed: 1 })" +
-            ", (c:Node { communityId: 3, seed: 1 })" +
-            ", (d:Node { communityId: 3, seed: 1 })" +
-            ", (e:Node { communityId: 3, seed: 1 })" +
-            ", (f:Node { communityId: 3, seed: 1 })" +
+            "  (a:Node { communityId: 14, seed: 1 })" +
+            ", (b:Node { communityId: 14, seed: 1 })" +
+            ", (c:Node { communityId: 14, seed: 1 })" +
+            ", (d:Node { communityId: 14, seed: 1 })" +
+            ", (e:Node { communityId: 14, seed: 1 })" +
+            ", (f:Node { communityId: 14, seed: 1 })" +
             ", (g:Node { communityId: 7, seed: 2 })" +
             ", (h:Node { communityId: 7, seed: 2 })" +
             ", (i:Node { communityId: 7, seed: 2 })" +
@@ -74,7 +74,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
             ", (l:Node { communityId: 12, seed: 42 })" +
             ", (m:Node { communityId: 12, seed: 42 })" +
             ", (n:Node { communityId: 12, seed: 42 })" +
-            ", (x:Node { communityId: 3, seed: 1 })" +
+            ", (x:Node { communityId: 14, seed: 1 })" +
             // 'LOUVAIN_GRAPH' is UNDIRECTED, e.g. each rel twice
             ", (a)-->(b)-->(a)" +
             ", (a)-->(d)-->(a)" +
