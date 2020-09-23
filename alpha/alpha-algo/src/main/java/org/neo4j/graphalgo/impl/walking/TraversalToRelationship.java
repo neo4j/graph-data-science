@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.builder.GraphBuilder;
-import org.neo4j.graphalgo.core.loading.builder.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.msbfs.ANPStrategy;
@@ -58,8 +58,8 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
 
     @Override
     public Relationships compute() {
-        RelationshipsBuilder relImporter = GraphBuilder.createRelationshipsBuilder(
-            ((HugeGraph)graphs[0]).idMap(),
+        RelationshipsBuilder relImporter = GraphFactory.relationshipsBuilder(
+            ((HugeGraph) graphs[0]).idMap(),
             Orientation.NATURAL,
             false,
             Aggregation.NONE,
