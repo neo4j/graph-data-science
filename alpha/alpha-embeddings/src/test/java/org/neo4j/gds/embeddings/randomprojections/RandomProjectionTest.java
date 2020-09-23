@@ -250,7 +250,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(158_544, estimate.min);
+        assertEquals(159_792, estimate.min);
     }
 
     @Test
@@ -265,7 +265,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(158544, estimate.min);
+        assertEquals(159_792, estimate.min);
     }
 
     @Test
