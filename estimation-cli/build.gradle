@@ -49,4 +49,3 @@ task shadowCopy(type: Copy) {
 }
 
 tasks.ci.dependsOn tasks.shadowCopy
-tasks.estimationCliArtifacts.dependsOn tasks.shadowCopy

@@ -369,8 +369,6 @@ tasks.assemble.dependsOn packageHtml, packagePdf
 rootProject.tasks.ci.finalizedBy assemble
 rootProject.tasks.cipr.finalizedBy packageHtml
 
-rootProject.tasks.docsArtifacts.finalizedBy assemble
-
 apply from: "$publicDir/gradle/build.preview.gradle"
 
 // vim: set fdm=expr:
