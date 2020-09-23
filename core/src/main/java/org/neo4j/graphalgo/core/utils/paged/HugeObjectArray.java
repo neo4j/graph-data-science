@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
@@ -229,10 +230,10 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
 
         builder.perNode("pages", nodeCount -> {
             if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
-                return 0;
+                return sizeOfObjectArray(nodeCount);
             } else {
                 int numPages = numberOfPages(nodeCount);
-                return sizeOfObjectArray(numPages);
+                return sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(PAGE_SIZE);
             }
         });
         return builder.build();
