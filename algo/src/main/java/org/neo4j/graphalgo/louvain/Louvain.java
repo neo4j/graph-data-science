@@ -226,6 +226,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             });
         });
 
+        relationshipIterator.close();
+
         return GraphFactory.create(idMap, relationshipsBuilder.build(), tracker);
     }
 
