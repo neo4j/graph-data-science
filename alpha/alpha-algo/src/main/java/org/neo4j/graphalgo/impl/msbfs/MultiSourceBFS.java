@@ -92,7 +92,7 @@ public final class MultiSourceBFS implements Runnable {
     private final IdMapping nodeIds;
     private final RelationshipIterator relationships;
     private final ExecutionStrategy strategy;
-    private final boolean allowSelfLoops;
+    private final boolean allowStartNodeTraversal;
     private final long[] startNodes;
     private int sourceNodeCount;
     private long nodeOffset;
@@ -192,14 +192,14 @@ public final class MultiSourceBFS implements Runnable {
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean initSeenNext,
-        boolean allowSelfLoops,
+        boolean allowStartNodeTraversal,
         AllocationTracker tracker,
         long... startNodes
     ) {
         this.nodeIds = nodeIds;
         this.relationships = relationships;
         this.strategy = strategy;
-        this.allowSelfLoops = allowSelfLoops;
+        this.allowStartNodeTraversal = allowStartNodeTraversal;
         this.startNodes = (startNodes != null && startNodes.length > 0) ? startNodes : null;
         if (this.startNodes != null) {
             Arrays.sort(this.startNodes);
@@ -216,7 +216,7 @@ public final class MultiSourceBFS implements Runnable {
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
-        boolean allowSelfLoops,
+        boolean allowStartNodeTraversal,
         CloseableThreadLocal<HugeLongArray> visits,
         CloseableThreadLocal<HugeLongArray> visitsNext,
         CloseableThreadLocal<HugeLongArray> seens,
@@ -229,7 +229,7 @@ public final class MultiSourceBFS implements Runnable {
         this.strategy = strategy;
         this.startNodes = startNodes;
         this.nodeCount = nodeCount;
-        this.allowSelfLoops = allowSelfLoops;
+        this.allowStartNodeTraversal = allowStartNodeTraversal;
         this.visits = visits;
         this.visitsNext = visitsNext;
         this.seens = seens;
@@ -243,7 +243,7 @@ public final class MultiSourceBFS implements Runnable {
         long nodeCount,
         long nodeOffset,
         int sourceNodeCount,
-        boolean allowSelfLoops,
+        boolean allowStartNodeTraversal,
         CloseableThreadLocal<HugeLongArray> visits,
         CloseableThreadLocal<HugeLongArray> visitsNext,
         CloseableThreadLocal<HugeLongArray> seens,
@@ -256,7 +256,7 @@ public final class MultiSourceBFS implements Runnable {
         this.nodeCount = nodeCount;
         this.nodeOffset = nodeOffset;
         this.sourceNodeCount = sourceNodeCount;
-        this.allowSelfLoops = allowSelfLoops;
+        this.allowStartNodeTraversal = allowStartNodeTraversal;
         this.visits = visits;
         this.visitsNext = visitsNext;
         this.seens = seens;
@@ -327,7 +327,7 @@ public final class MultiSourceBFS implements Runnable {
 
         for (int i = 0; i < localNodeCount; ++i) {
             long nodeId = startNodes[i];
-            if (!allowSelfLoops) {
+            if (!allowStartNodeTraversal) {
                 seenSet.set(nodeId, 1L << i);
             }
             visitSet.or(nodeId, 1L << i);
@@ -375,7 +375,7 @@ public final class MultiSourceBFS implements Runnable {
                         sourceLength,
                         from,
                         length,
-                        allowSelfLoops,
+                        allowStartNodeTraversal,
                         visits,
                         visitsNext,
                         seens,
@@ -394,7 +394,7 @@ public final class MultiSourceBFS implements Runnable {
                     relationships.concurrentCopy(),
                     strategy,
                     nodeCount,
-                    allowSelfLoops,
+                    allowStartNodeTraversal,
                     visits,
                     visitsNext,
                     seens,
