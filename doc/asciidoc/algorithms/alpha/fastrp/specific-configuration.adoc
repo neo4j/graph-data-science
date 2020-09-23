@@ -4,13 +4,11 @@
 | Name                          | Type          | Default   | Optional  | Description
 | embeddingSize                 | Integer       | n/a       | no        | The dimension of the computed node embeddings.
 | sparsity                      | Integer       | 3         | yes       | The expected proportion of non-zero elements in the initial random vectors is `1/sparsity`.
-| maxIterations                 | Integer       | n/a       | no        | The number of iterations to run. Each iteration produces an intermediate embedding per node.
-| iterationWeights              | List<Float>   | []        | yes       | Controls how much each intermediate embedding from an iteration contributes to the final embedding.
+| iterationWeights              | List<Float>   | []        | yes       | Contains a weight for each iteration. The weight controls how much the intermediate embedding from the iteration contributes to the final embedding.
 | normalizationStrength         | Float         | 0         | yes       | The initial random vector for each node is scaled by its degree to the power of `normalizationStrength`.
 | normalizeL2                   | Boolean       | false     | yes       | Whether the intermediate embeddings produced at each iteration should be l2 normalized.
 | relationshipWeightProperty    | String        | null      | yes       | The name of the relationship property used for weighted random projection
-5+| If `iterationWeights` is non-empty, then its length must be the same as `maxIterations`.
-5+| If `iterationWeights` is empty, then the resulting each node embedding is a concatenation of its intermediate embeddings.
+5+| The number of iterations is equal to the length of `iterationWeights`.
 |===
 
 

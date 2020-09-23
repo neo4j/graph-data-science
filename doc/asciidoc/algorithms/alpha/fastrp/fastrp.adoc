@@ -7,24 +7,36 @@
 This section describes the Random Projection node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
-Random Projection (fastrp), is a node embedding algorithm that uses very sparse random projections.
-It iteratively constructs _intermediate_ embeddings by averaging neighboring embeddings.
+Random Projection, is a node embedding algorithm in the family of random projection algorithms.
+These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which, one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
+In fact the projection is linear and can be chosen in a random way.
+
+Such techniques therefore allow for aggressive dimensionality reduction while preserving most of the distance information.
+The Random Projection operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
+This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors. Conversely, two nodes that are not similar
+should be not be assigned similar embedding vectors.
+
+The Random Projection algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
+The algorithm then iteratively constructs _intermediate_ embeddings by averaging neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
+
+In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
+
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way Random Projection exploits higher-order relationships in the graph while still being highly scalable.
 
-There are two aggregation methods that the algorithm can use.
-The computed embeddings are aggregated from intermediate embeddings computed during the iterations.
-One aggregation simply concatenates all the intermediate embeddings node by node.
-The other aggregation computes the embeddings as a weighted sum of the intermediate embeddings.
-The choice of aggregation method is made by specifying `iterationWeights` configuration parameters either as an empty list or containing the desired weights for the iterations.
-In order to instead compute weighted averages of neighbouring embeddings, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
+The present implementation extends the original algorithm to support weighted graphs, which computes weighted averages of neighboring embeddings using the relationship weights.
+In order to make use of this, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
 
-NOTE: The algorithm is defined only for UNDIRECTED graphs.
+The original algorithm is intended only for undirected graphs.
+We support running on both on directed graphs and undirected graph.
+For directed graphs we consider only the outgoing neighbors when computing the intermediate embeddings for a node.
+Therefore, using the orientations NATURAL, REVERSE and UNDIRECTED will all give different embeddings.
+In general, it is recommended to first use UNDIRECTED as this is what the original algorithm was evaluated on.
 
 For more information on this algorithm see:
 
 * https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
-
+* https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 [[algorithms-embeddings-random-projection-syntax]]
 == Syntax
@@ -164,8 +176,6 @@ CALL gds.graph.create(
     }
 })
 ----
-
-NOTE: The algorithm is defined only for UNDIRECTED graphs.
 
 
 === Stream
