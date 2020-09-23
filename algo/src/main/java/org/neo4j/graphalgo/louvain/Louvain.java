@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
@@ -36,7 +37,8 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.utils.CloseableThreadLocal;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -44,6 +46,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -216,17 +219,19 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .tracker(tracker)
             .build();
 
-        var relationshipIterator = CloseableThreadLocal.withInitial(workingGraph::concurrentCopy);
+        var relationshipCreators = PartitionUtils
+            .rangePartition(config.concurrency(), workingGraph.nodeCount())
+            .stream()
+            .map(partition ->
+                new RelationshipCreator(
+                    relationshipsBuilder,
+                    modularityOptimization,
+                    workingGraph.concurrentCopy(),
+                    partition
+                ))
+            .collect(Collectors.toList());
 
-        ParallelUtil.parallelForEachNode(workingGraph, config.concurrency(), nodeId -> {
-            long communityId = modularityOptimization.getCommunityId(nodeId);
-            relationshipIterator.get().forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
-                return true;
-            });
-        });
-
-        relationshipIterator.close();
+        ParallelUtil.run(relationshipCreators, executorService);
 
         return GraphFactory.create(idMap, relationshipsBuilder.build(), tracker);
     }
@@ -305,6 +310,41 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         @Override
         public OptionalLong getMaxLongPropertyValue() {
             return OptionalLong.empty();
+        }
+    }
+
+    static final class RelationshipCreator implements Runnable {
+
+        private final RelationshipsBuilder relationshipsBuilder;
+
+        private final ModularityOptimization modularityOptimization;
+
+        private final RelationshipIterator relationshipIterator;
+
+        private final Partition partition;
+
+
+        private RelationshipCreator(
+            RelationshipsBuilder relationshipsBuilder,
+            ModularityOptimization modularityOptimization,
+            RelationshipIterator relationshipIterator,
+            Partition partition
+        ) {
+            this.relationshipsBuilder = relationshipsBuilder;
+            this.modularityOptimization = modularityOptimization;
+            this.relationshipIterator = relationshipIterator;
+            this.partition = partition;
+        }
+
+        @Override
+        public void run() {
+            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+                long communityId = modularityOptimization.getCommunityId(nodeId);
+                relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
+                    relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
+                    return true;
+                });
+            }
         }
     }
 }
