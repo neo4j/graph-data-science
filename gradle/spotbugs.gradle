@@ -1,35 +1,39 @@
-allprojects { proj ->
+def shouldSpotbugs = !project.hasProperty('no-spotbugs')
 
-    plugins.withType(JavaLibraryPlugin) {
+if (shouldSpotbugs) {
+    allprojects { proj ->
 
-        proj.apply plugin: 'com.github.spotbugs'
+        plugins.withType(JavaLibraryPlugin) {
 
-        proj.spotbugs {
-            toolVersion = ver.spotbugsToolVersion
-            effort = 'max'
-            reportLevel = 'low'
+            proj.apply plugin: 'com.github.spotbugs'
 
-            // When  `ignoreFailures=false` the build will be failing on spotbugs errors
-            ignoreFailures = false
-            showStackTraces = false
-            showProgress = false
+            proj.spotbugs {
+                toolVersion = ver.spotbugsToolVersion
+                effort = 'max'
+                reportLevel = 'low'
 
-            excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
-        }
+                // When  `ignoreFailures=false` the build will be failing on spotbugs errors
+                ignoreFailures = false
+                showStackTraces = false
+                showProgress = false
 
-        proj.tasks.withType(SpotBugsTask) {
-            proj.tasks.spotbugs.dependsOn(it)
+                excludeFilter = file("$publicDir/etc/spotbugs/spotbugs-exclude.xml")
+            }
 
-            def taskName = it.name
-            it.reports {
-                html {
-                    // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
-                    enabled = true
-                    destination = file("${spotbugsReportsDir}/html/${taskName}/${proj.name}.html")
-                }
-                xml {
-                    enabled = false
-                    destination = file("${spotbugsReportsDir}/xml/${taskName}/${proj.name}.xml")
+            proj.tasks.withType(SpotBugsTask) {
+                proj.tasks.spotbugs.dependsOn(it)
+
+                def taskName = it.name
+                it.reports {
+                    html {
+                        // Due to a known issue with SpotBugs, HTML and XML reports cannot be generated both at the same time.
+                        enabled = true
+                        destination = file("${spotbugsReportsDir}/html/${taskName}/${proj.name}.html")
+                    }
+                    xml {
+                        enabled = false
+                        destination = file("${spotbugsReportsDir}/xml/${taskName}/${proj.name}.xml")
+                    }
                 }
             }
         }
