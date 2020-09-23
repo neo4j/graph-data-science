@@ -113,6 +113,10 @@ public final class InitContext {
     public void setNodeValue(String key, double value);
     // Sets a long node value for the given schema key.
     public void setNodeValue(String key, long value);
+    // Sets a double array node value for the given schema key.
+    public void setNodeValue(String key, double[] value);
+    // Sets a long array node value for the given schema key.
+    public void setNodeValue(String key, long[] value);
     // Number of nodes in the input graph.
     public long nodeCount();
     // Number of relationships in the input graph.
@@ -151,14 +155,20 @@ public final class ComputeContext {
     public double doubleNodeValue(String key);
     // Double value for the given node schema key.
     public long longNodeValue(String key);
+    // Double array value for the given node schema key.
+    public double[] doubleArrayNodeValue(String key);
+    // Long array value for the given node schema key.
+    public long[] longArrayNodeValue(String key);
     // Notify the framework that the node intends to stop its computation.
     public void voteToHalt();
     // Indicates whether this is superstep 0.
     public boolean isInitialSuperstep();
     // 0-based superstep identifier.
     public int superstep();
-    // Send message to all neighbors of the currently processed node.
-    public void sendMessages(double message);
+    // Sends the given message to all neighbors of the node.
+    public void sendToNeighbors(double message);
+    // Sends the given message to the target node.
+    public void sendTo(long targetNodeId, double message);
 }
 ----
 
