@@ -1,33 +1,37 @@
-subprojects { proj ->
-    proj.apply plugin: 'checkstyle'
+def shouldCheckstyle = !project.hasProperty('no-checkstyle')
 
-    proj.checkstyle {
-        configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
-        configProperties = [
-                'org.checkstyle.sun.suppressionfilter.config':
-                        file("$publicDir/etc/checkstyle/checkstyle-suppressions.xml")
-        ]
+if (shouldCheckstyle) {
+    subprojects { proj ->
+        proj.apply plugin: 'checkstyle'
 
-        // When  `ignoreFailures=false` the build will be failing on checkstyle errors
-        ignoreFailures = false
-        // When  `showViolations=true` the checkstyle errors will be printed in the console
-        showViolations = false
-    }
+        proj.checkstyle {
+            configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
+            configProperties = [
+                    'org.checkstyle.sun.suppressionfilter.config':
+                            file("$publicDir/etc/checkstyle/checkstyle-suppressions.xml")
+            ]
 
-    proj.tasks.withType(Checkstyle) {
-        proj.tasks.checkstyle.dependsOn(it)
-        def fileName = "${proj.name}-${name}"
-        reports {
-            xml {
-                enabled false
-                destination file("${checkstyleReportsDir}/xml/${fileName}.xml")
-            }
-            html {
-                // Disable HTML reports by default, TeamCity would make use only of the XML ones.
-                // Keeping this here for local checks/investigation.
-                enabled true
-                destination file("${checkstyleReportsDir}/html/${fileName}.html")
-                stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
+            // When  `ignoreFailures=false` the build will be failing on checkstyle errors
+            ignoreFailures = false
+            // When  `showViolations=true` the checkstyle errors will be printed in the console
+            showViolations = false
+        }
+
+        proj.tasks.withType(Checkstyle) {
+            proj.tasks.checkstyle.dependsOn(it)
+            def fileName = "${proj.name}-${name}"
+            reports {
+                xml {
+                    enabled false
+                    destination file("${checkstyleReportsDir}/xml/${fileName}.xml")
+                }
+                html {
+                    // Disable HTML reports by default, TeamCity would make use only of the XML ones.
+                    // Keeping this here for local checks/investigation.
+                    enabled true
+                    destination file("${checkstyleReportsDir}/html/${fileName}.html")
+                    stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
+                }
             }
         }
     }
