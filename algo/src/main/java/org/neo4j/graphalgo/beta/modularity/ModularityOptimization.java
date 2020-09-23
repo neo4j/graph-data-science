@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
@@ -38,11 +39,13 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.utils.CloseableThreadLocal;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -215,41 +218,89 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
 
-        double doubleTotalNodeWeight;
+        var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount)
+            .stream()
+            .map(partition -> new InitTask(
+                graph.concurrentCopy(),
+                currentCommunities,
+                communityWeights,
+                cumulativeNodeWeights,
+                seedProperty != null,
+                partition
+            ))
+            .collect(Collectors.toList());
 
-        try (var graphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
-            doubleTotalNodeWeight = ParallelUtil.parallelStream(
-                LongStream.range(0, nodeCount),
-                concurrency,
-                nodeStream ->
-                    nodeStream.mapToDouble(nodeId -> {
-                        // Note: this map function has side effects - For performance reasons!!!11!
-                        if (seedProperty == null) {
-                            currentCommunities.set(nodeId, nodeId);
-                        }
+        ParallelUtil.run(initTasks, executor);
 
-                        MutableDouble cumulativeWeight = new MutableDouble(0.0D);
-
-                        graphCopy.get().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                            cumulativeWeight.add(w);
-                            return true;
-                        });
-
-                        communityWeights.update(
-                            currentCommunities.get(nodeId),
-                            acc -> acc + cumulativeWeight.doubleValue()
-                        );
-
-                        cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
-
-                        return cumulativeWeight.doubleValue();
-                    }).reduce(Double::sum)
-                        .orElseThrow(() -> new RuntimeException("Error initializing modularity optimization."))
-            );
-        }
+        var doubleTotalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
 
         totalNodeWeight = doubleTotalNodeWeight / 2.0;
         currentCommunities.copyTo(nextCommunities, nodeCount);
+    }
+
+    private static final class InitTask implements Runnable {
+
+        private final RelationshipIterator relationshipIterator;
+
+        private final HugeLongArray currentCommunities;
+
+        private final HugeAtomicDoubleArray communityWeights;
+
+        private final HugeDoubleArray cumulativeNodeWeights;
+
+        private final boolean isSeeded;
+
+        private final Partition partition;
+
+        private double localSum;
+
+        private InitTask(
+            RelationshipIterator relationshipIterator,
+            HugeLongArray currentCommunities,
+            HugeAtomicDoubleArray communityWeights,
+            HugeDoubleArray cumulativeNodeWeights,
+            boolean isSeeded,
+            Partition partition
+        ) {
+            this.relationshipIterator = relationshipIterator;
+            this.currentCommunities = currentCommunities;
+            this.communityWeights = communityWeights;
+            this.cumulativeNodeWeights = cumulativeNodeWeights;
+            this.isSeeded = isSeeded;
+            this.partition = partition;
+            this.localSum = 0.0D;
+        }
+
+        @Override
+        public void run() {
+            var cumulativeWeight = new MutableDouble();
+
+            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+                if (!isSeeded) {
+                    currentCommunities.set(nodeId, nodeId);
+                }
+
+                cumulativeWeight.setValue(0.0D);
+
+                relationshipIterator.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    cumulativeWeight.add(w);
+                    return true;
+                });
+
+                communityWeights.update(
+                    currentCommunities.get(nodeId),
+                    acc -> acc + cumulativeWeight.doubleValue()
+                );
+
+                cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
+
+                localSum += cumulativeWeight.doubleValue();
+            }
+        }
+
+        double localSum() {
+            return localSum;
+        }
     }
 
     private void optimizeForColor(long currentColor) {
