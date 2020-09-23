@@ -153,6 +153,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                     );
 
                     Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    config.remove("nodeWeightProperty");
                     try {
                         mutateMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {

@@ -76,6 +76,7 @@ public interface MutateRelationshipTest<ALGORITHM extends Algorithm<ALGORITHM, R
                     );
 
                     Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    config.remove("nodeWeightProperty");
                     try {
                         mutateMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {
