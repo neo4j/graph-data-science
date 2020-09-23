@@ -21,12 +21,13 @@ package org.neo4j.graphalgo.nodesim;
 
 import org.neo4j.graphalgo.api.Graph;
 
+// TODO move to common similarity code
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
     private final long comparedNodes;
     private final boolean isTopKGraph;
 
-    SimilarityGraphResult(Graph similarityGraph, long comparedNodes, boolean isTopKGraph) {
+    public SimilarityGraphResult(Graph similarityGraph, long comparedNodes, boolean isTopKGraph) {
         this.similarityGraph = similarityGraph;
         this.comparedNodes = comparedNodes;
         this.isTopKGraph = isTopKGraph;
