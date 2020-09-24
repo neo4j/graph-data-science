@@ -24,7 +24,7 @@ For example, the following statement will not be able to load any nodes:
 [EXAMPLE]
 [source, cypher]
 ----
-MATCH (n) SET n:MyLabel CALL algo.graph.load('graph-name', 'MyLabel', '')
+MATCH (n) SET n:MyLabel CALL gds.graph.create('graph-name', 'MyLabel', '*')
 ----
 
 Similarly, the following statement will execute the algorithm over an empty graph:
@@ -34,7 +34,9 @@ Similarly, the following statement will execute the algorithm over an empty grap
 ----
 MATCH (n)
 SET n:MyLabel
-CALL algo.pageRank('MyLabel', null)
+CALL gds.pageRank(
+  {nodeProjection: 'MyLabel',
+   relationshipProjection:'*'})
 ----
 
 [[tx-graph-writing]]
