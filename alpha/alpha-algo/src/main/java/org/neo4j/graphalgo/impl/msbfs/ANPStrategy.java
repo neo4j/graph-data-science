@@ -43,9 +43,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
  */
 public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
 
-    private final BfsConsumer perNodeAction;
+    final BfsConsumer perNodeAction;
 
-    ANPStrategy(BfsConsumer perNodeAction) {
+    public ANPStrategy(BfsConsumer perNodeAction) {
         this.perNodeAction = perNodeAction;
     }
 
@@ -61,7 +61,8 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
     ) {
         HugeCursor<long[]> visitCursor = visitSet.newCursor();
         HugeCursor<long[]> nextCursor = visitNextSet.newCursor();
-        int depth = 0;
+
+        var depth = 0;
 
         while (true) {
             visitSet.initCursor(visitCursor);
@@ -72,7 +73,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 long base = visitCursor.base;
                 for (int i = offset; i < limit; ++i) {
                     if (array[i] != 0L) {
-                        prepareNextVisit(relationships, array[i], base + i, visitNextSet);
+                        prepareNextVisit(relationships, array[i], base + i, visitNextSet, 0);
                     }
                 }
             }
@@ -100,7 +101,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 }
             }
 
-            if (!hasNext) {
+            if (stopTraversal(hasNext, depth)) {
                 return;
             }
 
@@ -109,7 +110,17 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         }
     }
 
-    private void prepareNextVisit(RelationshipIterator relationships, long nodeVisit, long nodeId, HugeLongArray nextSet) {
+    protected boolean stopTraversal(boolean hasNext, int depth) {
+        return !hasNext;
+    }
+
+    protected void prepareNextVisit(
+        RelationshipIterator relationships,
+        long nodeVisit,
+        long nodeId,
+        HugeLongArray nextSet,
+        int depth
+    ) {
         relationships.forEachRelationship(
             nodeId,
             (src, tgt) -> {
