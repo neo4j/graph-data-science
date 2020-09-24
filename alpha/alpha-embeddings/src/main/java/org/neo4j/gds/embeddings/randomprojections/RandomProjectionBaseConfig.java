@@ -34,7 +34,7 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
-    List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 0.0D, 1.0D);
+    List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
     int embeddingSize();
 
