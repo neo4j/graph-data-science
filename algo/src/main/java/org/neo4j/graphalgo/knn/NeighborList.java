@@ -122,7 +122,7 @@ class NeighborList {
     public void addAll(
         LongHashSet neighbors,
         long baseNodeId,
-        Knn.SimilarityComputer similarityComputer,
+        SimilarityComputer similarityComputer,
         SplittableRandom random
     ) {
         for (LongCursor neighbor : neighbors) {

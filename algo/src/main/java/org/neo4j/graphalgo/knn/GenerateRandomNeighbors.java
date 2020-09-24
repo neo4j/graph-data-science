@@ -30,7 +30,7 @@ import java.util.SplittableRandom;
  */
 final class GenerateRandomNeighbors implements BiLongConsumer {
     private final SplittableRandom random;
-    private final Knn.SimilarityComputer computer;
+    private final SimilarityComputer computer;
     private final HugeObjectArray<NeighborList> neighbors;
     private final long n;
     private final int k;
@@ -38,7 +38,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
 
     GenerateRandomNeighbors(
         SplittableRandom random,
-        Knn.SimilarityComputer computer,
+        SimilarityComputer computer,
         HugeObjectArray<NeighborList> neighbors,
         long n,
         int k,
