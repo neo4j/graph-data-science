@@ -338,7 +338,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         @Override
         public void run() {
-            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+            long endNodeId = partition.startNode() + partition.nodeCount();
+            for (long nodeId = partition.startNode(); nodeId < endNodeId; nodeId++) {
                 long communityId = modularityOptimization.getCommunityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
                     relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
