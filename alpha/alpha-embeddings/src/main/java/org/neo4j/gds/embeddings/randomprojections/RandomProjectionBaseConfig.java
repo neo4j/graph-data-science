@@ -60,11 +60,6 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
         return 0.0f;
     }
 
-    @Value.Default
-    default boolean normalizeL2() {
-        return false;
-    }
-
     @Value.Check
     default void validate() {
         if (iterationWeights().isEmpty()) {
