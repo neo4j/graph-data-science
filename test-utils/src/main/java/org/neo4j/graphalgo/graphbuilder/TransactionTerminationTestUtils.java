@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.graphbuilder;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,31 +32,45 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TransactionTerminationTestUtils {
 
-    public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfter) {
-        assertTerminates(algoRunner, terminateAfter, Long.MAX_VALUE);
+    // Give tests 5 times more time when running on CI
+    private static final long CI_SMEAR = 5;
+
+    public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfterMillis) {
+        assertTerminates(algoRunner, terminateAfterMillis, Long.MAX_VALUE);
     }
 
-    public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfter, long maxDelay) {
+    public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfterMillis, long maxDelayMillis) {
         TestTerminationFlag terminationFlag = new TestTerminationFlag();
 
-        MutableLong terminationTime = new MutableLong();
+        AtomicLong terminationTime = new AtomicLong();
         assertThrows(TransactionTerminatedException.class, () -> {
-            new java.util.Timer().schedule(
+            new java.util.Timer(true).schedule(
                 new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        terminationTime.setValue(System.currentTimeMillis());
+                        terminationTime.set(System.nanoTime());
                         terminationFlag.stop();
                     }
                 },
-                terminateAfter
+                terminateAfterMillis
             );
             algoRunner.accept(terminationFlag);
         });
-        long terminatedAt = System.currentTimeMillis();
-        long terminationDelay = terminatedAt - terminationTime.getValue();
+        long terminatedAt = System.nanoTime();
+        long terminationDelay = terminatedAt - terminationTime.get();
+        long terminationDelayMillis = TimeUnit.NANOSECONDS.toMillis(terminationDelay);
 
-        assertTrue(terminationDelay <= maxDelay, formatWithLocale("Expected to terminate after at most %dms but took %dms", maxDelay, terminationDelay));
+        if (System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null) {
+            maxDelayMillis *= CI_SMEAR;
+            if (maxDelayMillis < 0) {
+                maxDelayMillis = Long.MAX_VALUE;
+            }
+        }
+
+        assertTrue(
+            terminationDelayMillis <= maxDelayMillis,
+            formatWithLocale("Expected to terminate after at most %dms but took %dms", maxDelayMillis, terminationDelayMillis)
+        );
     }
 
     private TransactionTerminationTestUtils() {}
