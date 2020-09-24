@@ -35,6 +35,10 @@ import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.knn.KnnMutateProc;
+import org.neo4j.graphalgo.knn.KnnStatsProc;
+import org.neo4j.graphalgo.knn.KnnStreamProc;
+import org.neo4j.graphalgo.knn.KnnWriteProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -114,6 +118,11 @@ final class EstimationCliTest {
         "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream.estimate",
         "gds.beta.k1coloring.write.estimate",
+
+        "gds.beta.knn.mutate.estimate",
+        "gds.beta.knn.stats.estimate",
+        "gds.beta.knn.stream.estimate",
+        "gds.beta.knn.write.estimate",
 
         "gds.beta.modularityOptimization.mutate.estimate",
         "gds.beta.modularityOptimization.stream.estimate",
@@ -352,6 +361,23 @@ final class EstimationCliTest {
             runEstimation(new K1ColoringStatsProc()::estimate),
             runEstimation(new K1ColoringStreamProc()::estimate),
             runEstimation(new K1ColoringWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(
+                new KnnMutateProc()::estimateMutate,
+                "mutateProperty",
+                "foo",
+                "mutateRelationshipType",
+                "bar"
+            ),
+            runEstimation(new KnnStatsProc()::estimateStats),
+            runEstimation(new KnnStreamProc()::estimate),
+            runEstimation(
+                new KnnWriteProc()::estimateWrite,
+                "writeProperty",
+                "foo",
+                "writeRelationshipType",
+                "bar"
+            ),
 
             runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new ModularityOptimizationStreamProc()::estimate),

@@ -205,10 +205,10 @@ public class EstimationCli implements Runnable {
             if (procedureName.endsWith(".mutate.estimate")) {
                 actualConfig.put(MUTATE_PROPERTY_KEY, "ESTIMATE_FAKE_MUTATE_PROPERTY");
             }
-            if (procedureName.equals("gds.nodeSimilarity.write.estimate")) {
+            if (procedureName.equals("gds.nodeSimilarity.write.estimate") || procedureName.equals("gds.beta.knn.write.estimate")) {
                 actualConfig.put("writeRelationshipType", "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
             }
-            if (procedureName.equals("gds.nodeSimilarity.mutate.estimate")) {
+            if (procedureName.equals("gds.nodeSimilarity.mutate.estimate") || procedureName.equals("gds.beta.knn.mutate.estimate")) {
                 actualConfig.put("mutateRelationshipType", "ESTIMATE_FAKE_MUTATE_RELATIONSHIP_PROPERTY");
             }
             return actualConfig;
