@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
