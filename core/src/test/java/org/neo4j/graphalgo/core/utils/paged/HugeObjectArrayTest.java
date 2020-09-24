@@ -64,9 +64,9 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         var estimation = HugeObjectArray.memoryEstimation(sizeOfLongArray(10));
 
         var dim0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
-        assertEquals(24, estimation.estimate(dim0, 1).memoryUsage().min);
+        assertEquals(40, estimation.estimate(dim0, 1).memoryUsage().min);
 
         var dim10000 = ImmutableGraphDimensions.builder().nodeCount(10000).build();
-        assertEquals(960024, estimation.estimate(dim10000, 1).memoryUsage().min);
+        assertEquals(1000040, estimation.estimate(dim10000, 1).memoryUsage().min);
     }
 }
