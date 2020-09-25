@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -94,28 +95,24 @@ class AllocationTrackerTest {
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeFalse(is40());
-        AllocationTracker.whileUsingKernelTracker(
-            () -> {
-                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
-                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
-                var allocationTracker = AllocationTracker.create(trackerProxy);
-                assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
-            }
-        );
+        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_KERNEL_TRACKER, () -> {
+            var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
+            var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+            var allocationTracker = AllocationTracker.create(trackerProxy);
+            assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
+        });
     }
 
     @Test
     void shouldIgnoreFeatureToggleOn40() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeTrue(is40());
-        AllocationTracker.whileUsingKernelTracker(
-            () -> {
-                var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
-                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
-                var allocationTracker = AllocationTracker.create(trackerProxy);
-                assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
-            }
-        );
+        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_KERNEL_TRACKER, () -> {
+            var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
+            var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+            var allocationTracker = AllocationTracker.create(trackerProxy);
+            assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
+        });
     }
 
     private static boolean is40() {
@@ -134,7 +131,10 @@ class AllocationTrackerTest {
     static Stream<AllocationTracker> allocationTrackers() {
         return Stream.of(
             AllocationTracker.create(),
-            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.limitedMemoryTracker(Long.MAX_VALUE, GRAB_SIZE_1KB)))
+            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.limitedMemoryTracker(
+                Long.MAX_VALUE,
+                GRAB_SIZE_1KB
+            )))
         );
     }
 }

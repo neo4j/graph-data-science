@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.util.FeatureToggles;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,6 +62,19 @@ public final class GdsFeatureToggles {
         USE_KERNEL_TRACKER_DEFAULT_SETTING
     );
     public static final AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(USE_KERNEL_TRACKER_FLAG);
+
+    @TestOnly
+    public static synchronized <E extends Exception> void runWithToggleEnabled(
+        AtomicBoolean toggle,
+        CheckedRunnable<E> code
+    ) throws E {
+        var before = toggle.getAndSet(true);
+        try {
+            code.checkedRun();
+        } finally {
+            toggle.set(before);
+        }
+    }
 
     private GdsFeatureToggles() {}
 }
