@@ -9,33 +9,59 @@ When an algorithm procedure is called from Cypher, the procedure call is execute
 
 This section includes:
 
-* <<tx-graph-loading>>
+* <<tx-graph-projection>>
 * <<tx-graph-writing>>
 * <<tx-termination>>
 
-[[tx-graph-loading]]
-== During graph loading
 
-During loading, new transactions are used that do not inherit the transaction state of the Cypher transaction.
-This means that changes from the Cypher transaction state are not visible to the loading transactions.
+[[tx-graph-projection]]
+== During graph projection
 
-For example, the following statement will not be able to load any nodes:
+During graph projection, new transactions are used that do not inherit the transaction state of the Cypher transaction.
+This means that changes from the Cypher transaction state are not visible to the graph projection transactions.
 
-[EXAMPLE]
+For example, the following statement will only create an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
+
+[role=query-example]
+--
 [source, cypher]
 ----
-MATCH (n) SET n:MyLabel CALL gds.graph.create('graph-name', 'MyLabel', '*')
+CREATE (n:MyLabel) // the new node is part of Cypher transaction state
+WITH *
+CALL gds.graph.create('myGraph', 'MyLabel', '*')
+YIELD nodeCount
+RETURN nodeCount
 ----
 
-Similarly, the following statement will execute the algorithm over an empty graph:
+.Results
+[opts="header"]
+|===
+| nodeCount
+| 0
+|===
+--
 
-[EXAMPLE]
+The situation is the same when using an anonymous projection with an algorithm procedure:
+
+[role=query-example]
+--
 [source, cypher]
 ----
-CALL gds.pageRank(
-  {nodeProjection: 'MyLabel',
-   relationshipProjection:'*'})
+CREATE (n:MyWccLabel) // the new node is part of Cypher transaction state
+WITH *
+CALL gds.wcc.stats({nodeProjection: 'MyWccLabel', relationshipProjection:'*'})
+YIELD componentCount
+RETURN componentCount
 ----
+
+.Results
+[opts="header"]
+|===
+| componentCount
+| -1
+|===
+--
+
 
 [[tx-graph-writing]]
 == During graph writing
