@@ -76,6 +76,10 @@ public final class MemoryEstimations {
         return new LeafEstimation(description, resident);
     }
 
+    public static MemoryEstimation of(final String description, final MemoryRange range) {
+        return new LeafEstimation(description, (dim, concurrency) -> range);
+    }
+
     /**
      * Creates a {@link MemoryEstimation} for a given collection of sub-components.
      *

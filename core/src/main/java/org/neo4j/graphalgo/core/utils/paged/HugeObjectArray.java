@@ -229,10 +229,10 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
 
         builder.perNode("pages", nodeCount -> {
             if (nodeCount <= ArrayUtil.MAX_ARRAY_LENGTH) {
-                return 0;
+                return sizeOfObjectArray(nodeCount);
             } else {
                 int numPages = numberOfPages(nodeCount);
-                return sizeOfObjectArray(numPages);
+                return sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(PAGE_SIZE);
             }
         });
         return builder.build();

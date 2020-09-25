@@ -44,6 +44,10 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
+import org.neo4j.graphalgo.knn.KnnMutateProc;
+import org.neo4j.graphalgo.knn.KnnStatsProc;
+import org.neo4j.graphalgo.knn.KnnStreamProc;
+import org.neo4j.graphalgo.knn.KnnWriteProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -94,6 +98,15 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.k1coloring.stream.estimate",
         "gds.beta.k1coloring.write",
         "gds.beta.k1coloring.write.estimate",
+
+        "gds.beta.knn.mutate",
+        "gds.beta.knn.mutate.estimate",
+        "gds.beta.knn.stats",
+        "gds.beta.knn.stats.estimate",
+        "gds.beta.knn.stream",
+        "gds.beta.knn.stream.estimate",
+        "gds.beta.knn.write",
+        "gds.beta.knn.write.estimate",
 
         "gds.beta.modularityOptimization.mutate",
         "gds.beta.modularityOptimization.mutate.estimate",
@@ -233,6 +246,10 @@ class ListProcTest extends BaseProcTest {
             K1ColoringStatsProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStreamProc.class,
+            KnnMutateProc.class,
+            KnnStatsProc.class,
+            KnnStreamProc.class,
+            KnnWriteProc.class,
             LabelPropagationWriteProc.class,
             LabelPropagationStreamProc.class,
             LabelPropagationStatsProc.class,
