@@ -46,7 +46,7 @@ public interface AllocationTracker extends Supplier<String> {
             .fold(
                 AllocationTracker::create,
                 AllocationTracker::empty,
-                USE_KERNEL_TRACKER.isToggled() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
+                USE_KERNEL_TRACKER.isEnabled() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
             );
     }
 

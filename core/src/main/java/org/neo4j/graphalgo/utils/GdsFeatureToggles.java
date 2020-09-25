@@ -32,7 +32,7 @@ public enum GdsFeatureToggles {
     SKIP_ORPHANS(false),
     USE_KERNEL_TRACKER(false);
 
-    public boolean isToggled() {
+    public boolean isEnabled() {
         return current.get();
     }
 
@@ -49,7 +49,7 @@ public enum GdsFeatureToggles {
     }
 
     @TestOnly
-    public synchronized <E extends Exception> void toggleOnAndRun(
+    public synchronized <E extends Exception> void enableAndRun(
         CheckedRunnable<E> code
     ) throws E {
         var before = toggle(true);

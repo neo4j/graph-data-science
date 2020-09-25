@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
@@ -52,7 +52,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new long[capacity] : null;
         this.labelIds = new long[capacity][];
-        this.skipOrphans = GdsFeatureToggles.SKIP_ORPHANS.isToggled();
+        this.skipOrphans = SKIP_ORPHANS.isEnabled();
     }
 
     @Override

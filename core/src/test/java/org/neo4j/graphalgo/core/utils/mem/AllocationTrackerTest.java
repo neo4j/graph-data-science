@@ -95,7 +95,7 @@ class AllocationTrackerTest {
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeFalse(is40());
-        USE_KERNEL_TRACKER.toggleOnAndRun(() -> {
+        USE_KERNEL_TRACKER.enableAndRun(() -> {
             var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
             var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
             var allocationTracker = AllocationTracker.create(trackerProxy);
@@ -107,7 +107,7 @@ class AllocationTrackerTest {
     void shouldIgnoreFeatureToggleOn40() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeTrue(is40());
-        USE_KERNEL_TRACKER.toggleOnAndRun(() -> {
+        USE_KERNEL_TRACKER.enableAndRun(() -> {
             var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
             var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
             var allocationTracker = AllocationTracker.create(trackerProxy);

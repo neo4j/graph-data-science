@@ -146,7 +146,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             propertyKeyIds,
             defaultValues,
             aggregations,
-            USE_PRE_AGGREGATION.isToggled()
+            USE_PRE_AGGREGATION.isEnabled()
         );
 
         RelationshipImporter importer = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);

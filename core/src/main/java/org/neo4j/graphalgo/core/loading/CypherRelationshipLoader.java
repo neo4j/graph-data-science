@@ -302,7 +302,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 propertyKeyIds,
                 propertyDefaultValues,
                 aggregationsWithDefault,
-                USE_PRE_AGGREGATION.isToggled()
+                USE_PRE_AGGREGATION.isEnabled()
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);

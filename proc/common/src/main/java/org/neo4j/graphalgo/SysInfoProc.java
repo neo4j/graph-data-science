@@ -117,10 +117,10 @@ public class SysInfoProc {
 
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
-            .add(value("featurePreAggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.isToggled()))
-            .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isToggled()))
+            .add(value("featurePreAggregation", GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()))
+            .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
-            .add(value("featureKernelTracker", GdsFeatureToggles.USE_KERNEL_TRACKER.isToggled()));
+            .add(value("featureKernelTracker", GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
     }
 
     private static void buildInfo(BuildInfoProperties properties, Stream.Builder<DebugValue> builder) {

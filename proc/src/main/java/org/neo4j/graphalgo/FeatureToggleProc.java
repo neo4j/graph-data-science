@@ -45,7 +45,7 @@ public final class FeatureToggleProc {
     @Description("Set the behavior of whether to skip orphan nodes to the default. That value is returned.")
     public Stream<FeatureState> resetSkipOrphanNodes() {
         GdsFeatureToggles.SKIP_ORPHANS.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS.isToggled()));
+        return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS.isEnabled()));
     }
 
     @Procedure("gds.features.importer.usePreAggregation")
@@ -58,7 +58,7 @@ public final class FeatureToggleProc {
     @Description("Set the behavior of whether to pre-aggregate relationships to the default. That value is returned.")
     public Stream<FeatureState> resetUsePreAggregation() {
         GdsFeatureToggles.USE_PRE_AGGREGATION.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION.isToggled()));
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()));
     }
 
     @Procedure("gds.features.useKernelTracker")
@@ -71,7 +71,7 @@ public final class FeatureToggleProc {
     @Description("Set the behavior of whether to use the native memory tracking to the default. That value is returned.")
     public Stream<FeatureState> resetUseKernelTracker() {
         GdsFeatureToggles.USE_KERNEL_TRACKER.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isToggled()));
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
     }
 
     @Procedure("gds.features.maxArrayLengthShift")

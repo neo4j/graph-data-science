@@ -196,7 +196,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void testSkipOrphanNodes() {
-        SKIP_ORPHANS.toggleOnAndRun(() -> {
+        SKIP_ORPHANS.enableAndRun(() -> {
             // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
             runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
             Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);

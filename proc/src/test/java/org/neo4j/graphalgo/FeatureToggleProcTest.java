@@ -43,11 +43,11 @@ class FeatureToggleProcTest extends BaseProcTest {
 
     @Test
     void toggleSkipOrphanNodes() {
-        var skipOrphanNodes = SKIP_ORPHANS.isToggled();
+        var skipOrphanNodes = SKIP_ORPHANS.isEnabled();
         runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", !skipOrphanNodes));
-        assertEquals(!skipOrphanNodes, SKIP_ORPHANS.isToggled());
+        assertEquals(!skipOrphanNodes, SKIP_ORPHANS.isEnabled());
         runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", skipOrphanNodes));
-        assertEquals(skipOrphanNodes, SKIP_ORPHANS.isToggled());
+        assertEquals(skipOrphanNodes, SKIP_ORPHANS.isEnabled());
     }
 
     @Test
@@ -57,16 +57,16 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.importer.skipOrphanNodes.reset()",
             List.of(Map.of("enabled", SKIP_ORPHANS.defaultValue()))
         );
-        assertEquals(SKIP_ORPHANS.defaultValue(), SKIP_ORPHANS.isToggled());
+        assertEquals(SKIP_ORPHANS.defaultValue(), SKIP_ORPHANS.isEnabled());
     }
 
     @Test
     void toggleusePreAggregation() {
-        var usePreAggregation = USE_PRE_AGGREGATION.isToggled();
+        var usePreAggregation = USE_PRE_AGGREGATION.isEnabled();
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", !usePreAggregation));
-        assertEquals(!usePreAggregation, USE_PRE_AGGREGATION.isToggled());
+        assertEquals(!usePreAggregation, USE_PRE_AGGREGATION.isEnabled());
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", usePreAggregation));
-        assertEquals(usePreAggregation, USE_PRE_AGGREGATION.isToggled());
+        assertEquals(usePreAggregation, USE_PRE_AGGREGATION.isEnabled());
     }
 
     @Test
@@ -76,16 +76,16 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.importer.usePreAggregation.reset()",
             List.of(Map.of("enabled", USE_PRE_AGGREGATION.defaultValue()))
         );
-        assertEquals(USE_PRE_AGGREGATION.defaultValue(), USE_PRE_AGGREGATION.isToggled());
+        assertEquals(USE_PRE_AGGREGATION.defaultValue(), USE_PRE_AGGREGATION.isEnabled());
     }
 
     @Test
     void toggleUseKernelTracker() {
-        var useKernelTracker = USE_KERNEL_TRACKER.isToggled();
+        var useKernelTracker = USE_KERNEL_TRACKER.isEnabled();
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", !useKernelTracker));
-        assertEquals(!useKernelTracker, USE_KERNEL_TRACKER.isToggled());
+        assertEquals(!useKernelTracker, USE_KERNEL_TRACKER.isEnabled());
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
-        assertEquals(useKernelTracker, USE_KERNEL_TRACKER.isToggled());
+        assertEquals(useKernelTracker, USE_KERNEL_TRACKER.isEnabled());
     }
 
     @Test
@@ -95,7 +95,7 @@ class FeatureToggleProcTest extends BaseProcTest {
             "CALL gds.features.useKernelTracker.reset()",
             List.of(Map.of("enabled", USE_KERNEL_TRACKER.defaultValue()))
         );
-        assertEquals(USE_KERNEL_TRACKER.defaultValue(), USE_KERNEL_TRACKER.isToggled());
+        assertEquals(USE_KERNEL_TRACKER.defaultValue(), USE_KERNEL_TRACKER.isEnabled());
     }
 
     @Test
