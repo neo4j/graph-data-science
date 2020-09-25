@@ -344,7 +344,6 @@ task pdf {
         file("$outputDir/index.pdf").renameTo(outputFile)   // workaround
     }
     validateOnStdErr(it)
-    validateOnStdErr(it)
 }
 
 task packagePdf(type: Copy) {
@@ -365,6 +364,11 @@ task asciidocJar(type: Jar) {
 }
 
 tasks.assemble.dependsOn packageHtml, packagePdf
+
+[test, project(":browser-guide").tasks.check].each {
+    docbook.mustRunAfter it
+    pdf.mustRunAfter it
+}
 
 rootProject.tasks.ci.finalizedBy assemble
 rootProject.tasks.cipr.finalizedBy packageHtml
