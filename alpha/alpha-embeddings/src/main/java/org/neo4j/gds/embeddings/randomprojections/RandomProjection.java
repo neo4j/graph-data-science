@@ -222,7 +222,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
     }
 
-    private void l2Normalize(float[] array) {
+    static void l2Normalize(float[] array) {
         double sum = 0.0f;
         for (double value : array) {
             sum += value * value;

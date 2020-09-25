@@ -37,13 +37,16 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.embeddings.randomprojections.RandomProjection.l2Normalize;
 
 class RandomProjectionTest extends AlgoTestBase {
 
+    static final int DEFUALT_EMBEDDING_SIZE = 128;
     static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
-        .embeddingSize(128)
+        .embeddingSize(DEFUALT_EMBEDDING_SIZE)
         .addIterationWeight(1.0D)
         .build();
 
@@ -88,11 +91,9 @@ class RandomProjectionTest extends AlgoTestBase {
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
-        boolean isEqual = true;
-        for (int i = 0; i < 128; i++) {
-            isEqual &= embeddings.get(0)[i] == randomVectors.get(1)[i];
-        }
-        assertTrue(isEqual);
+        float[] expected = randomVectors.get(1);
+        l2Normalize(expected);
+        assertArrayEquals(expected, embeddings.get(0));
     }
 
     @Test
@@ -118,11 +119,12 @@ class RandomProjectionTest extends AlgoTestBase {
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
-        boolean isEqual = true;
-        for (int i = 0; i < 128; i++) {
-            isEqual &= embeddings.get(0)[i] == (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
+        float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
+        for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
+            expected[i] = (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
         }
-        assertTrue(isEqual);
+        l2Normalize(expected);
+        assertArrayEquals(expected, embeddings.get(0));
     }
 
     @Test
@@ -140,7 +142,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
-            .embeddingSize(128)
+            .embeddingSize(DEFUALT_EMBEDDING_SIZE)
             .build();
 
         RandomProjection randomProjection = new RandomProjection(
@@ -156,13 +158,13 @@ class RandomProjectionTest extends AlgoTestBase {
         randomProjection.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
 
-        for (int i = 0; i < 2; i++) {
-            assertEquals(
-                embeddings.get(0)[i],
-                (2.0 * randomVectors.get(1)[i] + 1 * randomVectors.get(2)[i]) / 2.0f,
-                0.001
-            );
+        float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
+        for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
+            expected[i] = (2.0f * randomVectors.get(1)[i] + 1.0f * randomVectors.get(2)[i]) / 2.0f;
         }
+        l2Normalize(expected);
+
+        assertArrayEquals(expected, embeddings.get(0));
     }
 
     @Test
@@ -250,7 +252,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_792, estimate.min);
+        assertEquals(159_784, estimate.min);
     }
 
     @Test
@@ -265,7 +267,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_792, estimate.min);
+        assertEquals(159_784, estimate.min);
     }
 
     @Test
