@@ -52,7 +52,7 @@ public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         this.hasLabelInformation = hasLabelInformation.orElse(false);
         this.properties = readProperty.orElse(false) ? new long[capacity] : null;
         this.labelIds = new long[capacity][];
-        this.skipOrphans = GdsFeatureToggles.SKIP_ORPHANS.get();
+        this.skipOrphans = GdsFeatureToggles.SKIP_ORPHANS.isToggled();
     }
 
     @Override

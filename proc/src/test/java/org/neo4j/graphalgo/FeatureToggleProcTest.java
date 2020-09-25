@@ -30,6 +30,9 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 
 class FeatureToggleProcTest extends BaseProcTest {
 
@@ -40,62 +43,59 @@ class FeatureToggleProcTest extends BaseProcTest {
 
     @Test
     void toggleSkipOrphanNodes() {
-        var skipOrphanNodes = GdsFeatureToggles.SKIP_ORPHANS.get();
+        var skipOrphanNodes = SKIP_ORPHANS.isToggled();
         runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", !skipOrphanNodes));
-        assertEquals(!skipOrphanNodes, GdsFeatureToggles.SKIP_ORPHANS.get());
+        assertEquals(!skipOrphanNodes, SKIP_ORPHANS.isToggled());
         runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", skipOrphanNodes));
-        assertEquals(skipOrphanNodes, GdsFeatureToggles.SKIP_ORPHANS.get());
+        assertEquals(skipOrphanNodes, SKIP_ORPHANS.isToggled());
     }
 
     @Test
     void resetSkipOrphanNodes() {
-        var defaultValue = GdsFeatureToggles.SKIP_ORPHANS_DEFAULT_SETTING;
-        GdsFeatureToggles.SKIP_ORPHANS.set(!defaultValue);
+        SKIP_ORPHANS.reset();
         assertCypherResult(
             "CALL gds.features.importer.skipOrphanNodes.reset()",
-            List.of(Map.of("enabled", defaultValue))
+            List.of(Map.of("enabled", SKIP_ORPHANS.defaultValue()))
         );
-        assertEquals(defaultValue, GdsFeatureToggles.SKIP_ORPHANS.get());
+        assertEquals(SKIP_ORPHANS.defaultValue(), SKIP_ORPHANS.isToggled());
     }
 
     @Test
     void toggleusePreAggregation() {
-        var usePreAggregation = GdsFeatureToggles.USE_PRE_AGGREGATION.get();
+        var usePreAggregation = USE_PRE_AGGREGATION.isToggled();
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", !usePreAggregation));
-        assertEquals(!usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+        assertEquals(!usePreAggregation, USE_PRE_AGGREGATION.isToggled());
         runQuery("CALL gds.features.importer.usePreAggregation($value)", Map.of("value", usePreAggregation));
-        assertEquals(usePreAggregation, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+        assertEquals(usePreAggregation, USE_PRE_AGGREGATION.isToggled());
     }
 
     @Test
     void resetUsePreAggregation() {
-        var defaultValue = GdsFeatureToggles.USE_PRE_AGGREGATION_DEFAULT_SETTING;
-        GdsFeatureToggles.USE_PRE_AGGREGATION.set(!defaultValue);
+        USE_PRE_AGGREGATION.reset();
         assertCypherResult(
             "CALL gds.features.importer.usePreAggregation.reset()",
-            List.of(Map.of("enabled", defaultValue))
+            List.of(Map.of("enabled", USE_PRE_AGGREGATION.defaultValue()))
         );
-        assertEquals(defaultValue, GdsFeatureToggles.USE_PRE_AGGREGATION.get());
+        assertEquals(USE_PRE_AGGREGATION.defaultValue(), USE_PRE_AGGREGATION.isToggled());
     }
 
     @Test
     void toggleUseKernelTracker() {
-        var useKernelTracker = GdsFeatureToggles.USE_KERNEL_TRACKER.get();
+        var useKernelTracker = USE_KERNEL_TRACKER.isToggled();
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", !useKernelTracker));
-        assertEquals(!useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+        assertEquals(!useKernelTracker, USE_KERNEL_TRACKER.isToggled());
         runQuery("CALL gds.features.useKernelTracker($value)", Map.of("value", useKernelTracker));
-        assertEquals(useKernelTracker, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+        assertEquals(useKernelTracker, USE_KERNEL_TRACKER.isToggled());
     }
 
     @Test
     void resetUseKernelTracker() {
-        var defaultValue = GdsFeatureToggles.USE_KERNEL_TRACKER_DEFAULT_SETTING;
-        GdsFeatureToggles.USE_KERNEL_TRACKER.set(!defaultValue);
+        USE_KERNEL_TRACKER.reset();
         assertCypherResult(
             "CALL gds.features.useKernelTracker.reset()",
-            List.of(Map.of("enabled", defaultValue))
+            List.of(Map.of("enabled", USE_KERNEL_TRACKER.defaultValue()))
         );
-        assertEquals(defaultValue, GdsFeatureToggles.USE_KERNEL_TRACKER.get());
+        assertEquals(USE_KERNEL_TRACKER.defaultValue(), USE_KERNEL_TRACKER.isToggled());
     }
 
     @Test

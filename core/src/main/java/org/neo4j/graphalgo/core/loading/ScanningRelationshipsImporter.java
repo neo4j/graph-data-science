@@ -31,13 +31,14 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 
 
 public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, ObjectLongMap<RelationshipType>> {
@@ -145,7 +146,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             propertyKeyIds,
             defaultValues,
             aggregations,
-            GdsFeatureToggles.USE_PRE_AGGREGATION.get()
+            USE_PRE_AGGREGATION.isToggled()
         );
 
         RelationshipImporter importer = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);

@@ -19,30 +19,58 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.apache.commons.text.CaseUtils;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.util.FeatureToggles;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class GdsFeatureToggles {
+public enum GdsFeatureToggles {
 
-    public static final boolean USE_PRE_AGGREGATION_DEFAULT_SETTING = false;
-    private static final boolean USE_PRE_AGGREGATION_FLAG = FeatureToggles.flag(
-        GdsFeatureToggles.class,
-        "usePreAggregation",
-        USE_PRE_AGGREGATION_DEFAULT_SETTING
-    );
-    public static final AtomicBoolean USE_PRE_AGGREGATION = new AtomicBoolean(USE_PRE_AGGREGATION_FLAG);
+    USE_PRE_AGGREGATION(false),
+    SKIP_ORPHANS(false),
+    USE_KERNEL_TRACKER(false);
 
+    public boolean isToggled() {
+        return current.get();
+    }
 
-    public static final boolean SKIP_ORPHANS_DEFAULT_SETTING = false;
-    private static final boolean SKIP_ORPHANS_FLAG = FeatureToggles.flag(
-        GdsFeatureToggles.class,
-        "skipOrphans",
-        SKIP_ORPHANS_DEFAULT_SETTING
-    );
-    public static final AtomicBoolean SKIP_ORPHANS = new AtomicBoolean(SKIP_ORPHANS_FLAG);
+    public boolean toggle(boolean value) {
+        return current.getAndSet(value);
+    }
+
+    public boolean defaultValue() {
+        return defaultValue;
+    }
+
+    public void reset() {
+        current.set(defaultValue);
+    }
+
+    @TestOnly
+    public synchronized <E extends Exception> void toggleOnAndRun(
+        CheckedRunnable<E> code
+    ) throws E {
+        var before = toggle(true);
+        try {
+            code.checkedRun();
+        } finally {
+            toggle(before);
+        }
+    }
+
+    private final AtomicBoolean current;
+    private final boolean defaultValue;
+
+    GdsFeatureToggles(boolean defaultValue) {
+        this.defaultValue = defaultValue;
+        this.current = new AtomicBoolean(FeatureToggles.flag(
+            GdsFeatureToggles.class,
+            CaseUtils.toCamelCase(name(), false, '_'),
+            defaultValue
+        ));
+    }
 
     // Prevents full GC more often as not so much consecutive memory is allocated in one go as
     // compared to a page shift of 30 or 32. See https://github.com/neo4j-contrib/neo4j-graph-algorithms/pull/859#discussion_r272262734.
@@ -55,26 +83,4 @@ public final class GdsFeatureToggles {
     );
     public static final AtomicInteger MAX_ARRAY_LENGTH_SHIFT = new AtomicInteger(MAX_ARRAY_LENGTH_SHIFT_FLAG);
 
-    public static final boolean USE_KERNEL_TRACKER_DEFAULT_SETTING = false;
-    private static final boolean USE_KERNEL_TRACKER_FLAG = FeatureToggles.flag(
-        GdsFeatureToggles.class,
-        "useKernelTracker",
-        USE_KERNEL_TRACKER_DEFAULT_SETTING
-    );
-    public static final AtomicBoolean USE_KERNEL_TRACKER = new AtomicBoolean(USE_KERNEL_TRACKER_FLAG);
-
-    @TestOnly
-    public static synchronized <E extends Exception> void runWithToggleEnabled(
-        AtomicBoolean toggle,
-        CheckedRunnable<E> code
-    ) throws E {
-        var before = toggle.getAndSet(true);
-        try {
-            code.checkedRun();
-        } finally {
-            toggle.set(before);
-        }
-    }
-
-    private GdsFeatureToggles() {}
 }

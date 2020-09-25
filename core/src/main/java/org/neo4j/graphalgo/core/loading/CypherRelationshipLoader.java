@@ -39,7 +39,6 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -55,6 +54,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter.NO_PROPERTY_VALUE;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Enclosing
@@ -302,7 +302,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 propertyKeyIds,
                 propertyDefaultValues,
                 aggregationsWithDefault,
-                GdsFeatureToggles.USE_PRE_AGGREGATION.get()
+                USE_PRE_AGGREGATION.isToggled()
             );
 
             RelationshipImporter relationshipImporter = new RelationshipImporter(loadingContext.tracker(), adjacencyBuilder);

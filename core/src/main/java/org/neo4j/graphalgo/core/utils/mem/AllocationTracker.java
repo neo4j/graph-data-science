@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 public interface AllocationTracker extends Supplier<String> {
 
@@ -37,10 +37,6 @@ public interface AllocationTracker extends Supplier<String> {
         return tracker != null && tracker != empty();
     }
 
-    static boolean useKernelTracker() {
-        return GdsFeatureToggles.USE_KERNEL_TRACKER.get();
-    }
-
     static AllocationTracker create() {
         return InMemoryAllocationTracker.create();
     }
@@ -50,7 +46,7 @@ public interface AllocationTracker extends Supplier<String> {
             .fold(
                 AllocationTracker::create,
                 AllocationTracker::empty,
-                useKernelTracker() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
+                USE_KERNEL_TRACKER.isToggled() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
             );
     }
 

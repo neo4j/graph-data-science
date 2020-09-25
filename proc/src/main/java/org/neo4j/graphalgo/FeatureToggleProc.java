@@ -38,40 +38,40 @@ public final class FeatureToggleProc {
     @Procedure("gds.features.importer.skipOrphanNodes")
     @Description("Toggle whether orphan nodes should be skipped during import")
     public void skipOrphanNodes(@Name(value = "skipOrphanNodes") boolean skipOrphanNodes) {
-        GdsFeatureToggles.SKIP_ORPHANS.set(skipOrphanNodes);
+        GdsFeatureToggles.SKIP_ORPHANS.toggle(skipOrphanNodes);
     }
 
     @Procedure("gds.features.importer.skipOrphanNodes.reset")
     @Description("Set the behavior of whether to skip orphan nodes to the default. That value is returned.")
     public Stream<FeatureState> resetSkipOrphanNodes() {
-        GdsFeatureToggles.SKIP_ORPHANS.set(GdsFeatureToggles.SKIP_ORPHANS_DEFAULT_SETTING);
-        return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS_DEFAULT_SETTING));
+        GdsFeatureToggles.SKIP_ORPHANS.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS.isToggled()));
     }
 
     @Procedure("gds.features.importer.usePreAggregation")
     @Description("Toggle whether the importer should pre-aggregate relationships")
     public void usePreAggregation(@Name(value = "usePreAggregation") boolean usePreAggregation) {
-        GdsFeatureToggles.USE_PRE_AGGREGATION.set(usePreAggregation);
+        GdsFeatureToggles.USE_PRE_AGGREGATION.toggle(usePreAggregation);
     }
 
     @Procedure("gds.features.importer.usePreAggregation.reset")
     @Description("Set the behavior of whether to pre-aggregate relationships to the default. That value is returned.")
     public Stream<FeatureState> resetUsePreAggregation() {
-        GdsFeatureToggles.USE_PRE_AGGREGATION.set(GdsFeatureToggles.USE_PRE_AGGREGATION_DEFAULT_SETTING);
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION_DEFAULT_SETTING));
+        GdsFeatureToggles.USE_PRE_AGGREGATION.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION.isToggled()));
     }
 
     @Procedure("gds.features.useKernelTracker")
     @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used")
     public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
-        GdsFeatureToggles.USE_KERNEL_TRACKER.set(useKernelTracker);
+        GdsFeatureToggles.USE_KERNEL_TRACKER.toggle(useKernelTracker);
     }
 
     @Procedure("gds.features.useKernelTracker.reset")
     @Description("Set the behavior of whether to use the native memory tracking to the default. That value is returned.")
     public Stream<FeatureState> resetUseKernelTracker() {
-        GdsFeatureToggles.USE_KERNEL_TRACKER.set(GdsFeatureToggles.USE_KERNEL_TRACKER_DEFAULT_SETTING);
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER_DEFAULT_SETTING));
+        GdsFeatureToggles.USE_KERNEL_TRACKER.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isToggled()));
     }
 
     @Procedure("gds.features.maxArrayLengthShift")

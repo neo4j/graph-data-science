@@ -31,11 +31,11 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
 
 class GraphLoaderTest extends BaseTest {
 
@@ -196,7 +196,7 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void testSkipOrphanNodes() {
-        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.SKIP_ORPHANS, () -> {
+        SKIP_ORPHANS.toggleOnAndRun(() -> {
             // existing graph is `(a)-->(b), (a)-->(c), (b)-->(c)`
             runQuery("CREATE (:Node1),(:Node2),(:Node1),(n:Node2)-[:REL]->(m:Node3)");
             Graph graph = TestGraphLoader.from(db).graph(TestSupport.FactoryType.NATIVE);

@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -35,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 class AllocationTrackerTest {
 
@@ -95,7 +95,7 @@ class AllocationTrackerTest {
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeFalse(is40());
-        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_KERNEL_TRACKER, () -> {
+        USE_KERNEL_TRACKER.toggleOnAndRun(() -> {
             var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
             var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
             var allocationTracker = AllocationTracker.create(trackerProxy);
@@ -107,7 +107,7 @@ class AllocationTrackerTest {
     void shouldIgnoreFeatureToggleOn40() {
         // There is no KernelTracker in 4.0
         Assumptions.assumeTrue(is40());
-        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_KERNEL_TRACKER, () -> {
+        USE_KERNEL_TRACKER.toggleOnAndRun(() -> {
             var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
             var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
             var allocationTracker = AllocationTracker.create(trackerProxy);
