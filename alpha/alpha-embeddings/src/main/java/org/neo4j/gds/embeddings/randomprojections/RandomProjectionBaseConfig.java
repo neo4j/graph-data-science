@@ -36,9 +36,11 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
 
     List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
+    @Configuration.IntegerRange(min = 1)
     int embeddingSize();
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int sparsity() {
         return 3;
     }
