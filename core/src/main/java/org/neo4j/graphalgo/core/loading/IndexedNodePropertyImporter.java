@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -78,9 +79,13 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     @Override
     public void accept(KernelTransaction ktx) throws Exception {
         var read = ktx.dataRead();
-        try (var indexCursor = ktx.cursors().allocateNodeValueIndexCursor()) {
+        try (var indexCursor = Neo4jProxy.allocateNodeValueIndexCursor(
+            ktx.cursors(),
+            ktx.pageCursorTracer(),
+            Neo4jProxy.memoryTracker(ktx)
+        )) {
             var indexReadSession = read.indexReadSession(index);
-            read.nodeIndexScan(indexReadSession, indexCursor, IndexOrder.NONE, true);
+            Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.NONE, true);
             while (indexCursor.next()) {
                 if (indexCursor.hasValue()) {
                     var node = indexCursor.nodeReference();

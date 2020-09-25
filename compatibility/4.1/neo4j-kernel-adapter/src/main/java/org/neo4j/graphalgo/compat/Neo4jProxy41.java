@@ -41,8 +41,11 @@ import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.IndexQueryConstraints;
+import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
@@ -176,6 +179,15 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
+    public NodeValueIndexCursor allocateNodeValueIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return cursorFactory.allocateNodeValueIndexCursor(cursorTracer);
+    }
+
+    @Override
     public long relationshipsReference(NodeCursor nodeCursor) {
         return nodeCursor.relationshipsReference();
     }
@@ -188,6 +200,17 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+    }
+
+    @Override
+    public void nodeIndexScan(
+        Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues
+    ) throws Exception {
+        var indexQueryConstraints = indexOrder == IndexOrder.NONE
+            ? IndexQueryConstraints.unordered(needsValues)
+            : IndexQueryConstraints.constrained(indexOrder, needsValues);
+
+        dataRead.nodeIndexScan(index, cursor, indexQueryConstraints);
     }
 
     @Override

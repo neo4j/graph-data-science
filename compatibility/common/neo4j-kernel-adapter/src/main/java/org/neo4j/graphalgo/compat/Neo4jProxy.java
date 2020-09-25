@@ -35,12 +35,15 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -169,6 +172,14 @@ public final class Neo4jProxy {
         return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
     }
 
+    public static NodeValueIndexCursor allocateNodeValueIndexCursor(
+        CursorFactory cursorFactory,
+        PageCursorTracer cursorTracer,
+        MemoryTracker memoryTracker
+    ) {
+        return IMPL.allocateNodeValueIndexCursor(cursorFactory, cursorTracer, memoryTracker);
+    }
+
     public static long relationshipsReference(NodeCursor nodeCursor) {
         return IMPL.relationshipsReference(nodeCursor);
     }
@@ -179,6 +190,11 @@ public final class Neo4jProxy {
 
     public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
         IMPL.nodeLabelScan(dataRead, label, cursor);
+    }
+
+    public static void nodeIndexScan(Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues )
+    throws Exception {
+        IMPL.nodeIndexScan(dataRead, index, cursor, indexOrder, needsValues);
     }
 
     public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
