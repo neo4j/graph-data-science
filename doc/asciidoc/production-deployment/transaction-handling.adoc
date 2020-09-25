@@ -64,10 +64,10 @@ RETURN componentCount
 
 
 [[tx-graph-writing]]
-== During graph writing
+== During results writing
 
-Properties are written to the graph in new transactions, batched over a fixed number of nodes.
-Those transactions are committed independently from the Cypher transaction.
+Results from algorithms (node properties, for example) are written to the graph in new transactions, one per batch footnote:[asdas].
+These transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
 
@@ -75,6 +75,5 @@ This means, if the Cypher transaction is terminated (either by the user or by th
 == Transaction termination
 
 The Cypher transaction can be terminated by either the user or the database system.
-This will eventually terminate all transactions that have been opened during loading, writing, or the algorithm execution.
+This will eventually terminate all transactions that have been opened during graph projection, algorithm execution, or results writing.
 It is not immediately visible and can take a moment for the transactions to recognize that the Cypher transaction has been terminated.
-
