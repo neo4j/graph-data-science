@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.internal.kernel.api.SchemaReadCore;
@@ -72,8 +73,7 @@ final class IndexPropertyMappings {
         SecureTransaction transaction,
         Map<NodeLabel, PropertyMappings> storeLoadedProperties
     ) {
-        var nodeLabelMapping = dimensions.tokenNodeLabelMapping();
-        if (nodeLabelMapping == null) {
+        if (dimensions.tokenNodeLabelMapping() == null || !GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get()) {
             return ImmutableLoadablePropertyMappings
                 .builder()
                 .putAllStoredProperties(storeLoadedProperties)

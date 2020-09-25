@@ -99,6 +99,26 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
+    void toggleUsePropertyValueIndex() {
+        var usePropertyValueIndex = GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get();
+        runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", !usePropertyValueIndex));
+        assertEquals(!usePropertyValueIndex, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+        runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", usePropertyValueIndex));
+        assertEquals(usePropertyValueIndex, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+    }
+
+    @Test
+    void resetUsePropertyValueIndex() {
+        var defaultValue = GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX_DEFAULT_SETTING;
+        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.set(!defaultValue);
+        assertCypherResult(
+            "CALL gds.features.usePropertyValueIndex.reset()",
+            List.of(Map.of("enabled", defaultValue))
+        );
+        assertEquals(defaultValue, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+    }
+
+    @Test
     void toggleMaxArrayLengthShift() {
         var maxArrayLengthShift = GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get();
         runQuery("CALL gds.features.maxArrayLengthShift($value)", Map.of("value", maxArrayLengthShift + 1));

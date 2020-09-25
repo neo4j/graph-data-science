@@ -74,6 +74,19 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
     }
 
+    @Procedure("gds.features.usePropertyValueIndex")
+    @Description("Toggle whether the property value index should be used during node property loading")
+    public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
+        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.set(usePropertyValueIndex);
+    }
+
+    @Procedure("gds.features.usePropertyValueIndex.reset")
+    @Description("Set the behavior of whether to use the property value index to the default. That value is returned.")
+    public Stream<FeatureState> resetUsePropertyValueIndex() {
+        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.set(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX_DEFAULT_SETTING);
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX_DEFAULT_SETTING));
+    }
+
     @Procedure("gds.features.maxArrayLengthShift")
     @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two")
     public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {

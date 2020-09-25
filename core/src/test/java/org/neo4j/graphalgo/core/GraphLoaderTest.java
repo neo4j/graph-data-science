@@ -190,30 +190,32 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testPropertyViaIndex(TestSupport.FactoryType factoryType) {
-        var indexQueries = List.of(
-            "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
-            "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
-        );
-        indexQueries.forEach(this::runQuery);
+        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX, () -> {
+            var indexQueries = List.of(
+                "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
+                "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
+            );
+            indexQueries.forEach(this::runQuery);
 
-        PropertyMappings nodePropertyMappings = PropertyMappings.of(
-            PropertyMapping.of("prop1", "prop1", 41D),
-            PropertyMapping.of("prop2", "prop2", 42D),
-            PropertyMapping.of("prop3", "prop3", 43D)
-        );
+            PropertyMappings nodePropertyMappings = PropertyMappings.of(
+                PropertyMapping.of("prop1", "prop1", 41L),
+                PropertyMapping.of("prop2", "prop2", 42L),
+                PropertyMapping.of("prop3", "prop3", 43L)
+            );
 
-        Graph graph = TestGraphLoader
-            .from(db)
-            .withLabels("Node1", "Node2", "Node3")
-            .withNodeProperties(nodePropertyMappings)
-            .withDefaultAggregation(Aggregation.SINGLE)
-            .graph(factoryType);
+            Graph graph = TestGraphLoader
+                .from(db)
+                .withLabels("Node1", "Node2", "Node3")
+                .withNodeProperties(nodePropertyMappings)
+                .withDefaultAggregation(Aggregation.SINGLE)
+                .graph(factoryType);
 
-        Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
-                                 "(b:Node2 {prop1: 41, prop2: 2, prop3: 43})" +
-                                 "(c:Node3 {prop1: 41, prop2: 42, prop3: 3})" +
-                                 "(a)-->(b), (a)-->(c), (b)-->(c)");
-        assertGraphEquals(expected, graph);
+            Graph expected = fromGdl("(a:Node1 {prop1: 1, prop2: 42, prop3: 43})" +
+                                     "(b:Node2 {prop1: 41, prop2: 2, prop3: 43})" +
+                                     "(c:Node3 {prop1: 41, prop2: 42, prop3: 3})" +
+                                     "(a)-->(b), (a)-->(c), (b)-->(c)");
+            assertGraphEquals(expected, graph);
+        });
     }
 
     @Test
@@ -249,7 +251,11 @@ class GraphLoaderTest extends BaseTest {
     @AllGraphStoreFactoryTypesTest
     void testLoggingActualGraphSize(TestSupport.FactoryType factoryType) {
         var log = new TestLog();
-        Graph graph = TestGraphLoader.from(db).withDefaultAggregation(Aggregation.SINGLE).withLog(log).graph(factoryType);
+        Graph graph = TestGraphLoader
+            .from(db)
+            .withDefaultAggregation(Aggregation.SINGLE)
+            .withLog(log)
+            .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
         log.containsMessage(TestLog.INFO, "Actual memory usage of the loaded graph:");
     }

@@ -121,6 +121,7 @@ public class SysInfoProc {
             .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
             .add(value("featureKernelTracker", GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
+            .add(value("featurePropertyValueIndex", GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()));
     }
 
     private static void buildInfo(BuildInfoProperties properties, Stream.Builder<DebugValue> builder) {
