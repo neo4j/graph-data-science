@@ -40,10 +40,6 @@ public enum GdsFeatureToggles {
         return current.getAndSet(value);
     }
 
-    public boolean defaultValue() {
-        return defaultValue;
-    }
-
     public void reset() {
         current.set(defaultValue);
     }

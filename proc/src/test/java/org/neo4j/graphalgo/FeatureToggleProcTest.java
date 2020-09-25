@@ -55,9 +55,9 @@ class FeatureToggleProcTest extends BaseProcTest {
         SKIP_ORPHANS.reset();
         assertCypherResult(
             "CALL gds.features.importer.skipOrphanNodes.reset()",
-            List.of(Map.of("enabled", SKIP_ORPHANS.defaultValue()))
+            List.of(Map.of("enabled", false))
         );
-        assertEquals(SKIP_ORPHANS.defaultValue(), SKIP_ORPHANS.isEnabled());
+        assertEquals(false, SKIP_ORPHANS.isEnabled());
     }
 
     @Test
@@ -74,9 +74,9 @@ class FeatureToggleProcTest extends BaseProcTest {
         USE_PRE_AGGREGATION.reset();
         assertCypherResult(
             "CALL gds.features.importer.usePreAggregation.reset()",
-            List.of(Map.of("enabled", USE_PRE_AGGREGATION.defaultValue()))
+            List.of(Map.of("enabled", false))
         );
-        assertEquals(USE_PRE_AGGREGATION.defaultValue(), USE_PRE_AGGREGATION.isEnabled());
+        assertEquals(false, USE_PRE_AGGREGATION.isEnabled());
     }
 
     @Test
@@ -93,9 +93,9 @@ class FeatureToggleProcTest extends BaseProcTest {
         USE_KERNEL_TRACKER.reset();
         assertCypherResult(
             "CALL gds.features.useKernelTracker.reset()",
-            List.of(Map.of("enabled", USE_KERNEL_TRACKER.defaultValue()))
+            List.of(Map.of("enabled", false))
         );
-        assertEquals(USE_KERNEL_TRACKER.defaultValue(), USE_KERNEL_TRACKER.isEnabled());
+        assertEquals(false, USE_KERNEL_TRACKER.isEnabled());
     }
 
     @Test
