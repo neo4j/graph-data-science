@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.function.Supplier;
@@ -54,16 +52,6 @@ public interface AllocationTracker extends Supplier<String> {
                 AllocationTracker::empty,
                 useKernelTracker() ? KernelAllocationTracker::create : InMemoryAllocationTracker::ignoring
             );
-    }
-
-    @TestOnly
-    static <E extends Exception> void whileUsingKernelTracker(CheckedRunnable<E> code) throws E {
-        var useKernelTracker = GdsFeatureToggles.USE_KERNEL_TRACKER.getAndSet(true);
-        try {
-            code.checkedRun();
-        } finally {
-            GdsFeatureToggles.USE_KERNEL_TRACKER.set(useKernelTracker);
-        }
     }
 
     /**

@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.token.api.TokenConstants;
 
@@ -33,16 +31,6 @@ import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public final class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
-
-    @TestOnly
-    public static synchronized <E extends Exception> void whileSkippingOrphans(CheckedRunnable<E> code) throws E {
-        var skipOrphans = GdsFeatureToggles.SKIP_ORPHANS.getAndSet(true);
-        try {
-            code.checkedRun();
-        } finally {
-            GdsFeatureToggles.SKIP_ORPHANS.set(skipOrphans);
-        }
-    }
 
     private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
