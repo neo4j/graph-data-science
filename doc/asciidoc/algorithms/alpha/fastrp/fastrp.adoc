@@ -7,14 +7,14 @@
 This section describes the Random Projection node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
-Random Projection, is a node embedding algorithm in the family of random projection algorithms.
+Random Projection is a node embedding algorithm in the family of random projection algorithms.
 These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which, one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
 In fact the projection is linear and can be chosen in a random way.
 
 Such techniques therefore allow for aggressive dimensionality reduction while preserving most of the distance information.
 The Random Projection operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
-This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors. Conversely, two nodes that are not similar
-should be not be assigned similar embedding vectors.
+This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors.
+Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
 The Random Projection algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
