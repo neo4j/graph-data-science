@@ -174,10 +174,6 @@ A positive value will instead increase their importance.
 The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
 In the original paper, hyperparameter tuning was done one the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
 
-=== Sparsity
-The `sparsity` parameter maybe be set to any value `>=3`.
-Higher values will speed up computation and values up to `sqrt(embeddingSize)` should give comparable results.
-
 === Iteration weights
 By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
 The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of distance `i`.
