@@ -83,72 +83,16 @@ public class KnnWriteProc extends WriteRelationshipsProc<Knn, Knn.Result, KnnWri
     }
 
     @Override
-    protected Stream<org.neo4j.graphalgo.similarity.WriteResult> write(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
-        return runWithExceptionLogging("Graph write failed", () -> {
-            KnnWriteConfig config = computationResult.config();
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.of(
-                    new org.neo4j.graphalgo.similarity.WriteResult(
-                        computationResult.createMillis(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        Collections.emptyMap(),
-                        config.toMap()
-                    )
-                );
-            }
-
-            Knn algorithm = Objects.requireNonNull(computationResult.algorithm());
-            SimilarityGraphResult similarityGraphResult = computeToGraph(
-                computationResult.graph(),
-                algorithm.nodeCount(),
-                config.concurrency(),
-                Objects.requireNonNull(computationResult.result()),
-                algorithm.context()
-            );
-
-            SimilarityProc.SimilarityResultBuilder<org.neo4j.graphalgo.similarity.WriteResult> resultBuilder =
-                SimilarityProc.resultBuilder(new org.neo4j.graphalgo.similarity.WriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
-
-            Graph similarityGraph = similarityGraphResult.similarityGraph();
-
-            if (similarityGraph.relationshipCount() > 0) {
-                String writeRelationshipType = config.writeRelationshipType();
-                String writeProperty = config.writeProperty();
-
-                runWithExceptionLogging(
-                    "Knn write-back failed",
-                    () -> {
-                        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            RelationshipExporter exporter = RelationshipExporter
-                                .of(api, similarityGraph, algorithm.getTerminationFlag())
-                                .withLog(log)
-                                .build();
-                            if (shouldComputeHistogram(callContext)) {
-                                DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-                                exporter.write(
-                                    writeRelationshipType,
-                                    Optional.of(writeProperty),
-                                    (node1, node2, similarity) -> {
-                                        histogram.recordValue(similarity);
-                                        return true;
-                                    }
-                                );
-                                resultBuilder.withHistogram(histogram);
-                            } else {
-                                exporter.write(writeRelationshipType, writeProperty);
-                            }
-                        }
-                    }
-                );
-            }
-            org.neo4j.graphalgo.similarity.WriteResult writeResult = resultBuilder.build();
-            return Stream.of(writeResult);
-        });
+    protected SimilarityGraphResult similarityGraphResult(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
+        Knn algorithm = Objects.requireNonNull(computationResult.algorithm());
+        KnnWriteConfig config = computationResult.config();
+        return computeToGraph(
+            computationResult.graph(),
+            algorithm.nodeCount(),
+            config.concurrency(),
+            Objects.requireNonNull(computationResult.result()),
+            algorithm.context()
+        );
     }
 
     static SimilarityGraphResult computeToGraph(
