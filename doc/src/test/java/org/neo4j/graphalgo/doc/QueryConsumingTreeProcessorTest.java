@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;
+import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStreamProc;
 
 import java.io.File;
 import java.net.URISyntaxException;

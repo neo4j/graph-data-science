@@ -17,23 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils;
+package org.neo4j.graphalgo.similarity.knn;import net.jqwik.api.Arbitraries;
+import net.jqwik.api.Arbitrary;
+import net.jqwik.api.Provide;
+import org.eclipse.collections.api.tuple.primitive.IntIntPair;
+import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 
-import org.neo4j.graphalgo.similarity.SimilarityResult;
+class RandomNodeCountAndKValues {
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-public final class SimilarityHelper {
-
-    private SimilarityHelper() {}
-
-    public static void assertSimilarityStreamsAreEqual(Stream<SimilarityResult> result1, Stream<SimilarityResult> result2) {
-        Set<SimilarityResult> set1 = result1.collect(Collectors.toSet());
-        Set<SimilarityResult> set2 = result2.collect(Collectors.toSet());
-        assertThat(set1).containsExactlyInAnyOrderElementsOf(set2);
+    @Provide("n and k")
+    final Arbitrary<IntIntPair> nAndK() {
+        return Arbitraries.integers().between(2, 100).flatMap(n ->
+            Arbitraries.integers().between(1, n - 1).map(k ->
+                PrimitiveTuples.pair((int) n, (int) k)));
     }
 }

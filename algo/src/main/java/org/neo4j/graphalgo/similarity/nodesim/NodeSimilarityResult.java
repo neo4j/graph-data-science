@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils;
+package org.neo4j.graphalgo.similarity.nodesim;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityResult;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+@ValueClass
+public interface NodeSimilarityResult {
+    Optional<Stream<SimilarityResult>> maybeStreamResult();
+    Optional<SimilarityGraphResult> maybeGraphResult();
 
-public final class SimilarityHelper {
+    default Stream<SimilarityResult> streamResult() {
+        return maybeStreamResult().get();
+    }
 
-    private SimilarityHelper() {}
-
-    public static void assertSimilarityStreamsAreEqual(Stream<SimilarityResult> result1, Stream<SimilarityResult> result2) {
-        Set<SimilarityResult> set1 = result1.collect(Collectors.toSet());
-        Set<SimilarityResult> set2 = result2.collect(Collectors.toSet());
-        assertThat(set1).containsExactlyInAnyOrderElementsOf(set2);
+    default SimilarityGraphResult graphResult() {
+        return maybeGraphResult().get();
     }
 }

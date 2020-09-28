@@ -17,23 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils;
+package org.neo4j.graphalgo.similarity;
 
-import org.neo4j.graphalgo.similarity.SimilarityResult;
+import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+// TODO move to common similarity code
+public class SimilarityGraphResult {
+    private final Graph similarityGraph;
+    private final long comparedNodes;
+    private final boolean isTopKGraph;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+    public SimilarityGraphResult(Graph similarityGraph, long comparedNodes, boolean isTopKGraph) {
+        this.similarityGraph = similarityGraph;
+        this.comparedNodes = comparedNodes;
+        this.isTopKGraph = isTopKGraph;
+    }
 
-public final class SimilarityHelper {
+    public Graph similarityGraph() {
+        return similarityGraph;
+    }
 
-    private SimilarityHelper() {}
+    public long comparedNodes() {
+        return comparedNodes;
+    }
 
-    public static void assertSimilarityStreamsAreEqual(Stream<SimilarityResult> result1, Stream<SimilarityResult> result2) {
-        Set<SimilarityResult> set1 = result1.collect(Collectors.toSet());
-        Set<SimilarityResult> set2 = result2.collect(Collectors.toSet());
-        assertThat(set1).containsExactlyInAnyOrderElementsOf(set2);
+    public boolean isTopKGraph() {
+        return isTopKGraph;
     }
 }

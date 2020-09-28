@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

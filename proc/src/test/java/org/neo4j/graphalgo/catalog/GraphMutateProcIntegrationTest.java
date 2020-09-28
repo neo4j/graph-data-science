@@ -32,8 +32,8 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainMutateProc;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
+import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
 import java.util.Collection;

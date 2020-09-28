@@ -29,7 +29,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
+import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;

@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils;
+package org.neo4j.graphalgo.similarity.knn;
 
-import org.neo4j.graphalgo.similarity.SimilarityResult;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+@ValueClass
+@Configuration
+public interface KnnStatsConfig extends KnnBaseConfig {
 
-public final class SimilarityHelper {
-
-    private SimilarityHelper() {}
-
-    public static void assertSimilarityStreamsAreEqual(Stream<SimilarityResult> result1, Stream<SimilarityResult> result2) {
-        Set<SimilarityResult> set1 = result1.collect(Collectors.toSet());
-        Set<SimilarityResult> set2 = result2.collect(Collectors.toSet());
-        assertThat(set1).containsExactlyInAnyOrderElementsOf(set2);
+    static KnnStatsConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
+        CypherMapWrapper config
+    ) {
+        return new KnnStatsConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }
