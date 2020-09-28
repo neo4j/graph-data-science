@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 class SimilarityComputerTest {
 
@@ -137,6 +138,25 @@ class SimilarityComputerTest {
         NodeProperties props = (LongArrayNodeProperties) nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray();
         var sim = SimilarityComputer.ofLongArrayProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
+    }
+
+    @Property
+    void similarVectorsShouldBeCLoseToOne() {
+        double[] doubleArray = new Random(42).doubles(42, 0.0, 1.0).toArray();
+        double[] doubleArrayCopy = doubleArray.clone();
+        doubleArrayCopy[1] = doubleArrayCopy[1] + 1.0D;
+        NodeProperties props = (DoubleArrayNodeProperties) nodeId -> {
+            if (nodeId == 0) {
+                return doubleArray;
+            }
+            if (nodeId == 1) {
+                return doubleArrayCopy;
+            }
+            return new double[0];
+        };
+        var sim = SimilarityComputer.ofDoubleArrayProperty(props);
+
+        assertThat(sim.similarity(0, 1)).isCloseTo(1.0D, within(0.05));
     }
 
     @Provide("differentValues")
