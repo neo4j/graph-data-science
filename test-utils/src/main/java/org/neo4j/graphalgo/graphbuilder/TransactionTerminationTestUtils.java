@@ -33,7 +33,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class TransactionTerminationTestUtils {
 
     // Give tests 5 times more time when running on CI
-    private static final long CI_SMEAR = 5;
+    private static final long CI_SMEAR = 10;
 
     public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfterMillis) {
         assertTerminates(algoRunner, terminateAfterMillis, Long.MAX_VALUE);
