@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
@@ -47,32 +46,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Knn extends Algorithm<Knn, Knn.Result> {
 
-    interface SimilarityComputer {
-        double similarity(long firstNodeId, long secondNodeId);
-    }
-
-    static final SimilarityComputer DEFAULT_SIMILARITY_COMPUTER =
-        (left, right) -> {
-            // we don't have Long.MIN_VALUE as id, so this is fine
-            var abs = Math.abs(left - right);
-            return 1.0 / (1.0 + abs);
-        };
-
-    private static final class PropertiesSimilarityComputer implements SimilarityComputer {
-        private final NodeProperties nodeProperties;
-
-        private PropertiesSimilarityComputer(NodeProperties nodeProperties) {
-            this.nodeProperties = nodeProperties;
-        }
-
-        @Override
-        public double similarity(long firstNodeId, long secondNodeId) {
-            var left = nodeProperties.doubleValue(firstNodeId);
-            var right = nodeProperties.doubleValue(secondNodeId);
-            return 1.0 / (1.0 + Math.abs(left - right));
-        }
-    }
-
     private final long nodeCount;
     private final KnnBaseConfig config;
     private final KnnContext context;
@@ -84,10 +57,13 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             graph.nodeCount(),
             config,
             Optional.ofNullable(config.nodeWeightProperty())
-                .map(property -> Objects.requireNonNull(
-                    graph.nodeProperties(property),
-                    () -> formatWithLocale("The property `%s` has not been loaded", property)
-                )).orElse(null),
+                .map(property -> {
+                    var nodeProperties = Objects.requireNonNull(
+                        graph.nodeProperties(property),
+                        () -> formatWithLocale("The property `%s` has not been loaded", property)
+                    );
+                    return SimilarityComputer.ofProperty(nodeProperties, property);
+                }).orElse(SimilarityComputer.DEFAULT_SIMILARITY_COMPUTER),
             context
         );
     }
@@ -95,19 +71,16 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     public Knn(
         long nodeCount,
         KnnBaseConfig config,
-        @Nullable NodeProperties similarityProperties,
+        SimilarityComputer similarityComputer,
         KnnContext context
     ) {
         this.nodeCount = nodeCount;
         this.config = config;
         this.context = context;
-
+        this.computer = similarityComputer;
         this.random = this.config.randomSeed() == -1L
             ? new SplittableRandom()
             : new SplittableRandom(this.config.randomSeed());
-        this.computer = similarityProperties != null
-            ? new PropertiesSimilarityComputer(similarityProperties)
-            : DEFAULT_SIMILARITY_COMPUTER;
         this.progressLogger = new BatchingProgressLogger(
             context.log(),
             (long) Math.ceil(config.sampleRate() * config.topK() * nodeCount),
