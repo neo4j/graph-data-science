@@ -356,7 +356,41 @@ task asciidocJar(type: Jar) {
     from copyAsciidoc
 }
 
-tasks.assemble.dependsOn packageHtml, packagePdf
+task docsVersionsJson {
+    ext.outFile = file("$distributionDir/documentation/gds-doc-versions.json")
+    def versionsJsonUrl = new URL("https://s3-eu-west-1.amazonaws.com/documentation.neo4j.com/publications/distributions/gds-doc-versions.json")
+    outputs.file(outFile)
+    doLast {
+        def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
+        def gdsVersion = project.version
+        // True if the project version doesn't contain `-alpha0x`
+        def isGa = gdsVersion.toString().matches("^(\\d+\\.){2}\\d+\$")
+
+        // Derive the Docs version  from the GDS Version -> i.e.
+        // GDS Version: `1.4.0-alpha01` -> `1.4-preview`
+        // GDS Version: `1.4.1` -> `1.4`
+        def docsVersion = (gdsVersion =~ /(\d+)\.(\d+)/).findAll()*.first()[0]
+        if(!isGa) {
+            docsVersion += '-preview'
+        }
+
+        // Find the index of the element that starts with our new docs version
+        // Using `startsWith` to catch new version being GA and the old one Preview
+        def idx = versionsJson.findIndexOf { v -> v.startsWith(docsVersion)}
+        if(idx >= 0) {
+            // Replace the old version it if exists
+            versionsJson[idx] = docsVersion
+        } else {
+            // Add the new docs version if it doesn't exist
+            versionsJson.add(docsVersion)
+        }
+
+        // Save the results to a file
+        outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(versionsJson))
+    }
+}
+
+tasks.assemble.dependsOn packageHtml, packagePdf, docsVersionsJson
 
 rootProject.tasks.ci.finalizedBy assemble
 rootProject.tasks.cipr.finalizedBy packageHtml
