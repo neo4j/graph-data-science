@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,8 +36,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.computeHistogram;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.shouldComputeHistogram;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.computeHistogram;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsProc.StatsResult, NodeSimilarityStatsConfig> {
@@ -98,8 +99,8 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                 );
             }
 
-            NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> resultBuilder =
-                NodeSimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<StatsResult> resultBuilder =
+                SimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
@@ -140,7 +141,7 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             this.configuration = configuration;
         }
 
-        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<StatsResult> {
+        static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
 
             @Override
             public StatsResult build() {

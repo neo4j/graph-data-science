@@ -26,8 +26,8 @@ import java.util.Objects;
 
 public class SimilarityResult implements Comparable<SimilarityResult>, RelationshipsBuilder.Relationship {
 
-    static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
-    static Comparator<SimilarityResult> DESCENDING = ASCENDING.reversed();
+    public static Comparator<SimilarityResult> ASCENDING = SimilarityResult::compareTo;
+    public static Comparator<SimilarityResult> DESCENDING = ASCENDING.reversed();
 
     public long node1;
     public long node2;

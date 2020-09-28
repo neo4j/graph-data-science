@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
+import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -47,16 +48,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.computeHistogram;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.computeHistogram;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateProc.MutateResult, NodeSimilarityMutateConfig> {
+public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, SimilarityProc.MutateResult, NodeSimilarityMutateConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<SimilarityProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -95,14 +96,14 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
+    protected AbstractResultBuilder<SimilarityProc.MutateResult> resultBuilder(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult
     ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<MutateResult> mutate(
+    public Stream<SimilarityProc.MutateResult> mutate(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
     ) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
@@ -110,7 +111,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new MutateResult(
+                    new SimilarityProc.MutateResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -123,8 +124,8 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 );
             }
 
-            NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder =
-                NodeSimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityProc.MutateResult.Builder(), computationResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                 Relationships resultRelationships = getRelationships(
@@ -149,7 +150,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     private Relationships getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
-        NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> resultBuilder
+        SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder
     ) {
         Relationships resultRelationships;
 
@@ -196,55 +197,5 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
             }
         }
         return resultRelationships;
-    }
-
-    public static class MutateResult {
-        public final long createMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long postProcessingMillis;
-
-        public final long nodesCompared;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> similarityDistribution;
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long createMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long relationshipsWritten,
-            Map<String, Object> similarityDistribution,
-            Map<String, Object> configuration
-        ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.relationshipsWritten = relationshipsWritten;
-            this.similarityDistribution = similarityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<MutateResult> {
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    createMillis,
-                    computeMillis,
-                    mutateMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-        }
     }
 }

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
+import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,16 +43,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteResult, KnnWriteConfig> {
+public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.WriteResult, KnnWriteConfig> {
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<KnnWriteProc.WriteResult> write(
+    public Stream<SimilarityProc.WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -78,7 +79,7 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteR
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityProc.WriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
@@ -88,13 +89,13 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteR
     }
 
     @Override
-    protected Stream<WriteResult> write(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
+    protected Stream<SimilarityProc.WriteResult> write(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             KnnWriteConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new KnnWriteProc.WriteResult(
+                    new SimilarityProc.WriteResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -116,10 +117,10 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteR
                 algorithm.context()
             );
 
-            Graph similarityGraph = similarityGraphResult.similarityGraph();
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.WriteResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityProc.WriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
 
-            KnnProc.KnnResultBuilder<KnnWriteProc.WriteResult> resultBuilder =
-                KnnProc.resultBuilder(new KnnWriteProc.WriteResult.Builder(), computationResult, similarityGraphResult);
+            Graph similarityGraph = similarityGraphResult.similarityGraph();
 
             if (similarityGraph.relationshipCount() > 0) {
                 String writeRelationshipType = config.writeRelationshipType();
@@ -151,7 +152,8 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteR
                     }
                 );
             }
-            return Stream.of(resultBuilder.build());
+            SimilarityProc.WriteResult writeResult = resultBuilder.build();
+            return Stream.of(writeResult);
         });
     }
 
@@ -203,7 +205,7 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, KnnWriteProc.WriteR
             this.configuration = configuration;
         }
 
-        static class Builder extends KnnProc.KnnResultBuilder<KnnWriteProc.WriteResult> {
+        static class Builder extends SimilarityProc.SimilarityResultBuilder<KnnWriteProc.WriteResult> {
 
             @Override
             public KnnWriteProc.WriteResult build() {

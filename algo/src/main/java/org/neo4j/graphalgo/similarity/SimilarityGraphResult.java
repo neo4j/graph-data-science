@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.api.Graph;
 
-// TODO move to common similarity code
 public class SimilarityGraphResult {
     private final Graph similarityGraph;
     private final long comparedNodes;

@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,16 +41,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteProc.WriteResult, NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimilarityResult, SimilarityProc.WriteResult, NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<SimilarityProc.WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -86,18 +87,18 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityProc.WriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<WriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    public Stream<SimilarityProc.WriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             NodeSimilarityWriteConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new WriteResult(
+                    new SimilarityProc.WriteResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -113,8 +114,8 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
             NodeSimilarity algorithm = computationResult.algorithm();
             Graph similarityGraph = computationResult.result().graphResult().similarityGraph();
 
-            NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> resultBuilder =
-                NodeSimilarityProc.resultBuilder(new WriteResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.WriteResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityProc.WriteResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
 
             if (similarityGraph.relationshipCount() > 0) {
                 String writeRelationshipType = config.writeRelationshipType();
@@ -148,55 +149,5 @@ public class NodeSimilarityWriteProc extends WriteProc<NodeSimilarity, NodeSimil
             }
             return Stream.of(resultBuilder.build());
         });
-    }
-
-    public static class WriteResult {
-        public final long createMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final long postProcessingMillis;
-
-        public final long nodesCompared;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> similarityDistribution;
-        public final Map<String, Object> configuration;
-
-        WriteResult(
-            long createMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long relationshipsWritten,
-            Map<String, Object> similarityDistribution,
-            Map<String, Object> configuration
-        ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.relationshipsWritten = relationshipsWritten;
-            this.similarityDistribution = similarityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends NodeSimilarityProc.NodeSimilarityResultBuilder<WriteResult> {
-
-            @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    createMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-        }
     }
 }

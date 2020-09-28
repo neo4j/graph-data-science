@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
+import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,17 +43,17 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.similarity.SimilarityProc.computeHistogram;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.graphalgo.similarity.knn.KnnWriteProc.computeToGraph;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.computeHistogram;
-import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.MutateResult, KnnMutateConfig> {
+public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.MutateResult, KnnMutateConfig> {
 
     @Procedure(name = "gds.beta.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)
-    public Stream<KnnMutateProc.MutateResult> mutate(
+    public Stream<SimilarityProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -79,7 +80,7 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.Mut
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityProc.MutateResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
@@ -89,13 +90,13 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.Mut
     }
 
     @Override
-    protected Stream<MutateResult> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
+    protected Stream<SimilarityProc.MutateResult> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
             KnnMutateConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new MutateResult(
+                    new SimilarityProc.MutateResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -123,11 +124,11 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.Mut
                 );
             }
 
-            KnnProc.KnnResultBuilder<KnnMutateProc.MutateResult> resultBuilder =
-                KnnProc.resultBuilder(
-                    new KnnMutateProc.MutateResult.Builder(),
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder =
+                SimilarityProc.resultBuilder(
+                    new SimilarityProc.MutateResult.Builder(),
                     computationResult,
-                    similarityGraphResult
+                    (ignore) -> similarityGraphResult
                 );
 
             try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
@@ -154,7 +155,7 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.Mut
 
     private Relationships getRelationships(
         SimilarityGraphResult similarityGraphResult,
-        KnnProc.KnnResultBuilder<MutateResult> resultBuilder
+        SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder
     ) {
         HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
         Relationships resultRelationships = similarityGraph.relationships();
@@ -162,55 +163,5 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, KnnMutateProc.Mut
             resultBuilder.withHistogram(computeHistogram(similarityGraph));
         }
         return resultRelationships;
-    }
-
-    public static class MutateResult {
-        public final long createMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final long postProcessingMillis;
-
-        public final long nodesCompared;
-        public final long relationshipsWritten;
-
-        public final Map<String, Object> similarityDistribution;
-        public final Map<String, Object> configuration;
-
-        MutateResult(
-            long createMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long relationshipsWritten,
-            Map<String, Object> similarityDistribution,
-            Map<String, Object> configuration
-        ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.relationshipsWritten = relationshipsWritten;
-            this.similarityDistribution = similarityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends KnnProc.KnnResultBuilder<MutateResult> {
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    createMillis,
-                    computeMillis,
-                    mutateMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-        }
     }
 }

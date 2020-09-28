@@ -35,14 +35,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
-// TODO move to common similarity code
 public class SimilarityGraphBuilder {
 
     private final int concurrency;
     private final ExecutorService executorService;
     private final AllocationTracker tracker;
 
-    static MemoryEstimation memoryEstimation(int topK, int topN) {
+    public static MemoryEstimation memoryEstimation(int topK, int topN) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
             long maxNodesToCompare = Math.min(dimensions.maxRelCount(), dimensions.nodeCount());
             long maxNumberOfSimilarityResults = maxNodesToCompare * (maxNodesToCompare - 1) / 2;
