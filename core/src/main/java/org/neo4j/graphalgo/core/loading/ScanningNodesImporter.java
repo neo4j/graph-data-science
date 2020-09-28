@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,18 +27,22 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
@@ -55,7 +58,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
     private HugeLongArrayBuilder idMapBuilder;
-    private Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
+    private Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
 
     ScanningNodesImporter(
         GraphDatabaseAPI api,
@@ -99,7 +102,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
             new NodeImporter(
                 idMapBuilder,
                 nodeLabelBitSetMapping,
-                labelTokenNodeLabelMapping
+                labelTokenNodeLabelMapping,
+                tracker
             ),
             nodePropertyImporter,
             terminationFlag
@@ -124,17 +128,33 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
     }
 
     @NotNull
-    private Map<NodeLabel, BitSet> initializeLabelBitSets(
+    private Map<NodeLabel, HugeAtomicBitSet> initializeLabelBitSets(
         long nodeCount,
         LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        return StreamSupport.stream(
+        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap = StreamSupport.stream(
             labelTokenNodeLabelMapping.values().spliterator(),
             false
         )
             .flatMap(cursor -> cursor.value.stream())
             .distinct()
-            .collect(Collectors.toMap(identifier -> identifier, s -> new BitSet(nodeCount)));
+            .collect(Collectors.toMap(
+                nodeLabel -> nodeLabel,
+                nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker)
+                )
+            );
+
+        // set the whole range for '*' projections
+        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
+            HugeAtomicBitSet bitSet = nodeLabelBitSetMap.get(starLabel);
+            ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, nodeCount),
+                concurrency,
+                stream -> stream.forEach(bitSet::set)
+            );
+        }
+
+        return nodeLabelBitSetMap;
     }
 
     @Nullable

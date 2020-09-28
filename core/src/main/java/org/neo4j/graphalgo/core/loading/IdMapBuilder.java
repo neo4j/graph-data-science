@@ -25,25 +25,38 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> elementIdentifierLabelMapping,
+        Map<NodeLabel, HugeAtomicBitSet> elementIdentifierLabelMapping,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) {
-        Optional<Map<NodeLabel, BitSet>> maybeLabelInformation = elementIdentifierLabelMapping == null || elementIdentifierLabelMapping.isEmpty()
-            ? Optional.empty()
-            : Optional.of(elementIdentifierLabelMapping);
+        Optional<Map<NodeLabel, BitSet>> maybeLabelInformation = Optional.empty();
+
+        if (elementIdentifierLabelMapping != null && !elementIdentifierLabelMapping.isEmpty()) {
+            Map<NodeLabel, BitSet> convertedMapping = elementIdentifierLabelMapping
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    entry -> entry.getValue().toBitSet()
+                ));
+
+            maybeLabelInformation = Optional.of(convertedMapping);
+        }
+
         HugeLongArray graphIds = idMapBuilder.build();
 
         SparseNodeMapping nodeToGraphIds = buildSparseNodeMapping(graphIds, highestNodeId, concurrency, tracker);

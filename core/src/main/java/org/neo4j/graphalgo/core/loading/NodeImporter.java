@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongObjectMap;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
+import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
@@ -32,31 +33,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
-
 public class NodeImporter {
 
     interface PropertyReader {
         int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
     }
 
-    final Map<NodeLabel, BitSet> nodeLabelBitSetMapping;
+    final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
     final LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
+    private final AllocationTracker tracker;
 
     private final HugeLongArrayBuilder idMapBuilder;
 
     public NodeImporter(HugeLongArrayBuilder idMapBuilder) {
-        this(idMapBuilder, null, null);
+        this(idMapBuilder, null, null, AllocationTracker.EMPTY);
     }
 
     public NodeImporter(
         HugeLongArrayBuilder idMapBuilder,
-        Map<NodeLabel, BitSet> nodeLabelBitSetMapping,
-        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
+        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
+        LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        AllocationTracker tracker
     ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
+        this.tracker = tracker;
     }
 
     long importNodes(NodesBatchBuffer buffer, Read read, CursorFactory cursors, @Nullable NativeNodePropertyImporter propertyImporter) {
@@ -127,18 +129,19 @@ public class NodeImporter {
         for (int i = 0; i < cappedBatchLength; i++) {
             long[] labelIdsForNode = labelIds[i];
             for (long labelId : labelIdsForNode) {
-                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(labelId, Collections.emptyList());
+                List<NodeLabel> elementIdentifiers = labelTokenNodeLabelMapping.getOrDefault(
+                    (int) labelId,
+                    Collections.emptyList()
+                );
                 for (NodeLabel elementIdentifier : elementIdentifiers) {
                     nodeLabelBitSetMapping
-                        .computeIfAbsent(elementIdentifier, (ignore) -> new BitSet(batchLength))
+                        .computeIfAbsent(
+                            elementIdentifier,
+                            (ignored) -> HugeAtomicBitSet.create(idMapBuilder.capacity(), tracker)
+                        )
                         .set(startIndex + i);
                 }
             }
-        }
-
-        // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            nodeLabelBitSetMapping.get(starLabel).set(startIndex, startIndex + batchLength);
         }
     }
 }
