@@ -10,7 +10,7 @@ When an algorithm procedure is called from Cypher, the procedure call is execute
 This section includes:
 
 * <<tx-graph-projection>>
-* <<tx-graph-writing>>
+* <<tx-results-writing>>
 * <<tx-termination>>
 
 
@@ -63,7 +63,7 @@ RETURN componentCount
 --
 
 
-[[tx-graph-writing]]
+[[tx-results-writing]]
 == During results writing
 
 Results from algorithms (node properties, for example) are written to the graph in new transactions, one per batch.
