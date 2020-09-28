@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -36,13 +35,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.loading.NodesBatchBuffer.ANY_LABEL;
@@ -87,8 +84,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
 
         LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.labelTokenNodeLabelMapping();
 
-        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(
-            ANY_LABEL)
+        nodeLabelBitSetMapping = labelTokenNodeLabelMapping.size() == 1 && labelTokenNodeLabelMapping.containsKey(ANY_LABEL)
             ? null
             : initializeLabelBitSets(nodeCount, labelTokenNodeLabelMapping);
 
@@ -143,16 +139,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker)
                 )
             );
-
-        // set the whole range for '*' projections
-        for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            HugeAtomicBitSet bitSet = nodeLabelBitSetMap.get(starLabel);
-            ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, nodeCount),
-                concurrency,
-                stream -> stream.forEach(bitSet::set)
-            );
-        }
 
         return nodeLabelBitSetMap;
     }
