@@ -15,7 +15,7 @@ window.docMeta = (async function () {
   }
 
   const versionsUrl =
-    'https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/doc-versions.json';
+    'https://s3-eu-west-1.amazonaws.com/documentation.neo4j.com/publications/distributions/gds-doc-versions.json';
   const availableDocVersions = await jQuery.ajax({
     type: 'GET',
     url: versionsUrl,
