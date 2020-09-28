@@ -233,4 +233,51 @@ public final class SimilarityProc {
             }
         }
     }
+
+    public static final class StatsResult {
+
+        public long createMillis;
+        public long computeMillis;
+        public long postProcessingMillis;
+
+        public long nodesCompared;
+        public long similarityPairs;
+        public Map<String, Object> similarityDistribution;
+        public Map<String, Object> configuration;
+
+        public StatsResult(
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long nodesCompared,
+            long similarityPairs,
+            Map<String, Object> communityDistribution,
+            Map<String, Object> configuration
+
+        ) {
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.postProcessingMillis = postProcessingMillis;
+            this.nodesCompared = nodesCompared;
+            this.similarityPairs = similarityPairs;
+            this.similarityDistribution = communityDistribution;
+            this.configuration = configuration;
+        }
+
+        public static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
+
+            @Override
+            public SimilarityProc.StatsResult build() {
+                return new SimilarityProc.StatsResult(
+                    createMillis,
+                    computeMillis,
+                    postProcessingMillis,
+                    nodesCompared,
+                    relationshipsWritten,
+                    distribution(),
+                    config.toMap()
+                );
+            }
+        }
+    }
 }

@@ -40,11 +40,11 @@ import static org.neo4j.graphalgo.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsProc.StatsResult, NodeSimilarityStatsConfig> {
+public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, SimilarityProc.StatsResult, NodeSimilarityStatsConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<SimilarityProc.StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -76,18 +76,18 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityProc.StatsResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computeResult) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
+    public Stream<SimilarityProc.StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             NodeSimilarityStatsConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new StatsResult(
+                    new SimilarityProc.StatsResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -99,8 +99,8 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<StatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.StatsResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityProc.StatsResult.Builder(), computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
@@ -109,52 +109,5 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
             }
             return Stream.of(resultBuilder.build());
         });
-    }
-
-    public static final class StatsResult {
-
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-
-        public long nodesCompared;
-        public long similarityPairs;
-        public Map<String, Object> similarityDistribution;
-        public Map<String, Object> configuration;
-
-        StatsResult(
-            long createMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long similarityPairs,
-            Map<String, Object> communityDistribution,
-            Map<String, Object> configuration
-
-        ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.similarityPairs = similarityPairs;
-            this.similarityDistribution = communityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
-
-            @Override
-            public StatsResult build() {
-                return new StatsResult(
-                    createMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-        }
     }
 }

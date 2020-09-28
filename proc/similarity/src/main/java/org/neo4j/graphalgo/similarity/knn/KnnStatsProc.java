@@ -45,11 +45,11 @@ import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogr
 import static org.neo4j.graphalgo.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.StatsResult, KnnStatsConfig> {
+public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityProc.StatsResult, KnnStatsConfig> {
 
     @Procedure(name = "gds.beta.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<SimilarityProc.StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -81,18 +81,18 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityProc.StatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
     @Override
-    public Stream<StatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
+    public Stream<SimilarityProc.StatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             KnnStatsConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new KnnStatsProc.StatsResult(
+                    new SimilarityProc.StatsResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -107,8 +107,8 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
             var result = Objects.requireNonNull(computationResult.result());
 
 
-            SimilarityProc.SimilarityResultBuilder<StatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<SimilarityProc.StatsResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityProc.StatsResult.Builder(), computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
@@ -135,52 +135,5 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
 
             return Stream.of(resultBuilder.build());
         });
-    }
-
-    public static final class StatsResult {
-
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-
-        public long nodesCompared;
-        public long similarityPairs;
-        public Map<String, Object> similarityDistribution;
-        public Map<String, Object> configuration;
-
-        StatsResult(
-            long createMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long nodesCompared,
-            long similarityPairs,
-            Map<String, Object> communityDistribution,
-            Map<String, Object> configuration
-
-        ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.nodesCompared = nodesCompared;
-            this.similarityPairs = similarityPairs;
-            this.similarityDistribution = communityDistribution;
-            this.configuration = configuration;
-        }
-
-        static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
-
-            @Override
-            public KnnStatsProc.StatsResult build() {
-                return new KnnStatsProc.StatsResult(
-                    createMillis,
-                    computeMillis,
-                    postProcessingMillis,
-                    nodesCompared,
-                    relationshipsWritten,
-                    distribution(),
-                    config.toMap()
-                );
-            }
-        }
     }
 }
