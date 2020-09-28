@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalInput> {
+class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, CategoricalInput> {
 
     private static final String DB_CYPHER = "CREATE" +
                                             "  (a:Person {name: 'Alice'})" +
@@ -433,7 +433,7 @@ class OverlapProcTest extends SimilarityProcTest<OverlapAlgorithm, CategoricalIn
     }
 
     @Override
-    Class<? extends SimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<OverlapAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
         return OverlapProc.class;
     }
 }

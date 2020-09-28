@@ -53,7 +53,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECT
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
-abstract class SimilarityProc
+abstract class AlphaSimilarityProc
     <ALGO extends SimilarityAlgorithm<ALGO, ?>, CONFIG extends SimilarityConfig>
     extends AlgoBaseProc<ALGO, SimilarityAlgorithmResult, CONFIG> {
 

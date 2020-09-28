@@ -61,18 +61,18 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
-import static org.neo4j.graphalgo.similarity.SimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
+import static org.neo4j.graphalgo.similarity.AlphaSimilarityProc.SIMILARITY_FAKE_GRAPH_NAME;
 
-public abstract class SimilarityProcTest<
+public abstract class AlphaSimilarityProcTest<
     ALGORITHM extends SimilarityAlgorithm<ALGORITHM, INPUT>,
     INPUT extends SimilarityInput
     > extends BaseProcTest implements GraphCreateConfigSupport {
 
-    abstract Class<? extends SimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
+    abstract Class<? extends AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> getProcedureClazz();
 
-    void applyOnProcedure(Consumer<? super SimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
+    void applyOnProcedure(Consumer<? super AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig>> func) {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            SimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc;
+            AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc;
             try {
                 proc = getProcedureClazz().getDeclaredConstructor().newInstance();
             } catch (ReflectiveOperationException e) {
@@ -98,7 +98,7 @@ public abstract class SimilarityProcTest<
         return name;
     }
 
-    private Stream<Method> getProcMethods(SimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
+    private Stream<Method> getProcMethods(AlphaSimilarityProc<ALGORITHM, ? extends SimilarityConfig> proc) {
         return Arrays.stream(proc.getClass().getDeclaredMethods())
             .filter(method ->
                 method.getDeclaredAnnotation(Procedure.class) != null && Set

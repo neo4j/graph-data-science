@@ -19,12 +19,12 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfig;
 import org.neo4j.graphalgo.impl.similarity.OverlapConfigImpl;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilarityStatsResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class OverlapProc extends SimilarityProc<OverlapAlgorithm, OverlapConfig> {
+public class OverlapProc extends AlphaSimilarityProc<OverlapAlgorithm, OverlapConfig> {
 
     private static final String DESCRIPTION = "Overlap-similarity is an algorithm for finding similar nodes based on the overlap coefficient.";
 

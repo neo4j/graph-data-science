@@ -62,7 +62,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DE
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ApproxNearestNeighborsProc extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig> {
+public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ApproximateNearestNeighborsConfig> {
 
     private static final String DESCRIPTION =
         "The Approximate Nearest Neighbors algorithm constructs a k-Nearest Neighbors " +

@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class EuclideanProcTest extends SimilarityProcTest<EuclideanAlgorithm, WeightedInput> {
+class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, WeightedInput> {
 
     private static final String STATEMENT_STATS =
         " MATCH (i:Item)" +
@@ -634,7 +634,7 @@ class EuclideanProcTest extends SimilarityProcTest<EuclideanAlgorithm, WeightedI
     }
 
     @Override
-    Class<? extends SimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<EuclideanAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
         return EuclideanProc.class;
     }
 }

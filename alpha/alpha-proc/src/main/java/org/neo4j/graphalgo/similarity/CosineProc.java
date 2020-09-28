@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class CosineProc extends SimilarityProc<CosineAlgorithm, CosineConfig> {
+public class CosineProc extends AlphaSimilarityProc<CosineAlgorithm, CosineConfig> {
 
     private static final String DESCRIPTION = "Cosine-similarity is an algorithm for finding similar nodes based on the cosine similarity metric.";
 

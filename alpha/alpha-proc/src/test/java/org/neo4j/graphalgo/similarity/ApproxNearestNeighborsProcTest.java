@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class ApproxNearestNeighborsProcTest extends SimilarityProcTest<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityInput> {
+class ApproxNearestNeighborsProcTest extends AlphaSimilarityProcTest<ApproxNearestNeighborsAlgorithm<SimilarityInput>, SimilarityInput> {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -193,7 +193,7 @@ class ApproxNearestNeighborsProcTest extends SimilarityProcTest<ApproxNearestNei
     }
 
     @Override
-    Class<? extends SimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<ApproxNearestNeighborsAlgorithm<SimilarityInput>, ? extends SimilarityConfig>> getProcedureClazz() {
         return ApproxNearestNeighborsProc.class;
     }
 }

@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class CosineProcTest extends SimilarityProcTest<CosineAlgorithm, WeightedInput> {
+class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedInput> {
 
     public static final String DB_CYPHER =
         "CREATE" +
@@ -608,7 +608,7 @@ class CosineProcTest extends SimilarityProcTest<CosineAlgorithm, WeightedInput> 
     }
 
     @Override
-    Class<? extends SimilarityProc<CosineAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<CosineAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
         return CosineProc.class;
     }
 }

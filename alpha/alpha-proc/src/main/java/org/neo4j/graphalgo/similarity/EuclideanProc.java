@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class EuclideanProc extends SimilarityProc<EuclideanAlgorithm, EuclideanConfig> {
+public class EuclideanProc extends AlphaSimilarityProc<EuclideanAlgorithm, EuclideanConfig> {
 
     private static final String DESCRIPTION = "Euclidean-similarity is an algorithm for finding similar nodes based on the euclidean distance.";
 
