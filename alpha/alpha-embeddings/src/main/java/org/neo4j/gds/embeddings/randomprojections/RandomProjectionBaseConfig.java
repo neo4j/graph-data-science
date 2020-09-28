@@ -39,12 +39,6 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
     @Configuration.IntegerRange(min = 1)
     int embeddingSize();
 
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int sparsity() {
-        return 3;
-    }
-
     @Configuration.Key(ITERATION_WEIGHTS_KEY)
     @Value.Default
     default List<Double> iterationWeights() {

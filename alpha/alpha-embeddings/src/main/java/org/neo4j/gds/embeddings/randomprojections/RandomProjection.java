@@ -39,6 +39,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class RandomProjection extends Algorithm<RandomProjection, RandomProjection> {
 
+    private static final int SPARSITY = 3;
     private final Graph graph;
     private final int concurrency;
     private final float normalizationStrength;
@@ -48,7 +49,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final EmbeddingCombiner embeddingCombiner;
 
     private final int embeddingSize;
-    private final int sparsity;
     private final int iterations;
     private final List<Double> iterationWeights;
 
@@ -75,7 +75,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
         this.embeddingSize = config.embeddingSize();
-        this.sparsity = config.sparsity();
         this.iterations = config.iterations();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
@@ -118,8 +117,8 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     }
 
     void initRandomVectors() {
-        double probability = 1.0f / (2.0f * sparsity);
-        float sqrtSparsity = (float) Math.sqrt(sparsity);
+        double probability = 1.0f / (2.0f * SPARSITY);
+        float sqrtSparsity = (float) Math.sqrt(SPARSITY);
         float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
