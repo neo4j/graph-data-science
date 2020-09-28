@@ -365,10 +365,8 @@ task asciidocJar(type: Jar) {
 
 tasks.assemble.dependsOn packageHtml, packagePdf
 
-[test, project(":browser-guide").tasks.check].each {
-    docbook.mustRunAfter it
-    pdf.mustRunAfter it
-}
+tasks.docbook.mustRunAfter tasks.test
+tasks.pdf.mustRunAfter tasks.test
 
 rootProject.tasks.ci.finalizedBy assemble
 rootProject.tasks.cipr.finalizedBy packageHtml
