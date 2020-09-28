@@ -41,7 +41,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
 
     private final Graph graph;
     private final int concurrency;
-    private final boolean normalizeL2;
     private final float normalizationStrength;
     private final HugeObjectArray<float[]> embeddings;
     private final HugeObjectArray<float[]> embeddingA;
@@ -80,7 +79,6 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         this.iterations = config.iterations();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
-        this.normalizeL2 = config.normalizeL2();
         this.concurrency = config.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
@@ -167,9 +165,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
                     int adjustedDegree = degree == 0 ? 1 : degree;
                     double degreeScale = 1.0f / adjustedDegree;
                     multiplyArrayValues(currentEmbedding, degreeScale);
-                    if (normalizeL2) {
-                        l2Normalize(currentEmbedding);
-                    }
+                    l2Normalize(currentEmbedding);
 
                     // Update the result embedding
                     updateEmbeddings(iterationWeight, embedding, currentEmbedding);
@@ -226,7 +222,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
         }
     }
 
-    private void l2Normalize(float[] array) {
+    static void l2Normalize(float[] array) {
         double sum = 0.0f;
         for (double value : array) {
             sum += value * value;
