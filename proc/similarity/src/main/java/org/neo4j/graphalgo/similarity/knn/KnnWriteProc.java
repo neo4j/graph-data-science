@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
+import org.neo4j.graphalgo.similarity.WriteResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -48,11 +49,11 @@ import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.WriteResult, KnnWriteConfig> {
+public class KnnWriteProc extends WriteProc<Knn, Knn.Result, WriteResult, KnnWriteConfig> {
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<SimilarityProc.WriteResult> write(
+    public Stream<org.neo4j.graphalgo.similarity.WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -79,7 +80,7 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.Writ
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityProc.WriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
+    protected AbstractResultBuilder<org.neo4j.graphalgo.similarity.WriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
@@ -89,13 +90,13 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.Writ
     }
 
     @Override
-    protected Stream<SimilarityProc.WriteResult> write(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
+    protected Stream<org.neo4j.graphalgo.similarity.WriteResult> write(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             KnnWriteConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityProc.WriteResult(
+                    new org.neo4j.graphalgo.similarity.WriteResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -117,8 +118,8 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.Writ
                 algorithm.context()
             );
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityProc.WriteResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityProc.WriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
+            SimilarityProc.SimilarityResultBuilder<org.neo4j.graphalgo.similarity.WriteResult> resultBuilder =
+                SimilarityProc.resultBuilder(new org.neo4j.graphalgo.similarity.WriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
 
             Graph similarityGraph = similarityGraphResult.similarityGraph();
 
@@ -152,7 +153,7 @@ public class KnnWriteProc extends WriteProc<Knn, Knn.Result, SimilarityProc.Writ
                     }
                 );
             }
-            SimilarityProc.WriteResult writeResult = resultBuilder.build();
+            org.neo4j.graphalgo.similarity.WriteResult writeResult = resultBuilder.build();
             return Stream.of(writeResult);
         });
     }

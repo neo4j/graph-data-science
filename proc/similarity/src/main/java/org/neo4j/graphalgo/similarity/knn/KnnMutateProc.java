@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.similarity.MutateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
@@ -49,11 +50,11 @@ import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.graphalgo.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.MutateResult, KnnMutateConfig> {
+public class KnnMutateProc extends MutateProc<Knn, Knn.Result, MutateResult, KnnMutateConfig> {
 
     @Procedure(name = "gds.beta.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)
-    public Stream<SimilarityProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -80,7 +81,7 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.Mu
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityProc.MutateResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
@@ -90,13 +91,13 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.Mu
     }
 
     @Override
-    protected Stream<SimilarityProc.MutateResult> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
+    protected Stream<MutateResult> mutate(ComputationResult<Knn, Knn.Result, KnnMutateConfig> computationResult) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
             KnnMutateConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityProc.MutateResult(
+                    new MutateResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -124,9 +125,9 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.Mu
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder =
+            SimilarityProc.SimilarityResultBuilder<MutateResult> resultBuilder =
                 SimilarityProc.resultBuilder(
-                    new SimilarityProc.MutateResult.Builder(),
+                    new MutateResult.Builder(),
                     computationResult,
                     (ignore) -> similarityGraphResult
                 );
@@ -155,7 +156,7 @@ public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityProc.Mu
 
     private Relationships getRelationships(
         SimilarityGraphResult similarityGraphResult,
-        SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder
+        SimilarityProc.SimilarityResultBuilder<MutateResult> resultBuilder
     ) {
         HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
         Relationships resultRelationships = similarityGraph.relationships();

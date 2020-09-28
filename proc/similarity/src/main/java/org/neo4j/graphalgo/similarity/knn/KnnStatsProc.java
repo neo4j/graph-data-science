@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
+import org.neo4j.graphalgo.similarity.StatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -45,11 +46,11 @@ import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogr
 import static org.neo4j.graphalgo.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityProc.StatsResult, KnnStatsConfig> {
+public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, StatsResult, KnnStatsConfig> {
 
     @Procedure(name = "gds.beta.knn.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<SimilarityProc.StatsResult> stats(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -81,18 +82,18 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityPro
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityProc.StatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 
     @Override
-    public Stream<SimilarityProc.StatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
+    public Stream<StatsResult> stats(AlgoBaseProc.ComputationResult<Knn, Knn.Result, KnnStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             KnnStatsConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityProc.StatsResult(
+                    new StatsResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -107,8 +108,8 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, SimilarityPro
             var result = Objects.requireNonNull(computationResult.result());
 
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityProc.StatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityProc.StatsResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<StatsResult> resultBuilder =
+                SimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {

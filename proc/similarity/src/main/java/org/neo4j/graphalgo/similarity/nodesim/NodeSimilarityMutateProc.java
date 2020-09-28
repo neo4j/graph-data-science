@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.similarity.MutateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.procedure.Description;
@@ -53,11 +54,11 @@ import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogr
 import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, SimilarityProc.MutateResult, NodeSimilarityMutateConfig> {
+public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, MutateResult, NodeSimilarityMutateConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<SimilarityProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -96,14 +97,14 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityProc.MutateResult> resultBuilder(
+    protected AbstractResultBuilder<MutateResult> resultBuilder(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computeResult
     ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<SimilarityProc.MutateResult> mutate(
+    public Stream<MutateResult> mutate(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult
     ) {
         return runWithExceptionLogging("Graph mutation failed", () -> {
@@ -111,7 +112,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityProc.MutateResult(
+                    new MutateResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -124,8 +125,8 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityProc.MutateResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<MutateResult> resultBuilder =
+                SimilarityProc.resultBuilder(new MutateResult.Builder(), computationResult);
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                 Relationships resultRelationships = getRelationships(
@@ -150,7 +151,7 @@ public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSim
     private Relationships getRelationships(
         ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
-        SimilarityProc.SimilarityResultBuilder<SimilarityProc.MutateResult> resultBuilder
+        SimilarityProc.SimilarityResultBuilder<MutateResult> resultBuilder
     ) {
         Relationships resultRelationships;
 

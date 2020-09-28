@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
+import org.neo4j.graphalgo.similarity.StatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,11 +41,11 @@ import static org.neo4j.graphalgo.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, SimilarityProc.StatsResult, NodeSimilarityStatsConfig> {
+public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimilarityResult, StatsResult, NodeSimilarityStatsConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<SimilarityProc.StatsResult> stats(
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -76,18 +77,18 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
     }
 
     @Override
-    protected AbstractResultBuilder<SimilarityProc.StatsResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computeResult) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
     @Override
-    public Stream<SimilarityProc.StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
+    public Stream<StatsResult> stats(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig> computationResult) {
         return runWithExceptionLogging("Graph stats failed", () -> {
             NodeSimilarityStatsConfig config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new SimilarityProc.StatsResult(
+                    new StatsResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -99,8 +100,8 @@ public class NodeSimilarityStatsProc extends StatsProc<NodeSimilarity, NodeSimil
                 );
             }
 
-            SimilarityProc.SimilarityResultBuilder<SimilarityProc.StatsResult> resultBuilder =
-                SimilarityProc.resultBuilder(new SimilarityProc.StatsResult.Builder(), computationResult);
+            SimilarityProc.SimilarityResultBuilder<StatsResult> resultBuilder =
+                SimilarityProc.resultBuilder(new StatsResult.Builder(), computationResult);
 
             if (shouldComputeHistogram(callContext)) {
                 try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
