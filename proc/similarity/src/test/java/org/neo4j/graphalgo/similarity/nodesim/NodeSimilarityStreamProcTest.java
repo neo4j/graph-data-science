@@ -84,7 +84,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allGraphVariations")
+    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
     void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
         String graphCreate =
             "CALL gds.graph.create(" +
@@ -130,7 +130,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         String query = queryBuilder
             .algo("nodeSimilarity")
@@ -155,7 +155,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
     void shouldStreamTopResults(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         int topN = 2;
         String query = queryBuilder
@@ -181,7 +181,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     }
 
     @ParameterizedTest(name = "{2}")
-    @MethodSource("org.neo4j.graphalgo.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
     void shouldIgnoreParallelEdges(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
         // Add parallel edges
         runQuery("" +
