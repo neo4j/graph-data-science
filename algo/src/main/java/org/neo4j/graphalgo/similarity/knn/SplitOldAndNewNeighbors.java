@@ -64,6 +64,7 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
         var allOldNeighbors = this.allOldNeighbors;
         var sampled = new IntArrayList(sampledK);
 
+        // TODO use cursors
         for (long nodeId = start; nodeId < end; nodeId++) {
             var neighbors = allNeighbors.get(nodeId);
             var k2 = neighbors.size();

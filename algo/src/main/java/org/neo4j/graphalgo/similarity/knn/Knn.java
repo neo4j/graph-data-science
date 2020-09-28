@@ -183,7 +183,6 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, n, tracker);
 
-        // TODO: implement spliterators on huge arrays and maybe do parallel stream
         ParallelUtil.readParallel(concurrency, n, executor, new SplitOldAndNewNeighbors(
             this.random,
             neighbors,
