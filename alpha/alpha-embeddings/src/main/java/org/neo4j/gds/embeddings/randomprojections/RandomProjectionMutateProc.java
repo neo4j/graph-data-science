@@ -34,13 +34,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, RandomProjectionMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
-    @Description(RandomProjectionCompanion.DESCRIPTION)
+    @Description(FastRPCompanion.DESCRIPTION)
     public Stream<RandomProjectionMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -63,7 +63,7 @@ public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, Rando
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPMutateConfig> computationResult) {
-        return RandomProjectionCompanion.getNodeProperties(computationResult);
+        return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, Rando
 
     @Override
     protected AlgorithmFactory<FastRP, FastRPMutateConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+        return new FastRPFactory<>();
     }
 
     public static final class MutateResult {

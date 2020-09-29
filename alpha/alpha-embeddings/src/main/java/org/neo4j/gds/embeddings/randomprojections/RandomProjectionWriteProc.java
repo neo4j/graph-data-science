@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -74,12 +74,12 @@ public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomP
 
     @Override
     protected AlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+        return new FastRPFactory<>();
     }
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult) {
-        return RandomProjectionCompanion.getNodeProperties(computationResult);
+        return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override

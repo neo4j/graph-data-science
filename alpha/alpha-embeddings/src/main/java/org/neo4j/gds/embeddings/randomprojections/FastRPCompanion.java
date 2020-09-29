@@ -23,11 +23,11 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 
-final class RandomProjectionCompanion {
+final class FastRPCompanion {
 
     static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
 
-    private RandomProjectionCompanion() {}
+    private FastRPCompanion() {}
 
     static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
         return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);

@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomProjectionStatsProc.StatsResult, FastRPStatsConfig> {
@@ -77,7 +77,7 @@ public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomP
 
     @Override
     protected AlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+        return new FastRPFactory<>();
     }
 
     public static final class StatsResult {
