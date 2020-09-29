@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.MutateRelationshipTest;
+import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -38,7 +38,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeSimilarityMutateProcTest
     extends NodeSimilarityProcTest<NodeSimilarityMutateConfig>
-    implements MutateRelationshipTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
+    implements MutateRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityMutateConfig, NodeSimilarityResult> {
 
     @Override
     public String mutateRelationshipType() {

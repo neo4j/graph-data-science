@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.MutateRelationshipTest;
+import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
-    implements MutateRelationshipTest<Knn, KnnMutateConfig, Knn.Result> {
+    implements MutateRelationshipWithPropertyTest<Knn, KnnMutateConfig, Knn.Result> {
 
     @Override
     public String mutateRelationshipType() {

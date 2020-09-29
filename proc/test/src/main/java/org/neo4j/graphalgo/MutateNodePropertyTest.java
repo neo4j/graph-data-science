@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -38,10 +39,21 @@ import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
-    extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {
+    extends MutatePropertyProcTest<ALGORITHM, CONFIG, RESULT> {
+
+    String mutateProperty();
+
+    ValueType mutatePropertyType();
+
+    @Override
+    default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        if (!mapWrapper.containsKey("mutateProperty")) {
+            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
+        }
+        return mapWrapper;
+    }
 
     @Test
-    @Override
     default void testWriteBackGraphMutationOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
         GraphStoreCatalog.removeAllLoadedGraphs();

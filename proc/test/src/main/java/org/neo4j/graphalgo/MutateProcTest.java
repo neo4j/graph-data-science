@@ -19,11 +19,10 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
@@ -43,10 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -55,62 +51,12 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         return Optional.empty();
     }
 
-    String mutateProperty();
-
-    ValueType mutatePropertyType();
-
-    @Override
-    default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
-        }
-        return mapWrapper;
-    }
-
     @Test
-    default void testGraphMutation() {
-        String graphName = mutateGraphName().orElseGet(() -> {
-            String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
-                TEST_USERNAME,
-                loadedGraphName,
-                relationshipProjections()
-            );
-            GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphLoader(graphCreateConfig).graphStore()
-            );
-            return loadedGraphName;
-        });
+    void testGraphMutation();
 
-        applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
+    String expectedMutatedGraph();
 
-        GraphStore graphStore = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
-        TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
-
-        GraphSchema schema = graphStore.schema();
-        boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
-        boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema().properties());
-        assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
-    }
-
-    default boolean containsMutateProperty(Map<?, Map<String, ValueType>> entitySchema) {
-        return entitySchema
-            .values()
-            .stream()
-            .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()) == mutatePropertyType());
-    }
+    String failOnExistingTokenMessage();
 
     @Test
     default void testExceptionLogging() {
@@ -128,20 +74,8 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
     }
 
     @Test
-    default void testGraphMutationOnFilteredGraph() {
-        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-        GraphStoreCatalog.removeAllLoadedGraphs();
-
-        runQuery(graphDb(), "CREATE (a1: A), (a2: A), (b: B), (a1)-[:REL]->(a2)");
-        GraphStore graphStore = TestGraphLoader
-            .from(graphDb())
-            .withLabels("A", "B")
-            .withRelationshipTypes("REL")
-            .graphStore(NATIVE);
-
-        String graphName = "myGraph";
-        var createConfig = withNameAndRelationshipProjections("", graphName, relationshipProjections());
-        GraphStoreCatalog.set(createConfig, graphStore);
+    default void testMutateFailsOnExistingToken() {
+        String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
@@ -154,47 +88,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
 
                     Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
                     config.remove("nodeWeightProperty");
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
-
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
-        assertEquals(
-            Collections.singleton(mutateProperty()),
-            mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
-        );
-
-        assertEquals(
-            Collections.emptySet(),
-            mutatedGraph.nodePropertyKeys(NodeLabel.of("B"))
-        );
-    }
-
-    @Test
-    default void testMutateFailsOnExistingToken() {
-        String graphName = mutateGraphName().orElseGet(() -> {
-            String loadedGraphName = "loadGraph";
-            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
-                TEST_USERNAME,
-                loadedGraphName,
-                relationshipProjections()
-            );
-            GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphLoader(graphCreateConfig).graphStore()
-            );
-            return loadedGraphName;
-        });
-
-        applyOnProcedure(procedure ->
-            getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
                         // write first time
                         mutateMethod.invoke(procedure, graphName, config);
@@ -217,15 +110,43 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
-    @Test
-    void testWriteBackGraphMutationOnFilteredGraph();
+    @NotNull
+    default String ensureGraphExists() {
+        return mutateGraphName().orElseGet(() -> {
+            String loadedGraphName = "loadGraph";
+            GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+                TEST_USERNAME,
+                loadedGraphName,
+                relationshipProjections()
+            );
+            GraphStoreCatalog.set(
+                graphCreateConfig,
+                graphLoader(graphCreateConfig).graphStore()
+            );
+            return loadedGraphName;
+        });
+    }
 
-    String expectedMutatedGraph();
+    @NotNull
+    default GraphStore runMutation() {
+        return runMutation(ensureGraphExists(), CypherMapWrapper.empty());
+    }
 
-    default String failOnExistingTokenMessage() {
-        return formatWithLocale(
-            "Node property `%s` already exists in the in-memory graph.",
-            mutateProperty()
+    @NotNull
+    default GraphStore runMutation(String graphName, CypherMapWrapper additionalConfig) {
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    Map<String, Object> config = createMinimalConfig(additionalConfig).toMap();
+                    try {
+                        mutateMethod.invoke(procedure, graphName, config);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        fail(e);
+                    }
+                })
         );
+
+        return GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
     }
 }
