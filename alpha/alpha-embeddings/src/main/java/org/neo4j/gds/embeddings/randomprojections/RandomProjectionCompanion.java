@@ -29,7 +29,7 @@ final class RandomProjectionCompanion {
 
     private RandomProjectionCompanion() {}
 
-    static <CONFIG extends RandomProjectionBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<RandomProjection, RandomProjection, CONFIG> computationResult) {
+    static <CONFIG extends RandomProjectionBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
         return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
     }
 }

@@ -34,7 +34,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProjectionMutateConfig>{
+class FastRPMutateProcTest extends FastRPProcTest<RandomProjectionMutateConfig> {
 
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
@@ -44,7 +44,7 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionMutateConfig>> getProcedureClazz() {
         return RandomProjectionMutateProc.class;
     }
 
@@ -64,7 +64,7 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.FastRPProcTest#weights")
     void shouldMutateNonZeroEmbeddings(List<Float> weights) {
         String loadedGraphName = "loadGraph";
 

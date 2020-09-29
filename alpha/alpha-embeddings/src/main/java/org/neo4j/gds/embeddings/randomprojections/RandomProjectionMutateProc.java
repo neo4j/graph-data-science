@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionMutateProc extends MutateProc<RandomProjection, RandomProjection, RandomProjectionMutateProc.MutateResult, RandomProjectionMutateConfig> {
+public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, RandomProjectionMutateProc.MutateResult, RandomProjectionMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
     @Description(RandomProjectionCompanion.DESCRIPTION)
@@ -45,7 +45,7 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -62,12 +62,12 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 
@@ -82,7 +82,7 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, RandomProjectionMutateConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 

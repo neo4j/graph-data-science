@@ -34,10 +34,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProjectionStreamConfig> {
+@SuppressWarnings("unchecked")
+class FastRPStreamProcTest extends FastRPProcTest<RandomProjectionStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionStreamConfig>> getProcedureClazz() {
         return RandomProjectionStreamProc.class;
     }
 
@@ -47,7 +48,7 @@ class RandomProjectionStreamProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingSize = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()

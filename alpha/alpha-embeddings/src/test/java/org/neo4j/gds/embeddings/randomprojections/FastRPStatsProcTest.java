@@ -32,10 +32,10 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class RandomProjectionStatsProcTest extends RandomProjectionProcTest<RandomProjectionStatsConfig> {
+class FastRPStatsProcTest extends FastRPProcTest<RandomProjectionStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionStatsConfig>> getProcedureClazz() {
         return RandomProjectionStatsProc.class;
     }
 

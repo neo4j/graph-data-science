@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import java.util.Arrays;
 import java.util.List;
 
-class RandomProjectionDocTest extends DocTestBase {
+class FastRPDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {

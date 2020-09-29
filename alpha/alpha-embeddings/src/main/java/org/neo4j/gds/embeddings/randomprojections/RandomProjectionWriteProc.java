@@ -38,7 +38,7 @@ import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompani
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class RandomProjectionWriteProc extends WriteProc<RandomProjection, RandomProjection, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
+public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -46,7 +46,7 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     )  {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -73,17 +73,17 @@ public class RandomProjectionWriteProc extends WriteProc<RandomProjection, Rando
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, RandomProjectionWriteConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<RandomProjection, RandomProjection, RandomProjectionWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computeResult) {
         return new WriteResult.Builder();
     }
 

@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
+public class RandomProjectionStreamProc extends StreamProc<FastRP, FastRP, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
     @Description(RandomProjectionCompanion.DESCRIPTION)
@@ -46,7 +46,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, RandomProjectionStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -63,7 +63,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, RandomProjectionStreamConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
@@ -85,7 +85,7 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, RandomProjectionStreamConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 

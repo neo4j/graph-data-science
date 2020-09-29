@@ -36,11 +36,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProjectionWriteConfig>
-    implements WritePropertyConfigTest<RandomProjection, RandomProjectionWriteConfig, RandomProjection> {
+class FastRPWriteProcTest extends FastRPProcTest<RandomProjectionWriteConfig>
+    implements WritePropertyConfigTest<FastRP, RandomProjectionWriteConfig, FastRP> {
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionWriteConfig>> getProcedureClazz() {
         return RandomProjectionWriteProc.class;
     }
 
@@ -60,7 +60,7 @@ class RandomProjectionWriteProcTest extends RandomProjectionProcTest<RandomProje
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingSize = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()

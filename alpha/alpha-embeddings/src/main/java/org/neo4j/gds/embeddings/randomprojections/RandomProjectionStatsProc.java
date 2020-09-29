@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStatsProc extends StatsProc<RandomProjection, RandomProjection, RandomProjectionStatsProc.StatsResult, RandomProjectionStatsConfig> {
+public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomProjectionStatsProc.StatsResult, RandomProjectionStatsConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
@@ -44,7 +44,7 @@ public class RandomProjectionStatsProc extends StatsProc<RandomProjection, Rando
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionStatsConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, RandomProjectionStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -61,7 +61,7 @@ public class RandomProjectionStatsProc extends StatsProc<RandomProjection, Rando
 
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionStatsConfig> computeResult) {
         return new StatsResult.Builder();
     }
 
@@ -76,7 +76,7 @@ public class RandomProjectionStatsProc extends StatsProc<RandomProjection, Rando
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, RandomProjectionStatsConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 
