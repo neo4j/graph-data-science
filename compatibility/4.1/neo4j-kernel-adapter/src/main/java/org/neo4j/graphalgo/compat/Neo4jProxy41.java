@@ -211,6 +211,11 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
+    public void allocateHeap(KernelTransaction kernelTransaction, long bytes) {
+        memoryTracker(kernelTransaction).allocateHeap(bytes);
+    }
+
+    @Override
     public MemoryTracker emptyMemoryTracker() {
         return EmptyMemoryTracker.INSTANCE;
     }

@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.io.ByteUnit;
-import org.neo4j.memory.MemoryLimitExceededException;
 
 import java.util.stream.Stream;
 
@@ -41,6 +40,7 @@ import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 class AllocationTrackerTest {
 
     private static final long GRAB_SIZE_1KB = ByteUnit.kibiBytes(1);
+    private static final String EXCEPTION_NAME = "MemoryLimitExceededException";
 
     @ParameterizedTest
     @MethodSource("allocationTrackers")
@@ -128,10 +128,12 @@ class AllocationTrackerTest {
                 allocationTracker.add(42);
                 assertEquals(42L, allocationTracker.trackedBytes());
                 var exception = assertThrows(
-                    MemoryLimitExceededException.class,
+                    Exception.class,
                     () -> allocationTracker.add(1)
                 );
-                assertThat(exception.getMessage()).startsWith("The allocation of an extra 1 B would use more than the limit 42 B.");
+
+                assertThat(exception.getClass().getSimpleName()).isEqualTo(EXCEPTION_NAME);
+                assertThat(exception).hasMessageStartingWith("The allocation of an extra 1 B would use more than the limit 42 B.");
             }
         );
     }

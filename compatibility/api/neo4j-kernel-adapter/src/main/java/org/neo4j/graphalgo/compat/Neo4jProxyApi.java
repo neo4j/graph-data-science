@@ -142,6 +142,8 @@ public interface Neo4jProxyApi {
 
     MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
 
+    void allocateHeap(KernelTransaction kernelTransaction, long bytes);
+
     MemoryTracker emptyMemoryTracker();
 
     @TestOnly
