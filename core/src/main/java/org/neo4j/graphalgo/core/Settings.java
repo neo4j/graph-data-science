@@ -118,7 +118,7 @@ public final class Settings {
     }
 
     public static Setting<Long> memoryTransactionMaxSize() {
-        return GraphDatabaseSettings.memory_transaction_max_size;
+        return Neo4jProxy.memoryTransactionMaxSize();
     }
 
     private Settings() {

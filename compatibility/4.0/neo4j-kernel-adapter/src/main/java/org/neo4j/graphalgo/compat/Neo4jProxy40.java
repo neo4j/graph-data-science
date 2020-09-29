@@ -83,6 +83,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
+import static org.neo4j.configuration.SettingImpl.newBuilder;
+import static org.neo4j.configuration.SettingValueParsers.BYTES;
+
 public final class Neo4jProxy40 implements Neo4jProxyApi {
 
     @Override
@@ -343,6 +346,11 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public Setting<String> additionalJvm() {
         return ExternalSettings.additionalJvm;
+    }
+
+    @Override
+    public Setting<Long> memoryTransactionMaxSize() {
+        return newBuilder("fake_setting", BYTES, 0L).build();
     }
 
     private static final class InputFromCompatInput implements Input {

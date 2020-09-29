@@ -296,6 +296,10 @@ public final class Neo4jProxy {
         return IMPL.additionalJvm();
     }
 
+    public static Setting<Long> memoryTransactionMaxSize() {
+        return IMPL.memoryTransactionMaxSize();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

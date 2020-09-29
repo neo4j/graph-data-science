@@ -199,4 +199,6 @@ public interface Neo4jProxyApi {
     Setting<Boolean> onlineBackupEnabled();
 
     Setting<String> additionalJvm();
+
+    Setting<Long> memoryTransactionMaxSize();
 }

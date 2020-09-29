@@ -26,11 +26,13 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.memory.MemoryLimitExceededException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 public class AllocationTrackerProcTest extends BaseProcTest {
@@ -38,6 +40,7 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     // Small enough so the Neo4j create query doesn't exceed the limit,
     // large enough so the GDS create query does.
     private static final String DB_CYPHER = "UNWIND range(0, 4096) AS x CREATE ()";
+    private static final String EXCEPTION_NAME = "MemoryLimitExceededException";
 
     @Override
     @ExtensionCallback
@@ -59,11 +62,15 @@ public class AllocationTrackerProcTest extends BaseProcTest {
             .graphCreate("foo")
             .yields();
         USE_KERNEL_TRACKER.enableAndRun(
-            () -> assertThatThrownBy(() -> runQuery(cypher))
-                .isInstanceOf(QueryExecutionException.class)
-                .getRootCause()
-                .isInstanceOf(MemoryLimitExceededException.class)
-                .hasMessageStartingWith("The allocation of an extra")
+            () -> {
+                var exception = rootCause(assertThrows(
+                    QueryExecutionException.class,
+                    () -> runQuery(cypher)
+                ));
+                assertThat(exception.getClass().getName()).isEqualTo(EXCEPTION_NAME);
+                assertThat(exception.getMessage()).startsWith("The allocation of an extra");
+
+            }
         );
     }
 

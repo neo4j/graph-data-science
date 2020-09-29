@@ -127,7 +127,7 @@ class AllocationTrackerTest {
                 var allocationTracker = AllocationTracker.create(trackerProxy);
                 allocationTracker.add(42);
                 assertEquals(42L, allocationTracker.trackedBytes());
-                MemoryLimitExceededException exception = assertThrows(
+                var exception = assertThrows(
                     MemoryLimitExceededException.class,
                     () -> allocationTracker.add(1)
                 );

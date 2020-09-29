@@ -23,6 +23,7 @@ import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.ExternalSettings;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -475,6 +476,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public Setting<String> additionalJvm() {
         return ExternalSettings.additional_jvm;
+    }
+
+    @Override
+    public Setting<Long> memoryTransactionMaxSize() {
+        return GraphDatabaseSettings.memory_transaction_max_size;
     }
 
     private static final class InputFromCompatInput implements Input {
