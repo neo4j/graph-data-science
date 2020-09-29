@@ -19,36 +19,16 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.core.huge.FilteredNodeProperties;
-import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     PROC_RESULT,
-    CONFIG extends MutatePropertyConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
-
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
-    }
-
-    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperties(computationResult)));
-    }
+    CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 
@@ -72,53 +52,8 @@ public abstract class MutateProc<
         });
     }
 
-    private void updateGraphStore(
+    protected abstract void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult
-    ) {
-        Graph graph = computationResult.graph();
-
-        var nodeProperties = nodePropertyList(computationResult);
-
-        if (graph instanceof NodeFilteredGraph) {
-            nodeProperties = nodeProperties.stream().map(nodeProperty ->
-                ImmutableNodeProperty.of(
-                    nodeProperty.propertyKey(),
-                    new ReverseFilteredNodeProperties(nodeProperty.properties(), (NodeFilteredGraph) graph)
-                )
-            )
-            .collect(Collectors.toList());
-        }
-
-        MutatePropertyConfig mutatePropertyConfig = computationResult.config();
-
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            log.debug("Updating in-memory graph store");
-            GraphStore graphStore = computationResult.graphStore();
-            Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
-
-            nodeProperties.forEach(nodeProperty -> {
-                for (NodeLabel label : labelsToUpdate) {
-                    graphStore.addNodeProperty(
-                        label,
-                        nodeProperty.propertyKey(),
-                        nodeProperty.properties()
-                    );
-                }
-            });
-
-            resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
-        }
-    }
-
-    static class ReverseFilteredNodeProperties extends FilteredNodeProperties {
-        ReverseFilteredNodeProperties(NodeProperties properties, NodeFilteredGraph idMap) {
-            super(properties, idMap);
-        }
-
-        @Override
-        protected long translateId(long nodeId) {
-            return graph.getFilteredMappedNodeId(nodeId);
-        }
-    }
+    );
 }

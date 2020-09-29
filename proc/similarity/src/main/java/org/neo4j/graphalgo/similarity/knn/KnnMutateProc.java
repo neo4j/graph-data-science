@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.SimilarityProc;
 import org.neo4j.graphalgo.api.Relationships;
@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.graphalgo.similarity.knn.KnnWriteProc.computeToGraph;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KnnMutateProc extends MutateProc<Knn, Knn.Result, SimilarityMutateResult, KnnMutateConfig> {
+public class KnnMutateProc extends MutatePropertyProc<Knn, Knn.Result, SimilarityMutateResult, KnnMutateConfig> {
 
     @Procedure(name = "gds.beta.knn.mutate", mode = READ)
     @Description(KNN_DESCRIPTION)

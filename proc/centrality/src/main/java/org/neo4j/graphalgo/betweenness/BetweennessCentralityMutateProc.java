@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.betweenness;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.betweenness.BetweennessCentralityProc.BETWEENN
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateOrientationCombinations;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityMutateProc extends MutateProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
+public class BetweennessCentralityMutateProc extends MutatePropertyProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateProc.MutateResult, BetweennessCentralityMutateConfig> {
 
     @Procedure(value = "gds.betweenness.mutate", mode = READ)
     @Description(BETWEENNESS_DESCRIPTION)
