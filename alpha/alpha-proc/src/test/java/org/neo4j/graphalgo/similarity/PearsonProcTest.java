@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransactio
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput> {
+class PearsonProcTest extends AlphaSimilarityProcTest<PearsonAlgorithm, WeightedInput> {
 
     private static final String STATEMENT_STATS =
         " MATCH (i:Item)" +
@@ -628,7 +628,7 @@ class PearsonProcTest extends SimilarityProcTest<PearsonAlgorithm, WeightedInput
     }
 
     @Override
-    Class<? extends SimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
+    Class<? extends AlphaSimilarityProc<PearsonAlgorithm, ? extends SimilarityConfig>> getProcedureClazz() {
         return PearsonProc.class;
     }
 }

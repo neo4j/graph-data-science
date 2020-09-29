@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public final class PearsonProc extends SimilarityProc<PearsonAlgorithm, PearsonConfig> {
+public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, PearsonConfig> {
 
     private static final String DESCRIPTION =
         "Pearson-similarity is an algorithm for finding similar nodes " +
