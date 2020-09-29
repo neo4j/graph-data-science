@@ -9,39 +9,66 @@ When an algorithm procedure is called from Cypher, the procedure call is execute
 
 This section includes:
 
-* <<tx-graph-loading>>
-* <<tx-graph-writing>>
+* <<tx-graph-projection>>
+* <<tx-results-writing>>
 * <<tx-termination>>
 
-[[tx-graph-loading]]
-== During graph loading
 
-During loading, new transactions are used that do not inherit the transaction state of the Cypher transaction.
-This means that changes from the Cypher transaction state are not visible to the loading transactions.
+[[tx-graph-projection]]
+== During graph projection
 
-For example, the following statement will not be able to load any nodes:
+During graph projection, new transactions are used that do not inherit the transaction state of the Cypher transaction.
+This means that changes from the Cypher transaction state are not visible to the graph projection transactions.
 
-[EXAMPLE]
+For example, the following statement will only create an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
+
+[role=query-example]
+--
 [source, cypher]
 ----
-MATCH (n) SET n:MyLabel CALL algo.graph.load('graph-name', 'MyLabel', '')
+CREATE (n:MyLabel) // the new node is part of Cypher transaction state
+WITH *
+CALL gds.graph.create('myGraph', 'MyLabel', '*')
+YIELD nodeCount
+RETURN nodeCount
 ----
 
-Similarly, the following statement will execute the algorithm over an empty graph:
+.Results
+[opts="header"]
+|===
+| nodeCount
+| 0
+|===
+--
 
-[EXAMPLE]
+The situation is the same when using an anonymous projection with an algorithm procedure:
+
+[role=query-example]
+--
 [source, cypher]
 ----
-MATCH (n)
-SET n:MyLabel
-CALL algo.pageRank('MyLabel', null)
+CREATE (n:MyWccLabel) // the new node is part of Cypher transaction state
+WITH *
+CALL gds.wcc.stats({nodeProjection: 'MyWccLabel', relationshipProjection:'*'})
+YIELD componentCount
+RETURN componentCount
 ----
 
-[[tx-graph-writing]]
-== During graph writing
+.Results
+[opts="header"]
+|===
+| componentCount
+| -1
+|===
+--
 
-Properties are written to the graph in new transactions, batched over a fixed number of nodes.
-Those transactions are committed independently from the Cypher transaction.
+
+[[tx-results-writing]]
+== During results writing
+
+Results from algorithms (node properties, for example) are written to the graph in new transactions.
+The number of transactions used depends on the size of the results and the `writeConcurrency` configuration parameter (for more details, please refer to sections <<running-algos-write>> and <<algorithms-syntax-configuration-parameters>>).
+These transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
 
@@ -49,6 +76,5 @@ This means, if the Cypher transaction is terminated (either by the user or by th
 == Transaction termination
 
 The Cypher transaction can be terminated by either the user or the database system.
-This will eventually terminate all transactions that have been opened during loading, writing, or the algorithm execution.
+This will eventually terminate all transactions that have been opened during graph projection, algorithm execution, or results writing.
 It is not immediately visible and can take a moment for the transactions to recognize that the Cypher transaction has been terminated.
-
