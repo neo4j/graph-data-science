@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.results.similarity.WriteResult;
+import org.neo4j.graphalgo.results.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 
 import java.util.Collections;
@@ -37,16 +37,16 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DE
 public abstract class WriteRelationshipsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig> extends WriteProc<ALGO, ALGO_RESULT, WriteResult, CONFIG> {
+    CONFIG extends WritePropertyConfig & WriteRelationshipConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
 
     @Override
-    protected Stream<WriteResult> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected Stream<SimilarityWriteResult> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
             CONFIG config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 return Stream.of(
-                    new WriteResult(
+                    new SimilarityWriteResult(
                         computationResult.createMillis(),
                         0,
                         0,
@@ -63,8 +63,8 @@ public abstract class WriteRelationshipsProc<
             var similarityGraphResult = similarityGraphResult(computationResult);
             var similarityGraph = similarityGraphResult.similarityGraph();
 
-            SimilarityProc.SimilarityResultBuilder<WriteResult> resultBuilder =
-                SimilarityProc.resultBuilder(new WriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
+            SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> resultBuilder =
+                SimilarityProc.resultBuilder(new SimilarityWriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);
 
             if (similarityGraph.relationshipCount() > 0) {
                 String writeRelationshipType = config.writeRelationshipType();

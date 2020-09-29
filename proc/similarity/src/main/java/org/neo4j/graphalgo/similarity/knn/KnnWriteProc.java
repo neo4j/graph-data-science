@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.procedure.Description;
@@ -46,7 +47,7 @@ public class KnnWriteProc extends WriteRelationshipsProc<Knn, Knn.Result, KnnWri
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<org.neo4j.graphalgo.results.similarity.WriteResult> write(
+    public Stream<SimilarityWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -73,7 +74,7 @@ public class KnnWriteProc extends WriteRelationshipsProc<Knn, Knn.Result, KnnWri
     }
 
     @Override
-    protected AbstractResultBuilder<org.neo4j.graphalgo.results.similarity.WriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computeResult) {
         throw new UnsupportedOperationException("Knn handles result building individually.");
     }
 

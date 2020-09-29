@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.SimilarityProc;
 
 import java.util.Map;
 
-public class WriteResult {
+public class SimilarityWriteResult {
     public final long createMillis;
     public final long computeMillis;
     public final long writeMillis;
@@ -35,7 +35,7 @@ public class WriteResult {
     public final Map<String, Object> similarityDistribution;
     public final Map<String, Object> configuration;
 
-    public WriteResult(
+    public SimilarityWriteResult(
         long createMillis,
         long computeMillis,
         long writeMillis,
@@ -55,11 +55,11 @@ public class WriteResult {
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<WriteResult> {
+    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> {
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public SimilarityWriteResult build() {
+            return new SimilarityWriteResult(
                 createMillis,
                 computeMillis,
                 writeMillis,

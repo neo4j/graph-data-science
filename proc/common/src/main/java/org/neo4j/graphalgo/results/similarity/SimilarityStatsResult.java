@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.SimilarityProc;
 
 import java.util.Map;
 
-public final class StatsResult {
+public final class SimilarityStatsResult {
 
     public long createMillis;
     public long computeMillis;
@@ -34,7 +34,7 @@ public final class StatsResult {
     public Map<String, Object> similarityDistribution;
     public Map<String, Object> configuration;
 
-    public StatsResult(
+    public SimilarityStatsResult(
         long createMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -53,11 +53,11 @@ public final class StatsResult {
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<StatsResult> {
+    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> {
 
         @Override
-        public StatsResult build() {
-            return new StatsResult(
+        public SimilarityStatsResult build() {
+            return new SimilarityStatsResult(
                 createMillis,
                 computeMillis,
                 postProcessingMillis,

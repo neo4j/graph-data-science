@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.SimilarityProc;
 
 import java.util.Map;
 
-public class MutateResult {
+public class SimilarityMutateResult {
     public final long createMillis;
     public final long computeMillis;
     public final long mutateMillis;
@@ -35,7 +35,7 @@ public class MutateResult {
     public final Map<String, Object> similarityDistribution;
     public final Map<String, Object> configuration;
 
-    public MutateResult(
+    public SimilarityMutateResult(
         long createMillis,
         long computeMillis,
         long mutateMillis,
@@ -55,11 +55,11 @@ public class MutateResult {
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<MutateResult> {
+    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> {
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public SimilarityMutateResult build() {
+            return new SimilarityMutateResult(
                 createMillis,
                 computeMillis,
                 mutateMillis,

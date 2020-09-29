@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.results.similarity.WriteResult;
+import org.neo4j.graphalgo.results.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class NodeSimilarityWriteProc extends WriteRelationshipsProc<NodeSimilari
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<SimilarityWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -81,7 +81,7 @@ public class NodeSimilarityWriteProc extends WriteRelationshipsProc<NodeSimilari
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
+    protected AbstractResultBuilder<SimilarityWriteResult> resultBuilder(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computeResult) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }
 
