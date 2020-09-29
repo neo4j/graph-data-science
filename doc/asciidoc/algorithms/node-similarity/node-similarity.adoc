@@ -153,7 +153,7 @@ include::specific-configuration.adoc[]
 
 [.include-with-mutate]
 ======
-.Run Node Similarity in write mode on a graph stored in the catalog.
+.Run Node Similarity in mutate mode on a graph stored in the catalog.
 [source, cypher]
 ----
 CALL gds.nodeSimilarity.mutate(
