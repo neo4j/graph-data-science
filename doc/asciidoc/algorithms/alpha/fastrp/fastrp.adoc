@@ -180,12 +180,14 @@ In the original paper, hyperparameter tuning was done on the range `[-1,0]`, but
 === Iteration weights
 
 By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
-The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of distance `i`.
-If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`.
-Therefore, the third iteration for example, will contain features depending both on direct neighbors and nodes at distance three.
+The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of length `i`.
+If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`, for any integer `k`.
+In particular, the third iteration will in this case contain features depending both on direct neighbors and nodes at distance three.
 It is good to have at least one non-zero weight in an even and in an odd position.
 Typically, using at least a few iterations, for example three, is recommended.
-However, a too high value will consider nodes far away and may not be informative.
+However, a too high value will consider nodes far away and may not be informative or even be detrimental.
+The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
+
 
 === Orientation
 Choosing the right orientation when creating the graph may have the single biggest impact.
