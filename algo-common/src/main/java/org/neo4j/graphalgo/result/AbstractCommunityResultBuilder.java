@@ -24,13 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.LongUnaryOperator;
+
+import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCount;
+import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCountAndHistogram;
 
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
@@ -83,9 +85,11 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
         if (communityFunction != null) {
             if (buildCommunityCount && !buildHistogram) {
-                buildCommunityCount();
+                maybeCommunityCount = OptionalLong.of(communityCount(nodeCount, communityFunction, tracker));
             } else if (buildCommunityCount || buildHistogram){
-                buildCommunityCountAndHistogram();
+                var communityCountAndHistogram = communityCountAndHistogram(nodeCount, communityFunction, tracker);
+                maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
+                maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());
             }
         }
 
@@ -94,46 +98,6 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         this.postProcessingDuration = timer.getDuration();
 
         return buildResult();
-    }
-
-    private void buildCommunityCount() {
-        long communityCount = 0L;
-
-        var componentSizes = buildComponentSizes();
-        for (long communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
-            long communitySize = componentSizes.get(communityId);
-            if (communitySize > 0) {
-                communityCount++;
-            }
-        }
-
-        maybeCommunityCount = OptionalLong.of(communityCount);
-    }
-
-    private void buildCommunityCountAndHistogram() {
-        var componentSizes = buildComponentSizes();
-
-        var histogram = new Histogram(5);
-        long communityCount = 0;
-        for (long communityId = 0; communityId < componentSizes.getCapacity(); communityId++) {
-            long communitySize = componentSizes.get(communityId);
-            if (communitySize > 0) {
-                communityCount++;
-                histogram.recordValue(communitySize);
-            }
-        }
-
-        maybeCommunityCount = OptionalLong.of(communityCount);
-        maybeCommunityHistogram = Optional.of(histogram);
-    }
-
-    private HugeSparseLongArray buildComponentSizes() {
-        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(0L, tracker);
-
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            componentSizeBuilder.addTo(communityFunction.applyAsLong(nodeId), 1L);
-        }
-        return componentSizeBuilder.build();
     }
 
 }
