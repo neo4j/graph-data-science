@@ -171,12 +171,14 @@ A value of at least 256 gives good results on graphs with as many as 200000 node
 Increasing embedding dimension will however increase memory requirements and runtime linearly.
 
 === Normalization strength
-Using a negative value for normalization strength will downplay the importance of high degree neighbors when constructing the embeddings.
-A positive value will instead increase their importance.
+
+The normalization strength is used to control how node degree influences the embedding.
+Using a negative value will downplay the importance of high degree neighbors, while a positive value will instead increase their importance.
 The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
-In the original paper, hyperparameter tuning was done one the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
+In the original paper, hyperparameter tuning was done on the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
 
 === Iteration weights
+
 By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
 The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of distance `i`.
 If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`.
