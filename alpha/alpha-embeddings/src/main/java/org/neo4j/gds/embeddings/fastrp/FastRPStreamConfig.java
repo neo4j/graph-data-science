@@ -17,19 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-final class FastRPCompanion {
+import java.util.Optional;
 
-    static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
+@ValueClass
+@Configuration
+public interface FastRPStreamConfig extends FastRPBaseConfig {
 
-    private FastRPCompanion() {}
-
-    static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
-        return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
+    static FastRPStreamConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new FastRPStreamConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,7 +60,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.FastRPProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingSize = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()

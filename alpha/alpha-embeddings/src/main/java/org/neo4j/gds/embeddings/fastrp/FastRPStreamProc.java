@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStreamProc extends StreamProc<FastRP, FastRP, FastRPStreamProc.StreamResult, FastRPStreamConfig> {

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.embeddings.randomprojections.FastRP.l2Normalize;
+import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
 
 class FastRPTest extends AlgoTestBase {
 

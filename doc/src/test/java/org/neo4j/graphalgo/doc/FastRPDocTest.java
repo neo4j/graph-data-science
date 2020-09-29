@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.gds.embeddings.randomprojections.FastRPStreamProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;

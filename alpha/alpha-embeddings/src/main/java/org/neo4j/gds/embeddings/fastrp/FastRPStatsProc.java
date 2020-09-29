@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -34,26 +33,24 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
-public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
+public class FastRPStatsProc extends StatsProc<FastRP, FastRP, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
-    @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
+    @Description("Random Projection produces node embeddings via the fastrp algorithm")
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    )  {
-        ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult = compute(
+    ) {
+        ComputationResult<FastRP, FastRP, FastRPStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+        return stats(computationResult);
     }
-
-    @Procedure(value = "gds.alpha.randomProjection.write.estimate", mode = READ)
+    @Procedure(value = "gds.alpha.randomProjection.stats.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -62,70 +59,57 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.W
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+
     @Override
-    protected FastRPWriteConfig newConfig(
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPStatsConfig> computeResult) {
+        return new StatsResult.Builder();
+    }
+
+    @Override
+    protected FastRPStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return FastRPWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult) {
-        return FastRPCompanion.getNodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computeResult) {
-        return new WriteResult.Builder();
-    }
-
-    public static final class WriteResult {
+    public static final class StatsResult {
 
         public final long nodeCount;
-        public final long nodePropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
         public final Map<String, Object> configuration;
 
-        WriteResult(
+        StatsResult(
             long nodeCount,
-            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long writeMillis,
-            Map<String, Object> configuration
+            Map<String, Object> config
         ) {
             this.nodeCount = nodeCount;
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.configuration = configuration;
+            this.configuration = config;
         }
 
-        static class Builder extends AbstractResultBuilder<WriteResult> {
+        static final class Builder extends AbstractResultBuilder<StatsResult> {
 
             @Override
-            public WriteResult build() {
-                return new WriteResult(
+            public StatsResult build() {
+                return new StatsResult(
                     nodeCount,
-                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
-                    writeMillis,
                     config.toMap()
                 );
             }
         }
     }
-
 }
