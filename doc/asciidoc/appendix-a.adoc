@@ -212,6 +212,8 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
 | `gds.alpha.eigenvector.stream`
 | `gds.alpha.eigenvector.write`
+.1+<.^|<<alpha-algorithms-yens-k-shortest-path, Traversal to Edge>>
+| `gds.alpha.traversalToEdge.mutate`
 .2+<.^|<<alpha-algorithms-yens-k-shortest-path, K-Shortest Paths>>
 | `gds.alpha.kShortestPaths.stream`
 | `gds.alpha.kShortestPaths.write`

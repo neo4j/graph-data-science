@@ -146,7 +146,7 @@ abstract class AlphaSimilarityProc
 
     // Alpha similarities don't play well with the API, so we must hook in here and hack graph creation
     @Override
-    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+    public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         if (graphNameOrConfig instanceof String) {
             throw new IllegalArgumentException("Similarity algorithms do not support named graphs");
         } else if (graphNameOrConfig instanceof Map) {
