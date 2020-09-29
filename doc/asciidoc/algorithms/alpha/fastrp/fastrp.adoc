@@ -11,7 +11,7 @@ This topic includes:
 
 * <<algorithms-embeddings-random-projection-introduction, Introduction>>
 * <<algorithms-embeddings-random-projection-syntax, Syntax>>
-* <<algorithms-embeddings-random-projection-hyperparameter-tuning, Hyperparameter tuning>>
+* <<algorithms-embeddings-fastrp-parameter-tuning, Hyperparameter tuning>>
 * <<algorithms-embeddings-random-projection-examples, Examples>>
 
 
@@ -151,13 +151,14 @@ include::specific-configuration.adoc[]
 The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-random-projection-syntax, write mode syntax above>>.
 
 
-[[algorithms-embeddings-random-projection-hyperparameter-tuning]]
-== Hyperparameter tuning
+[[algorithms-embeddings-fastrp-parameter-tuning]]
+== Tuning algorithm parameters
 
-In order to improve the embedding quality using Random Projection on one of your graphs, it is possible to tune several hyperparameters.
-We will go through each of them and explain how they work.
+In order to improve the embedding quality using Random Projection on one of your graphs, it is possible to tune the algorithm parameters.
+This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
+We will go through each of the configuration parameters and explain how they behave.
 
-For statistically sound results, it is a good idea to reserve a test set excluded from hyperparameter tuning.
+For statistically sound results, it is a good idea to reserve a test set excluded from parameter tuning.
 After hyperparameter tuning has been made, the embedding with the best settings can then be evaluated using a downstream machine learning task on the test set.
 To construct such a set you may want to create a node label in the graph using cypher that represents a subgraph without the test data.
 
