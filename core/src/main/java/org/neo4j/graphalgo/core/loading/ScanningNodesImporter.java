@@ -128,7 +128,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
         long nodeCount,
         LongObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping
     ) {
-        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap = StreamSupport.stream(
+        return StreamSupport.stream(
             labelTokenNodeLabelMapping.values().spliterator(),
             false
         )
@@ -139,8 +139,6 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRecord, Id
                 nodeLabel -> HugeAtomicBitSet.create(nodeCount, tracker)
                 )
             );
-
-        return nodeLabelBitSetMap;
     }
 
     @Nullable

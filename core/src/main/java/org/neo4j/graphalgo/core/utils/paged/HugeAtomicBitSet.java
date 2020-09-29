@@ -100,7 +100,6 @@ public final class HugeAtomicBitSet {
             if (bits.compareAndSet(wordIndex, oldWord, newWord)) {
                 return false;
             }
-            ;
         }
     }
 
