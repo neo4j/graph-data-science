@@ -44,9 +44,9 @@ import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
 
 class FastRPTest extends AlgoTestBase {
 
-    static final int DEFUALT_EMBEDDING_SIZE = 128;
+    private static final int DEFAULT_EMBEDDING_SIZE = 128;
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
-        .embeddingSize(DEFUALT_EMBEDDING_SIZE)
+        .embeddingSize(DEFAULT_EMBEDDING_SIZE)
         .addIterationWeight(1.0D)
         .build();
 
@@ -119,8 +119,8 @@ class FastRPTest extends AlgoTestBase {
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
-        float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
-        for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
+        float[] expected = new float[DEFAULT_EMBEDDING_SIZE];
+        for (int i = 0; i < DEFAULT_EMBEDDING_SIZE; i++) {
             expected[i] = (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
         }
         l2Normalize(expected);
@@ -142,7 +142,7 @@ class FastRPTest extends AlgoTestBase {
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
-            .embeddingSize(DEFUALT_EMBEDDING_SIZE)
+            .embeddingSize(DEFAULT_EMBEDDING_SIZE)
             .build();
 
         FastRP fastRP = new FastRP(
@@ -158,8 +158,8 @@ class FastRPTest extends AlgoTestBase {
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
-        float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
-        for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
+        float[] expected = new float[DEFAULT_EMBEDDING_SIZE];
+        for (int i = 0; i < DEFAULT_EMBEDDING_SIZE; i++) {
             expected[i] = (2.0f * randomVectors.get(1)[i] + 1.0f * randomVectors.get(2)[i]) / 2.0f;
         }
         l2Normalize(expected);
