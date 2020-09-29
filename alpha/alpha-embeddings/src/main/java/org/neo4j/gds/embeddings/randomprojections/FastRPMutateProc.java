@@ -37,11 +37,11 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, RandomProjectionMutateProc.MutateResult, FastRPMutateConfig> {
+public class FastRPMutateProc extends MutateProc<FastRP, FastRP, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
-    public Stream<RandomProjectionMutateProc.MutateResult> mutate(
+    public Stream<FastRPMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

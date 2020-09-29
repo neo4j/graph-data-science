@@ -20,17 +20,15 @@
 package org.neo4j.gds.embeddings.randomprojections;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -38,22 +36,21 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStreamProc extends StreamProc<FastRP, FastRP, RandomProjectionStreamProc.StreamResult, FastRPStreamConfig> {
+public class FastRPStatsProc extends StatsProc<FastRP, FastRP, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
-    @Description(FastRPCompanion.DESCRIPTION)
-    public Stream<RandomProjectionStreamProc.StreamResult> stream(
+    @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
+    @Description("Random Projection produces node embeddings via the fastrp algorithm")
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP, FastRPStreamConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return stream(computationResult);
+        return stats(computationResult);
     }
-
-    @Procedure(value = "gds.alpha.randomProjection.stream.estimate", mode = READ)
+    @Procedure(value = "gds.alpha.randomProjection.stats.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -62,48 +59,57 @@ public class RandomProjectionStreamProc extends StreamProc<FastRP, FastRP, Rando
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPStreamConfig> computationResult) {
-        return FastRPCompanion.getNodeProperties(computationResult);
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPStatsConfig> computeResult) {
+        return new StatsResult.Builder();
     }
 
     @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
-    }
-
-    @Override
-    protected FastRPStreamConfig newConfig(
+    protected FastRPStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return FastRPStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new FastRPFactory<>();
     }
 
-    public static final class StreamResult {
-        public final long nodeId;
-        public final List<Number> embedding;
+    public static final class StatsResult {
 
-        StreamResult(long nodeId, float[] embedding) {
-            this.nodeId = nodeId;
-            this.embedding = arrayToList(embedding);
+        public final long nodeCount;
+        public final long createMillis;
+        public final long computeMillis;
+        public final Map<String, Object> configuration;
+
+        StatsResult(
+            long nodeCount,
+            long createMillis,
+            long computeMillis,
+            Map<String, Object> config
+        ) {
+            this.nodeCount = nodeCount;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.configuration = config;
         }
 
-        static List<Number> arrayToList(float[] values) {
-            var floats = new ArrayList<Number>(values.length);
-            for (float value : values) {
-                floats.add(value);
+        static final class Builder extends AbstractResultBuilder<StatsResult> {
+
+            @Override
+            public StatsResult build() {
+                return new StatsResult(
+                    nodeCount,
+                    createMillis,
+                    computeMillis,
+                    config.toMap()
+                );
             }
-            return floats;
         }
     }
 }

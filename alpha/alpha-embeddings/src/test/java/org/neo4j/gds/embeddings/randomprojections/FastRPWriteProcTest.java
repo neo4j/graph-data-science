@@ -41,7 +41,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
 
     @Override
     public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPWriteConfig>> getProcedureClazz() {
-        return RandomProjectionWriteProc.class;
+        return FastRPWriteProc.class;
     }
 
     @Override

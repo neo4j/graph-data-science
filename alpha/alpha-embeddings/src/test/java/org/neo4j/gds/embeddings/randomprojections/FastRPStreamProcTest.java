@@ -39,7 +39,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Override
     public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStreamConfig>> getProcedureClazz() {
-        return RandomProjectionStreamProc.class;
+        return FastRPStreamProc.class;
     }
 
     @Override

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.gds.embeddings.randomprojections.RandomProjectionStreamProc;
+import org.neo4j.gds.embeddings.randomprojections.FastRPStreamProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;
@@ -30,7 +30,7 @@ class FastRPDocTest extends DocTestBase {
     @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
-            RandomProjectionStreamProc.class,
+            FastRPStreamProc.class,
             GraphCreateProc.class
         );
     }
