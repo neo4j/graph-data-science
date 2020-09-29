@@ -116,6 +116,12 @@ public abstract class HugeAtomicLongArray {
     public abstract long sizeOf();
 
     /**
+     * Set all entries in the array to the given value.
+     * This method is not atomic!
+     */
+    public abstract void setAll(long value);
+
+    /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
      * The array is unusable after calling this method and will throw {@link NullPointerException}s on virtually every method invocation.
      * <p>
@@ -209,7 +215,7 @@ public abstract class HugeAtomicLongArray {
         return ((long) i << shift) + base;
     }
 
-    private static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
+    static final class SingleHugeAtomicLongArray extends HugeAtomicLongArray {
 
         private static HugeAtomicLongArray of(long size, LongPageCreator pageCreator, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
@@ -226,6 +232,10 @@ public abstract class HugeAtomicLongArray {
         private SingleHugeAtomicLongArray(int size, long[] page) {
             this.size = size;
             this.page = page;
+        }
+
+        long[] page() {
+            return page;
         }
 
         @Override
@@ -265,6 +275,11 @@ public abstract class HugeAtomicLongArray {
         @Override
         public long sizeOf() {
             return sizeOfLongArray(size);
+        }
+
+        @Override
+        public void setAll(long value) {
+            Arrays.fill(page, value);
         }
 
         @Override
@@ -368,6 +383,13 @@ public abstract class HugeAtomicLongArray {
         @Override
         public long sizeOf() {
             return memoryUsed;
+        }
+
+        @Override
+        public void setAll(long value) {
+            for (long[] page : pages) {
+                Arrays.fill(page, value);
+            }
         }
 
         @Override
