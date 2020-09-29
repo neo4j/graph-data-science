@@ -24,6 +24,7 @@ import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -276,6 +277,49 @@ final class HugeAtomicLongArrayTest {
     }
 
     @Test
+    void testSetAll() {
+        var pool = Executors.newCachedThreadPool();
+        try {
+            int nthreads = Runtime.getRuntime().availableProcessors() * 2;
+            var arraySize = 42_1337;
+            var phaser = new Phaser(nthreads + 1);
+            var aa = singleArray(arraySize); // 1 page
+            var tasks = new ArrayList<GetTask>();
+            aa.setAll(42);
+            for (int i = 0; i < nthreads; ++i) {
+                var t = new GetTask(aa, phaser);
+                tasks.add(t);
+                pool.execute(t);
+            }
+            phaser.arriveAndAwaitAdvance();
+
+            tasks.forEach(t -> assertEquals(42 * arraySize, t.result));
+
+        } finally {
+            pool.shutdown();
+        }
+    }
+
+    private static final class GetTask implements Runnable {
+        private final HugeAtomicLongArray array;
+        private final Phaser phaser;
+        volatile long result;
+
+        private GetTask(HugeAtomicLongArray array, Phaser phaser) {
+            this.array = array;
+            this.phaser = phaser;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < array.size(); i++) {
+                result += array.get(i);
+            }
+            phaser.arrive();
+        }
+    }
+
+    @Test
     void testAdder() {
         int incsPerThread = 10_000;
         int ncpu = Runtime.getRuntime().availableProcessors();
@@ -296,6 +340,7 @@ final class HugeAtomicLongArrayTest {
     }
 
     private static void casTest(int nthreads, int incs, HugeAtomicLongArray a, Executor pool) {
+        System.out.println(nthreads);
         Phaser phaser = new Phaser(nthreads + 1);
         for (int i = 0; i < nthreads; ++i) {
             pool.execute(new CasTask(a, phaser, incs));
