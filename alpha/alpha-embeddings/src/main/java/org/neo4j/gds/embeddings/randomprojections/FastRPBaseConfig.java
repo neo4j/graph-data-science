@@ -65,4 +65,9 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, RelationshipWeightConf
             ));
         }
     }
+
+    @Configuration.Ignore
+    static ImmutableFastRPBaseConfig.Builder builder() {
+        return ImmutableFastRPBaseConfig.builder();
+    }
 }

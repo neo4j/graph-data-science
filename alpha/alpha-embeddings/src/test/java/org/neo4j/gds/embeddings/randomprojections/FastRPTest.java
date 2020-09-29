@@ -45,7 +45,7 @@ import static org.neo4j.gds.embeddings.randomprojections.FastRP.l2Normalize;
 class FastRPTest extends AlgoTestBase {
 
     static final int DEFUALT_EMBEDDING_SIZE = 128;
-    static final FastRPBaseConfig DEFAULT_CONFIG = ImmutableFastRPBaseConfig.builder()
+    static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
         .embeddingSize(DEFUALT_EMBEDDING_SIZE)
         .addIterationWeight(1.0D)
         .build();
@@ -179,7 +179,7 @@ class FastRPTest extends AlgoTestBase {
 
         FastRP fastRP = new FastRP(
             graph,
-            ImmutableFastRPBaseConfig.builder()
+            FastRPBaseConfig.builder()
                 .embeddingSize(512)
                 .addIterationWeight(1.0D)
                 .build(),
@@ -222,7 +222,7 @@ class FastRPTest extends AlgoTestBase {
 
         FastRP fastRP = new FastRP(
             graph,
-            ImmutableFastRPBaseConfig.builder()
+            FastRPBaseConfig.builder()
                 .embeddingSize(64)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
