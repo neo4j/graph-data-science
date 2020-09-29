@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -57,6 +60,8 @@ public class AllocationTrackerProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnMemoryLimitExceeded() {
+        Assumptions.assumeTrue(!is40());
+
         String cypher = GdsCypher.call()
             .loadEverything()
             .graphCreate("foo")
@@ -67,20 +72,25 @@ public class AllocationTrackerProcTest extends BaseProcTest {
                     QueryExecutionException.class,
                     () -> runQuery(cypher)
                 ));
-                assertThat(exception.getClass().getName()).isEqualTo(EXCEPTION_NAME);
+                assertThat(exception.getClass().getSimpleName()).isEqualTo(EXCEPTION_NAME);
                 assertThat(exception.getMessage()).startsWith("The allocation of an extra");
-
             }
         );
     }
 
     @Test
     void shouldReally() {
+        Assumptions.assumeTrue(!is40());
+
         String cypher = "CALL test.doIt()";
         USE_KERNEL_TRACKER.enableAndRun(
             () -> assertThatThrownBy(
                 () -> SecureTransaction.of(db).accept((tx, ktx) -> tx.execute(cypher).next())
             )
         );
+    }
+
+    private static boolean is40() {
+        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
     }
 }
