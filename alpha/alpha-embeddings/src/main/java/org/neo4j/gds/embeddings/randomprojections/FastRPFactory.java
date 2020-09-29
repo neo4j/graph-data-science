@@ -32,7 +32,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
     public FastRP build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
     ) {
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "RandomProjection", configuration.concurrency());
+        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency());
 
         return new FastRP(
             graph,
