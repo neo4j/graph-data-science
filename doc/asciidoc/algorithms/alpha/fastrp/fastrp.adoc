@@ -163,11 +163,12 @@ After hyperparameter tuning has been made, the embedding with the best settings 
 To construct such a set you may want to create a node label in the graph using cypher that represents a subgraph without the test data.
 
 === Embedding Dimension
-The best value for `embeddingSize` depends on the number of nodes in the graph.
-Since the projection becomes more lossy the smaller we set this value, a larger graph may demand a higher embedding dimension.
+
+The optimal value for `embeddingSize` depends on the number of nodes in the graph.
+Since the amount of information the embedding can encode is limited by the `embeddingSize`, a larger graph will tend to require a higher embedding dimension.
 A typical value is a power of two in the range 128 - 1024.
 A value of at least 256 gives good results on graphs with as many as 200000 nodes, but in general increasing the dimension improves results.
-Increasing embedding dimension will however increase memory requirements linearly.
+Increasing embedding dimension will however increase memory requirements and runtime linearly.
 
 === Normalization strength
 Using a negative value for normalization strength will downplay the importance of high degree neighbors when constructing the embeddings.
