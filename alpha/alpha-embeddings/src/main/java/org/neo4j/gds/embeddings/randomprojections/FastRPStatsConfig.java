@@ -28,15 +28,15 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface RandomProjectionStreamConfig extends RandomProjectionBaseConfig {
+public interface FastRPStatsConfig extends FastRPBaseConfig {
 
-    static RandomProjectionStreamConfig of(
+    static FastRPStatsConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new RandomProjectionStreamConfigImpl(
+        return new FastRPStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

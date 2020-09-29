@@ -38,7 +38,7 @@ import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompani
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomProjectionWriteProc.WriteResult, RandomProjectionWriteConfig> {
+public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomProjectionWriteProc.WriteResult, FastRPWriteConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -46,7 +46,7 @@ public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomP
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     )  {
-        ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -63,27 +63,27 @@ public class RandomProjectionWriteProc extends WriteProc<FastRP, FastRP, RandomP
     }
 
     @Override
-    protected RandomProjectionWriteConfig newConfig(
+    protected FastRPWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, RandomProjectionWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computeResult) {
         return new WriteResult.Builder();
     }
 

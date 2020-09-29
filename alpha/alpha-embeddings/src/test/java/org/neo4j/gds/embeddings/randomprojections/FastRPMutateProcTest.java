@@ -34,7 +34,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class FastRPMutateProcTest extends FastRPProcTest<RandomProjectionMutateConfig> {
+class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
@@ -44,13 +44,13 @@ class FastRPMutateProcTest extends FastRPProcTest<RandomProjectionMutateConfig> 
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPMutateConfig>> getProcedureClazz() {
         return RandomProjectionMutateProc.class;
     }
 
     @Override
-    public RandomProjectionMutateConfig createConfig(CypherMapWrapper userInput) {
-        return RandomProjectionMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPMutateConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override

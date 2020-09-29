@@ -22,22 +22,21 @@ package org.neo4j.gds.embeddings.randomprojections;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface RandomProjectionWriteConfig extends RandomProjectionBaseConfig, WritePropertyConfig {
+public interface FastRPStreamConfig extends FastRPBaseConfig {
 
-    static RandomProjectionWriteConfig of(
+    static FastRPStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new RandomProjectionWriteConfigImpl(
+        return new FastRPStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

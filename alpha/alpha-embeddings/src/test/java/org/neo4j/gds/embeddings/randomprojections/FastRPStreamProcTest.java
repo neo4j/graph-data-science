@@ -35,16 +35,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SuppressWarnings("unchecked")
-class FastRPStreamProcTest extends FastRPProcTest<RandomProjectionStreamConfig> {
+class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStreamConfig>> getProcedureClazz() {
         return RandomProjectionStreamProc.class;
     }
 
     @Override
-    public RandomProjectionStreamConfig createConfig(CypherMapWrapper userInput) {
-        return RandomProjectionStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPStreamConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @ParameterizedTest

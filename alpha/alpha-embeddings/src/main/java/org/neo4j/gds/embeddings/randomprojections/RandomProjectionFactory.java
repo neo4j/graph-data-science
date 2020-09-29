@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
+public class RandomProjectionFactory<CONFIG extends FastRPBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
 
     @Override
     public FastRP build(

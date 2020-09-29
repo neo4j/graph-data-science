@@ -52,7 +52,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private final int iterations;
     private final List<Double> iterationWeights;
 
-    static MemoryEstimation memoryEstimation(RandomProjectionBaseConfig config) {
+    static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
             .builder(FastRP.class)
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
@@ -63,7 +63,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     public FastRP(
         Graph graph,
-        RandomProjectionBaseConfig config,
+        FastRPBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {

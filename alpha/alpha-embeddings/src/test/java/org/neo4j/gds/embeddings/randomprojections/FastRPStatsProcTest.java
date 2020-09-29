@@ -32,16 +32,16 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 
-class FastRPStatsProcTest extends FastRPProcTest<RandomProjectionStatsConfig> {
+class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStatsConfig>> getProcedureClazz() {
         return RandomProjectionStatsProc.class;
     }
 
     @Override
-    public RandomProjectionStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return RandomProjectionStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public FastRPStatsConfig createConfig(CypherMapWrapper mapWrapper) {
+        return FastRPStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

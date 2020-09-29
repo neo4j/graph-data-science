@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public abstract class FastRPProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements
+public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<FastRP, CONFIG, FastRP>,
     MemoryEstimateTest<FastRP, CONFIG, FastRP> {
 

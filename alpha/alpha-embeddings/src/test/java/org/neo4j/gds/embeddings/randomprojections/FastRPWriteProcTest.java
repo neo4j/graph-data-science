@@ -36,17 +36,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class FastRPWriteProcTest extends FastRPProcTest<RandomProjectionWriteConfig>
-    implements WritePropertyConfigTest<FastRP, RandomProjectionWriteConfig, FastRP> {
+class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
+    implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, RandomProjectionWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPWriteConfig>> getProcedureClazz() {
         return RandomProjectionWriteProc.class;
     }
 
     @Override
-    public RandomProjectionWriteConfig createConfig(CypherMapWrapper userInput) {
-        return RandomProjectionWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPWriteConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override

@@ -45,7 +45,7 @@ import static org.neo4j.gds.embeddings.randomprojections.FastRP.l2Normalize;
 class FastRPTest extends AlgoTestBase {
 
     static final int DEFUALT_EMBEDDING_SIZE = 128;
-    static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
+    static final FastRPBaseConfig DEFAULT_CONFIG = ImmutableFastRPBaseConfig.builder()
         .embeddingSize(DEFUALT_EMBEDDING_SIZE)
         .addIterationWeight(1.0D)
         .build();
@@ -138,7 +138,7 @@ class FastRPTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        var weightedConfig = ImmutableRandomProjectionBaseConfig
+        var weightedConfig = ImmutableFastRPBaseConfig
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
@@ -179,7 +179,7 @@ class FastRPTest extends AlgoTestBase {
 
         FastRP fastRP = new FastRP(
             graph,
-            ImmutableRandomProjectionBaseConfig.builder()
+            ImmutableFastRPBaseConfig.builder()
                 .embeddingSize(512)
                 .addIterationWeight(1.0D)
                 .build(),
@@ -222,7 +222,7 @@ class FastRPTest extends AlgoTestBase {
 
         FastRP fastRP = new FastRP(
             graph,
-            ImmutableRandomProjectionBaseConfig.builder()
+            ImmutableFastRPBaseConfig.builder()
                 .embeddingSize(64)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
@@ -242,7 +242,7 @@ class FastRPTest extends AlgoTestBase {
 
     @Test
     void testMemoryEstimationWithoutIterationWeights() {
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .addIterationWeights(1.0D, 1.0D)
             .embeddingSize(128)
@@ -257,7 +257,7 @@ class FastRPTest extends AlgoTestBase {
 
     @Test
     void testMemoryEstimationWithIterationWeights() {
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .embeddingSize(128)
             .iterationWeights(List.of(1.0D, 2.0D))
@@ -281,7 +281,7 @@ class FastRPTest extends AlgoTestBase {
             .build()
             .generate();
 
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .embeddingSize(2)
             .iterationWeights(List.of(1.0D, 2.0D))

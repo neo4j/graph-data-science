@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, RandomProjectionMutateProc.MutateResult, RandomProjectionMutateConfig> {
+public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, RandomProjectionMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
     @Description(RandomProjectionCompanion.DESCRIPTION)
@@ -45,7 +45,7 @@ public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, Rando
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -62,27 +62,27 @@ public class RandomProjectionMutateProc extends MutateProc<FastRP, FastRP, Rando
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPMutateConfig> computationResult) {
         return RandomProjectionCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 
     @Override
-    protected RandomProjectionMutateConfig newConfig(
+    protected FastRPMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, RandomProjectionMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPMutateConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 

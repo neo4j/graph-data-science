@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomProjectionStatsProc.StatsResult, RandomProjectionStatsConfig> {
+public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomProjectionStatsProc.StatsResult, FastRPStatsConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
@@ -44,7 +44,7 @@ public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomP
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP, RandomProjectionStatsConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -61,22 +61,22 @@ public class RandomProjectionStatsProc extends StatsProc<FastRP, FastRP, RandomP
 
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, RandomProjectionStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPStatsConfig> computeResult) {
         return new StatsResult.Builder();
     }
 
     @Override
-    protected RandomProjectionStatsConfig newConfig(
+    protected FastRPStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, RandomProjectionStatsConfig> algorithmFactory() {
+    protected AlgorithmFactory<FastRP, FastRPStatsConfig> algorithmFactory() {
         return new RandomProjectionFactory<>();
     }
 
