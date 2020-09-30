@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -278,16 +279,16 @@ final class HugeAtomicLongArrayTest {
 
     @Test
     void testSetAll() {
-        var pool = Executors.newCachedThreadPool();
+        ExecutorService pool = Executors.newCachedThreadPool();
         try {
             int nthreads = Runtime.getRuntime().availableProcessors() * 2;
-            var arraySize = 42_1337;
-            var phaser = new Phaser(nthreads + 1);
-            var aa = singleArray(arraySize); // 1 page
-            var tasks = new ArrayList<GetTask>();
+            int arraySize = 42_1337;
+            Phaser phaser = new Phaser(nthreads + 1);
+            HugeAtomicLongArray aa = singleArray(arraySize); // 1 page
+            List<GetTask> tasks = new ArrayList<>();
             aa.setAll(42);
             for (int i = 0; i < nthreads; ++i) {
-                var t = new GetTask(aa, phaser);
+                GetTask t = new GetTask(aa, phaser);
                 tasks.add(t);
                 pool.execute(t);
             }

@@ -120,6 +120,13 @@ public final class UnsafeProxy {
         return UnsafeUtil.compareAndSwapLong(array, offset, expect, update);
     }
 
+    /**
+     * Orders stores before the fence, with loads and stores after the fence.
+     */
+    public static void storeFence() {
+        UnsafeUtil.storeFence();
+    }
+
     private UnsafeProxy() {
         throw new UnsupportedOperationException("No instances");
     }
