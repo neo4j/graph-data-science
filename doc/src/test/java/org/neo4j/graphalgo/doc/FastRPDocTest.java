@@ -37,7 +37,7 @@ class FastRPDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/alpha/fastrp/fastrp.adoc";
+        return "algorithms/fastrp/fastrp.adoc";
     }
 
 }

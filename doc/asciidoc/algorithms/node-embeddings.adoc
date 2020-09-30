@@ -20,4 +20,4 @@ include::node-embeddings/node2vec.adoc[leveloffset=+1]
 
 include::alpha/graph-sage/graph-sage.adoc[leveloffset=+1]
 
-include::alpha/fastrp/fastrp.adoc[leveloffset=+1]
+include::fastrp/fastrp.adoc[leveloffset=+1]
