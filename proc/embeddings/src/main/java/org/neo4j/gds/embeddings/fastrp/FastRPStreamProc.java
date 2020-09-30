@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStreamProc extends StreamProc<FastRP, FastRP, FastRPStreamProc.StreamResult, FastRPStreamConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
+    @Procedure(value = "gds.fastRP.stream", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
     public Stream<FastRPStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -53,7 +53,7 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP, FastRPStreamPro
         return stream(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.randomProjection.stream.estimate", mode = READ)
+    @Procedure(value = "gds.fastRP.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

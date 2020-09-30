@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStatsProc extends StatsProc<FastRP, FastRP, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
+    @Procedure(value = "gds.fastRP.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
     public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP, FastRPStatsProc.S
         );
         return stats(computationResult);
     }
-    @Procedure(value = "gds.alpha.randomProjection.stats.estimate", mode = READ)
+    @Procedure(value = "gds.fastRP.stats.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

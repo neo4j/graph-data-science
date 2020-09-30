@@ -39,7 +39,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
+    @Procedure(value = "gds.fastRP.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
     public Stream<FastRPMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -52,7 +52,7 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP, FastRPM
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.randomProjection.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.fastRP.mutate.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

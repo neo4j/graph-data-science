@@ -266,14 +266,14 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.graphSage.write`
 | `gds.alpha.graphSage.train`
 .8+<.^| RandomProjections
-| `gds.alpha.randomProjection.mutate`
-| `gds.alpha.randomProjection.mutate.estimate`
-| `gds.alpha.randomProjection.stats`
-| `gds.alpha.randomProjection.stats.estimate`
-| `gds.alpha.randomProjection.stream`
-| `gds.alpha.randomProjection.stream.estimate`
-| `gds.alpha.randomProjection.write`
-| `gds.alpha.randomProjection.write.estimate`
+| `gds.fastRP.mutate`
+| `gds.fastRP.mutate.estimate`
+| `gds.fastRP.stats`
+| `gds.fastRP.stats.estimate`
+| `gds.fastRP.stream`
+| `gds.fastRP.stream.estimate`
+| `gds.fastRP.write`
+| `gds.fastRP.write.estimate`
 |===
 
 The following table lists all functions in the GDS library:

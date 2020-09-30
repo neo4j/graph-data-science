@@ -69,7 +69,7 @@ For more information on this algorithm see:
 .Run FastRP in stream mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.stream(
+CALL gds.fastRP.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -97,7 +97,7 @@ include::specific-configuration.adoc[]
 .Run FastRP in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.write(
+CALL gds.fastRP.write(
   graphName: String,
   configuration: Map
 )
@@ -139,7 +139,7 @@ include::../shared/syntax-anonymous-graphs.adoc[]
 .Run FastRP in write mode on an anonymous graph.
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.write(
+CALL gds.fastRP.write(
   configuration: Map
 )
 YIELD
@@ -238,7 +238,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.stream(
+CALL gds.fastRP.stream(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],

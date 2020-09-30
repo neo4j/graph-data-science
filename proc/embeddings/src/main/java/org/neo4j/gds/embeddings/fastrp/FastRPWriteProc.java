@@ -40,7 +40,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
+    @Procedure(value = "gds.fastRP.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -53,7 +53,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.W
         return write(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.randomProjection.write.estimate", mode = READ)
+    @Procedure(value = "gds.fastRP.write.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

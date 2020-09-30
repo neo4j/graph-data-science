@@ -66,7 +66,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .algo("gds.alpha.randomProjection")
+            .algo("gds.fastRP")
             .writeMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("writeProperty", "embedding");
@@ -101,7 +101,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
             .withNodeLabel("Node2")
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
-            .algo("gds.alpha.randomProjection")
+            .algo("gds.fastRP")
             .writeMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("relationshipWeightProperty", "weight")

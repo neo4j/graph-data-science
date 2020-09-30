@@ -112,7 +112,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         String rpQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
-            .algo("gds.alpha.randomProjection")
+            .algo("gds.fastRP")
             .writeMode()
             .addParameter("embeddingSize", rpEmbeddingSize)
             .addParameter("iterationWeights", List.of(1D, 1D))
