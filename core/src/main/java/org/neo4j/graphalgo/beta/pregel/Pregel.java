@@ -100,12 +100,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static MemoryEstimation memoryEstimation(NodeSchema nodeSchema) {
         return MemoryEstimations.builder(Pregel.class)
-            .perNode("receiver bits", MemoryUsage::sizeOfBitset)
-            .perNode("vote bits", MemoryUsage::sizeOfBitset)
-            .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class)
-                .perNode("sender bits", MemoryUsage::sizeOfBitset)
-                .build()
-            )
+            .perNode("message bits", MemoryUsage::sizeOfHugeAtomicBitset)
+            .perNode("previous message bits", MemoryUsage::sizeOfHugeAtomicBitset)
+            .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
+            .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
             .add(
                 "message queues",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
@@ -186,7 +184,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         List<ComputeStep<CONFIG>> computeSteps = createComputeSteps(voteBits);
 
         int iterations;
-        for (iterations = 0;iterations < config.maxIterations(); iterations++) {
+        for (iterations = 0; iterations < config.maxIterations(); iterations++) {
             if (iterations > 0) {
                 messageBits.clear();
             }
