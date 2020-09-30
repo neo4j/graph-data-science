@@ -86,7 +86,7 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
             public TestAlgorithm build(
                 Graph graph, TestConfig configuration, AllocationTracker tracker, Log log
             ) {
-                return new TestAlgorithm(graph);
+                return new TestAlgorithm(graph, allocationTracker(), 0L);
             }
 
             @Override

@@ -21,19 +21,25 @@ package org.neo4j.graphalgo.test;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
 
     private final Graph graph;
+    private final AllocationTracker allocationTracker;
     private long relationshipCount = 0;
+    private long memoryLimit;
 
-    TestAlgorithm(Graph graph) {
+    public TestAlgorithm(Graph graph, AllocationTracker allocationTracker, long memoryLimit) {
         this.graph = graph;
+        this.allocationTracker = allocationTracker;
+        this.memoryLimit = memoryLimit;
     }
 
     @Override
     public TestAlgorithm compute() {
-        this.relationshipCount = graph.relationshipCount();
+        relationshipCount = graph.relationshipCount();
+        allocationTracker.add(memoryLimit * 2);
         return this;
     }
 
