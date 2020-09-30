@@ -16,4 +16,6 @@ The Neo4j GDS library includes the following auxiliary procedures, grouped by qu
 
 include::beta/graph-generation.adoc[leveloffset=+1]
 
+include::alpha/traversal-to-relationship/traversal-to-relationship.adoc[leveloffset=+1]
+
 include::alpha/alpha-one-hot-encoding.adoc[leveloffset=+1]
