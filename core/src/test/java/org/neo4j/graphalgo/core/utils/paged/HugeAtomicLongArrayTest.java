@@ -341,7 +341,6 @@ final class HugeAtomicLongArrayTest {
     }
 
     private static void casTest(int nthreads, int incs, HugeAtomicLongArray a, Executor pool) {
-        System.out.println(nthreads);
         Phaser phaser = new Phaser(nthreads + 1);
         for (int i = 0; i < nthreads; ++i) {
             pool.execute(new CasTask(a, phaser, incs));

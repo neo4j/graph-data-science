@@ -121,7 +121,7 @@ public final class UnsafeProxy {
     }
 
     /**
-     * Orders stores before the fence, with loads and stores after the fence.
+     * Ensures that stores before the fence will not be reordered with stores after the fence.
      */
     public static void storeFence() {
         UnsafeUtil.storeFence();
