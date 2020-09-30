@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import com.carrotsearch.hppc.BitSet;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
@@ -51,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -177,40 +175,45 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     public PregelResult run() {
-        int iterations = 0;
-        boolean canHalt = false;
+        boolean didConverge = false;
+        // Tracks if a node received messages in the current iteration
+        HugeAtomicBitSet messageBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
         // Tracks if a node received messages in the previous iteration
-        // TODO: try RoaringBitSet instead
-        BitSet receiverBits = new BitSet(graph.nodeCount());
+        HugeAtomicBitSet prevMessageBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
         // Tracks if a node voted to halt in the previous iteration
         HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
         List<ComputeStep<CONFIG>> computeSteps = createComputeSteps(voteBits);
 
-        while (iterations < config.maxIterations() && !canHalt) {
-            int iteration = iterations++;
+        int iterations;
+        for (iterations = 0;iterations < config.maxIterations(); iterations++) {
+            if (iterations > 0) {
+                messageBits.clear();
+            }
 
             // Init compute steps with the updated state
             for (ComputeStep<CONFIG> computeStep : computeSteps) {
-                computeStep.init(iteration, receiverBits);
+                computeStep.init(iterations, messageBits, prevMessageBits);
             }
 
-            runComputeSteps(computeSteps, iteration, receiverBits);
-
-            if (iteration > 0) {
-                receiverBits.clear();
-            }
-            receiverBits = unionBitSets(computeSteps, receiverBits, ComputeStep::getSenders);
+            runComputeSteps(computeSteps, iterations, prevMessageBits);
 
             // No messages have been sent
-            if (receiverBits.nextSetBit(0) == -1) {
-                canHalt = true;
+            // TODO method that only checks for > 0
+            if (messageBits.cardinality() == 0) {
+                didConverge = true;
+                break;
             }
+
+            // Swap message bits for next iteration
+            var tmp = messageBits;
+            messageBits = prevMessageBits;
+            prevMessageBits = tmp;
         }
 
         return ImmutablePregelResult.builder()
             .nodeValues(nodeValues)
-            .didConverge(canHalt)
+            .didConverge(didConverge)
             .ranIterations(iterations)
             .build();
     }
@@ -240,18 +243,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return computeSteps;
     }
 
-    private BitSet unionBitSets(Collection<ComputeStep<CONFIG>> computeSteps, BitSet identity, Function<ComputeStep<CONFIG>, BitSet> fn) {
-        return ParallelUtil.parallelStream(computeSteps.stream(), concurrency, stream ->
-                stream.map(fn).reduce(identity, (bitSet1, bitSet2) -> {
-                    bitSet1.union(bitSet2);
-                    return bitSet1;
-                }));
-    }
-
     private void runComputeSteps(
         Collection<ComputeStep<CONFIG>> computeSteps,
         final int iteration,
-        BitSet messageBits
+        HugeAtomicBitSet messageBits
     ) {
 
         if (!config.isAsynchronous()) {
@@ -299,7 +294,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final PregelComputation<CONFIG> computation;
         private final PregelContext.InitContext<CONFIG> initContext;
         private final PregelContext.ComputeContext<CONFIG> computeContext;
-        private final BitSet senderBits;
         private final Partition nodeBatch;
         private final Degrees degrees;
         private final CompositeNodeValue nodeValues;
@@ -307,7 +301,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final RelationshipIterator relationshipIterator;
 
         private int iteration;
-        private BitSet receiverBits;
+        private HugeAtomicBitSet messageBits;
+        private HugeAtomicBitSet prevMessageBits;
         private final HugeAtomicBitSet voteBits;
 
         private ComputeStep(
@@ -327,7 +322,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.isAsync = config.isAsynchronous();
             this.computation = computation;
             this.voteBits = voteBits;
-            this.senderBits = new BitSet(nodeCount);
             this.nodeBatch = nodeBatch;
             this.degrees = graph;
             this.nodeValues = nodeValues;
@@ -337,13 +331,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.initContext = PregelContext.initContext(this, config, graph);
         }
 
-        void init(int iteration, BitSet receiverBits) {
+        void init(
+            int iteration,
+            HugeAtomicBitSet messageBits,
+            HugeAtomicBitSet prevMessageBits
+        ) {
             this.iteration = iteration;
-            this.receiverBits = receiverBits;
-
-            if (iteration > 0) {
-                this.senderBits.clear();
-            }
+            this.messageBits = messageBits;
+            this.prevMessageBits = prevMessageBits;
         }
 
         @Override
@@ -363,7 +358,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                     computation.init(initContext);
                 }
 
-                if (receiverBits.get(nodeId) || !voteBits.get(nodeId)) {
+                if (prevMessageBits.get(nodeId) || !voteBits.get(nodeId)) {
                     voteBits.clear(nodeId);
                     computeContext.setNodeId(nodeId);
 
@@ -371,10 +366,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
                     computation.compute(computeContext, messages);
                 }
             }
-        }
-
-        BitSet getSenders() {
-            return senderBits;
         }
 
         public int iteration() {
@@ -406,19 +397,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         void sendTo(long targetNodeId, double message) {
             messageQueues.get(targetNodeId).add(message);
-            senderBits.set(targetNodeId);
+            messageBits.set(targetNodeId);
         }
 
         void sendToNeighborsWeighted(long sourceNodeId, double message) {
             relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
                 messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
-                senderBits.set(target);
+                messageBits.set(target);
                 return true;
             });
         }
 
         private @Nullable Queue<Double> receiveMessages(long nodeId) {
-            return receiverBits.get(nodeId) ? messageQueues.get(nodeId) : null;
+            return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
 
         double doubleNodeValue(String key, long nodeId) {
