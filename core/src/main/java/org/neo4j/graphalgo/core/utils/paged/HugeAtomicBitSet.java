@@ -103,19 +103,17 @@ public final class HugeAtomicBitSet {
     }
 
     private void setWord(long wordIndex, long bitMask) {
-        var oldWord = bits.get(wordIndex);
         while (true) {
-            var newWord = oldWord | bitMask;
+            long oldWord = bits.get(wordIndex);
+            long newWord = oldWord | bitMask;
             if (newWord == oldWord) {
                 // already set
                 return;
             }
-            var currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
-            if (currentWord == oldWord) {
-                // CAX successful
+            if (bits.compareAndSet(wordIndex, oldWord, newWord)) {;
+                // CAS successful
                 return;
             }
-            oldWord = currentWord;
         }
     }
 
