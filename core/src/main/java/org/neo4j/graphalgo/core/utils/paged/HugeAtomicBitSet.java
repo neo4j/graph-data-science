@@ -78,10 +78,32 @@ public final class HugeAtomicBitSet {
         }
     }
 
+    /**
+     * Sets the bits from the startIndex (inclusive) to the endIndex (exclusive).
+     * <p>
+     * Note: this method is not thread-safe.
+     */
     public void set(long startIndex, long endIndex) {
-        for (long i = startIndex; i < endIndex; i++) {
-            set(i);
+        long startWordIndex = startIndex / NUM_BITS;
+        // since endIndex is exclusive, we need the word before that index
+        long endWordIndex = (endIndex - 1) / NUM_BITS;
+
+        long startBitMask = -1L << startIndex;
+        long endBitMask = -1L >>> -endIndex;
+
+        if (startWordIndex == endWordIndex) {
+            var oldStartWord = bits.get(startWordIndex);
+            bits.set(startWordIndex, oldStartWord | (startBitMask & endBitMask));
+            return;
         }
+
+        var oldStartWord = bits.get(startWordIndex);
+        bits.set(startWordIndex, oldStartWord | startBitMask);
+        for (long i = startWordIndex + 1; i <= endWordIndex; i++) {
+            bits.set(i, -1L);
+        }
+        var oldEndWord = bits.get(endWordIndex);
+        bits.set(endWordIndex, oldEndWord | endBitMask);
     }
 
     /**

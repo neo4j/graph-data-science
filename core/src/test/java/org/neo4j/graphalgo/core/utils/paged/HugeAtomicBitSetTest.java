@@ -70,9 +70,9 @@ class HugeAtomicBitSetTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"0,41", "0,7", "10,20"})
+    @CsvSource({"0,1336", "0,63", "70,140"})
     void setRange(int startIndex, int endIndex) {
-        HugeAtomicBitSet bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        HugeAtomicBitSet bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.EMPTY);
         bitSet.set(startIndex, endIndex);
         for (int i = 0; i < bitSet.capacity(); i++) {
             if (i < startIndex || i > endIndex) {
