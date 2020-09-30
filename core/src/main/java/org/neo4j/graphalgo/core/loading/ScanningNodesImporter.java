@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
@@ -40,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
@@ -156,12 +154,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
         // set the whole range for '*' projections
         for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            var bitSet = nodeLabelBitSetMap.get(starLabel);
-            ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, nodeCount),
-                concurrency,
-                stream -> stream.forEach(bitSet::set)
-            );
+            nodeLabelBitSetMap.get(starLabel).set(0, nodeCount);
         }
 
         return nodeLabelBitSetMap;
