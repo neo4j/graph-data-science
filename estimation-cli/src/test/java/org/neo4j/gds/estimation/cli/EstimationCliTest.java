@@ -23,6 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
@@ -114,6 +118,11 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.alpha.randomProjection.mutate.estimate",
+        "gds.alpha.randomProjection.stats.estimate",
+        "gds.alpha.randomProjection.stream.estimate",
+        "gds.alpha.randomProjection.write.estimate",
+
         "gds.beta.k1coloring.mutate.estimate",
         "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream.estimate",
@@ -357,6 +366,11 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
+            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingSize", 128),
+            runEstimation(new FastRPStatsProc()::estimate, "embeddingSize", 128),
+            runEstimation(new FastRPStreamProc()::estimate, "embeddingSize", 128),
+            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingSize", 128),
+
             runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new K1ColoringStatsProc()::estimate),
             runEstimation(new K1ColoringStreamProc()::estimate),
