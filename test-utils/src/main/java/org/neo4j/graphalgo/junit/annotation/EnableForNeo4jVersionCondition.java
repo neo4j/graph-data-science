@@ -30,36 +30,36 @@ import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled
 import static org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.helpers.AnnotationHelper.findAnnotation;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class DisableForNeo4jVersionCondition implements ExecutionCondition {
+public class EnableForNeo4jVersionCondition implements ExecutionCondition {
 
     private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
         ConditionEvaluationResult.enabled(
-            "@EnabledIfReachable is not present");
+            "@EnableForNeo4jVersion is not present");
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
         AnnotatedElement element = context
             .getElement()
             .orElseThrow(IllegalStateException::new);
-        return shouldDisableForNeo4jVersion(
-            findAnnotation(element, DisableForNeo4jVersion.class),
+        return shouldEnableForNeo4jVersion(
+            findAnnotation(element, EnableForNeo4jVersion.class),
             element
         );
     }
 
-    private ConditionEvaluationResult shouldDisableForNeo4jVersion(
-        DisableForNeo4jVersion annotation,
+    private ConditionEvaluationResult shouldEnableForNeo4jVersion(
+        EnableForNeo4jVersion annotation,
         AnnotatedElement element
     ) {
         if (annotation != null) {
-            var disableForNeo4jVersion = annotation.value();
+            var enableForNeo4jVersion = annotation.value();
             var runningOnNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-            if (runningOnNeo4jVersion == disableForNeo4jVersion) {
+            if (runningOnNeo4jVersion != enableForNeo4jVersion) {
                 var message = annotation.message().isBlank() ?
                     formatWithLocale(
                         "%s should be disabled for Neo4j %s",
                         element.toString(),
-                        disableForNeo4jVersion.toString()
+                        runningOnNeo4jVersion.toString()
                     ) :
                     annotation.message();
 

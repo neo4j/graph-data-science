@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.graphalgo.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;
@@ -105,7 +106,7 @@ class AllocationTrackerTest {
     }
 
     @Test
-    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
+    @EnableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldIgnoreFeatureToggleOn40() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
             var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
@@ -143,10 +144,14 @@ class AllocationTrackerTest {
     static Stream<AllocationTracker> emptyTrackers() {
         return Stream.concat(
             Stream.of(AllocationTracker.empty()),
-            GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0
+            is40()
                 ? Stream.empty()
                 : Stream.of(AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker())))
         );
+    }
+
+    private static boolean is40() {
+        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
     }
 
     static Stream<AllocationTracker> allocationTrackers() {
