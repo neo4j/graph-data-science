@@ -81,6 +81,47 @@ public final class HugeAtomicBitSet {
     }
 
     /**
+     * Sets the bits from the startIndex (inclusive) to the endIndex (exclusive).
+     */
+    public void set(long startIndex, long endIndex) {
+        long startWordIndex = startIndex / NUM_BITS;
+        // since endIndex is exclusive, we need the word before that index
+        long endWordIndex = (endIndex - 1) / NUM_BITS;
+
+        long startBitMask = -1L << startIndex;
+        long endBitMask = -1L >>> -endIndex;
+
+        if (startWordIndex == endWordIndex) {
+            // set within single word
+            setWord(startWordIndex, startBitMask & endBitMask);
+        } else {
+            // set within range
+            setWord(startWordIndex, startBitMask);
+            for (long wordIndex = startWordIndex + 1; wordIndex <= endWordIndex; wordIndex++) {
+                bits.set(wordIndex, -1L);
+            }
+            setWord(endWordIndex, endBitMask);
+        }
+    }
+
+    private void setWord(long wordIndex, long bitMask) {
+        var oldWord = bits.get(wordIndex);
+        while (true) {
+            var newWord = oldWord | bitMask;
+            if (newWord == oldWord) {
+                // already set
+                return;
+            }
+            var currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAX successful
+                return;
+            }
+            oldWord = currentWord;
+        }
+    }
+
+    /**
      * Sets a bit and returns the previous value.
      * The index should be less than the BitSet size.
      */
