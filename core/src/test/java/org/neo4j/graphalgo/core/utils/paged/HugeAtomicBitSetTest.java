@@ -25,6 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Phaser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -80,6 +83,47 @@ class HugeAtomicBitSetTest {
             } else {
                 assertTrue(bitSet.get(i), String.format(Locale.US, "index %d expected to be true", i));
             }
+        }
+    }
+
+    @Test
+    void setRangeParallel() {
+        HugeAtomicBitSet bitSet = HugeAtomicBitSet.create(128, AllocationTracker.EMPTY);
+        Phaser phaser = new Phaser(5);
+        ExecutorService pool = Executors.newCachedThreadPool();
+        pool.submit(new SetTask(bitSet, phaser, 0, 16));
+        pool.submit(new SetTask(bitSet, phaser, 16, 32));
+        pool.submit(new SetTask(bitSet, phaser, 40, 80));
+        pool.submit(new SetTask(bitSet, phaser, 100, 127));
+        phaser.arriveAndAwaitAdvance();
+        phaser.arriveAndAwaitAdvance();
+
+        for (int i = 0; i < bitSet.capacity(); i++) {
+            if (i >= 0 && i < 32) assertTrue(bitSet.get(i));
+            else if (i >= 40 && i < 80) assertTrue(bitSet.get(i));
+            else if (i >= 100 && i < 127) assertTrue(bitSet.get(i));
+            else assertFalse(bitSet.get(i));
+        }
+    }
+
+    private static final class SetTask implements Runnable {
+        private final HugeAtomicBitSet habs;
+        private final Phaser phaser;
+        private final long startIndex;
+        private final long endIndex;
+
+        private SetTask(HugeAtomicBitSet habs, Phaser phaser, long startIndex, long endIndex) {
+            this.habs = habs;
+            this.phaser = phaser;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+        }
+
+        @Override
+        public void run() {
+            phaser.arriveAndAwaitAdvance();
+            habs.set(startIndex, endIndex);
+            phaser.arrive();
         }
     }
 
