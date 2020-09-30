@@ -78,13 +78,13 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computationResult) {
-        return ModularityOptimizationProc.nodeProperties(computationResult);
+        return ModularityOptimizationProc.nodeProperties(computationResult, allocationTracker());
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computeResult) {
         return ModularityOptimizationProc.resultBuilder(
-            new WriteResult.Builder(callContext, computeResult.tracker()),
+            new WriteResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

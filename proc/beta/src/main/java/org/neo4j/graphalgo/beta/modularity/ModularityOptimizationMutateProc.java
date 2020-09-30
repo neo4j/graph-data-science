@@ -63,7 +63,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
     protected NodeProperties nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computationResult
     ) {
-        return ModularityOptimizationProc.nodeProperties(computationResult);
+        return ModularityOptimizationProc.nodeProperties(computationResult, allocationTracker());
     }
 
     @Override
@@ -71,7 +71,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationMutateConfig> computeResult
     ) {
         return ModularityOptimizationProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.tracker()), computeResult
+            new MutateResult.Builder(callContext, allocationTracker()), computeResult
         );
     }
 

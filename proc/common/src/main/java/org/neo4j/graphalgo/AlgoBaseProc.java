@@ -183,7 +183,6 @@ public abstract class AlgoBaseProc<
                 .graph(graph)
                 .graphStore(graphStore)
                 .config(config)
-                .tracker(tracker)
                 .computeMillis(0)
                 .result(null)
                 .algorithm(null)
@@ -213,7 +212,6 @@ public abstract class AlgoBaseProc<
         return builder
             .graph(graph)
             .graphStore(graphStore)
-            .tracker(AllocationTracker.empty())
             .algorithm(algo)
             .result(result)
             .config(config)
@@ -352,8 +350,6 @@ public abstract class AlgoBaseProc<
         Graph graph();
 
         GraphStore graphStore();
-
-        AllocationTracker tracker();
 
         CONFIG config();
 

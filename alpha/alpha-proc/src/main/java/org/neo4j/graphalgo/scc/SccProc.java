@@ -67,12 +67,12 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
         SccAlgorithm algorithm = computationResult.algorithm();
         HugeLongArray components = computationResult.result();
         SccConfig config = computationResult.config();
-        AllocationTracker tracker = computationResult.tracker();
+        AllocationTracker tracker = allocationTracker();
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
             callContext,
-            computationResult.tracker()
+            tracker
         )
             .buildCommunityCount(true)
             .buildHistogram(true)
@@ -115,7 +115,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
     ) {
         ComputationResult<SccAlgorithm, HugeLongArray, SccConfig> computationResult = compute(graphNameOrConfig, configuration);
 
-        AllocationTracker tracker = computationResult.tracker();
+        AllocationTracker tracker = allocationTracker();
         Graph graph = computationResult.graph();
         HugeLongArray components = computationResult.result();
 

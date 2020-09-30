@@ -65,15 +65,12 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, computationResult.config().writeProperty());
+        return LouvainProc.nodeProperties(computationResult, computationResult.config().writeProperty(), allocationTracker());
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult) {
-        return LouvainProc.resultBuilder(new WriteResult.Builder(
-            callContext, computeResult.tracker()),
-            computeResult
-        );
+        return LouvainProc.resultBuilder(new WriteResult.Builder(callContext, allocationTracker()), computeResult);
     }
 
     @Override

@@ -166,7 +166,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
                 false,
                 1,
                 Pools.DEFAULT,
-                computationResult.tracker()
+                allocationTracker()
             );
 
             if (shouldComputeHistogram(callContext)) {

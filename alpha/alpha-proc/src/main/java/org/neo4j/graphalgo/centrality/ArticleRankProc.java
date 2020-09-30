@@ -65,7 +65,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
 
         PageRank algo = computationResult.algorithm();
         ArticleRankConfig config = computationResult.config();
-        AllocationTracker tracker = computationResult.tracker();
+        AllocationTracker tracker = allocationTracker();
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
@@ -104,7 +104,7 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         ComputationResult<PageRank, PageRank, ArticleRankConfig> computationResult = compute(graphNameOrConfig, configuration);
 
         PageRank algo = computationResult.algorithm();
-        AllocationTracker tracker = computationResult.tracker();
+        AllocationTracker tracker = allocationTracker();
         Graph graph = computationResult.graph();
 
         if (computationResult.graph().isEmpty()) {

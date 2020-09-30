@@ -63,7 +63,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainStatsConfig> computeResult) {
         return LouvainProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.tracker()),
+            new StatsResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

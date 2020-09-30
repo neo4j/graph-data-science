@@ -98,7 +98,6 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
        return builder
             .graphStore(graphStore)
             .graph(graphs[0])
-            .tracker(tracker)
             .algorithm(algo)
             .config(config)
             .build();

@@ -60,7 +60,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.tracker()),
+            new StatsResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

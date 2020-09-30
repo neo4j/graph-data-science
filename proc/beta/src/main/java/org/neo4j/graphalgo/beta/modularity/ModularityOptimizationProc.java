@@ -48,11 +48,12 @@ final class ModularityOptimizationProc {
     }
 
     static <CONFIG extends ModularityOptimizationConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult,
+        AllocationTracker tracker
     ) {
         LongNodeProperties resultCommunities = computationResult.result().asNodeProperties();
         if (computationResult.config().consecutiveIds()) {
-            return new ConsecutiveLongNodeProperties(resultCommunities, computationResult.graph().nodeCount(), computationResult.tracker());
+            return new ConsecutiveLongNodeProperties(resultCommunities, computationResult.graph().nodeCount(), tracker);
         } else {
             return resultCommunities;
         }

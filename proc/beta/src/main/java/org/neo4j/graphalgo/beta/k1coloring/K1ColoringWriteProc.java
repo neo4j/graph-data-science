@@ -70,7 +70,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringWriteConfig> computeResult) {
-        WriteResult.Builder builder = new WriteResult.Builder(callContext, computeResult.tracker());
+        WriteResult.Builder builder = new WriteResult.Builder(callContext, allocationTracker());
         return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
     }
 

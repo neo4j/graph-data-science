@@ -76,13 +76,13 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computationResult) {
-        return LabelPropagationProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+        return LabelPropagationProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationMutateConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.tracker()),
+            new MutateResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

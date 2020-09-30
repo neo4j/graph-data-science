@@ -80,13 +80,13 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computationResult) {
-        return LouvainProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+        return LouvainProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
     }
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computeResult) {
         return LouvainProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.tracker()),
+            new MutateResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

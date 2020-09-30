@@ -70,7 +70,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientStatsBuilder(callContext, computeResult.tracker()),
+            new LocalClusteringCoefficientStatsBuilder(callContext, allocationTracker()),
             computeResult
         );
     }

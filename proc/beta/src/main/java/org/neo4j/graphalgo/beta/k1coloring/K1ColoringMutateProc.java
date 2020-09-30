@@ -77,7 +77,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult) {
-        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.tracker()), computeResult, callContext);
+        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, allocationTracker()), computeResult, callContext);
     }
 
     @Override

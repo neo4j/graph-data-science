@@ -26,13 +26,15 @@ import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 public class CommunityProcCompanion {
 
     public static <ALGO extends Algorithm<ALGO, RESULT>, RESULT, CONFIG extends AlgoBaseConfig & SeedConfig & ConsecutiveIdsConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<ALGO, RESULT, CONFIG> computationResult,
         String resultProperty,
-        LongNodeProperties nodeProperties
+        LongNodeProperties nodeProperties,
+        AllocationTracker tracker
     ) {
         var config = computationResult.config();
         var graphStore = computationResult.graphStore();
@@ -48,7 +50,7 @@ public class CommunityProcCompanion {
             return new ConsecutiveLongNodeProperties(
                 nodeProperties,
                 computationResult.graph().nodeCount(),
-                computationResult.tracker()
+                tracker
             );
         } else {
             return nodeProperties;

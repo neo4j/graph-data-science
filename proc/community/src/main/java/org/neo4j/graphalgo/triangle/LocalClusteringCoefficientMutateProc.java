@@ -99,7 +99,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientMutateBuilder(callContext, computeResult.tracker()),
+            new LocalClusteringCoefficientMutateBuilder(callContext, allocationTracker()),
             computeResult
         );
     }

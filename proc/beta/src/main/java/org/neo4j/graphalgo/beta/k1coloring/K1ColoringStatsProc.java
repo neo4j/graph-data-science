@@ -64,7 +64,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStatsConfig> computeResult) {
-        StatsResult.Builder builder = new StatsResult.Builder(callContext, computeResult.tracker());
+        StatsResult.Builder builder = new StatsResult.Builder(callContext, allocationTracker());
         return K1ColoringProc.resultBuilder(builder, computeResult, callContext);
     }
 

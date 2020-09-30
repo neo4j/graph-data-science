@@ -85,13 +85,13 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
     protected NodeProperties nodeProperties(
         ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
     ) {
-        return WccProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
+        return WccProc.nodeProperties(computationResult, computationResult.config().mutateProperty(), allocationTracker());
     }
 
     @Override
     protected AbstractResultBuilder<WccMutateProc.MutateResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
         return WccProc.resultBuilder(
-            new MutateResult.Builder(callContext, computeResult.tracker()),
+            new MutateResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

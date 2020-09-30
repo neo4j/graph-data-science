@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.CommunityProcCompanion;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 
@@ -46,8 +47,14 @@ final class WccProc {
 
     static <CONFIG extends WccBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
-        String resultProperty
+        String resultProperty,
+        AllocationTracker tracker
     ) {
-        return CommunityProcCompanion.nodeProperties(computationResult, resultProperty, computationResult.result().asNodeProperties());
+        return CommunityProcCompanion.nodeProperties(
+            computationResult,
+            resultProperty,
+            computationResult.result().asNodeProperties(),
+            tracker
+        );
     }
 }

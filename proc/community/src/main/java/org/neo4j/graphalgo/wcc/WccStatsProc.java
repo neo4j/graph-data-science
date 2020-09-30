@@ -66,7 +66,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult) {
         return WccProc.resultBuilder(
-            new StatsResult.Builder(callContext, computeResult.tracker()),
+            new StatsResult.Builder(callContext, allocationTracker()),
             computeResult
         );
     }

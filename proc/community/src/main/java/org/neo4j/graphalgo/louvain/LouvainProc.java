@@ -37,7 +37,8 @@ final class LouvainProc {
 
     static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Louvain, Louvain, CONFIG> computationResult,
-        String resultProperty
+        String resultProperty,
+        AllocationTracker tracker
     ) {
         var config = computationResult.config();
         var includeIntermediateCommunities = config.includeIntermediateCommunities();
@@ -45,7 +46,8 @@ final class LouvainProc {
             return CommunityProcCompanion.nodeProperties(
                 computationResult,
                 resultProperty,
-                computationResult.result().finalDendrogram().asNodeProperties()
+                computationResult.result().finalDendrogram().asNodeProperties(),
+                tracker
             );
         } else {
             return (LongArrayNodeProperties) computationResult.result()::getCommunities;
