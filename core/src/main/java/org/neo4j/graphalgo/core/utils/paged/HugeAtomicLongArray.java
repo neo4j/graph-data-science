@@ -309,6 +309,7 @@ public abstract class HugeAtomicLongArray {
         @Override
         public void setAll(long value) {
             Arrays.fill(page, value);
+            VarHandle.storeStoreFence();
         }
 
         @Override
@@ -414,6 +415,7 @@ public abstract class HugeAtomicLongArray {
             for (long[] page : pages) {
                 Arrays.fill(page, value);
             }
+            VarHandle.storeStoreFence();
         }
 
         @Override
