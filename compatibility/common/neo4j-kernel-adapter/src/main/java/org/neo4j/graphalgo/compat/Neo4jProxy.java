@@ -210,10 +210,6 @@ public final class Neo4jProxy {
         return IMPL.memoryTrackerProxy(memoryTracker);
     }
 
-    public static void allocateHeap(KernelTransaction kernelTransaction, long bytes) {
-        IMPL.allocateHeap(kernelTransaction, bytes);
-    }
-
     public static LogService logProviderForStoreAndRegister(
         Path storeLogPath,
         FileSystemAbstraction fs,

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
@@ -29,7 +28,7 @@ public class AllocationTrackingTestProc extends BaseProc {
 
     @Procedure(name = "test.doIt")
     public Stream<Output> doIt() {
-        Neo4jProxy.allocateHeap(transaction, 1000000000L);
+        allocationTracker().add(1000000000L);
         return Stream.empty();
     }
 

@@ -218,11 +218,6 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public void allocateHeap(KernelTransaction kernelTransaction, long bytes) {
-        // NOOP
-    }
-
-    @Override
     public MemoryTracker emptyMemoryTracker() {
         return MemoryTracker.NONE;
     }
