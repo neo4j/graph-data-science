@@ -20,9 +20,11 @@
 package org.neo4j.graphalgo.walking;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateRelationshipsTest;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Relationships;
@@ -36,6 +38,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
@@ -45,12 +49,12 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
     @Override
     public String createQuery() {
         return "CREATE" +
-        "  (a:Person)" +
-        ", (b:Person)" +
-        ", (c:Person)" +
+               "  (a:Person)" +
+               ", (b:Person)" +
+               ", (c:Person)" +
 
-        ", (a)-[:KNOWS]->(b)" +
-        ", (b)-[:KNOWS]->(c)";
+               ", (a)-[:KNOWS]->(b)" +
+               ", (b)-[:KNOWS]->(c)";
     }
 
     @Override
@@ -96,7 +100,10 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
         mapWrapper = MutateRelationshipsTest.super.createMinimalConfig(mapWrapper);
 
         if (!mapWrapper.containsKey("relationshipTypes")) {
-            mapWrapper = mapWrapper.withEntry("relationshipTypes", List.of(RelationshipType.ALL_RELATIONSHIPS.name(), RelationshipType.ALL_RELATIONSHIPS.name()));
+            mapWrapper = mapWrapper.withEntry(
+                "relationshipTypes",
+                List.of(RelationshipType.ALL_RELATIONSHIPS.name(), RelationshipType.ALL_RELATIONSHIPS.name())
+            );
         }
 
         return mapWrapper;
@@ -114,5 +121,35 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
         assertEquals(result1.topology().isMultiGraph(), result2.topology().isMultiGraph());
 
         assertEquals(result1.properties().isPresent(), result2.properties().isPresent());
+    }
+
+    @Test
+    void testMutateYields() {
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withRelationshipType("KNOWS")
+            .algo("gds.alpha.traversalToRelationship")
+            .mutateMode()
+            .addParameter("relationshipTypes", List.of("KNOWS", "KNOWS"))
+            .addParameter("mutateRelationshipType", "FoF")
+            .yields(
+                "createMillis",
+                "computeMillis",
+                "mutateMillis",
+                "relationshipsWritten",
+                "configuration"
+            );
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertEquals(1L, row.getNumber("relationshipsWritten"));
+
+                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
+            }
+        );
     }
 }
