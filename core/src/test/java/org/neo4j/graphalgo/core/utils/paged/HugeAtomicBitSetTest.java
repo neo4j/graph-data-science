@@ -20,10 +20,13 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class HugeAtomicBitSetTest {
 
@@ -62,6 +65,20 @@ class HugeAtomicBitSetTest {
         assertFalse(bitSet.get(0));
         bitSet.getAndSet(0);
         assertTrue(bitSet.get(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,41", "0,7", "10,20"})
+    void setRange(int startIndex, int endIndex) {
+        var bitSet = HugeAtomicBitSet.create(42, AllocationTracker.EMPTY);
+        bitSet.set(startIndex, endIndex);
+        for (int i = 0; i < bitSet.capacity(); i++) {
+            if (i < startIndex || i > endIndex) {
+                assertFalse(bitSet.get(i), formatWithLocale("index %d expected to be false", i));
+            } else {
+                assertTrue(bitSet.get(i), formatWithLocale("index %d expected to be true", i));
+            }
+        }
     }
 
     @Test

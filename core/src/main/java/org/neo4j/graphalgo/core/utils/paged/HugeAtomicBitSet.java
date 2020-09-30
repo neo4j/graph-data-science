@@ -79,6 +79,12 @@ public final class HugeAtomicBitSet {
         }
     }
 
+    public void set(long startIndex, long endIndex) {
+        for (long i = startIndex; i < endIndex; i++) {
+            set(i);
+        }
+    }
+
     /**
      * Sets a bit and returns the previous value.
      * The index should be less than the BitSet size.
