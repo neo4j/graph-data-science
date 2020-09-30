@@ -197,8 +197,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             runComputeSteps(computeSteps, iterations, prevMessageBits);
 
             // No messages have been sent
-            // TODO method that only checks for > 0
-            if (messageBits.cardinality() == 0) {
+            if (messageBits.isEmpty()) {
                 didConverge = true;
                 break;
             }
