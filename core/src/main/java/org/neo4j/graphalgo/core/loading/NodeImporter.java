@@ -148,10 +148,7 @@ public class NodeImporter {
 
         // set the whole range for '*' projections
         for (NodeLabel starLabel : labelTokenNodeLabelMapping.getOrDefault(ANY_LABEL, Collections.emptyList())) {
-            HugeAtomicBitSet anyLabelBitSet = nodeLabelBitSetMapping.get(starLabel);
-            for (long nodeId = startIndex; nodeId <  startIndex + batchLength; nodeId++) {
-                anyLabelBitSet.set(nodeId);
-            }
+            nodeLabelBitSetMapping.get(starLabel).set(startIndex, startIndex + batchLength);
         }
     }
 }
