@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -74,6 +75,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final int concurrency;
     private final ExecutorService executor;
+    private final AllocationTracker tracker;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
             Graph graph,
@@ -169,6 +171,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.nodeValues = initialNodeValues;
         this.concurrency = config.concurrency();
         this.executor = executor;
+        this.tracker = tracker;
 
         this.messageQueues = initLinkedQueues(graph, tracker);
     }
@@ -180,16 +183,16 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // TODO: try RoaringBitSet instead
         BitSet receiverBits = new BitSet(graph.nodeCount());
         // Tracks if a node voted to halt in the previous iteration
-        BitSet voteBits = new BitSet(graph.nodeCount());
+        HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        List<ComputeStep<CONFIG>> computeSteps = createComputeSteps();
+        List<ComputeStep<CONFIG>> computeSteps = createComputeSteps(voteBits);
 
         while (iterations < config.maxIterations() && !canHalt) {
             int iteration = iterations++;
 
             // Init compute steps with the updated state
             for (ComputeStep<CONFIG> computeStep : computeSteps) {
-                computeStep.init(iteration, receiverBits, voteBits);
+                computeStep.init(iteration, receiverBits);
             }
 
             runComputeSteps(computeSteps, iteration, receiverBits);
@@ -216,7 +219,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messageQueues.release();
     }
 
-    private List<ComputeStep<CONFIG>> createComputeSteps() {
+    private List<ComputeStep<CONFIG>> createComputeSteps(HugeAtomicBitSet voteBits) {
         List<Partition> partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
 
         List<ComputeStep<CONFIG>> computeSteps = new ArrayList<>(concurrency);
@@ -230,6 +233,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 partition,
                 nodeValues,
                 messageQueues,
+                voteBits,
                 graph
             ));
         }
@@ -304,7 +308,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         private int iteration;
         private BitSet receiverBits;
-        private BitSet voteBits;
+        private final HugeAtomicBitSet voteBits;
 
         private ComputeStep(
             Graph graph,
@@ -314,6 +318,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             Partition nodeBatch,
             CompositeNodeValue nodeValues,
             HugeObjectArray<? extends Queue<Double>> messageQueues,
+            HugeAtomicBitSet voteBits,
             RelationshipIterator relationshipIterator
         ) {
             this.iteration = iteration;
@@ -321,6 +326,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.relationshipCount = graph.relationshipCount();
             this.isAsync = config.isAsynchronous();
             this.computation = computation;
+            this.voteBits = voteBits;
             this.senderBits = new BitSet(nodeCount);
             this.nodeBatch = nodeBatch;
             this.degrees = graph;
@@ -331,10 +337,9 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.initContext = PregelContext.initContext(this, config, graph);
         }
 
-        void init(int iteration, BitSet receiverBits, BitSet voteBits) {
+        void init(int iteration, BitSet receiverBits) {
             this.iteration = iteration;
             this.receiverBits = receiverBits;
-            this.voteBits = voteBits;
 
             if (iteration > 0) {
                 this.senderBits.clear();
