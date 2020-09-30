@@ -9,6 +9,7 @@ dependencies {
 
     api project(':proc-common')
     api project(':alpha-proc')
+    api project(':proc-embeddings')
     api project(':proc-similarity')
     api project(':proc-centrality')
     api project(':proc-community')
