@@ -73,7 +73,7 @@ final class IndexPropertyMappings {
         SecureTransaction transaction,
         Map<NodeLabel, PropertyMappings> storeLoadedProperties
     ) {
-        if (dimensions.tokenNodeLabelMapping() == null || !GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get()) {
+        if (dimensions.tokenNodeLabelMapping() == null || !GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()) {
             return ImmutableLoadablePropertyMappings
                 .builder()
                 .putAllStoredProperties(storeLoadedProperties)

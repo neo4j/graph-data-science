@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
 class FeatureToggleProcTest extends BaseProcTest {
 
@@ -100,22 +101,21 @@ class FeatureToggleProcTest extends BaseProcTest {
 
     @Test
     void toggleUsePropertyValueIndex() {
-        var usePropertyValueIndex = GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get();
+        var usePropertyValueIndex = USE_PROPERTY_VALUE_INDEX.isEnabled();
         runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", !usePropertyValueIndex));
-        assertEquals(!usePropertyValueIndex, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+        assertEquals(!usePropertyValueIndex, USE_PROPERTY_VALUE_INDEX.isEnabled());
         runQuery("CALL gds.features.usePropertyValueIndex($value)", Map.of("value", usePropertyValueIndex));
-        assertEquals(usePropertyValueIndex, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+        assertEquals(usePropertyValueIndex, USE_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test
     void resetUsePropertyValueIndex() {
-        var defaultValue = GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX_DEFAULT_SETTING;
-        GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.set(!defaultValue);
+        USE_PROPERTY_VALUE_INDEX.reset();
         assertCypherResult(
             "CALL gds.features.usePropertyValueIndex.reset()",
-            List.of(Map.of("enabled", defaultValue))
+            List.of(Map.of("enabled", false))
         );
-        assertEquals(defaultValue, GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.get());
+        assertEquals(false, USE_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test

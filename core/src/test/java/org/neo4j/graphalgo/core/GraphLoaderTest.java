@@ -38,6 +38,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
 class GraphLoaderTest extends BaseTest {
 
@@ -190,7 +191,7 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testPropertyViaIndex(TestSupport.FactoryType factoryType) {
-        GdsFeatureToggles.runWithToggleEnabled(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX, () -> {
+        USE_PROPERTY_VALUE_INDEX.enableAndRun(() -> {
             var indexQueries = List.of(
                 "CREATE INDEX prop1 FOR (n:Node1) ON (n.prop1)",
                 "CREATE INDEX prop2 FOR (n:Node2) ON (n.prop2)"
