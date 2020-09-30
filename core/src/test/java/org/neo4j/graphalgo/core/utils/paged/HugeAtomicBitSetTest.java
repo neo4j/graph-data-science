@@ -180,4 +180,14 @@ class HugeAtomicBitSetTest {
 
         bitSet.set(43);
     }
+
+    @Test
+    void testIsEmpty() {
+        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+        assertTrue(atomicBitSet.isEmpty());
+        atomicBitSet.set(23);
+        assertFalse(atomicBitSet.isEmpty());
+        atomicBitSet.flip(23);
+        assertTrue(atomicBitSet.isEmpty());
+    }
 }
