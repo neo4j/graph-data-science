@@ -47,8 +47,10 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -169,6 +171,25 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     @Disabled("KNN always uses a node weight property")
     @Override
     public void testDefaultNodeWeightPropertyIsNull() {
+    }
+
+    @Test
+    void failOnInvalidConfigurationParams() {
+        var configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+        applyOnProcedure(proc -> assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> {
+                CypherMapWrapper invalidConfig = CypherMapWrapper.create(configMap)
+                    .withNumber("topK", 0)
+                    .withNumber("sampleRate", 0.0)
+                    .withNumber("maxIterations", 0)
+                    .withoutEntry("nodeWeightProperty");
+                proc.newConfig(Optional.empty(), invalidConfig);
+            })
+            .withMessageContaining(
+                "No value specified for the mandatory configuration parameter `nodeWeightProperty`")
+            .withMessageContaining("`topK` must be within [1")
+            .withMessageContaining("`sampleRate` must be within (0.00, 1.00]")
+            .withMessageContaining("`maxIterations` must be within [1"));
     }
 
     static Stream<Arguments> allGraphVariations() {
