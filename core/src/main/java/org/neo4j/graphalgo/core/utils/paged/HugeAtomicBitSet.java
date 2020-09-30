@@ -81,8 +81,6 @@ public final class HugeAtomicBitSet {
 
     /**
      * Sets the bits from the startIndex (inclusive) to the endIndex (exclusive).
-     * <p>
-     * Note: this method is not thread-safe.
      */
     public void set(long startIndex, long endIndex) {
         long startWordIndex = startIndex / NUM_BITS;
@@ -93,18 +91,33 @@ public final class HugeAtomicBitSet {
         long endBitMask = -1L >>> -endIndex;
 
         if (startWordIndex == endWordIndex) {
-            var oldStartWord = bits.get(startWordIndex);
-            bits.set(startWordIndex, oldStartWord | (startBitMask & endBitMask));
-            return;
+            // set within single word
+            setWord(startWordIndex, startBitMask & endBitMask);
+        } else {
+            // set within range
+            setWord(startWordIndex, startBitMask);
+            for (long wordIndex = startWordIndex + 1; wordIndex <= endWordIndex; wordIndex++) {
+                bits.set(wordIndex, -1L);
+            }
+            setWord(endWordIndex, endBitMask);
         }
+    }
 
-        var oldStartWord = bits.get(startWordIndex);
-        bits.set(startWordIndex, oldStartWord | startBitMask);
-        for (long i = startWordIndex + 1; i <= endWordIndex; i++) {
-            bits.set(i, -1L);
+    private void setWord(long wordIndex, long bitMask) {
+        var oldWord = bits.get(wordIndex);
+        while (true) {
+            var newWord = oldWord | bitMask;
+            if (newWord == oldWord) {
+                // already set
+                return;
+            }
+            var currentWord = bits.compareAndExchange(wordIndex, oldWord, newWord);
+            if (currentWord == oldWord) {
+                // CAX successful
+                return;
+            }
+            oldWord = currentWord;
         }
-        var oldEndWord = bits.get(endWordIndex);
-        bits.set(endWordIndex, oldEndWord | endBitMask);
     }
 
     /**
