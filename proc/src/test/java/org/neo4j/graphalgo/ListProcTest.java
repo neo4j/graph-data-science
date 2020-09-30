@@ -21,6 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
@@ -123,6 +128,15 @@ class ListProcTest extends BaseProcTest {
         "gds.betweenness.stream.estimate",
         "gds.betweenness.write",
         "gds.betweenness.write.estimate",
+
+        "gds.fastRP.mutate",
+        "gds.fastRP.mutate.estimate",
+        "gds.fastRP.stats",
+        "gds.fastRP.stats.estimate",
+        "gds.fastRP.stream",
+        "gds.fastRP.stream.estimate",
+        "gds.fastRP.write",
+        "gds.fastRP.write.estimate",
 
         "gds.graph.create",
         "gds.graph.create.cypher",
@@ -233,6 +247,10 @@ class ListProcTest extends BaseProcTest {
             BetweennessCentralityStatsProc.class,
             // We register it to check that all of those procedures will not be listed
             FeatureToggleProc.class,
+            FastRPStreamProc.class,
+            FastRPWriteProc.class,
+            FastRPMutateProc.class,
+            FastRPStatsProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,
