@@ -73,7 +73,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
                 long base = visitCursor.base;
                 for (int i = offset; i < limit; ++i) {
                     if (array[i] != 0L) {
-                        prepareNextVisit(relationships, array[i], base + i, visitNextSet, 0);
+                        prepareNextVisit(relationships, array[i], base + i, visitNextSet, depth);
                     }
                 }
             }
