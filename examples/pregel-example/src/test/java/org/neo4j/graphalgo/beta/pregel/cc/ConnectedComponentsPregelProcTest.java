@@ -177,7 +177,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("writeMillis"));
 
-            assertEquals(3, row.getNumber("ranIterations").longValue());
+            assertEquals(2, row.getNumber("ranIterations").longValue());
             assertTrue(row.getBoolean("didConverge"));
         });
 
@@ -214,7 +214,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("mutateMillis"));
 
-            assertEquals(3, row.getNumber("ranIterations").longValue());
+            assertEquals(2, row.getNumber("ranIterations").longValue());
             assertTrue(row.getBoolean("didConverge"));
         });
 
@@ -250,7 +250,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
                 assertNotEquals(-1L, row.getNumber("createMillis"));
                 assertNotEquals(-1L, row.getNumber("computeMillis"));
 
-                assertEquals(3, row.getNumber("ranIterations").longValue());
+                assertEquals(2, row.getNumber("ranIterations").longValue());
                 assertTrue(row.getBoolean("didConverge"));
             }
         );
