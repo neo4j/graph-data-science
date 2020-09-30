@@ -70,11 +70,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
 
     @Override
     protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig>) (graph, configuration, tracker, log) -> new GraphSageTrain(
-            graph,
-            configuration,
-            log
-        );
+        return (AlphaAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig>) GraphSageTrain::new;
     }
 
 }

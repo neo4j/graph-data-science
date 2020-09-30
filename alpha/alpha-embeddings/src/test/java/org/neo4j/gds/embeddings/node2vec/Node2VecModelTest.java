@@ -76,7 +76,8 @@ class Node2VecModelTest {
             config,
             walks,
             new ProbabilityComputer(walks, nodeCount, 0.001, 0.75, 4, AllocationTracker.empty()),
-            TestProgressLogger.NULL_LOGGER
+            TestProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
         );
 
         word2Vec.train();

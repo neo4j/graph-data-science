@@ -77,7 +77,8 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             config,
             walks,
             probabilityComputer,
-            progressLogger
+            progressLogger,
+            tracker
         );
 
         node2VecModel.train();

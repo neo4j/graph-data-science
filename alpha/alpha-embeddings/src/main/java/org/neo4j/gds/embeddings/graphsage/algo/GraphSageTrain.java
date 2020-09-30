@@ -24,6 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
@@ -32,11 +33,18 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Layer[], Gra
 
     private final Graph graph;
     private final GraphSageTrainConfig config;
+    private final AllocationTracker tracker;
     private final Log log;
 
-    public GraphSageTrain(Graph graph, GraphSageTrainConfig config, Log log) {
+    public GraphSageTrain(
+        Graph graph,
+        GraphSageTrainConfig config,
+        AllocationTracker tracker,
+        Log log
+    ) {
         this.graph = graph;
         this.config = config;
+        this.tracker = tracker;
         this.log = log;
     }
 
@@ -46,7 +54,7 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Layer[], Gra
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty())
+            initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty(), tracker)
         );
 
         return Model.of(

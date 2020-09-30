@@ -35,22 +35,25 @@ public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final BatchProvider batchProvider;
     private final int concurrency;
+    private final AllocationTracker tracker;
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
         int batchSize,
-        int concurrency
+        int concurrency,
+        AllocationTracker tracker
     ) {
         this.layers = layers;
         this.batchProvider = new BatchProvider(batchSize);
         this.concurrency = concurrency;
+        this.tracker = tracker;
     }
 
     public HugeObjectArray<double[]> makeEmbeddings(Graph graph, HugeObjectArray<double[]> features) {
         HugeObjectArray<double[]> result = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
-            AllocationTracker.empty()
+            tracker
         );
 
         parallelStreamConsume(

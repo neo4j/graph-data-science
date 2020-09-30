@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
@@ -36,15 +37,18 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     private final Graph graph;
     private final GraphSageBaseConfig config;
     private final Model<Layer[], GraphSageTrainConfig> model;
+    private final AllocationTracker tracker;
 
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
-        Model<Layer[], GraphSageTrainConfig> model
+        Model<Layer[], GraphSageTrainConfig> model,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.model = model;
+        this.tracker = tracker;
     }
 
     @Override
@@ -53,7 +57,8 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             layers,
             config.batchSize(),
-            config.concurrency()
+            config.concurrency(),
+            tracker
         );
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
@@ -62,7 +67,8 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             initializeFeatures(
                 graph,
                 trainConfig.nodePropertyNames(),
-                trainConfig.degreeAsProperty()
+                trainConfig.degreeAsProperty(),
+                tracker
             )
         );
         return GraphSageResult.of(embeddings);

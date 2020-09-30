@@ -68,7 +68,12 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    public static HugeObjectArray<double[]> initializeFeatures(Graph graph, Collection<String> nodePropertyNames, boolean useDegreeAsProperty) {
+    public static HugeObjectArray<double[]> initializeFeatures(
+        Graph graph,
+        Collection<String> nodePropertyNames,
+        boolean useDegreeAsProperty,
+        AllocationTracker tracker
+    ) {
 
         var nodeProperties =
             nodePropertyNames
@@ -79,7 +84,7 @@ public final class GraphSageHelper {
         HugeObjectArray<double[]> features = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
-            AllocationTracker.empty()
+            tracker
         );
         features.setAll(n -> {
             DoubleStream nodeFeatures = nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));

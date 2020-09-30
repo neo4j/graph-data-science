@@ -91,7 +91,8 @@ class GraphSageEmbeddingsGeneratorTest {
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             result.layers(),
             config.batchSize(),
-            config.concurrency()
+            config.concurrency(),
+            AllocationTracker.empty()
         );
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(graph, features);

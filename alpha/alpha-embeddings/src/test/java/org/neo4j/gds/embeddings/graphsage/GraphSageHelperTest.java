@@ -53,7 +53,8 @@ class GraphSageHelperTest {
         HugeObjectArray<double[]> properties = GraphSageHelper.initializeFeatures(
             graph,
             List.of("dummyProperty"),
-            false
+            false,
+            AllocationTracker.empty()
         );
 
         assertNotNull(properties);

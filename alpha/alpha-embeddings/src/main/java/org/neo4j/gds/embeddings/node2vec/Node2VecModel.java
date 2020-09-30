@@ -40,6 +40,7 @@ public class Node2VecModel {
     private final HugeObjectArray<long[]> walks;
     private final ProbabilityComputer probabilityComputer;
     private final ProgressLogger progressLogger;
+    private final AllocationTracker tracker;
     private final long batchSize;
 
     Node2VecModel(
@@ -47,13 +48,15 @@ public class Node2VecModel {
         Node2VecBaseConfig config,
         HugeObjectArray<long[]> walks,
         ProbabilityComputer probabilityComputer,
-        ProgressLogger progressLogger
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
     ) {
         this.config = config;
         this.walks = walks;
         this.probabilityComputer = probabilityComputer;
         this.progressLogger = progressLogger;
         this.negativeSamples = new NegativeSampleProducer(probabilityComputer.getContextNodeDistribution());
+        this.tracker = tracker;
 
         // TODO research how the weights are initialized
         centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingSize());
@@ -89,7 +92,7 @@ public class Node2VecModel {
         HugeObjectArray<Vector> embeddings = HugeObjectArray.newArray(
             Vector.class,
             nodeCount,
-            AllocationTracker.empty()
+            tracker
         );
         for (var i = 0L; i < nodeCount; i++) {
             var data = new Random()

@@ -45,7 +45,7 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
                 configuration.modelName(),
                 Layer[].class,
                 GraphSageTrainConfig.class
-            )
+            ), tracker
         );
     }
 }
