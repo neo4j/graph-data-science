@@ -80,7 +80,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(5, result.ranIterations());
+        assertEquals(4, result.ranIterations());
 
        var expected = Map.of(
             "a", 0L,
@@ -116,7 +116,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(4, result.ranIterations());
+        assertEquals(3, result.ranIterations());
 
         var expected = Map.of(
             "a", 0L,

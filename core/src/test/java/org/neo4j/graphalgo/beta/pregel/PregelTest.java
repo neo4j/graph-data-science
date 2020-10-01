@@ -136,15 +136,15 @@ class PregelTest {
 
     static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(1, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_064L),
-            Arguments.of(10, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_896_448L),
+            Arguments.of(1, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_072L),
+            Arguments.of(10, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_792L),
             Arguments.of(1, new NodeSchemaBuilder()
                     .putElement("key1", ValueType.LONG)
                     .putElement("key2", ValueType.DOUBLE)
                     .putElement("key3", ValueType.LONG_ARRAY)
                     .putElement("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
-                6_884_136L
+                6_884_144L
             ),
             Arguments.of(10, new NodeSchemaBuilder()
                     .putElement("key1", ValueType.LONG)
@@ -152,7 +152,7 @@ class PregelTest {
                     .putElement("key3", ValueType.LONG_ARRAY)
                     .putElement("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
-                6_896_520L
+                6_884_864L
             )
         );
     }
@@ -166,8 +166,8 @@ class PregelTest {
             .build();
 
         assertEquals(
-            MemoryRange.of(expectedBytes),
-            Pregel.memoryEstimation(nodeSchema).estimate(dimensions, concurrency).memoryUsage()
+            MemoryRange.of(expectedBytes).max,
+            Pregel.memoryEstimation(nodeSchema).estimate(dimensions, concurrency).memoryUsage().max
         );
     }
 

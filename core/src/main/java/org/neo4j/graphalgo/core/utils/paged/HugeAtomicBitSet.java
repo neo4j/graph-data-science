@@ -188,6 +188,20 @@ public final class HugeAtomicBitSet {
     }
 
     /**
+     * Returns true iff no bit is set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public boolean isEmpty() {
+        for (long wordIndex = 0; wordIndex < bits.size(); wordIndex++) {
+            if (Long.bitCount(bits.get(wordIndex)) > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns the number of bits this bitset can hold.
      */
     public long capacity() {
