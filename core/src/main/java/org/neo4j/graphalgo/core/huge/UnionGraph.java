@@ -158,7 +158,13 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public int degree(long nodeId) {
-        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(nodeId)).sum());
+        int degree = 0;
+
+        for (CSRGraph graph : graphs) {
+            degree += graph.degree(nodeId);
+        }
+
+        return  degree;
     }
 
     @Override
