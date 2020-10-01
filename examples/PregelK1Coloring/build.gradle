@@ -5,8 +5,8 @@ plugins {
 }
 
 ext {
-    gdsVersion = '1.1.5'
-    neo4jVersion = '3.5.20'
+    gdsVersion = '1.1.6'
+    neo4jVersion = '3.5.22'
 }
 
 description = 'Graph Data Science :: Pregel Training'
