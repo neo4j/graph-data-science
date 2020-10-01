@@ -20,7 +20,8 @@
 package org.neo4j.gds.embeddings.randomprojections;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StatsProc;
+import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -33,24 +34,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStatsProc extends StatsProc<RandomProjection, RandomProjection, RandomProjectionStatsProc.StatsResult, RandomProjectionStatsConfig> {
+public class FastRPMutateProc extends MutateProc<FastRP, FastRP, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.stats", mode = READ)
-    @Description("Random Projection produces node embeddings via the fastrp algorithm")
-    public Stream<StatsResult> stats(
+    @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
+    @Description(FastRPCompanion.DESCRIPTION)
+    public Stream<FastRPMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionStatsConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return stats(computationResult);
+        return mutate(computationResult);
     }
-    @Procedure(value = "gds.alpha.randomProjection.stats.estimate", mode = READ)
+
+    @Procedure(value = "gds.alpha.randomProjection.mutate.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -59,54 +61,66 @@ public class RandomProjectionStatsProc extends StatsProc<RandomProjection, Rando
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
-
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStatsConfig> computeResult) {
-        return new StatsResult.Builder();
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPMutateConfig> computationResult) {
+        return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected RandomProjectionStatsConfig newConfig(
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPMutateConfig> computeResult) {
+        return new MutateResult.Builder();
+    }
+
+    @Override
+    protected FastRPMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionStatsConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+    protected AlgorithmFactory<FastRP, FastRPMutateConfig> algorithmFactory() {
+        return new FastRPFactory<>();
     }
 
-    public static final class StatsResult {
+    public static final class MutateResult {
 
+        public final long nodePropertiesWritten;
+        public final long mutateMillis;
         public final long nodeCount;
         public final long createMillis;
         public final long computeMillis;
         public final Map<String, Object> configuration;
 
-        StatsResult(
+        MutateResult(
             long nodeCount,
+            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
+            long mutateMillis,
             Map<String, Object> config
         ) {
             this.nodeCount = nodeCount;
+            this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
+            this.mutateMillis = mutateMillis;
             this.configuration = config;
         }
 
-        static final class Builder extends AbstractResultBuilder<StatsResult> {
+        static final class Builder extends AbstractResultBuilder<MutateResult> {
 
             @Override
-            public StatsResult build() {
-                return new StatsResult(
+            public MutateResult build() {
+                return new MutateResult(
                     nodeCount,
+                    nodePropertiesWritten,
                     createMillis,
                     computeMillis,
+                    mutateMillis,
                     config.toMap()
                 );
             }

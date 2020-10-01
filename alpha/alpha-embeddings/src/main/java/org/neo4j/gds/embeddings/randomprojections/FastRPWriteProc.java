@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.randomprojections;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -34,25 +34,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-public class RandomProjectionMutateProc extends MutateProc<RandomProjection, RandomProjection, RandomProjectionMutateProc.MutateResult, RandomProjectionMutateConfig> {
+public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
 
-    @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
-    @Description(RandomProjectionCompanion.DESCRIPTION)
-    public Stream<RandomProjectionMutateProc.MutateResult> mutate(
+    @Procedure(value = "gds.alpha.randomProjection.write", mode = WRITE)
+    @Description(DESCRIPTION)
+    public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult = compute(
+    )  {
+        ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return mutate(computationResult);
+        return write(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.randomProjection.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.alpha.randomProjection.write.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -62,68 +63,69 @@ public class RandomProjectionMutateProc extends MutateProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computationResult) {
-        return RandomProjectionCompanion.getNodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<RandomProjection, RandomProjection, RandomProjectionMutateConfig> computeResult) {
-        return new MutateResult.Builder();
-    }
-
-    @Override
-    protected RandomProjectionMutateConfig newConfig(
+    protected FastRPWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionMutateConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+    protected AlgorithmFactory<FastRP, FastRPWriteConfig> algorithmFactory() {
+        return new FastRPFactory<>();
     }
 
-    public static final class MutateResult {
+    @Override
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult) {
+        return FastRPCompanion.getNodeProperties(computationResult);
+    }
 
-        public final long nodePropertiesWritten;
-        public final long mutateMillis;
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computeResult) {
+        return new WriteResult.Builder();
+    }
+
+    public static final class WriteResult {
+
         public final long nodeCount;
+        public final long nodePropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
+        public final long writeMillis;
         public final Map<String, Object> configuration;
 
-        MutateResult(
+        WriteResult(
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long mutateMillis,
-            Map<String, Object> config
+            long writeMillis,
+            Map<String, Object> configuration
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.configuration = config;
+            this.writeMillis = writeMillis;
+            this.configuration = configuration;
         }
 
-        static final class Builder extends AbstractResultBuilder<MutateResult> {
+        static class Builder extends AbstractResultBuilder<WriteResult> {
 
             @Override
-            public MutateResult build() {
-                return new MutateResult(
+            public WriteResult build() {
+                return new WriteResult(
                     nodeCount,
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
-                    mutateMillis,
+                    writeMillis,
                     config.toMap()
                 );
             }
         }
     }
+
 }

@@ -37,7 +37,7 @@ import java.util.Random;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class RandomProjection extends Algorithm<RandomProjection, RandomProjection> {
+public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private static final int SPARSITY = 3;
     private final Graph graph;
@@ -52,18 +52,18 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     private final int iterations;
     private final List<Double> iterationWeights;
 
-    static MemoryEstimation memoryEstimation(RandomProjectionBaseConfig config) {
+    static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
-            .builder(RandomProjection.class)
+            .builder(FastRP.class)
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
             .build();
     }
 
-    public RandomProjection(
+    public FastRP(
         Graph graph,
-        RandomProjectionBaseConfig config,
+        FastRPBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -86,7 +86,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     }
 
     @Override
-    public RandomProjection compute() {
+    public FastRP compute() {
         progressLogger.logMessage(":: Start");
         initRandomVectors();
         propagateEmbeddings();
@@ -106,7 +106,7 @@ public class RandomProjection extends Algorithm<RandomProjection, RandomProjecti
     }
 
     @Override
-    public RandomProjection me() {
+    public FastRP me() {
         return this;
     }
 

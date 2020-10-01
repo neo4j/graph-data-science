@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
-import org.neo4j.gds.embeddings.randomprojections.RandomProjectionWriteProc;
+import org.neo4j.gds.embeddings.randomprojections.FastRPWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -73,7 +73,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphSageTrainProc.class,
             GraphSageStreamProc.class,
-            RandomProjectionWriteProc.class,
+            FastRPWriteProc.class,
             Node2VecWriteProc.class
         );
 

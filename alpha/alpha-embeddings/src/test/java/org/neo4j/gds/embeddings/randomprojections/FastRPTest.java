@@ -40,12 +40,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjection.l2Normalize;
+import static org.neo4j.gds.embeddings.randomprojections.FastRP.l2Normalize;
 
-class RandomProjectionTest extends AlgoTestBase {
+class FastRPTest extends AlgoTestBase {
 
     static final int DEFUALT_EMBEDDING_SIZE = 128;
-    static final RandomProjectionBaseConfig DEFAULT_CONFIG = ImmutableRandomProjectionBaseConfig.builder()
+    static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
         .embeddingSize(DEFUALT_EMBEDDING_SIZE)
         .addIterationWeight(1.0D)
         .build();
@@ -78,18 +78,18 @@ class RandomProjectionTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        RandomProjection randomProjection = new RandomProjection(
+        FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
             progressLogger,
             AllocationTracker.empty()
         );
 
-        randomProjection.initRandomVectors();
+        fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.empty());
-        randomProjection.currentEmbedding(-1).copyTo(randomVectors, 2);
-        randomProjection.propagateEmbeddings();
-        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
+        fastRP.currentEmbedding(-1).copyTo(randomVectors, 2);
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
         float[] expected = randomVectors.get(1);
         l2Normalize(expected);
@@ -106,18 +106,18 @@ class RandomProjectionTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        RandomProjection randomProjection = new RandomProjection(
+        FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
             progressLogger,
             AllocationTracker.empty()
         );
 
-        randomProjection.initRandomVectors();
+        fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
-        randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
-        randomProjection.propagateEmbeddings();
-        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
+        fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
         float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
         for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
@@ -138,25 +138,25 @@ class RandomProjectionTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        var weightedConfig = ImmutableRandomProjectionBaseConfig
+        var weightedConfig = ImmutableFastRPBaseConfig
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
             .embeddingSize(DEFUALT_EMBEDDING_SIZE)
             .build();
 
-        RandomProjection randomProjection = new RandomProjection(
+        FastRP fastRP = new FastRP(
             graph,
             weightedConfig,
             progressLogger,
             AllocationTracker.empty()
         );
 
-        randomProjection.initRandomVectors();
+        fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
-        randomProjection.currentEmbedding(-1).copyTo(randomVectors, 3);
-        randomProjection.propagateEmbeddings();
-        HugeObjectArray<float[]> embeddings = randomProjection.embeddings();
+        fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
+        fastRP.propagateEmbeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
         float[] expected = new float[DEFUALT_EMBEDDING_SIZE];
         for (int i = 0; i < DEFUALT_EMBEDDING_SIZE; i++) {
@@ -177,9 +177,9 @@ class RandomProjectionTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        RandomProjection randomProjection = new RandomProjection(
+        FastRP fastRP = new FastRP(
             graph,
-            ImmutableRandomProjectionBaseConfig.builder()
+            FastRPBaseConfig.builder()
                 .embeddingSize(512)
                 .addIterationWeight(1.0D)
                 .build(),
@@ -187,11 +187,11 @@ class RandomProjectionTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
-        randomProjection.initRandomVectors();
+        fastRP.initRandomVectors();
         double p = 1D / 6D;
         int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
         int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
-        HugeObjectArray<float[]> randomVectors = randomProjection.currentEmbedding(-1);
+        HugeObjectArray<float[]> randomVectors = fastRP.currentEmbedding(-1);
         for (int i = 0; i < graph.nodeCount(); i++) {
             float[] embedding = randomVectors.get(i);
             int numZeros = 0;
@@ -220,9 +220,9 @@ class RandomProjectionTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        RandomProjection randomProjection = new RandomProjection(
+        FastRP fastRP = new FastRP(
             graph,
-            ImmutableRandomProjectionBaseConfig.builder()
+            FastRPBaseConfig.builder()
                 .embeddingSize(64)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
@@ -230,7 +230,7 @@ class RandomProjectionTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
-        RandomProjection computeResult = randomProjection.compute();
+        FastRP computeResult = fastRP.compute();
         HugeObjectArray<float[]> embeddings = computeResult.embeddings();
         for (int i = 0; i < embeddings.size(); i++) {
             float[] embedding = embeddings.get(i);
@@ -242,7 +242,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
     @Test
     void testMemoryEstimationWithoutIterationWeights() {
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .addIterationWeights(1.0D, 1.0D)
             .embeddingSize(128)
@@ -250,14 +250,14 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
-        var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
+        var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
         assertEquals(159_784, estimate.min);
     }
 
     @Test
     void testMemoryEstimationWithIterationWeights() {
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .embeddingSize(128)
             .iterationWeights(List.of(1.0D, 2.0D))
@@ -265,7 +265,7 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
-        var estimate = RandomProjection.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
+        var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
         assertEquals(159_784, estimate.min);
     }
@@ -281,7 +281,7 @@ class RandomProjectionTest extends AlgoTestBase {
             .build()
             .generate();
 
-        var config = ImmutableRandomProjectionBaseConfig
+        var config = ImmutableFastRPBaseConfig
             .builder()
             .embeddingSize(2)
             .iterationWeights(List.of(1.0D, 2.0D))
@@ -290,11 +290,11 @@ class RandomProjectionTest extends AlgoTestBase {
 
         var logger = new TestProgressLogger(
             graph.nodeCount(),
-            RandomProjection.class.getSimpleName(),
+            FastRP.class.getSimpleName(),
             config.concurrency()
         );
 
-        new RandomProjection(graph, config, logger, AllocationTracker.empty()).compute();
+        new FastRP(graph, config, logger, AllocationTracker.empty()).compute();
 
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Start"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Start"));

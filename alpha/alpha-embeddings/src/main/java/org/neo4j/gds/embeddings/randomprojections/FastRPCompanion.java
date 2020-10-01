@@ -17,28 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.embeddings.randomprojections;
 
-import org.neo4j.gds.embeddings.randomprojections.RandomProjectionStreamProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 
-import java.util.Arrays;
-import java.util.List;
+final class FastRPCompanion {
 
-class RandomProjectionDocTest extends DocTestBase {
+    static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
 
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            RandomProjectionStreamProc.class,
-            GraphCreateProc.class
-        );
+    private FastRPCompanion() {}
+
+    static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
+        return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
     }
-
-    @Override
-    String adocFile() {
-        return "algorithms/alpha/fastrp/fastrp.adoc";
-    }
-
 }
-

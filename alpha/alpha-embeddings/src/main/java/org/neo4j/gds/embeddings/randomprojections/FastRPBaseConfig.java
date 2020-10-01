@@ -30,7 +30,7 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RandomProjectionBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+public interface FastRPBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
@@ -64,5 +64,10 @@ public interface RandomProjectionBaseConfig extends AlgoBaseConfig, Relationship
                 ITERATION_WEIGHTS_KEY
             ));
         }
+    }
+
+    @Configuration.Ignore
+    static ImmutableFastRPBaseConfig.Builder builder() {
+        return ImmutableFastRPBaseConfig.builder();
     }
 }

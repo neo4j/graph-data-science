@@ -36,9 +36,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<RandomProjection, CONFIG, RandomProjection>,
-    MemoryEstimateTest<RandomProjection, CONFIG, RandomProjection> {
+public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<FastRP, CONFIG, FastRP>,
+    MemoryEstimateTest<FastRP, CONFIG, FastRP> {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -73,7 +73,7 @@ public abstract class RandomProjectionProcTest<CONFIG extends RandomProjectionBa
 
     @Override
     public void assertResultEquals(
-        RandomProjection result1, RandomProjection result2
+        FastRP result1, FastRP result2
     ) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);

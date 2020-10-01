@@ -26,15 +26,15 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> implements AlgorithmFactory<RandomProjection, CONFIG> {
+public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
 
     @Override
-    public RandomProjection build(
+    public FastRP build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
     ) {
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "RandomProjection", configuration.concurrency());
+        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency());
 
-        return new RandomProjection(
+        return new FastRP(
             graph,
             configuration,
             progressLogger,
@@ -44,6 +44,6 @@ public class RandomProjectionFactory<CONFIG extends RandomProjectionBaseConfig> 
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return RandomProjection.memoryEstimation(configuration);
+        return FastRP.memoryEstimation(configuration);
     }
 }

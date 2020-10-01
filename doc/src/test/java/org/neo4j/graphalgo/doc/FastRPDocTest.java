@@ -17,30 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.randomprojections;
+package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.randomprojections.FastRPStreamProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
-@ValueClass
-@Configuration
-public interface RandomProjectionStreamConfig extends RandomProjectionBaseConfig {
+class FastRPDocTest extends DocTestBase {
 
-    static RandomProjectionStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new RandomProjectionStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
+    @Override
+    List<Class<?>> procedures() {
+        return Arrays.asList(
+            FastRPStreamProc.class,
+            GraphCreateProc.class
         );
     }
+
+    @Override
+    String adocFile() {
+        return "algorithms/alpha/fastrp/fastrp.adoc";
+    }
+
 }
+

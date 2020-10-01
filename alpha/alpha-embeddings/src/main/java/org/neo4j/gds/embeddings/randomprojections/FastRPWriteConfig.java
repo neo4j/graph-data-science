@@ -19,17 +19,29 @@
  */
 package org.neo4j.gds.embeddings.randomprojections;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-final class RandomProjectionCompanion {
+import java.util.Optional;
 
-    static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
+@ValueClass
+@Configuration
+public interface FastRPWriteConfig extends FastRPBaseConfig, WritePropertyConfig {
 
-    private RandomProjectionCompanion() {}
-
-    static <CONFIG extends RandomProjectionBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<RandomProjection, RandomProjection, CONFIG> computationResult) {
-        return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
+    static FastRPWriteConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new FastRPWriteConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 }

@@ -34,7 +34,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProjectionMutateConfig>{
+class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
@@ -44,13 +44,13 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<RandomProjection, RandomProjection, RandomProjectionMutateConfig>> getProcedureClazz() {
-        return RandomProjectionMutateProc.class;
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPMutateConfig>> getProcedureClazz() {
+        return FastRPMutateProc.class;
     }
 
     @Override
-    public RandomProjectionMutateConfig createConfig(CypherMapWrapper userInput) {
-        return RandomProjectionMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPMutateConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override
@@ -64,7 +64,7 @@ class RandomProjectionMutateProcTest extends RandomProjectionProcTest<RandomProj
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.randomprojections.RandomProjectionProcTest#weights")
+    @MethodSource("org.neo4j.gds.embeddings.randomprojections.FastRPProcTest#weights")
     void shouldMutateNonZeroEmbeddings(List<Float> weights) {
         String loadedGraphName = "loadGraph";
 

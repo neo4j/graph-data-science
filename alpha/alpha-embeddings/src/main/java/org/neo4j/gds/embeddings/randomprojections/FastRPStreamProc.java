@@ -35,18 +35,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.randomprojections.RandomProjectionCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.randomprojections.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomProjectionStreamProc extends StreamProc<RandomProjection, RandomProjection, RandomProjectionStreamProc.StreamResult, RandomProjectionStreamConfig> {
+public class FastRPStreamProc extends StreamProc<FastRP, FastRP, FastRPStreamProc.StreamResult, FastRPStreamConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.stream", mode = READ)
-    @Description(RandomProjectionCompanion.DESCRIPTION)
-    public Stream<RandomProjectionStreamProc.StreamResult> stream(
+    @Description(FastRPCompanion.DESCRIPTION)
+    public Stream<FastRPStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -63,8 +63,8 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<RandomProjection, RandomProjection, RandomProjectionStreamConfig> computationResult) {
-        return RandomProjectionCompanion.getNodeProperties(computationResult);
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPStreamConfig> computationResult) {
+        return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
@@ -75,18 +75,18 @@ public class RandomProjectionStreamProc extends StreamProc<RandomProjection, Ran
     }
 
     @Override
-    protected RandomProjectionStreamConfig newConfig(
+    protected FastRPStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return RandomProjectionStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<RandomProjection, RandomProjectionStreamConfig> algorithmFactory() {
-        return new RandomProjectionFactory<>();
+    protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+        return new FastRPFactory<>();
     }
 
     public static final class StreamResult {
