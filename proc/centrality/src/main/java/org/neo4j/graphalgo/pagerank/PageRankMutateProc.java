@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankMutateProc extends MutateProc<PageRank, PageRank, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
+public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
 
     @Procedure(value = "gds.pageRank.mutate", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)

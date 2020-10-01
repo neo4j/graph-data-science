@@ -126,7 +126,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
     }
 
     @Override
-    protected Pair<YensKShortestPathsConfig, Optional<String>> processInput(
+    public Pair<YensKShortestPathsConfig, Optional<String>> processInput(
         Object graphNameOrConfig, Map<String, Object> configuration
     ) {
         return super.processInput(graphNameOrConfig, configuration);
@@ -184,7 +184,7 @@ public class KShortestPathsProc extends AlgoBaseProc<YensKShortestPaths, YensKSh
     }
 
     @Override
-    protected Graph createGraph(Pair<YensKShortestPathsConfig, Optional<String>> configAndName) {
+    public Graph createGraph(Pair<YensKShortestPathsConfig, Optional<String>> configAndName) {
         Graph graph = super.createGraph(configAndName);
         return new ReleaseBlockedGraph(graph);
     }

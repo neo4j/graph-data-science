@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -43,7 +43,7 @@ import static org.neo4j.graphalgo.louvain.LouvainProc.LOUVAIN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainMutateProc extends MutateProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
+public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
 
     @Procedure(value = "gds.louvain.mutate", mode = WRITE)
     @Description(LOUVAIN_DESCRIPTION)

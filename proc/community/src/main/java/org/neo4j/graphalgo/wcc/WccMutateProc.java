@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccMutateProc extends MutateProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
+public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, WccMutateProc.MutateResult, WccMutateConfig> {
 
     @Procedure(value = "gds.wcc.mutate", mode = READ)
     @Description(WCC_DESCRIPTION)

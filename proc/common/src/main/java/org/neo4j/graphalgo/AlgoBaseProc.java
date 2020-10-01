@@ -111,7 +111,7 @@ public abstract class AlgoBaseProc<
 
     protected abstract AlgorithmFactory<ALGO, CONFIG> algorithmFactory();
 
-    protected Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
+    public Pair<CONFIG, Optional<String>> processInput(Object graphNameOrConfig, Map<String, Object> configuration) {
         CONFIG config;
         Optional<String> graphName = Optional.empty();
 
@@ -142,7 +142,7 @@ public abstract class AlgoBaseProc<
         return Tuples.pair(config, graphName);
     }
 
-    protected Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
+    public Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
         return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
     }
 
@@ -303,7 +303,7 @@ public abstract class AlgoBaseProc<
         return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
-    private GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
+    protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
         CONFIG config = configAndName.getOne();
         Optional<String> maybeGraphName = configAndName.getTwo();
 

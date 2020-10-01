@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPMutateProc extends MutateProc<FastRP, FastRP, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
+public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.alpha.randomProjection.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)

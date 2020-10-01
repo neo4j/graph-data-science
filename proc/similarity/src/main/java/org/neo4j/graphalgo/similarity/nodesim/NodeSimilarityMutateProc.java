@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.similarity.nodesim;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.SimilarityProc;
@@ -54,7 +54,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DE
 import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeSimilarityMutateProc extends MutateProc<NodeSimilarity, NodeSimilarityResult, SimilarityMutateResult, NodeSimilarityMutateConfig> {
+public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity, NodeSimilarityResult, SimilarityMutateResult, NodeSimilarityMutateConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)

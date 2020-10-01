@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutateProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.k1coloring.K1ColoringProc.K1_COLORING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringMutateProc extends MutateProc<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig> {
+public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLongArray, K1ColoringMutateProc.MutateResult, K1ColoringMutateConfig> {
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
