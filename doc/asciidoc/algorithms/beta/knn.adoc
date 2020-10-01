@@ -8,7 +8,7 @@
 
 [abstract]
 --
-This section describes the K-Nearest Neighbors algorithm in the Neo4j Graph Data Science library.
+This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library.
 --
 
 This topic includes:
@@ -263,7 +263,7 @@ Please note that the values for `relationshipProjection` or `relationshipQuery` 
 
 include::knn-specific-algo-config.adoc[]
 
-The results are the same as for running write mode with a named graph, see <<algorithms-knn-syntax, write mode syntax above>>.
+The results are the same as running write mode on a named graph, see <<algorithms-knn-syntax, write mode syntax above>>.
 
 
 [[algorithms-knn-examples]]
@@ -366,8 +366,8 @@ ORDER BY similarity DESCENDING, Person1, Person2
 --
 
 We use default values for the procedure configuration parameter for most parameters.
-The randomSeed is set to produce the same result on every invocation.
-The TopK is set to 1 to only return the single nearest neighbor for every node.
+The `randomSeed` is set to produce the same result on every invocation.
+The `topK` parameter is set to 1 to only return the single nearest neighbor for every node.
 
 
 [[algorithms-knn-examples-stats]]
@@ -378,7 +378,7 @@ include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm and returns the result in form of statistical and measurement values
+.The following will run the algorithm and return the result in form of statistical and measurement values:
 [source, cypher]
 ----
 CALL gds.beta.knn.stats('myGraph', {topK: 1, randomSeed: 42, nodeWeightProperty: 'age'})
@@ -401,7 +401,7 @@ include::../shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm, and write back results to the in-mempry graph:
+.The following will run the algorithm, and write back results to the in-memory graph:
 [source, cypher]
 ----
 CALL gds.beta.knn.mutate('myGraph', {
@@ -430,7 +430,8 @@ As we can see from the results, the number of created relationships is equal to 
 
 The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the similarity score as a property to the Neo4j database.
 The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
-The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+Each new relationship stores the similarity score between the two nodes it represents.
+The relationship property key is set using the mandatory configuration parameter `writeProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
 
 For more details on the `write` mode in general, see <<running-algos-write>>.
