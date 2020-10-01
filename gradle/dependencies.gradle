@@ -21,6 +21,7 @@ ext {
             'commons-compress':             '1.19',
             'commons-io':                   '2.7',
             'commons-math3':                '3.6.1',
+            'commons-text':                 '1.9',
             'compile-testing':              '0.18',
             'deeplearning4j':               '1.0.0-beta7',
             'ejml':                         '0.39',

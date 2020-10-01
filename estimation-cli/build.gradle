@@ -22,6 +22,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-annotations',  version: ver.'jackson'
     implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-core',         version: ver.'jackson'
     implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',     version: ver.'jackson'
+    implementation group: 'org.apache.commons',          name: 'commons-text',         version: ver.'commons-text'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
