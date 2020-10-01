@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -101,7 +100,7 @@ public final class GraphGenerateProc extends BaseProc {
                 DUMMY_RELATIONSHIP_NAME,
                 relationshipProperty,
                 config.readConcurrency(),
-                AllocationTracker.empty()
+                allocationTracker()
             );
 
             stats.nodes = graphStore.nodeCount();
@@ -120,7 +119,7 @@ public final class GraphGenerateProc extends BaseProc {
             .aggregation(config.aggregation())
             .orientation(config.orientation())
             .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()))
-            .allocationTracker(AllocationTracker.empty());
+            .allocationTracker(allocationTracker());
        if (config.relationshipSeed() != null) {
            builder.seed(config.relationshipSeed());
        }

@@ -210,7 +210,7 @@ public final class Neo4jProxy {
     }
 
     public static MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
-        return IMPL.memoryTracker(kernelTransaction);
+        return kernelTransaction == null ? emptyMemoryTracker() : IMPL.memoryTracker(kernelTransaction);
     }
 
     public static MemoryTracker emptyMemoryTracker() {
