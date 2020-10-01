@@ -71,7 +71,7 @@ class ExamplePregelComputationAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(1, result.ranIterations());
+        assertEquals(0, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("alice", 0L);
