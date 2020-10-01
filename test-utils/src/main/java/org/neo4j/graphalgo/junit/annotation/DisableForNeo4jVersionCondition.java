@@ -34,7 +34,7 @@ public class DisableForNeo4jVersionCondition implements ExecutionCondition {
 
     private static final ConditionEvaluationResult ENABLED_BY_DEFAULT =
         ConditionEvaluationResult.enabled(
-            "@EnabledIfReachable is not present");
+            "@DisableForNeo4jVersion is not present");
 
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {

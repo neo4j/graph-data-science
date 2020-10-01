@@ -137,21 +137,13 @@ class AllocationTrackerTest {
         );
     }
 
-    private static boolean is40() {
-        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
-    }
-
     static Stream<AllocationTracker> emptyTrackers() {
         return Stream.concat(
             Stream.of(AllocationTracker.empty()),
-            is40()
+            GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0
                 ? Stream.empty()
                 : Stream.of(AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker())))
         );
-    }
-
-    private static boolean is40() {
-        return GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0;
     }
 
     static Stream<AllocationTracker> allocationTrackers() {
