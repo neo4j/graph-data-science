@@ -31,9 +31,6 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig {
 
-    @Override
-    String nodeWeightProperty();
-
     @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int topK() {

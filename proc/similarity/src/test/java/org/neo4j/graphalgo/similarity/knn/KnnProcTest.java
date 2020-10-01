@@ -181,12 +181,9 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
                 CypherMapWrapper invalidConfig = CypherMapWrapper.create(configMap)
                     .withNumber("topK", 0)
                     .withNumber("sampleRate", 0.0)
-                    .withNumber("maxIterations", 0)
-                    .withoutEntry("nodeWeightProperty");
+                    .withNumber("maxIterations", 0);
                 proc.newConfig(Optional.empty(), invalidConfig);
             })
-            .withMessageContaining(
-                "No value specified for the mandatory configuration parameter `nodeWeightProperty`")
             .withMessageContaining("`topK` must be within [1")
             .withMessageContaining("`sampleRate` must be within (0.00, 1.00]")
             .withMessageContaining("`maxIterations` must be within [1"));
