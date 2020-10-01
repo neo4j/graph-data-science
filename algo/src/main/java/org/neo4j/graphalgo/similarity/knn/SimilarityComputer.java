@@ -27,7 +27,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-interface SimilarityComputer {
+public interface SimilarityComputer {
     double similarity(long firstNodeId, long secondNodeId);
 
     SimilarityComputer DEFAULT_SIMILARITY_COMPUTER = new IdSimilarityComputer();
