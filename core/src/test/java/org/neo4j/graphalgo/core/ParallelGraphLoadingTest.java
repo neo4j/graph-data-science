@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.neo4j.graphalgo.PrivateLookup;
@@ -74,26 +77,6 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
     @Test
     @Timeout(value = 5)
-    void shouldLoadSparseNodes() {
-        GraphDbApi largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
-        try {
-            Graph sparseGraph = load(largerGraph, l -> l.addNodeLabel("Label2"));
-            runInTransaction(largerGraph, tx -> {
-                findNodes(largerGraph, tx, Label.label("Label2"))
-                    .stream().forEach(n -> {
-                        long graphId = sparseGraph.toMappedNodeId(n.getId());
-                        assertNotEquals(-1, graphId, n + " not mapped");
-                        long neoId = sparseGraph.toOriginalNodeId(graphId);
-                        assertEquals(n.getId(), neoId, n + " mapped wrongly");
-                });
-            });
-        } finally {
-            largerGraph.shutdown();
-        }
-    }
-
-    @Test
-    @Timeout(value = 5)
     void shouldLoadNodesInOrder() {
         Graph graph = loadEverything();
         final Set<Long> nodeIds;
@@ -142,6 +125,39 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
                 assertEquals(message, t.getMessage());
                 assertEquals(RuntimeException.class, t.getClass());
             }
+        }
+    }
+
+    @Nested
+    class LoadSparseNodes {
+
+        private GraphDbApi largerGraph;
+        private Graph sparseGraph;
+
+        @BeforeEach
+        void setUp() {
+            largerGraph = buildGraph(PageUtil.pageSizeFor(Long.BYTES) << 1);
+            sparseGraph = load(largerGraph, l -> l.addNodeLabel("Label2"));
+        }
+
+        @AfterEach
+        void tearDown() {
+            sparseGraph.release();
+            largerGraph.shutdown();
+        }
+
+        @Test
+        @Timeout(value = 5)
+        void shouldLoadSparseNodes() {
+            runInTransaction(largerGraph, tx -> {
+                findNodes(largerGraph, tx, Label.label("Label2"))
+                    .stream().forEach(n -> {
+                    long graphId = sparseGraph.toMappedNodeId(n.getId());
+                    assertNotEquals(-1, graphId, n + " not mapped");
+                    long neoId = sparseGraph.toOriginalNodeId(graphId);
+                    assertEquals(n.getId(), neoId, n + " mapped wrongly");
+                });
+            });
         }
     }
 
