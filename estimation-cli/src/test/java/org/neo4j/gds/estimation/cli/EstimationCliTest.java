@@ -118,11 +118,6 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
-        "gds.alpha.randomProjection.mutate.estimate",
-        "gds.alpha.randomProjection.stats.estimate",
-        "gds.alpha.randomProjection.stream.estimate",
-        "gds.alpha.randomProjection.write.estimate",
-
         "gds.beta.k1coloring.mutate.estimate",
         "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream.estimate",
@@ -141,6 +136,12 @@ final class EstimationCliTest {
         "gds.betweenness.stats.estimate",
         "gds.betweenness.stream.estimate",
         "gds.betweenness.write.estimate",
+
+        "gds.fastRP.mutate.estimate",
+        "gds.fastRP.stats.estimate",
+        "gds.fastRP.stream.estimate",
+        "gds.fastRP.write.estimate",
+
 
         "gds.graph.create.cypher.estimate",
         "gds.graph.create.estimate",
@@ -366,11 +367,6 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
-            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingSize", 128),
-            runEstimation(new FastRPStatsProc()::estimate, "embeddingSize", 128),
-            runEstimation(new FastRPStreamProc()::estimate, "embeddingSize", 128),
-            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingSize", 128),
-
             runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new K1ColoringStatsProc()::estimate),
             runEstimation(new K1ColoringStreamProc()::estimate),
@@ -401,6 +397,12 @@ final class EstimationCliTest {
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
             runEstimation(new BetweennessCentralityStreamProc()::estimate),
             runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingSize", 128),
+            runEstimation(new FastRPStatsProc()::estimate, "embeddingSize", 128),
+            runEstimation(new FastRPStreamProc()::estimate, "embeddingSize", 128),
+            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingSize", 128),
+
 
             graphCreateEstimate(false),
             graphCreateEstimate(true),
