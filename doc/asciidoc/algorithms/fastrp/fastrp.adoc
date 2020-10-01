@@ -25,22 +25,22 @@ This topic includes:
 [[algorithms-embeddings-fastrp-introduction]]
 == Introduction
 
-Random Projection is a node embedding algorithm in the family of random projection algorithms.
+Fast Random Projection, or FastRP for short, is a node embedding algorithm in the family of random projection algorithms.
 These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which, one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
-In fact the projection is linear and can be chosen in a random way.
+In fact, a linear projection chosen in a random way satisfies this property.
 
 Such techniques therefore allow for aggressive dimensionality reduction while preserving most of the distance information.
-The Random Projection operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
+The FastRP algorithm operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
 This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors.
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
-The Random Projection algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
+The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
 
 In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
-This way Random Projection exploits higher-order relationships in the graph while still being highly scalable.
+This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
 
 The present implementation extends the original algorithm to support weighted graphs, which computes weighted averages of neighboring embeddings using the relationship weights.
 In order to make use of this, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
@@ -60,13 +60,13 @@ For more information on this algorithm see:
 [[algorithms-embeddings-fastrp-syntax]]
 == Syntax
 
-.Random Projection syntax per mode
+.FastRP syntax per mode
 [.tabbed-example]
 ====
 
 [.include-with-stream]
 ======
-.Run Random Projection in stream mode on a named graph.
+.Run FastRP in stream mode on a named graph.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.stream(
@@ -94,7 +94,7 @@ include::specific-configuration.adoc[]
 
 [.include-with-write]
 ======
-.Run Random Projection in write mode on a graph stored in the catalog.
+.Run FastRP in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.write(
@@ -136,7 +136,7 @@ include::specific-configuration.adoc[]
 
 include::../shared/syntax-anonymous-graphs.adoc[]
 
-.Run Random Projection in write mode on an anonymous graph.
+.Run FastRP in write mode on an anonymous graph.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.write(
@@ -396,7 +396,7 @@ YIELD nodeId, embedding
 [[algorithms-embeddings-fastrp-parameter-tuning]]
 == Tuning algorithm parameters
 
-In order to improve the embedding quality using Random Projection on one of your graphs, it is possible to tune the algorithm parameters.
+In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
 This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
 We will go through each of the configuration parameters and explain how they behave.
 
@@ -433,7 +433,7 @@ The intuition here is that as the projections reach further away from the node, 
 
 === Orientation
 Choosing the right orientation when creating the graph may have the single biggest impact.
-The Random Projection algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
+The FastRP algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
 If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
 
 
