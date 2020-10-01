@@ -88,7 +88,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         nodePropertyImporter = new CypherNodePropertyImporter(
             propertyColumns,
             labelTokenNodeLabelMapping,
-            nodeCount
+            nodeCount,
+            loadingContext.tracker()
         );
 
         boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);

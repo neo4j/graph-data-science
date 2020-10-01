@@ -44,6 +44,7 @@ public class CypherNodePropertyImporter {
 
     private final Collection<String> propertyColumns;
     private final long nodeCount;
+    private final AllocationTracker tracker;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final Map<NodeLabel, Map<String, NodePropertiesFromStoreBuilder>> buildersByNodeLabel;
 
@@ -51,11 +52,13 @@ public class CypherNodePropertyImporter {
     public CypherNodePropertyImporter(
         Collection<String> propertyColumns,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        long nodeCount
+        long nodeCount,
+        AllocationTracker tracker
     ) {
         this.propertyColumns = propertyColumns;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.nodeCount = nodeCount;
+        this.tracker = tracker;
 
         this.buildersByNodeLabel = new HashMap<>();
     }
@@ -75,7 +78,7 @@ public class CypherNodePropertyImporter {
                 propertyBuilders.computeIfAbsent(
                     property,
                     (ignore) -> NodePropertiesFromStoreBuilder.of(
-                        nodeCount, AllocationTracker.empty(), NO_PROPERTY_VALUE
+                        nodeCount, tracker, NO_PROPERTY_VALUE
                     )
                 );
             }
