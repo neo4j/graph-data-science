@@ -47,14 +47,6 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
 
     ValueType mutatePropertyType();
 
-    @Override
-    default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        if (!mapWrapper.containsKey("mutateProperty")) {
-            mapWrapper = mapWrapper.withString("mutateProperty", mutateProperty());
-        }
-        return mapWrapper;
-    }
-
     @Test
     default void testWriteBackGraphMutationOnFilteredGraph() {
         runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
