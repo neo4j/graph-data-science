@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.walking.TraversalToRelationship;
 import org.neo4j.graphalgo.impl.walking.TraversalToRelationshipConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -79,7 +78,7 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
             .map(relType -> graphStore.getGraph(RelationshipType.of(relType)))
             .toArray(Graph[]::new);
 
-        var tracker = AllocationTracker.create();
+        var tracker = allocationTracker();
 
         TraversalToRelationship algo = new TraversalToRelationship(graphs, config, Pools.DEFAULT, tracker);
         builder.algorithm(algo);
@@ -99,7 +98,7 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
        return builder
             .graphStore(graphStore)
             .graph(graphs[0])
-            .tracker(AllocationTracker.empty())
+            .tracker(tracker)
             .algorithm(algo)
             .config(config)
             .build();
