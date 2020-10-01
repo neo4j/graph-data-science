@@ -32,13 +32,13 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig {
 
     @Value.Default
-    @Configuration.IntegerRange(min = 0)
+    @Configuration.IntegerRange(min = 1)
     default int topK() {
         return 10;
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0, max = 1)
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double sampleRate() {
         return 0.5;
     }
@@ -57,7 +57,7 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
 
     @Override
     @Value.Default
-    @Configuration.IntegerRange(min = 0)
+    @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 100;
     }
