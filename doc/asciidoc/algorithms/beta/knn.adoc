@@ -181,10 +181,6 @@ include::knn-specific-algo-config.adoc[]
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
-| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
-| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
-
-
 | nodesCompared          | Integer | The number of nodes compared.
 | relationshipsWritten   | Integer | The number of relationships created.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
