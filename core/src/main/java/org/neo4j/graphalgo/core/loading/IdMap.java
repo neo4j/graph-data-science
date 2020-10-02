@@ -72,6 +72,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     private final long nodeCount;
+    private final AllocationTracker tracker;
 
     private final Map<NodeLabel, BitSet> labelInformation;
 
@@ -85,11 +86,18 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(HugeLongArray graphIds, HugeSparseLongArray nodeToGraphIds, Map<NodeLabel, BitSet> labelInformation, long nodeCount) {
+    public IdMap(
+        HugeLongArray graphIds,
+        HugeSparseLongArray nodeToGraphIds,
+        Map<NodeLabel, BitSet> labelInformation,
+        long nodeCount,
+        AllocationTracker tracker
+    ) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
+        this.tracker = tracker;
     }
 
     @Override
@@ -180,7 +188,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, AllocationTracker.empty());
+        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             newGraphIds.set(cursor, nodeId);
@@ -192,14 +200,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             nodeToGraphIds.getCapacity(),
             concurrency,
             IdMapBuilder.add(newGraphIds),
-            AllocationTracker.empty()
+            tracker
         );
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
-        return new FilteredIdMap(newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount);
+        return new FilteredIdMap(newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount, tracker);
     }
 
     private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
@@ -222,9 +230,10 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             Map<NodeLabel, BitSet> filteredLabelMap,
-            long nodeCount
+            long nodeCount,
+            AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount);
+            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, tracker);
         }
 
         @Override

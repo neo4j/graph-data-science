@@ -58,7 +58,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size());
+        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 
     static IdMap buildChecked(
@@ -82,7 +82,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size());
+        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 
     @NotNull
