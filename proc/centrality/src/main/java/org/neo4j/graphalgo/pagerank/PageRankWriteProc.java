@@ -88,38 +88,33 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    public static final class WriteResult {
+    public static final class WriteResult extends PageRankStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-        public long writeMillis;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> centralityDistribution;
-        public Map<String, Object> configuration;
+        public final long writeMillis;
+        public final long nodePropertiesWritten;
 
         WriteResult(
-            long nodePropertiesWritten,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> centralityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
-            long ranIterations,
-            boolean didConverge,
-            Map<String, Object> centralityDistribution,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
+            super(
+                ranIterations,
+                didConverge,
+                centralityDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.writeMillis = writeMillis;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.centralityDistribution = centralityDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends PageRankProc.PageRankResultBuilder<WriteResult> {
@@ -131,14 +126,14 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
             @Override
             public WriteResult buildResult() {
                 return new WriteResult(
-                    nodePropertiesWritten,
+                    ranIterations,
+                    didConverge,
+                    distribution(),
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,
-                    ranIterations,
-                    didConverge,
-                    distribution(),
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }

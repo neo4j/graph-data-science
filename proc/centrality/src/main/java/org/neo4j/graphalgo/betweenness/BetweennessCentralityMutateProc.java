@@ -107,12 +107,12 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
             Map<String, Object> config
         ) {
             super(
-                createMillis,
-                computeMillis,
-                postProcessingMillis,
                 minCentrality,
                 maxCentrality,
                 sumCentrality,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
                 config
             );
             this.nodePropertiesWritten = nodePropertiesWritten;

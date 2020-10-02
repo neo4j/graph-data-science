@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -80,32 +81,25 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         return new PageRankFactory<>();
     }
 
-    public static final class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
 
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> centralityDistribution;
-        public Map<String, Object> configuration;
+        public final long ranIterations;
+        public final boolean didConverge;
+        public final Map<String, Object> centralityDistribution;
 
         StatsResult(
-            long createMillis,
-            long computeMillis,
-            long postProcessingMillis,
             long ranIterations,
             boolean didConverge,
             Map<String, Object> centralityDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
+            super(createMillis, computeMillis, postProcessingMillis, configuration);
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
             this.centralityDistribution = centralityDistribution;
-            this.configuration = configuration;
         }
 
         static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
@@ -117,12 +111,12 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
             @Override
             public StatsResult buildResult() {
                 return new StatsResult(
-                    createMillis,
-                    computeMillis,
-                    postProcessingMillis,
                     ranIterations,
                     didConverge,
                     distribution(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingMillis,
                     config.toMap()
                 );
             }

@@ -107,12 +107,12 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             Map<String, Object> config
         ) {
             super(
-                createMillis,
-                computeMillis,
-                postProcessingMillis,
                 minCentrality,
                 maxCentrality,
                 sumCentrality,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
                 config
             );
             this.nodePropertiesWritten = nodePropertiesWritten;
