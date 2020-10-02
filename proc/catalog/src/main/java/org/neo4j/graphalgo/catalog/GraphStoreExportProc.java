@@ -52,7 +52,7 @@ public class GraphStoreExportProc extends BaseProc {
                 var graphStoreExport = new GraphStoreExport(graphStore, api, exportConfig);
 
                 var start = System.nanoTime();
-                var importedProperties = graphStoreExport.run();
+                var importedProperties = graphStoreExport.run(allocationTracker());
                 var end = System.nanoTime();
 
                 return new GraphStoreExportResult(

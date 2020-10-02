@@ -87,8 +87,8 @@ public class GraphStoreExport {
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
     }
 
-    public ImportedProperties run() {
-        return run(false);
+    public ImportedProperties run(AllocationTracker tracker) {
+        return run(false, tracker);
     }
 
     /**
@@ -98,10 +98,10 @@ public class GraphStoreExport {
      */
     @TestOnly
     public void runFromTests() {
-        run(true);
+        run(true, AllocationTracker.empty());
     }
 
-    private ImportedProperties run(boolean defaultSettingsSuitableForTests) {
+    private ImportedProperties run(boolean defaultSettingsSuitableForTests, AllocationTracker tracker) {
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
         var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
@@ -121,7 +121,7 @@ public class GraphStoreExport {
 
             lifeSupport.start();
 
-            var nodeStore = NodeStore.of(graphStore);
+            var nodeStore = NodeStore.of(graphStore, tracker);
             var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
             Input input = Neo4jProxy.batchInputFrom(new GraphStoreInput(
                 nodeStore,
@@ -258,14 +258,14 @@ public class GraphStoreExport {
             return labels;
         }
 
-        static NodeStore of(GraphStore graphStore) {
+        static NodeStore of(GraphStore graphStore, AllocationTracker tracker) {
             HugeIntArray labelCounts = null;
             Map<String, Map<String, NodeProperties>> nodeProperties;
 
             var nodeLabels = graphStore.nodes();
 
             if (!nodeLabels.containsOnlyAllNodesLabel()) {
-                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), AllocationTracker.empty());
+                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), tracker);
                 labelCounts.setAll(i -> {
                     int labelCount = 0;
                     for (var nodeLabel : nodeLabels.availableNodeLabels()) {
