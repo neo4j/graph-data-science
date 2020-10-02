@@ -33,6 +33,7 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
+import static org.neo4j.graphalgo.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
@@ -61,7 +62,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
             "modularity", closeTo(0.3744, 1e-5),
             "modularities", contains((closeTo(0.3744, 1e-5))),
             "communityCount", 4L,
-            "communityDistribution", Map.of(
+            "communityDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
                 "min", 2L,
                 "max", 8L,
                 "mean", 3.75,
@@ -71,7 +72,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
                 "p95", 8L,
                 "p99", 8L,
                 "p999", 8L
-            ),
+            )),
             "createMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),

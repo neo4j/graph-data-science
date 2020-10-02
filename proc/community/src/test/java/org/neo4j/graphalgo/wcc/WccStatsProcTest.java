@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
+import static org.neo4j.graphalgo.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
@@ -57,7 +58,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
         assertCypherResult(query, List.of(Map.of(
             "componentCount", 3L,
-            "componentDistribution", Map.of(
+            "componentDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
                 "min", 1L,
                 "max", 7L,
                 "mean", 3.3333333333333335D,
@@ -67,7 +68,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
                 "p95", 7L,
                 "p99", 7L,
                 "p999", 7L
-            ),
+            )),
             "createMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
