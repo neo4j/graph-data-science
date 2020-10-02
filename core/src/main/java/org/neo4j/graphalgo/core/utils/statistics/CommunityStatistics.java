@@ -28,12 +28,15 @@ import java.util.function.LongUnaryOperator;
 
 public final class CommunityStatistics {
 
+    private static final long EMPTY_COMMUNITY = 0L;
+
     public static HugeSparseLongArray communitySizes(long nodeCount, LongUnaryOperator communityFunction, AllocationTracker tracker) {
-        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(0L, tracker);
+        var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(EMPTY_COMMUNITY, tracker);
 
         for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
             componentSizeBuilder.addTo(communityFunction.applyAsLong(nodeId), 1L);
         }
+
         return componentSizeBuilder.build();
     }
 
@@ -42,11 +45,11 @@ public final class CommunityStatistics {
     }
 
     public static long communityCount(HugeSparseLongArray communitySizes) {
-        long communityCount = 0L;
+        var communityCount = 0L;
+        var capacity = communitySizes.getCapacity();
 
-        for (long communityId = 0; communityId < communitySizes.getCapacity(); communityId++) {
-            long communitySize = communitySizes.get(communityId);
-            if (communitySize > 0) {
+        for (long communityId = 0; communityId < capacity; communityId++) {
+            if (communitySizes.get(communityId) != EMPTY_COMMUNITY) {
                 communityCount++;
             }
         }
@@ -60,10 +63,12 @@ public final class CommunityStatistics {
 
     public static CommunityCountAndHistogram communityCountAndHistogram(HugeSparseLongArray communitySizes) {
         var histogram = new Histogram(5);
-        long communityCount = 0;
-        for (long communityId = 0; communityId < communitySizes.getCapacity(); communityId++) {
+        var communityCount = 0L;
+        var capacity = communitySizes.getCapacity();
+
+        for (long communityId = 0; communityId < capacity; communityId++) {
             long communitySize = communitySizes.get(communityId);
-            if (communitySize > 0) {
+            if (communitySize != EMPTY_COMMUNITY) {
                 communityCount++;
                 histogram.recordValue(communitySize);
             }
