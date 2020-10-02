@@ -23,6 +23,8 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
@@ -31,21 +33,25 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 class CommunityStatisticsTest {
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("testInput")
     void communitySizes(
         long nodeCount,
         LongUnaryOperator communityFunction,
         long expectedCommunityCount,
         Map<Long, Long> expectedCommunitySizes,
-        Histogram expectedCommunitySizeHistogram
+        Histogram expectedCommunitySizeHistogram,
+        int concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeCount,
             communityFunction,
+            Pools.DEFAULT,
+            concurrency,
             AllocationTracker.empty()
         );
         expectedCommunitySizes.forEach((communityId, expectedSize) -> {
@@ -54,32 +60,42 @@ class CommunityStatisticsTest {
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("testInput")
     void communityCount(
         long nodeCount,
         LongUnaryOperator communityFunction,
         long expectedCommunityCount,
         Map<Long, Long> expectedCommunitySizes,
-        Histogram expectedCommunitySizeHistogram
+        Histogram expectedCommunitySizeHistogram,
+        int concurrency
     ) {
         assertEquals(
             expectedCommunityCount,
-            CommunityStatistics.communityCount(nodeCount, communityFunction, AllocationTracker.empty())
+            CommunityStatistics.communityCount(
+                nodeCount,
+                communityFunction,
+                Pools.DEFAULT,
+                concurrency,
+                AllocationTracker.empty()
+            )
         );
     }
 
     @ParameterizedTest
-    @MethodSource("testArguments")
+    @MethodSource("testInput")
     void communityCountAndHistogram(
         long nodeCount,
         LongUnaryOperator communityFunction,
         long expectedCommunityCount,
         Map<Long, Long> expectedCommunitySizes,
-        Histogram expectedCommunitySizeHistogram
+        Histogram expectedCommunitySizeHistogram,
+        int concurrency
     ) {
         var communityCountAndHistogram = CommunityStatistics.communityCountAndHistogram(
             nodeCount,
             communityFunction,
+            Pools.DEFAULT,
+            concurrency,
             AllocationTracker.empty()
         );
 
@@ -87,7 +103,18 @@ class CommunityStatisticsTest {
         assertEquals(expectedCommunitySizeHistogram, communityCountAndHistogram.histogram());
     }
 
-    private static Stream<Arguments> testArguments() {
+    private static Stream<Arguments> testInput() {
+        return TestSupport.crossArguments(
+            CommunityStatisticsTest::expectedResults,
+            toArguments(CommunityStatisticsTest::concurrencies)
+        );
+    }
+
+    private static Stream<Integer> concurrencies() {
+        return Stream.of(1, 4);
+    }
+
+    private static Stream<Arguments> expectedResults() {
         return Stream.of(
             Arguments.of(
                 1000,

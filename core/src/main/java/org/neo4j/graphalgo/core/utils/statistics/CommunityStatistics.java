@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.statistics;
 
+import com.carrotsearch.hppc.LongLongHashMap;
+import com.carrotsearch.hppc.LongLongMap;
+import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
@@ -36,21 +39,71 @@ public final class CommunityStatistics {
 
     private static final long EMPTY_COMMUNITY = 0L;
 
-    public static HugeSparseLongArray communitySizes(long nodeCount, LongUnaryOperator communityFunction, AllocationTracker tracker) {
+    public static HugeSparseLongArray communitySizes(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         var componentSizeBuilder = HugeSparseLongArray.GrowingBuilder.create(EMPTY_COMMUNITY, tracker);
 
-        for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
-            componentSizeBuilder.addTo(communityFunction.applyAsLong(nodeId), 1L);
+        if (concurrency == 1) {
+            // For one thread, we can just iterate through the node space
+            // to avoid allocating thread-local buffers for each batch.
+            for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
+                componentSizeBuilder.addTo(communityFunction.applyAsLong(nodeId), 1L);
+            }
+        } else {
+            // To avoid thread-contention on builder.addTo(),
+            // each AddTask creates a thread-local buffer to cache
+            // community sizes before they are written to the builder.
+            // The batchSize is the size of that buffer and we limit
+            // it in order to reduce memory overhead for the parallel
+            // execution.
+            var batchSize = ParallelUtil.adjustedBatchSize(
+                nodeCount,
+                concurrency,
+                ParallelUtil.DEFAULT_BATCH_SIZE,
+                // 10 is just a magic number that has been proven
+                // to perform well in benchmarking.
+                ParallelUtil.DEFAULT_BATCH_SIZE * 10
+            );
+
+            var tasks = LazyBatchCollection.of(
+                nodeCount,
+                batchSize,
+                (start, length) -> new AddTask(componentSizeBuilder, communityFunction, start, length)
+            );
+
+            ParallelUtil.run(tasks, executorService);
         }
 
         return componentSizeBuilder.build();
     }
 
-    public static long communityCount(long nodeCount, LongUnaryOperator communityFunction, AllocationTracker tracker) {
-        return communityCount(communitySizes(nodeCount, communityFunction, tracker), Pools.DEFAULT, 1);
+    public static long communityCount(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        var communitySizes = communitySizes(
+            nodeCount,
+            communityFunction,
+            executorService,
+            concurrency,
+            tracker
+        );
+        return communityCount(communitySizes, executorService, concurrency);
     }
 
-    public static long communityCount(HugeSparseLongArray communitySizes, ExecutorService executorService, int concurrency) {
+    public static long communityCount(
+        HugeSparseLongArray communitySizes,
+        ExecutorService executorService,
+        int concurrency
+    ) {
         var capacity = communitySizes.getCapacity();
 
         var tasks = PartitionUtils
@@ -69,8 +122,21 @@ public final class CommunityStatistics {
         return communityCount;
     }
 
-    public static CommunityCountAndHistogram communityCountAndHistogram(long nodeCount, LongUnaryOperator communityFunction, AllocationTracker tracker) {
-        return communityCountAndHistogram(communitySizes(nodeCount, communityFunction, tracker));
+    public static CommunityCountAndHistogram communityCountAndHistogram(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        var communitySizes = communitySizes(
+            nodeCount,
+            communityFunction,
+            executorService,
+            concurrency,
+            tracker
+        );
+        return communityCountAndHistogram(communitySizes);
     }
 
     public static CommunityCountAndHistogram communityCountAndHistogram(HugeSparseLongArray communitySizes) {
@@ -101,9 +167,48 @@ public final class CommunityStatistics {
         Histogram histogram();
     }
 
+    private static class AddTask implements Runnable {
+
+        private final HugeSparseLongArray.GrowingBuilder builder;
+
+        private final LongUnaryOperator communityFunction;
+
+        private final long startId;
+        private final long length;
+
+        // Use local buffer to avoid contention on GrowingBuilder.add().
+        // This is especially useful, if the input has a skewed
+        // distribution, i.e. most nodes end up in the same community.
+        private final LongLongMap buffer;
+
+        AddTask(
+            HugeSparseLongArray.GrowingBuilder builder,
+            LongUnaryOperator communityFunction,
+            long startId,
+            long length
+        ) {
+            this.builder = builder;
+            this.communityFunction = communityFunction;
+            this.startId = startId;
+            this.length = length;
+            // safe cast, since max batch size less than Integer.MAX_VALUE
+            this.buffer = new LongLongHashMap((int) length);
+        }
+
+        @Override
+        public void run() {
+            var endId = startId + length;
+            for (long id = startId; id < endId; id++) {
+                buffer.addTo(communityFunction.applyAsLong(id), 1L);
+            }
+            buffer.forEach((LongLongProcedure) builder::addTo);
+        }
+    }
+
     private static class CountTask implements Runnable {
 
         private final HugeSparseLongArray communitySizes;
+
         private final Partition partition;
 
         private long count;

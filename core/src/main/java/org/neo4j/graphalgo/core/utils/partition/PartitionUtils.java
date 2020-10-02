@@ -35,6 +35,10 @@ public final class PartitionUtils {
 
     public static List<Partition> rangePartition(int concurrency, long nodeCount) {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+        return rangePartition(concurrency, nodeCount, batchSize);
+    }
+
+    public static List<Partition> rangePartition(int concurrency, long nodeCount, long batchSize) {
         List<Partition> partitions = new ArrayList<>(concurrency);
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
@@ -43,6 +47,7 @@ public final class PartitionUtils {
 
         return partitions;
     }
+
 
     public static List<Partition> numberAlignedPartitioning(
         int concurrency,

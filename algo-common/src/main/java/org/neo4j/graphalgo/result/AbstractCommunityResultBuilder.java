@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.result;
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -33,6 +34,7 @@ import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCount;
 import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCountAndHistogram;
+import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communitySizes;
 
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
@@ -85,9 +87,11 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
         if (communityFunction != null) {
             if (buildCommunityCount && !buildHistogram) {
-                maybeCommunityCount = OptionalLong.of(communityCount(nodeCount, communityFunction, tracker));
-            } else if (buildCommunityCount || buildHistogram){
-                var communityCountAndHistogram = communityCountAndHistogram(nodeCount, communityFunction, tracker);
+                var communitySizes = communitySizes(nodeCount, communityFunction, Pools.DEFAULT, 1, tracker);
+                maybeCommunityCount = OptionalLong.of(communityCount(communitySizes, Pools.DEFAULT, 1));
+            } else if (buildCommunityCount || buildHistogram) {
+                var communitySizes = communitySizes(nodeCount, communityFunction, Pools.DEFAULT, 1, tracker);
+                var communityCountAndHistogram = communityCountAndHistogram(communitySizes);
                 maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
                 maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());
             }
