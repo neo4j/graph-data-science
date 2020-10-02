@@ -72,8 +72,6 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 GraphStoreCatalog.graphStoresCount()
             );
         }
-        System.out.println(message);
-        System.out.println(messageTemplate);
         assertTrue(message.matches(
             messageTemplate));
     }
