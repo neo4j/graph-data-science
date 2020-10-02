@@ -104,6 +104,7 @@ class LocalClusteringCoefficientMutateProcTest
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
             "mutateMillis", greaterThan(-1L),
             "nodePropertiesWritten", 5L
@@ -122,6 +123,7 @@ class LocalClusteringCoefficientMutateProcTest
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
             "mutateMillis", greaterThan(-1L),
             "nodePropertiesWritten", 5L

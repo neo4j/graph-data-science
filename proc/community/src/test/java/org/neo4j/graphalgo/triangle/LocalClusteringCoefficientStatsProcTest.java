@@ -42,6 +42,7 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }
@@ -55,6 +56,7 @@ class LocalClusteringCoefficientStatsProcTest extends LocalClusteringCoefficient
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }

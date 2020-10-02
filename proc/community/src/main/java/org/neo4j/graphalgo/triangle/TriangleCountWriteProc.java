@@ -98,16 +98,16 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
 
     public static class WriteResult extends TriangleCountStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
         public long writeMillis;
+        public long nodePropertiesWritten;
 
         public WriteResult(
             long globalTriangleCount,
             long nodeCount,
-            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long writeMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
             super(
@@ -117,7 +117,6 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
                 computeMillis,
                 configuration
             );
-
             this.writeMillis = writeMillis;
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
@@ -130,10 +129,10 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
             return new WriteResult(
                 globalTriangleCount,
                 nodeCount,
-                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 writeMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }

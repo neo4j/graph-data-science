@@ -95,6 +95,7 @@ YIELD
   nodeCount: Integer,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   configuration: Map
 ----
 
@@ -112,6 +113,7 @@ include::specific-configuration.adoc[]
 | nodeCount                    | Integer | Number of nodes in the graph.
 | createMillis                 | Integer | Milliseconds for creating the graph.
 | computeMillis                | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis         | Integer | Milliseconds for computing the global metrics.
 | configuration                | Map     | The configuration used for running the algorithm.
 |===
 ======
@@ -131,6 +133,7 @@ YIELD
   nodePropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   mutateMillis: Integer,
   configuration: Map
 ----
@@ -150,6 +153,7 @@ include::specific-configuration.adoc[]
 | nodePropertiesWritten         | Integer | Number of properties added to the in-memory graph.
 | createMillis                  | Integer | Milliseconds for creating the graph.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer | Milliseconds for computing the global metrics.
 | mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
@@ -170,6 +174,7 @@ YIELD
   nodePropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   writeMillis: Integer,
   configuration: Map
 ----
@@ -189,6 +194,7 @@ include::specific-configuration.adoc[]
 | nodePropertiesWritten         | Integer | Number of properties written to Neo4j.
 | createMillis                  | Integer | Milliseconds for creating the graph.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer | Milliseconds for computing the global metrics.
 | writeMillis                   | Integer | Milliseconds for writing results back to Neo4j.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===

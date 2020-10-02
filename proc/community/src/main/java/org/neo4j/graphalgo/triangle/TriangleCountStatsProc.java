@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -87,25 +88,22 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         return new IntersectingTriangleCountFactory<>();
     }
 
-    public static class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
+
         public final long globalTriangleCount;
         public final long nodeCount;
-        public final long createMillis;
-        public final long computeMillis;
-        public final Map<String, Object> configuration;
 
-        public StatsResult(
+        StatsResult(
             long globalTriangleCount,
             long nodeCount,
             long createMillis,
             long computeMillis,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.nodeCount = nodeCount;
+            // post-processing is instant for TC
+            super(createMillis, computeMillis, 0L, configuration);
             this.globalTriangleCount = globalTriangleCount;
-            this.configuration = configuration;
+            this.nodeCount = nodeCount;
         }
     }
 
