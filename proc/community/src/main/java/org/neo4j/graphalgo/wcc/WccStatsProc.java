@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.result.AbstractCommunityResultBuilder;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -86,29 +87,22 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         return WccProc.algorithmFactory();
     }
 
-    public static class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
 
-        public final long createMillis;
-        public final long computeMillis;
-        public final long postProcessingMillis;
         public final long componentCount;
         public final Map<String, Object> componentDistribution;
-        public final Map<String, Object> configuration;
 
         StatsResult(
+            long componentCount,
+            Map<String, Object> componentDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
-            long componentCount,
-            Map<String, Object> componentDistribution,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
+            super(createMillis, computeMillis, postProcessingMillis, configuration);
             this.componentCount = componentCount;
             this.componentDistribution = componentDistribution;
-            this.configuration = configuration;
         }
 
         static class Builder extends AbstractCommunityResultBuilder<StatsResult> {
@@ -123,11 +117,11 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
             @Override
             protected StatsResult buildResult() {
                 return new StatsResult(
+                    maybeCommunityCount.orElse(0L),
+                    communityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
                     config.toMap()
                 );
             }

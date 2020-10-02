@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -80,35 +81,28 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         return new LabelPropagationFactory<>();
     }
 
-    public static class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
 
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-        public long communityCount;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> communityDistribution;
-        public Map<String, Object> configuration;
+        public final long ranIterations;
+        public final boolean didConverge;
+        public final long communityCount;
+        public final Map<String, Object> communityDistribution;
 
         StatsResult(
+            long ranIterations,
+            boolean didConverge,
+            long communityCount,
+            Map<String, Object> communityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
-            long communityCount,
-            long ranIterations,
-            boolean didConverge,
-            Map<String, Object> communityDistribution,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.communityCount = communityCount;
+            super(createMillis, computeMillis, postProcessingMillis, configuration);
             this.ranIterations = ranIterations;
             this.didConverge = didConverge;
+            this.communityCount = communityCount;
             this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
         }
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
@@ -126,13 +120,13 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
             @Override
             protected StatsResult buildResult() {
                 return new StatsResult(
+                    ranIterations,
+                    didConverge,
+                    maybeCommunityCount.orElse(0L),
+                    communityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(0L),
-                    ranIterations,
-                    didConverge,
-                    communityHistogramOrNull(),
                     config.toMap()
                 );
             }

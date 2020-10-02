@@ -91,44 +91,37 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
         );
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends LouvainStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long mutateMillis;
-        public long postProcessingMillis;
-        public long ranLevels;
-        public long communityCount;
-        public double modularity;
-        public List<Double> modularities;
-        public Map<String, Object> communityDistribution;
-        public Map<String, Object> configuration;
+        public final long mutateMillis;
+        public final long nodePropertiesWritten;
 
         MutateResult(
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
+            double modularity,
+            List<Double> modularities,
             long ranLevels,
             long communityCount,
-            double modularity,
-            double[] modularities,
             Map<String, Object> communityDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long mutateMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
+            super(
+                modularity,
+                modularities,
+                ranLevels,
+                communityCount,
+                communityDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.ranLevels = ranLevels;
-            this.communityCount = communityCount;
-            this.modularity = modularity;
-            this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());
-            this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends LouvainProc.LouvainResultBuilder<MutateResult> {
@@ -140,16 +133,16 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    mutateMillis,
-                    postProcessingDuration,
+                    modularity,
+                    Arrays.stream(modularities).boxed().collect(Collectors.toList()),
                     levels,
                     maybeCommunityCount.orElse(0L),
-                    modularity,
-                    modularities,
                     communityHistogramOrNull(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    mutateMillis,
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }
