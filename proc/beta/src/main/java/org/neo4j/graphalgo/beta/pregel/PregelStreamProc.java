@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,6 +33,9 @@ public abstract class PregelStreamProc<
     ALGO extends Algorithm<ALGO, Pregel.PregelResult>,
     CONFIG extends PregelConfig>
     extends StreamProc<ALGO, Pregel.PregelResult, PregelStreamResult, CONFIG> {
+
+    private static final long[] EMPTY_LONG_ARRAY = new long[0];
+    private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
 
     @Override
     protected Stream<PregelStreamResult> stream(
@@ -47,10 +49,22 @@ public abstract class PregelStreamProc<
             Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
                 Pregel.Element::propertyKey,
                 element -> {
-                    if (element.propertyType() == ValueType.DOUBLE) {
-                        return result.doubleProperties(element.propertyKey()).get(nodeId);
+                    var propertyType = element.propertyType();
+                    switch (propertyType) {
+                        case LONG:
+                            return result.longProperties(element.propertyKey()).get(nodeId);
+                        case DOUBLE:
+                            return result.doubleProperties(element.propertyKey()).get(nodeId);
+                        case DOUBLE_ARRAY:
+                        case FLOAT_ARRAY:
+                            var doubleArray = result.doubleArrayProperties(element.propertyKey()).get(nodeId);
+                            return doubleArray == null ? EMPTY_DOUBLE_ARRAY : doubleArray;
+                        case LONG_ARRAY:
+                            var longArray = result.longArrayProperties(element.propertyKey()).get(nodeId);
+                            return longArray == null ? EMPTY_LONG_ARRAY : longArray;
+                        case UNKNOWN:
                     }
-                    return result.longProperties(element.propertyKey()).get(nodeId);
+                    throw new IllegalStateException("Unknown result property type");
                 }
             ));
             return new PregelStreamResult(nodeId, values);
