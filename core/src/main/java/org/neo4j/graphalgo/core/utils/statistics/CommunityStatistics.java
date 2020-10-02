@@ -21,10 +21,16 @@ package org.neo4j.graphalgo.core.utils.statistics;
 
 import org.HdrHistogram.Histogram;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
 
 public final class CommunityStatistics {
 
@@ -41,17 +47,23 @@ public final class CommunityStatistics {
     }
 
     public static long communityCount(long nodeCount, LongUnaryOperator communityFunction, AllocationTracker tracker) {
-        return communityCount(communitySizes(nodeCount, communityFunction, tracker));
+        return communityCount(communitySizes(nodeCount, communityFunction, tracker), Pools.DEFAULT, 1);
     }
 
-    public static long communityCount(HugeSparseLongArray communitySizes) {
-        var communityCount = 0L;
+    public static long communityCount(HugeSparseLongArray communitySizes, ExecutorService executorService, int concurrency) {
         var capacity = communitySizes.getCapacity();
 
-        for (long communityId = 0; communityId < capacity; communityId++) {
-            if (communitySizes.get(communityId) != EMPTY_COMMUNITY) {
-                communityCount++;
-            }
+        var tasks = PartitionUtils
+            .rangePartition(concurrency, capacity)
+            .stream()
+            .map(partition -> new CountTask(communitySizes, partition))
+            .collect(Collectors.toList());
+
+        ParallelUtil.run(tasks, executorService);
+
+        var communityCount = 0L;
+        for (CountTask task : tasks) {
+            communityCount += task.count();
         }
 
         return communityCount;
@@ -87,6 +99,35 @@ public final class CommunityStatistics {
         long componentCount();
 
         Histogram histogram();
+    }
+
+    private static class CountTask implements Runnable {
+
+        private final HugeSparseLongArray communitySizes;
+        private final Partition partition;
+
+        private long count;
+
+        CountTask(HugeSparseLongArray communitySizes, Partition partition) {
+            this.communitySizes = communitySizes;
+            this.partition = partition;
+        }
+
+        @Override
+        public void run() {
+            long startId = partition.startNode();
+            long endId = partition.startNode() + partition.nodeCount();
+
+            for (long id = startId; id < endId; id++) {
+                if (communitySizes.get(id) != EMPTY_COMMUNITY) {
+                    count++;
+                }
+            }
+        }
+
+        public long count() {
+            return count;
+        }
     }
 
 }
