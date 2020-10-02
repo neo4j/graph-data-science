@@ -26,12 +26,12 @@ This topic includes:
 [[algorithms-knn-intro]]
 == Introduction
 
-The K-Nearest Neighbors algorithm connects each node to a set of neighbors where the distance between two nodes is among the k-th smallest distances from that node to all other nodes.
+The K-Nearest Neighbors algorithm computes a distance value for all node pairs in the graph and creates new relationships between each node and its k nearest neighbors.
 The distance is calculated based on node properties.
 
 The input of this algorithm is a monopartite graph.
 The graph does not need to be connected, in fact, existing relationships between nodes will be ignored.
-New relationships are created between each node and its k-th nearest new neighbors.
+New relationships are created between each node and its k nearest neighbors.
 
 The K-Nearest Neighbors algorithm compares a given property of each node.
 The `k` nodes where this property is most similar are the k-nearest neighbors.
@@ -42,22 +42,18 @@ The algorithm may stop earlier if the neighbor lists only change by a small amou
 
 The particular implementation is based on https://dl.acm.org/doi/abs/10.1145/1963405.1963487[Efficient k-nearest neighbor graph construction for generic similarity measures] by Wei Dong et al.
 Instead of comparing every node with every other node, the algorithm selects possible neighbors based on the assumption, that the neighbors-of-neighbors of a node are most likely already the nearest one.
-Furthermore, the algorithm only compares a sample of all possible neighbors on each iteration, assuming that eventually all possible neighbors will be seen.
-This can be controlled with the configuration parameter `sampleRate`.
-A valid sample rate must be in between 0 (exclusive) and 1 (inclusive), the default value is `0.5`.
-A higher sample rate will increase the accuracy of the result.
-A lower sample rate will increase the runtime-performance.
 The algorithm scales quasi-linear with respect to the node count, instead of being quadratic.
 
-//Furthermore, the neighbors to compare against are taken from the "outgoing" and "incoming" neighbors list.
-//"Outgoing" and "incoming" do not refer to the relationships of the node.
-//Instead, "outgoing" here means the neighbors of the existing neighbors of a node.
-//"Incoming" here means the nodes where a given node is in the neighbors of that other nodes' neighbors.
-//MATCH
-//  (incoming)-[:NEIGHBOR]->()-[:NEIGHBOR]->(me)-[:NEIGHBOR]->()-[:NEIGHBOR]->(outgoing)
-//RETURN
-//  me, collect(incoming) as incoming_neighbors, collect(outgoing) as outgoing_neighbors
+Furthermore, the algorithm only compares a sample of all possible neighbors on each iteration, assuming that eventually all possible neighbors will be seen.
+This can be controlled with the configuration parameter `sampleRate`:
 
+* A valid sample rate must be in between 0 (exclusive) and 1 (inclusive).
+* The default value is `0.5`.
+* The parameter is used to control the trade-off between accuracy and runtime-performance.
+* A higher sample rate will increase the accuracy of the result.
+** The algorithm will also require more memory and will take longer to compute.
+* A lower sample rate will increase the runtime-performance.
+** Some potential nodes may be missed in the comparison and may not be included in the result.
 
 The output of the algorithm are new relationships between nodes and their k-nearest neighbors.
 Similarity scores are expressed via relationship properties.
@@ -144,8 +140,8 @@ include::knn-specific-algo-config.adoc[]
 | Name                          | Type      | Description
 | createMillis                  | Integer   | Milliseconds for loading data.
 | computeMillis                 | Integer   | Milliseconds for running the algorithm.
-| postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
-| similarityPairs               | Integer   | The number of neighbors of nodes computed.
+| postProcessingMillis          | Integer   | Milliseconds for computing similarity value distribution statistics.
+| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
 | similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
 | configuration                 | Map       | The configuration used for running the algorithm.
 |===
@@ -181,12 +177,16 @@ include::knn-specific-algo-config.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type    | Description
-| nodesCompared          | Integer | The number of nodes compared.
-| relationshipsWritten   | Integer | The number of relationships created.
 | createMillis           | Integer | Milliseconds for loading data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
-| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+
+
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
@@ -222,12 +222,12 @@ include::knn-specific-algo-config.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type    | Description
-| nodesCompared          | Integer | The number of nodes compared.
-| relationshipsWritten   | Integer | The number of relationships created.
 | createMillis           | Integer | Milliseconds for loading data.
 | computeMillis          | Integer | Milliseconds for running the algorithm.
 | writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
-| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
 | similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
 | configuration          | Map     | The configuration used for running the algorithm.
 |===
@@ -259,7 +259,10 @@ YIELD
 
 include::../common-configuration/common-write-relationships-configuration-anonymous-graph.adoc[]
 
-Please note that the values for `relationshipProjection` or `relationshipQuery` are being used and respected for the graph loading, but loaded relationships are being ignored.
+[NOTE]
+====
+The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.
+====
 
 include::knn-specific-algo-config.adoc[]
 
@@ -279,8 +282,6 @@ CREATE (carol:Person {name: 'Carol', age: 24})
 CREATE (dave:Person {name: 'Dave', age: 48})
 CREATE (eve:Person {name: 'Eve', age: 67});
 ----
-
-This graph as persons, each with an age property.
 
 In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on their age.
 
@@ -304,8 +305,6 @@ CALL gds.graph.create(
     '*'
 );
 ----
-
-In the following examples we will demonstrate using the K-Nearest Neighbors algorithm on this graph.
 
 
 [[algorithms-knn-examples-memory-estimation]]
