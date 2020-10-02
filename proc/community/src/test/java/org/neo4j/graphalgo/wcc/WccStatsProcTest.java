@@ -83,4 +83,19 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
             }, "")
         )));
     }
+
+    @Test
+    void zeroComponentsInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("wcc")
+            .statsMode()
+            .yields("componentCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
+    }
 }
