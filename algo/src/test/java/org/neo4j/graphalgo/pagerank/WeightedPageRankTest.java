@@ -20,154 +20,144 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @GdlExtension
 class WeightedPageRankTest {
 
-    private static final PageRankBaseConfig DEFAULT_CONFIG = ImmutablePageRankStreamConfig
-        .builder()
-        .maxIterations(40)
-        .build();
+    private static final String NODE_CREATE_QUERY =
+        "CREATE" +
+        "  (a:Label)" +
+        ", (b:Label)" +
+        ", (c:Label)" +
+        ", (d:Label)" +
+        ", (e:Label)" +
+        ", (f:Label)" +
+        ", (g:Label)" +
+        ", (h:Label)" +
+        ", (i:Label)" +
+        ", (j:Label)";
+
+    @GdlGraph(graphNamePrefix = "zeroWeights")
+    private static final String ZERO_WEIGHTS_GRAPH =
+        NODE_CREATE_QUERY +
+        "  (b)-[:TYPE1 {weight: 0}]->(c)" +
+        ", (c)-[:TYPE1 {weight: 0}]->(b)" +
+        ", (d)-[:TYPE1 {weight: 0}]->(a)" +
+        ", (d)-[:TYPE1 {weight: 0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 0}]->(d)" +
+        ", (e)-[:TYPE1 {weight: 0}]->(f)" +
+        ", (f)-[:TYPE1 {weight: 0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 0}]->(e)";
+
+    @GdlGraph(graphNamePrefix = "constantWeight")
+    private static final String CONSTANT_WEIGHT_GRAPH =
+        NODE_CREATE_QUERY +
+        "  (b)-[:TYPE2 {weight: 1}]->(c)" +
+        ", (c)-[:TYPE2 {weight: 1}]->(b)" +
+        ", (d)-[:TYPE2 {weight: 1}]->(a)" +
+        ", (d)-[:TYPE2 {weight: 1}]->(b)" +
+        ", (e)-[:TYPE2 {weight: 1}]->(b)" +
+        ", (e)-[:TYPE2 {weight: 1}]->(d)" +
+        ", (e)-[:TYPE2 {weight: 1}]->(f)" +
+        ", (f)-[:TYPE2 {weight: 1}]->(b)" +
+        ", (f)-[:TYPE2 {weight: 1}]->(e)";
 
     @GdlGraph
-    private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Label)" +
-            ", (b:Label)" +
-            ", (c:Label)" +
-            ", (d:Label)" +
-            ", (e:Label)" +
-            ", (f:Label)" +
-            ", (g:Label)" +
-            ", (h:Label)" +
-            ", (i:Label)" +
-            ", (j:Label)" +
+    private static final String GRAPH =
+        NODE_CREATE_QUERY +
+        "  (b)-[:TYPE3 {weight: 1.0}]->(c)" +
+        ", (c)-[:TYPE3 {weight: 1.0}]->(b)" +
+        ", (d)-[:TYPE3 {weight: 0.3}]->(a)" +
+        ", (d)-[:TYPE3 {weight: 0.7}]->(b)" +
+        ", (e)-[:TYPE3 {weight: 0.9}]->(b)" +
+        ", (e)-[:TYPE3 {weight: 0.05}]->(d)" +
+        ", (e)-[:TYPE3 {weight: 0.05}]->(f)" +
+        ", (f)-[:TYPE3 {weight: 0.9}]->(b)" +
+        ", (f)-[:TYPE3 {weight: 0.1}]->(e)";
 
-            ", (b)-[:TYPE1 {weight: 0}]->(c)" +
-            ", (c)-[:TYPE1 {weight: 0}]->(b)" +
-            ", (d)-[:TYPE1 {weight: 0}]->(a)" +
-            ", (d)-[:TYPE1 {weight: 0}]->(b)" +
-            ", (e)-[:TYPE1 {weight: 0}]->(b)" +
-            ", (e)-[:TYPE1 {weight: 0}]->(d)" +
-            ", (e)-[:TYPE1 {weight: 0}]->(f)" +
-            ", (f)-[:TYPE1 {weight: 0}]->(b)" +
-            ", (f)-[:TYPE1 {weight: 0}]->(e)" +
+    @GdlGraph(graphNamePrefix = "negativeWeights")
+    private static final String NEGATIVE_WEIGHTS_GRAPH =
+        NODE_CREATE_QUERY +
+        ", (b)-[:TYPE4 {weight: 1.0}]->(c)" +
+        ", (c)-[:TYPE4 {weight: 1.0}]->(b)" +
+        ", (d)-[:TYPE4 {weight: 0.3}]->(a)" +
+        ", (d)-[:TYPE4 {weight: 0.7}]->(b)" +
+        ", (e)-[:TYPE4 {weight: 0.9}]->(b)" +
+        ", (e)-[:TYPE4 {weight: 0.05}]->(d)" +
+        ", (e)-[:TYPE4 {weight: 0.05}]->(f)" +
+        ", (f)-[:TYPE4 {weight: 0.9}]->(b)" +
+        ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
+        ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
-            ", (b)-[:TYPE2 {weight: 1}]->(c)" +
-            ", (c)-[:TYPE2 {weight: 1}]->(b)" +
-            ", (d)-[:TYPE2 {weight: 1}]->(a)" +
-            ", (d)-[:TYPE2 {weight: 1}]->(b)" +
-            ", (e)-[:TYPE2 {weight: 1}]->(b)" +
-            ", (e)-[:TYPE2 {weight: 1}]->(d)" +
-            ", (e)-[:TYPE2 {weight: 1}]->(f)" +
-            ", (f)-[:TYPE2 {weight: 1}]->(b)" +
-            ", (f)-[:TYPE2 {weight: 1}]->(e)" +
-
-            ", (b)-[:TYPE3 {weight: 1.0}]->(c)" +
-            ", (c)-[:TYPE3 {weight: 1.0}]->(b)" +
-            ", (d)-[:TYPE3 {weight: 0.3}]->(a)" +
-            ", (d)-[:TYPE3 {weight: 0.7}]->(b)" +
-            ", (e)-[:TYPE3 {weight: 0.9}]->(b)" +
-            ", (e)-[:TYPE3 {weight: 0.05}]->(d)" +
-            ", (e)-[:TYPE3 {weight: 0.05}]->(f)" +
-            ", (f)-[:TYPE3 {weight: 0.9}]->(b)" +
-            ", (f)-[:TYPE3 {weight: 0.1}]->(e)" +
-
-            ", (b)-[:TYPE4 {weight: 1.0}]->(c)" +
-            ", (c)-[:TYPE4 {weight: 1.0}]->(b)" +
-            ", (d)-[:TYPE4 {weight: 0.3}]->(a)" +
-            ", (d)-[:TYPE4 {weight: 0.7}]->(b)" +
-            ", (e)-[:TYPE4 {weight: 0.9}]->(b)" +
-            ", (e)-[:TYPE4 {weight: 0.05}]->(d)" +
-            ", (e)-[:TYPE4 {weight: 0.05}]->(f)" +
-            ", (f)-[:TYPE4 {weight: 0.9}]->(b)" +
-            ", (f)-[:TYPE4 {weight: -0.9}]->(a)" +
-            ", (f)-[:TYPE4 {weight: 0.1}]->(e)";
 
     @Inject
-    private GraphStore graphStore;
+    private TestGraph zeroWeightsGraph;
 
     @Inject
-    private IdFunction idFunction;
+    private TestGraph constantWeightGraph;
+
+    @Inject
+    private TestGraph graph;
+
+    @Inject
+    private TestGraph negativeWeightsGraph;
 
     @Test
     void defaultWeightOf0MeansNoDiffusionOfPageRank() {
         var expected = Map.of(
-            idFunction.of("a"), 0.15,
-            idFunction.of("b"), 0.15,
-            idFunction.of("c"), 0.15,
-            idFunction.of("d"), 0.15,
-            idFunction.of("e"), 0.15,
-            idFunction.of("f"), 0.15,
-            idFunction.of("g"), 0.15,
-            idFunction.of("h"), 0.15,
-            idFunction.of("i"), 0.15,
-            idFunction.of("j"), 0.15
+            "a", 0.15,
+            "b", 0.15,
+            "c", 0.15,
+            "d", 0.15,
+            "e", 0.15,
+            "f", 0.15,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
-        var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("Label")),
-            List.of(RelationshipType.of("TYPE1")),
-            Optional.of("weight")
-        );
-
-        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
+        PageRankTest.assertResult(zeroWeightsGraph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 
     @Test
     void allWeightsTheSameShouldBeTheSameAsPageRank() {
         var expected = Map.of(
-            idFunction.of("a"), 0.243007,
-            idFunction.of("b"), 1.9183995,
-            idFunction.of("c"), 1.7806315,
-            idFunction.of("d"), 0.21885,
-            idFunction.of("e"), 0.243007,
-            idFunction.of("f"), 0.21885,
-            idFunction.of("g"), 0.15,
-            idFunction.of("h"), 0.15,
-            idFunction.of("i"), 0.15,
-            idFunction.of("j"), 0.15
+            "a", 0.243007,
+            "b", 1.9183995,
+            "c", 1.7806315,
+            "d", 0.21885,
+            "e", 0.243007,
+            "f", 0.21885,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
-        var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("Label")),
-            List.of(RelationshipType.of("TYPE2")),
-            Optional.of("weight")
-        );
-
-        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
+        PageRankTest.assertResult(constantWeightGraph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 
     @Test
     void higherWeightsLeadToHigherPageRank() {
         var expected = Map.of(
-            idFunction.of("a"), 0.1900095,
-            idFunction.of("b"), 2.2152279,
-            idFunction.of("c"), 2.0325884,
-            idFunction.of("d"), 0.1569275,
-            idFunction.of("e"), 0.1633280,
-            idFunction.of("f"), 0.1569275,
-            idFunction.of("g"), 0.15,
-            idFunction.of("h"), 0.15,
-            idFunction.of("i"), 0.15,
-            idFunction.of("j"), 0.15
-        );
-
-        var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("Label")),
-            List.of(RelationshipType.of("TYPE3")),
-            Optional.of("weight")
+            "a", 0.1900095,
+            "b", 2.2152279,
+            "c", 2.0325884,
+            "d", 0.1569275,
+            "e", 0.1633280,
+            "f", 0.1569275,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
         PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
@@ -176,24 +166,18 @@ class WeightedPageRankTest {
     @Test
     void shouldExcludeNegativeWeights() {
         var expected = Map.of(
-            idFunction.of("a"), 0.1900095,
-            idFunction.of("b"), 2.2152279,
-            idFunction.of("c"), 2.0325884,
-            idFunction.of("d"), 0.1569275,
-            idFunction.of("e"), 0.1633280,
-            idFunction.of("f"), 0.1569275,
-            idFunction.of("g"), 0.15,
-            idFunction.of("h"), 0.15,
-            idFunction.of("i"), 0.15,
-            idFunction.of("j"), 0.15
+            "a", 0.1900095,
+            "b", 2.2152279,
+            "c", 2.0325884,
+            "d", 0.1569275,
+            "e", 0.1633280,
+            "f", 0.1569275,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
-        var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("Label")),
-            List.of(RelationshipType.of("TYPE4")),
-            Optional.of("weight")
-        );
-
-        PageRankTest.assertResult(graph, PageRankAlgorithmType.WEIGHTED, expected);
+        PageRankTest.assertResult(negativeWeightsGraph, PageRankAlgorithmType.WEIGHTED, expected);
     }
 }

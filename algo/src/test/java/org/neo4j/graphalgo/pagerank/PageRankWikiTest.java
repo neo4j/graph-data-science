@@ -69,18 +69,18 @@ class PageRankWikiTest {
 
     @Test
     void test() {
-        var expected = new HashMap<Long, Double>();
-        expected.put(graph.toMappedNodeId("a"), 0.3040965);
-        expected.put(graph.toMappedNodeId("b"), 3.5658695);
-        expected.put(graph.toMappedNodeId("c"), 3.180981);
-        expected.put(graph.toMappedNodeId("d"), 0.3625935);
-        expected.put(graph.toMappedNodeId("e"), 0.7503465);
-        expected.put(graph.toMappedNodeId("f"), 0.3625935);
-        expected.put(graph.toMappedNodeId("g"), 0.15);
-        expected.put(graph.toMappedNodeId("h"), 0.15);
-        expected.put(graph.toMappedNodeId("i"), 0.15);
-        expected.put(graph.toMappedNodeId("j"), 0.15);
-        expected.put(graph.toMappedNodeId("k"), 0.15);
+        var expected = new HashMap<String, Double>();
+        expected.put("a", 0.3040965);
+        expected.put("b", 3.5658695);
+        expected.put("c", 3.180981);
+        expected.put("d", 0.3625935);
+        expected.put("e", 0.7503465);
+        expected.put("f", 0.3625935);
+        expected.put("g", 0.15);
+        expected.put("h", 0.15);
+        expected.put("i", 0.15);
+        expected.put("j", 0.15);
+        expected.put("k", 0.15);
 
         assertResult(graph, PageRankAlgorithmType.NON_WEIGHTED, expected);
     }

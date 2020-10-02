@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -88,16 +87,16 @@ final class PageRankTest {
     @Test
     void testOnOutgoingRelationships() {
         var expected = Map.of(
-            naturalGraph.toMappedNodeId("a"), 0.243007,
-            naturalGraph.toMappedNodeId("b"), 1.9183995,
-            naturalGraph.toMappedNodeId("c"), 1.7806315,
-            naturalGraph.toMappedNodeId("d"), 0.21885,
-            naturalGraph.toMappedNodeId("e"), 0.243007,
-            naturalGraph.toMappedNodeId("f"), 0.21885,
-            naturalGraph.toMappedNodeId("g"), 0.15,
-            naturalGraph.toMappedNodeId("h"), 0.15,
-            naturalGraph.toMappedNodeId("i"), 0.15,
-            naturalGraph.toMappedNodeId("j"), 0.15
+            "a", 0.243007,
+            "b", 1.9183995,
+            "c", 1.7806315,
+            "d", 0.21885,
+            "e", 0.243007,
+            "f", 0.21885,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
         assertResult(this.naturalGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
@@ -106,16 +105,16 @@ final class PageRankTest {
     @Test
     void testOnIncomingRelationships() {
         var expected = Map.of(
-            reverseGraph.toMappedNodeId("a"), 0.15,
-            reverseGraph.toMappedNodeId("b"), 0.3386727,
-            reverseGraph.toMappedNodeId("c"), 0.2219679,
-            reverseGraph.toMappedNodeId("d"), 0.3494679,
-            reverseGraph.toMappedNodeId("e"), 2.5463981,
-            reverseGraph.toMappedNodeId("f"), 2.3858317,
-            reverseGraph.toMappedNodeId("g"), 0.15,
-            reverseGraph.toMappedNodeId("h"), 0.15,
-            reverseGraph.toMappedNodeId("i"), 0.15,
-            reverseGraph.toMappedNodeId("j"), 0.15
+            "a", 0.15,
+            "b", 0.3386727,
+            "c", 0.2219679,
+            "d", 0.3494679,
+            "e", 2.5463981,
+            "f", 2.3858317,
+            "g", 0.15,
+            "h", 0.15,
+            "i", 0.15,
+            "j", 0.15
         );
 
         assertResult(reverseGraph, PageRankAlgorithmType.NON_WEIGHTED, expected);
@@ -192,18 +191,18 @@ final class PageRankTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 
-    static void assertResult(Graph graph, PageRankAlgorithm algorithmType, Map<Long, Double> expected) {
+    static void assertResult(TestGraph graph, PageRankAlgorithm algorithmType, Map<String, Double> expected) {
         var rankResult = algorithmType
             .create(graph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
             .compute()
             .result();
 
-        expected.forEach((originalNodeId, expectedPageRank) -> {
+        expected.forEach((node, expectedPageRank) -> {
             assertEquals(
-                expected.get(originalNodeId),
-                rankResult.score(graph.toMappedNodeId(originalNodeId)),
+                expected.get(node),
+                rankResult.score(graph.toOriginalNodeId(node)),
                 1e-2,
-                "Node#" + originalNodeId
+                "Node#" + node
             );
         });
     }
