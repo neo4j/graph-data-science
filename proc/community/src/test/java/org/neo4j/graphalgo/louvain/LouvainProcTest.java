@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.IterationsConfigTest;
@@ -58,7 +57,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
     SeedConfigTest<Louvain, CONFIG, Louvain>,
-    ConsecutiveIdsConfigTest<Louvain, CONFIG, Louvain>,
     IterationsConfigTest<Louvain, CONFIG, Louvain>,
     RelationshipWeightConfigTest<Louvain, CONFIG, Louvain>,
     ToleranceConfigTest<Louvain, CONFIG, Louvain>,

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
@@ -44,7 +45,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
-    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
+    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
     public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {

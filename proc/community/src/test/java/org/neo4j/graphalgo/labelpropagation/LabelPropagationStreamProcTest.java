@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -39,7 +40,9 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> {
+class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropagationStreamConfig> implements
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationStreamConfig, LabelPropagation> {
+
     @Override
     public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig>> getProcedureClazz() {
         return LabelPropagationStreamProc.class;

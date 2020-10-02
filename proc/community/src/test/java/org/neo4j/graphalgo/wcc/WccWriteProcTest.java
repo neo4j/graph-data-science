@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -37,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
+class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
+    ConsecutiveIdsConfigTest<Wcc, WccWriteConfig, DisjointSetStruct> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";

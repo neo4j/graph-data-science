@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -44,7 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
+public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements
+    MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
 
     @Override
     public String mutateProperty() {

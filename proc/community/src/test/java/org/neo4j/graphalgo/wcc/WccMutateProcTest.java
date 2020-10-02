@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -40,7 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements MutateNodePropertyTest<Wcc, WccMutateConfig, DisjointSetStruct> {
+class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
+    MutateNodePropertyTest<Wcc, WccMutateConfig, DisjointSetStruct>,
+    ConsecutiveIdsConfigTest<Wcc, WccMutateConfig, DisjointSetStruct> {
 
     @Override
     public String mutateProperty() {
