@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 
 import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -50,6 +51,7 @@ public abstract class BaseTest {
         builder.impermanent();
         builder.noOpSystemGraphInitializer();
         builder.addExtension(new EnterpriseLicensingExtension());
+        builder.addExtension(new AllocationTrackerExtensionFactory());
     }
 
     protected long clearDb() {

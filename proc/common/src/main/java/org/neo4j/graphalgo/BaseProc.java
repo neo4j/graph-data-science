@@ -22,7 +22,6 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -80,9 +79,15 @@ public abstract class BaseProc {
     @Context
     public ProcedureCallContext callContext;
 
+    @Context
+    public AllocationTracker tracker;
+
     protected BaseProc() {
         if (GdsEdition.instance().isInvalidLicense()) {
             throw new RuntimeException(GdsEdition.instance().errorMessage().get());
+        }
+        if (tracker == null) {
+            tracker = AllocationTracker.empty();
         }
     }
 
@@ -248,8 +253,6 @@ public abstract class BaseProc {
     }
 
     protected AllocationTracker allocationTracker() {
-        var memoryTracker = Neo4jProxy.memoryTracker(transaction);
-        var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
-        return AllocationTracker.create(memoryTrackerProxy);
+        return tracker;
     }
 }
