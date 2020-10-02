@@ -30,9 +30,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +46,6 @@ class RandomGraphGeneratorTest {
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
@@ -56,90 +53,73 @@ class RandomGraphGeneratorTest {
         assertEquals(nbrNodes * avgDeg, graph.relationshipCount());
 
         graph.forEachNode((nodeId) -> {
-            long[] degree = {0L};
-
-            graph.forEachRelationship(nodeId, (a, b) -> {
-                degree[0] = degree[0] + 1;
-                return true;
-            });
-
-            assertEquals(avgDeg, degree[0]);
+            assertEquals(avgDeg, graph.degree(nodeId));
             return true;
         });
     }
 
     @Test
     void shouldGenerateRelsPowerLawDistributed() {
-        int nbrNodes = 10000;
+        int nbrNodes = 10_000;
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .allocationTracker(AllocationTracker.empty())
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         assertEquals(graph.nodeCount(), nbrNodes);
-        assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1000D);
+        assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1_000D);
     }
 
     @Test
     void shouldNotGenerateSelfLoops() {
         int nbrNodes = 1000;
         long avgDeg = 5L;
-        AllowSelfLoops allowSelfLoops = AllowSelfLoops.NO;
 
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .aggregation(Aggregation.NONE)
             .orientation(Orientation.UNDIRECTED)
-            .allowSelfLoops(allowSelfLoops)
-            .allocationTracker(AllocationTracker.empty())
+            .allowSelfLoops(AllowSelfLoops.NO)
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             graph.forEachRelationship(nodeId, (src, trg) -> {
-               Assertions.assertNotEquals(src, trg);
-               return true;
+                Assertions.assertNotEquals(src, trg);
+                return true;
             });
         }
     }
 
     @Test
     void shouldGenerateRelsRandomDistributed() {
-        int nbrNodes = 1000;
+        int nbrNodes = 1_000;
         long avgDeg = 5L;
 
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.RANDOM)
-            .allocationTracker(AllocationTracker.empty())
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         assertEquals(graph.nodeCount(), nbrNodes);
 
-        List<Long> degrees = new ArrayList<Long>();
-        graph.forEachNode((nodeId) -> {
-            long[] degree = {0L};
-
-            graph.forEachRelationship(nodeId, (a, b) -> {
-                degree[0] = degree[0] + 1;
+        AtomicLong actualRelCount = new AtomicLong();
+        graph.forEachNode(node -> {
+                actualRelCount.addAndGet(graph.degree(node));
                 return true;
-            });
+            }
+        );
 
-            degrees.add(degree[0]);
-            return true;
-        });
+        double actualAverage = actualRelCount.get() / (double) nbrNodes;
 
-        double actualAverage = degrees.stream().reduce(Long::sum).orElseGet(() -> 0L) / (double) degrees.size();
-        assertEquals((double) avgDeg, actualAverage, 1D);
+        assertEquals((double) avgDeg, actualAverage, 0.5D);
     }
 
     @Test
@@ -147,18 +127,18 @@ class RandomGraphGeneratorTest {
         int nbrNodes = 10;
         long avgDeg = 5L;
 
+        double fixedValue = 42D;
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.fixed("property", 42D))
-            .allocationTracker(AllocationTracker.empty())
+            .relationshipPropertyProducer(PropertyProducer.fixed("property", fixedValue))
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
-                assertEquals(42D, p);
+                assertEquals(fixedValue, p);
                 return true;
             });
             return true;
@@ -167,22 +147,21 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateRelationshipWithRandom() {
-        int nbrNodes = 10;
-        long avgDeg = 5L;
+        int lowerBound = -10;
+        int upperBound = 10;
 
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
-            .nodeCount(nbrNodes)
-            .averageDegree(avgDeg)
+            .nodeCount(10)
+            .averageDegree(5L)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.random("prop", -10, 10))
-            .allocationTracker(AllocationTracker.empty())
+            .relationshipPropertyProducer(PropertyProducer.random("prop", lowerBound, upperBound))
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
         graph.forEachNode((nodeId) -> {
             graph.forEachRelationship(nodeId, Double.NaN, (s, t, p) -> {
-                assertTrue(p >= -10);
-                assertTrue(p <= 10);
+                assertTrue(p >= lowerBound);
+                assertTrue(p <= upperBound);
                 return true;
             });
             return true;
@@ -191,20 +170,23 @@ class RandomGraphGeneratorTest {
 
     @Test
     void shouldGenerateNodeProperties() {
+        int lowerBound = 0;
+        int upperBound = 1;
         HugeGraph graph = RandomGraphGenerator.builder()
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .allocationTracker(AllocationTracker.empty())
-            .nodePropertyProducer(PropertyProducer.random("foo", 0, 1))
+            .nodePropertyProducer(PropertyProducer.random("foo", lowerBound, upperBound))
             .build()
             .generate();
 
         NodeProperties nodeProperties = graph.nodeProperties("foo");
-        for (int nodeId = 0; nodeId < 10; nodeId++) {
-            double value = nodeProperties.doubleValue(nodeId);
-            assertTrue(0 <= value && value <= 1);
-        }
+        graph.forEachNode(nodeId -> {
+                double value = nodeProperties.doubleValue(nodeId);
+                assertTrue(lowerBound <= value && value <= upperBound);
+                return true;
+            }
+        );
     }
 
     @Test
@@ -249,16 +231,14 @@ class RandomGraphGeneratorTest {
             .build()
             .generate();
 
-        AtomicInteger actualRelCount = new AtomicInteger();
+        AtomicLong actualRelCount = new AtomicLong();
+
         graph.forEachNode(node -> {
-                graph.forEachRelationship(node, (src, trg) -> {
-                    actualRelCount.getAndIncrement();
-                    return true;
-                });
+                actualRelCount.addAndGet(graph.degree(node));
                 return true;
             }
         );
 
-        assertEquals(actualRelCount.longValue(), graph.relationshipCount());
+        assertEquals(actualRelCount.get(), graph.relationshipCount());
     }
 }
