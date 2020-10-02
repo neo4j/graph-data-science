@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.centrality.eigenvector.ImmutableEigenvectorCentralityConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -104,7 +105,7 @@ final class EigenvectorCentralityTest {
                     0,
                     "PageRank",
                     DEFAULT_EIGENVECTOR_CONFIG.concurrency()
-                )
+                ), AllocationTracker.empty()
             )
             .compute()
             .result();

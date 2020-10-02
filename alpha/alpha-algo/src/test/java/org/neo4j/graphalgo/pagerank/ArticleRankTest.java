@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -97,7 +98,8 @@ final class ArticleRankTest {
                 graph,
                 DEFAULT_CONFIG,
                 LongStream.empty(),
-                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", DEFAULT_CONFIG.concurrency())
+                new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", DEFAULT_CONFIG.concurrency()),
+                AllocationTracker.empty()
             ).compute()
             .result();
 

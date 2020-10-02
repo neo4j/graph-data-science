@@ -173,7 +173,8 @@ final class PageRankTest {
             naturalGraph,
             config,
             LongStream.empty(),
-            testLogger
+            testLogger,
+            AllocationTracker.empty()
         );
 
         pageRank.compute();
@@ -193,7 +194,7 @@ final class PageRankTest {
 
     static void assertResult(TestGraph graph, PageRankAlgorithm algorithmType, Map<String, Double> expected) {
         var rankResult = algorithmType
-            .create(graph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER)
+            .create(graph, DEFAULT_CONFIG, LongStream.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute()
             .result();
 
