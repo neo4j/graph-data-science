@@ -35,4 +35,11 @@ public final class ConditionFactory {
             return true;
         }, "a map containing all entries of %s", map.toString());
     }
+
+    public static <K, V> Condition<Map<K, V>> containsExactlyInAnyOrderEntriesOf(Map<K, V> map) {
+        return new Condition<>(m -> {
+            assertThat(m).containsExactlyInAnyOrderEntriesOf(map);
+            return true;
+        }, "a map containing all entries of %s", map.toString());
+    }
 }
