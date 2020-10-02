@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
@@ -31,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
 
 class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
@@ -59,28 +58,25 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
         assertCypherResult(query, List.of(Map.of(
             "componentCount", 3L,
             "componentDistribution", Map.of(
-                    "min", 1L,
-                    "max", 7L,
-                    "mean", 3.3333333333333335D,
-                    "p50", 2L,
-                    "p75", 2L,
-                    "p90", 7L,
-                    "p95", 7L,
-                    "p99", 7L,
-                    "p999", 7L
+                "min", 1L,
+                "max", 7L,
+                "mean", 3.3333333333333335D,
+                "p50", 2L,
+                "p75", 2L,
+                "p90", 7L,
+                "p95", 7L,
+                "p99", 7L,
+                "p999", 7L
             ),
             "createMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
             "postProcessingMillis", greaterThanOrEqualTo(0L),
-            "configuration", new Condition<Map<String, Object>>(map -> {
-                assertThat(map).containsAllEntriesOf(MapUtil.map(
-                    "consecutiveIds", false,
-                    "threshold", 0D,
-                    "seedProperty", null,
-                    "relationshipWeightProperty", null
-                ));
-                return true;
-            }, "")
+            "configuration", containsAllEntriesOf(MapUtil.map(
+                "consecutiveIds", false,
+                "threshold", 0D,
+                "seedProperty", null,
+                "relationshipWeightProperty", null
+            ))
         )));
     }
 
