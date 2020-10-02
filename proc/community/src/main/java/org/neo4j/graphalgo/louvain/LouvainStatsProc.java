@@ -137,7 +137,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
                     computeMillis,
                     postProcessingDuration,
                     levels,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     modularity,
                     modularities,
                     communityHistogramOrNull(),
