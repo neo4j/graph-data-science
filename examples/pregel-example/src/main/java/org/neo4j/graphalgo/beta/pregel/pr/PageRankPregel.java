@@ -41,6 +41,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
     static final String PAGE_RANK = "pagerank";
 
+    private static boolean weighted;
+
     @Override
     public Pregel.NodeSchema nodeSchema() {
         return new NodeSchemaBuilder()
@@ -54,6 +56,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             ? context.nodeProperties(context.config().seedProperty()).doubleValue(context.nodeId())
             : 1.0 / context.nodeCount();
         context.setNodeValue(PAGE_RANK, initialValue);
+
+        weighted = context.config().relationshipWeightProperty() != null;
     }
 
     @Override
@@ -76,7 +80,18 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         }
 
         // send new rank to neighbors
-        context.sendToNeighbors(newRank / context.degree());
+        if (weighted) {
+            // normalized via `applyRelationshipWeight`
+            context.sendToNeighbors(newRank);
+        } else {
+            context.sendToNeighbors(newRank / context.degree());
+        }
+    }
+
+    @Override
+    public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
+        // ! assuming normalized relationshipWeights (sum of outgoing edge weights = 1 and none negative weights)
+        return nodeValue * relationshipWeight;
     }
 
     @ValueClass
