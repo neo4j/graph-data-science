@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,10 +80,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
-    }
-
-    public IdMap(HugeLongArray graphIds, HugeSparseLongArray nodeToGraphIds, long nodeCount) {
-        this(graphIds, nodeToGraphIds, Collections.emptyMap(), nodeCount);
     }
 
     /**
