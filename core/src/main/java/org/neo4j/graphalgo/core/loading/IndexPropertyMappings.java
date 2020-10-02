@@ -146,7 +146,7 @@ final class IndexPropertyMappings {
             return false;
         }
 
-        // check of the index is online
+        // check if the index is online
         try {
             // give it a second
             schema.awaitIndexOnline(index.getName(), 1, TimeUnit.SECONDS);
@@ -210,7 +210,6 @@ final class IndexPropertyMappings {
             var storeMappings = storeMappingsBuilder.build();
             if (storeMappings.hasMappings()) {
                 builder.putStoredProperty(nodeLabel, storeMappings);
-
             }
 
             // check if we got indexed properties that we need to load

@@ -89,12 +89,12 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             while (indexCursor.next()) {
                 if (indexCursor.hasValue()) {
                     var node = indexCursor.nodeReference();
+                    var nodeId = idMap.toMappedNodeId(node);
                     var numberOfProperties = indexCursor.numberOfProperties();
                     for (int i = 0; i < numberOfProperties; i++) {
                         var propertyKey = indexCursor.propertyKey(i);
                         if (propertyId == propertyKey) {
                             var propertyValue = indexCursor.propertyValue(i);
-                            var nodeId = idMap.toMappedNodeId(node);
                             propertiesBuilder.set(nodeId, propertyValue);
                             imported += 1;
                             if ((imported & 0x1_FFFFL) == 0L) {

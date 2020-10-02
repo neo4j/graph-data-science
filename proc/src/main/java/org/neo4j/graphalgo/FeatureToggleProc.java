@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class FeatureToggleProc {
 
     @Procedure("gds.features.importer.skipOrphanNodes")
-    @Description("Toggle whether orphan nodes should be skipped during import")
+    @Description("Toggle whether orphan nodes should be skipped during import.")
     public void skipOrphanNodes(@Name(value = "skipOrphanNodes") boolean skipOrphanNodes) {
         GdsFeatureToggles.SKIP_ORPHANS.toggle(skipOrphanNodes);
     }
@@ -49,7 +49,7 @@ public final class FeatureToggleProc {
     }
 
     @Procedure("gds.features.importer.usePreAggregation")
-    @Description("Toggle whether the importer should pre-aggregate relationships")
+    @Description("Toggle whether the importer should pre-aggregate relationships.")
     public void usePreAggregation(@Name(value = "usePreAggregation") boolean usePreAggregation) {
         GdsFeatureToggles.USE_PRE_AGGREGATION.toggle(usePreAggregation);
     }
@@ -62,7 +62,7 @@ public final class FeatureToggleProc {
     }
 
     @Procedure("gds.features.useKernelTracker")
-    @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used")
+    @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used.")
     public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
         GdsFeatureToggles.USE_KERNEL_TRACKER.toggle(useKernelTracker);
     }
@@ -75,7 +75,7 @@ public final class FeatureToggleProc {
     }
 
     @Procedure("gds.features.usePropertyValueIndex")
-    @Description("Toggle whether the property value index should be used during node property loading")
+    @Description("Toggle whether the property value index should be used during node property loading.")
     public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
         GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.toggle(usePropertyValueIndex);
     }
@@ -88,7 +88,7 @@ public final class FeatureToggleProc {
     }
 
     @Procedure("gds.features.maxArrayLengthShift")
-    @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two")
+    @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two.")
     public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {
         if (maxArrayLengthShift <= 0 || maxArrayLengthShift >= Integer.SIZE) {
             throw new IllegalArgumentException(formatWithLocale(
