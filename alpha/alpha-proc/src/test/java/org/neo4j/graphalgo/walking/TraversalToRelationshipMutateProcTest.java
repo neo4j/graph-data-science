@@ -36,10 +36,11 @@ import org.neo4j.graphalgo.impl.walking.TraversalToRelationshipConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
@@ -133,23 +134,19 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
             .mutateMode()
             .addParameter("relationshipTypes", List.of("KNOWS", "KNOWS"))
             .addParameter("mutateRelationshipType", "FoF")
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "mutateMillis",
-                "relationshipsWritten",
-                "configuration"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(
+        assertCypherResult(
             query,
-            row -> {
-                assertEquals(1L, row.getNumber("relationshipsWritten"));
-
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
-            }
+            List.of(
+                Map.of(
+                    "relationshipsWritten", 1L,
+                    "createMillis", greaterThan(-1L),
+                    "computeMillis", greaterThan(-1L),
+                    "mutateMillis", greaterThan(-1L),
+                    "configuration", instanceOf(Map.class)
+                )
+            )
         );
     }
 }
