@@ -106,7 +106,7 @@ public class PregelProcTest extends BaseProcTest {
         assertCypherResult(validationQuery, List.of(
             Map.of(
                 "long", 42L,
-                "double", 42L,
+                "double", 42.0D,
                 "long_array", new long[] {1, 3, 3, 7},
                 "double_array", new double[] {1, 9, 8, 4}
             )
@@ -139,7 +139,7 @@ public class PregelProcTest extends BaseProcTest {
 
         assertGraphEquals(
             fromGdl(
-                "(a { test_long: 42L, test_double: 42.0D, test_long_array: [1, 3, 3, 7], test_double_array: [1.0, 9.0, 8.0 4.0]})"),
+                "(a { test_long: 42L, test_double: 42.0D, test_long_array: [1L, 3L, 3L, 7L], test_double_array: [1.0, 9.0, 8.0, 4.0] })"),
             graph
         );
     }

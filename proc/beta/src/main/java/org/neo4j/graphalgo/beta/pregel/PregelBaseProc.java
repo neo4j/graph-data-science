@@ -22,7 +22,8 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
@@ -43,15 +44,29 @@ final class PregelBaseProc {
         // TODO change this to generic prefix setting
 
         return schema.elements().stream().map(schemaElement -> {
+
+            var propertyKey = schemaElement.propertyKey();
+
             NodeProperties nodeProperties;
-            if (schemaElement.propertyType() == ValueType.DOUBLE) {
-                nodeProperties = compositeNodeValue.doubleProperties(schemaElement.propertyKey()).asNodeProperties();
-            } else {
-                nodeProperties = compositeNodeValue.longProperties(schemaElement.propertyKey()).asNodeProperties();
+            switch (schemaElement.propertyType()) {
+                case LONG:
+                    nodeProperties = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
+                    break;
+                case DOUBLE:
+                    nodeProperties = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
+                    break;
+                case LONG_ARRAY:
+                    nodeProperties = (LongArrayNodeProperties) compositeNodeValue.longArrayProperties(propertyKey)::get;
+                    break;
+                case DOUBLE_ARRAY:
+                    nodeProperties = (DoubleArrayNodeProperties) compositeNodeValue.doubleArrayProperties(propertyKey)::get;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported property type: " + schemaElement.propertyType());
             }
 
             return ImmutableNodeProperty.of(
-                formatWithLocale("%s%s", propertyPrefix, schemaElement.propertyKey()),
+                formatWithLocale("%s%s", propertyPrefix, propertyKey),
                 nodeProperties
             );
         }).collect(Collectors.toList());
