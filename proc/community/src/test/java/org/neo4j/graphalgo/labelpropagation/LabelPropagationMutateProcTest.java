@@ -203,4 +203,20 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             }
         );
     }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("labelPropagation")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
+    }
 }

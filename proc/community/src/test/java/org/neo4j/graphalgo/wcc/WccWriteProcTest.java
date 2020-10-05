@@ -276,4 +276,20 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
             row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
         );
     }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("componentCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
+    }
 }

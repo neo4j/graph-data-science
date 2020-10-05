@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -183,6 +184,22 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
         assertEquals(10, louvainConfig.maxIterations());
         assertEquals(0.0001D, louvainConfig.tolerance());
         assertNull(louvainConfig.seedProperty());
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
     }
 
     @Override

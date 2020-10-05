@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -176,6 +177,22 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
                 ), row.get("componentDistribution"));
             }
         );
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("wcc")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .yields("componentCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
     }
 }
 

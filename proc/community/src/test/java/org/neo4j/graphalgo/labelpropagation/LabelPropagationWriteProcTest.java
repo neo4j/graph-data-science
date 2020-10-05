@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -430,5 +431,21 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             "bytesMin", 1656L,
             "bytesMax", 2168L
         )));
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
+        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
     }
 }

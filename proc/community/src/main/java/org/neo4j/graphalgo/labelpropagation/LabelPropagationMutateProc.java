@@ -138,7 +138,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
                     computeMillis,
                     mutateMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     ranIterations,
                     didConverge,
                     communityHistogramOrNull(),
