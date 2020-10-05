@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
-import java.util.List;
-
 public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig {
 
     @Configuration.Ignore
@@ -38,8 +36,4 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Tr
 
         return graphSageTrainConfig.featuresSize();
     }
-
-//    default GraphSageBaseConfig of(String modelName) {
-//        GraphSageBaseConfig
-//    }
 }
