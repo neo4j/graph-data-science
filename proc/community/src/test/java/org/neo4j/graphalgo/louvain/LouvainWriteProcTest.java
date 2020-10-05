@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -199,7 +199,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
             .addParameter("writeProperty", "foo")
             .yields("communityCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -290,6 +291,6 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
             .addParameter("writeProperty", "foo")
             .yields("componentCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
     }
 }

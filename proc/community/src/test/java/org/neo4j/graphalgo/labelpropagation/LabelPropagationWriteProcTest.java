@@ -446,6 +446,6 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             .addParameter("writeProperty", "foo")
             .yields("communityCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 }

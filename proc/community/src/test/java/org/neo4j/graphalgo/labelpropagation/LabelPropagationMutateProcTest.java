@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -217,6 +218,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .addParameter("mutateProperty", "foo")
             .yields("communityCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 }

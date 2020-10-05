@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -192,7 +193,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
             .addParameter("mutateProperty", "foo")
             .yields("componentCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
     }
 }
 

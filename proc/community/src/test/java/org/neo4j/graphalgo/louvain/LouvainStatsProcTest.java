@@ -100,6 +100,6 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
             .statsMode()
             .yields("communityCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("communityCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 }

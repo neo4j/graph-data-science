@@ -93,6 +93,6 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
             .statsMode()
             .yields("componentCount");
 
-        assertCypherResult(query, List.of(MapUtil.map("componentCount", 0L)));
+        assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
     }
 }
