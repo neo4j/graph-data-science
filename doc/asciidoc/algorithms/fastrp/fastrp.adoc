@@ -1,39 +1,46 @@
-[[algorithms-embeddings-random-projection]]
-[.alpha]
-= Random Projection
+[[algorithms-embeddings-fastrp]]
+= Fast Random Projection
 
 [abstract]
 --
-This section describes the Random Projection node embedding algorithm in the Neo4j Graph Data Science library.
+This section describes the Fast Random Projection (FastRP) node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
 This topic includes:
 
-* <<algorithms-embeddings-random-projection-introduction, Introduction>>
-* <<algorithms-embeddings-random-projection-syntax, Syntax>>
+* <<algorithms-embeddings-fastrp-introduction>>
+
+* <<algorithms-embeddings-fastrp-syntax, Syntax>>
+** <<algorithms-embeddings-fastrp-syntax-anonymous, Anonymous graphs>>
+* <<algorithms-embeddings-fastrp-examples, Examples>>
+** <<algorithms-embeddings-fastrp-examples-memory-estimation, Memory Estimation>>
+** <<algorithms-embeddings-fastrp-examples-stream, Stream>>
+** <<algorithms-embeddings-fastrp-examples-stats, Stats>>
+** <<algorithms-embeddings-fastrp-examples-mutate, Mutate>>
+** <<algorithms-embeddings-fastrp-examples-write, Write>>
+** <<algorithms-embeddings-fastrp-examples-weighted, Weighted>>
 * <<algorithms-embeddings-fastrp-parameter-tuning, Hyperparameter tuning>>
-* <<algorithms-embeddings-random-projection-examples, Examples>>
 
 
-[[algorithms-embeddings-random-projection-introduction]]
+[[algorithms-embeddings-fastrp-introduction]]
 == Introduction
 
-Random Projection is a node embedding algorithm in the family of random projection algorithms.
+Fast Random Projection, or FastRP for short, is a node embedding algorithm in the family of random projection algorithms.
 These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which, one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
-In fact the projection is linear and can be chosen in a random way.
+In fact, a linear projection chosen in a random way satisfies this property.
 
 Such techniques therefore allow for aggressive dimensionality reduction while preserving most of the distance information.
-The Random Projection operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
+The FastRP algorithm operates on graphs, in which case we care about preserving similarity between nodes and their neighbors.
 This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors.
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
-The Random Projection algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
+The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
 
 In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
-This way Random Projection exploits higher-order relationships in the graph while still being highly scalable.
+This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
 
 The present implementation extends the original algorithm to support weighted graphs, which computes weighted averages of neighboring embeddings using the relationship weights.
 In order to make use of this, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
@@ -50,16 +57,16 @@ For more information on this algorithm see:
 * https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 
-[[algorithms-embeddings-random-projection-syntax]]
+[[algorithms-embeddings-fastrp-syntax]]
 == Syntax
 
-.Random Projection syntax per mode
+.FastRP syntax per mode
 [.tabbed-example]
 ====
 
 [.include-with-stream]
 ======
-.Run Random Projection in stream mode on a named graph.
+.Run FastRP in stream mode on a named graph.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.stream(
@@ -87,7 +94,7 @@ include::specific-configuration.adoc[]
 
 [.include-with-write]
 ======
-.Run Random Projection in write mode on a graph stored in the catalog.
+.Run FastRP in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.write(
@@ -124,12 +131,12 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-embeddings-random-projection-syntax-anonymous]]
+[[algorithms-embeddings-fastrp-syntax-anonymous]]
 === Anonymous graphs
 
 include::../shared/syntax-anonymous-graphs.adoc[]
 
-.Run Random Projection in write mode on an anonymous graph.
+.Run FastRP in write mode on an anonymous graph.
 [source, cypher]
 ----
 CALL gds.alpha.randomProjection.write(
@@ -148,13 +155,248 @@ include::../common-configuration/common-configuration-anonymous-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
-The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-random-projection-syntax, write mode syntax above>>.
+The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-fastrp-syntax, write mode syntax above>>.
+
+
+
+
+[[algorithms-embeddings-fastrp-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=setup-query]
+----
+CREATE
+  (Dan:Person),
+  (Annie:Person),
+  (Matt:Person),
+  (Jeff:Person),
+  (Brie:Person),
+  (Elsa:Person),
+  (John:Person),
+
+  (Dan)-[:REL {weight: 1.0}]->(Annie),
+  (Dan)-[:REL {weight: 1.0}]->(Matt),
+  (Annie)-[:REL {weight: 1.0}]->(Matt),
+  (Annie)-[:REL {weight: 1.0}]->(Jeff),
+  (Annie)-[:REL {weight: 1.0}]->(Brie),
+  (Matt)-[:REL {weight: 3.5}]->(Brie),
+  (Brie)-[:REL {weight: 1.0}]->(Elsa),
+  (Brie)-[:REL {weight: 2.0}]->(Jeff),
+  (John)-[:REL {weight: 1.0}]->(Jeff);
+----
+
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'persons',
+  'Person',
+  {
+    REL: {
+      orientation: 'UNDIRECTED',
+        properties: {
+           weight: {
+             property: 'weight',
+             defaultValue: 1.0
+           }
+        }
+    }
+})
+----
+
+
+[[algorithms-embeddings-fastrp-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.stream.estimate('persons', {embeddingSize: 128})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 18                | 11368    | 11368    | "11368 Bytes"
+|===
+--
+
+
+[[algorithms-embeddings-fastrp-examples-stream]]
+=== Stream
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.stream(
+  'persons',
+  {
+    iterationWeights: [0.0, 0.34, 2.1],
+    embeddingSize: 3,
+    normalizationStrength: -0.71
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
+| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
+| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
+| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
+| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
+| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
+| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+|===
+--
+
+[NOTE]
+====
+Due to the random nature of the algorithm the results will vary between the runs.
+However, this does not necessarily mean that the pairwise distances of two node embeddings vary as much.
+====
+
+
+[[algorithms-embeddings-fastrp-examples-stats]]
+=== Stats
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.stats(
+  'persons',
+  {
+    iterationWeights: [0.0, 0.34, 2.1],
+    embeddingSize: 3,
+    normalizationStrength: -0.71
+  }
+)
+YIELD createMillis, computeMillis
+----
+
+[opts=header]
+.Results
+|===
+| createMillis | computeMillis
+| 0            | 5
+|===
+--
+
+
+[[algorithms-embeddings-fastrp-examples-mutate]]
+=== Mutate
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.mutate(
+  'persons',
+  {
+    iterationWeights: [0.0, 0.34, 2.1],
+    embeddingSize: 3,
+    normalizationStrength: -0.71,
+    mutateProperty: 'embedding'
+  }
+)
+YIELD nodePropertiesWritten, mutateMillis
+
+----
+
+[opts=header]
+.Results
+|===
+| nodePropertiesWritten | mutateMillis
+| 7                     | 0
+|===
+--
+
+
+[[algorithms-embeddings-fastrp-examples-write]]
+=== Write
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.write(
+  'persons',
+  {
+    iterationWeights: [0.0, 0.34, 2.1],
+    embeddingSize: 3,
+    normalizationStrength: -0.71,
+    writeProperty: 'embedding'
+  }
+)
+YIELD nodePropertiesWritten, writeMillis
+
+----
+
+[opts=header]
+.Results
+|===
+| nodePropertiesWritten | mutateMillis
+| 7                     | 212
+|===
+--
+
+
+[[algorithms-embeddings-fastrp-examples-weighted]]
+=== Weighted
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher]
+----
+CALL gds.alpha.randomProjection.stream(
+  'persons',
+  {
+    iterationWeights: [0.0, 0.34, 2.1],
+    embeddingSize: 3,
+    normalizationStrength: -0.71,
+    relationshipWeightProperty: 'weight'
+  }
+)
+YIELD nodeId, embedding
+----
+
+[opts=header]
+.Results
+|===
+| nodeId | embedding
+| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
+| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
+| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
+| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
+| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
+| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
+| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+|===
+--
 
 
 [[algorithms-embeddings-fastrp-parameter-tuning]]
 == Tuning algorithm parameters
 
-In order to improve the embedding quality using Random Projection on one of your graphs, it is possible to tune the algorithm parameters.
+In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
 This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
 We will go through each of the configuration parameters and explain how they behave.
 
@@ -191,79 +433,7 @@ The intuition here is that as the projections reach further away from the node, 
 
 === Orientation
 Choosing the right orientation when creating the graph may have the single biggest impact.
-The Random Projection algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
+The FastRP algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
 If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
 
 
-[[algorithms-embeddings-random-projection-examples]]
-== Examples
-
-Consider the graph created by the following Cypher statement:
-
-[source, cypher, role=setup-query]
-----
-CREATE
-  (Dan:Person),
-  (Annie:Person),
-  (Matt:Person),
-  (Jeff:Person),
-  (Brie:Person),
-  (Elsa:Person),
-  (John:Person),
-
-  (Dan)-[:REL]->(Annie),
-  (Dan)-[:REL]->(Matt),
-  (Annie)-[:REL]->(Matt),
-  (Annie)-[:REL]->(Jeff),
-  (Annie)-[:REL]->(Brie),
-  (Matt)-[:REL]->(Brie),
-  (Brie)-[:REL]->(Elsa),
-  (Brie)-[:REL]->(Jeff),
-  (John)-[:REL]->(Jeff);
-----
-
-[source, cypher, role=graph-create-query]
-----
-CALL gds.graph.create(
-  'persons',
-  'Person',
-  {
-    REL: {
-      orientation: 'UNDIRECTED'
-    }
-})
-----
-
-
-=== Stream
-
-[source, cypher, role=query-example, no-result=true]
-----
-CALL gds.alpha.randomProjection.stream(
-  'persons',
-  {
-    iterationWeights: [1.0, 1.0, 4.0],
-    embeddingSize: 3,
-    normalizationStrength: -0.9
-  }
-)
-----
-
-[opts=header]
-.Results
-|===
-| nodeId | embedding
-| 0      | [4.898722171783447,-2.360605239868164,-0.005474746227264404]
-| 1      | [4.2204999923706055,-3.6900253295898438,1.4258460998535156]
-| 2      | [2.1105315685272217,-4.533860206604004,1.5421669483184814]
-| 3      | [1.578028917312622,-3.608323574066162,-2.6669602394104004]
-| 4      | [4.866636753082275,-1.8121209144592285,0.38477471470832825]
-| 5      | [0.9328402280807495,-3.445551633834839,3.0306806564331055]
-| 6      | [4.526181221008301,-0.7839458584785461,-0.5074502825737]
-|===
-
-[NOTE]
-====
-Due to the random nature of the algorithm the results will vary between the runs.
-However, this does not necessarily mean that the pairwise distances of two node embeddings vary as much.
-====
