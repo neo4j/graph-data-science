@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.generator;
 
+import org.neo4j.graphalgo.core.utils.statistics.DistributionHelper;
+
 import java.util.Locale;
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
@@ -39,7 +41,7 @@ public enum RelationshipDistribution {
         @Override
         public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> DistributionHelper.gauseanSample(nodeCount, averageDegree, stdDev, random);
+            return (ignore) -> DistributionHelper.gaussianSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
@@ -52,7 +54,7 @@ public enum RelationshipDistribution {
         @Override
         public LongUnaryOperator degreeProducer(long nodeCount, long averageDegree, Random random) {
             long stdDev = averageDegree / 2;
-            return (ignore) -> DistributionHelper.gauseanSample(nodeCount, averageDegree, stdDev, random);
+            return (ignore) -> DistributionHelper.gaussianSample(nodeCount, averageDegree, stdDev, random);
         }
 
         @Override
