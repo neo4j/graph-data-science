@@ -34,18 +34,21 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PregelProcTest extends BaseProcTest {
 
@@ -54,7 +57,7 @@ public class PregelProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(StreamProc.class);
+        registerProcedures(StreamProc.class, WriteProc.class);
     }
 
     @Test
@@ -68,11 +71,92 @@ public class PregelProcTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, row -> {
             var values = (Map<String, Object>) row.get("values");
-            assertArrayEquals(new long[0], (long[]) values.get(CompositeTestAlgorithm.LONG_ARRAY_KEY));
-            assertArrayEquals(new double[0], (double[]) values.get(CompositeTestAlgorithm.DOUBLE_ARRAY_KEY));
-            assertTrue(Double.isNaN((double) values.get(CompositeTestAlgorithm.DOUBLE_KEY)));
-            assertEquals(Long.MIN_VALUE, values.get(CompositeTestAlgorithm.LONG_KEY));
+            assertEquals(42L, values.get(CompositeTestAlgorithm.LONG_KEY));
+            assertEquals(42.0D, values.get(CompositeTestAlgorithm.DOUBLE_KEY));
+            assertArrayEquals(new long[]{1, 3, 3, 7}, (long[]) values.get(CompositeTestAlgorithm.LONG_ARRAY_KEY));
+            assertArrayEquals(new double[]{1, 9, 8, 4}, (double[]) values.get(CompositeTestAlgorithm.DOUBLE_ARRAY_KEY));
         });
+    }
+
+    @Test
+    void write() {
+        var writePrefix = "test_";
+        var query = GdsCypher.call()
+            .loadEverything()
+            .algo("example", "pregel", "test")
+            .writeMode()
+            .addParameter("maxIterations", 20)
+            .addParameter("writeProperty", writePrefix)
+            .yields();
+
+        runQuery(query);
+
+        var validationQuery = formatWithLocale(
+            "MATCH (n) RETURN n.%s AS long, n.%s AS double, n.%s AS long_array, n.%s AS double_array",
+            writePrefix + CompositeTestAlgorithm.LONG_KEY,
+            writePrefix + CompositeTestAlgorithm.DOUBLE_KEY,
+            writePrefix + CompositeTestAlgorithm.LONG_ARRAY_KEY,
+            writePrefix + CompositeTestAlgorithm.DOUBLE_ARRAY_KEY
+        );
+
+        assertCypherResult(validationQuery, List.of(
+            Map.of(
+                "long", 42L,
+                "double", 42L,
+                "long_array", new long[] {1, 3, 3, 7},
+                "double_array", new double[] {1, 9, 8, 4}
+            )
+        ));
+    }
+
+    public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, PregelConfig> {
+
+        @Procedure(
+            name = "example.pregel.test.write",
+            mode = Mode.WRITE
+        )
+        @Description("Connected Components")
+        public Stream<PregelWriteResult> write(
+            @Name("graphName") Object graphNameOrConfig,
+            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        ) {
+            return write(compute(graphNameOrConfig, configuration));
+        }
+
+        @Override
+        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            var ranIterations = computeResult.result().ranIterations();
+            var didConverge = computeResult.result().didConverge();
+            return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
+        }
+
+        @Override
+        protected PregelConfig newConfig(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper config
+        ) {
+            return PregelConfig.of(username, graphName, maybeImplicitCreate, config);
+        }
+
+        @Override
+        protected AlgorithmFactory<CompositeTestAlgorithm, PregelConfig> algorithmFactory() {
+            return new AlgorithmFactory<>() {
+                @Override
+                public CompositeTestAlgorithm build(
+                    Graph graph,
+                    PregelConfig configuration, AllocationTracker tracker, Log log
+                ) {
+                    return new CompositeTestAlgorithm(graph, configuration, tracker, log);
+                }
+
+                @Override
+                public MemoryEstimation memoryEstimation(PregelConfig configuration) {
+                    return MemoryEstimations.empty();
+                }
+            };
+        }
     }
 
     public static class StreamProc extends PregelStreamProc<CompositeTestAlgorithm, PregelConfig> {
@@ -150,7 +234,12 @@ public class PregelProcTest extends BaseProcTest {
                 }
 
                 @Override
-                public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {}
+                public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+                    context.setNodeValue(LONG_KEY, 42L);
+                    context.setNodeValue(DOUBLE_KEY, 42.0D);
+                    context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
+                    context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
+                }
             }, Pools.DEFAULT, tracker);
         }
 
