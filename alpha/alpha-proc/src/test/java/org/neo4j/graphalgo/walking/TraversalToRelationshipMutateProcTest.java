@@ -66,7 +66,7 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            TraversalToRelationshipMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );

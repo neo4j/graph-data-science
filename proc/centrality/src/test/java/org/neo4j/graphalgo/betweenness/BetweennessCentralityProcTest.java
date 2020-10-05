@@ -69,10 +69,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            BetweennessCentralityStreamProc.class,
-            BetweennessCentralityWriteProc.class,
-            BetweennessCentralityMutateProc.class,
-            BetweennessCentralityStatsProc.class,
+            getProcedureClazz(),
             GraphWriteNodePropertiesProc.class,
             GraphCreateProc.class
         );

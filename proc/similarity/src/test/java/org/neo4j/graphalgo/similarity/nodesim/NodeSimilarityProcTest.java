@@ -89,10 +89,7 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            NodeSimilarityWriteProc.class,
-            NodeSimilarityStreamProc.class,
-            NodeSimilarityStatsProc.class,
-            NodeSimilarityMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class

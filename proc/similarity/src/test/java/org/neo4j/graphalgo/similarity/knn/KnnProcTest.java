@@ -79,10 +79,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            KnnStreamProc.class,
-            KnnWriteProc.class,
-            KnnMutateProc.class,
-            KnnStatsProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class

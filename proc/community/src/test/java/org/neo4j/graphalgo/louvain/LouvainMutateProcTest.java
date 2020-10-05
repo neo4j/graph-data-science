@@ -118,7 +118,8 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     }
 
     @Test
-    void testMutateAndWriteWithSeeding() {
+    void testMutateAndWriteWithSeeding() throws Exception {
+        registerProcedures(LouvainWriteProc.class);
         var testGraphName = mutateGraphName().get();
 
         var mutateQuery = GdsCypher

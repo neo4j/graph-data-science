@@ -27,16 +27,11 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -164,53 +159,5 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
         );
         assertMapEqualsWithTolerance(weightedExpected, actual);
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testStatsYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
-            .statsMode()
-            .addParameter("tolerance", 0.0001)
-            .yields("ranIterations", "didConverge", "configuration");
-
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertEquals(20, row.getNumber("ranIterations").longValue());
-                assertUserInput(row, "maxIterations", 20);
-                assertUserInput(row, "dampingFactor", 0.85D);
-                assertFalse(row.getBoolean("didConverge"));
-            }
-        );
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void statsShouldNotHaveWriteProperties(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
-            .statsMode()
-            .yields();
-
-        List<String> forbiddenResultColumns = Arrays.asList(
-            "writeMillis",
-            "nodePropertiesWritten",
-            "relationshipPropertiesWritten"
-        );
-        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
-        runQueryWithResultConsumer(query, result -> {
-            List<String> badResultColumns = result.columns()
-                .stream()
-                .filter(forbiddenResultColumns::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badResultColumns);
-            assertTrue(result.hasNext(), "Result must not be empty.");
-            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
-            List<String> badConfigKeys = config.keySet()
-                .stream()
-                .filter(forbiddenConfigKeys::contains)
-                .collect(Collectors.toList());
-            assertEquals(Collections.emptyList(), badConfigKeys);
-        });
     }
 }

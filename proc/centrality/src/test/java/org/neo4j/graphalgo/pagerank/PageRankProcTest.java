@@ -119,10 +119,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            PageRankStreamProc.class,
-            PageRankWriteProc.class,
-            PageRankMutateProc.class,
-            PageRankStatsProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );

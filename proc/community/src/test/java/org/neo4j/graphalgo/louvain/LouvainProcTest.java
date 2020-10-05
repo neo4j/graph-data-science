@@ -125,10 +125,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            LouvainStreamProc.class,
-            LouvainWriteProc.class,
-            LouvainStatsProc.class,
-            LouvainMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );

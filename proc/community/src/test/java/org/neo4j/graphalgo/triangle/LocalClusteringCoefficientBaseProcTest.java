@@ -97,10 +97,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
         registerProcedures(
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class,
-            LocalClusteringCoefficientStreamProc.class,
-            LocalClusteringCoefficientStatsProc.class,
-            LocalClusteringCoefficientWriteProc.class,
-            LocalClusteringCoefficientMutateProc.class
+            getProcedureClazz()
         );
 
         runQuery(createQuery());

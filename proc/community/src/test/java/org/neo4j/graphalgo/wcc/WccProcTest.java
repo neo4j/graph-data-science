@@ -92,10 +92,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            WccStreamProc.class,
-            WccWriteProc.class,
-            WccStatsProc.class,
-            WccMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );

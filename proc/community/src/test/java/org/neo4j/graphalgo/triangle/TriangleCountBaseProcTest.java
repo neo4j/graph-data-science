@@ -65,10 +65,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
         registerProcedures(
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class,
-            TriangleCountStreamProc.class,
-            TriangleCountStatsProc.class,
-            TriangleCountWriteProc.class,
-            TriangleCountMutateProc.class
+            getProcedureClazz()
         );
 
         runQuery(createQuery());

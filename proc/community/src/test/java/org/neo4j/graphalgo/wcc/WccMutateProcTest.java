@@ -94,7 +94,8 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
 
     @Test
-    void testMutateAndWriteWithSeeding() {
+    void testMutateAndWriteWithSeeding() throws Exception {
+        registerProcedures(WccWriteProc.class);
         var testGraphName = "wccGraph";
         var initialGraphStore = new StoreLoaderBuilder().api(db)
             .build()

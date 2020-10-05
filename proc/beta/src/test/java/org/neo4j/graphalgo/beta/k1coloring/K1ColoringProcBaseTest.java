@@ -59,10 +59,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
-            K1ColoringWriteProc.class,
-            K1ColoringStatsProc.class,
-            K1ColoringStreamProc.class,
-            K1ColoringMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class
         );
         runQuery(createQuery());

@@ -20,18 +20,25 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
 import static org.neo4j.graphalgo.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
@@ -101,5 +108,35 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
             .yields("communityCount");
 
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.louvain.LouvainProcTest#graphVariations")
+    void statsShouldNotHaveWriteProperties(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .algo("louvain")
+            .statsMode()
+            .yields();
+
+        List<String> forbiddenResultColumns = Arrays.asList(
+            "writeMillis",
+            "nodePropertiesWritten",
+            "relationshipPropertiesWritten"
+        );
+        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
+        runQueryWithResultConsumer(query, result -> {
+            List<String> badResultColumns = result.columns()
+                .stream()
+                .filter(forbiddenResultColumns::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badResultColumns);
+            assertTrue(result.hasNext(), "Result must not be empty.");
+            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+            List<String> badConfigKeys = config.keySet()
+                .stream()
+                .filter(forbiddenConfigKeys::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badConfigKeys);
+        });
     }
 }

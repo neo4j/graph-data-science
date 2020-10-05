@@ -21,17 +21,25 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
 
@@ -40,13 +48,14 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
         return "CREATE " +
                "  (a:Label1 {name: 'a'})" +
                ", (b:Label1 {name: 'b'})" +
-               ", (a)-[:REL]->(b)";
+               ", (a)-[:TYPE1]->(b)";
     }
 
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
         runQuery(createQuery());
+        runQuery("CALL gds.graph.create('graphLabel1', '*', '*')");
     }
 
     @Override
@@ -90,5 +99,34 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
                 assertNotNull(row.get("centralityDistribution"));
             }
         );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    void statsShouldNotHaveWriteProperties(GdsCypher.ModeBuildStage queryBuilder, String testCaseName) {
+        String query = queryBuilder
+            .statsMode()
+            .yields();
+
+        List<String> forbiddenResultColumns = Arrays.asList(
+            "writeMillis",
+            "nodePropertiesWritten",
+            "relationshipPropertiesWritten"
+        );
+        List<String> forbiddenConfigKeys = Collections.singletonList("writeProperty");
+        runQueryWithResultConsumer(query, result -> {
+            List<String> badResultColumns = result.columns()
+                .stream()
+                .filter(forbiddenResultColumns::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badResultColumns);
+            assertTrue(result.hasNext(), "Result must not be empty.");
+            Map<String, Object> config = (Map<String, Object>) result.next().get("configuration");
+            List<String> badConfigKeys = config.keySet()
+                .stream()
+                .filter(forbiddenConfigKeys::contains)
+                .collect(Collectors.toList());
+            assertEquals(Collections.emptyList(), badConfigKeys);
+        });
     }
 }

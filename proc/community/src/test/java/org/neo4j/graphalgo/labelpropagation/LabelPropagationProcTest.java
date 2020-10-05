@@ -99,10 +99,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
-            LabelPropagationStreamProc.class,
-            LabelPropagationWriteProc.class,
-            LabelPropagationStatsProc.class,
-            LabelPropagationMutateProc.class,
+            getProcedureClazz(),
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
