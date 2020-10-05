@@ -23,20 +23,24 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.graphalgo.AlphaAlgorithmFactory;
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount;
 import org.neo4j.logging.Log;
 
-class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaAlgorithmFactory<GraphSage, T> {
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+
+class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
+
     @Override
-    public GraphSage buildAlphaAlgo(
-        Graph graph,
-        T configuration,
-        AllocationTracker tracker,
-        Log log
-    ) {
+    public GraphSage build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         return new GraphSage(
             graph,
             configuration,
@@ -45,7 +49,21 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
                 configuration.modelName(),
                 ModelData.class,
                 GraphSageTrainConfig.class
-            ), tracker
+            ),
+            tracker
         );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        var embeddingSize = configuration.embeddingSizeFromModel();
+        var batchSize = configuration.batchSize();
+
+        return MemoryEstimations
+            .builder(GraphSage.class)
+            .add("embeddings", HugeObjectArray.memoryEstimation(sizeOfDoubleArray(embeddingSize)))
+            .add("features", HugeObjectArray.memoryEstimation(sizeOfDoubleArray(embeddingSize)))
+            .perThread("batches", sizeOfDoubleArray(embeddingSize * batchSize))
+            .build();
     }
 }

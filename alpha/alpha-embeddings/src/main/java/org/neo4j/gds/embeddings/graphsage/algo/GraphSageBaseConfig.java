@@ -23,18 +23,23 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, NodePropertiesConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig {
 
-    @Override
     @Configuration.Ignore
-    default List<String> nodePropertyNames() {
-        var model = ModelCatalog.get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class);
-        return model.trainConfig().nodePropertyNames();
+    default int embeddingSizeFromModel() {
+        var graphSageTrainConfig = ModelCatalog
+            .get(username(), modelName(), ModelData[].class, GraphSageTrainConfig.class)
+            .trainConfig();
+
+        return graphSageTrainConfig.featuresSize();
     }
+
+//    default GraphSageBaseConfig of(String modelName) {
+//        GraphSageBaseConfig
+//    }
 }

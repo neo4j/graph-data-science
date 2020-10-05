@@ -137,7 +137,7 @@ public final class GraphSageHelper {
 
     public static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
-        double[] data = new double[nodeIds.length * dimension];
+        double[] data = new double[Math.multiplyExact(nodeIds.length, dimension)];
         IntStream
             .range(0, nodeIds.length)
             .forEach(nodeOffset -> System.arraycopy(

@@ -68,4 +68,8 @@ public interface GraphSchema {
     static String forValueType(ValueType vt) {
         return vt.cypherName();
     }
+
+    static GraphSchema empty() {
+        return of(NodeSchema.of(Map.of()), RelationshipSchema.of(Map.of()));
+    }
 }
