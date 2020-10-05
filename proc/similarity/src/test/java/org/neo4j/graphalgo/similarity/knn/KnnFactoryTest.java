@@ -94,7 +94,6 @@ class KnnFactoryTest {
         MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
-        System.out.println("estimate.render() = " + estimate.render());
         MemoryRange actual = estimate.memoryUsage();
 
         int pageSize = 16384;

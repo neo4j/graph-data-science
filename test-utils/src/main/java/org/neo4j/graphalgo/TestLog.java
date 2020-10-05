@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.Logger;
@@ -56,6 +57,7 @@ public class TestLog extends AbstractLog {
         return new ArrayList<>(messages.getOrDefault(level, new ConcurrentLinkedQueue<>()));
     }
 
+    @SuppressForbidden(reason = "test log can print")
     public void printMessages() {
         System.out.println("TestLog Messages: " + messages);
     }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.core.loading.DoubleCodec.CompressionInfo;
 import org.neo4j.util.FeatureToggles;
 
@@ -118,8 +119,7 @@ public abstract class DoubleCodecTestBase {
         try {
             testDoubleCompression(data, false);
         } catch (AssertionError e) {
-            System.err.println("Seed for random values: " + seed);
-            throw e;
+            throw new RuntimeException("Seed for random values: " + seed, e);
         }
     }
 
@@ -228,12 +228,59 @@ public abstract class DoubleCodecTestBase {
             pos += size;
         }
 
+        debugPrint(
+            original,
+            detailPrint,
+            compressed,
+            decompressed,
+            uncompressed,
+            uncompressedSize,
+            compressedSize,
+            savings,
+            bytesPerValue,
+            sizeDistribution,
+            typeDistribution,
+            sizePerType
+        );
+
+        // then all values are identical
+        assertAll(
+            "Check compression<>decompression cycle",
+            compressionInfos
+                .stream()
+                .map(Check::new)
+                .filter(not(Check::valid))
+                .limit(5)
+                .map(Check::asExecutable)
+        );
+
+        if (caughtException != null) {
+            throw caughtException;
+        }
+    }
+
+    @SuppressForbidden(reason = "this is supposed to print helpful stuff")
+    private void debugPrint(
+        double[] original,
+        boolean detailPrint,
+        byte[] compressed,
+        double[] decompressed,
+        byte[] uncompressed,
+        int uncompressedSize,
+        int compressedSize,
+        double savings,
+        double bytesPerValue,
+        int[] sizeDistribution,
+        int[] typeDistribution,
+        int[][] sizePerType
+    ) {
         if (DEBUG_PRINT) {
             if (detailPrint) {
                 System.out.printf(Locale.ENGLISH, "original = %s%n", Arrays.toString(original));
                 System.out.printf(Locale.ENGLISH, "decompressed = %s%n", Arrays.toString(decompressed));
                 System.out.printf(Locale.ENGLISH, "compressed [%d] = %s%n", compressedSize, Arrays.toString(compressed));
-                System.out.printf(Locale.ENGLISH, "uncompressed [%d] = %s%n", uncompressedSize, Arrays.toString(uncompressed));
+                System.out.printf(Locale.ENGLISH, "uncompressed [%d] = %s%n",
+                    uncompressedSize, Arrays.toString(uncompressed));
                 System.out.printf(Locale.ENGLISH, "space savings %.2f%%%n", 100 * savings);
                 System.out.printf(Locale.ENGLISH, "bytes per value %.4f%n", bytesPerValue);
             } else {
@@ -299,21 +346,6 @@ public abstract class DoubleCodecTestBase {
                     }
                 }
             }
-        }
-
-        // then all values are identical
-        assertAll(
-            "Check compression<>decompression cycle",
-            compressionInfos
-                .stream()
-                .map(Check::new)
-                .filter(not(Check::valid))
-                .limit(5)
-                .map(Check::asExecutable)
-        );
-
-        if (caughtException != null) {
-            throw caughtException;
         }
     }
 

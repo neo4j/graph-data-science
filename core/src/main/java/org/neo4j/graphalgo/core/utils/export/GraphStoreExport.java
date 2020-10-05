@@ -52,6 +52,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -159,12 +160,10 @@ public class GraphStoreExport {
             long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
             return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         } finally {
             lifeSupport.shutdown();
         }
-
-        return null;
     }
 
     @NotNull

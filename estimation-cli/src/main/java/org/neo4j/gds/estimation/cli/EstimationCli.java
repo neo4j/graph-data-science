@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementProjection;
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -69,6 +70,7 @@ import static org.neo4j.graphalgo.utils.CheckedFunction.function;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "DefaultAnnotationParam"})
+@SuppressForbidden(reason = "supposed to print")
 @CommandLine.Command(
     description = "Estimates the memory consumption of a GDS procedure.",
     name = "estimation-cli",

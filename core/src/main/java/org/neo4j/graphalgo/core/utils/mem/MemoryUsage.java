@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.io.NullOutputStream;
@@ -169,27 +170,26 @@ public final class MemoryUsage {
         }
     }
 
-    private static final boolean VM_INFO_AVAILABLE;
+    private static final boolean VM_INFO_AVAILABLE = isVmInfoAvailable();
 
     /*
      * Try to initialize JOL without having it print warnings or throw errors because
      * we run on an unsupported VM
      */
-    static {
-        boolean available;
+    @SuppressForbidden(reason = "we want to use system.out here")
+    private static boolean isVmInfoAvailable() {
         var sysOut = System.out;
         try {
             var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
             System.setOut(swallowSysOut);
             VM.current();
             swallowSysOut.flush();
-            available = true;
+            return true;
         } catch (Exception unavailable) {
-            available = false;
+            return false;
         } finally {
             System.setOut(sysOut);
         }
-        VM_INFO_AVAILABLE = available;
     }
 
     public static long sizeOfByteArray(final long length) {

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.PrintWriter;
@@ -67,6 +68,7 @@ public abstract class RandomGraphTestCase extends BaseTest {
             return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
         }
 
+        @SuppressForbidden(reason = "this is supposed to use sys.out")
         void dumpGraph(GraphDatabaseService db) {
             try {
                 PrintWriter pw = new PrintWriter(System.out, true, StandardCharsets.UTF_8);
