@@ -83,8 +83,8 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
 
     @Test
     void zeroComponentsInEmptyGraph() {
-        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
-        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
         String query = GdsCypher
             .call()
             .withNodeLabel("VeryTemp")

@@ -182,8 +182,8 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
     @Test
     void zeroCommunitiesInEmptyGraph() {
-        runQuery("CREATE (:VeryTemp)-[:VERY_TEMP]->(:VeryTemp)");
-        runQuery("MATCH (a:VeryTemp)-[r:VERY_TEMP]->(b:VeryTemp) DELETE a, r, b");
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
         String query = GdsCypher
             .call()
             .withNodeLabel("VeryTemp")
