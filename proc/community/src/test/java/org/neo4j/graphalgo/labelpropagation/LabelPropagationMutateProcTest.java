@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
@@ -35,6 +36,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +46,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
+public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<LabelPropagationMutateConfig> implements
+    MutateNodePropertyTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationMutateConfig, LabelPropagation> {
 
     @Override
     public String mutateProperty() {
@@ -199,5 +203,21 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
                 return true;
             }
         );
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("labelPropagation")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 }

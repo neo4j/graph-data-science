@@ -145,7 +145,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
                     computeMillis,
                     writeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     ranIterations,
                     didConverge,
                     communityHistogramOrNull(),

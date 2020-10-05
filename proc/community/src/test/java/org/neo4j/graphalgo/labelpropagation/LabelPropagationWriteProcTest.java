@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
@@ -34,6 +35,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -44,7 +46,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
-    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
+    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation>,
+    ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
 
     @Override
     public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {
@@ -428,5 +431,21 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
             "bytesMin", 1656L,
             "bytesMax", 2168L
         )));
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 }

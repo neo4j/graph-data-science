@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,7 +39,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
+class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
+    ConsecutiveIdsConfigTest<Wcc, WccWriteConfig, DisjointSetStruct> {
 
     private static final String WRITE_PROPERTY = "componentId";
     private static final String SEED_PROPERTY = "seedId";
@@ -273,5 +276,21 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS components ",
             row -> assertThat((List<Long>) row.get("components"), containsInAnyOrder(0L, 1L, 2L))
         );
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("componentCount");
+
+        assertCypherResult(query, List.of(Map.of("componentCount", 0L)));
     }
 }

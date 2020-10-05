@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -32,6 +33,7 @@ import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,7 +47,8 @@ import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
-    WritePropertyConfigTest<Louvain, LouvainWriteConfig, Louvain> {
+    WritePropertyConfigTest<Louvain, LouvainWriteConfig, Louvain>,
+    ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {
 
     @Override
     public Class<? extends AlgoBaseProc<Louvain, Louvain, LouvainWriteConfig>> getProcedureClazz() {
@@ -181,6 +184,22 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
         assertEquals(10, louvainConfig.maxIterations());
         assertEquals(0.0001D, louvainConfig.tolerance());
         assertNull(louvainConfig.seedProperty());
+    }
+
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
     }
 
     @Override

@@ -126,7 +126,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
                     config.toMap()
                 );

@@ -150,7 +150,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
                     writeMillis,
                     postProcessingDuration,
                     levels,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     modularity,
                     modularities,
                     communityHistogramOrNull(),

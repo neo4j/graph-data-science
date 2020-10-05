@@ -178,9 +178,11 @@ public class BaseProcTest extends BaseTest {
                 expectedRow.forEach((key, expectedValue) -> {
                     Object actualValue = actualRow.get(key);
                     ObjectAssert<Object> assertion = assertThat(actualValue).withFailMessage(
-                        "Different value for column '%s' of row %d",
+                        "Different value for column '%s' of row %d (expected %s, but got %s)",
                         key,
-                        rowNumber
+                        rowNumber,
+                        expectedValue,
+                        actualValue
                     );
 
                     if (expectedValue instanceof Matcher) {

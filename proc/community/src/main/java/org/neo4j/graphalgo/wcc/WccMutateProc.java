@@ -144,7 +144,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
                     computeMillis,
                     mutateMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
                     config.toMap()
                 );

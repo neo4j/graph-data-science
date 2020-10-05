@@ -58,7 +58,7 @@ RETURN componentCount
 [opts="header"]
 |===
 | componentCount
-| -1
+| 0
 |===
 --
 

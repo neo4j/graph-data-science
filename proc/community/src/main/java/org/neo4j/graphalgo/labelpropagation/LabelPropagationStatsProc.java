@@ -129,7 +129,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     ranIterations,
                     didConverge,
                     communityHistogramOrNull(),

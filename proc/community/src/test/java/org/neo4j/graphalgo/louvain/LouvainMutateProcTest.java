@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.Orientation;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,7 +42,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain> {
+public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements
+    MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain>,
+    ConsecutiveIdsConfigTest<Louvain, LouvainMutateConfig, Louvain> {
 
     @Override
     public String mutateProperty() {
@@ -199,4 +203,19 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
         );
     }
 
+    @Test
+    void zeroCommunitiesInEmptyGraph() {
+        runQuery("CALL db.createLabel('VeryTemp')");
+        runQuery("CALL db.createRelationshipType('VERY_TEMP')");
+        String query = GdsCypher
+            .call()
+            .withNodeLabel("VeryTemp")
+            .withRelationshipType("VERY_TEMP")
+            .algo("louvain")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .yields("communityCount");
+
+        assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+    }
 }

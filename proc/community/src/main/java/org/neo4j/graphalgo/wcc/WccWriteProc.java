@@ -147,7 +147,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
                     computeMillis,
                     writeMillis,
                     postProcessingDuration,
-                    maybeCommunityCount.orElse(-1L),
+                    maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
                     config.toMap()
                 );
