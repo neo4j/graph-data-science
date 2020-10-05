@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -50,6 +51,15 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return stream(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(value = "gds.alpha.graphSage.stream.estimate", mode = Mode.READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
