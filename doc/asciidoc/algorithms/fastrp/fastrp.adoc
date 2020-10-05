@@ -217,7 +217,7 @@ include::../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.stream.estimate('persons', {embeddingSize: 128})
+CALL gds.fastRP.stream.estimate('persons', {embeddingSize: 128})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
@@ -278,7 +278,7 @@ However, this does not necessarily mean that the pairwise distances of two node 
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.stats(
+CALL gds.fastRP.stats(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
@@ -306,7 +306,7 @@ YIELD createMillis, computeMillis
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.mutate(
+CALL gds.fastRP.mutate(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
@@ -336,7 +336,7 @@ YIELD nodePropertiesWritten, mutateMillis
 .The following will run the algorithm in `write` mode:
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.write(
+CALL gds.fastRP.write(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
@@ -366,7 +366,7 @@ YIELD nodePropertiesWritten, writeMillis
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.randomProjection.stream(
+CALL gds.fastRP.stream(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
