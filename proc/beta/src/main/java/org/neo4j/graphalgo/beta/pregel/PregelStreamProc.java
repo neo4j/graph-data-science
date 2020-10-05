@@ -34,9 +34,6 @@ public abstract class PregelStreamProc<
     CONFIG extends PregelConfig>
     extends StreamProc<ALGO, Pregel.PregelResult, PregelStreamResult, CONFIG> {
 
-    private static final long[] EMPTY_LONG_ARRAY = new long[0];
-    private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
-
     @Override
     protected Stream<PregelStreamResult> stream(
         AlgoBaseProc.ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult
@@ -49,22 +46,18 @@ public abstract class PregelStreamProc<
             Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
                 Pregel.Element::propertyKey,
                 element -> {
-                    var propertyType = element.propertyType();
-                    switch (propertyType) {
+                    switch (element.propertyType()) {
                         case LONG:
                             return result.longProperties(element.propertyKey()).get(nodeId);
                         case DOUBLE:
                             return result.doubleProperties(element.propertyKey()).get(nodeId);
                         case DOUBLE_ARRAY:
-                        case FLOAT_ARRAY:
-                            var doubleArray = result.doubleArrayProperties(element.propertyKey()).get(nodeId);
-                            return doubleArray == null ? EMPTY_DOUBLE_ARRAY : doubleArray;
+                            return result.doubleArrayProperties(element.propertyKey()).get(nodeId);
                         case LONG_ARRAY:
-                            var longArray = result.longArrayProperties(element.propertyKey()).get(nodeId);
-                            return longArray == null ? EMPTY_LONG_ARRAY : longArray;
-                        case UNKNOWN:
+                            return result.longArrayProperties(element.propertyKey()).get(nodeId);
+                        default:
+                            throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
                     }
-                    throw new IllegalStateException("Unknown result property type");
                 }
             ));
             return new PregelStreamResult(nodeId, values);
