@@ -28,9 +28,11 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -48,6 +50,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PregelProcTest extends BaseProcTest {
@@ -57,7 +61,7 @@ public class PregelProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(StreamProc.class, WriteProc.class);
+        registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
     }
 
     @Test
@@ -107,6 +111,87 @@ public class PregelProcTest extends BaseProcTest {
                 "double_array", new double[] {1, 9, 8, 4}
             )
         ));
+    }
+
+    @Test
+    void mutate() {
+        var graphName = "testGraph";
+        var mutatePrefix = "test_";
+
+        var loadQuery = GdsCypher.call()
+            .loadEverything()
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(loadQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("example", "pregel", "test")
+            .mutateMode()
+            .addParameter("maxIterations", 20)
+            .addParameter("mutateProperty", mutatePrefix)
+            .yields();
+
+        runQuery(query);
+
+        var graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore().getUnion();
+
+        assertGraphEquals(
+            fromGdl(
+                "(a { test_long: 42L, test_double: 42.0D, test_long_array: [1, 3, 3, 7], test_double_array: [1.0, 9.0, 8.0 4.0]})"),
+            graph
+        );
+    }
+
+    public static class MutateProc extends PregelMutateProc<CompositeTestAlgorithm, PregelConfig> {
+
+        @Procedure(
+            name = "example.pregel.test.mutate",
+            mode = Mode.WRITE
+        )
+        @Description("Connected Components")
+        public Stream<PregelMutateResult> mutate(
+            @Name("graphName") Object graphNameOrConfig,
+            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        ) {
+            return mutate(compute(graphNameOrConfig, configuration));
+        }
+
+        @Override
+        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            var ranIterations = computeResult.result().ranIterations();
+            var didConverge = computeResult.result().didConverge();
+            return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
+        }
+
+        @Override
+        protected PregelConfig newConfig(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper config
+        ) {
+            return PregelConfig.of(username, graphName, maybeImplicitCreate, config);
+        }
+
+        @Override
+        protected AlgorithmFactory<CompositeTestAlgorithm, PregelConfig> algorithmFactory() {
+            return new AlgorithmFactory<>() {
+                @Override
+                public CompositeTestAlgorithm build(
+                    Graph graph,
+                    PregelConfig configuration, AllocationTracker tracker, Log log
+                ) {
+                    return new CompositeTestAlgorithm(graph, configuration, tracker, log);
+                }
+
+                @Override
+                public MemoryEstimation memoryEstimation(PregelConfig configuration) {
+                    return MemoryEstimations.empty();
+                }
+            };
+        }
     }
 
     public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, PregelConfig> {
