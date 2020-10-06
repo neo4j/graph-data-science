@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -89,35 +90,25 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(), computeResult, callContext);
     }
 
-    public static class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
 
         public final double minimumScore;
         public final double maximumScore;
         public final double scoreSum;
 
-        public final long postProcessingMillis;
-        public final long createMillis;
-        public final long computeMillis;
-
-        public final Map<String, Object> configuration;
-
         StatsResult(
-            long createMillis,
-            long computeMillis,
-            long postProcessingMillis,
             double minimumScore,
             double maximumScore,
             double scoreSum,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
             Map<String, Object> configuration
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-
+            super(createMillis, computeMillis, postProcessingMillis, configuration);
             this.minimumScore = minimumScore;
             this.maximumScore = maximumScore;
             this.scoreSum = scoreSum;
-            this.configuration = configuration;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
@@ -125,12 +116,12 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
             @Override
             public StatsResult build() {
                 return new StatsResult(
-                    createMillis,
-                    computeMillis,
-                    postProcessingMillis,
                     minimumScore,
                     maximumScore,
                     scoreSum,
+                    createMillis,
+                    computeMillis,
+                    postProcessingMillis,
                     config.toMap()
                 );
             }

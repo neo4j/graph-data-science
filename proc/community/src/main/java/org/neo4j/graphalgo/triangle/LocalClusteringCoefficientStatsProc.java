@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -95,25 +96,22 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         return new LocalClusteringCoefficientFactory<>();
     }
 
-    public static class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
+
         public final double averageClusteringCoefficient;
         public final long nodeCount;
-        public final long createMillis;
-        public final long computeMillis;
-        public final Map<String, Object> configuration;
 
-        public StatsResult(
+        StatsResult(
             double averageClusteringCoefficient,
             long nodeCount,
             long createMillis,
             long computeMillis,
             Map<String, Object> configuration
         ) {
+            // post-processing is instant for LCC
+            super(createMillis, computeMillis, 0L, configuration);
             this.averageClusteringCoefficient = averageClusteringCoefficient;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
             this.nodeCount = nodeCount;
-            this.configuration = configuration;
         }
     }
 

@@ -47,6 +47,7 @@ class LocalClusteringCoefficientWriteProcTest
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
             "nodePropertiesWritten", 5L,
             "writeMillis", greaterThan(-1L)
@@ -67,6 +68,7 @@ class LocalClusteringCoefficientWriteProcTest
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
             "nodePropertiesWritten", 5L,
             "writeMillis", greaterThan(-1L)

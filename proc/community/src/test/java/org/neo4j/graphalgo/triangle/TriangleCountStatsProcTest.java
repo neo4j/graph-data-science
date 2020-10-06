@@ -47,6 +47,7 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             "nodeCount", 3L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
     }
@@ -64,14 +65,11 @@ class TriangleCountStatsProcTest extends TriangleCountBaseProcTest<TriangleCount
             .algo("triangleCount")
             .statsMode()
             .addParameter("maxDegree", 2)
-            .yields();
+            .yields("globalTriangleCount", "nodeCount");
 
         assertCypherResult(query, List.of(Map.of(
             "globalTriangleCount", 0L,
-            "nodeCount", 4L,
-            "createMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "configuration", isA(Map.class)
+            "nodeCount", 4L
         )));
     }
 

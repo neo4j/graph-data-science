@@ -87,41 +87,35 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         );
     }
 
-    public static class MutateResult {
+    public static class MutateResult extends LabelPropagationStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long mutateMillis;
-        public long postProcessingMillis;
-        public long communityCount;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> communityDistribution;
-        public Map<String, Object> configuration;
+        public final long mutateMillis;
+        public final long nodePropertiesWritten;
 
         MutateResult(
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
-            long communityCount,
             long ranIterations,
             boolean didConverge,
+            long communityCount,
             Map<String, Object> communityDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long mutateMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
+            super(
+                ranIterations,
+                didConverge,
+                communityCount,
+                communityDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.communityCount = communityCount;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<MutateResult> {
@@ -133,15 +127,15 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
             @Override
             protected MutateResult buildResult() {
                 return new MutateResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    mutateMillis,
-                    postProcessingDuration,
-                    maybeCommunityCount.orElse(0L),
                     ranIterations,
                     didConverge,
+                    maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    mutateMillis,
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }

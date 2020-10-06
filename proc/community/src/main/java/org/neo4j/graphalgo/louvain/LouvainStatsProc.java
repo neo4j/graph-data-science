@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -83,39 +84,31 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
         return new LouvainFactory<>();
     }
 
-    public static final class StatsResult {
+    public static class StatsResult extends StandardStatsResult {
 
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-        public long ranLevels;
-        public long communityCount;
-        public double modularity;
-        public List<Double> modularities;
-        public Map<String, Object> communityDistribution;
-        public Map<String, Object> configuration;
+        public final double modularity;
+        public final List<Double> modularities;
+        public final long ranLevels;
+        public final long communityCount;
+        public final Map<String, Object> communityDistribution;
 
         StatsResult(
+            double modularity,
+            List<Double> modularities,
+            long ranLevels,
+            long communityCount,
+            Map<String, Object> communityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
-            long ranLevels,
-            long communityCount,
-            double modularity,
-            double[] modularities,
-            Map<String, Object> communityDistribution,
             Map<String, Object> configuration
-
         ) {
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
+            super(createMillis, computeMillis, postProcessingMillis, configuration);
+            this.modularity = modularity;
+            this.modularities = modularities;
             this.ranLevels = ranLevels;
             this.communityCount = communityCount;
-            this.modularity = modularity;
-            this.modularities = Arrays.stream(modularities).boxed().collect(Collectors.toList());;
             this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
         }
 
         static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
@@ -133,14 +126,14 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
             @Override
             protected StatsResult buildResult() {
                 return new StatsResult(
+                    modularity,
+                    Arrays.stream(modularities).boxed().collect(Collectors.toList()),
+                    levels,
+                    maybeCommunityCount.orElse(0L),
+                    communityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingDuration,
-                    levels,
-                    maybeCommunityCount.orElse(0L),
-                    modularity,
-                    modularities,
-                    communityHistogramOrNull(),
                     config.toMap()
                 );
             }

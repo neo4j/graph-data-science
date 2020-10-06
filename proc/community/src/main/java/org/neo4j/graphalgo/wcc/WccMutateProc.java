@@ -96,35 +96,31 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
         );
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends WccStatsProc.StatsResult {
 
-        public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
         public final long mutateMillis;
-        public final long postProcessingMillis;
-        public final long componentCount;
-        public final Map<String, Object> componentDistribution;
-        public final Map<String, Object> configuration;
+        public final long nodePropertiesWritten;
 
         MutateResult(
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
             long componentCount,
             Map<String, Object> componentDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long mutateMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
+            super(
+                componentCount,
+                componentDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.mutateMillis = mutateMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.componentCount = componentCount;
-            this.componentDistribution = componentDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends AbstractCommunityResultBuilder<WccMutateProc.MutateResult> {
@@ -139,13 +135,13 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
             @Override
             protected WccMutateProc.MutateResult buildResult() {
                 return new WccMutateProc.MutateResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    mutateMillis,
-                    postProcessingDuration,
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    mutateMillis,
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }

@@ -106,16 +106,16 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
 
     public static class MutateResult extends LocalClusteringCoefficientStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
         public long mutateMillis;
+        public long nodePropertiesWritten;
 
-        public MutateResult(
+        MutateResult(
             double averageClusteringCoefficient,
             long nodeCount,
-            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long mutateMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
             super(
@@ -125,8 +125,8 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
                 computeMillis,
                 configuration
             );
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.mutateMillis = mutateMillis;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
     }
 
@@ -144,10 +144,10 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
             return new MutateResult(
                 averageClusteringCoefficient,
                 nodeCount,
-                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 mutateMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }

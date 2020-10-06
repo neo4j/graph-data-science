@@ -96,35 +96,31 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         );
     }
 
-    public static final class WriteResult {
+    public static final class WriteResult extends WccStatsProc.StatsResult {
 
-        public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
         public final long writeMillis;
-        public final long postProcessingMillis;
-        public final long componentCount;
-        public final Map<String, Object> componentDistribution;
-        public final Map<String, Object> configuration;
+        public final long nodePropertiesWritten;
 
         WriteResult(
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
             long componentCount,
             Map<String, Object> componentDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
+            super(
+                componentCount,
+                componentDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.componentCount = componentCount;
-            this.componentDistribution = componentDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
         static class Builder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
@@ -142,13 +138,13 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
             @Override
             protected WccWriteProc.WriteResult buildResult() {
                 return new WccWriteProc.WriteResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingDuration,
                     maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    writeMillis,
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }

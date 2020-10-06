@@ -66,6 +66,7 @@ class TriangleCountWriteProcTest
             "nodeCount", 5L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
             "configuration", isA(Map.class),
             "nodePropertiesWritten", 5L,
             "writeMillis", greaterThan(-1L)
@@ -90,16 +91,12 @@ class TriangleCountWriteProcTest
             .writeMode()
             .addParameter("writeProperty", "triangles")
             .addParameter("maxDegree", 2)
-            .yields();
+            .yields("globalTriangleCount", "nodeCount", "nodePropertiesWritten");
 
         assertCypherResult(query, List.of(Map.of(
             "globalTriangleCount", 0L,
             "nodeCount", 5L,
-            "createMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "configuration", isA(Map.class),
-            "nodePropertiesWritten", 5L,
-            "writeMillis", greaterThan(-1L)
+            "nodePropertiesWritten", 5L
         )));
 
         Map<String, Long> expectedResult = Map.of(

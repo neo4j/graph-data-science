@@ -87,39 +87,35 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
         return PageRankProc.resultBuilder(new MutateResult.Builder(callContext), computeResult);
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends PageRankStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long postProcessingMillis;
-        public long mutateMillis;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> centralityDistribution;
-        public Map<String, Object> configuration;
+        public final long mutateMillis;
+        public final long nodePropertiesWritten;
 
         MutateResult(
-            long nodePropertiesWritten,
+            long ranIterations,
+            boolean didConverge,
+            Map<String, Object> centralityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
-            long ranIterations,
-            boolean didConverge,
-            Map<String, Object> centralityDistribution,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.postProcessingMillis = postProcessingMillis;
+            super(
+                ranIterations,
+                didConverge,
+                centralityDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.mutateMillis = mutateMillis;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.centralityDistribution = centralityDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
+
 
         static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
 
@@ -130,14 +126,14 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
             @Override
             public MutateResult buildResult() {
                 return new MutateResult(
-                    nodePropertiesWritten,
+                    ranIterations,
+                    didConverge,
+                    distribution(),
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,
-                    ranIterations,
-                    didConverge,
-                    distribution(),
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }

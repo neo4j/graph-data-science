@@ -97,16 +97,16 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
 
     public static class MutateResult extends TriangleCountStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
         public long mutateMillis;
+        public long nodePropertiesWritten;
 
-        public MutateResult(
+        MutateResult(
             long globalTriangleCount,
             long nodeCount,
-            long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
             long mutateMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
             super(
@@ -116,8 +116,8 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
                 computeMillis,
                 configuration
             );
-            this.nodePropertiesWritten = nodePropertiesWritten;
             this.mutateMillis = mutateMillis;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
     }
 
@@ -128,10 +128,10 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
             return new MutateResult(
                 globalTriangleCount,
                 nodeCount,
-                nodePropertiesWritten,
                 createMillis,
                 computeMillis,
                 mutateMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }

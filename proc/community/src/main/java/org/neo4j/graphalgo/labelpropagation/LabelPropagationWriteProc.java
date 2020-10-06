@@ -88,42 +88,37 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         return new LabelPropagationFactory<>();
     }
 
-    public static class WriteResult {
+    public static class WriteResult extends LabelPropagationStatsProc.StatsResult {
 
-        public long nodePropertiesWritten;
-        public long createMillis;
-        public long computeMillis;
-        public long writeMillis;
-        public long postProcessingMillis;
-        public long communityCount;
-        public long ranIterations;
-        public boolean didConverge;
-        public Map<String, Object> communityDistribution;
-        public Map<String, Object> configuration;
+        public final long writeMillis;
+        public final long nodePropertiesWritten;
 
         WriteResult(
-            long nodePropertiesWritten,
-            long createMillis,
-            long computeMillis,
-            long writeMillis,
-            long postProcessingMillis,
-            long communityCount,
             long ranIterations,
             boolean didConverge,
+            long communityCount,
             Map<String, Object> communityDistribution,
+            long createMillis,
+            long computeMillis,
+            long postProcessingMillis,
+            long writeMillis,
+            long nodePropertiesWritten,
             Map<String, Object> configuration
         ) {
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
+            super(
+                ranIterations,
+                didConverge,
+                communityCount,
+                communityDistribution,
+                createMillis,
+                computeMillis,
+                postProcessingMillis,
+                configuration
+            );
             this.writeMillis = writeMillis;
-            this.postProcessingMillis = postProcessingMillis;
-            this.communityCount = communityCount;
-            this.ranIterations = ranIterations;
-            this.didConverge = didConverge;
-            this.communityDistribution = communityDistribution;
-            this.configuration = configuration;
+            this.nodePropertiesWritten = nodePropertiesWritten;
         }
+
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
 
@@ -140,15 +135,15 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
             @Override
             protected WriteResult buildResult() {
                 return new WriteResult(
-                    nodePropertiesWritten,
-                    createMillis,
-                    computeMillis,
-                    writeMillis,
-                    postProcessingDuration,
-                    maybeCommunityCount.orElse(0L),
                     ranIterations,
                     didConverge,
+                    maybeCommunityCount.orElse(0L),
                     communityHistogramOrNull(),
+                    createMillis,
+                    computeMillis,
+                    postProcessingDuration,
+                    writeMillis,
+                    nodePropertiesWritten,
                     config.toMap()
                 );
             }
