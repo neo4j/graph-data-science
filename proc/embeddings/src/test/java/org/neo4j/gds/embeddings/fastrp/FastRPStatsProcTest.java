@@ -48,7 +48,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
     void testStats() {
         var query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("gds.fastRP")
+            .algo("fastRP")
             .statsMode()
             .addParameter("embeddingSize", 2)
             .yields();

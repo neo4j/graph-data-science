@@ -54,7 +54,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .algo("gds.fastRP")
+            .algo("fastRP")
             .streamMode()
             .addParameter("embeddingSize", embeddingSize);
 
@@ -77,7 +77,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .algo("gds.fastRP")
+            .algo("fastRP")
             .streamMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("iterationWeights", weights);
@@ -99,7 +99,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
             .withNodeLabel("Node2")
             .withRelationshipType("REL2")
             .withRelationshipProperty("weight")
-            .algo("gds.fastRP")
+            .algo("fastRP")
             .streamMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("relationshipWeightProperty", "weight")

@@ -79,7 +79,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
         int embeddingSize = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(loadedGraphName)
-            .algo("gds.fastRP")
+            .algo("fastRP")
             .mutateMode()
             .addParameter("embeddingSize", embeddingSize)
             .addParameter("mutateProperty", "embedding");
