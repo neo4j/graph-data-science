@@ -96,11 +96,12 @@ public class PregelProcTest extends BaseProcTest {
         runQuery(query);
 
         var validationQuery = formatWithLocale(
-            "MATCH (n) RETURN n.%s AS long, n.%s AS double, n.%s AS long_array, n.%s AS double_array",
-            writePrefix + CompositeTestAlgorithm.LONG_KEY,
-            writePrefix + CompositeTestAlgorithm.DOUBLE_KEY,
-            writePrefix + CompositeTestAlgorithm.LONG_ARRAY_KEY,
-            writePrefix + CompositeTestAlgorithm.DOUBLE_ARRAY_KEY
+            "MATCH (n) RETURN n.%5$s%s AS long, n.%5$s%s AS double, n.%5$s%s AS long_array, n.%5$s%s AS double_array",
+            CompositeTestAlgorithm.LONG_KEY,
+            CompositeTestAlgorithm.DOUBLE_KEY,
+            CompositeTestAlgorithm.LONG_ARRAY_KEY,
+            CompositeTestAlgorithm.DOUBLE_ARRAY_KEY,
+            writePrefix
         );
 
         assertCypherResult(validationQuery, List.of(
