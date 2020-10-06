@@ -18,6 +18,11 @@ MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
 RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 ----
 
+[NOTE]
+====
+For certain Cypher patterns, the same behaviour can be achieved using the <<algorithms-traversal-to-relationship, Traversal to Relationship>> algorithm in combination with native projections.
+====
+
 Cypher projections are especially useful during the development phase.
 Their flexibility is convenient when exploring data and algorithms, and designing a workflow.
 However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the Neo4j store files.

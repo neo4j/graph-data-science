@@ -41,7 +41,46 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 @GdlExtension
 class TraversalToRelationshipTest {
 
+    private static final String EXPECTED_WITHOUT_LOOPS =
+        "CREATE" +
+        "  (a:Patient {id: 1})" +
+        "  (b:Patient {id: 2})" +
+        "  (c:Patient {id: 4})" +
+        "  (d:Patient {id: 5})" +
+
+        "  (e:Drug {id: 6})" +
+        "  (f:Drug {id: 7})" +
+
+        ", (a)-[:SAME_DRUG]->(b)" +
+        ", (b)-[:SAME_DRUG]->(a)" +
+        ", (c)-[:SAME_DRUG]->(d)" +
+        ", (d)-[:SAME_DRUG]->(c)";
+
+    private static final String EXPECTED_WITH_LOOPS =
+        "CREATE" +
+        "  (a:Patient {id: 1})" +
+        "  (b:Patient {id: 2})" +
+        "  (c:Patient {id: 4})" +
+        "  (d:Patient {id: 5})" +
+
+        "  (e:Drug {id: 6})" +
+        "  (f:Drug {id: 7})" +
+
+        ", (e)-[:SAME_DRUG]->(e)" +
+        ", (f)-[:SAME_DRUG]->(f)" +
+
+        ", (a)-[:SAME_DRUG]->(a)" +
+        ", (a)-[:SAME_DRUG]->(b)" +
+        ", (b)-[:SAME_DRUG]->(b)" +
+        ", (b)-[:SAME_DRUG]->(a)" +
+        ", (c)-[:SAME_DRUG]->(c)" +
+        ", (c)-[:SAME_DRUG]->(d)" +
+        ", (d)-[:SAME_DRUG]->(d)" +
+        ", (d)-[:SAME_DRUG]->(c)";
+
     @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "took")
+    @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "takenBy")
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Patient {id: 1})" +
@@ -59,6 +98,14 @@ class TraversalToRelationshipTest {
 
     @Inject
     private GraphStore graphStore;
+
+    @Inject
+    private Graph tookGraph;
+    @Inject
+    private GraphStore tookGraphStore;
+
+    @Inject
+    private Graph takenByGraph;
 
     @Inject
     private IdFunction idFunction;
@@ -83,33 +130,7 @@ class TraversalToRelationshipTest {
 
         ).compute();
 
-        graphStore.addRelationshipType(
-            RelationshipType.of("SAME_DRUG"),
-            Optional.empty(),
-            Optional.empty(),
-            relationships
-        );
-
-        String expected =
-            "CREATE" +
-            "  (a:Patient {id: 1})" +
-            "  (b:Patient {id: 2})" +
-            "  (c:Patient {id: 4})" +
-            "  (d:Patient {id: 5})" +
-
-            "  (e:Drug {id: 6})" +
-            "  (f:Drug {id: 7})" +
-
-            ", (a)-[:SAME_DRUG]->(b)" +
-            ", (b)-[:SAME_DRUG]->(a)" +
-            ", (c)-[:SAME_DRUG]->(d)" +
-            ", (d)-[:SAME_DRUG]->(c)";
-
-
-        assertGraphEquals(
-            fromGdl(expected),
-            graphStore.getGraph(RelationshipType.of("SAME_DRUG"))
-        );
+        assertResultGraph(graphStore, relationships, EXPECTED_WITHOUT_LOOPS);
     }
 
     @Test
@@ -132,35 +153,36 @@ class TraversalToRelationshipTest {
 
         ).compute();
 
+        assertResultGraph(graphStore, relationships, EXPECTED_WITH_LOOPS);
+    }
+
+    @Test
+    void runWithDifferentRelationshipTypes() {
+        var config = ImmutableTraversalToRelationshipConfig
+            .builder()
+            .concurrency(2)
+            .relationshipTypes(List.of("TOOK", "TAKEN_BY"))
+            .mutateRelationshipType("SAME_DRUG")
+            .allowSelfLoops(false)
+            .build();
+
+        Relationships relationships = new TraversalToRelationship(
+            new Graph[]{tookGraph, takenByGraph},
+            config,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        ).compute();
+
+        assertResultGraph(tookGraphStore, relationships, EXPECTED_WITHOUT_LOOPS);
+    }
+
+    private void assertResultGraph(GraphStore graphStore, Relationships relationships, String expected) {
         graphStore.addRelationshipType(
             RelationshipType.of("SAME_DRUG"),
             Optional.empty(),
             Optional.empty(),
             relationships
         );
-
-        String expected =
-            "CREATE" +
-            "  (a:Patient {id: 1})" +
-            "  (b:Patient {id: 2})" +
-            "  (c:Patient {id: 4})" +
-            "  (d:Patient {id: 5})" +
-
-            "  (e:Drug {id: 6})" +
-            "  (f:Drug {id: 7})" +
-
-            ", (e)-[:SAME_DRUG]->(e)" +
-            ", (f)-[:SAME_DRUG]->(f)" +
-
-            ", (a)-[:SAME_DRUG]->(a)" +
-            ", (a)-[:SAME_DRUG]->(b)" +
-            ", (b)-[:SAME_DRUG]->(b)" +
-            ", (b)-[:SAME_DRUG]->(a)" +
-            ", (c)-[:SAME_DRUG]->(c)" +
-            ", (c)-[:SAME_DRUG]->(d)" +
-            ", (d)-[:SAME_DRUG]->(d)" +
-            ", (d)-[:SAME_DRUG]->(c)";
-
 
         assertGraphEquals(
             fromGdl(expected),

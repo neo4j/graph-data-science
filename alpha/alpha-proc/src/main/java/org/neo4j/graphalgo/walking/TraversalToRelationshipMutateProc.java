@@ -46,7 +46,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRelationship, Relationships, TraversalToRelationshipMutateProc.MutateResult, TraversalToRelationshipConfig> {
 
-    @Procedure(name = "gds.alpha.traversalToEdge.mutate", mode = READ)
+    @Procedure(name = "gds.alpha.traversalToRelationship.mutate", mode = READ)
     @Description("")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -118,18 +118,23 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
         AbstractResultBuilder<?> resultBuilder,
         ComputationResult<TraversalToRelationship, Relationships, TraversalToRelationshipConfig> computationResult
     ) {
-        computationResult.graphStore().addRelationshipType(
-            RelationshipType.of(computationResult.config().mutateRelationshipType()),
-            Optional.empty(),
-            Optional.empty(),
-            computationResult.result()
-        );
+        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
+            computationResult.graphStore().addRelationshipType(
+                RelationshipType.of(computationResult.config().mutateRelationshipType()),
+                Optional.empty(),
+                Optional.empty(),
+                computationResult.result()
+            );
+        }
+
+        resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
     }
 
     public static class MutateResult {
         public final long createMillis;
         public final long computeMillis;
         public final long mutateMillis;
+        public final long relationshipsWritten;
 
         public final Map<String, Object> configuration;
 
@@ -137,11 +142,13 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
             long createMillis,
             long computeMillis,
             long mutateMillis,
+            long relationshipsWritten,
             Map<String, Object> configuration
         ) {
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.mutateMillis = mutateMillis;
+            this.relationshipsWritten = relationshipsWritten;
             this.configuration = configuration;
         }
 
@@ -153,6 +160,7 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
                     createMillis,
                     computeMillis,
                     mutateMillis,
+                    relationshipsWritten,
                     config.toMap()
                 );
             }
