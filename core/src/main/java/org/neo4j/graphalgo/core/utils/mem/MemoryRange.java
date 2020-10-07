@@ -95,6 +95,10 @@ public final class MemoryRange {
         return MemoryRange.of(Math.min(this.min, other.min), Math.max(this.max, other.max));
     }
 
+    public MemoryRange max(MemoryRange other) {
+        return MemoryRange.of(Math.max(this.min, other.min), Math.max(this.max, other.max));
+    }
+
     public boolean isEmpty() {
         return min == 0 && max == 0;
     }
