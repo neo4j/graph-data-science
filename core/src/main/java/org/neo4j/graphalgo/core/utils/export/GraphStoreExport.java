@@ -30,9 +30,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -55,7 +58,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -302,42 +305,30 @@ public class GraphStoreExport {
         final long nodeCount;
         final long relationshipCount;
 
-        final Map<String, RelationshipIterator> relationships;
-
-        final Map<String, String> relationshipPropertyKeys;
-
-        final String[] relTypes;
-
-        final String[] propertyKeys;
+        final Map<RelationshipType, CompositeRelationships> compositeRelationshipsMap;
 
         RelationshipStore(
             long nodeCount,
             long relationshipCount,
-            Map<String, RelationshipIterator> relationships,
-            Map<String, String> relationshipPropertyKeys
+            Map<RelationshipType, CompositeRelationships> relationships
         ) {
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
-            this.relationships = relationships;
-            this.relationshipPropertyKeys = relationshipPropertyKeys;
-
-            this.relTypes = relationships.keySet().toArray(new String[0]);
-            this.propertyKeys = Arrays.stream(relTypes).map(relationshipPropertyKeys::get).toArray(String[]::new);
+            this.compositeRelationshipsMap = relationships;
         }
 
-        int propertyCount() {
-            return relationshipPropertyKeys.size();
+        long propertyCount() {
+            return compositeRelationshipsMap.values().stream().mapToInt(CompositeRelationships::propertyCount).sum();
         }
 
         RelationshipStore concurrentCopy() {
             return new RelationshipStore(
                 nodeCount,
                 relationshipCount,
-                relationships.entrySet().stream().collect(Collectors.toMap(
+                compositeRelationshipsMap.entrySet().stream().collect(Collectors.toMap(
                     Map.Entry::getKey,
                     entry -> entry.getValue().concurrentCopy()
-                )),
-                relationshipPropertyKeys
+                ))
             );
         }
 
@@ -365,25 +356,50 @@ public class GraphStoreExport {
                     relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
                 ));
 
-            Map<String, RelationshipIterator> relationships = graphs.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().getOne().name,
-                Map.Entry::getValue,
-                (left, right) -> left
-            ));
+            Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
+            Map<RelationshipType, Map<String, Relationships.Properties>> properties = new HashMap<>();
 
-            var relationshipPropertyKeys = graphs.keySet().stream()
-                .filter(pair -> pair.getTwo().isPresent())
-                .collect(Collectors.toMap(
-                    entry -> entry.getOne().name,
-                    entry -> entry.getTwo().get(),
-                    (left, right) -> left
-                ));
+            graphs.forEach((typeAndProperty, graph) -> {
+                RelationshipType relationshipType = typeAndProperty.getOne();
+                topologies.computeIfAbsent(relationshipType, ignored -> ((HugeGraph) graph).relationshipTopology());
+
+                typeAndProperty.getTwo().ifPresent(propertyKey -> properties
+                    .computeIfAbsent(relationshipType, ignored -> new HashMap<>())
+                    .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
+            });
+
+            Map<RelationshipType, CompositeRelationships> compositeRelationships = new HashMap<>();
+
+            topologies.forEach((relationshipType, topology) -> {
+                var adjacencyList = (TransientAdjacencyList) topology.list();
+                var adjacencyOffsets = (TransientAdjacencyOffsets) topology.offsets();
+
+                var propertyLists = properties.getOrDefault(relationshipType, Map.of())
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> (TransientAdjacencyList) entry.getValue().list()
+                    ));
+
+                var propertyOffsets = properties.getOrDefault(relationshipType, Map.of())
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> (TransientAdjacencyOffsets) entry.getValue().offsets()
+                    ));
+
+                compositeRelationships.put(
+                    relationshipType,
+                    new CompositeRelationships(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
+                );
+            });
 
             return new RelationshipStore(
                 graphStore.nodeCount(),
                 graphStore.relationshipCount(),
-                relationships,
-                relationshipPropertyKeys
+                compositeRelationships
             );
         }
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
@@ -228,40 +227,15 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
-                for (int i = 0; i < relationshipStore.relTypes.length; i++) {
-                    String relType = relationshipStore.relTypes[i];
-                    String propKey = relationshipStore.propertyKeys[i];
-                    RelationshipIterator relationshipIterator = relationshipStore.relationships.get(relType);
-
-                    if (propKey != null) {
-                        relationshipIterator
-                            .forEachRelationship(id, Double.NaN, (s, t, propertyValue) -> {
-                                visitor.startId(s);
-                                visitor.endId(t);
-                                visitor.type(relType);
-                                visitor.property(propKey, propertyValue);
-                                try {
-                                    visitor.endOfEntity();
-                                } catch (IOException e) {
-                                    throw new UncheckedIOException(e);
-                                }
-                                return true;
-                            });
-                    } else {
-                        relationshipIterator.forEachRelationship(id, (s, t) -> {
-                            visitor.startId(s);
-                            visitor.endId(t);
-                            visitor.type(relType);
-                            try {
-                                visitor.endOfEntity();
-                            } catch (IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                            return true;
-                        });
+                for (var entry : relationshipStore.compositeRelationshipsMap.entrySet()) {
+                    var relationshipType = entry.getKey();
+                    var compositeRelationships = entry.getValue();
+                    try {
+                        compositeRelationships.visitRelationships(id, relationshipType.name, visitor);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
                     }
                 }
-
                 id++;
                 return true;
             }
