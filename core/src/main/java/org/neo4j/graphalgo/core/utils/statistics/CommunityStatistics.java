@@ -136,22 +136,52 @@ public final class CommunityStatistics {
             concurrency,
             tracker
         );
-        return communityCountAndHistogram(communitySizes);
+        return communityCountAndHistogram(communitySizes, executorService, concurrency);
     }
 
-    public static CommunityCountAndHistogram communityCountAndHistogram(HugeSparseLongArray communitySizes) {
-        var histogram = new Histogram(5);
+    public static CommunityCountAndHistogram communityCountAndHistogram(
+        HugeSparseLongArray communitySizes,
+        ExecutorService executorService,
+        int concurrency
+    ) {
+        Histogram histogram;
         var communityCount = 0L;
-        var capacity = communitySizes.getCapacity();
 
-        for (long communityId = 0; communityId < capacity; communityId++) {
-            long communitySize = communitySizes.get(communityId);
-            if (communitySize != EMPTY_COMMUNITY) {
-                communityCount++;
-                histogram.recordValue(communitySize);
+        if (concurrency == 1) {
+            histogram = new Histogram(5);
+            var capacity = communitySizes.getCapacity();
+
+            for (long communityId = 0; communityId < capacity; communityId++) {
+                long communitySize = communitySizes.get(communityId);
+                if (communitySize != EMPTY_COMMUNITY) {
+                    communityCount++;
+                    histogram.recordValue(communitySize);
+                }
+            }
+        } else {
+            var capacity = communitySizes.getCapacity();
+
+            var tasks = PartitionUtils
+                .rangePartition(concurrency, capacity)
+                .stream()
+                .map(partition -> new CountAndRecordTask(communitySizes, partition))
+                .collect(Collectors.toList());
+
+            ParallelUtil.run(tasks, executorService);
+
+            // highestTrackableValue must be >= 2 * lowestDiscernibleValue (1)
+            var highestTrackableValue = 2L;
+            for (CountAndRecordTask task : tasks) {
+                communityCount += task.count;
+                if (task.histogram.getMaxValue() > highestTrackableValue) {
+                    highestTrackableValue = task.histogram.getMaxValue();
+                }
+            }
+            histogram = new Histogram(highestTrackableValue, 5);
+            for (CountAndRecordTask task : tasks) {
+                histogram.add(task.histogram);
             }
         }
-
         return ImmutableCommunityCountAndHistogram.builder()
             .componentCount(communityCount)
             .histogram(histogram)
@@ -232,6 +262,37 @@ public final class CommunityStatistics {
 
         public long count() {
             return count;
+        }
+    }
+
+    private static class CountAndRecordTask implements Runnable {
+
+        private final HugeSparseLongArray communitySizes;
+
+        private final Partition partition;
+
+        private final Histogram histogram;
+
+        private long count;
+
+        CountAndRecordTask(HugeSparseLongArray communitySizes, Partition partition) {
+            this.communitySizes = communitySizes;
+            this.partition = partition;
+            this.histogram = new Histogram(5);
+        }
+
+        @Override
+        public void run() {
+            long startId = partition.startNode();
+            long endId = partition.startNode() + partition.nodeCount();
+
+            for (long id = startId; id < endId; id++) {
+                long communitySize = communitySizes.get(id);
+                if (communitySize != EMPTY_COMMUNITY) {
+                    count++;
+                    histogram.recordValue(communitySize);
+                }
+            }
         }
     }
 

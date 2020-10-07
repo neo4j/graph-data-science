@@ -91,7 +91,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
                 maybeCommunityCount = OptionalLong.of(communityCount(communitySizes, Pools.DEFAULT, 1));
             } else if (buildCommunityCount || buildHistogram) {
                 var communitySizes = communitySizes(nodeCount, communityFunction, Pools.DEFAULT, 1, tracker);
-                var communityCountAndHistogram = communityCountAndHistogram(communitySizes);
+                var communityCountAndHistogram = communityCountAndHistogram(communitySizes, Pools.DEFAULT, 1);
                 maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
                 maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());
             }
