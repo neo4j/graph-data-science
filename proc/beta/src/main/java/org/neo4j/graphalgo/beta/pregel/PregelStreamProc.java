@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,10 +46,18 @@ public abstract class PregelStreamProc<
             Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
                 Pregel.Element::propertyKey,
                 element -> {
-                    if (element.propertyType() == ValueType.DOUBLE) {
-                        return result.doubleProperties(element.propertyKey()).get(nodeId);
+                    switch (element.propertyType()) {
+                        case LONG:
+                            return result.longProperties(element.propertyKey()).get(nodeId);
+                        case DOUBLE:
+                            return result.doubleProperties(element.propertyKey()).get(nodeId);
+                        case DOUBLE_ARRAY:
+                            return result.doubleArrayProperties(element.propertyKey()).get(nodeId);
+                        case LONG_ARRAY:
+                            return result.longArrayProperties(element.propertyKey()).get(nodeId);
+                        default:
+                            throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
                     }
-                    return result.longProperties(element.propertyKey()).get(nodeId);
                 }
             ));
             return new PregelStreamResult(nodeId, values);
