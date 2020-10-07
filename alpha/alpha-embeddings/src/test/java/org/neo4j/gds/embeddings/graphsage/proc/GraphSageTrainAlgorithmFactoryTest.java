@@ -57,24 +57,46 @@ class GraphSageTrainAlgorithmFactoryTest {
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize,
         int concurrency,
-        int embeddingSize,
+        int numberOfProperties,
         boolean degreeAsProperty
     ) {
+        // times concurrency: *
         // 3 times batch size = 3bs
 
-        // features: HugeOA[nodeCount * double[embeddingSize]]
+        // embeddings: start
+        // features: HugeOA[nodeCount * double[featureSize]]
 
-        // layer representation = parent = local features: double[3bs * embeddingSize]
+        // layer representation = parent = local features: double[3bs * featureSize]
+
+        // weights - new double[featureSize * embeddingSize] // for any following iteration it's embeddingSize * embeddingSize
+
+        // iteration
+        // iterNodeCount = starting at 3bs * sampleSize.0 * sampleSize.1
+        //   this should be the largest node count in the first iteration
+        // after mean = 3bs * sampleSize.0 (removing sampleSize.1)
 
         // mean aggregator
-        //   multi mean - new double[adjacency.length(=3bs) * embeddingSize];
-        //   MatrixMultiplyWithTransposedSecondOperand - new double[3bs * 3bs] or maybe new double[embeddingSize * embeddingSize]
-        //   activation function
-        //     rows = means.rows = 3bs, cols = weights.cols = embeddingSize
+        //   multi mean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
+        //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
+        //   activation function = same as input
+        //     rows = means.rows = iterNodeCount, cols = weights.cols = embeddingSize
 
-        // max pooling todo
+        // max pooling
+        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingSize]
+        //  MatrixVectorSum = shape is matrix input == weightedPreviousLayer
+        //  activation function = same as input
+        //  ElementwiseMax - double[iterNodeCount * embeddingSize]
+        //
+        //  Slice - double[iterNodeCount * embeddingSize]
+        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
+        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
+        //  MatrixSum - new double[iterNodeCount * embeddingSize]
+        //  activation function = same as input
 
-        // normalize rows new double[rows * cols]
+
+        // normalize rows = same as input (output of aggregator)
+
+        // embeddings: end
 
 
         // SubGraph: (times layerSize)
@@ -87,21 +109,32 @@ class GraphSageTrainAlgorithmFactoryTest {
         // SubGraph per Layer
 
 
+        // evaluate loss
+        //     ComputationContext ctx = new ComputationContext();
+        //     Variable<Scalar> loss = lossFunction(batch, graph, features);
+        //     doubleAdder.add(ctx.forward(loss).dataAt(0));  --> what we did above
+
+        // train on batch
+
+        //  ComputationContext localCtx = new ComputationContext();
+        //  ->   newLoss = localCtx.forward(lossFunction).dataAt(0);  -> what we did above
+        //  ->   localCtx.backward(lossFunction); -> should be same size
+        //  ->   updater.update(localCtx);
 
 
         int batchSize = 100;
         var userName = "userName";
         var modelName = "modelName";
-        int featureSize = embeddingSize + (degreeAsProperty ? 1 : 0);
+        int featureSize = numberOfProperties + (degreeAsProperty ? 1 : 0);
 
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName(modelName)
             .username(userName)
             .degreeAsProperty(degreeAsProperty)
-            .embeddingSize(embeddingSize)
+            .embeddingSize(numberOfProperties)
             .nodePropertyNames(
-                IntStream.range(0, embeddingSize)
+                IntStream.range(0, numberOfProperties)
                     .mapToObj(i -> String.valueOf('a' + i))
                     .collect(Collectors.toList())
             )
