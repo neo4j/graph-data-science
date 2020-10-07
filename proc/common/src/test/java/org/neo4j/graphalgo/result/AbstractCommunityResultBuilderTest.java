@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.result;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.HdrHistogram.Histogram;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
@@ -34,6 +37,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -41,10 +45,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class AbstractCommunityResultBuilderTest {
 
-    @Test
-    void countCommunitySizesOverHugeCommunities() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void countCommunitySizesOverHugeCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
                 assertTrue(maybeHistogram.isPresent());
@@ -64,21 +70,24 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    @Test
-    void countCommunitySizesOverPresizedHugeCommunities() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void countCommunitySizesOverPresizedHugeCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
-            assertTrue(maybeCommunityCount.isPresent());
-            assertTrue(maybeHistogram.isPresent());
+                assertTrue(maybeCommunityCount.isPresent());
+                assertTrue(maybeHistogram.isPresent());
 
-            long communityCount = maybeCommunityCount.orElse(-1);
-            Histogram histogram = maybeHistogram.get();
+                long communityCount = maybeCommunityCount.orElse(-1);
+                Histogram histogram = maybeHistogram.get();
 
-            assertEquals(10L, communityCount, "should build 10 communities");
-            assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
-            assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
-        });
+                assertEquals(10L, communityCount, "should build 10 communities");
+                assertEquals(2L, histogram.getCountAtValue(5L), "should 2 communities with 5 members");
+                assertEquals(8L, histogram.getCountAtValue(4L), "should build 8 communities with 4 members");
+            }
+        );
 
         builder
             .withCommunityFunction(n -> n % 10L)
@@ -86,21 +95,24 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    @Test
-    void countCommunitySizesOverIntegerCommunities() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void countCommunitySizesOverIntegerCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
-            assertTrue(maybeCommunityCount.isPresent());
-            assertTrue(maybeHistogram.isPresent());
+                assertTrue(maybeCommunityCount.isPresent());
+                assertTrue(maybeHistogram.isPresent());
 
-            long communityCount = maybeCommunityCount.orElse(-1);
-            Histogram histogram = maybeHistogram.get();
+                long communityCount = maybeCommunityCount.orElse(-1);
+                Histogram histogram = maybeHistogram.get();
 
-            assertEquals(5L, communityCount, "should build 5 communities");
-            assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
-            assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
-        });
+                assertEquals(5L, communityCount, "should build 5 communities");
+                assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
+                assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
+            }
+        );
 
         builder
             .withCommunityFunction(n -> (n / 10) + 1)
@@ -108,21 +120,24 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    @Test
-    void countCommunitySizesOverLongCommunities() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void countCommunitySizesOverLongCommunities(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
-            assertTrue(maybeCommunityCount.isPresent());
-            assertTrue(maybeHistogram.isPresent());
+                assertTrue(maybeCommunityCount.isPresent());
+                assertTrue(maybeHistogram.isPresent());
 
-            long communityCount = maybeCommunityCount.orElse(-1);
-            Histogram histogram = maybeHistogram.get();
+                long communityCount = maybeCommunityCount.orElse(-1);
+                Histogram histogram = maybeHistogram.get();
 
-            assertEquals(5L, communityCount, "should build 5 communities");
-            assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
-            assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
-        });
+                assertEquals(5L, communityCount, "should build 5 communities");
+                assertEquals(4L, histogram.getCountAtValue(10L), "should build 4 communities with 10 member");
+                assertEquals(1L, histogram.getCountAtValue(2L), "should build 1 community with 2 members");
+            }
+        );
 
         builder
             .withCommunityFunction(n -> (int) (n / 10) + 1)
@@ -130,28 +145,34 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    @Test
-    void doNotGenerateCommunityCountOrHistogram() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void doNotGenerateCommunityCountOrHistogram(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext(),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
-            assertFalse(maybeCommunityCount.isPresent());
-            assertFalse(maybeHistogram.isPresent());
-        });
+                assertFalse(maybeCommunityCount.isPresent());
+                assertFalse(maybeHistogram.isPresent());
+            }
+        );
         builder
             .withCommunityFunction(n -> n % 10L)
             .withNodeCount(42)
             .build();
     }
 
-    @Test
-    void doNotGenerateHistogram() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void doNotGenerateHistogram(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
-            assertTrue(maybeCommunityCount.isPresent());
-            assertFalse(maybeHistogram.isPresent());
-        });
+                assertTrue(maybeCommunityCount.isPresent());
+                assertFalse(maybeHistogram.isPresent());
+            }
+        );
 
         builder
             .withCommunityFunction(n -> n % 10L)
@@ -173,16 +194,19 @@ final class AbstractCommunityResultBuilderTest {
         assertEquals(4.0, histogram.getValueAtPercentile(100D), 0.01);
     }
 
-    @Test
-    void buildCommunityCountWithHugeCommunityCount() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void buildCommunityCountWithHugeCommunityCount(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
                 assertFalse(maybeHistogram.isPresent());
                 long communityCount = maybeCommunityCount.orElse(-1);
                 assertEquals(2L, communityCount, "should build 2 communities");
-            });
+            }
+        );
 
         LongUnaryOperator communityFunction = n -> n % 2 == 0 ? 0 : ((long) Integer.MAX_VALUE) + 2;
         builder
@@ -191,10 +215,12 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    @Test
-    void buildCommunityHistogramWithHugeCommunityCount() {
+    @ParameterizedTest
+    @MethodSource("concurrencies")
+    void buildCommunityHistogramWithHugeCommunityCount(int concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureCallContext("communityCount", "communityDistribution"),
+            concurrency,
             (maybeCommunityCount, maybeHistogram) -> {
                 assertTrue(maybeCommunityCount.isPresent());
                 assertTrue(maybeHistogram.isPresent());
@@ -204,13 +230,21 @@ final class AbstractCommunityResultBuilderTest {
 
                 assertEquals(2L, communityCount, "should build 2 communities");
                 assertEquals(2L, histogram.getCountAtValue(1L), "should build 2 communities with 1 member");
-            });
+            }
+        );
 
         LongUnaryOperator communityFunction = n -> n % 2 == 0 ? 0 : ((long) Integer.MAX_VALUE) + 2;
         builder
             .withCommunityFunction(communityFunction)
             .withNodeCount(2)
             .build();
+    }
+
+    static Stream<Arguments> concurrencies() {
+        return Stream.of(
+            Arguments.of(1),
+            Arguments.of(4)
+        );
     }
 
     private static final MethodHandle NEW_PROCEDURE_CALL_CONTEXT;
@@ -255,11 +289,12 @@ final class AbstractCommunityResultBuilderTest {
 
     private AbstractCommunityResultBuilder<Void> builder(
         ProcedureCallContext context,
+        int concurrency,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
         return new AbstractCommunityResultBuilder<>(
             context,
-            1,
+            concurrency,
             AllocationTracker.empty()
         ) {
             @Override
