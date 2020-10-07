@@ -278,27 +278,27 @@ public class GraphStoreExport {
         final long nodeCount;
         final long relationshipCount;
 
-        final Map<RelationshipType, CompositeRelationships> compositeRelationshipsMap;
+        final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
 
         RelationshipStore(
             long nodeCount,
             long relationshipCount,
-            Map<RelationshipType, CompositeRelationships> relationships
+            Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
         ) {
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
-            this.compositeRelationshipsMap = relationships;
+            this.relationshipIterators = relationshipIterators;
         }
 
         long propertyCount() {
-            return compositeRelationshipsMap.values().stream().mapToInt(CompositeRelationships::propertyCount).sum();
+            return relationshipIterators.values().stream().mapToInt(CompositeRelationshipIterator::propertyCount).sum();
         }
 
         RelationshipStore concurrentCopy() {
             return new RelationshipStore(
                 nodeCount,
                 relationshipCount,
-                compositeRelationshipsMap.entrySet().stream().collect(Collectors.toMap(
+                relationshipIterators.entrySet().stream().collect(Collectors.toMap(
                     Map.Entry::getKey,
                     entry -> entry.getValue().concurrentCopy()
                 ))
@@ -341,7 +341,7 @@ public class GraphStoreExport {
                     .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
             });
 
-            Map<RelationshipType, CompositeRelationships> compositeRelationships = new HashMap<>();
+            Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
 
             topologies.forEach((relationshipType, topology) -> {
                 var adjacencyList = (AdjacencyList) topology.list();
@@ -363,16 +363,16 @@ public class GraphStoreExport {
                         entry -> entry.getValue().offsets()
                     ));
 
-                compositeRelationships.put(
+                relationshipIterators.put(
                     relationshipType,
-                    new CompositeRelationships(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
+                    new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
                 );
             });
 
             return new RelationshipStore(
                 graphStore.nodeCount(),
                 graphStore.relationshipCount(),
-                compositeRelationships
+                relationshipIterators
             );
         }
     }

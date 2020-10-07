@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class CompositeRelationships {
+class CompositeRelationshipIterator {
 
     private final TransientAdjacencyList adjacencyList;
     private final TransientAdjacencyOffsets adjacencyOffsets;
@@ -38,7 +38,7 @@ public class CompositeRelationships {
     private final TransientAdjacencyList.DecompressingCursor cursorCache;
     private final Map<String, TransientAdjacencyList.Cursor> propertyCursorCache;
 
-    CompositeRelationships(
+    CompositeRelationshipIterator(
         TransientAdjacencyList adjacencyList,
         TransientAdjacencyOffsets adjacencyOffsets,
         Map<String, TransientAdjacencyList> propertyLists,
@@ -48,35 +48,43 @@ public class CompositeRelationships {
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyLists = propertyLists;
         this.propertyOffsets = propertyOffsets;
+
+        // create un-initialized cursors
         this.cursorCache = adjacencyList.rawDecompressingCursor();
-        this.propertyCursorCache = propertyLists.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> entry.getValue().rawCursor()
+        this.propertyCursorCache = new HashMap<>(propertyLists.size());
+        this.propertyLists.forEach((propertyKey, propertyList) -> this.propertyCursorCache.put(
+            propertyKey,
+            propertyList.rawCursor()
         ));
+    }
+
+    CompositeRelationshipIterator concurrentCopy() {
+        return new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets);
     }
 
     int propertyCount() {
         return propertyLists.size();
     }
 
-    void visitRelationships(long sourceId, String relType, InputEntityVisitor visitor) throws IOException {
+    void forEachRelationship(long sourceId, String relType, InputEntityVisitor visitor) throws IOException {
         var offset = adjacencyOffsets.get(sourceId);
 
         if (offset == 0L) {
             return;
         }
 
+        // init adjacency cursor
         var adjacencyCursor = TransientAdjacencyList.decompressingCursor(cursorCache, offset);
+        // init property cursors
+        propertyLists.forEach((propertyKey, propertyList) -> propertyCursorCache.put(
+            propertyKey,
+            TransientAdjacencyList.cursor(
+                propertyCursorCache.get(propertyKey),
+                propertyOffsets.get(propertyKey).get(sourceId)
+            )
+        ));
 
-        propertyLists.forEach((propertyKey, propertyList) -> propertyCursorCache
-            .computeIfPresent(
-                propertyKey,
-                (ignore, cursor) -> TransientAdjacencyList.cursor(
-                    cursor,
-                    propertyOffsets.get(propertyKey).get(sourceId)
-                )
-            ));
-
+        // in-step iteration of adjacency and property cursors
         while (adjacencyCursor.hasNextVLong()) {
             long targetId = adjacencyCursor.nextVLong();
             visitor.startId(sourceId);
@@ -89,9 +97,5 @@ public class CompositeRelationships {
 
             visitor.endOfEntity();
         }
-    }
-
-    CompositeRelationships concurrentCopy() {
-        return new CompositeRelationships(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets);
     }
 }

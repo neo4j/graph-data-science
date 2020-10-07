@@ -227,11 +227,11 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public boolean next(InputEntityVisitor visitor) {
             if (id < endId) {
-                for (var entry : relationshipStore.compositeRelationshipsMap.entrySet()) {
+                for (var entry : relationshipStore.relationshipIterators.entrySet()) {
                     var relationshipType = entry.getKey();
                     var compositeRelationships = entry.getValue();
                     try {
-                        compositeRelationships.visitRelationships(id, relationshipType.name, visitor);
+                        compositeRelationships.forEachRelationship(id, relationshipType.name, visitor);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
