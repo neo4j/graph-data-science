@@ -30,14 +30,16 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCount;
 import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communityCountAndHistogram;
-import static org.neo4j.graphalgo.core.utils.statistics.CommunityStatistics.communitySizes;
 
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
+    private final ExecutorService executorService;
+    private final int concurrency;
     private final AllocationTracker tracker;
     protected boolean buildHistogram;
     protected boolean buildCommunityCount;
@@ -63,6 +65,16 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     protected AbstractCommunityResultBuilder(
         ProcedureCallContext callContext,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        this(callContext, Pools.DEFAULT, concurrency, tracker);
+    }
+
+    protected AbstractCommunityResultBuilder(
+        ProcedureCallContext callContext,
+        ExecutorService executorService,
+        int concurrency,
         AllocationTracker tracker
     ) {
         this.buildHistogram = callContext
@@ -71,6 +83,8 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         this.buildCommunityCount = callContext
             .outputFields()
             .anyMatch(s -> s.equalsIgnoreCase("communityCount") || s.equalsIgnoreCase("componentCount"));
+        this.executorService = executorService;
+        this.concurrency = concurrency;
         this.tracker = tracker;
     }
 
@@ -87,11 +101,21 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
         if (communityFunction != null) {
             if (buildCommunityCount && !buildHistogram) {
-                var communitySizes = communitySizes(nodeCount, communityFunction, Pools.DEFAULT, 1, tracker);
-                maybeCommunityCount = OptionalLong.of(communityCount(communitySizes, Pools.DEFAULT, 1));
+                maybeCommunityCount = OptionalLong.of(communityCount(
+                    nodeCount,
+                    communityFunction,
+                    executorService,
+                    concurrency,
+                    tracker
+                ));
             } else if (buildCommunityCount || buildHistogram) {
-                var communitySizes = communitySizes(nodeCount, communityFunction, Pools.DEFAULT, 1, tracker);
-                var communityCountAndHistogram = communityCountAndHistogram(communitySizes, Pools.DEFAULT, 1);
+                var communityCountAndHistogram = communityCountAndHistogram(
+                    nodeCount,
+                    communityFunction,
+                    executorService,
+                    concurrency,
+                    tracker
+                );
                 maybeCommunityCount = OptionalLong.of(communityCountAndHistogram.componentCount());
                 maybeCommunityHistogram = Optional.of(communityCountAndHistogram.histogram());
             }

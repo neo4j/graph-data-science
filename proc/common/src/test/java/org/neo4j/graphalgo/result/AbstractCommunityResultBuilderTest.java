@@ -257,8 +257,9 @@ final class AbstractCommunityResultBuilderTest {
         ProcedureCallContext context,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
-        return new AbstractCommunityResultBuilder<Void>(
+        return new AbstractCommunityResultBuilder<>(
             context,
+            1,
             AllocationTracker.empty()
         ) {
             @Override

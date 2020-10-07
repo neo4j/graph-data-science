@@ -91,7 +91,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     @Override
     protected AbstractResultBuilder<WccWriteProc.WriteResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult) {
         return WccProc.resultBuilder(
-            new WriteResult.Builder(callContext, allocationTracker()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -125,14 +125,8 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
 
         static class Builder extends AbstractCommunityResultBuilder<WccWriteProc.WriteResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override

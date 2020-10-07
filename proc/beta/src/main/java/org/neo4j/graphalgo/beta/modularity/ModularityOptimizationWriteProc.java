@@ -84,7 +84,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<ModularityOptimization, ModularityOptimization, ModularityOptimizationWriteConfig> computeResult) {
         return ModularityOptimizationProc.resultBuilder(
-            new WriteResult.Builder(callContext, allocationTracker()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -133,9 +133,10 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
 
             Builder(
                 ProcedureCallContext context,
+                int concurrency,
                 AllocationTracker tracker
             ) {
-                super(context, tracker);
+                super(context, concurrency, tracker);
             }
 
             @Override

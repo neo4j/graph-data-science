@@ -66,9 +66,10 @@ final class ModularityOptimizationProc {
 
         ModularityOptimizationResultBuilder(
             ProcedureCallContext callContext,
+            int concurrency,
             AllocationTracker tracker
         ) {
-            super(callContext, tracker);
+            super(callContext, concurrency, tracker);
         }
 
         ModularityOptimizationResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {

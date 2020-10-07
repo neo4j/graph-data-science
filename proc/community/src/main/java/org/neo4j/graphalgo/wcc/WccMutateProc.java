@@ -91,7 +91,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
     @Override
     protected AbstractResultBuilder<WccMutateProc.MutateResult> resultBuilder(ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computeResult) {
         return WccProc.resultBuilder(
-            new MutateResult.Builder(callContext, allocationTracker()),
+            new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -127,9 +127,10 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
 
             Builder(
                 ProcedureCallContext context,
+                int concurrency,
                 AllocationTracker tracker
             ) {
-                super(context, tracker);
+                super(context, concurrency, tracker);
             }
 
             @Override

@@ -76,12 +76,10 @@ final class LouvainProc {
 
         LouvainResultBuilder(
             ProcedureCallContext context,
+            int concurrency,
             AllocationTracker tracker
         ) {
-            super(
-                context,
-                tracker
-            );
+            super(context, concurrency, tracker);
         }
 
         LouvainResultBuilder<PROC_RESULT> withLevels(long levels) {

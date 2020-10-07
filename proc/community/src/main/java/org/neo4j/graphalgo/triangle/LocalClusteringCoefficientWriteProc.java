@@ -100,7 +100,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientWriteConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientWriteResultBuilder(callContext, allocationTracker()),
+            new LocalClusteringCoefficientWriteResultBuilder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -130,9 +130,10 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
 
         LocalClusteringCoefficientWriteResultBuilder(
             ProcedureCallContext callContext,
+            int concurrency,
             AllocationTracker tracker
         ) {
-            super(callContext, tracker);
+            super(callContext, concurrency, tracker);
         }
 
         @Override

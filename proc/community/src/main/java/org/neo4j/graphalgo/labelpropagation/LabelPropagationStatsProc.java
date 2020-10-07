@@ -61,7 +61,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStatsConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new StatsResult.Builder(callContext, allocationTracker()),
+            new StatsResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -107,14 +107,8 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<StatsResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override

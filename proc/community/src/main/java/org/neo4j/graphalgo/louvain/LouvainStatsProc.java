@@ -64,7 +64,7 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainStatsConfig> computeResult) {
         return LouvainProc.resultBuilder(
-            new StatsResult.Builder(callContext, allocationTracker()),
+            new StatsResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -113,14 +113,8 @@ public class LouvainStatsProc extends StatsProc<Louvain, Louvain, LouvainStatsPr
 
         static class Builder extends LouvainProc.LouvainResultBuilder<StatsResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override

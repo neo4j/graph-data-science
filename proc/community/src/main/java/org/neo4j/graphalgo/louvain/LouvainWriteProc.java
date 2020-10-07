@@ -70,7 +70,11 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainWriteConfig> computeResult) {
-        return LouvainProc.resultBuilder(new WriteResult.Builder(callContext, allocationTracker()), computeResult);
+        return LouvainProc.resultBuilder(new WriteResult.Builder(
+            callContext,
+            computeResult.config().concurrency(),
+            allocationTracker()
+        ), computeResult);
     }
 
     @Override
@@ -123,14 +127,8 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
 
         static class Builder extends LouvainProc.LouvainResultBuilder<WriteResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override
