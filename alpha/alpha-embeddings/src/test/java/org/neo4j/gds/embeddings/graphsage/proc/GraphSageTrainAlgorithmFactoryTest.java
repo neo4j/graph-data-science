@@ -60,13 +60,35 @@ class GraphSageTrainAlgorithmFactoryTest {
         int numberOfProperties,
         boolean degreeAsProperty
     ) {
+        // initial layers
+        // rows - embeddingSize, cols - feature size (first layer), embedding size every other layer
+        //  applies to the weights
+        //  weights = double[rows * cols], 1x for mean, 2x for maxpooling, double[row * row] for maxpooling, double[rows] bias for maxpooling
+
+        // features: HugeOA[nodeCount * double[featureSize]]
+
+        // train epoch
+
+        // adam optimizer
+        //  copy of weight for every layer
+
+        // train on batch
         // times concurrency: *
+
+        // loss function
         // 3 times batch size = 3bs
 
         // embeddings: start
-        // features: HugeOA[nodeCount * double[featureSize]]
+        //  subgraph, batchSizes * sampleSize[i]
 
-        // layer representation = parent = local features: double[3bs * featureSize]
+
+        // sub graph sizes
+        // 3bs -> [min(3bs, nodeCount) .. min(3bs * (sampleSize + 1), nodeCount)]
+
+
+
+
+        // layer representation = parent = local features: double[(bs..3bs) * featureSize]
 
         // weights - new double[featureSize * embeddingSize] // for any following iteration it's embeddingSize * embeddingSize
 
@@ -80,6 +102,14 @@ class GraphSageTrainAlgorithmFactoryTest {
         //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
         //   activation function = same as input
         //     rows = means.rows = iterNodeCount, cols = weights.cols = embeddingSize
+
+        // example
+        // mean aggregator next layer
+        //   multi mean - new double[iterCount * embeddingSize];
+        //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
+        //   activation function = same as input
+        //     rows = means.rows = iterNodeCount, cols = weights.cols = embeddingSize
+
 
         // max pooling
         //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingSize]
@@ -120,6 +150,20 @@ class GraphSageTrainAlgorithmFactoryTest {
         //  ->   newLoss = localCtx.forward(lossFunction).dataAt(0);  -> what we did above
         //  ->   localCtx.backward(lossFunction); -> should be same size
         //  ->   updater.update(localCtx);
+
+        // adam update
+        //  new momentum
+        //   copies of weights (per layer)
+        //   copies of momentum terms (per layer) (same dim as weights)
+        //  new velocity
+        //   2 copies of weights (per layer)
+        //   copies of momentum terms (per layer) (same dim as weights)
+        //  mCaps
+        //   copy of momentumTerm (size of weights)
+        //  vCaps
+        //   copy of velocityTerm (size of weights)
+        //  updating weights
+        //   2 copies of mCap, 1 copy of vCap
 
 
         int batchSize = 100;
