@@ -148,6 +148,10 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
     // Cursors
 
+    public Cursor rawCursor() {
+        return new Cursor(pages);
+    }
+
     @Override
     public Cursor cursor(long offset) {
         return new Cursor(pages).init(offset);
@@ -166,7 +170,14 @@ public final class TransientAdjacencyList implements AdjacencyList {
     /**
      * Initialise the given cursor with the given offset
      */
-    static DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
+    public static Cursor cursor(Cursor reuse, long offset) {
+        return reuse.init(offset);
+    }
+
+    /**
+     * Initialise the given cursor with the given offset
+     */
+    public static DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
         return reuse.init(offset);
     }
 
