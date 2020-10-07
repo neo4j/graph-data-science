@@ -55,6 +55,11 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
+    public PropertyCursor rawCursor() {
+        throw new UnsupportedOperationException("CompositeAdjacencyList#rawCursor is not supported");
+    }
+
+    @Override
     public PropertyCursor cursor(long offset) {
         throw new UnsupportedOperationException("CompositeAdjacencyList#cursor is not supported");
     }

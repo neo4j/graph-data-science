@@ -148,6 +148,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
     // Cursors
 
+    @Override
     public Cursor rawCursor() {
         return new Cursor(pages);
     }

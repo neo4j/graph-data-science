@@ -25,6 +25,8 @@ public interface AdjacencyList extends AutoCloseable {
 
     // Cursors
 
+    PropertyCursor rawCursor();
+
     PropertyCursor cursor(long offset);
 
     /**
