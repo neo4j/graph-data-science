@@ -20,13 +20,14 @@
 package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -38,78 +39,92 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.getNodeProperties;
+import static org.neo4j.procedure.Mode.READ;
 
-public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
+public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage.GraphSageResult, GraphSageMutateProc.MutateResult, GraphSageMutateConfig> {
 
-    @Procedure(name = "gds.alpha.graphSage.write", mode = Mode.WRITE)
+    @Procedure(value = "gds.alpha.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPHSAGE_DESCRIPTION)
-    public Stream<GraphSageWriteResult> write(
+    public Stream<GraphSageMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return write(compute(graphNameOrConfig, configuration));
+        ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
+        return mutate(computationResult);
+    }
+
+    @Procedure(value = "gds.alpha.graphSage.mutate.estimate", mode = READ)
+    @Description(GRAPHSAGE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
-    protected GraphSageWriteConfig newConfig(
+    protected NodeProperties nodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computationResult) {
+        return getNodeProperties(computationResult);
+    }
+
+    @Override
+    protected AbstractResultBuilder<GraphSageMutateProc.MutateResult> resultBuilder(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageMutateConfig> computeResult) {
+        return new MutateResult.Builder();
+    }
+
+    @Override
+    protected GraphSageMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return GraphSageWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return GraphSageMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<GraphSage, GraphSageMutateConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>();
     }
 
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computationResult) {
-        return getNodeProperties(computationResult);
-    }
+    public static final class MutateResult {
 
-    @Override
-    protected AbstractResultBuilder<GraphSageWriteResult> resultBuilder(ComputationResult<GraphSage, GraphSage.GraphSageResult, GraphSageWriteConfig> computeResult) {
-        return new GraphSageWriteResult.Builder();
-    }
-
-    public static final class GraphSageWriteResult {
-
-        public final long nodeCount;
         public final long nodePropertiesWritten;
+        public final long mutateMillis;
+        public final long nodeCount;
         public final long createMillis;
         public final long computeMillis;
-        public final long writeMillis;
         public final Map<String, Object> configuration;
 
-        GraphSageWriteResult(
+        MutateResult(
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long writeMillis,
-            Map<String, Object> configuration
+            long mutateMillis,
+            Map<String, Object> config
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.configuration = configuration;
+            this.mutateMillis = mutateMillis;
+            this.configuration = config;
         }
 
-        static class Builder extends AbstractResultBuilder<GraphSageWriteResult> {
+        static final class Builder extends AbstractResultBuilder<MutateResult> {
 
             @Override
-            public GraphSageWriteResult build() {
-                return new GraphSageWriteResult(
+            public MutateResult build() {
+                return new MutateResult(
                     nodeCount,
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
-                    writeMillis,
+                    mutateMillis,
                     config.toMap()
                 );
             }

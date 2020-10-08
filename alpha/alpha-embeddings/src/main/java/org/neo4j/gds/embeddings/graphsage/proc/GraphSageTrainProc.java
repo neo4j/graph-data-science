@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainConfig> {
 

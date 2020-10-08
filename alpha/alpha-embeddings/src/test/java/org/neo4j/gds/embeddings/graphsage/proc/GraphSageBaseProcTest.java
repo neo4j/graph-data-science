@@ -90,6 +90,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphSageStreamProc.class,
             GraphSageWriteProc.class,
+            GraphSageMutateProc.class,
             GraphSageTrainProc.class,
             ModelExistsProc.class,
             ModelDropProc.class
