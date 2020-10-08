@@ -32,17 +32,13 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AppendixAProcedureListingTest extends BaseProcTest {
 
@@ -87,32 +83,20 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         asciidoctor.javaExtensionRegistry().treeprocessor(procedureListingProcessor);
 
         File file = ASCIIDOC_PATH.resolve("appendix-a.adoc").toFile();
-        assertTrue(file.exists() && file.canRead());
+        assertThat(file).exists().canRead();
+
         asciidoctor.loadFile(file, Collections.emptyMap());
 
         List<String> registeredProcedures = new LinkedList<>();
         runQueryWithRowConsumer("CALL gds.list() YIELD name", row -> {
             registeredProcedures.add(row.getString("name"));
         });
-
-        List<String> documentedProcedures = procedureListingProcessor.procedures();
         registeredProcedures.add("gds.list");
 
-        List<String> registeredProceduresCopy = new ArrayList<>(registeredProcedures);
-        registeredProceduresCopy.removeAll(documentedProcedures);
-        assertThat(registeredProceduresCopy, is(empty()));
+        List<String> documentedProcedures = procedureListingProcessor.procedures();
 
-        List<String> documentedProceduresCopy = new ArrayList<>(documentedProcedures);
-        documentedProceduresCopy.removeAll(registeredProcedures);
-        assertThat(documentedProceduresCopy, is(empty()));
-
-        registeredProcedures.sort(String::compareTo);
-        documentedProcedures.sort(String::compareTo);
-        assertEquals(registeredProcedures, documentedProcedures);
-
-        assertEquals(registeredProcedures.size(), documentedProcedures.size());
+        assertThat(registeredProcedures).containsExactlyInAnyOrderElementsOf(documentedProcedures);
     }
-
 
     private Reflections createReflections(String pkg) {
         return new Reflections(
