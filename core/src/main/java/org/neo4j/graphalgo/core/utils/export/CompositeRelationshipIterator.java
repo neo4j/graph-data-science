@@ -76,13 +76,15 @@ class CompositeRelationshipIterator {
         // init adjacency cursor
         var adjacencyCursor = TransientAdjacencyList.decompressingCursor(cursorCache, offset);
         // init property cursors
-        propertyLists.forEach((propertyKey, propertyList) -> propertyCursorCache.put(
-            propertyKey,
-            TransientAdjacencyList.cursor(
-                propertyCursorCache.get(propertyKey),
-                propertyOffsets.get(propertyKey).get(sourceId)
-            )
-        ));
+        for (var propertyKey : propertyLists.keySet()) {
+            propertyCursorCache.put(
+                propertyKey,
+                TransientAdjacencyList.cursor(
+                    propertyCursorCache.get(propertyKey),
+                    propertyOffsets.get(propertyKey).get(sourceId)
+                )
+            );
+        }
 
         // in-step iteration of adjacency and property cursors
         while (adjacencyCursor.hasNextVLong()) {
@@ -91,9 +93,12 @@ class CompositeRelationshipIterator {
             visitor.endId(targetId);
             visitor.type(relType);
 
-            propertyCursorCache.forEach((propertyKey, propertyCursor) -> {
-                visitor.property(propertyKey, Double.longBitsToDouble(propertyCursor.nextLong()));
-            });
+            for (var propertyKeyAndCursor : propertyCursorCache.entrySet()) {
+                visitor.property(
+                    propertyKeyAndCursor.getKey(),
+                    Double.longBitsToDouble(propertyKeyAndCursor.getValue().nextLong())
+                );
+            }
 
             visitor.endOfEntity();
         }
