@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.core.huge.AdjacencyList;
+import org.neo4j.graphalgo.core.huge.AdjacencyOffsets;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
@@ -29,20 +29,20 @@ import java.util.Map;
 
 class CompositeRelationshipIterator {
 
-    private final TransientAdjacencyList adjacencyList;
-    private final TransientAdjacencyOffsets adjacencyOffsets;
+    private final AdjacencyList adjacencyList;
+    private final AdjacencyOffsets adjacencyOffsets;
 
-    private final Map<String, TransientAdjacencyList> propertyLists;
-    private final Map<String, TransientAdjacencyOffsets> propertyOffsets;
+    private final Map<String, AdjacencyList> propertyLists;
+    private final Map<String, AdjacencyOffsets> propertyOffsets;
 
-    private final TransientAdjacencyList.DecompressingCursor cursorCache;
-    private final Map<String, TransientAdjacencyList.Cursor> propertyCursorCache;
+    private final AdjacencyList.DecompressingCursor cursorCache;
+    private final Map<String, AdjacencyList.Cursor> propertyCursorCache;
 
     CompositeRelationshipIterator(
-        TransientAdjacencyList adjacencyList,
-        TransientAdjacencyOffsets adjacencyOffsets,
-        Map<String, TransientAdjacencyList> propertyLists,
-        Map<String, TransientAdjacencyOffsets> propertyOffsets
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
+        Map<String, AdjacencyList> propertyLists,
+        Map<String, AdjacencyOffsets> propertyOffsets
     ) {
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -74,12 +74,12 @@ class CompositeRelationshipIterator {
         }
 
         // init adjacency cursor
-        var adjacencyCursor = TransientAdjacencyList.decompressingCursor(cursorCache, offset);
+        var adjacencyCursor = AdjacencyList.decompressingCursor(cursorCache, offset);
         // init property cursors
         for (var propertyKey : propertyLists.keySet()) {
             propertyCursorCache.put(
                 propertyKey,
-                TransientAdjacencyList.cursor(
+                AdjacencyList.cursor(
                     propertyCursorCache.get(propertyKey),
                     propertyOffsets.get(propertyKey).get(sourceId)
                 )

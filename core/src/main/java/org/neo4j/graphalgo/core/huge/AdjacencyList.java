@@ -151,10 +151,14 @@ public final class AdjacencyList {
         return new Cursor(pages).init(offset);
     }
 
+    public Cursor rawCursor() {
+        return new Cursor(pages);
+    }
+    
     /**
      * Returns a new, uninitialized delta cursor. Call {@link DecompressingCursor#init(long)}.
      */
-    DecompressingCursor rawDecompressingCursor() {
+    public DecompressingCursor rawDecompressingCursor() {
         return new DecompressingCursor(pages);
     }
 
@@ -165,10 +169,14 @@ public final class AdjacencyList {
         return rawDecompressingCursor().init(offset);
     }
 
+    public static Cursor cursor(Cursor reuse, long offset) {
+        return reuse.init(offset);
+    }
+
     /**
      * Initialise the given cursor with the given offset
      */
-    DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
+    public static DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
         return reuse.init(offset);
     }
 
@@ -203,7 +211,7 @@ public final class AdjacencyList {
          * Read the next target id.
          * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
          */
-        long nextLong() {
+        public long nextLong() {
             long value = AdjacencyDecompressingReader.readLong(currentPage, offset);
             offset += Long.BYTES;
             return value;
@@ -260,7 +268,7 @@ public final class AdjacencyList {
         /**
          * Return true iff there is at least one more target to decode.
          */
-        boolean hasNextVLong() {
+        public boolean hasNextVLong() {
             return currentTarget < maxTargets;
         }
 
@@ -268,7 +276,7 @@ public final class AdjacencyList {
          * Read and decode the next target id.
          * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
          */
-        long nextVLong() {
+        public long nextVLong() {
             int current = currentTarget++;
             int remaining = maxTargets - current;
             return decompress.next(remaining);

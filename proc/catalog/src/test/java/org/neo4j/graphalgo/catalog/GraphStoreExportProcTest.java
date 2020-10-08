@@ -87,7 +87,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(6, row.getNumber("relationshipCount").longValue());
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
-            assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue(), greaterThan(0L));
         });
     }
