@@ -44,9 +44,9 @@ import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
 
 class FastRPTest extends AlgoTestBase {
 
-    private static final int DEFAULT_EMBEDDING_SIZE = 128;
+    private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
-        .embeddingSize(DEFAULT_EMBEDDING_SIZE)
+        .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
         .addIterationWeight(1.0D)
         .build();
 
@@ -119,8 +119,8 @@ class FastRPTest extends AlgoTestBase {
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
-        float[] expected = new float[DEFAULT_EMBEDDING_SIZE];
-        for (int i = 0; i < DEFAULT_EMBEDDING_SIZE; i++) {
+        float[] expected = new float[DEFAULT_EMBEDDING_DIMENSION];
+        for (int i = 0; i < DEFAULT_EMBEDDING_DIMENSION; i++) {
             expected[i] = (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
         }
         l2Normalize(expected);
@@ -142,7 +142,7 @@ class FastRPTest extends AlgoTestBase {
             .builder()
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
-            .embeddingSize(DEFAULT_EMBEDDING_SIZE)
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
             .build();
 
         FastRP fastRP = new FastRP(
@@ -158,8 +158,8 @@ class FastRPTest extends AlgoTestBase {
         fastRP.propagateEmbeddings();
         HugeObjectArray<float[]> embeddings = fastRP.embeddings();
 
-        float[] expected = new float[DEFAULT_EMBEDDING_SIZE];
-        for (int i = 0; i < DEFAULT_EMBEDDING_SIZE; i++) {
+        float[] expected = new float[DEFAULT_EMBEDDING_DIMENSION];
+        for (int i = 0; i < DEFAULT_EMBEDDING_DIMENSION; i++) {
             expected[i] = (2.0f * randomVectors.get(1)[i] + 1.0f * randomVectors.get(2)[i]) / 2.0f;
         }
         l2Normalize(expected);
@@ -180,7 +180,7 @@ class FastRPTest extends AlgoTestBase {
         FastRP fastRP = new FastRP(
             graph,
             FastRPBaseConfig.builder()
-                .embeddingSize(512)
+                .embeddingDimension(512)
                 .addIterationWeight(1.0D)
                 .build(),
             progressLogger,
@@ -223,7 +223,7 @@ class FastRPTest extends AlgoTestBase {
         FastRP fastRP = new FastRP(
             graph,
             FastRPBaseConfig.builder()
-                .embeddingSize(64)
+                .embeddingDimension(64)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
             progressLogger,
@@ -245,7 +245,7 @@ class FastRPTest extends AlgoTestBase {
         var config = ImmutableFastRPBaseConfig
             .builder()
             .addIterationWeights(1.0D, 1.0D)
-            .embeddingSize(128)
+            .embeddingDimension(128)
             .build();
 
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
@@ -259,7 +259,7 @@ class FastRPTest extends AlgoTestBase {
     void testMemoryEstimationWithIterationWeights() {
         var config = ImmutableFastRPBaseConfig
             .builder()
-            .embeddingSize(128)
+            .embeddingDimension(128)
             .iterationWeights(List.of(1.0D, 2.0D))
             .build();
 
@@ -283,7 +283,7 @@ class FastRPTest extends AlgoTestBase {
 
         var config = ImmutableFastRPBaseConfig
             .builder()
-            .embeddingSize(2)
+            .embeddingDimension(2)
             .iterationWeights(List.of(1.0D, 2.0D))
             .concurrency(4)
             .build();

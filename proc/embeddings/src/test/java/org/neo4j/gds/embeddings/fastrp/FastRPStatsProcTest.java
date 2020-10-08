@@ -50,7 +50,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
             .loadEverything(Orientation.UNDIRECTED)
             .algo("fastRP")
             .statsMode()
-            .addParameter("embeddingSize", 2)
+            .addParameter("embeddingDimension", 2)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(

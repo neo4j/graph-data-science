@@ -64,7 +64,7 @@ class Node2VecModelTest {
 
 
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-            .embeddingSize(10)
+            .embeddingDimension(10)
             .initialLearningRate(0.05)
             .negativeSamplingRate(1)
             .concurrency(4)

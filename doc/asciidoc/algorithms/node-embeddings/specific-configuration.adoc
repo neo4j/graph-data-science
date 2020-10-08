@@ -11,7 +11,7 @@
 | negativeSamplingRate    | Integer | 5       | yes      | Number of negative samples to produce for each positive sample.
 | centerSamplingFactor    | Float   | 0.001   | yes      | Factor for influencing the sampling distribution for center words. A higher value increases the probability that frequent words are down-sampled.
 | contextSamplingExponent | Float   | 0.75    | yes      | Exponent applied to the context word frequency to obtain the context word sampling distribution. A value of 1.0 samples proportionally to the frequency distribution. A value of 0.0 samples each word equally.
-| embeddingSize           | Integer | 128     | yes      | Size of the computed node embeddings. Denoted by `dimensions` in the Node2Vec paper.
+| embeddingDimension      | Integer | 128     | yes      | Size of the computed node embeddings. Denoted by `dimensions` in the Node2Vec paper.
 | initialLearningRate     | Float   | 0.01    | yes      | Learning rate used initially for training the neural network. The learning rate decreases during training.
 | minLearningRate         | Float   | 0.0001  | yes      | Lower bound for learning rate as it is decreased during training.
 | iterations              | Integer | 1       | yes      | Number of training iterations.

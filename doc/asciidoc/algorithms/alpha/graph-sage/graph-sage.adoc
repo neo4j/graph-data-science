@@ -247,7 +247,7 @@ CALL gds.alpha.graphSage.train(
   {
     modelName: 'graphSage',
     nodePropertyNames: ['age', 'height', 'weight'],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     degreeAsProperty: true
   }
 )

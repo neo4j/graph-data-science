@@ -40,8 +40,8 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
-    void testWriting(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
-        train(embeddingSize, aggregator, activationFunction);
+    void testWriting(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
+        train(embeddingDimension, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")
@@ -61,7 +61,7 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
         List<Map<String, Object>> results = new ArrayList<>();
         for (int i = 0; i < 15; i++) {
-            results.add(Map.of("size", (long)embeddingSize));
+            results.add(Map.of("size", (long)embeddingDimension));
         }
 
         assertCypherResult(

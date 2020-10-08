@@ -208,7 +208,7 @@ public class EstimationCli implements Runnable {
                 actualConfig.put(MUTATE_PROPERTY_KEY, "ESTIMATE_FAKE_MUTATE_PROPERTY");
             }
             if (procedureName.startsWith("gds.fastRP")) {
-                actualConfig.put("embeddingSize", 128);
+                actualConfig.put("embeddingDimension", 128);
             }
             if (procedureName.equals("gds.nodeSimilarity.write.estimate") || procedureName.equals("gds.beta.knn.write.estimate")) {
                 actualConfig.put("writeRelationshipType", "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");

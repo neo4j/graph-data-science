@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GraphSageModelTrainerTest {
 
     private final int FEATURES_COUNT = 5;
-    private final int EMBEDDING_SIZE = 64;
+    private final int EMBEDDING_DIMENSION = 64;
 
     private final String MODEL_NAME = "graphSageModel";
 
@@ -74,7 +74,7 @@ class GraphSageModelTrainerTest {
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
         configBuilder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
-            .embeddingSize(EMBEDDING_SIZE);
+            .embeddingDimension(EMBEDDING_DIMENSION);
     }
 
     @Test
@@ -94,14 +94,14 @@ class GraphSageModelTrainerTest {
         List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
         assertEquals(1, firstWeights.size());
 
-        // First layer is (embeddingSize x features.length)
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, FEATURES_COUNT}, firstWeights.get(0).dimensions());
+        // First layer is (embeddingDimension x features.length)
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstWeights.get(0).dimensions());
         Layer second = layers[1];
         List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
         assertEquals(1, secondWeights.size());
 
-        // Second layer weights (embeddingSize x embeddingSize)
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, EMBEDDING_SIZE}, secondWeights.get(0).dimensions());
+        // Second layer weights (embeddingDimension x embeddingDimension)
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondWeights.get(0).dimensions());
     }
 
     @Test
@@ -125,10 +125,10 @@ class GraphSageModelTrainerTest {
         var firstLayerSelfWeights = firstWeights.get(1).dimensions();
         var firstLayerNeighborsWeights = firstWeights.get(2).dimensions();
         var firstLayerBias = firstWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, FEATURES_COUNT}, firstLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, FEATURES_COUNT}, firstLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, EMBEDDING_SIZE}, firstLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE}, firstLayerBias);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerPoolWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerSelfWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, firstLayerNeighborsWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, firstLayerBias);
 
         Layer second = layers[1];
         List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
@@ -138,10 +138,10 @@ class GraphSageModelTrainerTest {
         var secondLayerSelfWeights = secondWeights.get(1).dimensions();
         var secondLayerNeighborsWeights = secondWeights.get(2).dimensions();
         var secondLayerBias = secondWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, EMBEDDING_SIZE}, secondLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, EMBEDDING_SIZE}, secondLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE, EMBEDDING_SIZE}, secondLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_SIZE}, secondLayerBias);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerPoolWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerSelfWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerNeighborsWeights);
+        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, secondLayerBias);
     }
 
 }

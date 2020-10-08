@@ -139,13 +139,13 @@ class GraphSageBaseProcTest extends BaseProcTest {
         );
     }
 
-    void train(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
+    void train(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
         String trainQuery = GdsCypher.call()
             .explicitCreation(graphName)
             .algo("gds.alpha.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("activationFunction", activationFunction)
             .addParameter("degreeAsProperty", true)
             .addParameter("aggregator", aggregator)

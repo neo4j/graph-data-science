@@ -44,7 +44,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> impl
             .loadEverything()
             .algo("gds.alpha.node2vec")
             .streamMode()
-            .addParameter("embeddingSize", 42)
+            .addParameter("embeddingDimension", 42)
             .yields();
 
         runQueryWithRowConsumer(query, row -> assertEquals(dimensions, ((List<Double>) row.get("embedding")).size()));

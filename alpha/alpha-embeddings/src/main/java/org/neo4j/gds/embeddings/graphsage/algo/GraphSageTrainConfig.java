@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
+import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.NodePropertiesConfig;
@@ -42,10 +43,11 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, BatchSizeConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig {
+public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, BatchSizeConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig, EmbeddingDimensionConfig {
 
+    @Override
     @Value.Default
-    default int embeddingSize() {
+    default int embeddingDimension() {
         return 64;
     }
 
@@ -112,8 +114,8 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
             LayerConfig layerConfig = LayerConfig.builder()
                 .aggregatorType(aggregator())
                 .activationFunction(activationFunction())
-                .rows(embeddingSize())
-                .cols(i == 0 ? featuresSize() : embeddingSize())
+                .rows(embeddingDimension())
+                .cols(i == 0 ? featuresSize() : embeddingDimension())
                 .sampleSize(sampleSizes().get(i))
                 .build();
 
@@ -156,7 +158,7 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
         ActivationFunction activationFunction,
         Aggregator.AggregatorType aggregator,
         int batchSize,
-        int embeddingSize,
+        int embeddingDimension,
         List<String> nodePropertyNames,
         double tolerance
     ) {
@@ -165,7 +167,7 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
             .activationFunction(activationFunction)
             .aggregator(aggregator)
             .batchSize(batchSize)
-            .embeddingSize(embeddingSize)
+            .embeddingDimension(embeddingDimension)
             .nodePropertyNames(nodePropertyNames)
             .tolerance(tolerance)
             .build();
