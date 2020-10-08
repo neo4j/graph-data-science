@@ -24,14 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.model.catalog.ModelDropProc;
-import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -43,20 +39,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
     private static final String DB_CYPHER =
             "CREATE" +
             "  (a:King{ name: 'A', age: 20 })" +
-            ", (b:King{ name: 'B', age: 12 })" +
-            ", (c:King{ name: 'C', age: 67 })" +
-            ", (d:King{ name: 'D', age: 78 })" +
-            ", (e:King{ name: 'E', age: 32 })" +
-            ", (f:King{ name: 'F', age: 32 })" +
-            ", (g:King{ name: 'G', age: 35 })" +
-            ", (h:King{ name: 'H', age: 56 })" +
-            ", (i:King{ name: 'I', age: 62 })" +
-            ", (j:King{ name: 'J', age: 44 })" +
-            ", (k:King{ name: 'K', age: 89 })" +
-            ", (l:King{ name: 'L', age: 99 })" +
-            ", (m:King{ name: 'M', age: 99 })" +
-            ", (n:King{ name: 'N', age: 99 })" +
-            ", (o:King{ name: 'O', age: 99 })";
+            ", (b:King{ name: 'B', age: 12 })";
 
     private static final String GRAPH_NAME = "embeddingsGraph";
 
@@ -64,25 +47,15 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
-            GraphSageStreamProc.class,
-            GraphSageWriteProc.class,
-            GraphSageTrainProc.class,
-            ModelExistsProc.class,
-            ModelDropProc.class
+            GraphSageTrainProc.class
         );
 
         runQuery(DB_CYPHER);
 
         String query = GdsCypher.call()
-            .withNodeLabel("King")
+            .withAnyLabel()
             .withNodeProperty(PropertyMapping.of("age", 1.0))
-            .withRelationshipType(
-                "R",
-                RelationshipProjection.of(
-                    "*",
-                    Orientation.UNDIRECTED
-                )
-            )
+            .withAnyRelationshipType()
             .graphCreate(GRAPH_NAME)
             .yields();
 
@@ -109,6 +82,6 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
         assertThatThrownBy(() -> runQuery(train))
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageEndingWith("There should be at least one relationship in the graph");
+            .hasMessageEndingWith("There should be at least one relationship in the graph.");
     }
 }

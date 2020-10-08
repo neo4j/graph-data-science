@@ -148,6 +148,8 @@ public abstract class AlgoBaseProc<
 
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
+    protected void validateGraphStore(GraphStore graphStore) {}
+
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
         Map<String, Object> configuration
@@ -174,7 +176,6 @@ public abstract class AlgoBaseProc<
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             graphStore = getOrCreateGraphStore(input);
-            validateGraphStore(graphStore);
             graph = createGraph(graphStore, config);
         }
 
@@ -322,15 +323,10 @@ public abstract class AlgoBaseProc<
 
         GraphStoreValidation.validate(graphCandidate, config);
         validateConfigs(graphCandidate.config(), config);
-        return graphCandidate.graphStore();
+        var graphStore = graphCandidate.graphStore();
+        validateGraphStore(graphStore);
+        return graphStore;
     }
-
-    /**
-     * This method is used to validate if a GraphStore meets conditions required to run an algorithm.
-     *
-     * @param graphStore - the `graphStore` to validate.
-     */
-    protected void validateGraphStore(GraphStore graphStore) {}
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {
         var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);

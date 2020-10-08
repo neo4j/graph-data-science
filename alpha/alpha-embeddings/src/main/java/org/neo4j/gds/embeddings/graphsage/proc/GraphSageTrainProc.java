@@ -76,8 +76,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
 
     @Override
     protected void validateGraphStore(GraphStore graphStore) {
-        if(graphStore.relationshipCount() == 0) {
-            throw new IllegalArgumentException("There should be at least one relationship in the graph");
+        if (graphStore.relationshipCount() == 0) {
+            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
         }
     }
 }

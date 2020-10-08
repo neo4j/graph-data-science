@@ -197,5 +197,4 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         assertEquals(expectedFail, throwable.getMessage());
     }
-
 }
