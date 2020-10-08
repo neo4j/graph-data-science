@@ -184,7 +184,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
 
-        int embeddingSize = 64;
+        int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
         String graphSageTrainQuery = GdsCypher
             .call()
@@ -192,7 +192,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .algo("gds.alpha.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("modelName", graphSageModel)
             .yields();
 
@@ -208,7 +208,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         runQueryWithRowConsumer(graphSageStreamQuery, row -> {
             Collection<Double> embedding = (Collection<Double>) row.get("embedding");
-            assertEquals(embedding.size(), embeddingSize);
+            assertEquals(embedding.size(), embeddingDimension);
 
             double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)

@@ -217,7 +217,7 @@ include::../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher]
 ----
-CALL gds.fastRP.stream.estimate('persons', {embeddingSize: 128})
+CALL gds.fastRP.stream.estimate('persons', {embeddingDimension: 128})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 
@@ -242,7 +242,7 @@ CALL gds.fastRP.stream(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     normalizationStrength: -0.71
   }
 )
@@ -282,7 +282,7 @@ CALL gds.fastRP.stats(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     normalizationStrength: -0.71
   }
 )
@@ -310,7 +310,7 @@ CALL gds.fastRP.mutate(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     normalizationStrength: -0.71,
     mutateProperty: 'embedding'
   }
@@ -340,7 +340,7 @@ CALL gds.fastRP.write(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     normalizationStrength: -0.71,
     writeProperty: 'embedding'
   }
@@ -370,7 +370,7 @@ CALL gds.fastRP.stream(
   'persons',
   {
     iterationWeights: [0.0, 0.34, 2.1],
-    embeddingSize: 3,
+    embeddingDimension: 3,
     normalizationStrength: -0.71,
     relationshipWeightProperty: 'weight'
   }
@@ -406,8 +406,8 @@ To construct such a set you may want to create a node label in the graph using c
 
 === Embedding Dimension
 
-The optimal value for `embeddingSize` depends on the number of nodes in the graph.
-Since the amount of information the embedding can encode is limited by the `embeddingSize`, a larger graph will tend to require a higher embedding dimension.
+The optimal value for `embeddingDimension` depends on the number of nodes in the graph.
+Since the amount of information the embedding can encode is limited by the `embeddingDimension`, a larger graph will tend to require a higher embedding dimension.
 A typical value is a power of two in the range 128 - 1024.
 A value of at least 256 gives good results on graphs with as many as 200000 nodes, but in general increasing the dimension improves results.
 Increasing embedding dimension will however increase memory requirements and runtime linearly.

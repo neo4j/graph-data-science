@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GraphSageEmbeddingsGeneratorTest {
 
     private final int FEATURES_COUNT = 5;
-    private final int EMBEDDING_SIZE = 64;
+    private final int EMBEDDING_DIMENSION = 64;
 
     private final String MODEL_NAME = "graphSageModel";
 
@@ -73,7 +73,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         configBuilder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
-            .embeddingSize(EMBEDDING_SIZE);
+            .embeddingDimension(EMBEDDING_DIMENSION);
     }
 
     @ParameterizedTest
@@ -100,7 +100,7 @@ class GraphSageEmbeddingsGeneratorTest {
         assertNotNull(embeddings);
         assertEquals(graph.nodeCount(), embeddings.size());
 
-        LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_SIZE, embeddings.get(n).length));
+        LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
 
 }

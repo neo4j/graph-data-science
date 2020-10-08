@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
@@ -30,14 +31,11 @@ import java.util.List;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface FastRPBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
 
     String ITERATION_WEIGHTS_KEY = "iterationWeights";
 
     List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
-
-    @Configuration.IntegerRange(min = 1)
-    int embeddingSize();
 
     @Configuration.Key(ITERATION_WEIGHTS_KEY)
     @Value.Default

@@ -41,8 +41,8 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
-    void testStreaming(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
-        train(embeddingSize, aggregator, activationFunction);
+    void testStreaming(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
+        train(embeddingDimension, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.alpha.graphSage")
@@ -51,14 +51,14 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        runQueryWithRowConsumer(query, Map.of("embeddingSize", embeddingSize), row -> {
+        runQueryWithRowConsumer(query, Map.of("embeddingDimension", embeddingDimension), row -> {
             Number nodeId = row.getNumber("nodeId");
             assertNotNull(nodeId);
 
             Object o = row.get("embedding");
             assertTrue(o instanceof List);
             Collection<Double> nodeEmbeddings = (List<Double>) o;
-            assertEquals(embeddingSize, nodeEmbeddings.size());
+            assertEquals(embeddingDimension, nodeEmbeddings.size());
         });
     }
 

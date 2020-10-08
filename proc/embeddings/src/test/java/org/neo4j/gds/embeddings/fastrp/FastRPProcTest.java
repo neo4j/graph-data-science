@@ -88,9 +88,9 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        return userInput.containsKey("embeddingSize")
+        return userInput.containsKey("embeddingDimension")
             ? userInput
-            : userInput.withEntry("embeddingSize", 128);
+            : userInput.withEntry("embeddingDimension", 128);
     }
 
     @Override

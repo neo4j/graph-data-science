@@ -59,8 +59,8 @@ public class Node2VecModel {
         this.tracker = tracker;
 
         // TODO research how the weights are initialized
-        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingSize());
-        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingSize());
+        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
+        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             walks.size(),
@@ -123,8 +123,8 @@ public class Node2VecModel {
                 config.windowSize(),
                 progressLogger
             );
-            this.centerGradientBuffer = new Vector(config.embeddingSize());
-            this.contextGradientBuffer = new Vector(config.embeddingSize());
+            this.centerGradientBuffer = new Vector(config.embeddingDimension());
+            this.contextGradientBuffer = new Vector(config.embeddingDimension());
 
             this.initialLearningRate = (float) config.initialLearningRate();
             this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / (endIndex - startIndex));

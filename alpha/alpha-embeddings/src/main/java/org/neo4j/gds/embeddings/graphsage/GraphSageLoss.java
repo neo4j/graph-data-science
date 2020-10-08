@@ -76,8 +76,8 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         int totalBatchSize = embeddingData.dimension(ROWS_INDEX);
         int batchSize = totalBatchSize / 3;
 
-        int embeddingSize = embeddingData.dimension(COLUMNS_INDEX);
-        double[] gradientResult = new double[totalBatchSize * embeddingSize];
+        int embeddingDimension = embeddingData.dimension(COLUMNS_INDEX);
+        double[] gradientResult = new double[totalBatchSize * embeddingDimension];
 
         IntStream.range(0, batchSize).forEach(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
@@ -89,7 +89,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
             double positiveLogistic = logisticFunction(positiveAffinity);
             double negativeLogistic = logisticFunction(-negativeAffinity);
 
-            IntStream.range(0, embeddingSize).forEach(columnOffset -> partialComputeGradient(
+            IntStream.range(0, embeddingDimension).forEach(columnOffset -> partialComputeGradient(
                 embeddings,
                 gradientResult,
                 nodeId,
@@ -102,7 +102,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
             ));
 
         });
-        return new Matrix(gradientResult, totalBatchSize, embeddingSize);
+        return new Matrix(gradientResult, totalBatchSize, embeddingDimension);
     }
 
     private void partialComputeGradient(

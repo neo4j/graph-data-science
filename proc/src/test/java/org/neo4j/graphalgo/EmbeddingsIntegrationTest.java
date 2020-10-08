@@ -22,10 +22,10 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
-import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -96,25 +96,25 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
     void runPipeline() {
         // run algorithms in write mode
 
-        int node2vecEmbeddingSize = 3;
+        int node2vecEmbeddingDimension = 3;
         String node2vecQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
             .algo("gds.alpha.node2vec")
             .writeMode()
-            .addParameter("embeddingSize", node2vecEmbeddingSize)
+            .addParameter("embeddingDimension", node2vecEmbeddingDimension)
             .addParameter("writeProperty", "node2vec")
             .yields();
 
         runQuery(node2vecQuery);
 
-        int rpEmbeddingSize = 3;
+        int rpEmbeddingDimension = 3;
         String rpQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
             .algo("gds.fastRP")
             .writeMode()
-            .addParameter("embeddingSize", rpEmbeddingSize)
+            .addParameter("embeddingDimension", rpEmbeddingDimension)
             .addParameter("iterationWeights", List.of(1D, 1D))
             .addParameter("writeProperty", "rp")
             .yields();
@@ -141,7 +141,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         runQuery(newCreateQuery);
 
         // run GraphSage in stream mode
-        int embeddingSize = 64;
+        int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
         String graphSageTrainQuery = GdsCypher
             .call()
@@ -149,7 +149,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
             .algo("gds.alpha.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("rp0", "rp1", "rp2", "node2vec0", "node2vec1", "node2vec2"))
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("modelName", graphSageModel)
             .yields();
 
@@ -164,7 +164,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
 
         runQueryWithRowConsumer(graphSageStreamQuery, row -> {
             Collection<Double> embedding = (Collection<Double>) row.get("embedding");
-            assertEquals(embedding.size(), embeddingSize);
+            assertEquals(embedding.size(), embeddingDimension);
 
             double[] values = embedding.stream()
                 .mapToDouble(Double::doubleValue)

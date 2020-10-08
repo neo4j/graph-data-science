@@ -45,7 +45,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
             .algo("gds.alpha.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
-            .addParameter("embeddingSize", dimensions)
+            .addParameter("embeddingDimension", dimensions)
             .yields();
         runQuery(query);
 

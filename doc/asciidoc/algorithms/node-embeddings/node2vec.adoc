@@ -159,7 +159,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 
 [source, cypher, role=query-example, no-result, group=node2vec]
 ----
-CALL gds.alpha.node2vec.stream('myGraph', {embeddingSize: 2})
+CALL gds.alpha.node2vec.stream('myGraph', {embeddingDimension: 2})
 ----
 
 [opts=header]

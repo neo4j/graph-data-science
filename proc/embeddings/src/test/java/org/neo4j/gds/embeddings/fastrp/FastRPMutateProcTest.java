@@ -76,12 +76,12 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
         runQuery(graphCreateQuery);
 
-        int embeddingSize = 128;
+        int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(loadedGraphName)
             .algo("fastRP")
             .mutateMode()
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("mutateProperty", "embedding");
 
         if (!weights.isEmpty()) {
@@ -93,7 +93,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
         runQueryWithRowConsumer("MATCH (n:Node) RETURN gds.util.nodeProperty('loadGraph', id(n), 'embedding') as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(embeddingSize, embeddings.length);
+            assertEquals(embeddingDimension, embeddings.length);
             boolean allMatch = true;
             for (float embedding : embeddings) {
                 if (Float.compare(embedding, 0.0F) != 0) {

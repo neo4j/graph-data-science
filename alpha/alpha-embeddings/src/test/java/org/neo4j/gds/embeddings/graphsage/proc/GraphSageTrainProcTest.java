@@ -65,7 +65,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
-            .addParameter("embeddingSize", 64)
+            .addParameter("embeddingDimension", 64)
             .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
@@ -97,7 +97,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.nodePropertyNames());
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
-        assertEquals(64, trainConfig.embeddingSize());
+        assertEquals(64, trainConfig.embeddingDimension());
         assertTrue(trainConfig.degreeAsProperty());
     }
 
@@ -187,7 +187,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("nodePropertyNames", List.of("age", "missing_1", "missing_2"))
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
-            .addParameter("embeddingSize", 42)
+            .addParameter("embeddingDimension", 42)
             .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();

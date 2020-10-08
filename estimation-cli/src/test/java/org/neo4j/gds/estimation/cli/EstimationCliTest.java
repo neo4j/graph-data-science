@@ -398,10 +398,10 @@ final class EstimationCliTest {
             runEstimation(new BetweennessCentralityStreamProc()::estimate),
             runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
 
-            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingSize", 128),
-            runEstimation(new FastRPStatsProc()::estimate, "embeddingSize", 128),
-            runEstimation(new FastRPStreamProc()::estimate, "embeddingSize", 128),
-            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingSize", 128),
+            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
+            runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
+            runEstimation(new FastRPStreamProc()::estimate, "embeddingDimension", 128),
+            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128),
 
 
             graphCreateEstimate(false),

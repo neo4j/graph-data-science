@@ -62,13 +62,13 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
-        int embeddingSize = 128;
+        int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .algo("fastRP")
             .writeMode()
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("writeProperty", "embedding");
 
         if (!weights.isEmpty()) {
@@ -80,7 +80,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
 
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
             float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(embeddingSize, embeddings.length);
+            assertEquals(embeddingDimension, embeddings.length);
             boolean allMatch = true;
             for (float embedding : embeddings) {
                 if (Float.compare(embedding, 0.0F) != 0) {
@@ -94,7 +94,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
 
     @Test
     void shouldComputeAndWriteWithWeight() {
-        int embeddingSize = 128;
+        int embeddingDimension = 128;
 
         String query = GdsCypher.call()
             .withNodeLabel("Node")
@@ -103,7 +103,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
             .withRelationshipProperty("weight")
             .algo("fastRP")
             .writeMode()
-            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("relationshipWeightProperty", "weight")
             .addParameter("writeProperty", "embedding")
             .yields();

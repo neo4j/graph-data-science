@@ -48,16 +48,16 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private final HugeObjectArray<float[]> embeddingB;
     private final EmbeddingCombiner embeddingCombiner;
 
-    private final int embeddingSize;
+    private final int embeddingDimension;
     private final int iterations;
     private final List<Double> iterationWeights;
 
     static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
             .builder(FastRP.class)
-            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
-            .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
-            .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingSize())))
+            .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
+            .add("embeddingB", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .build();
     }
 
@@ -74,7 +74,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
-        this.embeddingSize = config.embeddingSize();
+        this.embeddingDimension = config.embeddingDimension();
         this.iterations = config.iterations();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
@@ -82,7 +82,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addArrayValues(lhs, rhs);
-        this.embeddings.setAll((i) -> new float[embeddingSize]);
+        this.embeddings.setAll((i) -> new float[embeddingDimension]);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     void initRandomVectors() {
         double probability = 1.0f / (2.0f * SPARSITY);
         float sqrtSparsity = (float) Math.sqrt(SPARSITY);
-        float sqrtEmbeddingSize = (float) Math.sqrt(embeddingSize);
+        float sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
 
         progressLogger.logMessage("Initialising Random Vectors :: Start");
@@ -129,10 +129,10 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
                 ? 1.0f
                 : (float) Math.pow(degree, normalizationStrength);
 
-            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingSize;
+            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
             float[] randomVector = computeRandomVector(random.get(), probability, entryValue);
             embeddingB.set(nodeId, randomVector);
-            embeddingA.set(nodeId, new float[this.embeddingSize]);
+            embeddingA.set(nodeId, new float[this.embeddingDimension]);
             progressLogger.logProgress();
         });
         progressLogger.logMessage("Initialising Random Vectors :: Finished");
@@ -178,8 +178,8 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     private float[] computeRandomVector(Random random, double probability, float entryValue) {
-        float[] randomVector = new float[embeddingSize];
-        for (int i = 0; i < embeddingSize; i++) {
+        float[] randomVector = new float[embeddingDimension];
+        for (int i = 0; i < embeddingDimension; i++) {
             randomVector[i] = computeRandomEntry(random, probability, entryValue);
         }
         return randomVector;
