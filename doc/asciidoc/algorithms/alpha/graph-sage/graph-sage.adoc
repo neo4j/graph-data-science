@@ -233,6 +233,8 @@ CALL gds.alpha.graphSage.train(
 )
 ----
 
+WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
+
 
 === Stream
 
