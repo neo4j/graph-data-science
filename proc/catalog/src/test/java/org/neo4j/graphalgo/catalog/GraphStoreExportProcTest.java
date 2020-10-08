@@ -23,6 +23,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -56,12 +60,18 @@ class GraphStoreExportProcTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperty("prop1")
             .withNodeProperty("prop2")
-            .withRelationshipType("REL1")
-            .withRelationshipType("REL2")
-            .withRelationshipType("REL3")
-            .withRelationshipProperty("weight1")
-            .withRelationshipProperty("weight2")
-            .withRelationshipProperty("weight3")
+            .withRelationshipType("REL1", RelationshipProjection
+                .of("REL1", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
+            )
+            .withRelationshipType("REL2", RelationshipProjection
+                .of("REL2", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
+            )
+            .withRelationshipType("REL3", RelationshipProjection
+                .of("REL3", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
+            )
             .graphCreate("test-graph")
             .yields());
 
