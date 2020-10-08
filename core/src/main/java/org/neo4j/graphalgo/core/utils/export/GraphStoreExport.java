@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
@@ -63,6 +62,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eclipse.collections.impl.tuple.Tuples.pair;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -306,43 +306,38 @@ public class GraphStoreExport {
         }
 
         static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
-            var graphs = graphStore
-                .relationshipTypes()
-                .stream()
-                .flatMap(relType -> {
-                    Set<String> relProperties = graphStore.relationshipPropertyKeys(relType);
-                    if (relProperties.isEmpty()) {
-                        return Stream.of(Tuples.pair(relType, Optional.<String>empty()));
-                    } else {
-                        return relProperties
-                            .stream()
-                            .map(propertyKey -> Tuples.pair(relType, Optional.of(propertyKey)));
-                    }
-                })
-                .collect(Collectors.toMap(
-                    relTypeAndProperty -> Tuples.pair(
-                        relTypeAndProperty.getOne().equals(RelationshipType.ALL_RELATIONSHIPS)
-                            ? RelationshipType.of(defaultRelationshipType)
-                            : relTypeAndProperty.getOne(),
-                        relTypeAndProperty.getTwo()
-                    ),
-                    relTypeAndProperty -> graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-                ));
-
             Map<RelationshipType, HugeGraph.TopologyCSR> topologies = new HashMap<>();
             Map<RelationshipType, Map<String, HugeGraph.PropertyCSR>> properties = new HashMap<>();
 
-            graphs.forEach((typeAndProperty, graph) -> {
-                RelationshipType relationshipType = typeAndProperty.getOne();
-                topologies.computeIfAbsent(relationshipType, ignored -> ((HugeGraph) graph).relationships().topology());
+            graphStore.relationshipTypes().stream()
+                // extract (relationshipType, propertyKey) tuples
+                .flatMap(relType -> graphStore.relationshipPropertyKeys(relType).isEmpty()
+                    ? Stream.of(pair(relType, Optional.<String>empty()))
+                    : graphStore
+                        .relationshipPropertyKeys(relType)
+                        .stream()
+                        .map(propertyKey -> pair(relType, Optional.of(propertyKey))))
+                // extract graph for relationship type and property
+                .map(relTypeAndProperty -> pair(
+                    relTypeAndProperty,
+                    graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
+                ))
+                // extract Topology list and associated Properties lists
+                .forEach(relTypeAndPropertyAndGraph -> {
+                    var relationshipType = relTypeAndPropertyAndGraph.getOne().getOne();
+                    var maybePropertyKey = relTypeAndPropertyAndGraph.getOne().getTwo();
+                    var graph = relTypeAndPropertyAndGraph.getTwo();
 
-                typeAndProperty.getTwo().ifPresent(propertyKey -> properties
-                    .computeIfAbsent(relationshipType, ignored -> new HashMap<>())
-                    .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
-            });
+                    topologies.computeIfAbsent(relationshipType, ignored -> ((HugeGraph) graph).relationships().topology());
+                    maybePropertyKey.ifPresent(propertyKey -> properties
+                        .computeIfAbsent(relationshipType, ignored -> new HashMap<>())
+                        // .get() is safe, since we have a property key
+                        .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
+                });
 
             Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
 
+            // for each relationship type, merge its Topology list and all associated Property lists
             topologies.forEach((relationshipType, topology) -> {
                 var adjacencyList = (AdjacencyList) topology.list();
                 var adjacencyOffsets = (AdjacencyOffsets) topology.offsets();
@@ -363,8 +358,13 @@ public class GraphStoreExport {
                         entry -> entry.getValue().offsets()
                     ));
 
+                // iff relationshipType is '*', change it the given default
+                var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
+                    ? RelationshipType.of(defaultRelationshipType)
+                    : relationshipType;
+
                 relationshipIterators.put(
-                    relationshipType,
+                    outputRelationshipType,
                     new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
                 );
             });
