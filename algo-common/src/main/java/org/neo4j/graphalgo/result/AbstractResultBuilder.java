@@ -27,6 +27,7 @@ public abstract class AbstractResultBuilder<WRITE_RESULT> {
     protected long computeMillis = -1;
     protected long writeMillis = -1;
     protected long mutateMillis = -1;
+    protected long postProcessingMillis = -1;
     protected long nodeCount;
     protected long nodePropertiesWritten;
     protected long relationshipsWritten;
@@ -49,6 +50,11 @@ public abstract class AbstractResultBuilder<WRITE_RESULT> {
 
     public AbstractResultBuilder<WRITE_RESULT> withMutateMillis(long mutateMillis) {
         this.mutateMillis = mutateMillis;
+        return this;
+    }
+
+    public AbstractResultBuilder<WRITE_RESULT> withPostProcessingMillis(long postProcessingMillis) {
+        this.postProcessingMillis = postProcessingMillis;
         return this;
     }
 
