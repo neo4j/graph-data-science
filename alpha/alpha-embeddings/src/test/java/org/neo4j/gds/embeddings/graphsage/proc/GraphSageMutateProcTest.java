@@ -29,8 +29,10 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -50,16 +52,16 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertNotNull(row.get("nodeCount"));
-            assertNotNull(row.get("nodePropertiesWritten"));
-            assertNotNull(row.get("createMillis"));
-            assertNotNull(row.get("computeMillis"));
-            assertNotNull(row.get("mutateMillis"));
-            assertNotNull(row.get("configuration"));
-        });
-
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.get("nodeCount")).isEqualTo(graphStore.nodeCount());
+            assertThat(row.get("nodePropertiesWritten")).isEqualTo(graphStore.nodeCount());
+            assertThat(row.get("createMillis")).isNotEqualTo(-1L);
+            assertThat(row.get("computeMillis")).isNotEqualTo(-1L);
+            assertThat(row.get("mutateMillis")).isNotEqualTo(-1L);
+            assertThat(row.get("configuration")).isInstanceOf(Map.class);
+        });
 
         NodeProperties embeddingNodeProperties = graphStore.nodePropertyValues(mutatePropertyKey);
         graphStore.nodes().forEachNode(nodeId -> {
@@ -67,7 +69,6 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             return true;
         });
     }
-
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
     @MethodSource("missingNodeProperties")
