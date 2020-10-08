@@ -56,6 +56,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.query.ExecutingQuery;
+import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.store.NodeLabelsField;
 import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -99,6 +100,14 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
         return new CompatAccessMode40(customAccessMode);
+    }
+
+    @Override
+    public AccessMode newRestrictedAccessMode(
+        AccessMode original,
+        AccessMode.Static restricting
+    ) {
+        return new RestrictedAccessMode(original, restricting);
     }
 
     @Override

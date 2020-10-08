@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.core;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Optional;
@@ -177,7 +177,7 @@ public final class SecureTransaction implements AutoCloseable {
      * instance's top-level transaction. To decouple the transaction, call {@link #fork()} on the returned instance.
      */
     public SecureTransaction withRestrictedAccess(AccessMode.Static accessMode) {
-        var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
+        var restrictedMode = Neo4jProxy.newRestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
         return new SecureTransaction(db, topTx, newContext);
     }

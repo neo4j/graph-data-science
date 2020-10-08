@@ -102,6 +102,13 @@ public final class Neo4jProxy {
         return IMPL.accessMode(customAccessMode);
     }
 
+    public static AccessMode newRestrictedAccessMode(
+        AccessMode original,
+        AccessMode.Static restricting
+    ) {
+        return IMPL.newRestrictedAccessMode(original, restricting);
+    }
+
     public static <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
         RECORD record,

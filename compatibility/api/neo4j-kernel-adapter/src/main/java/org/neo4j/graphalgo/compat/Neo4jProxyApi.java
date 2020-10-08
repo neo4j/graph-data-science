@@ -83,6 +83,8 @@ public interface Neo4jProxyApi {
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
+    AccessMode newRestrictedAccessMode(AccessMode original, AccessMode.Static restricting);
+
     <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
         RECORD record,
