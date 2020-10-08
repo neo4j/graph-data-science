@@ -261,8 +261,10 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-embeddings-node2vec, Node2Vec>>
 | `gds.alpha.node2vec.stream`
 | `gds.alpha.node2vec.write`
-.3+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
+.5+<.^|<<algorithms-embeddings-graph-sage, GraphSAGE>>
 | `gds.alpha.graphSage.stream`
+| `gds.alpha.graphSage.mutate`
+| `gds.alpha.graphSage.mutate.estimate`
 | `gds.alpha.graphSage.write`
 | `gds.alpha.graphSage.train`
 .8+<.^| RandomProjections
