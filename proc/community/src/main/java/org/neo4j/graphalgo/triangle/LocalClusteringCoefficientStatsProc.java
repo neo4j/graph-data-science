@@ -71,7 +71,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStatsConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientStatsBuilder(callContext, allocationTracker()),
+            new LocalClusteringCoefficientStatsBuilder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -117,11 +117,8 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
 
     static class LocalClusteringCoefficientStatsBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<StatsResult> {
 
-        LocalClusteringCoefficientStatsBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
-            super(callContext, tracker);
+        LocalClusteringCoefficientStatsBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
+            super(callContext, concurrency, tracker);
         }
 
         @Override

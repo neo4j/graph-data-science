@@ -99,7 +99,11 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateConfig> computeResult) {
         return LocalClusteringCoefficientCompanion.resultBuilder(
-            new LocalClusteringCoefficientMutateBuilder(callContext, allocationTracker()),
+            new LocalClusteringCoefficientMutateBuilder(
+                callContext,
+                computeResult.config().concurrency(),
+                allocationTracker()
+            ),
             computeResult
         );
     }
@@ -132,11 +136,8 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
 
     static class LocalClusteringCoefficientMutateBuilder extends LocalClusteringCoefficientCompanion.ResultBuilder<MutateResult> {
 
-        LocalClusteringCoefficientMutateBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
-            super(callContext, tracker);
+        LocalClusteringCoefficientMutateBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
+            super(callContext, concurrency, tracker);
         }
 
         @Override

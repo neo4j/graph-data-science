@@ -77,7 +77,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<K1Coloring, HugeLongArray, K1ColoringMutateConfig> computeResult) {
-        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, allocationTracker()), computeResult, callContext);
+        return K1ColoringProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()), computeResult, callContext);
     }
 
     @Override
@@ -132,9 +132,10 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
         static class Builder extends K1ColoringProc.K1ColoringResultBuilder<MutateResult> {
             Builder(
                 ProcedureCallContext context,
+                int concurrency,
                 AllocationTracker tracker
             ) {
-                super(context, tracker);
+                super(context, concurrency, tracker);
             }
 
             @Override

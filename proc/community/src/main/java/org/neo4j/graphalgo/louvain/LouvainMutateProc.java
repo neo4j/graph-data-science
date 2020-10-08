@@ -86,7 +86,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<Louvain, Louvain, LouvainMutateConfig> computeResult) {
         return LouvainProc.resultBuilder(
-            new MutateResult.Builder(callContext, allocationTracker()),
+            new MutateResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -126,8 +126,8 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
 
         static class Builder extends LouvainProc.LouvainResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context, AllocationTracker tracker) {
-                super(context, tracker);
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override

@@ -65,11 +65,8 @@ final class LabelPropagationProc {
 
         boolean didConverge;
 
-        LabelPropagationResultBuilder(
-            ProcedureCallContext callContext,
-            AllocationTracker tracker
-        ) {
-            super(callContext, tracker);
+        LabelPropagationResultBuilder(ProcedureCallContext callContext, int concurrency, AllocationTracker tracker) {
+            super(callContext, concurrency, tracker);
         }
 
         LabelPropagationResultBuilder<PROC_RESULT> ranIterations(long iterations) {

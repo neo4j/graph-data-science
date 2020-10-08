@@ -72,6 +72,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
         AbstractResultBuilder<SccResult> writeBuilder = new SccResultBuilder(
             callContext,
+            config.concurrency(),
             tracker
         )
             .buildCommunityCount(true)
@@ -217,11 +218,8 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
 
     public static final class SccResultBuilder extends AbstractCommunityResultBuilder<SccResult> {
 
-        SccResultBuilder(
-            ProcedureCallContext context,
-            AllocationTracker tracker
-        ) {
-            super(context, tracker);
+        SccResultBuilder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+            super(context, concurrency, tracker);
         }
 
         @Override

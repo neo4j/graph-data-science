@@ -68,7 +68,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig> computeResult) {
         return LabelPropagationProc.resultBuilder(
-            new WriteResult.Builder(callContext, allocationTracker()),
+            new WriteResult.Builder(callContext, computeResult.config().concurrency(), allocationTracker()),
             computeResult
         );
     }
@@ -122,14 +122,8 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
 
         static class Builder extends LabelPropagationProc.LabelPropagationResultBuilder<WriteResult> {
 
-            Builder(
-                ProcedureCallContext context,
-                AllocationTracker tracker
-            ) {
-                super(
-                    context,
-                    tracker
-                );
+            Builder(ProcedureCallContext context, int concurrency, AllocationTracker tracker) {
+                super(context, concurrency, tracker);
             }
 
             @Override
