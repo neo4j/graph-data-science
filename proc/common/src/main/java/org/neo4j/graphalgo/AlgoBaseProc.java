@@ -174,6 +174,7 @@ public abstract class AlgoBaseProc<
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             graphStore = getOrCreateGraphStore(input);
+            validateGraphStore(graphStore);
             graph = createGraph(graphStore, config);
         }
 
@@ -323,6 +324,13 @@ public abstract class AlgoBaseProc<
         validateConfigs(graphCandidate.config(), config);
         return graphCandidate.graphStore();
     }
+
+    /**
+     * This method is used to validate if a GraphStore meets conditions required to run an algorithm.
+     *
+     * @param graphStore - the `graphStore` to validate.
+     */
+    protected void validateGraphStore(GraphStore graphStore) {}
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {
         var sudoImplicitCreate = config.implicitCreateConfig().map(BaseConfig::sudo).orElse(false);

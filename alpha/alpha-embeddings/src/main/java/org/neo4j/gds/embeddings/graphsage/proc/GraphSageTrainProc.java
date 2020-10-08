@@ -25,6 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
@@ -73,4 +74,10 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         return (AlphaAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig>) GraphSageTrain::new;
     }
 
+    @Override
+    protected void validateGraphStore(GraphStore graphStore) {
+        if(graphStore.relationshipCount() == 0) {
+            throw new IllegalArgumentException("There should be at least one relationship in the graph");
+        }
+    }
 }

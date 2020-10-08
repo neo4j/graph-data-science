@@ -233,7 +233,10 @@ public class GraphSageModelTrainer {
                         return nodeId;
                     }
                 }
-                throw new RuntimeException("This should never happen");
+                throw new RuntimeException(
+                    "This happens when there are no relationships in the Graph. " +
+                    "This condition is checked by the calling procedure."
+                );
             });
     }
 
