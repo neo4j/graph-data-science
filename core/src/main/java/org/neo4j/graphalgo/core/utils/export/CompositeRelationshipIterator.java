@@ -19,24 +19,27 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import com.carrotsearch.hppc.ObjectObjectHashMap;
+import com.carrotsearch.hppc.ObjectObjectMap;
+import com.carrotsearch.hppc.procedures.ObjectObjectProcedure;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 class CompositeRelationshipIterator {
 
     private final TransientAdjacencyList adjacencyList;
     private final TransientAdjacencyOffsets adjacencyOffsets;
-
     private final Map<String, TransientAdjacencyList> propertyLists;
     private final Map<String, TransientAdjacencyOffsets> propertyOffsets;
 
+    private final String[] propertyKeys;
     private final TransientAdjacencyList.DecompressingCursor cursorCache;
-    private final Map<String, TransientAdjacencyList.Cursor> propertyCursorCache;
+    private final ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsetsCache;
+    private final ObjectObjectMap<String, TransientAdjacencyList.Cursor> propertyCursorCache;
 
     CompositeRelationshipIterator(
         TransientAdjacencyList adjacencyList,
@@ -49,13 +52,13 @@ class CompositeRelationshipIterator {
         this.propertyLists = propertyLists;
         this.propertyOffsets = propertyOffsets;
 
-        // create un-initialized cursors
+        // create data structures for internal use
+        this.propertyKeys = propertyLists.keySet().toArray(new String[0]);
         this.cursorCache = adjacencyList.rawDecompressingCursor();
-        this.propertyCursorCache = new HashMap<>(propertyLists.size());
-        this.propertyLists.forEach((propertyKey, propertyList) -> this.propertyCursorCache.put(
-            propertyKey,
-            propertyList.rawCursor()
-        ));
+        this.propertyOffsetsCache = new ObjectObjectHashMap<>(propertyOffsets.size());
+        this.propertyOffsets.forEach(propertyOffsetsCache::put);
+        this.propertyCursorCache = new ObjectObjectHashMap<>(propertyLists.size());
+        this.propertyLists.forEach((key, list) -> this.propertyCursorCache.put(key, list.rawCursor()));
     }
 
     CompositeRelationshipIterator concurrentCopy() {
@@ -63,7 +66,7 @@ class CompositeRelationshipIterator {
     }
 
     int propertyCount() {
-        return propertyLists.size();
+        return propertyKeys.length;
     }
 
     void forEachRelationship(long sourceId, String relType, InputEntityVisitor visitor) throws IOException {
@@ -76,29 +79,28 @@ class CompositeRelationshipIterator {
         // init adjacency cursor
         var adjacencyCursor = TransientAdjacencyList.decompressingCursor(cursorCache, offset);
         // init property cursors
-        for (var propertyKey : propertyLists.keySet()) {
+        for (var propertyKey : propertyKeys) {
             propertyCursorCache.put(
                 propertyKey,
                 TransientAdjacencyList.cursor(
                     propertyCursorCache.get(propertyKey),
-                    propertyOffsets.get(propertyKey).get(sourceId)
+                    propertyOffsetsCache.get(propertyKey).get(sourceId)
                 )
             );
         }
 
         // in-step iteration of adjacency and property cursors
         while (adjacencyCursor.hasNextVLong()) {
-            long targetId = adjacencyCursor.nextVLong();
             visitor.startId(sourceId);
-            visitor.endId(targetId);
+            visitor.endId(adjacencyCursor.nextVLong());
             visitor.type(relType);
 
-            for (var propertyKeyAndCursor : propertyCursorCache.entrySet()) {
+            propertyCursorCache.forEach((ObjectObjectProcedure<String, TransientAdjacencyList.Cursor>) (propertyKey, propertyCursor) -> {
                 visitor.property(
-                    propertyKeyAndCursor.getKey(),
-                    Double.longBitsToDouble(propertyKeyAndCursor.getValue().nextLong())
+                    propertyKey,
+                    Double.longBitsToDouble(propertyCursor.nextLong())
                 );
-            }
+            });
 
             visitor.endOfEntity();
         }
