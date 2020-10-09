@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.proc;
 
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -28,16 +29,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import java.util.ArrayList;
-
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
 
@@ -63,19 +58,9 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
-        var rootBuilder = MemoryEstimations.builder(GraphSage.class);
-        var layerBuilder = rootBuilder
+        var layerBuilder = MemoryEstimations.builder(GraphSage.class)
             .startField("persistentMemory")
             .startField("layers");
-
-        var trainOnBatchBuilder = MemoryEstimations.builder().startField("trainOnBatch");
-        var lossBuilder = trainOnBatchBuilder.startField("lossFunction");
-        var subGraphBuilder = lossBuilder.startField("subgraphs");
-
-        final var minBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
-        final var maxBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
-        minBatchNodeCounts.add(3L * config.batchSize());
-        maxBatchNodeCounts.add(3L * config.batchSize());
 
         long initialAdamOptimizer = 0L;
         long updateAdamOptimizer = 0L;
@@ -95,107 +80,27 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
 
             initialAdamOptimizer += 2 * sizeOfDoubleArray(weightDimensions);
             updateAdamOptimizer += 5 * weightDimensions;
-
-            var sampleSize = layerConfig.sampleSize();
-
-            var min = minBatchNodeCounts.get(i);
-            var max = maxBatchNodeCounts.get(i);
-            var minNextNodeCount = Math.min(min, nodeCount);
-            var maxNextNodeCount = Math.min(max * (sampleSize + 1), nodeCount);
-            minBatchNodeCounts.add(minNextNodeCount);
-            maxBatchNodeCounts.add(maxNextNodeCount);
-
-            var subgraphRange = MemoryRange.of(
-                sizeOfIntArray(min) + sizeOfObjectArray(min) + min * sizeOfIntArray(0) + sizeOfLongArray(minNextNodeCount),
-                sizeOfIntArray(max) + sizeOfObjectArray(max) + max * sizeOfIntArray(sampleSize) + sizeOfLongArray(maxNextNodeCount)
-            );
-
-            subGraphBuilder.add(MemoryEstimations.of("subgraph " + (i + 1), subgraphRange));
         }
-        subGraphBuilder.endField();
-        layerBuilder.endField().endField();
 
-        var previousLayerMinNodeCounts = new ArrayList<>(minBatchNodeCounts);
-        previousLayerMinNodeCounts.set(
-            minBatchNodeCounts.size() - 1,
-            minBatchNodeCounts.get(minBatchNodeCounts.size() - 2)
-        );
-        var previousLayerMaxNodeCounts = new ArrayList<>(maxBatchNodeCounts);
-        previousLayerMaxNodeCounts.set(
-            maxBatchNodeCounts.size() - 1,
-            maxBatchNodeCounts.get(maxBatchNodeCounts.size() - 2)
-        );
+        var embeddingEstimations = GraphSageHelper.embeddingsEstimation(config, 3 * config.batchSize(), nodeCount);
 
-        var aggregatorsBuilder = lossBuilder.startField("aggregators");
-        for (int i = 0; i < numberOfLayers; i++) {
-            var layerConfig = layerConfigs.get(i);
-            // aggregators go backwards through the layers
-            var minNodeCount = minBatchNodeCounts.get(numberOfLayers - i - 1);
-            var maxNodeCount = maxBatchNodeCounts.get(numberOfLayers - i - 1);
-
-            if (i == 0) {
-                aggregatorsBuilder.fixed(
-                    "firstLayer",
-                    MemoryRange.of(sizeOfDoubleArray(minNodeCount), sizeOfDoubleArray(maxNodeCount))
-                );
-            }
-
-            Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
-            if (aggregatorType == Aggregator.AggregatorType.MEAN) {
-                var minBound =
-                    sizeOfDoubleArray(minNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
-                var maxBound =
-                    sizeOfDoubleArray(maxNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
-
-                aggregatorsBuilder.add("MEAN " + (i + 1), MemoryEstimations.of("", MemoryRange.of(
-                    minBound,
-                    maxBound
-                )));
-            } else if (aggregatorType == Aggregator.AggregatorType.POOL) {
-                var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
-                var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
-
-                var minBound =
-                    3 * sizeOfDoubleArray(minPreviousNodeCount * config.embeddingDimension()) +
-                    6 * sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
-                var maxBound =
-                    3 * sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingDimension()) +
-                    6 * sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
-
-                aggregatorsBuilder.add(
-                    "POOL " + (i + 1),
-                    MemoryEstimations.of("", MemoryRange.of(minBound, maxBound))
-                );
-            }
-
-            if (i == numberOfLayers - 1) {
-                aggregatorsBuilder.fixed(
-                    "normalizeRows",
-                    MemoryRange.of(
-                        sizeOfDoubleArray(minNodeCount * config.embeddingDimension()),
-                        sizeOfDoubleArray(maxNodeCount * config.embeddingDimension())
-                    )
-                );
-            }
-        }
-        var gradientDescentAggregators = aggregatorsBuilder.build();
-        aggregatorsBuilder.endField();
-        lossBuilder.endField();
-        trainOnBatchBuilder.add("gradientDescent", gradientDescentAggregators);
-
-        rootBuilder.startField("peakMemory")
+        return layerBuilder
+            .endField()
+            .endField()
+            .startField("peakMemory")
             .add("initialFeatures", HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.featuresSize())))
             .startField("trainOnEpoch")
             .fixed("initialAdamOptimizer", initialAdamOptimizer)
-            .perThread("concurrentBatches", trainOnBatchBuilder
+            .perThread("concurrentBatches", MemoryEstimations
+                .builder()
+                .startField("trainOnBatch")
+                .add(embeddingEstimations.lossFunction())
+                .add("gradientDescent", embeddingEstimations.aggregators())
                 .fixed("updateAdamOptimizer", updateAdamOptimizer)
                 .endField()
                 .build())
             .endField()
-            .endField();
-
-        return rootBuilder.build();
+            .endField()
+            .build();
     }
 }

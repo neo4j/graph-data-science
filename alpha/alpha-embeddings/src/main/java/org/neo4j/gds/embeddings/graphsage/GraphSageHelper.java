@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -88,96 +89,109 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    public static MemoryEstimation embeddingsEstimation(GraphSageTrainConfig config) {
-        return MemoryEstimations.setup("", (graphDimensions -> {
-            var layerConfigs = config.layerConfigs();
-            var numberOfLayers = layerConfigs.size();
-            var nodeCount = graphDimensions.nodeCount();
+    public static EmbeddingEstimations embeddingsEstimation(
+        GraphSageTrainConfig config,
+        long batchSize,
+        long nodeCount
+    ) {
+        var layerConfigs = config.layerConfigs();
+        var numberOfLayers = layerConfigs.size();
 
-            var lossBuilder = MemoryEstimations.builder().startField("lossFunction");
-            var subGraphBuilder = lossBuilder.startField("subgraphs");
+        var lossBuilder = MemoryEstimations.builder("lossFunction");
+        var subGraphBuilder = lossBuilder.startField("subgraphs");
 
-            final var minBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
-            final var maxBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
-            minBatchNodeCounts.add((long) config.batchSize());
-            maxBatchNodeCounts.add((long) config.batchSize());
+        final var minBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
+        final var maxBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
+        minBatchNodeCounts.add(batchSize);
+        maxBatchNodeCounts.add(batchSize);
 
-            for (int i = 0; i < numberOfLayers; i++) {
-                var sampleSize = layerConfigs.get(i).sampleSize();
+        for (int i = 0; i < numberOfLayers; i++) {
+            var sampleSize = layerConfigs.get(i).sampleSize();
 
-                var min = minBatchNodeCounts.get(i);
-                var max = maxBatchNodeCounts.get(i);
-                var minNextNodeCount = Math.min(min, nodeCount);
-                var maxNextNodeCount = Math.min(max * (sampleSize + 1), nodeCount);
-                minBatchNodeCounts.add(minNextNodeCount);
-                maxBatchNodeCounts.add(maxNextNodeCount);
+            var min = minBatchNodeCounts.get(i);
+            var max = maxBatchNodeCounts.get(i);
+            var minNextNodeCount = Math.min(min, nodeCount);
+            var maxNextNodeCount = Math.min(max * (sampleSize + 1), nodeCount);
+            minBatchNodeCounts.add(minNextNodeCount);
+            maxBatchNodeCounts.add(maxNextNodeCount);
 
-                var subgraphRange = MemoryRange.of(
-                    sizeOfIntArray(min) + sizeOfObjectArray(min) + min * sizeOfIntArray(0) + sizeOfLongArray(
-                        minNextNodeCount),
-                    sizeOfIntArray(max) + sizeOfObjectArray(max) + max * sizeOfIntArray(sampleSize) + sizeOfLongArray(
-                        maxNextNodeCount)
-                );
-
-                subGraphBuilder.add(MemoryEstimations.of("subgraph " + (i + 1), subgraphRange));
-            }
-            subGraphBuilder.endField();
-
-            var previousLayerMinNodeCounts = new ArrayList<>(minBatchNodeCounts);
-            previousLayerMinNodeCounts.set(
-                minBatchNodeCounts.size() - 1,
-                minBatchNodeCounts.get(minBatchNodeCounts.size() - 2)
-            );
-            var previousLayerMaxNodeCounts = new ArrayList<>(maxBatchNodeCounts);
-            previousLayerMaxNodeCounts.set(
-                maxBatchNodeCounts.size() - 1,
-                maxBatchNodeCounts.get(maxBatchNodeCounts.size() - 2)
+            var subgraphRange = MemoryRange.of(
+                sizeOfIntArray(min) + sizeOfObjectArray(min) + min * sizeOfIntArray(0) + sizeOfLongArray(
+                    minNextNodeCount),
+                sizeOfIntArray(max) + sizeOfObjectArray(max) + max * sizeOfIntArray(sampleSize) + sizeOfLongArray(
+                    maxNextNodeCount)
             );
 
-            var aggregatorsBuilder = lossBuilder.startField("aggregators");
-            for (int i = 0; i < numberOfLayers; i++) {
-                var layerConfig = layerConfigs.get(i);
-                // aggregators go backwards through the layers
-                var minNodeCount = minBatchNodeCounts.get(numberOfLayers - i - 1);
-                var maxNodeCount = maxBatchNodeCounts.get(numberOfLayers - i - 1);
+            subGraphBuilder.add(MemoryEstimations.of("subgraph " + (i + 1), subgraphRange));
+        }
+        subGraphBuilder.endField();
 
-                if (i == 0) {
-                    aggregatorsBuilder.fixed(
-                        "firstLayer",
-                        MemoryRange.of(sizeOfDoubleArray(minNodeCount), sizeOfDoubleArray(maxNodeCount))
-                    );
-                }
+        var previousLayerMinNodeCounts = new ArrayList<>(minBatchNodeCounts);
+        previousLayerMinNodeCounts.set(
+            minBatchNodeCounts.size() - 1,
+            minBatchNodeCounts.get(minBatchNodeCounts.size() - 2)
+        );
+        var previousLayerMaxNodeCounts = new ArrayList<>(maxBatchNodeCounts);
+        previousLayerMaxNodeCounts.set(
+            maxBatchNodeCounts.size() - 1,
+            maxBatchNodeCounts.get(maxBatchNodeCounts.size() - 2)
+        );
 
-                Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
-                var embeddingDimension = config.embeddingDimension();
+        var aggregatorsBuilder = lossBuilder.startField("aggregators");
+        for (int i = 0; i < numberOfLayers; i++) {
+            var layerConfig = layerConfigs.get(i);
+            // aggregators go backwards through the layers
+            var minNodeCount = minBatchNodeCounts.get(numberOfLayers - i - 1);
+            var maxNodeCount = maxBatchNodeCounts.get(numberOfLayers - i - 1);
 
-                var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
-                var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
-
+            if (i == 0) {
                 aggregatorsBuilder.fixed(
-                    formatWithLocale("%s %d", aggregatorType.name(), i + 1),
-                    aggregatorType.memoryEstimation(
-                        minNodeCount,
-                        maxNodeCount,
-                        minPreviousNodeCount,
-                        maxPreviousNodeCount,
-                        layerConfig.cols(),
-                        embeddingDimension
+                    "firstLayer",
+                    MemoryRange.of(sizeOfDoubleArray(minNodeCount), sizeOfDoubleArray(maxNodeCount))
+                );
+            }
+
+            Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
+            var embeddingDimension = config.embeddingDimension();
+
+            var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
+            var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
+
+            aggregatorsBuilder.fixed(
+                formatWithLocale("%s %d", aggregatorType.name(), i + 1),
+                aggregatorType.memoryEstimation(
+                    minNodeCount,
+                    maxNodeCount,
+                    minPreviousNodeCount,
+                    maxPreviousNodeCount,
+                    layerConfig.cols(),
+                    embeddingDimension
+                )
+            );
+
+            if (i == numberOfLayers - 1) {
+                aggregatorsBuilder.fixed(
+                    "normalizeRows",
+                    MemoryRange.of(
+                        sizeOfDoubleArray(minNodeCount * embeddingDimension),
+                        sizeOfDoubleArray(maxNodeCount * embeddingDimension)
                     )
                 );
-
-                if (i == numberOfLayers - 1) {
-                    aggregatorsBuilder.fixed(
-                        "normalizeRows",
-                        MemoryRange.of(
-                            sizeOfDoubleArray(minNodeCount * embeddingDimension),
-                            sizeOfDoubleArray(maxNodeCount * embeddingDimension)
-                        )
-                    );
-                }
             }
-            return aggregatorsBuilder.endField().endField().build();
-        }));
+        }
+
+        return ImmutableEmbeddingEstimations.of(
+            aggregatorsBuilder.build(),
+            aggregatorsBuilder.endField().build()
+        );
+    }
+
+    @ValueClass
+    public interface EmbeddingEstimations {
+
+        MemoryEstimation aggregators();
+        MemoryEstimation lossFunction();
+
     }
 
     public static HugeObjectArray<double[]> initializeFeatures(

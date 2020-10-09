@@ -54,16 +54,28 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
+        return MemoryEstimations.setup(
+            "",
+            graphDimensions -> withNodeCount(config.trainConfig(), graphDimensions.nodeCount())
+        );
+    }
+
+    private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount) {
         return MemoryEstimations.builder(GraphSage.class)
             .startField("peakMemory")
             .add(
                 "initialFeatures",
-                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.trainConfig().featuresSize()))
+                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.featuresSize()))
             )
-            .perThread("concurrentBatches", GraphSageHelper.embeddingsEstimation(config.trainConfig()))
+            .perThread(
+                "concurrentBatches",
+                MemoryEstimations.builder().add(
+                    GraphSageHelper.embeddingsEstimation(config, config.batchSize(), nodeCount).lossFunction()
+                ).build()
+            )
             .add(
                 "resultFeatures",
-                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.trainConfig().embeddingDimension()))
+                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
             )
             .endField().build();
     }
