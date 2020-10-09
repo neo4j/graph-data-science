@@ -23,10 +23,12 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.List;
 import java.util.Locale;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface Aggregator {
@@ -36,8 +38,46 @@ public interface Aggregator {
     List<Weights<? extends Tensor<?>>> weights();
 
     enum AggregatorType {
-        MEAN,
-        POOL;
+        MEAN {
+            @Override
+            public MemoryRange memoryEstimation(
+                long minNodeCount,
+                long maxNodeCount,
+                long minPreviousNodeCount,
+                long maxPreviousNodeCount,
+                int inputDimension,
+                int embeddingDimension
+            ) {
+                var minBound =
+                    sizeOfDoubleArray(minNodeCount * inputDimension) +
+                    2 * sizeOfDoubleArray(minNodeCount * embeddingDimension);
+                var maxBound =
+                    sizeOfDoubleArray(maxNodeCount * inputDimension) +
+                    2 * sizeOfDoubleArray(maxNodeCount * embeddingDimension);
+
+                return MemoryRange.of(minBound, maxBound);
+            }
+        },
+        POOL {
+            @Override
+            public MemoryRange memoryEstimation(
+                long minNodeCount,
+                long maxNodeCount,
+                long minPreviousNodeCount,
+                long maxPreviousNodeCount,
+                int inputDimension,
+                int embeddingDimension
+            ) {
+                var minBound =
+                    3 * sizeOfDoubleArray(minPreviousNodeCount * embeddingDimension) +
+                    6 * sizeOfDoubleArray(minNodeCount * embeddingDimension);
+                var maxBound =
+                    3 * sizeOfDoubleArray(maxPreviousNodeCount * embeddingDimension) +
+                    6 * sizeOfDoubleArray(maxNodeCount * embeddingDimension);
+
+                return MemoryRange.of(minBound, maxBound);
+            }
+        };
 
         public static AggregatorType of(String activationFunction) {
             return valueOf(toUpperCaseWithLocale(activationFunction));
@@ -59,5 +99,14 @@ public interface Aggregator {
         public static String toString(AggregatorType af) {
             return af.toString();
         }
+
+        public abstract MemoryRange memoryEstimation(
+            long minNodeCount,
+            long maxNodeCount,
+            long minPreviousNodeCount,
+            long maxPreviousNodeCount,
+            int inputDimension,
+            int embeddingDimension
+        );
     }
 }

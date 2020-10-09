@@ -40,6 +40,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
 
@@ -126,34 +127,21 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
 
             Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
             var embeddingDimension = config.trainConfig().embeddingDimension();
-            if (aggregatorType == Aggregator.AggregatorType.MEAN) {
-                var minBound =
-                    sizeOfDoubleArray(minNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(minNodeCount * embeddingDimension);
-                var maxBound =
-                    sizeOfDoubleArray(maxNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(maxNodeCount * embeddingDimension);
 
-                aggregatorsBuilder.add("MEAN " + (i + 1), MemoryEstimations.of("", MemoryRange.of(
-                    minBound,
-                    maxBound
-                )));
-            } else if (aggregatorType == Aggregator.AggregatorType.POOL) {
-                var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
-                var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
+            var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
+            var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
 
-                var minBound =
-                    3 * sizeOfDoubleArray(minPreviousNodeCount * embeddingDimension) +
-                    6 * sizeOfDoubleArray(minNodeCount * embeddingDimension);
-                var maxBound =
-                    3 * sizeOfDoubleArray(maxPreviousNodeCount * embeddingDimension) +
-                    6 * sizeOfDoubleArray(maxNodeCount * embeddingDimension);
-
-                aggregatorsBuilder.add(
-                    "POOL " + (i + 1),
-                    MemoryEstimations.of("", MemoryRange.of(minBound, maxBound))
-                );
-            }
+            aggregatorsBuilder.fixed(
+                formatWithLocale("%s %d", aggregatorType.name(), i + 1),
+                aggregatorType.memoryEstimation(
+                    minNodeCount,
+                    maxNodeCount,
+                    minPreviousNodeCount,
+                    maxPreviousNodeCount,
+                    layerConfig.cols(),
+                    embeddingDimension
+                )
+            );
 
             if (i == numberOfLayers - 1) {
                 aggregatorsBuilder.fixed(
