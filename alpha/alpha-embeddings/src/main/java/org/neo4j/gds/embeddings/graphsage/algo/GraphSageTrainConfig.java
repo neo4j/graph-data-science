@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
