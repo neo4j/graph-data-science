@@ -32,18 +32,15 @@ import java.util.List;
 public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, NodePropertiesConfig {
 
     @Configuration.Ignore
-    default int embeddingSizeFromModel() {
-        var graphSageTrainConfig = ModelCatalog
+    default GraphSageTrainConfig trainConfig() {
+        return ModelCatalog
             .get(username(), modelName(), ModelData[].class, GraphSageTrainConfig.class)
             .trainConfig();
-
-        return graphSageTrainConfig.featuresSize();
     }
 
     @Override
     @Configuration.Ignore
     default List<String> nodePropertyNames() {
-        var model = ModelCatalog.get(username(), modelName(), Layer[].class, GraphSageTrainConfig.class);
-        return model.trainConfig().nodePropertyNames();
+        return trainConfig().nodePropertyNames();
     }
 }
