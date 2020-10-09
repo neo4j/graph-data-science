@@ -42,21 +42,17 @@ import java.util.stream.DoubleStream;
 
 import static org.neo4j.gds.embeddings.graphsage.LayerFactory.generateWeights;
 
-public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<Layer[], GraphSageTrainConfig>> {
-
-    // TODO: move this to config or infer a good value
-    // TODO: This should not be tied to the total number of features
-    public static final int PROJECTED_FEATURE_SIZE = 4;
+public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<Layer[], MultiLabelGraphSageTrainConfig>> {
 
     private final Graph graph;
-    private final GraphSageTrainConfig config;
+    private final MultiLabelGraphSageTrainConfig config;
     private final AllocationTracker tracker;
     private final Log log;
     private Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
 
     public MultiLabelGraphSageTrain(
         Graph graph,
-        GraphSageTrainConfig config,
+        MultiLabelGraphSageTrainConfig config,
         AllocationTracker tracker,
         Log log
     ) {
@@ -68,7 +64,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     }
 
     @Override
-    public Model<Layer[], GraphSageTrainConfig> compute() {
+    public Model<Layer[], MultiLabelGraphSageTrainConfig> compute() {
         GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, log, this::apply, weightsByLabel.values());
 
         GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
@@ -135,7 +131,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
             .collect(Collectors.toMap(Map.Entry::getKey, e -> {
                 int numProperties = (int) config.nodePropertyNames().stream().filter(e.getValue()::contains).count();
                 //TODO: how should we initialize the values in the matrix?
-                return generateWeights(PROJECTED_FEATURE_SIZE, numProperties, 1.0D);
+                return generateWeights(config.projectedFeatureSize(), numProperties, 1.0D);
             }));
     }
 
@@ -147,7 +143,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     }
 
     private Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
-        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, graph);
+        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, config.projectedFeatureSize(), graph);
     }
 
     private NodeLabel labelOf(long nodeId) {

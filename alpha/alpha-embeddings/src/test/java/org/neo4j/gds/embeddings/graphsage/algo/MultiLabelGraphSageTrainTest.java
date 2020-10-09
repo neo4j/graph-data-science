@@ -20,6 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -28,6 +31,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @GdlExtension
 class MultiLabelGraphSageTrainTest {
@@ -45,7 +49,7 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void should() {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
             .modelName("foo")
@@ -59,5 +63,35 @@ class MultiLabelGraphSageTrainTest {
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("featureSizes")
+    void shouldRunWithDifferentProjectedFeatureSizes(String name, MultiLabelGraphSageTrainConfig config) {
+        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            new TestLog()
+        );
+        // should not fail
+        multiLabelGraphSageTrain.compute();
+    }
+
+    private static Stream<Arguments> featureSizes() {
+        var builder = ImmutableMultiLabelGraphSageTrainConfig.builder()
+            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .embeddingDimension(64)
+            .modelName("foo");
+        return Stream.of(
+            Arguments.of(
+                "default", builder.build()
+            ), Arguments.of(
+                "larger projection", builder.projectedFeatureSize(10).build()
+            ), Arguments.of(
+                "smaller projection", builder.projectedFeatureSize(2).build()
+            )
+        );
+
     }
 }

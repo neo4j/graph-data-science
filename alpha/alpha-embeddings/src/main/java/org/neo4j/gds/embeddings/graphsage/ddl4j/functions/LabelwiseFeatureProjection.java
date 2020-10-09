@@ -35,31 +35,32 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.PROJECTED_FEATURE_SIZE;
-
 public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
 
     private final long[] nodeIds;
     private final HugeObjectArray<double[]> features;
     private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
+    private final int projectedFeatureSize;
     private final Graph graph;
 
     public LabelwiseFeatureProjection(
         long[] nodeIds,
         HugeObjectArray<double[]> features,
         Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
+        int projectedFeatureSize,
         Graph graph
     ) {
-        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, PROJECTED_FEATURE_SIZE});
+        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, projectedFeatureSize});
         this.nodeIds = nodeIds;
         this.features = features;
         this.weightsByLabel = weightsByLabel;
+        this.projectedFeatureSize = projectedFeatureSize;
         this.graph = graph;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] data = new double[nodeIds.length * PROJECTED_FEATURE_SIZE];
+        double[] data = new double[nodeIds.length * projectedFeatureSize];
         IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
             long nodeId = nodeIds[nodeOffset];
             NodeLabel label = labelOf(nodeId);
@@ -78,11 +79,11 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
                 product.getData(),
                 0,
                 data,
-                nodeOffset * PROJECTED_FEATURE_SIZE,
-                PROJECTED_FEATURE_SIZE
+                nodeOffset * projectedFeatureSize,
+                projectedFeatureSize
             );
         });
-        return new Matrix(data, nodeIds.length, PROJECTED_FEATURE_SIZE);
+        return new Matrix(data, nodeIds.length, projectedFeatureSize);
     }
 
     @Override

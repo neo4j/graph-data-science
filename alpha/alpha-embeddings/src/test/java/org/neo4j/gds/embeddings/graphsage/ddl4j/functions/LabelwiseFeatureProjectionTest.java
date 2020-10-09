@@ -38,7 +38,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.PROJECTED_FEATURE_SIZE;
+import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrainConfig.PROJECTED_FEATURE_SIZE;
 
 @GdlExtension
 class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
@@ -64,7 +64,13 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             new double[]{15.0}
         );
         Map<NodeLabel, Weights<? extends Tensor<?>>> nodeLabelWeightsMap = makeWeights();
-        var projection = new LabelwiseFeatureProjection(nodeIds, features, nodeLabelWeightsMap, graph);
+        var projection = new LabelwiseFeatureProjection(
+            nodeIds,
+            features,
+            nodeLabelWeightsMap,
+            PROJECTED_FEATURE_SIZE,
+            graph
+        );
 
         Matrix result = projection.apply(new ComputationContext());
         var actual = result.data();
@@ -90,7 +96,13 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             new double[]{15.0}
         );
         Map<NodeLabel, Weights<? extends Tensor<?>>> nodeLabelWeightsMap = makeWeights();
-        var projection = new LabelwiseFeatureProjection(nodeIds, features, nodeLabelWeightsMap, graph);
+        var projection = new LabelwiseFeatureProjection(
+            nodeIds,
+            features,
+            nodeLabelWeightsMap,
+            PROJECTED_FEATURE_SIZE,
+            graph
+        );
         var loss = new L2Norm(projection);
         List<Weights<?>> arrayList = new ArrayList<>(nodeLabelWeightsMap.values());
         finiteDifferenceShouldApproximateGradient(arrayList, loss);
