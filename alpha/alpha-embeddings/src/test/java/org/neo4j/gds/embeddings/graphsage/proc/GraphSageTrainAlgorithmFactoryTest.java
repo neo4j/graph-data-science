@@ -181,7 +181,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                 maxAggregatorMemory = maxMeans + maxProduct + maxActivation;
             } else if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
                 var minPreviousNodeCount = previousNodeCounts.getOne();
-                var maxPreviousNodeCount = previousNodeCounts.getOne();
+                var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingSize]
                 var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * config.embeddingSize());
@@ -455,7 +455,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     }
 
     static Stream<Arguments> parameters() {
-        var smallNodeCounts = List.of(1L, 10L, 100L, 10_000L);
+        var smallNodeCounts = List.of(1L, 100L, 10_000L);
         var largeNodeCounts = List.of(11_000_000_000L, 100_000_000_000L);
         var nodeCounts = Stream.concat(
             smallNodeCounts.stream().map(nc -> {
@@ -498,19 +498,13 @@ class GraphSageTrainAlgorithmFactoryTest {
         var userName = "userName";
         var modelName = "modelName";
 
-//        var concurrencies = List.of(4);
-        var concurrencies = List.of(1, 2, 4, 20, 42);
-//        var batchSizes = List.of(5);
+        var concurrencies = List.of(1, 4, 42);
         var batchSizes = List.of(1, 100, 10_000);
-//        var nodePropertySizes = List.of(3);
         var nodePropertySizes = List.of(1, 9, 42);
-//        var embeddingSizes = List.of(64);
         var embeddingSizes = List.of(64, 256);
-        var aggregators = List.of(Aggregator.AggregatorType.MEAN);
-//        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
-//        var degreesAsProperty = List.of(true);
+        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
-        var sampleSizesList = List.of(List.of(5L, 10L));
+        var sampleSizesList = List.of(List.of(5L, 100L));
 
         return nodeCounts.flatMap(nodeCountPair -> {
             var nodeCount = nodeCountPair.getOne();
