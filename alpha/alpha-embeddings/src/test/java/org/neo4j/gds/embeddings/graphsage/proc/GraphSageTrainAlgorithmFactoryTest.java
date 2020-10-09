@@ -30,9 +30,12 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +45,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
@@ -59,6 +64,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
+        GdsEdition.instance().setToEnterpriseEdition();
         var concurrency = config.concurrency();
         var layerConfigs = config.layerConfigs();
 
@@ -71,8 +77,8 @@ class GraphSageTrainAlgorithmFactoryTest {
             var weightsMemory = sizeOfDoubleArray(weightDimensions);
             Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
             if (aggregatorType == Aggregator.AggregatorType.POOL) {
-                // pool weights + self weights
-                weightsMemory *= 2;
+                // selfWeights
+                weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
                 // neighborsWeights
                 weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
                 // bias
@@ -85,38 +91,37 @@ class GraphSageTrainAlgorithmFactoryTest {
         var initialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
 
-
         var batchSize = config.batchSize();
         var totalBatchSize = 3 * batchSize;
 
         // embeddings
         // subgraphs
 
-        var minSubNodeCount = (long) totalBatchSize;
-        var maxSubNodeCount = (long) totalBatchSize;
+        var minBatchNodeCount = (long) totalBatchSize;
+        var maxBatchNodeCount = (long) totalBatchSize;
 
         var batchSizes = new ArrayList<LongLongPair>();
         var subGraphMemories = new ArrayList<MemoryRange>();
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
 
-            // 3bs -> [min(3bs, nodeCount) .. min(3bs * (sampleSize + 1), nodeCount)]
-            var minNextNodeCount = Math.min(minSubNodeCount, nodeCount);
-            var maxNextNodeCount = Math.min(maxSubNodeCount * (sampleSize + 1), nodeCount);
-
             // int[3bs] selfAdjacency
-            var minSelfAdjacencyMemory = sizeOfIntArray(minSubNodeCount);
-            var maxSelfAdjacencyMemory = sizeOfIntArray(maxSubNodeCount);
+            var minSelfAdjacencyMemory = sizeOfIntArray(minBatchNodeCount);
+            var maxSelfAdjacencyMemory = sizeOfIntArray(maxBatchNodeCount);
 
             // int[3bs][0-sampleSize] adjacency
-            var minAdjacencyMemory = sizeOfObjectArray(minSubNodeCount);
-            var maxAdjacencyMemory = sizeOfObjectArray(maxSubNodeCount);
+            var minAdjacencyMemory = sizeOfObjectArray(minBatchNodeCount);
+            var maxAdjacencyMemory = sizeOfObjectArray(maxBatchNodeCount);
 
             var minInnerAdjacencyMemory = sizeOfIntArray(0);
             var maxInnerAdjacencyMemory = sizeOfIntArray(sampleSize);
 
-            minAdjacencyMemory += minSubNodeCount * minInnerAdjacencyMemory;
-            maxAdjacencyMemory += maxSubNodeCount * maxInnerAdjacencyMemory;
+            minAdjacencyMemory += minBatchNodeCount * minInnerAdjacencyMemory;
+            maxAdjacencyMemory += maxBatchNodeCount * maxInnerAdjacencyMemory;
+
+            // 3bs -> [min(3bs, nodeCount) .. min(3bs * (sampleSize + 1), nodeCount)]
+            var minNextNodeCount = Math.min(minBatchNodeCount, nodeCount);
+            var maxNextNodeCount = Math.min(maxBatchNodeCount * (sampleSize + 1), nodeCount);
 
             // nodeIds long[3bs]
             var minNextNodesMemory = sizeOfLongArray(minNextNodeCount);
@@ -131,32 +136,29 @@ class GraphSageTrainAlgorithmFactoryTest {
             var maxLocalIdMapMemory = sizeOfOpenHashContainer(maxNextNodeCount) + sizeOfLongArray(maxNextNodeCount);
 
             subGraphMemories.add(MemoryRange.of(minSubGraphMemory, maxSubGraphMemory));
-            batchSizes.add(PrimitiveTuples.pair(minSubNodeCount, maxSubNodeCount));
+            batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
 
-            minSubNodeCount = minNextNodeCount;
-            maxSubNodeCount = maxNextNodeCount;
+            minBatchNodeCount = minNextNodeCount;
+            maxBatchNodeCount = maxNextNodeCount;
         }
 
-        var layerBatchSizes = new ArrayList<>(batchSizes);
-        Collections.reverse(layerBatchSizes);
+        var aggregatorBatchSizes = new ArrayList<>(batchSizes);
+        Collections.reverse(aggregatorBatchSizes);
 
-        // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
-        var firstLayerBatchNodeCount = layerBatchSizes.get(0);
-        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne());
-        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo());
+        var firstLayerBatchNodeCount = aggregatorBatchSizes.get(0);
 
-        var layerBatchNodeCounts = layerBatchSizes.iterator();
-        var previousLayerBatchNodeCounts = Stream.concat(
+        var aggregatorNodeCounts = aggregatorBatchSizes.iterator();
+        var previousAggregatorNodeCounts = Stream.concat(
             Stream.of(firstLayerBatchNodeCount),
-            layerBatchSizes.stream()
+            aggregatorBatchSizes.stream()
         ).iterator();
 
-        var aggregationMemories = layerConfigs.stream().map(layerConfig -> {
-            var nodeCounts = layerBatchNodeCounts.next();
+        var aggregatorMemories = layerConfigs.stream().map(layerConfig -> {
+            var nodeCounts = aggregatorNodeCounts.next();
             var minNodeCount = nodeCounts.getOne();
             var maxNodeCount = nodeCounts.getTwo();
 
-            var previousNodeCounts = previousLayerBatchNodeCounts.next();
+            var previousNodeCounts = previousAggregatorNodeCounts.next();
 
             long minAggregatorMemory;
             long maxAggregatorMemory;
@@ -231,20 +233,23 @@ class GraphSageTrainAlgorithmFactoryTest {
         // normalize rows = same as input (output of aggregator)
         var minNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getOne() * config.embeddingSize());
         var maxNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getTwo() * config.embeddingSize());
+        aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
-        aggregationMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
-        aggregationMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
+        // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
+        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne());
+        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo());
+        aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(
             subGraphMemories.stream(),
-            aggregationMemories.stream()
+            aggregatorMemories.stream()
         ).reduce(MemoryRange.empty(), MemoryRange::add);
 
         var evaluateLossMemory = lossFunctionMemory.times(concurrency);
 
         // adam optimizer
         //  copy of weight for every layer
-        var initialAdamMemories = layerConfigs.stream().mapToLong(layerConfig -> {
+        var initialAdamMemory = layerConfigs.stream().mapToLong(layerConfig -> {
             var weightDimensions = layerConfig.rows() * layerConfig.cols();
             var momentumTermsMemory = sizeOfDoubleArray(weightDimensions);
             var velocityTermsMemory = momentumTermsMemory;
@@ -252,7 +257,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             return momentumTermsMemory + velocityTermsMemory;
         }).sum();
 
-        var updateMemories = layerConfigs.stream().mapToLong(layerConfig -> {
+        var updateAdamMemory = layerConfigs.stream().mapToLong(layerConfig -> {
             var weightDimensions = layerConfig.rows() * layerConfig.cols();
             // adam update
 
@@ -286,31 +291,38 @@ class GraphSageTrainAlgorithmFactoryTest {
         }).sum();
 
         var backwardsLossFunctionMemory =
-            aggregationMemories.stream().reduce(MemoryRange.empty(), MemoryRange::add);
-
+            aggregatorMemories.stream().reduce(MemoryRange.empty(), MemoryRange::add);
 
         var trainOnBatchMemory =
             lossFunctionMemory
                 .add(backwardsLossFunctionMemory)
-                .add(MemoryRange.of(updateMemories));
+                .add(MemoryRange.of(updateAdamMemory));
 
         var trainOnEpoch = trainOnBatchMemory
             .times(concurrency)
-            .add(MemoryRange.of(initialAdamMemories));
-
+            .add(MemoryRange.of(initialAdamMemory));
 
         var trainMemory =
-            evaluateLossMemory.max(trainOnEpoch)
+            trainOnEpoch
+                .max(evaluateLossMemory)
                 .add(MemoryRange.of(initialFeaturesMemory));
 
+        var expectedPersistentMemory = MemoryRange.of(layersMemory);
+        var expectedPeakMemory = trainMemory
+            .add(expectedPersistentMemory)
+            .add(MemoryRange.of(40L)); // For GraphSage.class
 
-        var peakMemory = trainMemory;
-        var persistentMemory = MemoryRange.of(layersMemory);
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+            .memoryEstimation(config)
+            .estimate(GraphDimensions.of(nodeCount), concurrency);
 
-
-        System.out.println("persistentMemory = " + persistentMemory);
-        System.out.println("peakMemory = " + peakMemory);
-
+        assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
+        assertThat(actualEstimation
+            .components()
+            .stream()
+            .filter(component -> component.description().equals("persistentMemory"))
+            .findFirst()
+        ).isPresent().map(MemoryTree::memoryUsage).contains(expectedPersistentMemory);
 
         // train epoch
 
@@ -486,50 +498,55 @@ class GraphSageTrainAlgorithmFactoryTest {
         var userName = "userName";
         var modelName = "modelName";
 
-        var concurrencies = List.of(4);
-//        var concurrencies = List.of(1, 2, 4, 20, 42);
-        var batchSizes = List.of(100);
-//        var batchSizes = List.of(1, 100, 10_000);
-        var nodePropertySizes = List.of(9);
-//        var nodePropertySizes = List.of(1, 9, 42);
-        var embeddingSizes = List.of(64);
-//        var embeddingSizes = List.of(64, 256);
-        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
-        var degreesAsProperty = List.of(true);
-//        var degreesAsProperty = List.of(true, false);
+//        var concurrencies = List.of(4);
+        var concurrencies = List.of(1, 2, 4, 20, 42);
+//        var batchSizes = List.of(5);
+        var batchSizes = List.of(1, 100, 10_000);
+//        var nodePropertySizes = List.of(3);
+        var nodePropertySizes = List.of(1, 9, 42);
+//        var embeddingSizes = List.of(64);
+        var embeddingSizes = List.of(64, 256);
+        var aggregators = List.of(Aggregator.AggregatorType.MEAN);
+//        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
+//        var degreesAsProperty = List.of(true);
+        var degreesAsProperty = List.of(true, false);
+        var sampleSizesList = List.of(List.of(5L, 10L));
 
         return nodeCounts.flatMap(nodeCountPair -> {
             var nodeCount = nodeCountPair.getOne();
             var hugeObjectArraySize = nodeCountPair.getTwo();
 
             return concurrencies.stream().flatMap(concurrency ->
-                batchSizes.stream().flatMap(batchSize ->
-                    aggregators.stream().flatMap(aggregator ->
-                        embeddingSizes.stream().flatMap(embeddingSize ->
-                            degreesAsProperty.stream().flatMap(degreeAsProperty ->
-                                nodePropertySizes.stream().map(nodePropertySize -> {
-                                    var config = ImmutableGraphSageTrainConfig
-                                        .builder()
-                                        .modelName(modelName)
-                                        .username(userName)
-                                        .concurrency(concurrency)
-                                        .batchSize(batchSize)
-                                        .aggregator(aggregator)
-                                        .embeddingSize(embeddingSize)
-                                        .degreeAsProperty(degreeAsProperty)
-                                        .nodePropertyNames(
-                                            IntStream.range(0, nodePropertySize)
-                                                .mapToObj(i -> String.valueOf('a' + i))
-                                                .collect(toList())
-                                        )
-                                        .build();
+                sampleSizesList.stream().flatMap(sampleSizes ->
+                    batchSizes.stream().flatMap(batchSize ->
+                        aggregators.stream().flatMap(aggregator ->
+                            embeddingSizes.stream().flatMap(embeddingSize ->
+                                degreesAsProperty.stream().flatMap(degreeAsProperty ->
+                                    nodePropertySizes.stream().map(nodePropertySize -> {
+                                        var config = ImmutableGraphSageTrainConfig
+                                            .builder()
+                                            .modelName(modelName)
+                                            .username(userName)
+                                            .concurrency(concurrency)
+                                            .sampleSizes(sampleSizes)
+                                            .batchSize(batchSize)
+                                            .aggregator(aggregator)
+                                            .embeddingSize(embeddingSize)
+                                            .degreeAsProperty(degreeAsProperty)
+                                            .nodePropertyNames(
+                                                IntStream.range(0, nodePropertySize)
+                                                    .mapToObj(i -> String.valueOf('a' + i))
+                                                    .collect(toList())
+                                            )
+                                            .build();
 
-                                    return arguments(
-                                        config,
-                                        nodeCount,
-                                        hugeObjectArraySize
-                                    );
-                                })
+                                        return arguments(
+                                            config,
+                                            nodeCount,
+                                            hugeObjectArraySize
+                                        );
+                                    })
+                                )
                             )
                         )
                     )

@@ -108,8 +108,8 @@ public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, Batch
     }
 
     @Configuration.Ignore
-    default Collection<LayerConfig> layerConfigs() {
-        Collection<LayerConfig> result = new ArrayList<>(sampleSizes().size());
+    default List<LayerConfig> layerConfigs() {
+        List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
         for (int i = 0; i < sampleSizes().size(); i++) {
             LayerConfig layerConfig = LayerConfig.builder()
                 .aggregatorType(aggregator())

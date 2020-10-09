@@ -223,6 +223,11 @@ public final class MemoryEstimations {
             field("this.instance", type);
         }
 
+        private Builder(final String description, final Builder parent) {
+            this(description);
+            this.parent = parent;
+        }
+
         private Builder(final String description, final Class<?> type, final Builder parent) {
             this(description, type);
             this.parent = parent;
@@ -240,6 +245,19 @@ public final class MemoryEstimations {
          */
         public Builder startField(final String name, final Class<?> type) {
             return new Builder(name, type, this);
+        }
+
+        /**
+         * Starts the construction of new sub-components.
+         *
+         * The returned builder is used to construct the sub-component.
+         * After construction, {@link #endField()} must be called to return to the parent builder.
+         *
+         * @param name description of the sub-component
+         * @return a builder for the sub-component
+         */
+        public Builder startField(final String name) {
+            return new Builder(name,  this);
         }
 
         /**
