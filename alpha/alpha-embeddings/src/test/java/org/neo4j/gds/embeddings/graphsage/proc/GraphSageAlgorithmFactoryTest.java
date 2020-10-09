@@ -57,22 +57,22 @@ class GraphSageAlgorithmFactoryTest {
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize,
         int concurrency,
-        int embeddingSize,
+        int embeddingDimension,
         boolean degreeAsProperty
     ) {
         int batchSize = 100;
         var userName = "userName";
         var modelName = "modelName";
-        int featureSize = embeddingSize + (degreeAsProperty ? 1 : 0);
+        int featureSize = embeddingDimension + (degreeAsProperty ? 1 : 0);
 
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName(modelName)
             .username(userName)
             .degreeAsProperty(degreeAsProperty)
-            .embeddingSize(embeddingSize)
+            .embeddingDimension(embeddingDimension)
             .nodePropertyNames(
-                IntStream.range(0, embeddingSize)
+                IntStream.range(0, embeddingDimension)
                     .mapToObj(i -> String.valueOf('a' + i))
                     .collect(Collectors.toList())
             )
