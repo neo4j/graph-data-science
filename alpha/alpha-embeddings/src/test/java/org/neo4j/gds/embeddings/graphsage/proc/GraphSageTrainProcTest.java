@@ -197,4 +197,18 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         assertEquals(expectedFail, throwable.getMessage());
     }
+
+    @Test
+    void estimates() {
+        String query = GdsCypher.call().explicitCreation(graphName)
+            .algo("gds.alpha.graphSage")
+            .trainEstimation()
+            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
+            .yields("requiredMemory");
+
+        assertCypherResult(query, List.of(Map.of(
+            "requiredMemory", "[5133 KiB ... 5257 KiB]"
+        )));
+    }
 }

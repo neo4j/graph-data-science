@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -59,6 +60,15 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         return Stream.of(trainResult(computationResult));
     }
 
+    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(name = "gds.alpha.graphSage.train.estimate", mode = Mode.READ)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     @Override
     protected GraphSageTrainConfig newConfig(
         String username,
@@ -71,7 +81,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
 
     @Override
     protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig>) GraphSageTrain::new;
+        return new GraphSageTrainAlgorithmFactory();
     }
 
     @Override
