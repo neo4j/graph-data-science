@@ -167,7 +167,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
         ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
             .builder()
-            .maxIterations(10)
+            .maxIterations(config.maxIterations())
             .tolerance(config.tolerance())
             .concurrency(config.concurrency())
             .batchSize(DEFAULT_BATCH_SIZE)
