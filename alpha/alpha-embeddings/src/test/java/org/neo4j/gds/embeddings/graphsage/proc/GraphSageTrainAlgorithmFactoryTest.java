@@ -131,7 +131,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             var maxSubGraphMemory = maxSelfAdjacencyMemory + maxAdjacencyMemory + maxNextNodesMemory;
 
             // LongIntHashMap toInternalId;
-            // TODO somehow add those
+            // This is a local peak; will be GC'd before the global peak
             var minLocalIdMapMemory = sizeOfOpenHashContainer(minNextNodeCount) + sizeOfLongArray(minNextNodeCount);
             var maxLocalIdMapMemory = sizeOfOpenHashContainer(maxNextNodeCount) + sizeOfLongArray(maxNextNodeCount);
 
@@ -323,135 +323,6 @@ class GraphSageTrainAlgorithmFactoryTest {
             .filter(component -> component.description().equals("persistentMemory"))
             .findFirst()
         ).isPresent().map(MemoryTree::memoryUsage).contains(expectedPersistentMemory);
-
-        // train epoch
-
-
-        // train on batch
-        // times concurrency: *
-
-        // loss function
-        // 3 times batch size = 3bs
-
-        // embeddings: start
-        //  subgraph, batchSizes * sampleSize[i]
-
-
-        // weights - new double[featureSize * embeddingSize] // for any following iteration it's embeddingSize * embeddingSize
-
-        // iteration
-        // iterNodeCount = starting at 3bs * sampleSize.0 * sampleSize.1
-        //   this should be the largest node count in the first iteration
-        // after mean = 3bs * sampleSize.0 (removing sampleSize.1)
-
-        // mean aggregator
-        //   multi mean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
-        //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-        //   activation function = same as input
-        //     rows = means.rows = iterNodeCount, cols = weights.cols = embeddingSize
-
-        // example
-        // mean aggregator next layer
-        //   multi mean - new double[iterCount * embeddingSize];
-        //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-        //   activation function = same as input
-        //     rows = means.rows = iterNodeCount, cols = weights.cols = embeddingSize
-
-
-        // max pooling
-        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingSize]
-        //  MatrixVectorSum = shape is matrix input == weightedPreviousLayer
-        //  activation function = same as input
-        //  ElementwiseMax - double[iterNodeCount * embeddingSize]
-        //
-        //  Slice - double[iterNodeCount * embeddingSize]
-        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-        //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-        //  MatrixSum - new double[iterNodeCount * embeddingSize]
-        //  activation function = same as input
-
-
-        // normalize rows = same as input (output of aggregator)
-
-        // embeddings: end
-
-
-        // SubGraph: (times layerSize)
-        // nodeIds long[3bs]
-        // private final LongArrayList originalIds;
-        // private final LongIntHashMap toInternalId;
-        // int[3bs][0-sampleSize] adjacency
-        // int[3bs] selfAdjacency
-
-        // SubGraph per Layer
-
-
-        // evaluate loss
-        //     ComputationContext ctx = new ComputationContext();
-        //     Variable<Scalar> loss = lossFunction(batch, graph, features);
-        //     doubleAdder.add(ctx.forward(loss).dataAt(0));  --> what we did above
-
-        // train on batch
-
-        //  ComputationContext localCtx = new ComputationContext();
-        //  ->   newLoss = localCtx.forward(lossFunction).dataAt(0);  -> what we did above
-        //  ->   localCtx.backward(lossFunction); -> should be same size
-        //  ->   updater.update(localCtx);
-
-        // adam update
-        //  new momentum
-        //   copies of weights (per layer)
-        //   copies of momentum terms (per layer) (same dim as weights)
-        //  new velocity
-        //   2 copies of weights (per layer)
-        //   copies of momentum terms (per layer) (same dim as weights)
-        //  mCaps
-        //   copy of momentumTerm (size of weights)
-        //  vCaps
-        //   copy of velocityTerm (size of weights)
-        //  updating weights
-        //   2 copies of mCap, 1 copy of vCap
-
-
-        //        int batchSize = 100;
-//        var userName = "userName";
-//        var modelName = "modelName";
-//        int featureSize = numberOfProperties + (degreeAsProperty ? 1 : 0);
-
-//        var model = Model.of(
-//            userName,
-//            modelName,
-//            "graphSage",
-//            GraphSchema.empty(),
-//            new Layer[]{},
-//            trainConfig
-//        );
-//
-//        ModelCatalog.set(model);
-//
-//        var streamConfig = ImmutableGraphSageStreamConfig
-//            .builder()
-//            .modelName(modelName)
-//            .username(userName)
-//            .batchSize(batchSize)
-//            .build();
-//
-//        MemoryEstimation estimation = new GraphSageAlgorithmFactory<GraphSageStreamConfig>()
-//            .memoryEstimation(streamConfig);
-//
-//        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-//
-//        MemoryTree estimate = estimation.estimate(dimensions, concurrency);
-//        MemoryRange actual = estimate.memoryUsage();
-//
-//        long doubleArray = sizeOfDoubleArray(featureSize);
-//        long hugeObjectArray = hugeObjectArraySize.applyAsLong(doubleArray);
-//        long perThreadArray = sizeOfDoubleArray(batchSize * featureSize);
-//        long instanceSize = 40;
-//        long expected = instanceSize + 2 * hugeObjectArray + concurrency * perThreadArray;
-//
-//        assertEquals(expected, actual.min);
-//        assertEquals(expected, actual.max);
     }
 
     static Stream<Arguments> parameters() {
