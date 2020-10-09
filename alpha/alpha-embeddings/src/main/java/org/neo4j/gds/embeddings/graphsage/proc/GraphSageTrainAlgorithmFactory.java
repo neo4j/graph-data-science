@@ -144,10 +144,10 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
             if (aggregatorType == Aggregator.AggregatorType.MEAN) {
                 var minBound =
                     sizeOfDoubleArray(minNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(minNodeCount * config.embeddingSize());
+                    2 * sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
                 var maxBound =
                     sizeOfDoubleArray(maxNodeCount * layerConfig.cols()) +
-                    2 * sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                    2 * sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 aggregatorsBuilder.add("MEAN " + (i + 1), MemoryEstimations.of("", MemoryRange.of(
                     minBound,
@@ -158,11 +158,11 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
                 var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
 
                 var minBound =
-                    3 * sizeOfDoubleArray(minPreviousNodeCount * config.embeddingSize()) +
-                    6 * sizeOfDoubleArray(minNodeCount * config.embeddingSize());
+                    3 * sizeOfDoubleArray(minPreviousNodeCount * config.embeddingDimension()) +
+                    6 * sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
                 var maxBound =
-                    3 * sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingSize()) +
-                    6 * sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                    3 * sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingDimension()) +
+                    6 * sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 aggregatorsBuilder.add(
                     "POOL " + (i + 1),
@@ -174,8 +174,8 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
                 aggregatorsBuilder.fixed(
                     "normalizeRows",
                     MemoryRange.of(
-                        sizeOfDoubleArray(minNodeCount * config.embeddingSize()),
-                        sizeOfDoubleArray(maxNodeCount * config.embeddingSize())
+                        sizeOfDoubleArray(minNodeCount * config.embeddingDimension()),
+                        sizeOfDoubleArray(maxNodeCount * config.embeddingDimension())
                     )
                 );
             }

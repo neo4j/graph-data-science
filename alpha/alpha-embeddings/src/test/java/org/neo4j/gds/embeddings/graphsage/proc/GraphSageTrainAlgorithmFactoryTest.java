@@ -69,7 +69,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         var layerConfigs = config.layerConfigs();
 
         // initial layers
-        // rows - embeddingSize, cols - feature size (first layer), embedding size every other layer
+        // rows - embeddingDimension, cols - feature size (first layer), embedding size every other layer
         //  applies to the weights
         //  weights = double[rows * cols], 1x for mean, 2x for maxpooling, double[row * row] for maxpooling, double[rows] bias for maxpooling
         var layersMemory = layerConfigs.stream().mapToLong(layerConfig -> {
@@ -169,9 +169,9 @@ class GraphSageTrainAlgorithmFactoryTest {
                 var minMeans = sizeOfDoubleArray(minNodeCount * featureOrEmbeddingSize);
                 var maxMeans = sizeOfDoubleArray(maxNodeCount * featureOrEmbeddingSize);
 
-                //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-                var minProduct = sizeOfDoubleArray(minNodeCount * config.embeddingSize());
-                var maxProduct = sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
+                var minProduct = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxProduct = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //   activation function = same as input
                 var minActivation = minProduct;
@@ -183,9 +183,9 @@ class GraphSageTrainAlgorithmFactoryTest {
                 var minPreviousNodeCount = previousNodeCounts.getOne();
                 var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
-                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingSize]
-                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * config.embeddingSize());
-                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingSize());
+                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingDimension]
+                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * config.embeddingDimension());
+                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingDimension());
 
                 // MatrixVectorSum = shape is matrix input == weightedPreviousLayer
                 var minBiasedWeightedPreviousLayer = minWeightedPreviousLayer;
@@ -195,23 +195,23 @@ class GraphSageTrainAlgorithmFactoryTest {
                 var minNeighborhoodActivations = minBiasedWeightedPreviousLayer;
                 var maxNeighborhoodActivations = maxBiasedWeightedPreviousLayer;
 
-                //  ElementwiseMax - double[iterNodeCount * embeddingSize]
-                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * config.embeddingSize());
-                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                //  ElementwiseMax - double[iterNodeCount * embeddingDimension]
+                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
-                //  Slice - double[iterNodeCount * embeddingSize]
-                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * config.embeddingSize());
-                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                //  Slice - double[iterNodeCount * embeddingDimension]
+                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
-                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-                var minSelf = sizeOfDoubleArray(minNodeCount * config.embeddingSize());
-                var maxSelf = sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
+                var minSelf = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxSelf = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
-                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingSize]
-                var minNeighbors = sizeOfDoubleArray(minNodeCount * config.embeddingSize());
-                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * config.embeddingSize());
+                //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
+                var minNeighbors = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
-                //  MatrixSum - new double[iterNodeCount * embeddingSize]
+                //  MatrixSum - new double[iterNodeCount * embeddingDimension]
                 var minSum = minSelf;
                 var maxSum = maxSelf;
 
@@ -231,8 +231,8 @@ class GraphSageTrainAlgorithmFactoryTest {
         }).collect(toList());
 
         // normalize rows = same as input (output of aggregator)
-        var minNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getOne() * config.embeddingSize());
-        var maxNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getTwo() * config.embeddingSize());
+        var minNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getOne() * config.embeddingDimension());
+        var maxNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getTwo() * config.embeddingDimension());
         aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
@@ -372,7 +372,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         var concurrencies = List.of(1, 4, 42);
         var batchSizes = List.of(1, 100, 10_000);
         var nodePropertySizes = List.of(1, 9, 42);
-        var embeddingSizes = List.of(64, 256);
+        var embeddingDimensions = List.of(64, 256);
         var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
         var sampleSizesList = List.of(List.of(5L, 100L));
@@ -385,7 +385,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                 sampleSizesList.stream().flatMap(sampleSizes ->
                     batchSizes.stream().flatMap(batchSize ->
                         aggregators.stream().flatMap(aggregator ->
-                            embeddingSizes.stream().flatMap(embeddingSize ->
+                            embeddingDimensions.stream().flatMap(embeddingDimension ->
                                 degreesAsProperty.stream().flatMap(degreeAsProperty ->
                                     nodePropertySizes.stream().map(nodePropertySize -> {
                                         var config = ImmutableGraphSageTrainConfig
@@ -396,7 +396,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                                             .sampleSizes(sampleSizes)
                                             .batchSize(batchSize)
                                             .aggregator(aggregator)
-                                            .embeddingSize(embeddingSize)
+                                            .embeddingDimension(embeddingDimension)
                                             .degreeAsProperty(degreeAsProperty)
                                             .nodePropertyNames(
                                                 IntStream.range(0, nodePropertySize)
