@@ -1,0 +1,119 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
+
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.PROJECTED_FEATURE_SIZE;
+
+class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
+
+    private final long[] nodeIds;
+    private final HugeObjectArray<double[]> features;
+    private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
+    private final Graph graph;
+
+    public LabelwiseFeatureProjection(
+        long[] nodeIds,
+        HugeObjectArray<double[]> features,
+        Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
+        Graph graph
+    ) {
+        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, PROJECTED_FEATURE_SIZE});
+        this.nodeIds = nodeIds;
+        this.features = features;
+        this.weightsByLabel = weightsByLabel;
+        this.graph = graph;
+    }
+
+    @Override
+    public Matrix apply(ComputationContext ctx) {
+        double[] data = new double[nodeIds.length * PROJECTED_FEATURE_SIZE];
+        IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
+            long nodeId = nodeIds[nodeOffset];
+            NodeLabel label = labelOf(nodeId);
+            Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
+            double[] nodeFeatures = features.get(nodeId);
+
+            DMatrix1Row wrappedWeights = DMatrixRMaj.wrap(
+                weights.dimension(0),
+                weights.dimension(1),
+                weights.data().data()
+            );
+            DMatrixRMaj wrappedNodeFeatures = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
+            DMatrixRMaj product = new DMatrixRMaj(weights.dimension(0), 1);
+            MatrixMatrixMult_DDRM.multTransB(wrappedWeights, wrappedNodeFeatures, product);
+            System.arraycopy(
+                product.getData(),
+                0,
+                data,
+                nodeOffset * PROJECTED_FEATURE_SIZE,
+                PROJECTED_FEATURE_SIZE
+            );
+        });
+        return new Matrix(data, nodeIds.length, PROJECTED_FEATURE_SIZE);
+    }
+
+    @Override
+    public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+        double[] thisGradient = ctx.gradient(this).data();
+        int rows = parent.dimension(0);
+        int cols = parent.dimension(1);
+        double[] gradientData = new double[rows * cols];
+
+        IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
+            long nodeId = nodeIds[nodeOffset];
+            NodeLabel label = labelOf(nodeId);
+            Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
+
+            if (weights == parent) {
+                // perform outer product between nodeFeatures and portion thisGradient corresponding to the node
+                // row is a projected feature
+                // col is a non-projected feature
+
+                double[] nodeFeatures = features.get(nodeId);
+                for (int row = 0; row < rows; row++) {
+                    for (int col = 0; col < cols; col++) {
+                        gradientData[row * cols + col] += nodeFeatures[col] * thisGradient[nodeOffset * dimension(1) + row];
+                    }
+                }
+            }
+        });
+        return new Matrix(gradientData, rows, cols);
+    }
+
+    private NodeLabel labelOf(long nodeId) {
+        return graph.nodeLabels(nodeId).stream().findFirst().get();
+    }
+}
