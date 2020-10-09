@@ -76,7 +76,7 @@ public final class LayerFactory {
         throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
     }
 
-    private static Weights<Matrix> generateWeights(int rows, int cols, double weightBound) {
+    public static Weights<Matrix> generateWeights(int rows, int cols, double weightBound) {
 
         double[] data = ThreadLocalRandom.current()
             .doubles(rows * cols, -weightBound, weightBound)

@@ -61,7 +61,7 @@ public class GraphSageEmbeddingsGenerator {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddings(graph, batch, features, layers);
+                Variable<Matrix> embeddingVariable = embeddings(graph, batch, features, layers, GraphSageHelper::features);
                 int cols = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data();
 

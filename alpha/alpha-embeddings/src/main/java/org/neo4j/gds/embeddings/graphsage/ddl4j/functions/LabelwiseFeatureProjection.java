@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 
 import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.PROJECTED_FEATURE_SIZE;
 
-class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
+public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
 
     private final long[] nodeIds;
     private final HugeObjectArray<double[]> features;
