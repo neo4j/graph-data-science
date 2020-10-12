@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
@@ -61,8 +62,9 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
     }
 
     private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount) {
-        return MemoryEstimations.builder(GraphSage.class)
-            .startField("peakMemory")
+        return MemoryEstimations.builder("GraphSage")
+            .startField(TEMPORARY)
+            .field("this.instance", GraphSage.class)
             .add(
                 "initialFeatures",
                 HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.featuresSize()))

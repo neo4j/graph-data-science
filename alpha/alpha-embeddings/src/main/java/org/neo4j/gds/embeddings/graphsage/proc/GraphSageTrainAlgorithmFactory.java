@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
@@ -58,8 +60,8 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
-        var layerBuilder = MemoryEstimations.builder(GraphSage.class)
-            .startField("persistentMemory")
+        var layerBuilder = MemoryEstimations.builder("GraphSage")
+            .startField(PERSISTENT)
             .startField("layers");
 
         long initialAdamOptimizer = 0L;
@@ -87,7 +89,8 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
         return layerBuilder
             .endField()
             .endField()
-            .startField("peakMemory")
+            .startField(TEMPORARY)
+            .field("this.instance", GraphSage.class)
             .add("initialFeatures", HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.featuresSize())))
             .startField("trainOnEpoch")
             .fixed("initialAdamOptimizer", initialAdamOptimizer)

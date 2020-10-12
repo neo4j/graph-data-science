@@ -37,6 +37,9 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public final class MemoryEstimations {
 
+    public static final String PERSISTENT = "persistentMemory";
+    public static final String TEMPORARY = "temporaryMemory";
+
     @FunctionalInterface
     public interface MemoryRangeModifier {
         MemoryRange modify(MemoryRange range, GraphDimensions dimensions, int concurrency);

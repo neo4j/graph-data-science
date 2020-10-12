@@ -24,7 +24,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
 
 /**
  * A tree shaped description of an object that has resources residing in memory.
@@ -46,6 +50,13 @@ public interface MemoryTree {
      */
     default Collection<MemoryTree> components() {
         return Collections.emptyList();
+    }
+
+    default Optional<MemoryTree> persistentMemory() {
+        return components()
+            .stream()
+            .filter(component -> component.description().equals(PERSISTENT))
+            .findFirst();
     }
 
     default Map<String, Object> renderMap() {

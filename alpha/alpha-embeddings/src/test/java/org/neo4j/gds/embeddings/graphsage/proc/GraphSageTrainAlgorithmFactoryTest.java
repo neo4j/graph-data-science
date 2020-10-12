@@ -317,12 +317,10 @@ class GraphSageTrainAlgorithmFactoryTest {
             .estimate(GraphDimensions.of(nodeCount), concurrency);
 
         assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
-        assertThat(actualEstimation
-            .components()
-            .stream()
-            .filter(component -> component.description().equals("persistentMemory"))
-            .findFirst()
-        ).isPresent().map(MemoryTree::memoryUsage).contains(expectedPersistentMemory);
+        assertThat(actualEstimation.persistentMemory())
+            .isPresent()
+            .map(MemoryTree::memoryUsage)
+            .contains(expectedPersistentMemory);
     }
 
     static Stream<Arguments> parameters() {
