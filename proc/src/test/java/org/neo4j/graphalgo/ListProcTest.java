@@ -25,6 +25,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageWriteProc;
@@ -95,6 +96,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
+        "gds.alpha.graphSage.mutate",
+        "gds.alpha.graphSage.mutate.estimate",
         "gds.alpha.graphSage.stream",
         "gds.alpha.graphSage.stream.estimate",
         "gds.alpha.graphSage.train",
@@ -266,6 +269,7 @@ class ListProcTest extends BaseProcTest {
             GraphListProc.class,
             GraphGenerateProc.class,
             GraphDeleteRelationshipProc.class,
+            GraphSageMutateProc.class,
             GraphSageStreamProc.class,
             GraphSageTrainProc.class,
             GraphSageWriteProc.class,
