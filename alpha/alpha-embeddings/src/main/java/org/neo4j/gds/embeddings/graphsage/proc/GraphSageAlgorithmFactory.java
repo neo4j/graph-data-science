@@ -27,7 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -38,10 +41,29 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
-class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
+// TODO: move it to algo package
+public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
+
+    private final ProgressLogger.ProgressLoggerFactory loggerFactory;
+
+    GraphSageAlgorithmFactory() {
+        this(BatchingProgressLogger.FACTORY);
+    }
+
+    public GraphSageAlgorithmFactory(ProgressLogger.ProgressLoggerFactory loggerFactory) {
+        this.loggerFactory = loggerFactory;
+    }
 
     @Override
     public GraphSage build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+        var taskVolume = ParallelUtil.threadCount(configuration.batchSize(), graph.nodeCount());
+        var progressLogger = loggerFactory.newLogger(
+            log,
+            taskVolume,
+            GraphSage.class.getSimpleName(),
+            configuration.concurrency()
+        );
+
         return new GraphSage(
             graph,
             configuration,
@@ -51,7 +73,8 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
                 ModelData.class,
                 GraphSageTrainConfig.class
             ),
-            tracker
+            tracker,
+            progressLogger
         );
     }
 

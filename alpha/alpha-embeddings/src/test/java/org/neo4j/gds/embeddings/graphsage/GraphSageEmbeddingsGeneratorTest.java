@@ -42,10 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class GraphSageEmbeddingsGeneratorTest {
 
-    private final int FEATURES_COUNT = 5;
-    private final int EMBEDDING_DIMENSION = 64;
+    private static final int FEATURES_COUNT = 5;
+    private static final int EMBEDDING_DIMENSION = 64;
 
-    private final String MODEL_NAME = "graphSageModel";
+    private static final String MODEL_NAME = "graphSageModel";
 
     private Graph graph;
     private HugeObjectArray<double[]> features;
@@ -92,6 +92,7 @@ class GraphSageEmbeddingsGeneratorTest {
             result.layers(),
             config.batchSize(),
             config.concurrency(),
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 

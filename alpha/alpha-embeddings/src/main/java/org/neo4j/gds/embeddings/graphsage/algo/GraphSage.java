@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -44,12 +45,14 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         Graph graph,
         GraphSageBaseConfig config,
         Model<ModelData, GraphSageTrainConfig> model,
-        AllocationTracker tracker
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
         this.model = model;
         this.tracker = tracker;
+        this.progressLogger = progressLogger;
     }
 
     @Override
@@ -60,6 +63,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             config.batchSize(),
             config.concurrency(),
             model.data().featureFunction(),
+            progressLogger,
             tracker
         );
 
