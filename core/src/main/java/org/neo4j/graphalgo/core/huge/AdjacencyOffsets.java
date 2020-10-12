@@ -29,7 +29,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 
 public abstract class AdjacencyOffsets {
 
-    abstract long get(long index);
+    public abstract long get(long index);
 
     abstract long release();
 
@@ -87,7 +87,7 @@ public abstract class AdjacencyOffsets {
         }
 
         @Override
-        long get(long index) {
+        public long get(long index) {
             final int pageIndex = (int) (index >>> pageShift);
             final int indexInPage = (int) (index & pageMask);
             return pages[pageIndex][indexInPage];
@@ -122,7 +122,7 @@ public abstract class AdjacencyOffsets {
         }
 
         @Override
-        long get(long index) {
+        public long get(long index) {
             return page[(int) index];
         }
 
