@@ -399,8 +399,6 @@ class GraphSageAlgorithmFactoryTest {
         var actualTree = new GraphSageAlgorithmFactory<>()
             .memoryEstimation(config).estimate(GraphDimensions.of(10000), 4);
 
-        System.out.println(actualTree.render());
-
         MemoryRange actual = actualTree.memoryUsage();
 
         assertEquals(6861816, actual.min);
