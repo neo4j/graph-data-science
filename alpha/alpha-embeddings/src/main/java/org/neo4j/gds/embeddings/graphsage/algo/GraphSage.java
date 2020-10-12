@@ -64,12 +64,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         GraphSageTrainConfig trainConfig = model.trainConfig();
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
-            initializeFeatures(
-                graph,
-                trainConfig.nodePropertyNames(),
-                trainConfig.degreeAsProperty(),
-                tracker
-            )
+            initializeFeatures(graph, trainConfig, tracker)
         );
         return GraphSageResult.of(embeddings);
     }

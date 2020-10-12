@@ -29,17 +29,16 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.propertyKeysPerNodeLabel;
 import static org.neo4j.gds.embeddings.graphsage.LayerFactory.generateWeights;
 
 public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<Layer[], MultiLabelGraphSageTrainConfig>> {
@@ -69,7 +68,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
 
         GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
             graph,
-            initializeFeatures()
+            initializeFeatures(graph, config, tracker)
         );
 
         return Model.of(
@@ -94,38 +93,8 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
             "org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.release is not implemented.");
     }
 
-    public HugeObjectArray<double[]> initializeFeatures() {
-        Map<NodeLabel, Set<NodeProperties>> propertiesPerNodeLabel = propertiesPerNodeLabel()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> config.nodePropertyNames()
-                    .stream()
-                    .filter(e.getValue()::contains)
-                    .map(graph::nodeProperties)
-                    .collect(Collectors.toSet())
-            ));
-
-        HugeObjectArray<double[]> features = HugeObjectArray.newArray(
-            double[].class,
-            graph.nodeCount(),
-            tracker
-        );
-
-        features.setAll(n -> {
-            var relevantProperties = propertiesPerNodeLabel.get(labelOf(n));
-            DoubleStream nodeFeatures = relevantProperties.stream().mapToDouble(p -> p.doubleValue(n));
-            if (config.degreeAsProperty()) {
-                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
-            }
-            return nodeFeatures.toArray();
-        });
-        return features;
-    }
-
     private Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel() {
-        return propertiesPerNodeLabel()
+        return propertyKeysPerNodeLabel(graph)
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> {
@@ -138,13 +107,6 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
             }));
     }
 
-    private Map<NodeLabel, Set<String>> propertiesPerNodeLabel() {
-        return graph.schema().nodeSchema().properties()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet()));
-    }
-
     private Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
         NodeLabel[] labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
@@ -153,7 +115,4 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
         return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, config.projectedFeatureSize(), labels);
     }
 
-    private NodeLabel labelOf(long nodeId) {
-        return graph.nodeLabels(nodeId).stream().findFirst().get();
-    }
 }

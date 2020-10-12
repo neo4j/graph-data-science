@@ -54,7 +54,7 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<Layer[], Gra
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeFeatures(graph, config.nodePropertyNames(), config.degreeAsProperty(), tracker)
+            initializeFeatures(graph, config, tracker)
         );
 
         return Model.of(
