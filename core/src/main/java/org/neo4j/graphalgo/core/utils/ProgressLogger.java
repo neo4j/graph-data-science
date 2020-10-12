@@ -120,4 +120,13 @@ public interface ProgressLogger {
 
         }
     };
+
+    interface ProgressLoggerFactory {
+        ProgressLogger newLogger(
+            Log log,
+            long taskVolume,
+            String task,
+            int concurrency
+        );
+    }
 }

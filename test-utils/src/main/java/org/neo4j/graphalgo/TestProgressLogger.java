@@ -29,6 +29,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public class TestProgressLogger extends TestLog implements ProgressLogger {
+
+    public static final ProgressLoggerFactory FACTORY =
+        (log, taskVolume, task, concurrency) -> new TestProgressLogger(taskVolume, task, concurrency);
+
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
 
