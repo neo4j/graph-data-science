@@ -29,8 +29,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +54,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private final Layer[] layers;
-    private final Log log;
     private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
@@ -65,22 +64,22 @@ public class GraphSageModelTrainer {
     private final int maxSearchDepth;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
+    private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageModelTrainer(GraphSageTrainConfig config, Log log) {
-        this(config, log, GraphSageHelper::features, Collections.emptyList());
+    public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
+        this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
     }
 
     public GraphSageModelTrainer(
         GraphSageTrainConfig config,
-        Log log,
+        ProgressLogger progressLogger,
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
         this.layers = config.layerConfigs().stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
-        this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
@@ -91,6 +90,7 @@ public class GraphSageModelTrainer {
         this.maxSearchDepth = config.searchDepth();
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
+        this.progressLogger = progressLogger;
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
@@ -155,7 +155,9 @@ public class GraphSageModelTrainer {
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
 
-        log.debug(formatWithLocale("Epoch %d\tBatch %d, Initial loss: %.10f", epoch, batchIndex, newLoss));
+        progressLogger
+            .getLog()
+            .debug("Epoch %d\tBatch %d, Initial loss: %.10f", epoch, batchIndex, newLoss);
 
         int iteration = 0;
         while (iteration < maxIterations) {
@@ -175,13 +177,13 @@ public class GraphSageModelTrainer {
             iteration++;
         }
 
-        log.debug(formatWithLocale(
+        progressLogger.getLog().debug(
             "Epoch %d\tBatch %d LOSS: %.10f at iteration %d",
             epoch,
             batchIndex,
             newLoss,
             iteration
-        ));
+        );
     }
 
     private double evaluateLoss(
@@ -201,7 +203,7 @@ public class GraphSageModelTrainer {
             })
         );
         double lossValue = doubleAdder.doubleValue();
-        log.debug(formatWithLocale("Loss after epoch %s: %s", epoch, lossValue));
+        progressLogger.getLog().debug("Loss after epoch %s: %s", epoch, lossValue);
         return lossValue;
     }
 

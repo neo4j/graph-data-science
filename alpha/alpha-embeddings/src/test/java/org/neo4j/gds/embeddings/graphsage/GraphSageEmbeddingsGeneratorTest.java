@@ -24,12 +24,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -84,7 +84,7 @@ class GraphSageEmbeddingsGeneratorTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 

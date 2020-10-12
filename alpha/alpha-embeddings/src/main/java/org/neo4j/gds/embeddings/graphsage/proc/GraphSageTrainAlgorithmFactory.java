@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -45,7 +46,14 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
         AllocationTracker tracker,
         Log log
     ) {
-        return new GraphSageTrain(graph, configuration, tracker, log);
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            1,
+            getClass().getSimpleName(),
+            configuration.concurrency()
+        );
+
+        return new GraphSageTrain(graph, configuration, tracker, progressLogger);
     }
 
     @Override

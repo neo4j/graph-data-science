@@ -65,7 +65,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     @Override
     public Model<ModelData, MultiLabelGraphSageTrainConfig> compute() {
         FeatureFunction featureFunction = new MultiLabelFeatureFunction(graph, weightsByLabel, config.projectedFeatureSize());
-        GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, log, featureFunction, weightsByLabel.values());
+        GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, progressLogger, featureFunction, weightsByLabel.values());
 
         GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
             graph,
