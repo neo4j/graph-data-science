@@ -19,19 +19,17 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.FeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LabelwiseFeatureProjection;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
 import java.util.Map;
@@ -41,7 +39,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatu
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.propertyKeysPerNodeLabel;
 import static org.neo4j.gds.embeddings.graphsage.LayerFactory.generateWeights;
 
-public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<Layer[], MultiLabelGraphSageTrainConfig>> {
+public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<ModelData, MultiLabelGraphSageTrainConfig>> {
 
     private final Graph graph;
     private final MultiLabelGraphSageTrainConfig config;
@@ -63,8 +61,9 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     }
 
     @Override
-    public Model<Layer[], MultiLabelGraphSageTrainConfig> compute() {
-        GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, log, this::apply, weightsByLabel.values());
+    public Model<ModelData, MultiLabelGraphSageTrainConfig> compute() {
+        FeatureFunction featureFunction = new MultiLabelFeatureFunction(graph, weightsByLabel, config.projectedFeatureSize());
+        GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, log, featureFunction, weightsByLabel.values());
 
         GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
             graph,
@@ -76,7 +75,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
             config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            trainResult.layers(),
+            new ModelData(trainResult.layers(), featureFunction),
             config
         );
     }
@@ -106,13 +105,4 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
                 return generateWeights(config.projectedFeatureSize(), numProperties, 1.0D);
             }));
     }
-
-    private Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
-        NodeLabel[] labels = new NodeLabel[nodeIds.length];
-        for (int i = 0; i < nodeIds.length; i++) {
-            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
-        }
-        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, config.projectedFeatureSize(), labels);
-    }
-
 }

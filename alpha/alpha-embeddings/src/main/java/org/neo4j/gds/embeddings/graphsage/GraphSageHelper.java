@@ -135,7 +135,7 @@ public final class GraphSageHelper {
         return features;
     }
 
-    static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
+    public static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
@@ -173,9 +173,5 @@ public final class GraphSageHelper {
 
     private static NodeLabel labelOf(Graph graph, long n) {
         return graph.nodeLabels(n).stream().findFirst().get();
-    }
-
-    public interface FeatureFunction {
-        Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features);
     }
 }

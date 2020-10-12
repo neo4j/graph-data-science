@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper.FeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
 import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -36,13 +37,13 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     private final Graph graph;
     private final GraphSageBaseConfig config;
-    private final Model<Layer[], GraphSageTrainConfig> model;
+    private final Model<ModelData, GraphSageTrainConfig> model;
     private final AllocationTracker tracker;
 
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
-        Model<Layer[], GraphSageTrainConfig> model,
+        Model<ModelData, GraphSageTrainConfig> model,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -53,11 +54,12 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     @Override
     public GraphSageResult compute() {
-        Layer[] layers = model.data();
+        Layer[] layers = model.data().layers();
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             layers,
             config.batchSize(),
             config.concurrency(),
+            model.data().featureFunction(),
             tracker
         );
 
