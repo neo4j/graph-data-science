@@ -65,11 +65,12 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void logProgress(Supplier<String> msgFactory) {
-        progressCounter.increment();
         var localProgress = callCounter.get();
         if (localProgress.longValue() < batchSize && (localProgress.incrementAndGet() >= batchSize)) {
-            doLogPercentage(msgFactory);
+            doLogPercentage(msgFactory, 1);
             localProgress.setValue(0L);
+        } else {
+            progressCounter.increment();
         }
     }
 
@@ -78,16 +79,18 @@ public class BatchingProgressLogger implements ProgressLogger {
         if (progress == 0) {
             return;
         }
-        progressCounter.add(progress);
         var localProgress = callCounter.get();
         if (localProgress.longValue() < batchSize && (localProgress.addAndGet(progress) >= batchSize)) {
-            doLogPercentage(msgFactory);
+            doLogPercentage(msgFactory, progress);
             localProgress.setValue(localProgress.longValue() & (batchSize - 1));
+        } else {
+            progressCounter.add(progress);
         }
     }
 
-    private synchronized void doLogPercentage(Supplier<String> msgFactory) {
+    private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {
         String message = msgFactory != ProgressLogger.NO_MESSAGE ? msgFactory.get() : null;
+        progressCounter.add(progress);
         int nextPercentage = (int) ((progressCounter.sum() / (double) taskVolume) * 100);
         if (globalPercentage < nextPercentage) {
             globalPercentage = nextPercentage;

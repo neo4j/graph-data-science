@@ -27,6 +27,8 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -119,6 +121,14 @@ class BatchingProgressLoggerTest {
         assertEquals(expected, loggedPercentages);
     }
 
+    @Test
+    void shouldLogEveryPercentageUnderHeavyContention() {
+        var loggedPercentages = performLogging(20, 4);
+        var expected = IntStream.rangeClosed(1, 20).map(p -> p * 5).boxed().collect(Collectors.toList());
+
+        assertEquals(expected, loggedPercentages);
+    }
+
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
         var logger = new TestProgressLogger(taskVolume, "Test", concurrency);
 
@@ -128,13 +138,10 @@ class BatchingProgressLoggerTest {
             .range(0, concurrency)
             .mapToObj(i -> (Runnable) () ->
                 IntStream.range(0, batchSize).forEach(ignore -> {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                logger.logProgress();
-            })).collect(Collectors.toList());
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
+                    logger.logProgress();
+                }))
+            .collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT);
 
