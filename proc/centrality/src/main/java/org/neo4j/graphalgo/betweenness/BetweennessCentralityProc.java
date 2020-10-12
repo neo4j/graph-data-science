@@ -104,5 +104,10 @@ final class BetweennessCentralityProc {
             this.scoreSum = scoreSum;
             return this;
         }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> withPostProcessingMillis(long postProcessingMillis) {
+            this.postProcessingMillis = postProcessingMillis;
+            return this;
+        }
     }
 }
