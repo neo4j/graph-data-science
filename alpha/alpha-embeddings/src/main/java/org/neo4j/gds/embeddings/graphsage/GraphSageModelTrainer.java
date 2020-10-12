@@ -94,6 +94,7 @@ public class GraphSageModelTrainer {
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
+        progressLogger.logStart();
         Map<String, Double> epochLosses = new TreeMap<>();
         degreeProbabilityNormalizer = LongStream
             .range(0, graph.nodeCount())
@@ -103,17 +104,22 @@ public class GraphSageModelTrainer {
         double initialLoss = evaluateLoss(graph, features, batchProvider, -1);
         double previousLoss = initialLoss;
         for (int epoch = 0; epoch < epochs; epoch++) {
+            var epochMessage = ":: Epoch " + (epoch + 1);
+            progressLogger.logStart(epochMessage);
+
             trainEpoch(graph, features, epoch);
             double newLoss = evaluateLoss(graph, features, batchProvider, epoch);
             epochLosses.put(
                 formatWithLocale("Epoch: %d", epoch),
                 newLoss
             );
+            progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 break;
             }
             previousLoss = newLoss;
         }
+        progressLogger.logFinish();
 
         return ModelTrainResult.of(initialLoss, epochLosses, this.layers);
     }
@@ -161,19 +167,23 @@ public class GraphSageModelTrainer {
 
         int iteration = 0;
         while (iteration < maxIterations) {
+            progressLogger.logStart(":: Iteration " + (iteration + 1));
             oldLoss = newLoss;
 
             ComputationContext localCtx = new ComputationContext();
 
             newLoss = localCtx.forward(lossFunction).dataAt(0);
             double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
+
             if (lossDiff < tolerance) {
+                progressLogger.logFinish(":: Iteration " + (iteration + 1));
                 break;
             }
             localCtx.backward(lossFunction);
 
             updater.update(localCtx);
 
+            progressLogger.logFinish(":: Iteration " + (iteration + 1));
             iteration++;
         }
 

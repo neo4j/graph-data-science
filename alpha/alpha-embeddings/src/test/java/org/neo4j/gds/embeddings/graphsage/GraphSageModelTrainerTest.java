@@ -25,6 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -39,8 +40,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestLog.INFO;
 
 class GraphSageModelTrainerTest {
 
@@ -142,6 +145,34 @@ class GraphSageModelTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerSelfWeights);
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerNeighborsWeights);
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, secondLayerBias);
+    }
+
+    @Test
+    void testLogging() {
+        var config = configBuilder
+            .modelName("model")
+            .epochs(1)
+            .maxIterations(1)
+            .build();
+        var testLogger = new TestProgressLogger(0, "GraphSage", config.concurrency());
+
+        var gs = new GraphSageModelTrainer(config, testLogger);
+
+        gs.train(graph, features);
+
+        var messagesInOrder = testLogger.getMessages(INFO);
+
+        assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(message -> message.substring(message.indexOf("] ")  + 2))
+            .containsExactly(
+                "GraphSage :: Start",
+                "GraphSage :: Epoch 1 :: Start",
+                "GraphSage :: Iteration 1 :: Start",
+                "GraphSage :: Iteration 1 :: Finished",
+                "GraphSage :: Epoch 1 :: Finished",
+                "GraphSage :: Finished"
+            );
     }
 
 }
