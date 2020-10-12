@@ -57,19 +57,24 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
     @Test
     void shouldMultiplyWeights() {
         var nodeIds = new long[]{0, 1, 2};
+        var labels = new NodeLabel[nodeIds.length];
+        for (int i = 0; i < nodeIds.length; i++) {
+            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+        }
 
         var features = HugeObjectArray.of(
             new double[]{5.0, 2.0},
             new double[]{3.0, 5.0},
             new double[]{15.0}
         );
+
         Map<NodeLabel, Weights<? extends Tensor<?>>> nodeLabelWeightsMap = makeWeights();
         var projection = new LabelwiseFeatureProjection(
             nodeIds,
             features,
             nodeLabelWeightsMap,
             PROJECTED_FEATURE_SIZE,
-            graph
+            labels
         );
 
         Matrix result = projection.apply(new ComputationContext());
@@ -89,6 +94,10 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
     @Test
     void shouldComputeGradient() {
         var nodeIds = new long[]{0, 1, 2};
+        var labels = new NodeLabel[nodeIds.length];
+        for (int i = 0; i < nodeIds.length; i++) {
+            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+        }
 
         var features = HugeObjectArray.of(
             new double[]{5.0, 2.0},
@@ -101,7 +110,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             features,
             nodeLabelWeightsMap,
             PROJECTED_FEATURE_SIZE,
-            graph
+            labels
         );
         var loss = new L2Norm(projection);
         List<Weights<?>> arrayList = new ArrayList<>(nodeLabelWeightsMap.values());

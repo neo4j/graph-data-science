@@ -146,7 +146,11 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     }
 
     private Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
-        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, config.projectedFeatureSize(), graph);
+        NodeLabel[] labels = new NodeLabel[nodeIds.length];
+        for (int i = 0; i < nodeIds.length; i++) {
+            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+        }
+        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, config.projectedFeatureSize(), labels);
     }
 
     private NodeLabel labelOf(long nodeId) {

@@ -28,7 +28,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
@@ -41,21 +40,21 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
     private final HugeObjectArray<double[]> features;
     private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
     private final int projectedFeatureSize;
-    private final Graph graph;
+    private final NodeLabel[] labels;
 
     public LabelwiseFeatureProjection(
         long[] nodeIds,
         HugeObjectArray<double[]> features,
         Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
         int projectedFeatureSize,
-        Graph graph
+        NodeLabel[] labels
     ) {
         super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, projectedFeatureSize});
         this.nodeIds = nodeIds;
         this.features = features;
         this.weightsByLabel = weightsByLabel;
         this.projectedFeatureSize = projectedFeatureSize;
-        this.graph = graph;
+        this.labels = labels;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
         double[] data = new double[nodeIds.length * projectedFeatureSize];
         IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
             long nodeId = nodeIds[nodeOffset];
-            NodeLabel label = labelOf(nodeId);
+            NodeLabel label = labels[nodeOffset];
             Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
             double[] nodeFeatures = features.get(nodeId);
 
@@ -95,7 +94,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
 
         IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
             long nodeId = nodeIds[nodeOffset];
-            NodeLabel label = labelOf(nodeId);
+            NodeLabel label = labels[nodeOffset];
             Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
 
             if (weights == parent) {
@@ -112,9 +111,5 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
             }
         });
         return new Matrix(gradientData, rows, cols);
-    }
-
-    private NodeLabel labelOf(long nodeId) {
-        return graph.nodeLabels(nodeId).stream().findFirst().get();
     }
 }
