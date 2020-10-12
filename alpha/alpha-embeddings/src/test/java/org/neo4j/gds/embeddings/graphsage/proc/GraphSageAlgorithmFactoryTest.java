@@ -24,6 +24,7 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,6 +32,7 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -40,6 +42,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +52,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -363,6 +367,49 @@ class GraphSageAlgorithmFactoryTest {
                 )
             );
         });
+    }
+
+    @Test
+    void mutateHasPersistentPart() {
+        var modelName = "modelName";
+
+        var trainConfig = ImmutableGraphSageTrainConfig
+            .builder()
+            .modelName(modelName)
+            .degreeAsProperty(true)
+            .build();
+
+        var model = Model.of(
+            "",
+            modelName,
+            "graphSage",
+            GraphSchema.empty(),
+            new Layer[]{},
+            trainConfig
+        );
+
+        ModelCatalog.set(model);
+
+        var config = ImmutableGraphSageMutateConfig
+            .builder()
+            .modelName(modelName)
+            .mutateProperty("foo")
+            .build();
+
+        var actualTree = new GraphSageAlgorithmFactory<>()
+            .memoryEstimation(config).estimate(GraphDimensions.of(10000), 4);
+
+        System.out.println(actualTree.render());
+
+        MemoryRange actual = actualTree.memoryUsage();
+
+        assertEquals(6861816, actual.min);
+        assertEquals(18356216, actual.max);
+
+        assertThat(actualTree.persistentMemory())
+            .isPresent()
+            .map(MemoryTree::memoryUsage)
+            .contains(MemoryRange.of(5320040L));
     }
 
     @AfterEach

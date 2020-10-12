@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
@@ -57,12 +59,26 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return MemoryEstimations.setup(
             "",
-            graphDimensions -> withNodeCount(config.trainConfig(), graphDimensions.nodeCount())
+            graphDimensions -> withNodeCount(
+                config.trainConfig(),
+                graphDimensions.nodeCount(),
+                config instanceof MutateConfig
+            )
         );
     }
 
-    private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount) {
-        return MemoryEstimations.builder("GraphSage")
+    private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {
+        var gsBuilder = MemoryEstimations.builder("GraphSage");
+
+        if (mutate) {
+            gsBuilder = gsBuilder.startField(PERSISTENT)
+                .add(
+                    "resultFeatures",
+                    HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
+                ).endField();
+        }
+
+        var builder = gsBuilder
             .startField(TEMPORARY)
             .field("this.instance", GraphSage.class)
             .add(
@@ -74,11 +90,13 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
                 MemoryEstimations.builder().add(
                     GraphSageHelper.embeddingsEstimation(config, config.batchSize(), nodeCount).lossFunction()
                 ).build()
-            )
-            .add(
+            );
+        if (!mutate) {
+            builder = builder.add(
                 "resultFeatures",
                 HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
-            )
-            .endField().build();
+            );
+        }
+        return builder.endField().build();
     }
 }
