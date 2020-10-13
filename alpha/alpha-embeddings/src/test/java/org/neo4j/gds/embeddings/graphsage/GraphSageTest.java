@@ -96,7 +96,7 @@ class GraphSageTest {
             MODEL_NAME,
             "graphSage",
             GraphSchema.empty(),
-            layers,
+            ModelData.of(layers, GraphSageHelper::features),
             trainConfig
         );
         ModelCatalog.set(model);
