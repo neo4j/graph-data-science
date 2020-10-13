@@ -47,6 +47,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -93,6 +94,8 @@ class GraphSageAlgorithmFactoryTest {
         var maxBatchNodeCount = (long) gsConfig.batchSize();
 
         var batchSizes = new ArrayList<LongLongPair>();
+        // additional final layer size
+        batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
         var layerConfigs = gsConfig.trainConfig().layerConfigs();
         for (LayerConfig layerConfig : layerConfigs) {
@@ -129,29 +132,25 @@ class GraphSageAlgorithmFactoryTest {
             var maxLocalIdMapMemory = sizeOfOpenHashContainer(maxNextNodeCount) + sizeOfLongArray(maxNextNodeCount);
 
             subGraphMemories.add(MemoryRange.of(minSubGraphMemory, maxSubGraphMemory));
-            batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
 
             minBatchNodeCount = minNextNodeCount;
             maxBatchNodeCount = maxNextNodeCount;
+
+            // add next layer's sizes
+            batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         }
 
-        var aggregatorBatchSizes = new ArrayList<>(batchSizes);
-        Collections.reverse(aggregatorBatchSizes);
+        Collections.reverse(batchSizes);
 
-        var firstLayerBatchNodeCount = aggregatorBatchSizes.get(0);
-
-        var aggregatorNodeCounts = aggregatorBatchSizes.iterator();
-        var previousAggregatorNodeCounts = Stream.concat(
-            Stream.of(firstLayerBatchNodeCount),
-            aggregatorBatchSizes.stream()
-        ).iterator();
-
+        var nextLayerIndex = new AtomicInteger();
         var aggregatorMemories = layerConfigs.stream().map(layerConfig -> {
-            var nodeCounts = aggregatorNodeCounts.next();
+            var layerIndex = nextLayerIndex.getAndIncrement();
+
+            var nodeCounts = batchSizes.get(layerIndex + 1);
             var minNodeCount = nodeCounts.getOne();
             var maxNodeCount = nodeCounts.getTwo();
 
-            var previousNodeCounts = previousAggregatorNodeCounts.next();
+            var previousNodeCounts = batchSizes.get(layerIndex);
 
             long minAggregatorMemory;
             long maxAggregatorMemory;
@@ -224,13 +223,15 @@ class GraphSageAlgorithmFactoryTest {
         }).collect(toList());
 
         // normalize rows = same as input (output of aggregator)
-        var minNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getOne() * trainConfig.embeddingDimension());
-        var maxNormalizeRows = sizeOfDoubleArray(batchSizes.get(0).getTwo() * trainConfig.embeddingDimension());
+        var lastLayerBatchNodeCount = batchSizes.get(batchSizes.size() - 1);
+        var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * trainConfig.embeddingDimension());
+        var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * trainConfig.embeddingDimension());
         aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
-        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne());
-        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo());
+        var firstLayerBatchNodeCount = batchSizes.get(0);
+        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainConfig.featuresSize());
+        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainConfig.featuresSize());
         aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(

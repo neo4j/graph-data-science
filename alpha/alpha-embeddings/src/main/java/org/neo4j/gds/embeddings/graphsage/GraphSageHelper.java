@@ -126,36 +126,31 @@ public final class GraphSageHelper {
         }
         subGraphBuilder.endField();
 
-        var previousLayerMinNodeCounts = new ArrayList<>(minBatchNodeCounts);
-        previousLayerMinNodeCounts.set(
-            minBatchNodeCounts.size() - 1,
-            minBatchNodeCounts.get(minBatchNodeCounts.size() - 2)
-        );
-        var previousLayerMaxNodeCounts = new ArrayList<>(maxBatchNodeCounts);
-        previousLayerMaxNodeCounts.set(
-            maxBatchNodeCounts.size() - 1,
-            maxBatchNodeCounts.get(maxBatchNodeCounts.size() - 2)
-        );
+        // aggregators go backwards through the layers
+        Collections.reverse(minBatchNodeCounts);
+        Collections.reverse(maxBatchNodeCounts);
 
         var aggregatorsBuilder = lossBuilder.startField("aggregators");
         for (int i = 0; i < numberOfLayers; i++) {
             var layerConfig = layerConfigs.get(i);
-            // aggregators go backwards through the layers
-            var minNodeCount = minBatchNodeCounts.get(numberOfLayers - i - 1);
-            var maxNodeCount = maxBatchNodeCounts.get(numberOfLayers - i - 1);
+
+            var minPreviousNodeCount = minBatchNodeCounts.get(i);
+            var maxPreviousNodeCount = maxBatchNodeCounts.get(i);
+            var minNodeCount = minBatchNodeCounts.get(i + 1);
+            var maxNodeCount = maxBatchNodeCounts.get(i + 1);
 
             if (i == 0) {
                 aggregatorsBuilder.fixed(
                     "firstLayer",
-                    MemoryRange.of(sizeOfDoubleArray(minNodeCount), sizeOfDoubleArray(maxNodeCount))
+                    MemoryRange.of(
+                        sizeOfDoubleArray(minPreviousNodeCount * config.featuresSize()),
+                        sizeOfDoubleArray(maxPreviousNodeCount * config.featuresSize())
+                    )
                 );
             }
 
             Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
             var embeddingDimension = config.embeddingDimension();
-
-            var minPreviousNodeCount = previousLayerMinNodeCounts.get(numberOfLayers - i);
-            var maxPreviousNodeCount = previousLayerMaxNodeCounts.get(numberOfLayers - i);
 
             aggregatorsBuilder.fixed(
                 formatWithLocale("%s %d", aggregatorType.name(), i + 1),
