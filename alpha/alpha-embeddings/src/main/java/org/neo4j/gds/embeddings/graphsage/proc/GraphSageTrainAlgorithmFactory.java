@@ -55,7 +55,10 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
 
     @Override
     protected GraphSageTrain build(
-        Graph graph, GraphSageTrainConfig configuration, AllocationTracker tracker, ProgressLogger progressLogger
+        Graph graph,
+        GraphSageTrainConfig configuration,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
         return new GraphSageTrain(graph, configuration, tracker, progressLogger);
     }

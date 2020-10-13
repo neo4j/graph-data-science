@@ -54,7 +54,7 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
     /**
      * The number of tasks the algorithm will perform. Used for progress logging.
      *
-     * @param graph the graph to compute over.
+     * @param graph         the graph to compute over.
      * @param configuration the configuration of the algorithm.
      * @return the number of tasks to perform.
      */
@@ -71,5 +71,10 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
     /**
      * Builds the algorithm class.
      */
-    protected abstract ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressLogger progressLogger);
+    protected abstract ALGO build(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
+    );
 }
