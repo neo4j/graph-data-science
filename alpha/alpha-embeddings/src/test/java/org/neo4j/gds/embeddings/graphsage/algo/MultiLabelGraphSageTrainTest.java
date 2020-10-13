@@ -61,8 +61,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            AllocationTracker.empty(),
-            new TestLog()
+            AllocationTracker.empty()
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -74,8 +73,7 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            AllocationTracker.empty(),
-            new TestLog()
+            AllocationTracker.empty()
         );
         // should not fail
         multiLabelGraphSageTrain.compute();

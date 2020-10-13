@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.logging.Log;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,19 +45,16 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     private final Graph graph;
     private final MultiLabelGraphSageTrainConfig config;
     private final AllocationTracker tracker;
-    private final Log log;
     private Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
 
     public MultiLabelGraphSageTrain(
         Graph graph,
         MultiLabelGraphSageTrainConfig config,
-        AllocationTracker tracker,
-        Log log
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
-        this.log = log;
         this.weightsByLabel = makeWeightsByLabel();
     }
 
