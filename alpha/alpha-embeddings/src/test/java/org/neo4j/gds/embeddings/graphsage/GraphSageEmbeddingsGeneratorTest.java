@@ -20,9 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableMultiLabelGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -32,14 +35,20 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@GdlExtension
 class GraphSageEmbeddingsGeneratorTest {
 
     private static final int FEATURES_COUNT = 5;
@@ -102,6 +111,42 @@ class GraphSageEmbeddingsGeneratorTest {
         assertEquals(graph.nodeCount(), embeddings.size());
 
         LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
+    }
+
+    @GdlGraph(graphNamePrefix = "multilabel")
+    private static final String GDL = "CREATE" +
+                                      "  (r1:Restaurant {numEmployees: 5.0, rating: 2.0})" +
+                                      ", (d1:Dish {numIngredients: 3.0, rating: 5.0})" +
+                                      ", (c1:Customer {numPurchases: 15.0}) " +
+                                      ", (r1)-[:SERVES]->(d1)" +
+                                      ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
+
+    @Inject
+    TestGraph multilabelGraph;
+
+    @Test
+    void makesEmbeddingsFromMultiLabelModel() {
+        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+            .modelName(MODEL_NAME)
+            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .build();
+        var trainer = new MultiLabelGraphSageTrain(multilabelGraph, config, AllocationTracker.empty(), new TestLog());
+        var model = trainer.compute();
+        var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
+            model.data().layers(),
+            config.batchSize(),
+            config.concurrency(),
+            model.data().featureFunction(),
+            AllocationTracker.empty()
+        );
+        var embeddings = embeddingsGenerator.makeEmbeddings(
+            multilabelGraph,
+            GraphSageHelper.initializeFeatures(multilabelGraph, config, AllocationTracker.empty())
+        );
+        assertNotNull(embeddings);
+        assertEquals(multilabelGraph.nodeCount(), embeddings.size());
+
+        LongStream.range(0, multilabelGraph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
 
 }
