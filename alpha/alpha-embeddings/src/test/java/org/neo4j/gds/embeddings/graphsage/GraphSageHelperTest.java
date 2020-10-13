@@ -19,51 +19,75 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.beta.generator.PropertyProducer;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableMultiLabelGraphSageTrainConfig;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@GdlExtension
 class GraphSageHelperTest {
 
-    @Test
-    void shouldInitializeFeaturesCorrectly() {
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
-            .nodeCount(20)
-            .averageDegree(3)
-            .nodePropertyProducer(PropertyProducer.fixed("dummyProperty", 5D))
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(123L)
-            .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
-            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
-            .build();
-        var graph = randomGraphGenerator.generate();
-        HugeObjectArray<double[]> properties = GraphSageHelper.initializeFeatures(
-            graph,
-            ImmutableGraphSageTrainConfig.builder()
-                .modelName("foo")
-                .nodePropertyNames(Set.of("dummyProperty"))
-                .build(),
-            AllocationTracker.empty()
-        );
+    @GdlGraph
+    private static final String GDL = "CREATE" +
+                                      "  (r1:Restaurant {dummyProperty: 5.0, numEmployees: 5.0, rating: 2.0})" +
+                                      ", (d1:Dish       {dummyProperty: 5.0, numIngredients: 3.0, rating: 5.0})" +
+                                      ", (c1:Customer   {dummyProperty: 5.0, numPurchases: 15.0}) " +
+                                      ", (r1)-[:SERVES]->(d1)" +
+                                      ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
 
-        assertNotNull(properties);
-        for(int i = 0; i < properties.size(); i++) {
-            double[] doubles = properties.get(i);
-            assertArrayEquals(new double[] { 5D }, doubles );
+    @Inject
+    Graph graph;
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource({"parameters"})
+    void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, HugeObjectArray<double[]> expected) {
+        var actual = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
+
+        assertEquals(expected.size(), actual.size());
+        for(int i = 0; i < actual.size(); i++) {
+            assertThat(actual.get(i)).containsExactlyInAnyOrder(expected.get(i));
         }
+    }
+
+    static Stream<Arguments> parameters() {
+        return Stream.of(
+            Arguments.of(
+                "single label",
+                ImmutableGraphSageTrainConfig.builder()
+                    .modelName("foo")
+                    .nodePropertyNames(Set.of("dummyProperty"))
+                    .build(),
+                HugeObjectArray.of(
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0}
+                )
+            ), Arguments.of(
+                "multi label",
+                ImmutableMultiLabelGraphSageTrainConfig.builder()
+                    .modelName("foo")
+                    .nodePropertyNames(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
+                    .build(),
+                HugeObjectArray.of(
+                    new double[]{5.0, 2.0},
+                    new double[]{3.0, 5.0},
+                    new double[]{15.0}
+                )
+            )
+        );
     }
 }
