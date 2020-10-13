@@ -52,17 +52,17 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
     public MemoryEstimation memoryEstimation(GraphSageTrainConfig configuration) {
         return MemoryEstimations.setup(
             "",
-            graphDimensions -> withNodeCount(configuration, graphDimensions.nodeCount())
+            graphDimensions -> estimate(configuration, graphDimensions.nodeCount())
         );
     }
 
-    private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount) {
+    private MemoryEstimation estimate(GraphSageTrainConfig config, long nodeCount) {
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
         var layerBuilder = MemoryEstimations.builder("GraphSage")
             .startField(PERSISTENT)
-            .startField("layers");
+            .startField("weights");
 
         long initialAdamOptimizer = 0L;
         long updateAdamOptimizer = 0L;
@@ -84,8 +84,6 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
             updateAdamOptimizer += 5 * weightDimensions;
         }
 
-        var embeddingEstimations = GraphSageHelper.embeddingsEstimation(config, 3 * config.batchSize(), nodeCount);
-
         return layerBuilder
             .endField()
             .endField()
@@ -97,8 +95,7 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
             .perThread("concurrentBatches", MemoryEstimations
                 .builder()
                 .startField("trainOnBatch")
-                .add(embeddingEstimations.lossFunction())
-                .add("gradientDescent", embeddingEstimations.aggregators())
+                .add(GraphSageHelper.embeddingsEstimation(config, 3 * config.batchSize(), nodeCount, true))
                 .fixed("updateAdamOptimizer", updateAdamOptimizer)
                 .endField()
                 .build())

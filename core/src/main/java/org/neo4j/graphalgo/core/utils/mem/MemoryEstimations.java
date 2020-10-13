@@ -289,6 +289,11 @@ public final class MemoryEstimations {
             return this;
         }
 
+        public Builder addComponentsOf(final MemoryEstimation estimation) {
+            components.addAll(estimation.components());
+            return this;
+        }
+
         /**
          * Adds a {@link MemoryEstimation} as a sub-component to the builder.
          * Uses the given {@code description} as sub-component name.

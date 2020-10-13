@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
@@ -54,8 +55,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -128,7 +132,9 @@ class GraphSageAlgorithmFactoryTest {
 
             // LongIntHashMap toInternalId;
             // This is a local peak; will be GC'd before the global peak
+            @SuppressWarnings("unused")
             var minLocalIdMapMemory = sizeOfOpenHashContainer(minNextNodeCount) + sizeOfLongArray(minNextNodeCount);
+            @SuppressWarnings("unused")
             var maxLocalIdMapMemory = sizeOfOpenHashContainer(maxNextNodeCount) + sizeOfLongArray(maxNextNodeCount);
 
             subGraphMemories.add(MemoryRange.of(minSubGraphMemory, maxSubGraphMemory));
@@ -254,6 +260,129 @@ class GraphSageAlgorithmFactoryTest {
 
         assertEquals(expectedMemory.min, actual.min);
         assertEquals(expectedMemory.max, actual.max);
+    }
+
+    @Test
+    void memoryEstimationTreeStructure() {
+        var trainConfig = ImmutableGraphSageTrainConfig
+            .builder()
+            .modelName("modelName")
+            .sampleSizes(List.of(1L, 2L))
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .degreeAsProperty(true)
+            .build();
+
+        var model = Model.of(
+            "",
+            "modelName",
+            "graphSage",
+            GraphSchema.empty(),
+            new Layer[]{},
+            trainConfig
+        );
+
+        ModelCatalog.set(model);
+
+        var gsConfig = ImmutableGraphSageStreamConfig
+            .builder()
+            .modelName("modelName")
+            .build();
+
+        var actualEstimation = new GraphSageAlgorithmFactory<>()
+            .memoryEstimation(gsConfig)
+            .estimate(GraphDimensions.of(1337), 42);
+
+        assertThat(flatten(actualEstimation)).containsExactly(
+            pair(0, "GraphSage"),
+            pair(1, TEMPORARY),
+            pair(2, "this.instance"),
+            pair(2, "initialFeatures"),
+            pair(3, "instance"),
+            pair(3, "data"),
+            pair(3, "pages"),
+            pair(2, "concurrentBatches"),
+            pair(3, "computationGraph"),
+            pair(4, "subgraphs"),
+            pair(5, "subgraph 1"),
+            pair(5, "subgraph 2"),
+            pair(4, "forward"),
+            pair(5, "firstLayer"),
+            pair(5, "MEAN 1"),
+            pair(5, "MEAN 2"),
+            pair(5, "normalizeRows"),
+            pair(2, "resultFeatures"),
+            pair(3, "instance"),
+            pair(3, "data"),
+            pair(3, "pages")
+        );
+    }
+
+    @Test
+    void memoryEstimationMutateTreeStructure() {
+        var trainConfig = ImmutableGraphSageTrainConfig
+            .builder()
+            .modelName("modelName")
+            .sampleSizes(List.of(1L, 2L))
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .degreeAsProperty(true)
+            .build();
+
+        var model = Model.of(
+            "",
+            "modelName",
+            "graphSage",
+            GraphSchema.empty(),
+            new Layer[]{},
+            trainConfig
+        );
+
+        ModelCatalog.set(model);
+
+        var gsConfig = ImmutableGraphSageMutateConfig
+            .builder()
+            .modelName("modelName")
+            .mutateProperty("foo")
+            .build();
+
+        var actualEstimation = new GraphSageAlgorithmFactory<>()
+            .memoryEstimation(gsConfig)
+            .estimate(GraphDimensions.of(1337), 42);
+
+        assertThat(flatten(actualEstimation)).containsExactly(
+            pair(0, "GraphSage"),
+            pair(1, PERSISTENT),
+            pair(2, "resultFeatures"),
+            pair(3, "instance"),
+            pair(3, "data"),
+            pair(3, "pages"),
+            pair(1, TEMPORARY),
+            pair(2, "this.instance"),
+            pair(2, "initialFeatures"),
+            pair(3, "instance"),
+            pair(3, "data"),
+            pair(3, "pages"),
+            pair(2, "concurrentBatches"),
+            pair(3, "computationGraph"),
+            pair(4, "subgraphs"),
+            pair(5, "subgraph 1"),
+            pair(5, "subgraph 2"),
+            pair(4, "forward"),
+            pair(5, "firstLayer"),
+            pair(5, "MEAN 1"),
+            pair(5, "MEAN 2"),
+            pair(5, "normalizeRows")
+        );
+    }
+
+    private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {
+        return leaves(0, memoryTree).collect(toList());
+    }
+
+    private static Stream<IntObjectPair<String>> leaves(int depth, MemoryTree memoryTree) {
+        return Stream.concat(
+            Stream.of(pair(depth, memoryTree.description())),
+            memoryTree.components().stream().flatMap(tree -> leaves(depth + 1, tree))
+        );
     }
 
     static Stream<Arguments> parameters() {
@@ -403,7 +532,7 @@ class GraphSageAlgorithmFactoryTest {
         MemoryRange actual = actualTree.memoryUsage();
 
         assertEquals(6861816, actual.min);
-        assertEquals(18356216, actual.max);
+        assertEquals(18593016, actual.max);
 
         assertThat(actualTree.persistentMemory())
             .isPresent()

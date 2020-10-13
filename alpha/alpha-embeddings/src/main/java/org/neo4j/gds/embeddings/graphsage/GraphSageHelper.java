@@ -27,7 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -89,16 +88,16 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    public static EmbeddingEstimations embeddingsEstimation(
+    public static MemoryEstimation embeddingsEstimation(
         GraphSageTrainConfig config,
         long batchSize,
-        long nodeCount
+        long nodeCount,
+        boolean withGradientDescent
     ) {
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
-        var lossBuilder = MemoryEstimations.builder("lossFunction");
-        var subGraphBuilder = lossBuilder.startField("subgraphs");
+        var computationGraphBuilder = MemoryEstimations.builder("computationGraph").startField("subgraphs");
 
         final var minBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
         final var maxBatchNodeCounts = new ArrayList<Long>(numberOfLayers + 1);
@@ -122,15 +121,14 @@ public final class GraphSageHelper {
                     maxNextNodeCount)
             );
 
-            subGraphBuilder.add(MemoryEstimations.of("subgraph " + (i + 1), subgraphRange));
+            computationGraphBuilder.add(MemoryEstimations.of("subgraph " + (i + 1), subgraphRange));
         }
-        subGraphBuilder.endField();
 
         // aggregators go backwards through the layers
         Collections.reverse(minBatchNodeCounts);
         Collections.reverse(maxBatchNodeCounts);
 
-        var aggregatorsBuilder = lossBuilder.startField("aggregators");
+        var aggregatorsBuilder = MemoryEstimations.builder();
         for (int i = 0; i < numberOfLayers; i++) {
             var layerConfig = layerConfigs.get(i);
 
@@ -175,18 +173,18 @@ public final class GraphSageHelper {
             }
         }
 
-        return ImmutableEmbeddingEstimations.of(
-            aggregatorsBuilder.build(),
-            aggregatorsBuilder.endField().build()
-        );
-    }
+        computationGraphBuilder = computationGraphBuilder
+            .endField()
+            .startField("forward")
+            .addComponentsOf(aggregatorsBuilder.build());
 
-    @ValueClass
-    public interface EmbeddingEstimations {
-
-        MemoryEstimation aggregators();
-        MemoryEstimation lossFunction();
-
+        if (withGradientDescent) {
+            computationGraphBuilder = computationGraphBuilder
+                .endField()
+                .startField("backward")
+                .addComponentsOf(aggregatorsBuilder.build());
+        }
+        return computationGraphBuilder.endField().build();
     }
 
     public static HugeObjectArray<double[]> initializeFeatures(

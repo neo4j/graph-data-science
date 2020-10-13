@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,8 +49,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -56,6 +61,11 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 class GraphSageTrainAlgorithmFactoryTest {
+
+    @BeforeAll
+    static void setUp() {
+        GdsEdition.instance().setToEnterpriseEdition();
+    }
 
     @SuppressWarnings("UnnecessaryLocalVariable")
     @ParameterizedTest
@@ -65,7 +75,6 @@ class GraphSageTrainAlgorithmFactoryTest {
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
-        GdsEdition.instance().setToEnterpriseEdition();
         var concurrency = config.concurrency();
         var layerConfigs = config.layerConfigs();
 
@@ -103,7 +112,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         var batchSizes = new ArrayList<LongLongPair>();
         // additional final layer size
-        batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
+        batchSizes.add(pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
@@ -135,7 +144,9 @@ class GraphSageTrainAlgorithmFactoryTest {
 
             // LongIntHashMap toInternalId;
             // This is a local peak; will be GC'd before the global peak
+            @SuppressWarnings("unused")
             var minLocalIdMapMemory = sizeOfOpenHashContainer(minNextNodeCount) + sizeOfLongArray(minNextNodeCount);
+            @SuppressWarnings("unused")
             var maxLocalIdMapMemory = sizeOfOpenHashContainer(maxNextNodeCount) + sizeOfLongArray(maxNextNodeCount);
 
             subGraphMemories.add(MemoryRange.of(minSubGraphMemory, maxSubGraphMemory));
@@ -144,7 +155,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             maxBatchNodeCount = maxNextNodeCount;
 
             // add next layer's sizes
-            batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
+            batchSizes.add(pair(minBatchNodeCount, maxBatchNodeCount));
         }
 
         Collections.reverse(batchSizes);
@@ -266,12 +277,14 @@ class GraphSageTrainAlgorithmFactoryTest {
             //   1 copy of weights
             //   1 copy of momentum terms (same dim as weights)
             // not part of peak usage as update peak is larger
+            @SuppressWarnings("unused")
             var newMomentum = 2 * weightDimensions;
 
             //  new velocity
             //   2 copies of weights
             //   1 copy of momentum terms (same dim as weights)
             // not part of peak usage as update peak is larger
+            @SuppressWarnings("unused")
             var newVelocity = 3 * weightDimensions;
 
             //  mCaps
@@ -322,6 +335,66 @@ class GraphSageTrainAlgorithmFactoryTest {
             .isPresent()
             .map(MemoryTree::memoryUsage)
             .contains(expectedPersistentMemory);
+    }
+
+    @Test
+    void memoryEstimationTreeStructure() {
+        var config = ImmutableGraphSageTrainConfig
+            .builder()
+            .username("userName")
+            .modelName("modelName")
+            .sampleSizes(List.of(1L, 2L))
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .degreeAsProperty(true)
+            .build();
+
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+            .memoryEstimation(config)
+            .estimate(GraphDimensions.of(1337), 42);
+
+        assertThat(flatten(actualEstimation)).containsExactly(
+            pair(0, "GraphSage"),
+            pair(1, PERSISTENT),
+            pair(2, "weights"),
+            pair(3, "layer 1"),
+            pair(3, "layer 2"),
+            pair(1, TEMPORARY),
+            pair(2, "this.instance"),
+            pair(2, "initialFeatures"),
+            pair(3, "instance"),
+            pair(3, "data"),
+            pair(3, "pages"),
+            pair(2, "trainOnEpoch"),
+            pair(3, "initialAdamOptimizer"),
+            pair(3, "concurrentBatches"),
+            pair(4, "trainOnBatch"),
+            pair(5, "computationGraph"),
+            pair(6, "subgraphs"),
+            pair(7, "subgraph 1"),
+            pair(7, "subgraph 2"),
+            pair(6, "forward"),
+            pair(7, "firstLayer"),
+            pair(7, "MEAN 1"),
+            pair(7, "MEAN 2"),
+            pair(7, "normalizeRows"),
+            pair(6, "backward"),
+            pair(7, "firstLayer"),
+            pair(7, "MEAN 1"),
+            pair(7, "MEAN 2"),
+            pair(7, "normalizeRows"),
+            pair(5, "updateAdamOptimizer")
+        );
+    }
+
+    private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {
+        return leaves(0, memoryTree).collect(toList());
+    }
+
+    private static Stream<IntObjectPair<String>> leaves(int depth, MemoryTree memoryTree) {
+        return Stream.concat(
+            Stream.of(pair(depth, memoryTree.description())),
+            memoryTree.components().stream().flatMap(tree -> leaves(depth + 1, tree))
+        );
     }
 
     static Stream<Arguments> parameters() {
