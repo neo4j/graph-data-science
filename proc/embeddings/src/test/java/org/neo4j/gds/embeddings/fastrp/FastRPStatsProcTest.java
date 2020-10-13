@@ -35,6 +35,11 @@ import static org.hamcrest.Matchers.isA;
 class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
 
     @Override
+    GdsCypher.ExecutionModes mode() {
+        return GdsCypher.ExecutionModes.STATS;
+    }
+
+    @Override
     public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStatsConfig>> getProcedureClazz() {
         return FastRPStatsProc.class;
     }

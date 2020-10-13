@@ -33,13 +33,11 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @ValueClass
 public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
 
-    String ITERATION_WEIGHTS_KEY = "iterationWeights";
-
     List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
-    @Configuration.Key(ITERATION_WEIGHTS_KEY)
+    @Configuration.Key("iterationWeights")
     @Value.Default
-    default List<Double> iterationWeights() {
+    default List<? extends Number> iterationWeights() {
         return DEFAULT_ITERATION_WEIGHTS;
     }
 
@@ -56,11 +54,21 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     @Value.Check
     default void validate() {
-        if (iterationWeights().isEmpty()) {
+        List<? extends Number> iterationWeights = iterationWeights();
+        if (iterationWeights.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must not be empty.",
-                ITERATION_WEIGHTS_KEY
+                "iterationWeights"
             ));
+        }
+        for (Object weight : iterationWeights) {
+            if (!(weight instanceof Number)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Iteration weights must be numbers, but found `%s` of type `%s`",
+                    weight,
+                    weight == null ? "null" : weight.getClass().getSimpleName()
+                ));
+            }
         }
     }
 

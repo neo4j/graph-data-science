@@ -38,6 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
 
     @Override
+    GdsCypher.ExecutionModes mode() {
+        return GdsCypher.ExecutionModes.STREAM;
+    }
+
+    @Override
     public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStreamConfig>> getProcedureClazz() {
         return FastRPStreamProc.class;
     }

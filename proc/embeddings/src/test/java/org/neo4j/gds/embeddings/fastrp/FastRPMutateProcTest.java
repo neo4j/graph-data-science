@@ -36,6 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
+    @Override
+    GdsCypher.ExecutionModes mode() {
+        return GdsCypher.ExecutionModes.MUTATE;
+    }
+
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
         registerFunctions(
