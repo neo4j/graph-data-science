@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class WeightedNeighborhoodSampler {
+public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
 
     public WeightedNeighborhoodSampler() {}
 
-    public List<Long> sample(Graph graph, long nodeId, int numberOfSamples) {
-        var positiveNeighbors = BoundedLongPriorityQueue.max(numberOfSamples);
+    @Override
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState) {
+        var positiveNeighbors = BoundedLongPriorityQueue.max((int) numberOfSamples);
         graph.concurrentCopy().forEachRelationship(
             nodeId,
             0.0,

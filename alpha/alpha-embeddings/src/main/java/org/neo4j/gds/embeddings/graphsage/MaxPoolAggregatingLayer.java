@@ -76,7 +76,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     }
 
     @Override
-    public UniformNeighborhoodSampler sampler() {
+    public NeighborhoodSampler sampler() {
         return sampler;
     }
 

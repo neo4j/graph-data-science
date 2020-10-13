@@ -219,7 +219,7 @@ public class GraphSageModelWeightedTrainer {
             while (searchDepth > 0) {
                 // TODO: find how to randomise these???
                 // Here we are going to sample the highest "ranking" neighbors with respect of relationship weight.
-                var samples = new WeightedNeighborhoodSampler().sample(graph, currentNode.get(), 1);
+                var samples = new WeightedNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
                 if (samples.size() == 1) {
                     currentNode.set(samples.get(0));
                 } else {

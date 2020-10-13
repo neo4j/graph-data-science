@@ -52,10 +52,10 @@ class WeightedNeighborhoodSamplerTest {
     void testSampling() {
         var sampler = new WeightedNeighborhoodSampler();
 
-        var u1Neighbors = sampler.sample(graph, idFunction.of("u1"), 2);
+        var u1Neighbors = sampler.sample(graph, idFunction.of("u1"), 2, 0);
         assertThat(u1Neighbors).containsExactlyInAnyOrder(idFunction.of("d1"), idFunction.of("d2"));
 
-        var u2Neighbors = sampler.sample(graph, idFunction.of("u2"), 1);
+        var u2Neighbors = sampler.sample(graph, idFunction.of("u2"), 1, 0);
         assertThat(u2Neighbors).containsExactly(idFunction.of("d4"));
     }
 }
