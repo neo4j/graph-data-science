@@ -34,7 +34,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Tr
     @Configuration.Ignore
     default GraphSageTrainConfig trainConfig() {
         return ModelCatalog
-            .get(username(), modelName(), ModelData[].class, GraphSageTrainConfig.class)
+            .get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class)
             .trainConfig();
     }
 

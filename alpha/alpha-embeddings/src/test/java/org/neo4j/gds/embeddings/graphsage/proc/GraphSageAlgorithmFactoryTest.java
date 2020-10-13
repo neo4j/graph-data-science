@@ -30,8 +30,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
@@ -277,7 +279,7 @@ class GraphSageAlgorithmFactoryTest {
             "modelName",
             "graphSage",
             GraphSchema.empty(),
-            new Layer[]{},
+            ModelData.of(new Layer[]{}, GraphSageHelper::features),
             trainConfig
         );
 
@@ -332,7 +334,7 @@ class GraphSageAlgorithmFactoryTest {
             "modelName",
             "graphSage",
             GraphSchema.empty(),
-            new Layer[]{},
+            ModelData.of(new Layer[]{}, GraphSageHelper::features),
             trainConfig
         );
 
@@ -470,7 +472,7 @@ class GraphSageAlgorithmFactoryTest {
                                             modelName,
                                             "graphSage",
                                             GraphSchema.empty(),
-                                            new Layer[]{},
+                                            ModelData.of(new Layer[]{}, GraphSageHelper::features),
                                             trainConfig
                                         );
 
@@ -514,7 +516,7 @@ class GraphSageAlgorithmFactoryTest {
             modelName,
             "graphSage",
             GraphSchema.empty(),
-            new Layer[]{},
+            ModelData.of(new Layer[]{}, GraphSageHelper::features),
             trainConfig
         );
 
