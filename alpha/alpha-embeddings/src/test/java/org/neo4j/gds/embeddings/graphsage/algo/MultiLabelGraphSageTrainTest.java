@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -32,6 +36,8 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class MultiLabelGraphSageTrainTest {
@@ -79,6 +85,25 @@ class MultiLabelGraphSageTrainTest {
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
+    }
+
+    @Test
+    void shouldStoreMultiLabelFeatureFunctionInModel() {
+        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .modelName("foo")
+            .build();
+
+        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+            graph,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        // should not fail
+        Model<ModelData, MultiLabelGraphSageTrainConfig> model = multiLabelGraphSageTrain.compute();
+        assertThat(model.data().featureFunction()).isExactlyInstanceOf(MultiLabelFeatureFunction.class);
+
     }
 
     private static Stream<Arguments> featureSizes() {
