@@ -23,7 +23,6 @@ import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 import org.neo4j.gds.embeddings.graphsage.BatchProvider;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.LayerFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -66,9 +65,9 @@ public class GraphSageModelWeightedTrainer {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageModelWeightedTrainer(GraphSageTrainConfig config, Log log) {
+    public GraphSageModelWeightedTrainer(Graph graph, GraphSageTrainConfig config, Log log) {
         this.layers = config.layerConfigs().stream()
-            .map(LayerFactory::createLayer)
+            .map(layerConfig -> WeightedLayerFactory.createLayer(graph, layerConfig))
             .toArray(Layer[]::new);
         this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());

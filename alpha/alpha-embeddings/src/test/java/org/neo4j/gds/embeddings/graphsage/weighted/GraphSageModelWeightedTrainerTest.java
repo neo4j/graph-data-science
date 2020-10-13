@@ -86,7 +86,7 @@ class GraphSageModelWeightedTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelWeightedTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelWeightedTrainer(graph, config, new TestLog());
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
@@ -113,7 +113,7 @@ class GraphSageModelWeightedTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelWeightedTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelWeightedTrainer(graph, config, new TestLog());
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
