@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest {
@@ -103,7 +103,7 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest {
             3.0, 3.0, 3.0 // d4
         };
 
-        assertArrayEquals(expected, matrix.data());
+        assertThat(matrix.data()).isEqualTo(expected);
     }
 
 }
