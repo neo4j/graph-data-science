@@ -83,14 +83,12 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
 
     @Override
     public MultiLabelGraphSageTrain me() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.me is not implemented.");
+        return this;
     }
 
     @Override
     public void release() {
-        throw new UnsupportedOperationException(
-            "org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain.release is not implemented.");
+        this.weightsByLabel = null;
     }
 
     private Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel() {
