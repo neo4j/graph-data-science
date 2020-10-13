@@ -60,9 +60,9 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         double[] data = new double[nodeIds.length * projectedFeatureSize];
-        IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
-            long nodeId = nodeIds[nodeOffset];
-            NodeLabel label = labels[nodeOffset];
+        IntStream.range(0, nodeIds.length).forEach(i -> {
+            long nodeId = nodeIds[i];
+            NodeLabel label = labels[i];
             Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
             double[] nodeFeatures = features.get(nodeId);
 
@@ -78,7 +78,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
                 product.getData(),
                 0,
                 data,
-                nodeOffset * projectedFeatureSize,
+                i * projectedFeatureSize,
                 projectedFeatureSize
             );
         });
@@ -92,9 +92,9 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
         int cols = parent.dimension(1);
         double[] gradientData = new double[rows * cols];
 
-        IntStream.range(0, nodeIds.length).forEach(nodeOffset -> {
-            long nodeId = nodeIds[nodeOffset];
-            NodeLabel label = labels[nodeOffset];
+        IntStream.range(0, nodeIds.length).forEach(i -> {
+            long nodeId = nodeIds[i];
+            NodeLabel label = labels[i];
             Weights<? extends Tensor<?>> weights = weightsByLabel.get(label);
 
             if (weights == parent) {
@@ -105,7 +105,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
                 double[] nodeFeatures = features.get(nodeId);
                 for (int row = 0; row < rows; row++) {
                     for (int col = 0; col < cols; col++) {
-                        gradientData[row * cols + col] += nodeFeatures[col] * thisGradient[nodeOffset * dimension(1) + row];
+                        gradientData[row * cols + col] += nodeFeatures[col] * thisGradient[i * dimension(1) + row];
                     }
                 }
             }

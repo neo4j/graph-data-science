@@ -44,12 +44,13 @@ import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrainCo
 class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
 
     @GdlGraph
-    private static final String GDL = "CREATE" +
-                                      "  (r1:Restaurant {numEmployees: 5.0, rating: 2.0})" +
-                                      ", (d1:Dish {numIngredients: 3.0, rating: 5.0})" +
-                                      ", (c1:Customer {numPurchases: 15.0}) " +
-                                      ", (r1)-[:SERVES]->(d1)" +
-                                      ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
+    private static final String GDL =
+        "CREATE" +
+        "  (r1:Restaurant {numEmployees: 5.0, rating: 2.0})" +
+        ", (d1:Dish {numIngredients: 3.0, rating: 5.0})" +
+        ", (c1:Customer {numPurchases: 15.0}) " +
+        ", (r1)-[:SERVES]->(d1)" +
+        ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
 
     @Inject
     TestGraph graph;

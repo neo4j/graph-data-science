@@ -41,6 +41,8 @@ import static org.neo4j.gds.embeddings.graphsage.LayerFactory.generateWeights;
 
 public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain, Model<ModelData, MultiLabelGraphSageTrainConfig>> {
 
+    private static final double WEIGHT_BOUND = 1.0D;
+
     private final Graph graph;
     private final MultiLabelGraphSageTrainConfig config;
     private final AllocationTracker tracker;
@@ -102,7 +104,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
                     numProperties += 1;
                 }
                 //TODO: how should we initialize the values in the matrix?
-                return generateWeights(config.projectedFeatureSize(), numProperties, 1.0D);
+                return generateWeights(config.projectedFeatureSize(), numProperties, WEIGHT_BOUND);
             }));
     }
 }

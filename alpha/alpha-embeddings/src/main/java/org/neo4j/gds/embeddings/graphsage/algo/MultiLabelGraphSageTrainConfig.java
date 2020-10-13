@@ -34,6 +34,11 @@ public interface MultiLabelGraphSageTrainConfig extends GraphSageTrainConfig {
 
     int PROJECTED_FEATURE_SIZE = 5;
 
+    @Value.Default
+    default int projectedFeatureSize() {
+        return PROJECTED_FEATURE_SIZE;
+    }
+
     @Configuration.Ignore
     @Override
     default List<LayerConfig> layerConfigs() {
@@ -50,11 +55,6 @@ public interface MultiLabelGraphSageTrainConfig extends GraphSageTrainConfig {
             result.add(layerConfig);
         }
         return result;
-    }
-
-    @Value.Default
-    default int projectedFeatureSize() {
-        return PROJECTED_FEATURE_SIZE;
     }
 
 }
