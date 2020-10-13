@@ -19,19 +19,24 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -42,7 +47,13 @@ public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    static Variable<Matrix> embeddings(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
+    static Variable<Matrix> embeddings(
+        Graph graph,
+        long[] nodeIds,
+        HugeObjectArray<double[]> features,
+        Layer[] layers,
+        FeatureFunction featureFunction
+    ) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -50,7 +61,7 @@ public final class GraphSageHelper {
         Collections.reverse(neighborhoodFunctions);
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
 
-        Variable<Matrix> previousLayerRepresentations = features(
+        Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
             features
         );
@@ -70,25 +81,36 @@ public final class GraphSageHelper {
 
     public static HugeObjectArray<double[]> initializeFeatures(
         Graph graph,
-        Collection<String> nodePropertyNames,
-        boolean useDegreeAsProperty,
+        GraphSageTrainConfig config,
         AllocationTracker tracker
     ) {
-
-        var nodeProperties =
-            nodePropertyNames
-                .stream()
-                .map(graph::nodeProperties)
-                .collect(toList());
-
         HugeObjectArray<double[]> features = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
             tracker
         );
+
+        if (config instanceof MultiLabelGraphSageTrainConfig) {
+            return initializeMultiLabelFeatures(graph, config, features);
+        } else {
+            return initializeSingleLabelFeatures(graph, config, features);
+        }
+    }
+
+    private static HugeObjectArray<double[]> initializeSingleLabelFeatures(
+        Graph graph,
+        GraphSageTrainConfig config,
+        HugeObjectArray<double[]> features
+    ) {
+        var nodeProperties =
+            config.nodePropertyNames()
+                .stream()
+                .map(graph::nodeProperties)
+                .collect(toList());
+
         features.setAll(n -> {
             DoubleStream nodeFeatures = nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));
-            if (useDegreeAsProperty) {
+            if (config.degreeAsProperty()) {
                 nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
             }
             return nodeFeatures.toArray();
@@ -96,7 +118,24 @@ public final class GraphSageHelper {
         return features;
     }
 
-    private static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
+    private static HugeObjectArray<double[]> initializeMultiLabelFeatures(
+        Graph graph,
+        GraphSageTrainConfig config,
+        HugeObjectArray<double[]> features
+    ) {
+        var propertiesPerNodeLabel = propertiesPerNodeLabel(graph, config);
+        features.setAll(n -> {
+            var relevantProperties = propertiesPerNodeLabel.get(labelOf(graph, n));
+            DoubleStream nodeFeatures = relevantProperties.stream().mapToDouble(p -> p.doubleValue(n));
+            if (config.degreeAsProperty()) {
+                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
+            }
+            return nodeFeatures.toArray();
+        });
+        return features;
+    }
+
+    public static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
         int dimension = features.get(0).length;
         double[] data = new double[nodeIds.length * dimension];
         IntStream
@@ -109,5 +148,32 @@ public final class GraphSageHelper {
                 dimension
             ));
         return new MatrixConstant(data, nodeIds.length, dimension);
+    }
+
+    public static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(Graph graph) {
+        return graph.schema()
+            .nodeSchema()
+            .properties()
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet()));
+    }
+
+    private static Map<NodeLabel, Set<NodeProperties>> propertiesPerNodeLabel(Graph graph, GraphSageTrainConfig config) {
+        return propertyKeysPerNodeLabel(graph)
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> config.nodePropertyNames()
+                    .stream()
+                    .filter(e.getValue()::contains)
+                    .map(graph::nodeProperties)
+                    .collect(Collectors.toSet())
+            ));
+    }
+
+    private static NodeLabel labelOf(Graph graph, long n) {
+        return graph.nodeLabels(n).stream().findFirst().get();
     }
 }

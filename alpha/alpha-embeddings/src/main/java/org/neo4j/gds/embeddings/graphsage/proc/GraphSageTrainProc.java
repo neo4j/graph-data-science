@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
-import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 
-public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], GraphSageTrainConfig> {
+public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
     @Procedure(name = "gds.alpha.graphSage.train", mode = Mode.READ)
@@ -49,11 +49,11 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Layer[], Graph
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<GraphSageTrain, Model<Layer[], GraphSageTrainConfig>, GraphSageTrainConfig> computationResult = compute(
+        ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>, GraphSageTrainConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        Model<Layer[], GraphSageTrainConfig> result = computationResult.result();
+        Model<ModelData, GraphSageTrainConfig> result = computationResult.result();
 
         ModelCatalog.set(result);
         return Stream.of(trainResult(computationResult));

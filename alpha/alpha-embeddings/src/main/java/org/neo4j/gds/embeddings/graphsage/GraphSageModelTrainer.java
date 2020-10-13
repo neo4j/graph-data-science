@@ -32,7 +32,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -60,9 +63,20 @@ public class GraphSageModelTrainer {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
+    private final FeatureFunction featureFunction;
+    private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private double degreeProbabilityNormalizer;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, Log log) {
+        this(config, log, GraphSageHelper::features, Collections.emptyList());
+    }
+
+    public GraphSageModelTrainer(
+        GraphSageTrainConfig config,
+        Log log,
+        FeatureFunction featureFunction,
+        Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
+    ) {
         this.layers = config.layerConfigs().stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
@@ -75,6 +89,8 @@ public class GraphSageModelTrainer {
         this.epochs = config.epochs();
         this.maxIterations = config.maxIterations();
         this.maxSearchDepth = config.searchDepth();
+        this.featureFunction = featureFunction;
+        this.labelProjectionWeights = labelProjectionWeights;
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
@@ -195,7 +211,7 @@ public class GraphSageModelTrainer {
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers);
+        Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
 
@@ -241,9 +257,11 @@ public class GraphSageModelTrainer {
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
-        return Arrays.stream(layers)
+        List<Weights<? extends Tensor<?>>> weights = new ArrayList<>(labelProjectionWeights);
+        weights.addAll(Arrays.stream(layers)
             .flatMap(layer -> layer.weights().stream())
-            .collect(Collectors.toList());
+            .collect(Collectors.toList()));
+        return weights;
     }
 
     @ValueClass

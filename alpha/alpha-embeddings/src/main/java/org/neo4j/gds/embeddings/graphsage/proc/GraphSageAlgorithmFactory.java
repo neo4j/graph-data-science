@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
-import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -43,7 +43,7 @@ class GraphSageAlgorithmFactory<T extends GraphSageBaseConfig> implements AlphaA
             ModelCatalog.get(
                 configuration.username(),
                 configuration.modelName(),
-                Layer[].class,
+                ModelData.class,
                 GraphSageTrainConfig.class
             ), tracker
         );

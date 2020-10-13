@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.proc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
@@ -82,10 +82,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        Model<Layer[], GraphSageTrainConfig> model = ModelCatalog.get(
+        Model<ModelData, GraphSageTrainConfig> model = ModelCatalog.get(
             getUsername(),
             modelName,
-            Layer[].class,
+            ModelData.class,
             GraphSageTrainConfig.class
         );
         assertEquals(modelName, model.name());

@@ -35,6 +35,7 @@ public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final BatchProvider batchProvider;
     private final int concurrency;
+    private final FeatureFunction featureFunction;
     private final AllocationTracker tracker;
 
     public GraphSageEmbeddingsGenerator(
@@ -43,13 +44,27 @@ public class GraphSageEmbeddingsGenerator {
         int concurrency,
         AllocationTracker tracker
     ) {
+        this(layers, batchSize, concurrency, GraphSageHelper::features, tracker);
+    }
+
+    public GraphSageEmbeddingsGenerator(
+        Layer[] layers,
+        int batchSize,
+        int concurrency,
+        FeatureFunction featureFunction,
+        AllocationTracker tracker
+    ) {
         this.layers = layers;
         this.batchProvider = new BatchProvider(batchSize);
         this.concurrency = concurrency;
+        this.featureFunction = featureFunction;
         this.tracker = tracker;
     }
 
-    public HugeObjectArray<double[]> makeEmbeddings(Graph graph, HugeObjectArray<double[]> features) {
+    public HugeObjectArray<double[]> makeEmbeddings(
+        Graph graph,
+        HugeObjectArray<double[]> features
+    ) {
         HugeObjectArray<double[]> result = HugeObjectArray.newArray(
             double[].class,
             graph.nodeCount(),
@@ -61,7 +76,7 @@ public class GraphSageEmbeddingsGenerator {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddings(graph, batch, features, layers);
+                Variable<Matrix> embeddingVariable = embeddings(graph, batch, features, layers, featureFunction);
                 int cols = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data();
 

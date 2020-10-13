@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -29,7 +30,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,8 +53,10 @@ class GraphSageHelperTest {
         var graph = randomGraphGenerator.generate();
         HugeObjectArray<double[]> properties = GraphSageHelper.initializeFeatures(
             graph,
-            List.of("dummyProperty"),
-            false,
+            ImmutableGraphSageTrainConfig.builder()
+                .modelName("foo")
+                .nodePropertyNames(Set.of("dummyProperty"))
+                .build(),
             AllocationTracker.empty()
         );
 
