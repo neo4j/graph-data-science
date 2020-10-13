@@ -33,11 +33,11 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @ValueClass
 public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
 
-    List<Double> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
+    List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
     @Configuration.Key("iterationWeights")
     @Value.Default
-    default List<? extends Number> iterationWeights() {
+    default List<Number> iterationWeights() {
         return DEFAULT_ITERATION_WEIGHTS;
     }
 
