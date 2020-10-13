@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.logging.Log;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements AlgorithmFactory<GraphSage, CONFIG> {
@@ -71,7 +71,7 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
         var gsBuilder = MemoryEstimations.builder("GraphSage");
 
         if (mutate) {
-            gsBuilder = gsBuilder.startField(PERSISTENT)
+            gsBuilder = gsBuilder.startField(RESIDENT_MEMORY)
                 .add(
                     "resultFeatures",
                     HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.embeddingDimension()))
@@ -79,7 +79,7 @@ class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> implements A
         }
 
         var builder = gsBuilder
-            .startField(TEMPORARY)
+            .startField(TEMPORARY_MEMORY)
             .field("this.instance", GraphSage.class)
             .add(
                 "initialFeatures",
