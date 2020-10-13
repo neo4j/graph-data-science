@@ -19,30 +19,21 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableMultiLabelGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,42 +47,22 @@ class GraphSageEmbeddingsGeneratorTest {
 
     private static final String MODEL_NAME = "graphSageModel";
 
+    @GdlGraph
+    private static final String GDL = GraphSageTestGraph.GDL;
+
+    @Inject
     private Graph graph;
-    private HugeObjectArray<double[]> features;
-    private ImmutableGraphSageTrainConfig.Builder configBuilder;
-
-    @BeforeEach
-    void setUp() {
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
-            .nodeCount(20)
-            .averageDegree(3)
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(123L)
-            .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
-            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
-            .build();
-        graph = randomGraphGenerator.generate();
-
-        long nodeCount = graph.nodeCount();
-        features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
-
-        Random random = new Random();
-        LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
-
-        configBuilder = ImmutableGraphSageTrainConfig.builder()
-            .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
-            .embeddingDimension(EMBEDDING_DIMENSION);
-    }
 
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddings(Aggregator.AggregatorType aggregatorType) {
-        var config = configBuilder
+        var config = ImmutableGraphSageTrainConfig.builder()
             .aggregator(aggregatorType)
+            .embeddingDimension(EMBEDDING_DIMENSION)
+            .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
             .build();
+        var features = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
 
         var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
 
@@ -113,40 +84,37 @@ class GraphSageEmbeddingsGeneratorTest {
         LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
 
-    @GdlGraph(graphNamePrefix = "multilabel")
-    private static final String GDL = "CREATE" +
-                                      "  (r1:Restaurant {numEmployees: 5.0, rating: 2.0})" +
-                                      ", (d1:Dish {numIngredients: 3.0, rating: 5.0})" +
-                                      ", (c1:Customer {numPurchases: 15.0}) " +
-                                      ", (r1)-[:SERVES]->(d1)" +
-                                      ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
-
-    @Inject
-    TestGraph multilabelGraph;
-
-    @Test
-    void makesEmbeddingsFromMultiLabelModel() {
+    @ParameterizedTest
+    @EnumSource(Aggregator.AggregatorType.class)
+    void makesEmbeddingsFromMultiLabelModel(Aggregator.AggregatorType aggregatorType) {
         var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+            .aggregator(aggregatorType)
             .modelName(MODEL_NAME)
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .embeddingDimension(EMBEDDING_DIMENSION)
             .build();
-        var trainer = new MultiLabelGraphSageTrain(multilabelGraph, config, AllocationTracker.empty(), new TestLog());
+
+        var trainer = new MultiLabelGraphSageTrain(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty());
+
         var model = trainer.compute();
+
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             model.data().layers(),
             config.batchSize(),
             config.concurrency(),
             model.data().featureFunction(),
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
+
         var embeddings = embeddingsGenerator.makeEmbeddings(
-            multilabelGraph,
-            GraphSageHelper.initializeFeatures(multilabelGraph, config, AllocationTracker.empty())
+            graph,
+            GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty())
         );
+
         assertNotNull(embeddings);
-        assertEquals(multilabelGraph.nodeCount(), embeddings.size());
+        assertEquals(graph.nodeCount(), embeddings.size());
 
-        LongStream.range(0, multilabelGraph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
+        LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
-
 }

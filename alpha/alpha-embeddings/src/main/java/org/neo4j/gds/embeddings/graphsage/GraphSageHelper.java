@@ -217,7 +217,8 @@ public final class GraphSageHelper {
                 .collect(toList());
 
         features.setAll(n -> {
-            DoubleStream nodeFeatures = nodeProperties.stream().mapToDouble(p -> p.doubleValue(n));
+            DoubleStream nodeFeatures = nodeProperties.stream()
+                .mapToDouble(p -> p.doubleValue(n));
             if (config.degreeAsProperty()) {
                 nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
             }
