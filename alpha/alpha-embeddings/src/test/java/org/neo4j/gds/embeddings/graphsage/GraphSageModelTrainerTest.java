@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,6 +35,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +46,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphSageModelTrainerTest {
 
@@ -149,29 +152,34 @@ class GraphSageModelTrainerTest {
 
     @Test
     void testLogging() {
-        var config = configBuilder
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .degreeAsProperty(true)
+            .embeddingDimension(EMBEDDING_DIMENSION)
             .modelName("model")
             .epochs(1)
             .maxIterations(1)
             .build();
-        var testLogger = new TestProgressLogger(0, "GraphSage", config.concurrency());
 
-        var gs = new GraphSageModelTrainer(config, testLogger);
+        var algo = new GraphSageTrainAlgorithmFactory(TestProgressLogger.FACTORY).build(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            NullLog.getInstance()
+        );
+        algo.compute();
 
-        gs.train(graph, features);
-
-        var messagesInOrder = testLogger.getMessages(INFO);
+        var messagesInOrder = ((TestProgressLogger) algo.getProgressLogger()).getMessages(INFO);
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id
-            .extracting(message -> message.substring(message.indexOf("] ")  + 2))
+            .extracting(removingThreadId())
             .containsExactly(
-                "GraphSage :: Start",
-                "GraphSage :: Epoch 1 :: Start",
-                "GraphSage :: Iteration 1 :: Start",
-                "GraphSage :: Iteration 1 :: Finished",
-                "GraphSage :: Epoch 1 :: Finished",
-                "GraphSage :: Finished"
+                "GraphSageTrain :: Start",
+                "GraphSageTrain :: Epoch 1 :: Start",
+                "GraphSageTrain :: Iteration 1 :: Start",
+                "GraphSageTrain :: Iteration 1 :: Finished",
+                "GraphSageTrain :: Epoch 1 :: Finished",
+                "GraphSageTrain :: Finished"
             );
     }
 

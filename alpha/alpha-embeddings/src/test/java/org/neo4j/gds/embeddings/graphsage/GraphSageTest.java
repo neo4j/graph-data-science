@@ -45,6 +45,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphSageTest {
 
@@ -115,7 +116,7 @@ class GraphSageTest {
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id
-            .extracting(message -> message.substring(message.indexOf("] ") + 2))
+            .extracting(removingThreadId())
             .containsExactly(
                 "GraphSage :: Start",
                 "GraphSage 5%",

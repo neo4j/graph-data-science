@@ -34,7 +34,6 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, G
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final AllocationTracker tracker;
-    private final ProgressLogger progressLogger;
 
     public GraphSageTrain(
         Graph graph,
