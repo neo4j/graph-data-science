@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
 
 /**
