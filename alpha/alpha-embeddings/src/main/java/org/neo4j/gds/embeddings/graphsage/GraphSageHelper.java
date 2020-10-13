@@ -151,7 +151,9 @@ public final class GraphSageHelper {
     }
 
     public static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(Graph graph) {
-        return graph.schema().nodeSchema().properties()
+        return graph.schema()
+            .nodeSchema()
+            .properties()
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet()));

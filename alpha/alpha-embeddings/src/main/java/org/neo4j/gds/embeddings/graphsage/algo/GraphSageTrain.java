@@ -62,7 +62,7 @@ public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, G
             config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            new ModelData(trainResult.layers(), org.neo4j.gds.embeddings.graphsage.GraphSageHelper::features),
+            ModelData.of(trainResult.layers(), org.neo4j.gds.embeddings.graphsage.GraphSageHelper::features),
             config
         );
     }

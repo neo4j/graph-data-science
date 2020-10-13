@@ -75,7 +75,7 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
             config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            new ModelData(trainResult.layers(), featureFunction),
+            ModelData.of(trainResult.layers(), featureFunction),
             config
         );
     }

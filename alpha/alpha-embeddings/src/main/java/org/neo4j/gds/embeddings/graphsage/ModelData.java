@@ -19,22 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-public class ModelData {
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-    Layer[] layers;
-    FeatureFunction featureFunction;
+@ValueClass
+public interface ModelData {
 
-    public ModelData(Layer[] layers, FeatureFunction featureFunction) {
-        this.layers = layers;
-        this.featureFunction = featureFunction;
+    Layer[] layers();
+
+    FeatureFunction featureFunction();
+
+    static ModelData of(Layer[] layers, FeatureFunction featureFunction) {
+        return ImmutableModelData.of(layers, featureFunction);
     }
-
-    public Layer[] layers() {
-        return layers;
-    }
-
-    public FeatureFunction featureFunction() {
-        return featureFunction;
-    }
-
 }
