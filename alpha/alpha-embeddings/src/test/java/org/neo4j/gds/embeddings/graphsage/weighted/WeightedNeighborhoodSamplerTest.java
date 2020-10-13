@@ -34,13 +34,17 @@ class WeightedNeighborhoodSamplerTest {
     @GdlGraph
     private static final String DB_QUERY =
         "CREATE " +
-        "   (u1:User), (u1:User)," +
-        "   (d1:Dish),(d2:Dish),(d3:Dish),(d4:Dish)," +
-        "   (u1)-[:ORDERED {times: 5}]->(d1), " +
-        "   (u1)-[:ORDERED {times: 2}]->(d2), " +
-        "   (u1)-[:ORDERED {times: 1}]->(d3), " +
-        "   (u2)-[:ORDERED {times: 2}]->(d3), " +
-        "   (u2)-[:ORDERED {times: 3}]->(d4)";
+        ", (u1:User)" +
+        ", (u1:User)" +
+        ", (d1:Dish)" +
+        ", (d2:Dish)" +
+        ", (d3:Dish)" +
+        ", (d4:Dish)" +
+        ", (u1)-[:ORDERED {times: 5}]->(d1)" +
+        ", (u1)-[:ORDERED {times: 2}]->(d2)" +
+        ", (u1)-[:ORDERED {times: 1}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 2}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
     @Inject
     private Graph graph;
