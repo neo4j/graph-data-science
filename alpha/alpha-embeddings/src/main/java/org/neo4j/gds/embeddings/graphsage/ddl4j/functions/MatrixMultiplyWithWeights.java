@@ -67,7 +67,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
                 long originalTargetId = subGraph.nextNodes[target];
                 double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
                 for (int col = 0; col < cols; col++) {
-                    weightedData[sourceOffset + col] = parentData[targetOffset + col] * relationshipWeight;
+                    weightedData[sourceOffset + col] += parentData[targetOffset + col] * relationshipWeight;
                 }
             }
         }
