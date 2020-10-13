@@ -353,7 +353,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .estimate(GraphDimensions.of(1337), 42);
 
         assertThat(flatten(actualEstimation)).containsExactly(
-            pair(0, "GraphSage"),
+            pair(0, "GraphSageTrain"),
             pair(1, PERSISTENT),
             pair(2, "weights"),
             pair(3, "layer 1"),

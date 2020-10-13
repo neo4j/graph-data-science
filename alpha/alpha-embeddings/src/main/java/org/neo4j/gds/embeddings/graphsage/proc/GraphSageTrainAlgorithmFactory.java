@@ -60,7 +60,7 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
-        var layerBuilder = MemoryEstimations.builder("GraphSage")
+        var layerBuilder = MemoryEstimations.builder("GraphSageTrain")
             .startField(PERSISTENT)
             .startField("weights");
 
