@@ -37,6 +37,7 @@ public class HingeLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
+    private double loss;
     private final Variable<Matrix> combinedEmbeddings;
 
     HingeLoss(Variable<Matrix> combinedEmbeddings) {
@@ -55,7 +56,7 @@ public class HingeLoss extends SingleParentVariable<Scalar> {
 
         var data = embeddingData.data();
         var cols = combinedEmbeddings.dimension(COLUMNS_INDEX);
-        double loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
+        loss = IntStream.range(0, batchSize).mapToDouble(nodeId -> {
             int positiveNodeId = nodeId + batchSize;
             int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
 
@@ -76,15 +77,14 @@ public class HingeLoss extends SingleParentVariable<Scalar> {
         return new Scalar(loss);
     }
 
-    // FIXME: This gradient is massively incorrect!!!
     @Override
     public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> embeddingData = ctx.data(parent);
-        double[] embeddings = embeddingData.data();
-        int totalBatchSize = embeddingData.dimension(ROWS_INDEX);
-        int embeddingDimension = embeddingData.dimension(COLUMNS_INDEX);
+        Tensor<?> parentData = ctx.data(parent);
+        Tensor<?> gradient = parentData.scalarMultiply(loss);
+        int totalBatchSize = parentData.dimension(ROWS_INDEX);
+        int embeddingDimension = parentData.dimension(COLUMNS_INDEX);
 
-        return new Matrix(embeddings, totalBatchSize, embeddingDimension);
+        return new Matrix(gradient.data(), totalBatchSize, embeddingDimension);
     }
 
 }

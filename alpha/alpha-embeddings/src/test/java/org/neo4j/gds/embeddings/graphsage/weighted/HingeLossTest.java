@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
@@ -99,7 +98,6 @@ class HingeLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
         assertEquals(expected, lossData.dataAt(0), 1e-10);
     }
 
-    @Disabled
     @Test
     void testGradient() {
         Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
