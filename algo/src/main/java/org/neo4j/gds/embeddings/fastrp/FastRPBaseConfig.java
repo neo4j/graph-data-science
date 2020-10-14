@@ -35,7 +35,6 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
-    @Configuration.Key("iterationWeights")
     @Value.Default
     default List<Number> iterationWeights() {
         return DEFAULT_ITERATION_WEIGHTS;
