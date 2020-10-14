@@ -40,6 +40,11 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP> {
 
     @Override
+    GdsCypher.ExecutionModes mode() {
+        return GdsCypher.ExecutionModes.WRITE;
+    }
+
+    @Override
     public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPWriteConfig>> getProcedureClazz() {
         return FastRPWriteProc.class;
     }

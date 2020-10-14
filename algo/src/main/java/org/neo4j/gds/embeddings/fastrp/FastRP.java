@@ -50,7 +50,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private final int embeddingDimension;
     private final int iterations;
-    private final List<Double> iterationWeights;
+    private final List<Number> iterationWeights;
 
     static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
@@ -145,7 +145,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
-            double iterationWeight = iterationWeights.get(i);
+            double iterationWeight = iterationWeights.get(i).doubleValue();
 
             try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
