@@ -94,6 +94,9 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
                 if (config.degreeAsProperty()) {
                     numProperties += 1;
                 }
+                if (config.labelAsProperty()) {
+                    numProperties += 1;
+                }
                 //TODO: how should we initialize the values in the matrix?
                 return generateWeights(config.projectedFeatureSize(), numProperties, WEIGHT_BOUND);
             }));

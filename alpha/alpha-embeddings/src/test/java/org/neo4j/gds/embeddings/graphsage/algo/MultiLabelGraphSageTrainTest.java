@@ -72,6 +72,27 @@ class MultiLabelGraphSageTrainTest {
         multiLabelGraphSageTrain.compute();
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldRunWithOrWithoutLabelAsProperty(boolean labelAsProperty) {
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .embeddingDimension(64)
+            .modelName("foo")
+            .labelAsProperty(labelAsProperty)
+            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
+            .build();
+
+        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+            graph,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        // should not fail
+        multiLabelGraphSageTrain.compute();
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("featureSizes")
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {

@@ -214,6 +214,7 @@ public final class GraphSageHelper {
                 .map(graph::nodeProperties)
                 .collect(toList());
 
+        // TODO: init fixed size array to avoid DoubleStream per node
         features.setAll(n -> {
             DoubleStream nodeFeatures = nodeProperties.stream()
                 .mapToDouble(p -> p.doubleValue(n));
@@ -231,11 +232,16 @@ public final class GraphSageHelper {
         HugeObjectArray<double[]> features
     ) {
         var propertiesPerNodeLabel = propertiesPerNodeLabel(graph, config);
+
         features.setAll(n -> {
-            var relevantProperties = propertiesPerNodeLabel.get(labelOf(graph, n));
+            var nodeLabel = labelOf(graph, n);
+            var relevantProperties = propertiesPerNodeLabel.get(nodeLabel);
             DoubleStream nodeFeatures = relevantProperties.stream().mapToDouble(p -> p.doubleValue(n));
             if (config.degreeAsProperty()) {
                 nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
+            }
+            if (config.labelAsProperty()) {
+                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(1.0));
             }
             return nodeFeatures.toArray();
         });
