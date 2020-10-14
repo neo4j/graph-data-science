@@ -29,6 +29,10 @@ import org.neo4j.gds.embeddings.graphsage.proc.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageWriteProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEMutateProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEStatsProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEStreamProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEWriteProc;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
@@ -104,6 +108,15 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.graphSage.train.estimate",
         "gds.alpha.graphSage.write",
         "gds.alpha.graphSage.write.estimate",
+
+        "gds.beta.fastRPE.mutate",
+        "gds.beta.fastRPE.mutate.estimate",
+        "gds.beta.fastRPE.stats",
+        "gds.beta.fastRPE.stats.estimate",
+        "gds.beta.fastRPE.stream",
+        "gds.beta.fastRPE.stream.estimate",
+        "gds.beta.fastRPE.write",
+        "gds.beta.fastRPE.write.estimate",
 
         "gds.beta.graph.generate",
 
@@ -263,6 +276,10 @@ class ListProcTest extends BaseProcTest {
             FastRPWriteProc.class,
             FastRPMutateProc.class,
             FastRPStatsProc.class,
+            FastRPEStreamProc.class,
+            FastRPEWriteProc.class,
+            FastRPEMutateProc.class,
+            FastRPEStatsProc.class,
             GraphCreateProc.class,
             GraphDropProc.class,
             GraphExistsProc.class,
