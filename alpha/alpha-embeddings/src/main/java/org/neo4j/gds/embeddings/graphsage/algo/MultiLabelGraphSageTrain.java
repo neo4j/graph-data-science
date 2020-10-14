@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
@@ -50,11 +51,13 @@ public class MultiLabelGraphSageTrain extends Algorithm<MultiLabelGraphSageTrain
     public MultiLabelGraphSageTrain(
         Graph graph,
         MultiLabelGraphSageTrainConfig config,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
+        this.progressLogger = progressLogger;
         this.weightsByLabel = makeWeightsByLabel();
     }
 
