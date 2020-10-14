@@ -59,7 +59,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
             .builder(FastRP.class)
             .fixed(
                 "propertyVectors",
-                MemoryUsage.sizeOfFloatArray(config.nodePropertyNames().size() * config.nodeFeatureDimension())
+                MemoryUsage.sizeOfFloatArray(config.nodePropertyNames().size() * config.propertyDimension())
             )
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
@@ -77,13 +77,13 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         this.progressLogger = progressLogger;
         this.nodePropertyNames = config.nodePropertyNames();
 
-        this.propertyVectors = new float[nodePropertyNames.size()][config.nodeFeatureDimension()];
+        this.propertyVectors = new float[nodePropertyNames.size()][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
 
         this.embeddingDimension = config.embeddingDimension();
-        this.baseEmbeddingDimension = config.embeddingDimension() - config.nodeFeatureDimension();
+        this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();
         this.iterationWeights = config.iterationWeights();
         this.normalizationStrength = config.normalizationStrength();
         this.concurrency = config.concurrency();
@@ -126,13 +126,13 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     private void initPropertyVectors() {
-        int nodeFeatureDimension = embeddingDimension - baseEmbeddingDimension;
-        float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(nodeFeatureDimension);
+        int propertyDimension = embeddingDimension - baseEmbeddingDimension;
+        float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
         double probability = 1.0f / (2.0f * SPARSITY);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
         for (int i = 0; i < nodePropertyNames.size(); i++) {
-            this.propertyVectors[i] = new float[nodeFeatureDimension];
-            for (int d = 0; d < nodeFeatureDimension; d++) {
+            this.propertyVectors[i] = new float[propertyDimension];
+            for (int d = 0; d < propertyDimension; d++) {
                 this.propertyVectors[i][d] = computeRandomEntry(random.get(), probability, entryValue);
             }
         }

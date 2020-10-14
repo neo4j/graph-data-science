@@ -37,7 +37,7 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
     @Value.Default
-    default int nodeFeatureDimension() {
+    default int propertyDimension() {
         return 0;
     }
 

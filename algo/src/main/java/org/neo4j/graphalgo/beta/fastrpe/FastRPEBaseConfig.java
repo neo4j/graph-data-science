@@ -36,10 +36,10 @@ public interface FastRPEBaseConfig extends FastRPBaseConfig {
 
             ));
         }
-        if (nodeFeatureDimension() > embeddingDimension()) {
+        if (propertyDimension() > embeddingDimension()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The value of nodeFeatureDimension %s may not exceed embeddingDimension %s.",
-                nodeFeatureDimension(),
+               "The value of propertyDimension %s may not exceed embeddingDimension %s.",
+                propertyDimension(),
                 embeddingDimension()
             ));
         }

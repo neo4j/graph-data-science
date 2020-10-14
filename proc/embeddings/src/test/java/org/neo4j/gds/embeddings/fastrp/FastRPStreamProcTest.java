@@ -120,4 +120,64 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
         }
     }
+<<<<<<< HEAD
+||||||| parent of 503b57238... Rename nodeFeatureDimension -> propertyDimension
+
+    @Test
+    void shouldComputeWithWeightAndFeatures() {
+        int embeddingSize = 128;
+        int nodeFeatureDimension = 127;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withNodeLabel("Node2")
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("weight")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .algo("gds.alpha.randomProjection")
+            .streamMode()
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("nodeFeatureDimension", nodeFeatureDimension)
+            .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("nodePropertyNames", List.of("f1", "f2"))
+            .yields();
+
+        List<List<Float>> embeddings = new ArrayList<>(3);
+        runQueryWithRowConsumer(query, row -> {
+            embeddings.add((List<Float>) row.get("embedding"));
+        });
+
+        for (int i = 0; i < 128; i++) {
+            assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
+        }
+    }
+=======
+
+    @Test
+    void shouldComputeWithWeightAndFeatures() {
+        int embeddingSize = 128;
+        int propertyDimension = 127;
+        String query = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withNodeLabel("Node2")
+            .withRelationshipType("REL2")
+            .withRelationshipProperty("weight")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .algo("gds.alpha.randomProjection")
+            .streamMode()
+            .addParameter("embeddingSize", embeddingSize)
+            .addParameter("propertyDimension", propertyDimension)
+            .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("nodePropertyNames", List.of("f1", "f2"))
+            .yields();
+
+        List<List<Float>> embeddings = new ArrayList<>(3);
+        runQueryWithRowConsumer(query, row -> {
+            embeddings.add((List<Float>) row.get("embedding"));
+        });
+
+        for (int i = 0; i < 128; i++) {
+            assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);
+        }
+    }
+>>>>>>> 503b57238... Rename nodeFeatureDimension -> propertyDimension
 }
