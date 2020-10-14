@@ -19,30 +19,78 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
+    private final double beta = 1d;
+    private final Random random;
 
-    public WeightedNeighborhoodSampler() {}
+    public WeightedNeighborhoodSampler() {
+        this.random = new Random();
+    }
 
-    @Override
     public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState) {
-        var positiveNeighbors = BoundedLongPriorityQueue.max((int) numberOfSamples);
+        AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
+        AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
+        List<Long> neighbors = new ArrayList<>();
+
+        Pair<Double, Double> minMax = minMax(graph, nodeId);
+        double min = minMax.getOne();
+        double max = minMax.getTwo();
+
         graph.concurrentCopy().forEachRelationship(
             nodeId,
-            0.0,
+            1.0d,
             (source, target, weight) -> {
-                // do something and fill in the Qs
-                positiveNeighbors.offer(target, weight);
+                if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                    return false;
+                }
+
+                double probability = (min == max) ?
+                    randomDouble(randomState, source, target, graph.nodeCount()) :
+                    (1.0 - Math.pow((weight - min) / (max - min), beta));
+
+                if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                    neighbors.add(target);
+                    remainingToSample.decrementAndGet();
+                }
                 return true;
             }
         );
 
-        return positiveNeighbors.elements().boxed().collect(Collectors.toList());
+        return neighbors;
+    }
+
+    private double randomDouble(long randomState, long source, long target, long nodeCount) {
+        random.setSeed(randomState + source + nodeCount * target);
+        return random.nextDouble();
+    }
+
+    private Pair<Double, Double> minMax(Graph graph, long nodeId) {
+        var maxQ = BoundedLongPriorityQueue.max(1);
+        var minQ = BoundedLongPriorityQueue.min(1);
+        graph.concurrentCopy().forEachRelationship(
+            nodeId,
+            1.0d,
+            (source, target, weight) -> {
+                maxQ.offer(target, weight);
+                minQ.offer(target, weight);
+                return true;
+            }
+        );
+
+        var min = minQ.priorities().max().orElse(0D);
+        var max = maxQ.priorities().min().orElse(0D);
+
+        return Tuples.pair(min, max);
     }
 }

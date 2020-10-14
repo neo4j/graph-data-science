@@ -65,13 +65,13 @@ public class GraphSageModelWeightedTrainer {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
-    private final boolean useWeights;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
 
     public GraphSageModelWeightedTrainer(Graph graph, GraphSageWeightedTrainConfig config, Log log) {
 
-        this.useWeights = config.useWeights();
+        boolean useWeights = config.useWeights();
 
-        RelationshipWeightsFunction relationshipWeightsFunction = useWeights ?
+        relationshipWeightsFunction = useWeights ?
             graph::relationshipProperty :
             (source, target, defaultValue) -> 1.0d;
 
@@ -229,9 +229,8 @@ public class GraphSageModelWeightedTrainer {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
-                // TODO: find how to randomise these???
-                // Here we are going to sample the highest "ranking" neighbors with respect of relationship weight.
                 var samples = new WeightedNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
+
                 if (samples.size() == 1) {
                     currentNode.set(samples.get(0));
                 } else {
