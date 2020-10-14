@@ -171,6 +171,18 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     }
 
     @Test
+    @Disabled("KNN requires a node weight property")
+    @Override
+    public void testEmptyNodeWeightPropertyValues() {
+    }
+
+    @Test
+    @Disabled("KNN requires a node weight property")
+    @Override
+    public void testTrimmedToNullNodeWeightProperty() {
+    }
+
+    @Test
     void failOnInvalidConfigurationParams() {
         var configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
         applyOnProcedure(proc -> assertThatExceptionOfType(IllegalArgumentException.class)

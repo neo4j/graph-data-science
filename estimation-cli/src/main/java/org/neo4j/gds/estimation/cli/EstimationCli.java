@@ -210,6 +210,9 @@ public class EstimationCli implements Runnable {
             if (procedureName.startsWith("gds.fastRP")) {
                 actualConfig.put("embeddingDimension", 128);
             }
+            if (procedureName.startsWith("gds.beta.knn")) {
+                actualConfig.put("nodeWeightProperty", "ESTIMATE_FAKE_NODE_WEIGHT_PROPERTY");
+            }
             if (procedureName.equals("gds.nodeSimilarity.write.estimate") || procedureName.equals("gds.beta.knn.write.estimate")) {
                 actualConfig.put("writeRelationshipType", "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
             }

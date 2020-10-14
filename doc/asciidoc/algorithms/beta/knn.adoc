@@ -315,6 +315,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.beta.knn.write.estimate('myGraph', {
+  nodeWeightProperty: 'age',
   writeRelationshipType: 'SIMILAR',
   writeProperty: 'score',
   topK: 1

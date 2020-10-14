@@ -374,15 +374,27 @@ final class EstimationCliTest {
 
             runEstimation(
                 new KnnMutateProc()::estimateMutate,
+                "nodeWeightProperty",
+                "foo",
                 "mutateProperty",
                 "foo",
                 "mutateRelationshipType",
                 "bar"
             ),
-            runEstimation(new KnnStatsProc()::estimateStats),
-            runEstimation(new KnnStreamProc()::estimate),
+            runEstimation(
+                new KnnStatsProc()::estimateStats,
+                "nodeWeightProperty",
+                "foo"
+            ),
+            runEstimation(
+                new KnnStreamProc()::estimate,
+                "nodeWeightProperty",
+                "foo"
+            ),
             runEstimation(
                 new KnnWriteProc()::estimateWrite,
+                "nodeWeightProperty",
+                "foo",
                 "writeProperty",
                 "foo",
                 "writeRelationshipType",

@@ -38,23 +38,8 @@ class KnnFactoryTest {
 
     @ParameterizedTest
     @ValueSource(longs = {1L, 10L, 100L, 10_000L})
-    void memoryEstimation(long nodeCount) {
-        var config = createConfig().build();
-        var boundedK = config.boundedK(nodeCount);
-        var sampledK = config.sampledK(nodeCount);
-
-        MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
-        MemoryRange actual = estimate.memoryUsage();
-
-        assertEstimation(nodeCount, 24, sizeOfObjectArray(nodeCount), boundedK, sampledK, actual);
-    }
-
-    @ParameterizedTest
-    @ValueSource(longs = {1L, 10L, 100L, 10_000L})
     void memoryEstimationWithNodeProperty(long nodeCount) {
-        var config = createConfig().nodeWeightProperty("knn").build();
+        var config = knnConfig();
         var boundedK = config.boundedK(nodeCount);
         var sampledK = config.sampledK(nodeCount);
 
@@ -64,30 +49,12 @@ class KnnFactoryTest {
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(nodeCount, 24, sizeOfObjectArray(nodeCount), boundedK, sampledK, actual);
-    }
-
-    @ParameterizedTest
-    @ValueSource(longs = {1000000000L, 100000000000L})
-    void memoryEstimationLargePages(long nodeCount) {
-        var config = createConfig().build();
-        var boundedK = config.boundedK(nodeCount);
-        var sampledK = config.sampledK(nodeCount);
-
-        MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
-        MemoryRange actual = estimate.memoryUsage();
-
-        int pageSize = 16384;
-        int numPages = (int) ceilDiv(nodeCount, 16384);
-        var sizeOfHugeArray = sizeOfObjectArray(numPages) + numPages * sizeOfObjectArray(pageSize);
-        assertEstimation(nodeCount, 32, sizeOfHugeArray, boundedK, sampledK, actual);
     }
 
     @ParameterizedTest
     @ValueSource(longs = {1000000000L, 100000000000L})
     void memoryEstimationLargePagesWithProperty(long nodeCount) {
-        var config = createConfig().nodeWeightProperty("knn").build();
+        var config = knnConfig();
         var boundedK = config.boundedK(nodeCount);
         var sampledK = config.sampledK(nodeCount);
 
@@ -128,8 +95,8 @@ class KnnFactoryTest {
         assertEquals(expectedMax, actual.max);
     }
 
-    private ImmutableKnnBaseConfig.Builder createConfig() {
-        return ImmutableKnnBaseConfig.builder();
+    private KnnBaseConfig knnConfig() {
+        return ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").build();
     }
 
 

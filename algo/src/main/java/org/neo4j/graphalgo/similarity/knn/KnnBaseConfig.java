@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -30,6 +31,11 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig {
+
+    @NotNull
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Override
+    String nodeWeightProperty();
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)

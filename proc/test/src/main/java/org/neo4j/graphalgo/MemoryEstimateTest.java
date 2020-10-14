@@ -88,7 +88,7 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
                     Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.empty()
                         .withNumber("nodeCount", 100_000_000L)
                         .withNumber("relationshipCount", 20_000_000_000L))
-                        .withoutAny(List.of("nodeWeightProperty", "nodeProperties"))
+                        .withoutEntry("nodeProperties")
                         .toMap();
                     try {
                         Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());

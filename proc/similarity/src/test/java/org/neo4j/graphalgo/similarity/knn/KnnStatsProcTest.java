@@ -103,6 +103,7 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         String query = queryBuilder
             .algo("gds", "beta", "knn")
             .statsMode()
+            .addParameter("nodeWeightProperty", "knn")
             .yields();
 
         List<String> forbiddenResultColumns = List.of(

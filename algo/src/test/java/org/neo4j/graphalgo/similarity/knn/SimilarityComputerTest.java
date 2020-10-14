@@ -47,18 +47,6 @@ import static org.assertj.core.api.Assertions.within;
 class SimilarityComputerTest {
 
     @Property
-    void defaultIdSimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        var sim = SimilarityComputer.DEFAULT_SIMILARITY_COMPUTER;
-        assertThat(sim.similarity(id, id)).isEqualTo(1.0);
-    }
-
-    @Property
-    void defaultIdSimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        var sim = SimilarityComputer.DEFAULT_SIMILARITY_COMPUTER;
-        assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
-    }
-
-    @Property
     void doublePropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
         NodeProperties props = (DoubleNodeProperties) nodeId -> Math.exp(Math.log1p(nodeId / 42.0));
         var sim = SimilarityComputer.ofDoubleProperty(props);

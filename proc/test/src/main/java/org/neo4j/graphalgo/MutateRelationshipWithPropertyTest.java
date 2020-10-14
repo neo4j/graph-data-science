@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
@@ -67,6 +68,27 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         relationshipProjections().projections().forEach((relationshipType, projection)->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
+        CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
+            "nodeLabels",
+            Collections.singletonList("A")
+        );
+        Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+        var nodeWeightProperty = config.get("nodeWeightProperty");
+        if (nodeWeightProperty != null) {
+            var nodeProperty = String.valueOf(nodeWeightProperty);
+            runQuery(
+                graphDb(),
+                "CALL db.createProperty($prop)",
+                Map.of("prop", nodeWeightProperty)
+            );
+            storeLoaderBuilder.addNodeProperty(
+                ImmutablePropertyMapping.builder()
+                    .propertyKey(nodeProperty)
+                    .defaultValue(DefaultValue.of(DefaultValue.DOUBLE_DEFAULT_FALLBACK))
+                    .build()
+            );
+        }
+
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
 
@@ -74,13 +96,6 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
             getProcedureMethods(procedure)
                 .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
                 .forEach(mutateMethod -> {
-                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
-                        "nodeLabels",
-                        Collections.singletonList("A")
-                    );
-
-                    Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
-                    config.remove("nodeWeightProperty");
                     try {
                         mutateMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {

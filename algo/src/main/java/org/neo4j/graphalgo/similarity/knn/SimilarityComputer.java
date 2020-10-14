@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodePropertyContainer;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.Intersections;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -36,7 +38,13 @@ public interface SimilarityComputer {
 
     double similarity(long firstNodeId, long secondNodeId);
 
-    SimilarityComputer DEFAULT_SIMILARITY_COMPUTER = new IdSimilarityComputer();
+    static SimilarityComputer ofProperty(NodePropertyContainer graph, String propertyName) {
+        var nodeProperties = Objects.requireNonNull(
+            graph.nodeProperties(propertyName),
+            () -> formatWithLocale("The property `%s` has not been loaded", propertyName)
+        );
+        return ofProperty(nodeProperties, propertyName);
+    }
 
     static SimilarityComputer ofProperty(NodeProperties nodeProperties, String propertyName) {
         switch (nodeProperties.valueType()) {
@@ -77,15 +85,6 @@ public interface SimilarityComputer {
 
     static SimilarityComputer ofLongArrayProperty(NodeProperties nodeProperties) {
         return new LongArrayPropertySimilarityComputer(nodeProperties);
-    }
-}
-
-final class IdSimilarityComputer implements SimilarityComputer {
-    @Override
-    public double similarity(long firstNodeId, long secondNodeId) {
-        // we don't have Long.MIN_VALUE as id, so this is fine
-        var abs = Math.abs(firstNodeId - secondNodeId);
-        return 1.0 / (1.0 + abs);
     }
 }
 

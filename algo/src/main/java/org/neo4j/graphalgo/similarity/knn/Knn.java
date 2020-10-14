@@ -32,8 +32,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.similarity.SimilarityResult;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
@@ -56,14 +54,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         this(
             graph.nodeCount(),
             config,
-            Optional.ofNullable(config.nodeWeightProperty())
-                .map(property -> {
-                    var nodeProperties = Objects.requireNonNull(
-                        graph.nodeProperties(property),
-                        () -> formatWithLocale("The property `%s` has not been loaded", property)
-                    );
-                    return SimilarityComputer.ofProperty(nodeProperties, property);
-                }).orElse(SimilarityComputer.DEFAULT_SIMILARITY_COMPUTER),
+            SimilarityComputer.ofProperty(graph, config.nodeWeightProperty()),
             context
         );
     }

@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -331,8 +332,24 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
                     configMap.remove(NODE_PROPERTIES_KEY);
                     configMap.remove(RELATIONSHIP_PROPERTIES_KEY);
-                    configMap.remove("nodeWeightProperty");
                     configMap.remove("relationshipWeightProperty");
+
+                    var nodeWeightProperty = configMap.get("nodeWeightProperty");
+                    if (nodeWeightProperty != null) {
+                        var nodeProperty = String.valueOf(nodeWeightProperty);
+                        runQuery(
+                            graphDb(),
+                            "CALL db.createProperty($prop)",
+                            Map.of("prop", nodeWeightProperty)
+                        );
+                        configMap.put(NODE_PROPERTIES_KEY, Map.ofEntries(ImmutablePropertyMapping
+                            .builder()
+                            .propertyKey(nodeProperty)
+                            .defaultValue(DefaultValue.of(DefaultValue.DOUBLE_DEFAULT_FALLBACK))
+                            .build()
+                            .toObject(false)
+                        ));
+                    }
 
                     try {
                         Stream<?> result = (Stream<?>) method.invoke(proc, configMap, Collections.emptyMap());
