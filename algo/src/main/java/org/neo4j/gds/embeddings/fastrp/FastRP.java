@@ -204,11 +204,13 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         for (int i = 0; i < embeddingDimension; i++) {
             randomVector[i] = computeRandomEntry(random, probability, entryValue);
         }
-        for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
-            for (int j = 0; j < nodePropertyNames.size(); j++) {
-                String feature = nodePropertyNames.get(j);
-                double featureValue = graph.nodeProperties(feature).doubleValue(nodeId);
-                randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
+        for (int j = 0; j < nodePropertyNames.size(); j++) {
+            String feature = nodePropertyNames.get(j);
+            double featureValue = graph.nodeProperties(feature).doubleValue(nodeId);
+            if (featureValue != 0.0D) {
+                for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
+                    randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
+                }
             }
         }
         return randomVector;
