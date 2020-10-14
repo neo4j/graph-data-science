@@ -23,6 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -36,15 +37,17 @@ public class GraphSageEmbeddingsGenerator {
     private final BatchProvider batchProvider;
     private final int concurrency;
     private final FeatureFunction featureFunction;
+    private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
         int batchSize,
         int concurrency,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this(layers, batchSize, concurrency, GraphSageHelper::features, tracker);
+        this(layers, batchSize, concurrency, GraphSageHelper::features, progressLogger, tracker);
     }
 
     public GraphSageEmbeddingsGenerator(
@@ -52,12 +55,14 @@ public class GraphSageEmbeddingsGenerator {
         int batchSize,
         int concurrency,
         FeatureFunction featureFunction,
+        ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.layers = layers;
         this.batchProvider = new BatchProvider(batchSize);
         this.concurrency = concurrency;
         this.featureFunction = featureFunction;
+        this.progressLogger = progressLogger;
         this.tracker = tracker;
     }
 
@@ -71,6 +76,7 @@ public class GraphSageEmbeddingsGenerator {
             tracker
         );
 
+        progressLogger.logStart();
         parallelStreamConsume(
             batchProvider.stream(graph),
             concurrency,
@@ -88,8 +94,10 @@ public class GraphSageEmbeddingsGenerator {
                     );
                     result.set(batch[nodeIndex], nodeEmbedding);
                 }
+                progressLogger.logProgress();
             })
         );
+        progressLogger.logFinish();
 
         return result;
     }

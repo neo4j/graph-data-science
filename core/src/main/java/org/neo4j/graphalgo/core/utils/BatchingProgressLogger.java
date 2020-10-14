@@ -28,6 +28,8 @@ import java.util.function.Supplier;
 public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
+    public static final ProgressLoggerFactory FACTORY = BatchingProgressLogger::new;
+
     private final Log log;
     private final int concurrency;
     private long taskVolume;

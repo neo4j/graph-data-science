@@ -48,6 +48,22 @@ public interface ProgressLogger {
         logMessage(() -> msg);
     }
 
+    default void logStart() {
+        logStart("");
+    }
+
+    default void logStart(String message) {
+        logMessage((message + " :: Start").trim());
+    }
+
+    default void logFinish() {
+        logFinish("");
+    }
+
+    default void logFinish(String message) {
+        logMessage((message + " :: Finished").trim());
+    }
+
     long reset(long newTaskVolume);
 
     Log getLog();
@@ -104,4 +120,13 @@ public interface ProgressLogger {
 
         }
     };
+
+    interface ProgressLoggerFactory {
+        ProgressLogger newLogger(
+            Log log,
+            long taskVolume,
+            String task,
+            int concurrency
+        );
+    }
 }

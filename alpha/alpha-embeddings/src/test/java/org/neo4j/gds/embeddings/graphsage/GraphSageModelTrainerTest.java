@@ -24,23 +24,29 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainAlgorithmFactory;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphSageModelTrainerTest {
 
@@ -84,7 +90,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
@@ -111,7 +117,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
@@ -142,6 +148,39 @@ class GraphSageModelTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerSelfWeights);
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerNeighborsWeights);
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, secondLayerBias);
+    }
+
+    @Test
+    void testLogging() {
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .degreeAsProperty(true)
+            .embeddingDimension(EMBEDDING_DIMENSION)
+            .modelName("model")
+            .epochs(1)
+            .maxIterations(1)
+            .build();
+
+        var algo = new GraphSageTrainAlgorithmFactory(TestProgressLogger.FACTORY).build(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            NullLog.getInstance()
+        );
+        algo.compute();
+
+        var messagesInOrder = ((TestProgressLogger) algo.getProgressLogger()).getMessages(INFO);
+
+        assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .containsExactly(
+                "GraphSageTrain :: Start",
+                "GraphSageTrain :: Epoch 1 :: Start",
+                "GraphSageTrain :: Iteration 1 :: Start",
+                "GraphSageTrain :: Iteration 1 :: Finished",
+                "GraphSageTrain :: Epoch 1 :: Finished",
+                "GraphSageTrain :: Finished"
+            );
     }
 
 }

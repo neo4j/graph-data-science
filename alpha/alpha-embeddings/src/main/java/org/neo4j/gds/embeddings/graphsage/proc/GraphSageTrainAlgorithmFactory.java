@@ -19,33 +19,48 @@
  */
 package org.neo4j.gds.embeddings.graphsage.proc;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
-public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
+public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
+
+    public GraphSageTrainAlgorithmFactory() {
+        super();
+    }
 
     @Override
-    public GraphSageTrain build(
+    protected long taskVolume(Graph graph, GraphSageTrainConfig configuration) {
+        return 1;
+    }
+
+    @Override
+    protected String taskName() {
+        return GraphSageTrain.class.getSimpleName();
+    }
+
+    @Override
+    protected GraphSageTrain build(
         Graph graph,
         GraphSageTrainConfig configuration,
         AllocationTracker tracker,
-        Log log
+        ProgressLogger progressLogger
     ) {
-        return new GraphSageTrain(graph, configuration, tracker, log);
+        return new GraphSageTrain(graph, configuration, tracker, progressLogger);
     }
 
     @Override
@@ -102,5 +117,10 @@ public final class GraphSageTrainAlgorithmFactory implements AlgorithmFactory<Gr
             .endField()
             .endField()
             .build();
+    }
+
+    @TestOnly
+    public GraphSageTrainAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
+        super(factory);
     }
 }

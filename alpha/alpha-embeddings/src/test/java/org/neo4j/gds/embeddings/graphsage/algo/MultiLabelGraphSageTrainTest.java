@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -61,8 +61,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            AllocationTracker.empty(),
-            new TestLog()
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -74,8 +74,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            AllocationTracker.empty(),
-            new TestLog()
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
