@@ -29,6 +29,8 @@ import net.jqwik.api.Provide;
 import net.jqwik.api.constraints.Positive;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
@@ -37,6 +39,7 @@ import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -157,6 +160,23 @@ class SimilarityComputerTest {
         var sim = SimilarityComputer.ofDoubleArrayProperty(props);
 
         assertThat(sim.similarity(0, 1)).isCloseTo(1.0D, within(0.05));
+    }
+
+    @ParameterizedTest
+    @MethodSource("nonFiniteSimilarities")
+    void safeSimilaritySwallowsNonFiniteValues(SimilarityComputer sim) {
+        assertThat(sim.similarity(42, 1337)).isNaN();
+        assertThat(sim.safeSimilarity(42, 1337)).isZero();
+    }
+
+    static Stream<SimilarityComputer> nonFiniteSimilarities() {
+        return Stream.of(
+            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.NaN),
+            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.POSITIVE_INFINITY),
+            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.NEGATIVE_INFINITY),
+            SimilarityComputer.ofFloatArrayProperty((FloatArrayNodeProperties) nodeId -> new float[]{}),
+            SimilarityComputer.ofDoubleArrayProperty((DoubleArrayNodeProperties) nodeId -> new double[]{})
+        );
     }
 
     @Provide("differentValues")

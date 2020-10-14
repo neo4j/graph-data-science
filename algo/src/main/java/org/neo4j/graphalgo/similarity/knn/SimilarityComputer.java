@@ -28,6 +28,12 @@ import java.util.Arrays;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface SimilarityComputer {
+
+    default double safeSimilarity(long firstNodeId, long secondNodeId) {
+        double similarity = similarity(firstNodeId, secondNodeId);
+        return Double.isFinite(similarity) ? similarity : 0.0;
+    }
+
     double similarity(long firstNodeId, long secondNodeId);
 
     SimilarityComputer DEFAULT_SIMILARITY_COMPUTER = new IdSimilarityComputer();
