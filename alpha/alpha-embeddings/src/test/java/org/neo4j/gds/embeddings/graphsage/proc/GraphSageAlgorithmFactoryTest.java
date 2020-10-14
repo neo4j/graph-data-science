@@ -60,8 +60,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -296,7 +296,7 @@ class GraphSageAlgorithmFactoryTest {
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
-            pair(1, TEMPORARY),
+            pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
             pair(3, "instance"),
@@ -352,12 +352,12 @@ class GraphSageAlgorithmFactoryTest {
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
-            pair(1, PERSISTENT),
+            pair(1, RESIDENT_MEMORY),
             pair(2, "resultFeatures"),
             pair(3, "instance"),
             pair(3, "data"),
             pair(3, "pages"),
-            pair(1, TEMPORARY),
+            pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
             pair(3, "instance"),
@@ -536,7 +536,7 @@ class GraphSageAlgorithmFactoryTest {
         assertEquals(6861816, actual.min);
         assertEquals(18593016, actual.max);
 
-        assertThat(actualTree.persistentMemory())
+        assertThat(actualTree.residentMemory())
             .isPresent()
             .map(MemoryTree::memoryUsage)
             .contains(MemoryRange.of(5320040L));

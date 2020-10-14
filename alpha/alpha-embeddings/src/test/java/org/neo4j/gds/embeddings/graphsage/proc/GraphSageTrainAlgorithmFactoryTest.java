@@ -52,8 +52,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -321,9 +321,9 @@ class GraphSageTrainAlgorithmFactoryTest {
                 .max(evaluateLossMemory)
                 .add(MemoryRange.of(initialFeaturesMemory));
 
-        var expectedPersistentMemory = MemoryRange.of(layersMemory);
+        var expectedResidentMemory = MemoryRange.of(layersMemory);
         var expectedPeakMemory = trainMemory
-            .add(expectedPersistentMemory)
+            .add(expectedResidentMemory)
             .add(MemoryRange.of(40L)); // For GraphSage.class
 
         var actualEstimation = new GraphSageTrainAlgorithmFactory()
@@ -331,10 +331,10 @@ class GraphSageTrainAlgorithmFactoryTest {
             .estimate(GraphDimensions.of(nodeCount), concurrency);
 
         assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
-        assertThat(actualEstimation.persistentMemory())
+        assertThat(actualEstimation.residentMemory())
             .isPresent()
             .map(MemoryTree::memoryUsage)
-            .contains(expectedPersistentMemory);
+            .contains(expectedResidentMemory);
     }
 
     @Test
@@ -354,11 +354,11 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSageTrain"),
-            pair(1, PERSISTENT),
+            pair(1, RESIDENT_MEMORY),
             pair(2, "weights"),
             pair(3, "layer 1"),
             pair(3, "layer 2"),
-            pair(1, TEMPORARY),
+            pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
             pair(3, "instance"),

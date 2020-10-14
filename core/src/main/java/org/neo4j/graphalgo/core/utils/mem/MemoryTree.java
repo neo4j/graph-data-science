@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.PERSISTENT;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 
 /**
  * A tree shaped description of an object that has resources residing in memory.
@@ -51,10 +51,10 @@ public interface MemoryTree {
         return Collections.emptyList();
     }
 
-    default Optional<MemoryTree> persistentMemory() {
+    default Optional<MemoryTree> residentMemory() {
         return components()
             .stream()
-            .filter(component -> component.description().equals(PERSISTENT))
+            .filter(component -> component.description().equals(RESIDENT_MEMORY))
             .findFirst();
     }
 
