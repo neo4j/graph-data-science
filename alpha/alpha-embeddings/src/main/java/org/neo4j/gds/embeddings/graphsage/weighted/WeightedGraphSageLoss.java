@@ -27,7 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.stream.IntStream;
 
@@ -38,15 +37,16 @@ public class WeightedGraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Variable<Matrix> combinedEmbeddings;
     private final int negativeSamplingFactor;
 
+    // TODO: Pass this as configuration parameter.
     private final double alpha = 1d;
 
-    WeightedGraphSageLoss(Graph graph, Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
+    WeightedGraphSageLoss(RelationshipWeightsFunction relationshipWeightsFunction, Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
-        this.graph = graph;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;
     }
@@ -68,7 +68,7 @@ public class WeightedGraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     private double relationshipWeightFactor(int nodeId, int positiveNodeId) {
-        double relationshipWeight = graph.relationshipProperty(nodeId, positiveNodeId, 1d);
+        double relationshipWeight = relationshipWeightsFunction.apply((long) nodeId, (long) positiveNodeId, 1d);
         if(Double.isNaN(relationshipWeight)) {
             relationshipWeight = 1d;
         }

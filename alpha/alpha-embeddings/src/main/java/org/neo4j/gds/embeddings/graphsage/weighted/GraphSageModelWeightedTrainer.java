@@ -214,7 +214,11 @@ public class GraphSageModelWeightedTrainer {
             GraphSageHelper::features
         );
 
-        Variable<Scalar> lossFunction = new WeightedGraphSageLoss(graph, embeddingVariable, negativeSampleWeight);
+        Variable<Scalar> lossFunction = new WeightedGraphSageLoss(
+            relationshipWeightsFunction,
+            embeddingVariable,
+            negativeSampleWeight
+        );
 
         return new PassthroughVariable<>(lossFunction);
     }

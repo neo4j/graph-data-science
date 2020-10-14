@@ -79,7 +79,7 @@ class WeightedGraphSageLossTest extends GraphSageBaseTest implements FiniteDiffe
             3, 3
         );
 
-        Variable<Scalar> lossVar = new WeightedGraphSageLoss(graph, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new WeightedGraphSageLoss(graph::relationshipProperty, combinedEmbeddings, Q);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -98,7 +98,10 @@ class WeightedGraphSageLossTest extends GraphSageBaseTest implements FiniteDiffe
             3, 3
         ));
 
-        finiteDifferenceShouldApproximateGradient(combinedEmbeddings, new WeightedGraphSageLoss(graph, combinedEmbeddings, 5));
+        finiteDifferenceShouldApproximateGradient(
+            combinedEmbeddings,
+            new WeightedGraphSageLoss(graph::relationshipProperty, combinedEmbeddings, 5)
+        );
 
     }
 
