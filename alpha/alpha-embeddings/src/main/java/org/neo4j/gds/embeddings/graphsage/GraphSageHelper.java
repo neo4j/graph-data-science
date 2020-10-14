@@ -56,7 +56,7 @@ public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    static Variable<Matrix> embeddings(
+    public static Variable<Matrix> embeddings(
         Graph graph,
         long[] nodeIds,
         HugeObjectArray<double[]> features,

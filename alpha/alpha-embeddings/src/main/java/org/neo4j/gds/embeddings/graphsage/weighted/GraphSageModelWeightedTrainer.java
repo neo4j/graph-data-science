@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.weighted;
 
 import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 import org.neo4j.gds.embeddings.graphsage.BatchProvider;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -49,7 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.embeddings.graphsage.weighted.GraphSageWeightedHelper.embeddings;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -59,7 +60,6 @@ public class GraphSageModelWeightedTrainer {
     private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
-    private final int negativeSampleWeight;
     private final int concurrency;
     private final int epochs;
     private final int maxIterations;
@@ -74,7 +74,6 @@ public class GraphSageModelWeightedTrainer {
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
-        this.negativeSampleWeight = config.negativeSampleWeight();
         this.concurrency = config.concurrency();
         this.epochs = config.epochs();
         this.maxIterations = config.maxIterations();
@@ -199,7 +198,13 @@ public class GraphSageModelWeightedTrainer {
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers);
+        Variable<Matrix> embeddingVariable = embeddings(
+            graph,
+            totalBatch,
+            features,
+            this.layers,
+            GraphSageHelper::features
+        );
 
         Variable<Scalar> lossFunction = new HingeLoss(embeddingVariable);
 

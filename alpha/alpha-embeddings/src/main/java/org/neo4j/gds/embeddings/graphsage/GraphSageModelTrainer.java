@@ -235,6 +235,7 @@ public class GraphSageModelTrainer {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
+                // TODO: check if it really is necessary to create a new Sampler object every time
                 List<Long> samples = new UniformNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
                 if (samples.size() == 1) {
                     currentNode.set(samples.get(0));
