@@ -17,27 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Optional;
+import java.util.List;
 
-@ValueClass
-@Configuration
-public interface LayerConfig {
-    int rows();
-    int cols();
+public interface WeightedLayer {
     long sampleSize();
 
-    Optional<Integer> bias();
+    Aggregator aggregator();
 
-    Aggregator.AggregatorType aggregatorType();
+    long randomState();
 
-    ActivationFunction activationFunction();
+    void generateNewRandomState();
 
-    static ImmutableLayerConfig.Builder builder() {
-        return ImmutableLayerConfig.builder();
+    NeighborhoodSampler sampler();
+
+    default List<Weights<? extends Tensor<?>>> weights() {
+        return aggregator().weights();
+    }
+
+    default List<Long> neighborhoodFunction(Graph graph, long nodeId) {
+        return sampler().sample(graph, nodeId, sampleSize(), randomState());
     }
 }

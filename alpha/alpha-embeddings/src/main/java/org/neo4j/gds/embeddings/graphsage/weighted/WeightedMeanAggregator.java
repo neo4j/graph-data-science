@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithWeights;
@@ -36,13 +35,13 @@ import java.util.function.Function;
 /*
     hkv ← σ(W · MEAN({h(k−1)v } ∪ {h(k−1)u, ∀u ∈ N (v)}
 */
-public class WeightedAggregator implements Aggregator {
+public class WeightedMeanAggregator implements Aggregator {
 
     private final Graph graph;
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    WeightedAggregator(Graph graph, Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
+    WeightedMeanAggregator(Graph graph, Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
         this.graph = graph;
         this.weights = weights;
         this.activationFunction = activationFunction;
@@ -57,8 +56,8 @@ public class WeightedAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph, int[][] adjacencyMatrix, int[] selfAdjacency) {
-        Variable<Matrix> weighted = new MatrixMultiplyWithWeights(previousLayerRepresentations, graph, subGraph, adjacencyMatrix, selfAdjacency);
-        Variable<Matrix> means = new MultiMean(weighted, adjacencyMatrix, selfAdjacency);
+        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithWeights(previousLayerRepresentations, graph, subGraph, adjacencyMatrix, selfAdjacency);
+        Variable<Matrix> means = new MultiMean(weightedPreviousLayerRepresentations, adjacencyMatrix, selfAdjacency);
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
     }

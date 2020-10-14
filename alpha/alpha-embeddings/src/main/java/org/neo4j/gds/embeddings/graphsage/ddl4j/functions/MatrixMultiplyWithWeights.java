@@ -36,7 +36,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
     private final int cols;
 
     public MatrixMultiplyWithWeights(
-        Variable<?> parent,
+        Variable<Matrix> parent,
         Graph graph,
         SubGraph subGraph,
         int[][] adjacency,
@@ -65,7 +65,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
+                double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
                 for (int col = 0; col < cols; col++) {
                     weightedData[sourceOffset + col] += parentData[targetOffset + col] * relationshipWeight;
                 }
@@ -77,11 +77,35 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
 
     @Override
     public boolean requireGradient() {
-        return false;
+        return true;
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        throw new UnsupportedOperationException();
+        Tensor<?> result = ctx.data(parent).zeros();
+
+        double[] weightedGradient = ctx.gradient(this).data();
+
+        for (int col = 0; col < cols; col++) {
+            for (int row = 0; row < rows; row++) {
+                int sourceId = selfAdjacency[row];
+                long originalSourceId = subGraph.nextNodes[sourceId];
+
+                int gradientElementIndex = row * cols + col;
+                for (int neighbor : adjacency[row]) {
+                    long originalTargetId = subGraph.nextNodes[neighbor];
+                    int neighborElementIndex = neighbor * cols + col;
+                    double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
+                    double newValue = weightedGradient[gradientElementIndex] * relationshipWeight;
+                    result.addDataAt(
+                        neighborElementIndex,
+                        newValue
+                    );
+                }
+            }
+        }
+
+        return result;
+
     }
 }

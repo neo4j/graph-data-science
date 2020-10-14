@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
@@ -44,7 +43,7 @@ public final class GraphSageWeightedHelper {
 
     private GraphSageWeightedHelper() {}
 
-    static Variable<Matrix> embeddings(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, Layer[] layers) {
+    static Variable<Matrix> embeddings(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features, WeightedLayer[] layers) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -58,7 +57,7 @@ public final class GraphSageWeightedHelper {
         );
 
         for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
-            Layer layer = layers[layers.length - layerNr - 1];
+            WeightedLayer layer = layers[layers.length - layerNr - 1];
             previousLayerRepresentations = layer
                 .aggregator()
                 .aggregate(
@@ -68,6 +67,7 @@ public final class GraphSageWeightedHelper {
                     subGraphs.get(layerNr).selfAdjacency
                 );
         }
+
         return new NormalizeRows(previousLayerRepresentations);
     }
 

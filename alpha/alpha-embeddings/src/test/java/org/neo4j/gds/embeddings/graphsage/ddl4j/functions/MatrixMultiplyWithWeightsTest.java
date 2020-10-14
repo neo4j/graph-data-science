@@ -21,7 +21,9 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.Orientation;
@@ -38,21 +40,22 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest {
+class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
-    private static final String DB_CYPHER = "CREATE" +
-                              "  (u1:User { id: 0 })" +
-                              ", (u1:User { id: 1 })" +
-                              ", (d1:Dish { id: 2 })" +
-                              ", (d2:Dish { id: 3 })" +
-                              ", (d3:Dish { id: 4 })" +
-                              ", (d4:Dish { id: 5 })" +
-                              ", (u1)-[:ORDERED {times: 5}]->(d1)" +
-                              ", (u1)-[:ORDERED {times: 2}]->(d2)" +
-                              ", (u1)-[:ORDERED {times: 1}]->(d3)" +
-                              ", (u2)-[:ORDERED {times: 2}]->(d3)" +
-                              ", (u2)-[:ORDERED {times: 3}]->(d4)";
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (u1:User { id: 0 })" +
+        ", (u1:User { id: 1 })" +
+        ", (d1:Dish { id: 2 })" +
+        ", (d2:Dish { id: 3 })" +
+        ", (d3:Dish { id: 4 })" +
+        ", (d4:Dish { id: 5 })" +
+        ", (u1)-[:ORDERED {times: 5}]->(d1)" +
+        ", (u1)-[:ORDERED {times: 2}]->(d2)" +
+        ", (u1)-[:ORDERED {times: 1}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 2}]->(d3)" +
+        ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
     @Inject
     Graph graph;
@@ -106,4 +109,32 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest {
         assertThat(matrix.data()).isEqualTo(expected);
     }
 
+    @Test
+    void testGradient() {
+        long[] ids = new long[]{
+            idFunction.of("d1"),
+            idFunction.of("d2"),
+            idFunction.of("d3"),
+            idFunction.of("d4"),
+        };
+        NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
+            .streamRelationships(nodeId, 0.0D)
+            .mapToLong(RelationshipCursor::targetId)
+            .boxed()
+            .collect(Collectors.toList());
+        SubGraph subGraph = SubGraph.buildSubGraphs(ids, List.of(neighborhoodFunction), graph).get(0);
+
+        double[] userEmbeddingsData = new double[] {
+            1, 1, 1, // u1
+            1, 1, 1, // u2
+            1, 1, 1, // d1
+            1, 1, 1, // d2
+            1, 1, 1, // d3
+            1, 1, 1 // d4
+        };
+
+        Weights<Matrix> weights = new Weights<>(new Matrix(userEmbeddingsData, 6, 3));
+
+        finiteDifferenceShouldApproximateGradient(weights, new ElementSum(List.of(new MatrixMultiplyWithWeights(weights, graph, subGraph, subGraph.adjacency, subGraph.selfAdjacency))));
+    }
 }

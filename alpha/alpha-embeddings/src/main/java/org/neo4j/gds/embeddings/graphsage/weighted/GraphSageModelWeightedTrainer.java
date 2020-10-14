@@ -54,7 +54,7 @@ import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamCo
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelWeightedTrainer {
-    private final Layer[] layers;
+    private final WeightedLayer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
     private final double learningRate;
@@ -65,10 +65,10 @@ public class GraphSageModelWeightedTrainer {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageModelWeightedTrainer(Graph graph, GraphSageTrainConfig config, Log log) {
+    public GraphSageModelWeightedTrainer(Graph graph, GraphSageWeightedTrainConfig config, Log log) {
         this.layers = config.layerConfigs().stream()
             .map(layerConfig -> WeightedLayerFactory.createLayer(graph, layerConfig))
-            .toArray(Layer[]::new);
+            .toArray(WeightedLayer[]::new);
         this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
@@ -132,7 +132,7 @@ public class GraphSageModelWeightedTrainer {
         int epoch,
         int batchIndex
     ) {
-        for (Layer layer : layers) {
+        for (WeightedLayer layer : layers) {
             layer.generateNewRandomState();
         }
 
@@ -205,7 +205,7 @@ public class GraphSageModelWeightedTrainer {
             GraphSageHelper::features
         );
 
-        Variable<Scalar> lossFunction = new HingeLoss(embeddingVariable);
+        Variable<Scalar> lossFunction = new WeightedGraphSageLoss(graph, embeddingVariable, negativeSampleWeight);
 
         return new PassthroughVariable<>(lossFunction);
     }
@@ -264,9 +264,9 @@ public class GraphSageModelWeightedTrainer {
 
         Map<String, Double> epochLosses();
 
-        Layer[] layers();
+        WeightedLayer[] layers();
 
-        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, Layer[] layers) {
+        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, WeightedLayer[] layers) {
             return ImmutableModelTrainResult.builder()
                 .startLoss(startLoss)
                 .epochLosses(epochLosses)

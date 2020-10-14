@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration
-public interface LayerConfig {
+public interface WeightedLayerConfig {
     int rows();
     int cols();
     long sampleSize();
@@ -37,7 +36,7 @@ public interface LayerConfig {
 
     ActivationFunction activationFunction();
 
-    static ImmutableLayerConfig.Builder builder() {
-        return ImmutableLayerConfig.builder();
+    static ImmutableWeightedLayerConfig.Builder builder() {
+        return ImmutableWeightedLayerConfig.builder();
     }
 }
