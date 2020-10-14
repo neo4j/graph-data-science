@@ -107,7 +107,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             .perThread(
                 "concurrentBatches",
                 MemoryEstimations.builder().add(
-                    GraphSageHelper.embeddingsEstimation(config, config.batchSize(), nodeCount, false)
+                    GraphSageHelper.embeddingsEstimation(config, config.batchSize(), nodeCount, 0, false)
                 ).build()
             );
         if (!mutate) {

@@ -369,7 +369,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         var actualEstimation = new GraphSageTrainAlgorithmFactory()
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(nodeCount), concurrency);
+            .estimate(graphDimensions, concurrency);
 
         assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
         assertThat(actualEstimation.residentMemory())

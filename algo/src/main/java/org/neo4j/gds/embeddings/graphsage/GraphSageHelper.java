@@ -89,8 +89,11 @@ public final class GraphSageHelper {
         GraphSageTrainConfig config,
         long batchSize,
         long nodeCount,
+        int labelCount,
         boolean withGradientDescent
     ) {
+        var isMultiLabel = config.isMultiLabel();
+
         var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
@@ -135,13 +138,15 @@ public final class GraphSageHelper {
             var maxNodeCount = maxBatchNodeCounts.get(i + 1);
 
             if (i == 0) {
-                aggregatorsBuilder.fixed(
-                    "firstLayer",
-                    MemoryRange.of(
-                        sizeOfDoubleArray(minPreviousNodeCount * config.featuresSize()),
-                        sizeOfDoubleArray(maxPreviousNodeCount * config.featuresSize())
-                    )
+                var featureSize = config.featuresSize();
+                MemoryRange firstLayerMemory = MemoryRange.of(
+                    sizeOfDoubleArray(minPreviousNodeCount * featureSize),
+                    sizeOfDoubleArray(maxPreviousNodeCount * featureSize)
                 );
+                if (isMultiLabel) {
+                    firstLayerMemory.add(MemoryRange.of(sizeOfDoubleArray(featureSize)));
+                }
+                aggregatorsBuilder.fixed("firstLayer", firstLayerMemory);
             }
 
             Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
@@ -171,7 +176,20 @@ public final class GraphSageHelper {
         }
 
         computationGraphBuilder = computationGraphBuilder
-            .endField()
+            .endField();
+
+        if (isMultiLabel) {
+            var minFeatureFunction = sizeOfObjectArray(minBatchNodeCounts.get(0));
+            var maxFeatureFunction = sizeOfObjectArray(maxBatchNodeCounts.get(0));
+            var copyOfLabels = sizeOfObjectArray(labelCount);
+
+            computationGraphBuilder.fixed(
+                "multiLabelFeatureFunction",
+                MemoryRange.of(minFeatureFunction, maxFeatureFunction).add(MemoryRange.of(copyOfLabels))
+            );
+        }
+
+        computationGraphBuilder = computationGraphBuilder
             .startField("forward")
             .addComponentsOf(aggregatorsBuilder.build());
 
