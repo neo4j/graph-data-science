@@ -34,11 +34,10 @@ class CompositeRelationshipIterator {
     private final TransientAdjacencyList adjacencyList;
     private final TransientAdjacencyOffsets adjacencyOffsets;
     private final Map<String, TransientAdjacencyList> propertyLists;
-    private final Map<String, TransientAdjacencyOffsets> propertyOffsets;
+    private final ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsets;
 
     private final String[] propertyKeys;
     private final TransientAdjacencyList.DecompressingCursor cursorCache;
-    private final ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsetsCache;
     private final ObjectObjectMap<String, TransientAdjacencyList.Cursor> propertyCursorCache;
 
     CompositeRelationshipIterator(
@@ -46,6 +45,15 @@ class CompositeRelationshipIterator {
         TransientAdjacencyOffsets adjacencyOffsets,
         Map<String, TransientAdjacencyList> propertyLists,
         Map<String, TransientAdjacencyOffsets> propertyOffsets
+    ) {
+        this(adjacencyList, adjacencyOffsets, propertyLists, hppcCopy(propertyOffsets));
+    }
+
+    private CompositeRelationshipIterator(
+        TransientAdjacencyList adjacencyList,
+        TransientAdjacencyOffsets adjacencyOffsets,
+        Map<String, TransientAdjacencyList> propertyLists,
+        ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsets
     ) {
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -55,10 +63,14 @@ class CompositeRelationshipIterator {
         // create data structures for internal use
         this.propertyKeys = propertyLists.keySet().toArray(new String[0]);
         this.cursorCache = adjacencyList.rawDecompressingCursor();
-        this.propertyOffsetsCache = new ObjectObjectHashMap<>(propertyOffsets.size());
-        this.propertyOffsets.forEach(propertyOffsetsCache::put);
         this.propertyCursorCache = new ObjectObjectHashMap<>(propertyLists.size());
         this.propertyLists.forEach((key, list) -> this.propertyCursorCache.put(key, list.rawCursor()));
+    }
+
+    private static ObjectObjectMap<String, TransientAdjacencyOffsets> hppcCopy(Map<String, TransientAdjacencyOffsets> offsets) {
+        var map = new ObjectObjectHashMap<String, TransientAdjacencyOffsets>(offsets.size());
+        offsets.forEach(map::put);
+        return map;
     }
 
     CompositeRelationshipIterator concurrentCopy() {
@@ -84,7 +96,7 @@ class CompositeRelationshipIterator {
                 propertyKey,
                 TransientAdjacencyList.cursor(
                     propertyCursorCache.get(propertyKey),
-                    propertyOffsetsCache.get(propertyKey).get(sourceId)
+                    propertyOffsets.get(propertyKey).get(sourceId)
                 )
             );
         }
