@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
@@ -52,6 +53,7 @@ class GraphSageModelTrainerTest {
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_DIMENSION = 64;
 
+    @SuppressFBWarnings
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
