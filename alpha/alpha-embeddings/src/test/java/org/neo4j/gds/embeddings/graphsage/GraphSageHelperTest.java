@@ -42,15 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GraphSageHelperTest {
 
     @GdlGraph
-    private static final String GDL = "CREATE" +
-                                      "  (r1:Restaurant {dummyProperty: 5.0, numEmployees: 5.0, rating: 2.0})" +
-                                      ", (d1:Dish       {dummyProperty: 5.0, numIngredients: 3.0, rating: 5.0})" +
-                                      ", (c1:Customer   {dummyProperty: 5.0, numPurchases: 15.0}) " +
-                                      ", (r1)-[:SERVES]->(d1)" +
-                                      ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
+    private static final String GDL = GraphSageTestGraph.GDL;
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @ParameterizedTest(name = "{0}")
     @MethodSource({"parameters"})
@@ -64,18 +59,21 @@ class GraphSageHelperTest {
     }
 
     static Stream<Arguments> parameters() {
+        var singleLabelProperties = HugeObjectArray.newArray(
+            double[].class,
+            20,
+            AllocationTracker.empty()
+        );
+        singleLabelProperties.fill(new double[]{5.0});
+
         return Stream.of(
             Arguments.of(
                 "single label",
                 ImmutableGraphSageTrainConfig.builder()
                     .modelName("foo")
-                    .nodePropertyNames(Set.of("dummyProperty"))
+                    .nodePropertyNames(Set.of("dummyProp"))
                     .build(),
-                HugeObjectArray.of(
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0}
-                )
+                    singleLabelProperties
             ), Arguments.of(
                 "multi label",
                 ImmutableMultiLabelGraphSageTrainConfig.builder()
@@ -84,8 +82,27 @@ class GraphSageHelperTest {
                     .build(),
                 HugeObjectArray.of(
                     new double[]{5.0, 2.0},
-                    new double[]{3.0, 5.0},
-                    new double[]{15.0}
+                    new double[]{5.0, 2.0},
+                    new double[]{5.0, 2.0},
+                    new double[]{5.0, 2.0},
+
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+                    new double[]{5.0, 5.0},
+
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0},
+                    new double[]{5.0}
                 )
             )
         );

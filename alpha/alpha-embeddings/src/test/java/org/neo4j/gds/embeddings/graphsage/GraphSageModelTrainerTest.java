@@ -25,16 +25,14 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainAlgorithmFactory;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
@@ -48,31 +46,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
+@GdlExtension
 class GraphSageModelTrainerTest {
 
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_DIMENSION = 64;
 
+    @GdlGraph
+    private static final String GDL = GraphSageTestGraph.GDL;
+
     private final String MODEL_NAME = "graphSageModel";
 
+    @Inject
     private Graph graph;
     private HugeObjectArray<double[]> features;
     private ImmutableGraphSageTrainConfig.Builder configBuilder;
 
     @BeforeEach
     void setUp() {
-        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
-            .nodeCount(20)
-            .averageDegree(3)
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(123L)
-            .aggregation(Aggregation.SINGLE)
-            .orientation(Orientation.UNDIRECTED)
-            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
-            .allocationTracker(AllocationTracker.empty())
-            .build();
-        graph = randomGraphGenerator.generate();
-
         long nodeCount = graph.nodeCount();
         features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
 
