@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -214,15 +213,22 @@ public final class GraphSageHelper {
                 .map(graph::nodeProperties)
                 .collect(toList());
 
-        // TODO: init fixed size array to avoid DoubleStream per node
-        features.setAll(n -> {
-            DoubleStream nodeFeatures = nodeProperties.stream()
-                .mapToDouble(p -> p.doubleValue(n));
-            if (config.degreeAsProperty()) {
-                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
+        var featureCount = nodeProperties.size() + (config.degreeAsProperty() ? 1 : 0);
+
+        features.setAll(nodeId -> {
+            var nodeFeatures = new double[featureCount];
+
+            for (int i = 0; i < nodeProperties.size(); i++) {
+                nodeFeatures[i] = nodeProperties.get(i).doubleValue(nodeId);
             }
-            return nodeFeatures.toArray();
+
+            if (config.degreeAsProperty()) {
+                nodeFeatures[featureCount - 1] = graph.degree(nodeId);
+            }
+
+            return nodeFeatures;
         });
+
         return features;
     }
 
@@ -232,18 +238,33 @@ public final class GraphSageHelper {
         HugeObjectArray<double[]> features
     ) {
         var propertiesPerNodeLabel = propertiesPerNodeLabel(graph, config);
+        var featureCountPerNodeLabel = propertiesPerNodeLabel.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().size()
+                         + (config.degreeAsProperty() ? 1 : 0)
+                         + (config.labelAsProperty() ? 1 : 0)
+            ));
 
-        features.setAll(n -> {
-            var nodeLabel = labelOf(graph, n);
+        features.setAll(nodeId -> {
+            var nodeLabel = labelOf(graph, nodeId);
             var relevantProperties = propertiesPerNodeLabel.get(nodeLabel);
-            DoubleStream nodeFeatures = relevantProperties.stream().mapToDouble(p -> p.doubleValue(n));
+            var featureCount = featureCountPerNodeLabel.get(nodeLabel);
+            var nodeFeatures = new double[featureCount];
+
+            int i = 0;
+            for (NodeProperties relevantProperty : relevantProperties) {
+                nodeFeatures[i++] = relevantProperty.doubleValue(nodeId);
+            }
+
             if (config.degreeAsProperty()) {
-                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(graph.degree(n)));
+                nodeFeatures[i++] = graph.degree(nodeId);
             }
             if (config.labelAsProperty()) {
-                nodeFeatures = DoubleStream.concat(nodeFeatures, DoubleStream.of(1.0));
+                nodeFeatures[i] = 1.0;
             }
-            return nodeFeatures.toArray();
+
+            return nodeFeatures;
         });
         return features;
     }
