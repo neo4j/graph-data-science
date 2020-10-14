@@ -26,7 +26,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphSageTrainConfigTest {
 
@@ -36,5 +38,30 @@ class GraphSageTrainConfigTest {
         var expectedMessage = "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set.";
         var throwable = assertThrows(IllegalArgumentException.class, () -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper));
         assertEquals(expectedMessage, throwable.getMessage());
+    }
+
+    @Test
+    void shouldKnowIfMultiOrSingleLabel() {
+        var multiLabelConfig = GraphSageTrainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.create(Map.of(
+                "modelName", "graphSageModel",
+                "degreeAsProperty", true,
+                "projectedFeatureSize", 42
+            ))
+        );
+        assertTrue(multiLabelConfig.isMultiLabel());
+        var singleLabelConfig = GraphSageTrainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.create(Map.of(
+                "modelName", "graphSageModel",
+                "degreeAsProperty", true
+            ))
+        );
+        assertFalse(singleLabelConfig.isMultiLabel());
     }
 }

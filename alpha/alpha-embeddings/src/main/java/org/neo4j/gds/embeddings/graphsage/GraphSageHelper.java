@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
@@ -197,7 +196,7 @@ public final class GraphSageHelper {
             tracker
         );
 
-        if (config instanceof MultiLabelGraphSageTrainConfig) {
+        if (config.isMultiLabel()) {
             return initializeMultiLabelFeatures(graph, config, features);
         } else {
             return initializeSingleLabelFeatures(graph, config, features);

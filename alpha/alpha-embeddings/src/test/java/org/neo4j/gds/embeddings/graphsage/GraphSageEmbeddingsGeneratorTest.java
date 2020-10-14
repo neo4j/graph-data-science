@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableMultiLabelGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -87,11 +86,12 @@ class GraphSageEmbeddingsGeneratorTest {
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddingsFromMultiLabelModel(Aggregator.AggregatorType aggregatorType) {
-        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+        var config = ImmutableGraphSageTrainConfig.builder()
             .aggregator(aggregatorType)
             .modelName(MODEL_NAME)
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(EMBEDDING_DIMENSION)
+            .projectedFeatureSize(5)
             .build();
 
         var trainer = new MultiLabelGraphSageTrain(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty());

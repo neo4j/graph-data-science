@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableMultiLabelGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -76,9 +75,10 @@ class GraphSageHelperTest {
                     singleLabelProperties
             ), Arguments.of(
                 "multi label",
-                ImmutableMultiLabelGraphSageTrainConfig.builder()
+                ImmutableGraphSageTrainConfig.builder()
                     .modelName("foo")
                     .nodePropertyNames(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
+                    .projectedFeatureSize(5)
                     .build(),
                 HugeObjectArray.of(
                     new double[]{5.0, 2.0},

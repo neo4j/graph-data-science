@@ -54,6 +54,8 @@ public interface GraphSageTrainConfig extends
     RelationshipWeightConfig
 {
 
+    int PROJECTED_FEATURE_SIZE = -1;
+
     @Override
     @Value.Default
     default int embeddingDimension() {
@@ -116,6 +118,12 @@ public interface GraphSageTrainConfig extends
         return false;
     }
 
+    // TODO: Can use Optional
+    @Value.Default
+    default int projectedFeatureSize() {
+        return PROJECTED_FEATURE_SIZE;
+    }
+
     @Configuration.Ignore
     default List<LayerConfig> layerConfigs() {
         List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
@@ -135,8 +143,15 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
+    default boolean isMultiLabel() {
+        return projectedFeatureSize() > 0;
+    }
+
+    @Configuration.Ignore
     default int featuresSize() {
-        return nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
+        return isMultiLabel()
+            ? projectedFeatureSize()
+            : nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
     }
 
     @Value.Check

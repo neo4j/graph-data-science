@@ -35,21 +35,30 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.similarity.nil.NullGraph;
+import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
@@ -374,6 +383,46 @@ class GraphSageAlgorithmFactoryTest {
             pair(5, "MEAN 2"),
             pair(5, "normalizeRows")
         );
+    }
+
+    @Test
+    void shouldCreateCorrectAlgorithmInstance() {
+        var multiLabelConfig = GraphSageTrainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.create(Map.of(
+                "modelName", "graphSageModel",
+                "degreeAsProperty", true,
+                "projectedFeatureSize", 42
+            ))
+        );
+        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
+            .build(
+                new NullGraph(),
+                multiLabelConfig,
+                AllocationTracker.empty(),
+                NullLog.getInstance()
+            );
+        assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
+
+        var singleLabelConfig = GraphSageTrainConfig.of(
+            "",
+            Optional.empty(),
+            Optional.empty(),
+            CypherMapWrapper.create(Map.of(
+                "modelName", "graphSageModel",
+                "degreeAsProperty", true
+            ))
+        );
+        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
+            .build(
+                new NullGraph(),
+                singleLabelConfig,
+                AllocationTracker.empty(),
+                NullLog.getInstance()
+            );
+        assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {

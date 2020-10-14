@@ -43,6 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class MultiLabelGraphSageTrainTest {
 
+    private static final int PROJECTED_FEATURE_SIZE = 5;
+
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
@@ -52,11 +54,12 @@ class MultiLabelGraphSageTrainTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldRunWithOrWithoutDegreeAsProperty(boolean degreeAsProperty) {
-        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+        var config = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
             .modelName("foo")
             .degreeAsProperty(degreeAsProperty)
+            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
@@ -71,7 +74,7 @@ class MultiLabelGraphSageTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("featureSizes")
-    void shouldRunWithDifferentProjectedFeatureSizes(String name, MultiLabelGraphSageTrainConfig config) {
+    void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
@@ -84,9 +87,10 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void shouldStoreMultiLabelFeatureFunctionInModel() {
-        var config = ImmutableMultiLabelGraphSageTrainConfig.builder()
+        var config = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .modelName("foo")
+            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
@@ -96,15 +100,16 @@ class MultiLabelGraphSageTrainTest {
             AllocationTracker.empty()
         );
         // should not fail
-        Model<ModelData, MultiLabelGraphSageTrainConfig> model = multiLabelGraphSageTrain.compute();
+        Model<ModelData, GraphSageTrainConfig> model = multiLabelGraphSageTrain.compute();
         assertThat(model.data().featureFunction()).isExactlyInstanceOf(MultiLabelFeatureFunction.class);
 
     }
 
     private static Stream<Arguments> featureSizes() {
-        var builder = ImmutableMultiLabelGraphSageTrainConfig.builder()
+        var builder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
+            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
             .modelName("foo");
         return Stream.of(
             Arguments.of(

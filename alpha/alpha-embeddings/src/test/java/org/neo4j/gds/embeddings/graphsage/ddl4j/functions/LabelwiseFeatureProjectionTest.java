@@ -38,10 +38,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrainConfig.PROJECTED_FEATURE_SIZE;
 
 @GdlExtension
 class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
+
+    private static final int PROJECTED_FEATURE_SIZE = 5;
 
     @GdlGraph
     private static final String GDL =

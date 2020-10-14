@@ -19,60 +19,15 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
-
-public class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>> {
-
-    private final Graph graph;
-    private final GraphSageTrainConfig config;
-    private final AllocationTracker tracker;
-
-    public GraphSageTrain(
-        Graph graph,
-        GraphSageTrainConfig config,
-        AllocationTracker tracker,
-        ProgressLogger progressLogger
-    ) {
-        this.graph = graph;
-        this.config = config;
-        this.tracker = tracker;
-        this.progressLogger = progressLogger;
-    }
-
-    @Override
-    public Model<ModelData, GraphSageTrainConfig> compute() {
-        var graphSageModel = new GraphSageModelTrainer(config, progressLogger);
-
-        GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
-            graph,
-            initializeFeatures(graph, config, tracker)
-        );
-
-        return Model.of(
-            config.username(),
-            config.modelName(),
-            GraphSage.MODEL_TYPE,
-            graph.schema(),
-            ModelData.of(trainResult.layers(), org.neo4j.gds.embeddings.graphsage.GraphSageHelper::features),
-            config
-        );
-    }
+public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>> {
 
     @Override
     public GraphSageTrain me() {
         return this;
     }
 
-    @Override
-    public void release() {
-
-    }
 }
