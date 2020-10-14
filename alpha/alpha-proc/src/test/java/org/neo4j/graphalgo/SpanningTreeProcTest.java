@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -65,6 +67,11 @@ public class SpanningTreeProcTest extends BaseProcTest {
                         "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
         runQuery(cypher);
         registerProcedures(SpanningTreeProc.class, GraphCreateProc.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
     @Override
