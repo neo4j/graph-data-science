@@ -54,7 +54,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private final int baseEmbeddingDimension;
     private final List<Number> iterationWeights;
 
-    static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
+    public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
             .builder(FastRP.class)
             .fixed(

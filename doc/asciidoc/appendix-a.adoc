@@ -158,6 +158,15 @@ The following table lists all beta procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
+.8+<.^|FastRPE
+| `gds.beta.fastRPE.mutate`
+| `gds.beta.fastRPE.mutate.estimate`
+| `gds.beta.fastRPE.stats`
+| `gds.beta.fastRPE.stats.estimate`
+| `gds.beta.fastRPE.stream`
+| `gds.beta.fastRPE.stream.estimate`
+| `gds.beta.fastRPE.write`
+| `gds.beta.fastRPE.write.estimate`
 .8+<.^|<<algorithms-k1coloring, K1Coloring>>
 | `gds.beta.k1coloring.mutate`
 | `gds.beta.k1coloring.mutate.estimate`
