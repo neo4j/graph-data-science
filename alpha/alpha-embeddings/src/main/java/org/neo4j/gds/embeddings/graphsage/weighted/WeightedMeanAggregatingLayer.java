@@ -23,7 +23,6 @@ import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -31,19 +30,19 @@ import java.util.function.Function;
 public class WeightedMeanAggregatingLayer implements WeightedLayer {
 
     private final NeighborhoodSampler sampler;
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final long sampleSize;
     private final Weights<Matrix> weights;
     private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     WeightedMeanAggregatingLayer(
-        Graph graph,
+        RelationshipWeightsFunction relationshipWeightsFunction,
         Weights<Matrix> weights,
         long sampleSize,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.graph = graph;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
@@ -53,7 +52,7 @@ public class WeightedMeanAggregatingLayer implements WeightedLayer {
 
     @Override
     public Aggregator aggregator() {
-        return new WeightedMeanAggregator(graph, weights, activationFunction);
+        return new WeightedMeanAggregator(relationshipWeightsFunction, weights, activationFunction);
     }
 
     @Override

@@ -91,7 +91,7 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteD
         ctx.forward(userEmbeddings);
         MatrixMultiplyWithWeights weightedEmbeddings = new MatrixMultiplyWithWeights(
             userEmbeddings,
-            graph,
+            graph::relationshipProperty,
             subGraph,
             subGraph.adjacency,
             subGraph.selfAdjacency
@@ -135,6 +135,14 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteD
 
         Weights<Matrix> weights = new Weights<>(new Matrix(userEmbeddingsData, 6, 3));
 
-        finiteDifferenceShouldApproximateGradient(weights, new ElementSum(List.of(new MatrixMultiplyWithWeights(weights, graph, subGraph, subGraph.adjacency, subGraph.selfAdjacency))));
+        finiteDifferenceShouldApproximateGradient(
+            weights,
+            new ElementSum(List.of(new MatrixMultiplyWithWeights(weights,
+                graph::relationshipProperty,
+                subGraph,
+                subGraph.adjacency,
+                subGraph.selfAdjacency
+            )))
+        );
     }
 }

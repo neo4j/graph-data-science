@@ -31,14 +31,13 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 import java.util.function.Function;
 
 public class WeightedMaxPoolingAggregator implements Aggregator {
 
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -46,14 +45,14 @@ public class WeightedMaxPoolingAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     WeightedMaxPoolingAggregator(
-        Graph graph,
+        RelationshipWeightsFunction relationshipWeightsFunction,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.graph = graph;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
 
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
@@ -70,17 +69,22 @@ public class WeightedMaxPoolingAggregator implements Aggregator {
         int[][] adjacencyMatrix,
         int[] selfAdjacencyMatrix
     ) {
+        // Weighted with respect to the Relationship Weights
+        Variable<Matrix> weightedPreviousLayerRepresentations =
+            new MatrixMultiplyWithWeights(
+                previousLayerRepresentations,
+                relationshipWeightsFunction,
+                subGraph,
+                adjacencyMatrix,
+                selfAdjacencyMatrix
+            );
+
         Variable<Matrix> weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
-            previousLayerRepresentations,
+            weightedPreviousLayerRepresentations,
             poolWeights
         );
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
-
-        // Weighted with respect to the Relationship Weights
-        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithWeights(biasedWeightedPreviousLayer, graph, subGraph, adjacencyMatrix, selfAdjacencyMatrix);
-
-        Variable<Matrix> neighborhoodActivations = activationFunction.apply(weightedPreviousLayerRepresentations);
-
+        Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
         Variable<Matrix> elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
 
         Variable<Matrix> selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);

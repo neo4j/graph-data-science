@@ -65,9 +65,18 @@ public class GraphSageModelWeightedTrainer {
     private final int maxSearchDepth;
     private double degreeProbabilityNormalizer;
 
+    private final boolean useWeights;
+
     public GraphSageModelWeightedTrainer(Graph graph, GraphSageWeightedTrainConfig config, Log log) {
+
+        this.useWeights = config.useWeights();
+
+        RelationshipWeightsFunction relationshipWeightsFunction = useWeights ?
+            graph::relationshipProperty :
+            (source, target, defaultValue) -> 1.0d;
+
         this.layers = config.layerConfigs().stream()
-            .map(layerConfig -> WeightedLayerFactory.createLayer(graph, layerConfig))
+            .map(layerConfig -> WeightedLayerFactory.createLayer(relationshipWeightsFunction, layerConfig))
             .toArray(WeightedLayer[]::new);
         this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());

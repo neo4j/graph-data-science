@@ -27,7 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 import java.util.function.Function;
@@ -37,12 +36,12 @@ import java.util.function.Function;
 */
 public class WeightedMeanAggregator implements Aggregator {
 
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    WeightedMeanAggregator(Graph graph, Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
-        this.graph = graph;
+    WeightedMeanAggregator(RelationshipWeightsFunction relationshipWeightsFunction, Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.weights = weights;
         this.activationFunction = activationFunction;
     }
@@ -56,7 +55,8 @@ public class WeightedMeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph, int[][] adjacencyMatrix, int[] selfAdjacency) {
-        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithWeights(previousLayerRepresentations, graph, subGraph, adjacencyMatrix, selfAdjacency);
+        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithWeights(previousLayerRepresentations,
+            relationshipWeightsFunction, subGraph, adjacencyMatrix, selfAdjacency);
         Variable<Matrix> means = new MultiMean(weightedPreviousLayerRepresentations, adjacencyMatrix, selfAdjacency);
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);

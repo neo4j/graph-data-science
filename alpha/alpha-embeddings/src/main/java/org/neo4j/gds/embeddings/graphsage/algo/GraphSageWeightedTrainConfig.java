@@ -106,6 +106,13 @@ public interface GraphSageWeightedTrainConfig extends AlgoBaseConfig, TrainConfi
         return false;
     }
 
+    // TODO: remove this and rely on graph created with relationship properties or not.
+    // ??? May be leave it if the user wants to try training on the same graph with and without weights ???
+    @Value.Default
+    default boolean useWeights() {
+        return true;
+    }
+
     @Configuration.Ignore
     default List<WeightedLayerConfig> layerConfigs() {
         List<WeightedLayerConfig> result = new ArrayList<>(sampleSizes().size());

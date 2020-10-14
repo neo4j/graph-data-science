@@ -25,10 +25,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.embeddings.graphsage.weighted.RelationshipWeightsFunction;
 
 public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final SubGraph subGraph;
     private final int[][] adjacency;
     private final int[] selfAdjacency;
@@ -37,13 +37,13 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
 
     public MatrixMultiplyWithWeights(
         Variable<Matrix> parent,
-        Graph graph,
+        RelationshipWeightsFunction relationshipWeightsFunction,
         SubGraph subGraph,
         int[][] adjacency,
         int[] selfAdjacency
     ) {
         super(parent, Dimensions.matrix(adjacency.length, parent.dimension(1)));
-        this.graph = graph;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.subGraph = subGraph;
         this.adjacency = adjacency;
         this.selfAdjacency = selfAdjacency;
@@ -65,7 +65,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
+                double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
                 for (int col = 0; col < cols; col++) {
                     weightedData[sourceOffset + col] += parentData[targetOffset + col] * relationshipWeight;
                 }
@@ -95,7 +95,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
                     int neighborElementIndex = neighbor * cols + col;
-                    double relationshipWeight = graph.relationshipProperty(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
+                    double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
                     double newValue = weightedGradient[gradientElementIndex] * relationshipWeight;
                     result.addDataAt(
                         neighborElementIndex,

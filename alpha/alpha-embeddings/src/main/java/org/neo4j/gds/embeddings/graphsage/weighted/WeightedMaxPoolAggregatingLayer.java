@@ -25,7 +25,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
@@ -34,7 +33,7 @@ public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
-    private final Graph graph;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -44,7 +43,7 @@ public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
     private long randomState;
 
     WeightedMaxPoolAggregatingLayer(
-        Graph graph,
+        RelationshipWeightsFunction relationshipWeightsFunction,
         long sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
@@ -52,7 +51,7 @@ public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.graph = graph;
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
@@ -74,7 +73,7 @@ public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
     @Override
     public Aggregator aggregator() {
         return new WeightedMaxPoolingAggregator(
-            this.graph,
+            this.relationshipWeightsFunction,
             this.poolWeights,
             this.selfWeights,
             this.neighborsWeights,
