@@ -1,0 +1,4 @@
+[.beta-symbol]
+[.tier-note]
+The following aspects of the algorithm are in the beta tier.
+For more information on algorithm tiers, see <<algorithms>>.
