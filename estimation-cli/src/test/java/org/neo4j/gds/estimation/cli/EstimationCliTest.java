@@ -27,6 +27,10 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEMutateProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEStatsProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEStreamProc;
+import org.neo4j.graphalgo.beta.fastrpe.FastRPEWriteProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
@@ -118,6 +122,11 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.beta.fastRPE.mutate.estimate",
+        "gds.beta.fastRPE.stats.estimate",
+        "gds.beta.fastRPE.stream.estimate",
+        "gds.beta.fastRPE.write.estimate",
+
         "gds.beta.k1coloring.mutate.estimate",
         "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream.estimate",
@@ -367,6 +376,11 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
+            runEstimation(new FastRPEMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPEStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPEStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPEWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+
             runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new K1ColoringStatsProc()::estimate),
             runEstimation(new K1ColoringStreamProc()::estimate),
