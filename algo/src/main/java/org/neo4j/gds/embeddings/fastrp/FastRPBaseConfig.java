@@ -75,13 +75,6 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
                 ));
             }
         }
-        if (nodeFeatureDimension() > embeddingDimension()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of nodeFeatureDimension %s may not exceed embeddingDimension %s.",
-                nodeFeatureDimension(),
-                embeddingDimension()
-            ));
-        }
     }
 
     @Configuration.Ignore

@@ -32,6 +32,7 @@ public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
     }
 
     @Override
+    @Configuration.Ignore
     default int nodeFeatureDimension() {
         return 0;
     }

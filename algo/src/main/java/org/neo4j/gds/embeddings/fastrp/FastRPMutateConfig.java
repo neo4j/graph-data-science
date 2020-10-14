@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPMutateConfig extends FastRPBaseConfig, MutatePropertyConfig {
+public interface FastRPMutateConfig extends FastRPBaseProductionConfig, MutatePropertyConfig {
 
     static FastRPMutateConfig of(
         String username,

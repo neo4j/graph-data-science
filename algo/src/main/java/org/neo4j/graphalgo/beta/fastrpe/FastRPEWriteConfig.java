@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.fastrpe;
 
-import org.neo4j.gds.embeddings.fastrp.FastRPBaseProductionConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -30,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPEWriteConfig extends FastRPBaseProductionConfig, WritePropertyConfig {
+public interface FastRPEWriteConfig extends FastRPEBaseConfig, WritePropertyConfig {
 
     static FastRPEWriteConfig of(
         String username,
