@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageWeightedTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -28,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
@@ -64,6 +64,7 @@ class GraphSageModelWeightedTrainerTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .relationshipPropertyProducer(PropertyProducer.random("weight", 13, 37))
             .allocationTracker(AllocationTracker.empty())
             .build();
         graph = randomGraphGenerator.generate();
@@ -105,7 +106,6 @@ class GraphSageModelWeightedTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondWeights.get(0).dimensions());
     }
 
-    @Disabled("Until Weighted POOL is implemented")
     @Test
     void trainsWithPoolAggregator() {
         var config = configBuilder

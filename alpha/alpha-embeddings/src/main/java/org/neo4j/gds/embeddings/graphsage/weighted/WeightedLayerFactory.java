@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.weighted;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -48,6 +49,32 @@ public final class WeightedLayerFactory {
                 graph,
                 weights,
                 layerConfig.sampleSize(),
+                activationFunction.activationFunction()
+            );
+        } else if (layerConfig.aggregatorType() == Aggregator.AggregatorType.WEIGHTED_POOL) {
+            Weights<Matrix> poolWeights = weights;
+
+            Weights<Matrix> selfWeights = generateWeights(
+                rows,
+                cols,
+                activationFunction.weightInitBound(rows, cols)
+            );
+
+            Weights<Matrix> neighborsWeights = generateWeights(
+                rows,
+                rows,
+                activationFunction.weightInitBound(rows, rows)
+            );
+
+            Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
+
+            return new WeightedMaxPoolAggregatingLayer(
+                graph,
+                layerConfig.sampleSize(),
+                poolWeights,
+                selfWeights,
+                neighborsWeights,
+                bias,
                 activationFunction.activationFunction()
             );
         }
