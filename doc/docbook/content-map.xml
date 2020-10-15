@@ -182,12 +182,12 @@
                 </d:tocentry>
             </d:tocentry>
 
-            <d:tocentry linkend="node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
-                <d:tocentry linkend="algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node-embeddings/node2vec/index.html"?>
+            <d:tocentry linkend="algorithms-node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
+                <d:tocentry linkend="algorithms-embeddings-fastrp"><?dbhtml filename="algorithms/fastrp/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="alpha-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/alpha/graph-sage/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-embeddings-random-projection"><?dbhtml filename="algorithms/alpha/fastrp/fastrp/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 

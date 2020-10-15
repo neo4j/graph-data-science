@@ -285,7 +285,7 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.ann.write`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
-.2+<.^|<<algorithms-embeddings-node2vec, Node2Vec>>
+.2+<.^|<<alpha-algorithms-embeddings-node2vec, Node2Vec>>
 | `gds.alpha.node2vec.stream`
 | `gds.alpha.node2vec.write`
 |===
