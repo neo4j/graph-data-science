@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -262,9 +263,9 @@ public class GraphSageModelTrainer {
                 NeighborhoodSampler neighborhoodSampler = useWeights ?
                     new WeightedNeighborhoodSampler() :
                     new UniformNeighborhoodSampler();
-                List<Long> samples = neighborhoodSampler.sample(graph, currentNode.get(), 1, 0);
-                if (samples.size() == 1) {
-                    currentNode.set(samples.get(0));
+                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId, 0);
+                if (maybeSample.isPresent()) {
+                    currentNode.set(maybeSample.getAsLong());
                 } else {
                     // terminate
                     searchDepth = 0;
