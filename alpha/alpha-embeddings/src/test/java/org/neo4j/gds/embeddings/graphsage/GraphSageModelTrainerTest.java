@@ -30,11 +30,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainAlgorithmFactory;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.PropertyProducer;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -84,7 +79,7 @@ class GraphSageModelTrainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "weight"})
+    @ValueSource(strings = {"", "times"})
     void trainsWithMeanAggregator(String relationshipWeightProperty) {
         if (!relationshipWeightProperty.isBlank()) {
             configBuilder.relationshipWeightProperty(relationshipWeightProperty);
@@ -115,7 +110,7 @@ class GraphSageModelTrainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "weight"})
+    @ValueSource(strings = {"", "times"})
     void trainsWithPoolAggregator(String relationshipWeightProperty) {
         if (!relationshipWeightProperty.isBlank()) {
             configBuilder.relationshipWeightProperty(relationshipWeightProperty);

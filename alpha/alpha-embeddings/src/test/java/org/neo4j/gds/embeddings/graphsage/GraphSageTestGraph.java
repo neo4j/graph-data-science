@@ -43,55 +43,55 @@ public final class GraphSageTestGraph {
         ", (n18:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
         ", (n19:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
 
-        ", (n0)-[:SERVES]->(n4)" +
-        ", (n0)-[:SERVES]->(n5)" +
-        ", (n0)-[:SERVES]->(n6)" +
-        ", (n0)-[:SERVES]->(n7)" +
-        ", (n0)-[:SERVES]->(n8)" +
+        ", (n0)-[:SERVES { times: 5 }]->(n4)" +
+        ", (n0)-[:SERVES { times: 5 }]->(n5)" +
+        ", (n0)-[:SERVES { times: 5 }]->(n6)" +
+        ", (n0)-[:SERVES { times: 5 }]->(n7)" +
+        ", (n0)-[:SERVES { times: 5 }]->(n8)" +
 
-        ", (n1)-[:SERVES]->(n5)" +
-        ", (n1)-[:SERVES]->(n6)" +
-        ", (n1)-[:SERVES]->(n8)" +
-        ", (n1)-[:SERVES]->(n9)" +
-        ", (n1)-[:SERVES]->(n10)" +
-        ", (n1)-[:SERVES]->(n11)" +
-        ", (n1)-[:SERVES]->(n12)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n5)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n6)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n8)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n9)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n10)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n11)" +
+        ", (n1)-[:SERVES { times: 5 }]->(n12)" +
 
-        ", (n2)-[:SERVES]->(n6)" +
-        ", (n2)-[:SERVES]->(n8)" +
-        ", (n2)-[:SERVES]->(n11)" +
-        ", (n2)-[:SERVES]->(n12)" +
+        ", (n2)-[:SERVES { times: 5 }]->(n6)" +
+        ", (n2)-[:SERVES { times: 5 }]->(n8)" +
+        ", (n2)-[:SERVES { times: 5 }]->(n11)" +
+        ", (n2)-[:SERVES { times: 5 }]->(n12)" +
 
-        ", (n3)-[:SERVES]->(n4)" +
-        ", (n3)-[:SERVES]->(n5)" +
-        ", (n3)-[:SERVES]->(n8)" +
-        ", (n3)-[:SERVES]->(n10)" +
+        ", (n3)-[:SERVES { times: 5 }]->(n4)" +
+        ", (n3)-[:SERVES { times: 5 }]->(n5)" +
+        ", (n3)-[:SERVES { times: 5 }]->(n8)" +
+        ", (n3)-[:SERVES { times: 5 }]->(n10)" +
 
-        ", (n13)-[:ORDERED]->(n4)" +
-        ", (n13)-[:ORDERED]->(n5)" +
+        ", (n13)-[:ORDERED { times: 5 }]->(n4)" +
+        ", (n13)-[:ORDERED { times: 5 }]->(n5)" +
 
-        ", (n14)-[:ORDERED]->(n4)" +
-        ", (n14)-[:ORDERED]->(n10)" +
-        ", (n14)-[:ORDERED]->(n12)" +
+        ", (n14)-[:ORDERED { times: 5 }]->(n4)" +
+        ", (n14)-[:ORDERED { times: 5 }]->(n10)" +
+        ", (n14)-[:ORDERED { times: 5 }]->(n12)" +
 
-        ", (n15)-[:ORDERED]->(n9)" +
-        ", (n15)-[:ORDERED]->(n12)" +
+        ", (n15)-[:ORDERED { times: 5 }]->(n9)" +
+        ", (n15)-[:ORDERED { times: 5 }]->(n12)" +
 
-        ", (n16)-[:ORDERED]->(n7)" +
-        ", (n16)-[:ORDERED]->(n8)" +
-        ", (n16)-[:ORDERED]->(n10)" +
-        ", (n16)-[:ORDERED]->(n12)" +
+        ", (n16)-[:ORDERED { times: 5 }]->(n7)" +
+        ", (n16)-[:ORDERED { times: 5 }]->(n8)" +
+        ", (n16)-[:ORDERED { times: 5 }]->(n10)" +
+        ", (n16)-[:ORDERED { times: 5 }]->(n12)" +
 
-        ", (n17)-[:ORDERED]->(n4)" +
-        ", (n17)-[:ORDERED]->(n5)" +
-        ", (n17)-[:ORDERED]->(n9)" +
+        ", (n17)-[:ORDERED { times: 5 }]->(n4)" +
+        ", (n17)-[:ORDERED { times: 5 }]->(n5)" +
+        ", (n17)-[:ORDERED { times: 5 }]->(n9)" +
 
-        ", (n18)-[:ORDERED]->(n5)" +
-        ", (n18)-[:ORDERED]->(n6)" +
-        ", (n18)-[:ORDERED]->(n11)" +
+        ", (n18)-[:ORDERED { times: 5 }]->(n5)" +
+        ", (n18)-[:ORDERED { times: 5 }]->(n6)" +
+        ", (n18)-[:ORDERED { times: 5 }]->(n11)" +
 
-        ", (n19)-[:ORDERED]->(n7)" +
-        ", (n19)-[:ORDERED]->(n11)";
+        ", (n19)-[:ORDERED { times: 5 }]->(n7)" +
+        ", (n19)-[:ORDERED { times: 5 }]->(n11)";
 
 
     private GraphSageTestGraph() {}
