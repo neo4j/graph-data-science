@@ -17,9 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.weighted;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.function.TriFunction;
 
 public interface RelationshipWeightsFunction extends TriFunction<Long, Long, Double, Double> {
+
+    RelationshipWeightsFunction DEFAULT_WEIGHT = (source, target, defaultValue) -> 1.0d;
+
+    default double weight(long source, long target) {
+        return weight(source, target, 1.0d);
+    }
+
+    default double weight(long source, long target, double defaultValue) {
+        return apply(source, target, defaultValue);
+    }
 }

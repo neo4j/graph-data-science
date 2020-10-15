@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -49,11 +50,13 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.DEFAULT_WEIGHT;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
-    private final Layer[] layers;
+    private Layer[] layers;
+    private final boolean useWeights;
     private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
@@ -62,10 +65,12 @@ public class GraphSageModelTrainer {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
+    private final List<LayerConfig> layerConfigs;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
+    private RelationshipWeightsFunction relationshipWeightsFunction;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
         this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
@@ -77,9 +82,7 @@ public class GraphSageModelTrainer {
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
-        this.layers = config.layerConfigs().stream()
-            .map(LayerFactory::createLayer)
-            .toArray(Layer[]::new);
+        this.layerConfigs = config.layerConfigs();
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
@@ -91,11 +94,28 @@ public class GraphSageModelTrainer {
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
         this.progressLogger = progressLogger;
+
+        this.useWeights = config.relationshipWeightProperty() != null;
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressLogger.logStart();
         Map<String, Double> epochLosses = new TreeMap<>();
+
+        // TODO: do not store in a field but pass as parameter
+        relationshipWeightsFunction = useWeights ?
+            graph::relationshipProperty :
+            DEFAULT_WEIGHT;
+
+        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction = useWeights ?
+            Optional.of(relationshipWeightsFunction) :
+            Optional.empty();
+
+        // TODO: do not store in a field but pass as parameter
+        this.layers = layerConfigs.stream()
+            .map(layerConfig -> LayerFactory.createLayer(layerConfig, maybeRelationshipWeightsFunction))
+            .toArray(Layer[]::new);
+
         degreeProbabilityNormalizer = LongStream
             .range(0, graph.nodeCount())
             .mapToDouble(nodeId -> Math.pow(graph.degree(nodeId), 0.75))
@@ -225,7 +245,11 @@ public class GraphSageModelTrainer {
             )).toArray();
         Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers, featureFunction);
 
-        Variable<Scalar> lossFunction = new GraphSageLoss(embeddingVariable, negativeSampleWeight);
+        Variable<Scalar> lossFunction = new GraphSageLoss(
+            relationshipWeightsFunction,
+            embeddingVariable,
+            negativeSampleWeight
+        );
 
         return new PassthroughVariable<>(lossFunction);
     }
@@ -235,8 +259,10 @@ public class GraphSageModelTrainer {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
-                // TODO: check if it really is necessary to create a new Sampler object every time
-                List<Long> samples = new UniformNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
+                NeighborhoodSampler neighborhoodSampler = useWeights ?
+                    new WeightedNeighborhoodSampler() :
+                    new UniformNeighborhoodSampler();
+                List<Long> samples = neighborhoodSampler.sample(graph, currentNode.get(), 1, 0);
                 if (samples.size() == 1) {
                     currentNode.set(samples.get(0));
                 } else {

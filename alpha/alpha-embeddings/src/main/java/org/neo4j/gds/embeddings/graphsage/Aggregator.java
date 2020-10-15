@@ -33,53 +33,16 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface Aggregator {
-    Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, int[][] adjacencyMatrix, int[] selfAdjacencyMatrix);
 
-    default Variable<Matrix> aggregate(
+    Variable<Matrix> aggregate(
         Variable<Matrix> previousLayerRepresentations,
-        SubGraph subGraph,
-        int[][] adjacencyMatrix,
-        int[] selfAdjacencyMatrix
-    ) {
-        return aggregate(previousLayerRepresentations, adjacencyMatrix, selfAdjacencyMatrix);
-    }
+        SubGraph subGraph
+    );
 
     // TODO: maybe turn this generic?
     List<Weights<? extends Tensor<?>>> weights();
 
     enum AggregatorType {
-        WEIGHTED_MEAN {
-            @Override
-            public MemoryRange memoryEstimation(
-                long minNodeCount,
-                long maxNodeCount,
-                long minPreviousNodeCount,
-                long maxPreviousNodeCount,
-                int inputDimension,
-                int embeddingDimension
-            ) {
-                // TODO: Implement memory estimation
-                var minBound = 0L;
-                var maxBound = 0L;
-                return MemoryRange.of(minBound, maxBound);
-            }
-        },
-        WEIGHTED_POOL {
-            @Override
-            public MemoryRange memoryEstimation(
-                long minNodeCount,
-                long maxNodeCount,
-                long minPreviousNodeCount,
-                long maxPreviousNodeCount,
-                int inputDimension,
-                int embeddingDimension
-            ) {
-                // TODO: Implement memory estimation
-                var minBound = 0L;
-                var maxBound = 0L;
-                return MemoryRange.of(minBound, maxBound);
-            }
-        },
         MEAN {
             @Override
             public MemoryRange memoryEstimation(

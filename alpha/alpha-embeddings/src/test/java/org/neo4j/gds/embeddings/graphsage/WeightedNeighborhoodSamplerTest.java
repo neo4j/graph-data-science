@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.weighted;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -37,18 +36,18 @@ class WeightedNeighborhoodSamplerTest {
 
     @GdlGraph
     private static final String GRAPH =
-        "(x)-[]->(y)-[]->(z), " +
-        "(a)-[]->(b)-[]->(c), " +
-        "(x)-[]->(d)-[]->(e), " +
-        "(a)-[]->(f) , " +
-        "(a)-[]->(g), " +
-        "(a)-[]->(h)";
+        "(x)-->(y)-->(z), " +
+        "(a)-->(b)-->(c), " +
+        "(x)-->(d)-->(e), " +
+        "(a)-->(f) , " +
+        "(a)-->(g), " +
+        "(a)-->(h)";
 
     @Inject
     private Graph graph;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void shouldSampleSubsetOfNeighbors() {
@@ -57,26 +56,24 @@ class WeightedNeighborhoodSamplerTest {
         int numberOfSamples = 3;
         List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
 
-        assertThat(sample).isNotNull();
-        assertThat(sample).hasSize(numberOfSamples);
-
-        assertThat(sample).containsAnyOf(
-            idFunction.of("b"),
-            idFunction.of("f"),
-            idFunction.of("g"),
-            idFunction.of("h")
-        );
-
-        // does not contain negative neighbors
-        assertThat(sample).doesNotContain(
-            idFunction.of("x"),
-            idFunction.of("y"),
-            idFunction.of("z"),
-            idFunction.of("a"),
-            idFunction.of("c"),
-            idFunction.of("d"),
-            idFunction.of("e")
-        );
+        assertThat(sample)
+            .isNotNull()
+            .hasSize(numberOfSamples)
+            .containsAnyOf(
+                idFunction.of("b"),
+                idFunction.of("f"),
+                idFunction.of("g"),
+                idFunction.of("h")
+            )
+            .doesNotContain( // does not contain negative neighbors
+                idFunction.of("x"),
+                idFunction.of("y"),
+                idFunction.of("z"),
+                idFunction.of("a"),
+                idFunction.of("c"),
+                idFunction.of("d"),
+                idFunction.of("e")
+            );
     }
 
     @Test
@@ -85,9 +82,9 @@ class WeightedNeighborhoodSamplerTest {
         int numberOfSamples = 19;
         List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
 
-        assertThat(sample).isNotNull();
-        assertThat(sample).hasSize(4);
-        assertThat(sample).hasSize(4);
+        assertThat(sample)
+            .isNotNull()
+            .hasSize(4);
     }
 
     @Nested
@@ -109,26 +106,24 @@ class WeightedNeighborhoodSamplerTest {
             int numberOfSamples = 3;
             List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
 
-            assertThat(sample).isNotNull();
-            assertThat(sample).hasSize(numberOfSamples);
-
-            assertThat(sample).containsAnyOf(
-                idFunction.of("b"),
-                idFunction.of("f"),
-                idFunction.of("g"),
-                idFunction.of("h")
-            );
-
-            // does not contain negative neighbors
-            assertThat(sample).doesNotContain(
-                idFunction.of("x"),
-                idFunction.of("y"),
-                idFunction.of("z"),
-                idFunction.of("a"),
-                idFunction.of("c"),
-                idFunction.of("d"),
-                idFunction.of("e")
-            );
+            assertThat(sample)
+                .isNotNull()
+                .hasSize(numberOfSamples)
+                .containsAnyOf(
+                    idFunction.of("b"),
+                    idFunction.of("f"),
+                    idFunction.of("g"),
+                    idFunction.of("h")
+                )
+                .doesNotContain( // does not contain negative neighbors
+                    idFunction.of("x"),
+                    idFunction.of("y"),
+                    idFunction.of("z"),
+                    idFunction.of("a"),
+                    idFunction.of("c"),
+                    idFunction.of("d"),
+                    idFunction.of("e")
+                );
         }
     }
 }

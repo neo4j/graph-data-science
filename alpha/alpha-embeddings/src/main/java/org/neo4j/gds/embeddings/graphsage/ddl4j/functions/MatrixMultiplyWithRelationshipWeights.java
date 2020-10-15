@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.gds.embeddings.graphsage.weighted.RelationshipWeightsFunction;
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
 
 public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<Matrix> {
     private final RelationshipWeightsFunction relationshipWeightsFunction;
@@ -65,7 +65,7 @@ public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
+                double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId); //TODO normalize weights
                 for (int col = 0; col < cols; col++) {
                     weightedData[sourceOffset + col] += parentData[targetOffset + col] * relationshipWeight;
                 }
@@ -95,7 +95,7 @@ public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
                     int neighborElementIndex = neighbor * cols + col;
-                    double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
+                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId); //TODO normalize weights
                     double newValue = weightedGradient[gradientElementIndex] * relationshipWeight;
                     result.addDataAt(
                         neighborElementIndex,

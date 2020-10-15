@@ -23,28 +23,36 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 public class MeanAggregatingLayer implements Layer {
 
-    private final UniformNeighborhoodSampler sampler;
+    private final NeighborhoodSampler sampler;
+    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
     private final long sampleSize;
     private final Weights<Matrix> weights;
     private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    public MeanAggregatingLayer(Weights<Matrix> weights, long sampleSize, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
+    public MeanAggregatingLayer(
+        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Weights<Matrix> weights,
+        long sampleSize,
+        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+    ) {
+        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
         this.randomState = ThreadLocalRandom.current().nextLong();
-        this.sampler = new UniformNeighborhoodSampler();
+        this.sampler = new WeightedNeighborhoodSampler();
     }
 
     @Override
     public Aggregator aggregator() {
-        return new MeanAggregator(weights, activationFunction);
+        return new MeanAggregator(maybeRelationshipWeightsFunction, weights, activationFunction);
     }
 
     @Override

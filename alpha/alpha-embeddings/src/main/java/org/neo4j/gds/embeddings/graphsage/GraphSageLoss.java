@@ -37,11 +37,16 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Variable<Matrix> combinedEmbeddings;
     private final int negativeSamplingFactor;
 
-    GraphSageLoss(Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
+    // TODO: Pass this as configuration parameter.
+    private static final double ALPHA = 1d;
+
+    GraphSageLoss(RelationshipWeightsFunction relationshipWeightsFunction, Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;
     }
@@ -55,9 +60,19 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
             int negativeNodeId = nodeId + NEGATIVE_NODES_OFFSET * batchSize;
             double positiveAffinity = affinity(embeddingData, nodeId, positiveNodeId);
             double negativeAffinity = affinity(embeddingData, nodeId, negativeNodeId);
-            return -Math.log(Sigmoid.sigmoid(positiveAffinity)) - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
+
+            return -relationshipWeightFactor(nodeId, positiveNodeId) * Math.log(Sigmoid.sigmoid(positiveAffinity))
+                   - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
         }).sum();
         return new Scalar(loss);
+    }
+
+    private double relationshipWeightFactor(int nodeId, int positiveNodeId) {
+        double relationshipWeight = relationshipWeightsFunction.weight(nodeId, positiveNodeId);
+        if(Double.isNaN(relationshipWeight)) {
+            relationshipWeight = 1d;
+        }
+        return Math.pow(relationshipWeight, ALPHA);
     }
 
     private double affinity(Tensor<?> embeddingData, int nodeId, int otherNodeId) {
@@ -119,10 +134,13 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         int nodeIndex = nodeId * dimension + columnOffset;
         int positiveNodeIndex = positiveNodeId * dimension + columnOffset;
         int negativeNodeIndex = negativeNodeId * dimension + columnOffset;
-        gradientResult[nodeIndex] = -embeddings[positiveNodeIndex] * positiveLogistic +
+
+        double relationshipWeightFactor = relationshipWeightFactor(nodeId, positiveNodeId);
+
+        gradientResult[nodeIndex] = -embeddings[positiveNodeIndex] * relationshipWeightFactor * positiveLogistic +
             negativeSamplingFactor * embeddings[negativeNodeIndex] * negativeLogistic;
 
-        gradientResult[positiveNodeIndex] = -embeddings[nodeIndex] * positiveLogistic;
+        gradientResult[positiveNodeIndex] = -embeddings[nodeIndex] * relationshipWeightFactor * positiveLogistic;
 
         gradientResult[negativeNodeIndex] = negativeSamplingFactor * embeddings[nodeIndex] * negativeLogistic;
     }

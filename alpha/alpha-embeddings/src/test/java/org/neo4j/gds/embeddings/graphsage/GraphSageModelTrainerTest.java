@@ -22,12 +22,19 @@ package org.neo4j.gds.embeddings.graphsage;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.proc.GraphSageTrainAlgorithmFactory;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -76,8 +83,12 @@ class GraphSageModelTrainerTest {
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
 
-    @Test
-    void trainsWithMeanAggregator() {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "weight"})
+    void trainsWithMeanAggregator(String relationshipWeightProperty) {
+        if (!relationshipWeightProperty.isBlank()) {
+            configBuilder.relationshipWeightProperty(relationshipWeightProperty);
+        }
         var config = configBuilder
             .aggregator(Aggregator.AggregatorType.MEAN)
             .modelName(MODEL_NAME)
@@ -103,8 +114,12 @@ class GraphSageModelTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondWeights.get(0).dimensions());
     }
 
-    @Test
-    void trainsWithPoolAggregator() {
+    @ParameterizedTest
+    @ValueSource(strings = {"", "weight"})
+    void trainsWithPoolAggregator(String relationshipWeightProperty) {
+        if (!relationshipWeightProperty.isBlank()) {
+            configBuilder.relationshipWeightProperty(relationshipWeightProperty);
+        }
         var config = configBuilder
             .aggregator(Aggregator.AggregatorType.POOL)
             .modelName(MODEL_NAME)

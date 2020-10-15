@@ -81,9 +81,7 @@ public final class GraphSageHelper {
                 .aggregator()
                 .aggregate(
                     previousLayerRepresentations,
-                    subGraphs.get(layerNr),
-                    subGraphs.get(layerNr).adjacency,
-                    subGraphs.get(layerNr).selfAdjacency
+                    subGraphs.get(layerNr)
                 );
         }
         return new NormalizeRows(previousLayerRepresentations);

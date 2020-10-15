@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.weighted;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 

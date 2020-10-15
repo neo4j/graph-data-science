@@ -19,22 +19,26 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithRelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
+import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class MaxPoolingAggregator implements Aggregator {
 
+    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -42,12 +46,14 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MaxPoolingAggregator(
+        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
+        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
 
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
@@ -60,18 +66,27 @@ public class MaxPoolingAggregator implements Aggregator {
     @Override
     public Variable<Matrix> aggregate(
         Variable<Matrix> previousLayerRepresentations,
-        int[][] adjacencyMatrix,
-        int[] selfAdjacencyMatrix
+        SubGraph subGraph
     ) {
+        if (maybeRelationshipWeightsFunction.isPresent()) {
+            // Weighted with respect to the Relationship Weights
+            previousLayerRepresentations = new MatrixMultiplyWithRelationshipWeights(
+                previousLayerRepresentations,
+                maybeRelationshipWeightsFunction.get(),
+                subGraph,
+                subGraph.adjacency,
+                subGraph.selfAdjacency
+            );
+        }
         Variable<Matrix> weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
             previousLayerRepresentations,
             poolWeights
         );
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
-        Variable<Matrix> elementwiseMax = new ElementwiseMax(neighborhoodActivations, adjacencyMatrix);
+        Variable<Matrix> elementwiseMax = new ElementwiseMax(neighborhoodActivations, subGraph.adjacency);
 
-        Variable<Matrix> selfPreviousLayer =  new Slice(previousLayerRepresentations, selfAdjacencyMatrix);
+        Variable<Matrix> selfPreviousLayer =  new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
         Variable<Matrix> neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable<Matrix> sum = new MatrixSum(List.of(self, neighbors));
