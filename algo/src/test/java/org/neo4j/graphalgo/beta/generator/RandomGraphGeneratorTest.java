@@ -218,6 +218,41 @@ class RandomGraphGeneratorTest {
     }
 
     @Test
+    void shouldGenerateNodeLabelsAndProperties() {
+        NodeLabel[] aLabel = new NodeLabel[]{NodeLabel.of("A")};
+        NodeLabel[] bLabel = new NodeLabel[]{NodeLabel.of("B")};
+
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodeLabelProducer(nodeId -> nodeId % 2 == 0 ? aLabel : bLabel)
+            .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixed("foo", 42.0))
+            .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixed("bar", 84.0))
+            .build()
+            .generate();
+
+        var fooProperties = graph.nodeProperties("foo");
+        var barProperties = graph.nodeProperties("bar");
+
+        graph.forEachNode(nodeId -> {
+                var nodeLabels = graph.nodeLabels(nodeId);
+                assertEquals(1, nodeLabels.size());
+                if (nodeId % 2 == 0) {
+                    assertTrue(nodeLabels.contains(NodeLabel.of("A")), formatWithLocale("node %d should have label A", nodeId));
+                    assertEquals(42.0, fooProperties.doubleValue(nodeId));
+                    assertTrue(Double.isNaN(barProperties.doubleValue(nodeId)));
+                } else {
+                    assertTrue(nodeLabels.contains(NodeLabel.of("B")), formatWithLocale("node %d should have label B", nodeId));
+                    assertEquals(84.0, barProperties.doubleValue(nodeId));
+                    assertTrue(Double.isNaN(fooProperties.doubleValue(nodeId)));
+                }
+                return true;
+            }
+        );
+    }
+
+    @Test
     void shouldBeSeedAble() {
         int nbrNodes = 10;
         long avgDeg = 5L;

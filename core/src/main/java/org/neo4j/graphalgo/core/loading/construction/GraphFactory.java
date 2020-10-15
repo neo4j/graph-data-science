@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading.construction;
 
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -108,31 +107,6 @@ public final class GraphFactory {
             relationships,
             tracker
         );
-    }
-
-    public static HugeGraph create(
-        IdMap idMap,
-        Map<String, NodeProperties> nodeProperties,
-        Relationships relationships,
-        AllocationTracker tracker
-    ) {
-        if (nodeProperties.isEmpty()) {
-            return create(idMap, relationships, tracker);
-        } else {
-            var nodeSchemaBuilder = NodeSchema.builder();
-            nodeProperties.forEach((propertyName, property) -> nodeSchemaBuilder.addProperty(
-                NodeLabel.ALL_NODES,
-                propertyName,
-                property.valueType()
-            ));
-            return create(
-                idMap,
-                nodeSchemaBuilder.build(),
-                nodeProperties,
-                relationships,
-                tracker
-            );
-        }
     }
 
     public static HugeGraph create(

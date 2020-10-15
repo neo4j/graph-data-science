@@ -20,8 +20,11 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.UnionNodeProperties;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -32,10 +35,12 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
 
 public final class RandomGraphGenerator {
 
@@ -50,7 +55,7 @@ public final class RandomGraphGenerator {
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer> maybeRelationshipPropertyProducer;
-    private final Optional<PropertyProducer> maybeNodePropertyProducer;
+    private final Map<NodeLabel, PropertyProducer> nodePropertyProducers;
 
     public RandomGraphGenerator(
         long nodeCount,
@@ -58,7 +63,7 @@ public final class RandomGraphGenerator {
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
-        Optional<PropertyProducer> maybeNodePropertyProducer,
+        Map<NodeLabel, PropertyProducer> nodePropertyProducers,
         Optional<PropertyProducer> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Orientation orientation,
@@ -67,7 +72,7 @@ public final class RandomGraphGenerator {
     ) {
         this.relationshipDistribution = relationshipDistribution;
         this.maybeNodeLabelProducer = maybeNodeLabelProducer;
-        this.maybeNodePropertyProducer = maybeNodePropertyProducer;
+        this.nodePropertyProducers = nodePropertyProducers;
         this.maybeRelationshipPropertyProducer = maybeRelationshipPropertyProducer;
         this.allocationTracker = allocationTracker;
         this.nodeCount = nodeCount;
@@ -110,12 +115,54 @@ public final class RandomGraphGenerator {
             .build();
 
         generateRelationships(relationshipsBuilder);
-        if (maybeNodePropertyProducer.isPresent()) {
-            NodeProperties nodeProperties = generateNodeProperties();
-            String propertyName = maybeNodePropertyProducer.get().getPropertyName();
+
+        if (!nodePropertyProducers.isEmpty()) {
+            var propertyToLabel = new HashMap<String, NodeLabel>();
+            var propertyToArray = new HashMap<String, HugeDoubleArray>();
+
+            nodePropertyProducers.forEach((nodeLabel, propertyProducer) -> {
+                propertyToLabel.put(propertyProducer.getPropertyName(), nodeLabel);
+                propertyToArray.put(
+                    propertyProducer.getPropertyName(),
+                    HugeDoubleArray.newArray(nodeCount, allocationTracker)
+                );
+            });
+
+            var propertyProducers = nodePropertyProducers.values();
+
+            // Fill property arrays
+            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+                for (var propertyProducer : propertyProducers) {
+                    propertyToArray
+                        .get(propertyProducer.getPropertyName())
+                        .set(nodeId, propertyProducer.getPropertyValue(random));
+                }
+            }
+
+            // Construct union node properties
+            Map<String, NodeProperties> unionProperties = propertyToLabel.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    var propertyKey = entry.getKey();
+                    var nodeLabel = entry.getValue();
+                    var nodeProperties = propertyToArray.get(propertyKey).asNodeProperties();
+                    return new UnionNodeProperties(idMap, Map.of(nodeLabel, nodeProperties));
+                }
+            ));
+
+            // Create a corresponding node schema
+            var nodeSchemaBuilder = NodeSchema.builder();
+
+            unionProperties.forEach((propertyKey, property) -> nodeSchemaBuilder.addProperty(
+                propertyToLabel.get(propertyKey),
+                propertyKey,
+                property.valueType()
+            ));
+
             return GraphFactory.create(
                 idMap,
-                Map.of(propertyName, nodeProperties),
+                nodeSchemaBuilder.build(),
+                unionProperties,
                 relationshipsBuilder.build(),
                 allocationTracker
             );
@@ -126,17 +173,6 @@ public final class RandomGraphGenerator {
                 allocationTracker
             );
         }
-    }
-
-    private NodeProperties generateNodeProperties() {
-        PropertyProducer nodePropertyProducer = maybeNodePropertyProducer.get();
-        HugeDoubleArray nodePropertiesArray = HugeDoubleArray.newArray(nodeCount, allocationTracker);
-
-        for (long i = 0; i < nodeCount; i++) {
-            nodePropertiesArray.set(i, nodePropertyProducer.getPropertyValue(random));
-        }
-
-        return nodePropertiesArray.asNodeProperties();
     }
 
     public RelationshipDistribution getRelationshipDistribution() {

@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.generator;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class RandomGraphGeneratorBuilder {
@@ -32,7 +35,7 @@ public class RandomGraphGeneratorBuilder {
     private RelationshipDistribution relationshipDistribution;
     private long seed = 0L;
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
-    private Optional<PropertyProducer> maybeNodePropertyProducer = Optional.empty();
+    private final Map<NodeLabel, PropertyProducer> nodePropertyProducers = new HashMap<>();
     private Optional<PropertyProducer> maybeRelationshipPropertyProducer = Optional.empty();
     private Aggregation aggregation = Aggregation.NONE;
     private Orientation orientation = Orientation.NATURAL;
@@ -65,7 +68,11 @@ public class RandomGraphGeneratorBuilder {
     }
 
     public RandomGraphGeneratorBuilder nodePropertyProducer(PropertyProducer nodePropertyProducer) {
-        this.maybeNodePropertyProducer = Optional.of(nodePropertyProducer);
+        return addNodePropertyProducer(NodeLabel.ALL_NODES, nodePropertyProducer);
+    }
+
+    public RandomGraphGeneratorBuilder addNodePropertyProducer(NodeLabel nodeLabel, PropertyProducer nodePropertyProducer) {
+        this.nodePropertyProducers.put(nodeLabel, nodePropertyProducer);
         return this;
     }
 
@@ -102,7 +109,7 @@ public class RandomGraphGeneratorBuilder {
             relationshipDistribution,
             seed,
             maybeNodeLabelProducer,
-            maybeNodePropertyProducer,
+            nodePropertyProducers,
             maybeRelationshipPropertyProducer,
             aggregation,
             orientation,
