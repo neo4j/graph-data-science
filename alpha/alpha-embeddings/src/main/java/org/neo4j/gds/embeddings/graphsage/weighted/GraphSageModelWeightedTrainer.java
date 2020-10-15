@@ -64,11 +64,21 @@ public class GraphSageModelWeightedTrainer {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
+    private final int negativeSampleWeight;
     private double degreeProbabilityNormalizer;
 
-    public GraphSageModelWeightedTrainer(GraphSageTrainConfig config, Log log) {
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
+
+    public GraphSageModelWeightedTrainer(Graph graph, GraphSageTrainConfig config, Log log) {
+
+        boolean useWeights = config.relationshipWeightProperty() != null;
+
+        relationshipWeightsFunction = useWeights ?
+            graph::relationshipProperty :
+            (source, target, defaultValue) -> 1.0d;
+
         this.layers = config.layerConfigs().stream()
-            .map(LayerFactory::createLayer)
+            .map(layerConfig -> LayerFactory.createLayer(relationshipWeightsFunction, layerConfig))
             .toArray(Layer[]::new);
         this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());
@@ -78,6 +88,7 @@ public class GraphSageModelWeightedTrainer {
         this.epochs = config.epochs();
         this.maxIterations = config.maxIterations();
         this.maxSearchDepth = config.searchDepth();
+        this.negativeSampleWeight = config.negativeSampleWeight();
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
@@ -206,7 +217,11 @@ public class GraphSageModelWeightedTrainer {
             GraphSageHelper::features
         );
 
-        Variable<Scalar> lossFunction = new HingeLoss(embeddingVariable);
+        Variable<Scalar> lossFunction = new WeightedGraphSageLoss(
+            relationshipWeightsFunction,
+            embeddingVariable,
+            negativeSampleWeight
+        );
 
         return new PassthroughVariable<>(lossFunction);
     }
@@ -217,9 +232,8 @@ public class GraphSageModelWeightedTrainer {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
-                // TODO: find how to randomise these???
-                // Here we are going to sample the highest "ranking" neighbors with respect of relationship weight.
-                var samples = new WeightedNeighborhoodSampler().sample(graph, currentNode.get(), 1);
+                var samples = new WeightedNeighborhoodSampler().sample(graph, currentNode.get(), 1, 0);
+
                 if (samples.size() == 1) {
                     currentNode.set(samples.get(0));
                 } else {

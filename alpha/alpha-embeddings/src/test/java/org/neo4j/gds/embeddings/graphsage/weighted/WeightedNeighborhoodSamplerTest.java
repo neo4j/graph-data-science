@@ -19,12 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,30 +36,99 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WeightedNeighborhoodSamplerTest {
 
     @GdlGraph
-    private static final String DB_QUERY =
-        "CREATE " +
-        "   (u1:User), (u1:User)," +
-        "   (d1:Dish),(d2:Dish),(d3:Dish),(d4:Dish)," +
-        "   (u1)-[:ORDERED {times: 5}]->(d1), " +
-        "   (u1)-[:ORDERED {times: 2}]->(d2), " +
-        "   (u1)-[:ORDERED {times: 1}]->(d3), " +
-        "   (u2)-[:ORDERED {times: 2}]->(d3), " +
-        "   (u2)-[:ORDERED {times: 3}]->(d4)";
+    private static final String GRAPH =
+        "(x)-[]->(y)-[]->(z), " +
+        "(a)-[]->(b)-[]->(c), " +
+        "(x)-[]->(d)-[]->(e), " +
+        "(a)-[]->(f) , " +
+        "(a)-[]->(g), " +
+        "(a)-[]->(h)";
 
     @Inject
     private Graph graph;
 
     @Inject
-    private IdFunction idFunction;
+    IdFunction idFunction;
 
     @Test
-    void testSampling() {
-        var sampler = new WeightedNeighborhoodSampler();
+    void shouldSampleSubsetOfNeighbors() {
 
-        var u1Neighbors = sampler.sample(graph, idFunction.of("u1"), 2);
-        assertThat(u1Neighbors).containsExactlyInAnyOrder(idFunction.of("d1"), idFunction.of("d2"));
+        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+        int numberOfSamples = 3;
+        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
 
-        var u2Neighbors = sampler.sample(graph, idFunction.of("u2"), 1);
-        assertThat(u2Neighbors).containsExactly(idFunction.of("d4"));
+        assertThat(sample).isNotNull();
+        assertThat(sample).hasSize(numberOfSamples);
+
+        assertThat(sample).containsAnyOf(
+            idFunction.of("b"),
+            idFunction.of("f"),
+            idFunction.of("g"),
+            idFunction.of("h")
+        );
+
+        // does not contain negative neighbors
+        assertThat(sample).doesNotContain(
+            idFunction.of("x"),
+            idFunction.of("y"),
+            idFunction.of("z"),
+            idFunction.of("a"),
+            idFunction.of("c"),
+            idFunction.of("d"),
+            idFunction.of("e")
+        );
+    }
+
+    @Test
+    void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
+        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+        int numberOfSamples = 19;
+        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
+
+        assertThat(sample).isNotNull();
+        assertThat(sample).hasSize(4);
+        assertThat(sample).hasSize(4);
+    }
+
+    @Nested
+    class WeightedCase {
+
+        @GdlGraph
+        private static final String GRAPH =
+            "(x)-[:R { weight: 8.0 }]->(y)-[:R { weight: 4.6 }]->(z), " +
+            "(a)-[:R { weight: 62.0 }]->(b)-[:R { weight: 4.6 }]->(c), " +
+            "(x)-[:R { weight: 3.0 }]->(d)-[:R { weight: 4.6 }]->(e), " +
+            "(a)-[:R { weight: 14.0 }]->(f), " +
+            "(a)-[:R { weight: 37.0 }]->(g), " +
+            "(a)-[:R { weight: 5.0 }]->(h)";
+
+        @Test
+        void shouldSampleSubsetOfNeighbors() {
+
+            NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+            int numberOfSamples = 3;
+            List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
+
+            assertThat(sample).isNotNull();
+            assertThat(sample).hasSize(numberOfSamples);
+
+            assertThat(sample).containsAnyOf(
+                idFunction.of("b"),
+                idFunction.of("f"),
+                idFunction.of("g"),
+                idFunction.of("h")
+            );
+
+            // does not contain negative neighbors
+            assertThat(sample).doesNotContain(
+                idFunction.of("x"),
+                idFunction.of("y"),
+                idFunction.of("z"),
+                idFunction.of("a"),
+                idFunction.of("c"),
+                idFunction.of("d"),
+                idFunction.of("e")
+            );
+        }
     }
 }

@@ -17,8 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
+import org.neo4j.gds.embeddings.graphsage.UniformNeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
@@ -27,18 +31,21 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class MaxPoolAggregatingLayer implements Layer {
+public class WeightedMaxPoolAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
-    private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    MaxPoolAggregatingLayer(
+    private long randomState;
+
+    public WeightedMaxPoolAggregatingLayer(
+        RelationshipWeightsFunction relationshipWeightsFunction,
         long sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
@@ -46,6 +53,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
@@ -66,7 +74,8 @@ public class MaxPoolAggregatingLayer implements Layer {
 
     @Override
     public Aggregator aggregator() {
-        return new MaxPoolingAggregator(
+        return new WeightedMaxPoolingAggregator(
+            this.relationshipWeightsFunction,
             this.poolWeights,
             this.selfWeights,
             this.neighborsWeights,

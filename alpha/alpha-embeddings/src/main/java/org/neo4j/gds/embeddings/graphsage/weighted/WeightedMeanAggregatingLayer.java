@@ -17,8 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
@@ -26,25 +29,32 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class MeanAggregatingLayer implements Layer {
+public class WeightedMeanAggregatingLayer implements Layer {
 
-    private final UniformNeighborhoodSampler sampler;
+    private final NeighborhoodSampler sampler;
+    private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final long sampleSize;
     private final Weights<Matrix> weights;
     private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    public MeanAggregatingLayer(Weights<Matrix> weights, long sampleSize, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
+    public WeightedMeanAggregatingLayer(
+        RelationshipWeightsFunction relationshipWeightsFunction,
+        Weights<Matrix> weights,
+        long sampleSize,
+        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+    ) {
+        this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
         this.randomState = ThreadLocalRandom.current().nextLong();
-        this.sampler = new UniformNeighborhoodSampler();
+        this.sampler = new WeightedNeighborhoodSampler();
     }
 
     @Override
     public Aggregator aggregator() {
-        return new MeanAggregator(weights, activationFunction);
+        return new WeightedMeanAggregator(relationshipWeightsFunction, weights, activationFunction);
     }
 
     @Override

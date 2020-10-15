@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
@@ -65,6 +66,7 @@ class GraphSageModelWeightedTrainerTest {
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .relationshipPropertyProducer(PropertyProducer.random("weight", 13, 37))
             .allocationTracker(AllocationTracker.empty())
             .build();
         graph = randomGraphGenerator.generate();
@@ -82,11 +84,11 @@ class GraphSageModelWeightedTrainerTest {
     @Test
     void trainsWithMeanAggregator() {
         var config = configBuilder
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(Aggregator.AggregatorType.WEIGHTED_MEAN)
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelWeightedTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelWeightedTrainer(graph, config, new TestLog());
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
@@ -109,11 +111,11 @@ class GraphSageModelWeightedTrainerTest {
     @Test
     void trainsWithPoolAggregator() {
         var config = configBuilder
-            .aggregator(Aggregator.AggregatorType.POOL)
+            .aggregator(Aggregator.AggregatorType.WEIGHTED_POOL)
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelWeightedTrainer(config, new TestLog());
+        var trainModel = new GraphSageModelWeightedTrainer(graph, config, new TestLog());
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();

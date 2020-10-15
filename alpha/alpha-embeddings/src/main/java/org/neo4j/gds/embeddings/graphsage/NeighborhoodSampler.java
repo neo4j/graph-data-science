@@ -19,28 +19,10 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public interface Layer {
-    long sampleSize();
-
-    Aggregator aggregator();
-
-    long randomState();
-
-    void generateNewRandomState();
-
-    NeighborhoodSampler sampler();
-
-    default List<Weights<? extends Tensor<?>>> weights() {
-        return aggregator().weights();
-    }
-
-    default List<Long> neighborhoodFunction(Graph graph, long nodeId) {
-        return sampler().sample(graph, nodeId, sampleSize(), randomState());
-    }
+public interface NeighborhoodSampler {
+    List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState);
 }

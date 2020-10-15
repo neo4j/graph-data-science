@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UniformNeighborhoodSampler {
+public class UniformNeighborhoodSampler implements NeighborhoodSampler {
     private final Random random;
 
     public UniformNeighborhoodSampler() {

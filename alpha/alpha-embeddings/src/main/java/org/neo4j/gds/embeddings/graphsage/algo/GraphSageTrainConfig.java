@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.NodePropertiesConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -42,7 +43,16 @@ import java.util.Optional;
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface GraphSageTrainConfig extends AlgoBaseConfig, TrainConfig, BatchSizeConfig, IterationsConfig, ToleranceConfig, NodePropertiesConfig, EmbeddingDimensionConfig {
+public interface GraphSageTrainConfig extends
+    AlgoBaseConfig,
+    TrainConfig,
+    BatchSizeConfig,
+    IterationsConfig,
+    ToleranceConfig,
+    NodePropertiesConfig,
+    EmbeddingDimensionConfig,
+    RelationshipWeightConfig
+{
 
     @Override
     @Value.Default

@@ -17,30 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.embeddings.graphsage.weighted;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.function.TriFunction;
 
-import java.util.List;
-
-public interface Layer {
-    long sampleSize();
-
-    Aggregator aggregator();
-
-    long randomState();
-
-    void generateNewRandomState();
-
-    NeighborhoodSampler sampler();
-
-    default List<Weights<? extends Tensor<?>>> weights() {
-        return aggregator().weights();
-    }
-
-    default List<Long> neighborhoodFunction(Graph graph, long nodeId) {
-        return sampler().sample(graph, nodeId, sampleSize(), randomState());
-    }
+public interface RelationshipWeightsFunction extends TriFunction<Long, Long, Double, Double> {
 }
