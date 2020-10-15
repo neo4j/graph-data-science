@@ -57,9 +57,7 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         return 0.0f;
     }
 
-    @Value.Check
-    default void validate() {
-        List<? extends Number> iterationWeights = iterationWeights();
+    static void validateCommon(List<? extends Number> iterationWeights) {
         if (iterationWeights.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of `%s` must not be empty.",

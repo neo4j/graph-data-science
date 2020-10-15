@@ -22,23 +22,19 @@ package org.neo4j.graphalgo.beta.fastrp;
 import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 
+import java.util.List;
+
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface FastRPExtendedBaseConfig extends FastRPBaseConfig {
 
-    @Override
     @Value.Check
     default void validate() {
-        if (iterationWeights().isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must not be empty.",
-                "iterationWeights"
-
-            ));
-        }
+        List<? extends Number> iterationWeights = iterationWeights();
+        FastRPBaseConfig.validateCommon(iterationWeights);
         if (propertyDimension() > embeddingDimension()) {
             throw new IllegalArgumentException(formatWithLocale(
-               "The value of propertyDimension %s may not exceed embeddingDimension %s.",
+                "The value of propertyDimension %s may not exceed embeddingDimension %s.",
                 propertyDimension(),
                 embeddingDimension()
             ));

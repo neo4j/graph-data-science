@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.List;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
 
@@ -36,4 +39,17 @@ public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
     default int propertyDimension() {
         return 0;
     }
+
+    @Value.Check
+    default void validate() {
+        List<? extends Number> iterationWeights = iterationWeights();
+        FastRPBaseConfig.validateCommon(iterationWeights);
+        if (embeddingDimension() < 1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of embeddingDimension is %s, but must be at least 1",
+                embeddingDimension()
+            ));
+        }
+    }
+
 }
