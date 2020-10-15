@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
+class MatrixMultiplyWithRelationshipWeightsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
@@ -89,7 +89,7 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteD
 
         MatrixConstant userEmbeddings = new MatrixConstant(userEmbeddingsData, 6, 3);
         ctx.forward(userEmbeddings);
-        MatrixMultiplyWithWeights weightedEmbeddings = new MatrixMultiplyWithWeights(
+        MatrixMultiplyWithRelationshipWeights weightedEmbeddings = new MatrixMultiplyWithRelationshipWeights(
             userEmbeddings,
             graph::relationshipProperty,
             subGraph,
@@ -137,7 +137,7 @@ class MatrixMultiplyWithWeightsTest extends GraphSageBaseTest implements FiniteD
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MatrixMultiplyWithWeights(weights,
+            new ElementSum(List.of(new MatrixMultiplyWithRelationshipWeights(weights,
                 graph::relationshipProperty,
                 subGraph,
                 subGraph.adjacency,

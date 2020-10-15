@@ -27,7 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.gds.embeddings.graphsage.weighted.RelationshipWeightsFunction;
 
-public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
+public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<Matrix> {
     private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final SubGraph subGraph;
     private final int[][] adjacency;
@@ -35,7 +35,7 @@ public class MatrixMultiplyWithWeights extends SingleParentVariable<Matrix> {
     private final int rows;
     private final int cols;
 
-    public MatrixMultiplyWithWeights(
+    public MatrixMultiplyWithRelationshipWeights(
         Variable<Matrix> parent,
         RelationshipWeightsFunction relationshipWeightsFunction,
         SubGraph subGraph,

@@ -22,8 +22,8 @@ package org.neo4j.gds.embeddings.graphsage.weighted;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithRelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
@@ -72,7 +72,7 @@ public class WeightedMaxPoolingAggregator implements Aggregator {
     ) {
         // Weighted with respect to the Relationship Weights
         Variable<Matrix> weightedPreviousLayerRepresentations =
-            new MatrixMultiplyWithWeights(
+            new MatrixMultiplyWithRelationshipWeights(
                 previousLayerRepresentations,
                 relationshipWeightsFunction,
                 subGraph,

@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.weighted;
 
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithRelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiMean;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
@@ -56,7 +56,7 @@ public class WeightedMeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph, int[][] adjacencyMatrix, int[] selfAdjacency) {
-        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithWeights(previousLayerRepresentations,
+        Variable<Matrix> weightedPreviousLayerRepresentations = new MatrixMultiplyWithRelationshipWeights(previousLayerRepresentations,
             relationshipWeightsFunction, subGraph, adjacencyMatrix, selfAdjacency);
         Variable<Matrix> means = new MultiMean(weightedPreviousLayerRepresentations, adjacencyMatrix, selfAdjacency);
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
