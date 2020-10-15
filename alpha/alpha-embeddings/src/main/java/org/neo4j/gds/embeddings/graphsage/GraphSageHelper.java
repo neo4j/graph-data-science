@@ -243,7 +243,7 @@ public final class GraphSageHelper {
                 Map.Entry::getKey,
                 entry -> entry.getValue().size()
                          + (config.degreeAsProperty() ? 1 : 0)
-                         + (config.labelAsProperty() ? 1 : 0)
+                         + 1 // Label is used as a property
             ));
 
         features.setAll(nodeId -> {
@@ -260,9 +260,8 @@ public final class GraphSageHelper {
             if (config.degreeAsProperty()) {
                 nodeFeatures[i++] = graph.degree(nodeId);
             }
-            if (config.labelAsProperty()) {
-                nodeFeatures[i] = 1.0;
-            }
+            // Label is used as a property
+            nodeFeatures[i] = 1.0;
 
             return nodeFeatures;
         });

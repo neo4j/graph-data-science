@@ -81,39 +81,6 @@ class GraphSageHelperTest {
                     .projectedFeatureSize(5)
                     .build(),
                 HugeObjectArray.of(
-                    new double[]{5.0, 2.0},
-                    new double[]{5.0, 2.0},
-                    new double[]{5.0, 2.0},
-                    new double[]{5.0, 2.0},
-
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-                    new double[]{5.0, 5.0},
-
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0},
-                    new double[]{5.0}
-                )
-            ),
-            Arguments.of(
-                "multi label (label as property)",
-                ImmutableGraphSageTrainConfig.builder()
-                    .modelName("foo")
-                    .nodePropertyNames(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
-                    .projectedFeatureSize(5)
-                    .labelAsProperty(true)
-                    .build(),
-                HugeObjectArray.of(
                     new double[]{5.0, 2.0, 1.0},
                     new double[]{5.0, 2.0, 1.0},
                     new double[]{5.0, 2.0, 1.0},

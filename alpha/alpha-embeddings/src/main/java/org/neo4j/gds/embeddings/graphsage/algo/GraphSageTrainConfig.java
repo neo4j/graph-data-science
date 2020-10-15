@@ -121,11 +121,6 @@ public interface GraphSageTrainConfig extends
         return false;
     }
 
-    @Value.Default
-    default boolean labelAsProperty() {
-        return false;
-    }
-
     // TODO: Can use Optional
     @Value.Default
     default int projectedFeatureSize() {
