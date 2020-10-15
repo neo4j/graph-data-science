@@ -137,6 +137,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.betweenness.mutate.estimate`
 | `gds.betweenness.write`
 | `gds.betweenness.write.estimate`
+.8+<.^| <<algorithms-embeddings-fastrp, Fast Random Projection>>
+| `gds.fastRP.mutate`
+| `gds.fastRP.mutate.estimate`
+| `gds.fastRP.stats`
+| `gds.fastRP.stats.estimate`
+| `gds.fastRP.stream`
+| `gds.fastRP.stream.estimate`
+| `gds.fastRP.write`
+| `gds.fastRP.write.estimate`
 |===
 
 [[beta-tier]]
@@ -279,15 +288,6 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-embeddings-node2vec, Node2Vec>>
 | `gds.alpha.node2vec.stream`
 | `gds.alpha.node2vec.write`
-.8+<.^| RandomProjections
-| `gds.fastRP.mutate`
-| `gds.fastRP.mutate.estimate`
-| `gds.fastRP.stats`
-| `gds.fastRP.stats.estimate`
-| `gds.fastRP.stream`
-| `gds.fastRP.stream.estimate`
-| `gds.fastRP.write`
-| `gds.fastRP.write.estimate`
 |===
 
 The following table lists all functions in the GDS library:
