@@ -47,6 +47,8 @@ public final class RandomGraphGenerator {
     private final Aggregation aggregation;
     private final Orientation orientation;
     private final AllowSelfLoops allowSelfLoops;
+
+    private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer> maybeRelationshipPropertyProducer;
     private final Optional<PropertyProducer> maybeNodePropertyProducer;
 
@@ -55,6 +57,7 @@ public final class RandomGraphGenerator {
         long averageDegree,
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
+        Optional<NodeLabelProducer> maybeNodeLabelProducer,
         Optional<PropertyProducer> maybeNodePropertyProducer,
         Optional<PropertyProducer> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
@@ -63,6 +66,7 @@ public final class RandomGraphGenerator {
         AllocationTracker allocationTracker
     ) {
         this.relationshipDistribution = relationshipDistribution;
+        this.maybeNodeLabelProducer = maybeNodeLabelProducer;
         this.maybeNodePropertyProducer = maybeNodePropertyProducer;
         this.maybeRelationshipPropertyProducer = maybeRelationshipPropertyProducer;
         this.allocationTracker = allocationTracker;
@@ -86,10 +90,15 @@ public final class RandomGraphGenerator {
     public HugeGraph generate() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
+            .hasLabelInformation(maybeNodeLabelProducer.isPresent())
             .tracker(allocationTracker)
             .build();
 
-        generateNodes(nodesBuilder);
+        if (maybeNodeLabelProducer.isPresent()) {
+            generateNodes(nodesBuilder, maybeNodeLabelProducer.get());
+        } else {
+            generateNodes(nodesBuilder);
+        }
 
         IdMap idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -136,6 +145,12 @@ public final class RandomGraphGenerator {
 
     public Optional<PropertyProducer> getMaybeRelationshipPropertyProducer() {
         return maybeRelationshipPropertyProducer;
+    }
+
+    private void generateNodes(NodesBuilder nodesBuilder, NodeLabelProducer nodeLabelProducer) {
+        for (long i = 0; i < nodeCount; i++) {
+            nodesBuilder.addNode(i, nodeLabelProducer.labels(i));
+        }
     }
 
     private void generateNodes(NodesBuilder nodesBuilder) {

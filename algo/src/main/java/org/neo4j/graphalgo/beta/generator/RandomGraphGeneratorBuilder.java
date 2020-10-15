@@ -31,6 +31,7 @@ public class RandomGraphGeneratorBuilder {
     private long averageDegree;
     private RelationshipDistribution relationshipDistribution;
     private long seed = 0L;
+    private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
     private Optional<PropertyProducer> maybeNodePropertyProducer = Optional.empty();
     private Optional<PropertyProducer> maybeRelationshipPropertyProducer = Optional.empty();
     private Aggregation aggregation = Aggregation.NONE;
@@ -55,6 +56,11 @@ public class RandomGraphGeneratorBuilder {
 
     public RandomGraphGeneratorBuilder seed(long seed) {
         this.seed = seed;
+        return this;
+    }
+
+    public RandomGraphGeneratorBuilder nodeLabelProducer(NodeLabelProducer nodeLabelProducer) {
+        this.maybeNodeLabelProducer = Optional.of(nodeLabelProducer);
         return this;
     }
 
@@ -95,6 +101,7 @@ public class RandomGraphGeneratorBuilder {
             averageDegree,
             relationshipDistribution,
             seed,
+            maybeNodeLabelProducer,
             maybeNodePropertyProducer,
             maybeRelationshipPropertyProducer,
             aggregation,
