@@ -33,7 +33,7 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
         this.random = new Random();
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState) {
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
@@ -43,7 +43,7 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
                 if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
                     return false;
                 }
-                double randomDouble = randomDouble(randomState, source, target, graph.nodeCount());
+                double randomDouble = randomDouble(randomSeed, source, target, graph.nodeCount());
                 if (remainingToConsider.getAndDecrement() * randomDouble <= remainingToSample.get()) {
                     neighbors.add(target);
                     remainingToSample.decrementAndGet();
