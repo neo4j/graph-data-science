@@ -95,7 +95,7 @@ public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
                     int neighborElementIndex = neighbor * cols + col;
-                    double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 0.0D); //TODO normalize weights
+                    double relationshipWeight = relationshipWeightsFunction.apply(originalSourceId, originalTargetId, 1.0D); //TODO normalize weights
                     double newValue = weightedGradient[gradientElementIndex] * relationshipWeight;
                     result.addDataAt(
                         neighborElementIndex,
