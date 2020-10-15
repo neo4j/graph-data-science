@@ -26,8 +26,10 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class RandomGraphGeneratorBuilder {
     private long nodeCount;
@@ -35,7 +37,7 @@ public class RandomGraphGeneratorBuilder {
     private RelationshipDistribution relationshipDistribution;
     private long seed = 0L;
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
-    private final Map<NodeLabel, PropertyProducer> nodePropertyProducers = new HashMap<>();
+    private final Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers = new HashMap<>();
     private Optional<PropertyProducer> maybeRelationshipPropertyProducer = Optional.empty();
     private Aggregation aggregation = Aggregation.NONE;
     private Orientation orientation = Orientation.NATURAL;
@@ -72,7 +74,7 @@ public class RandomGraphGeneratorBuilder {
     }
 
     public RandomGraphGeneratorBuilder addNodePropertyProducer(NodeLabel nodeLabel, PropertyProducer nodePropertyProducer) {
-        this.nodePropertyProducers.put(nodeLabel, nodePropertyProducer);
+        this.nodePropertyProducers.computeIfAbsent(nodeLabel, ignore -> new HashSet<>()).add(nodePropertyProducer);
         return this;
     }
 
