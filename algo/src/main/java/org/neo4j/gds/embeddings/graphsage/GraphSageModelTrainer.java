@@ -50,7 +50,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.UNWEIGHTED;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.DEFAULT_WEIGHT;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -70,7 +70,7 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
-    private RelationshipWeightsFunction relationshipWeightsFunction;
+    private RelationshipWeights relationshipWeights;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
         this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
@@ -103,12 +103,12 @@ public class GraphSageModelTrainer {
         Map<String, Double> epochLosses = new TreeMap<>();
 
         // TODO: do not store in a field but pass as parameter
-        relationshipWeightsFunction = useWeights ?
+        relationshipWeights = useWeights ?
             graph::relationshipProperty :
-            UNWEIGHTED;
+            DEFAULT_WEIGHT;
 
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction = useWeights ?
-            Optional.of(relationshipWeightsFunction) :
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction = useWeights ?
+            Optional.of(relationshipWeights) :
             Optional.empty();
 
         // TODO: do not store in a field but pass as parameter
@@ -246,7 +246,7 @@ public class GraphSageModelTrainer {
         Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(
-            relationshipWeightsFunction,
+            relationshipWeights,
             embeddingVariable,
             negativeSampleWeight
         );

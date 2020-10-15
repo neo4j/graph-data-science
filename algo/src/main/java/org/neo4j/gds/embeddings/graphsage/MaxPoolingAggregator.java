@@ -38,7 +38,7 @@ import java.util.function.Function;
 
 public class MaxPoolingAggregator implements Aggregator {
 
-    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
+    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -46,7 +46,7 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MaxPoolingAggregator(
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,

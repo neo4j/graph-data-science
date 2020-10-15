@@ -37,16 +37,16 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
 
     private static final int NEGATIVE_NODES_OFFSET = 2;
 
-    private final RelationshipWeightsFunction relationshipWeightsFunction;
+    private final RelationshipWeights relationshipWeights;
     private final Variable<Matrix> combinedEmbeddings;
     private final int negativeSamplingFactor;
 
     // TODO: Pass this as configuration parameter.
     private static final double ALPHA = 1d;
 
-    GraphSageLoss(RelationshipWeightsFunction relationshipWeightsFunction, Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
+    GraphSageLoss(RelationshipWeights relationshipWeights, Variable<Matrix> combinedEmbeddings, int negativeSamplingFactor) {
         super(combinedEmbeddings, Dimensions.scalar());
-        this.relationshipWeightsFunction = relationshipWeightsFunction;
+        this.relationshipWeights = relationshipWeights;
         this.combinedEmbeddings = combinedEmbeddings;
         this.negativeSamplingFactor = negativeSamplingFactor;
     }
@@ -68,7 +68,7 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     private double relationshipWeightFactor(int nodeId, int positiveNodeId) {
-        double relationshipWeight = relationshipWeightsFunction.weight(nodeId, positiveNodeId);
+        double relationshipWeight = relationshipWeights.weight(nodeId, positiveNodeId);
         if(Double.isNaN(relationshipWeight)) {
             relationshipWeight = 1d;
         }
