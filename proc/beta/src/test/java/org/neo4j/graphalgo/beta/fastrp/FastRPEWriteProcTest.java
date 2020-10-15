@@ -17,78 +17,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.fastrpe;
+package org.neo4j.graphalgo.beta.fastrp;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
 import java.util.List;
 import java.util.Optional;
 
-class FastRPEMutateProcTest extends FastRPEProcTest<FastRPEMutateConfig> {
+class FastRPEWriteProcTest extends FastRPEProcTest<FastRPEWriteConfig>
+    implements WritePropertyConfigTest<FastRP, FastRPEWriteConfig, FastRP> {
 
-    @BeforeEach
-    void setupNodePropertyFunc() throws Exception {
-        registerFunctions(
-            NodePropertyFunc.class
-        );
+    @Override
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPEWriteConfig>> getProcedureClazz() {
+        return FastRPEWriteProc.class;
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPEMutateConfig>> getProcedureClazz() {
-        return FastRPEMutateProc.class;
-    }
-
-    @Override
-    public FastRPEMutateConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPEMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPEWriteConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPEWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
         CypherMapWrapper minimalConfig = super.createMinimalConfig(userInput);
 
-        if (!minimalConfig.containsKey("mutateProperty")) {
-            return minimalConfig.withString("mutateProperty", "embedding");
+        if (!minimalConfig.containsKey("writeProperty")) {
+            return minimalConfig.withString("writeProperty", "embedding");
         }
         return minimalConfig;
     }
 
     @Test
     void shouldNotCrash() {
-        String loadedGraphName = "loadGraph";
-
-        var graphCreateQuery = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .graphCreate(loadedGraphName)
-            .yields();
-
-        runQuery(graphCreateQuery);
-
         int embeddingDimension = 128;
-        int propertyDimension = 127;
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
             .algo("gds.beta.fastRPE")
-            .mutateMode()
-            .addParameter("mutateProperty", "embedding")
+            .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyDimension", propertyDimension)
+            .addParameter("propertyDimension", embeddingDimension/2)
             .addParameter("nodePropertyNames", List.of("f1", "f2"))
+            .addParameter("writeProperty", "embedding")
             .yields();
 
         runQuery(query);
-
     }
 }

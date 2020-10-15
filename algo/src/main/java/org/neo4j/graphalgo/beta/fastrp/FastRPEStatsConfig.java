@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.fastrpe;
+package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -28,15 +28,15 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPEStreamConfig extends FastRPEBaseConfig {
+public interface FastRPEStatsConfig extends FastRPEBaseConfig {
 
-    static FastRPEStreamConfig of(
+    static FastRPEStatsConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new FastRPEStreamConfigImpl(
+        return new FastRPEStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

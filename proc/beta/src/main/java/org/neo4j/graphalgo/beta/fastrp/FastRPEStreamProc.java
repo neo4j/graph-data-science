@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.fastrpe;
+package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.fastrpe.FastRPECompanion.DESCRIPTION;
+import static org.neo4j.graphalgo.beta.fastrp.FastRPECompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPEStreamProc extends StreamProc<FastRP, FastRP, FastRPEStreamProc.StreamResult, FastRPEStreamConfig> {

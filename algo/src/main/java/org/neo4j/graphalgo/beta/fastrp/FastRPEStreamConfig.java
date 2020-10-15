@@ -17,27 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.fastrpe;
+package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPEMutateConfig extends FastRPEBaseConfig, MutatePropertyConfig {
+public interface FastRPEStreamConfig extends FastRPEBaseConfig {
 
-    static FastRPEMutateConfig of(
+    static FastRPEStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new FastRPEMutateConfigImpl(
+        return new FastRPEStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
