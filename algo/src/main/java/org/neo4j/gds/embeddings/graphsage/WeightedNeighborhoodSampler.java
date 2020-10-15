@@ -37,7 +37,7 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         this.random = new Random();
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState) {
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
@@ -55,7 +55,7 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
                 }
 
                 double probability = (min == max) ?
-                    randomDouble(randomState, source, target, graph.nodeCount()) :
+                    randomDouble(randomSeed, source, target, graph.nodeCount()) :
                     (1.0 - Math.pow((weight - min) / (max - min), beta));
 
                 if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {

@@ -24,5 +24,5 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.List;
 
 public interface NeighborhoodSampler {
-    List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState);
+    List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed);
 }
