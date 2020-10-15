@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -28,7 +28,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
 public class WeightedMultiMean extends SingleParentVariable<Matrix> {
-    private final RelationshipWeightsFunction relationshipWeightsFunction;
+    private final RelationshipWeights relationshipWeights;
     private final SubGraph subGraph;
     private final int[][] adjacency;
     private final int[] selfAdjacency;
@@ -37,11 +37,11 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
 
     public WeightedMultiMean(
         Variable<Matrix> parent,
-        RelationshipWeightsFunction relationshipWeightsFunction,
+        RelationshipWeights relationshipWeights,
         SubGraph subGraph
     ) {
         super(parent, Dimensions.matrix(subGraph.adjacency.length, parent.dimension(1)));
-        this.relationshipWeightsFunction = relationshipWeightsFunction;
+        this.relationshipWeights = relationshipWeights;
         this.subGraph = subGraph;
         this.adjacency = subGraph.adjacency;
         this.selfAdjacency = subGraph.selfAdjacency;
@@ -68,7 +68,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+                double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
                 for (int col = 0; col < cols; col++) {
                     means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
@@ -93,7 +93,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
-                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+                    double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId); //TODO normalize weights
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,

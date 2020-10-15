@@ -30,14 +30,14 @@ import java.util.function.Function;
 public class MeanAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
-    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
+    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final long sampleSize;
     private final Weights<Matrix> weights;
     private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     public MeanAggregatingLayer(
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         Weights<Matrix> weights,
         long sampleSize,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
