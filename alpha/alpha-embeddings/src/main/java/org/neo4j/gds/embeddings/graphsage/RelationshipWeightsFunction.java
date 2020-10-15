@@ -23,7 +23,7 @@ import org.neo4j.function.TriFunction;
 
 public interface RelationshipWeightsFunction extends TriFunction<Long, Long, Double, Double> {
 
-    RelationshipWeightsFunction DEFAULT_WEIGHT = (source, target, defaultValue) -> 1.0d;
+    RelationshipWeightsFunction UNWEIGHTED = (source, target, defaultValue) -> 1.0d;
 
     default double weight(long source, long target) {
         return weight(source, target, 1.0d);

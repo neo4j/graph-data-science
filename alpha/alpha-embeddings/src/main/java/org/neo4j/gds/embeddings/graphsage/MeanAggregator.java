@@ -42,7 +42,11 @@ public class MeanAggregator implements Aggregator {
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    MeanAggregator(Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction, Weights<Matrix> weights, Function<Variable<Matrix>, Variable<Matrix>> activationFunction) {
+    MeanAggregator(
+        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Weights<Matrix> weights,
+        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+    ) {
         this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
         this.weights = weights;
         this.activationFunction = activationFunction;
@@ -50,16 +54,18 @@ public class MeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        if (maybeRelationshipWeightsFunction.isPresent()) {
-            previousLayerRepresentations = new MatrixMultiplyWithRelationshipWeights(
+        var previousOrWeighted = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
+            // Weighted with respect to the Relationship Weights
+            new MatrixMultiplyWithRelationshipWeights(
                 previousLayerRepresentations,
-                maybeRelationshipWeightsFunction.get(),
+                relationshipWeightsFunction,
                 subGraph,
                 subGraph.adjacency,
                 subGraph.selfAdjacency
-            );
-        }
-        Variable<Matrix> means = new MultiMean(previousLayerRepresentations, subGraph.adjacency,
+            )
+        ).orElse(previousLayerRepresentations);
+
+        Variable<Matrix> means = new MultiMean(previousOrWeighted, subGraph.adjacency,
             subGraph.selfAdjacency
         );
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);

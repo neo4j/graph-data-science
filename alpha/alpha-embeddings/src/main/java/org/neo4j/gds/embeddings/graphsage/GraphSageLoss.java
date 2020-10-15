@@ -136,11 +136,12 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         int negativeNodeIndex = negativeNodeId * dimension + columnOffset;
 
         double relationshipWeightFactor = relationshipWeightFactor(nodeId, positiveNodeId);
+        double weightedPositiveLogistic = relationshipWeightFactor * positiveLogistic;
 
-        gradientResult[nodeIndex] = -embeddings[positiveNodeIndex] * relationshipWeightFactor * positiveLogistic +
+        gradientResult[nodeIndex] = -embeddings[positiveNodeIndex] * weightedPositiveLogistic +
             negativeSamplingFactor * embeddings[negativeNodeIndex] * negativeLogistic;
 
-        gradientResult[positiveNodeIndex] = -embeddings[nodeIndex] * relationshipWeightFactor * positiveLogistic;
+        gradientResult[positiveNodeIndex] = -embeddings[nodeIndex] * weightedPositiveLogistic;
 
         gradientResult[negativeNodeIndex] = negativeSamplingFactor * embeddings[nodeIndex] * negativeLogistic;
     }

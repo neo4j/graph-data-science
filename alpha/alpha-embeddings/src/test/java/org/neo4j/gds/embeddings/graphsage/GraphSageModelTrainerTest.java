@@ -79,10 +79,10 @@ class GraphSageModelTrainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "times"})
-    void trainsWithMeanAggregator(String relationshipWeightProperty) {
-        if (!relationshipWeightProperty.isBlank()) {
-            configBuilder.relationshipWeightProperty(relationshipWeightProperty);
+    @ValueSource(booleans = {false, true})
+    void trainsWithMeanAggregator(boolean useRelationshipWeight) {
+        if (useRelationshipWeight) {
+            configBuilder.relationshipWeightProperty("times");
         }
         var config = configBuilder
             .aggregator(Aggregator.AggregatorType.MEAN)
@@ -110,10 +110,10 @@ class GraphSageModelTrainerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "times"})
-    void trainsWithPoolAggregator(String relationshipWeightProperty) {
-        if (!relationshipWeightProperty.isBlank()) {
-            configBuilder.relationshipWeightProperty(relationshipWeightProperty);
+    @ValueSource(booleans = {false, true})
+    void trainsWithPoolAggregator(boolean useRelationshipWeight) {
+        if (useRelationshipWeight) {
+            configBuilder.relationshipWeightProperty("times");
         }
         var config = configBuilder
             .aggregator(Aggregator.AggregatorType.POOL)

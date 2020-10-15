@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.DEFAULT_WEIGHT;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.UNWEIGHTED;
 
 class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
@@ -62,7 +62,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(DEFAULT_WEIGHT, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -95,7 +95,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             9, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(DEFAULT_WEIGHT, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -113,7 +113,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         ));
 
-        finiteDifferenceShouldApproximateGradient(combinedEmbeddings, new GraphSageLoss(DEFAULT_WEIGHT, combinedEmbeddings, 5));
+        finiteDifferenceShouldApproximateGradient(combinedEmbeddings, new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, 5));
 
     }
 

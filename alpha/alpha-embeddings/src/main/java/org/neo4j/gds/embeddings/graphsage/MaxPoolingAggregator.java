@@ -68,25 +68,25 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> previousLayerRepresentations,
         SubGraph subGraph
     ) {
-        if (maybeRelationshipWeightsFunction.isPresent()) {
+        var previousOrWeighted = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
             // Weighted with respect to the Relationship Weights
-            previousLayerRepresentations = new MatrixMultiplyWithRelationshipWeights(
+            new MatrixMultiplyWithRelationshipWeights(
                 previousLayerRepresentations,
-                maybeRelationshipWeightsFunction.get(),
+                relationshipWeightsFunction,
                 subGraph,
                 subGraph.adjacency,
                 subGraph.selfAdjacency
-            );
-        }
+            )
+        ).orElse(previousLayerRepresentations);
         Variable<Matrix> weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
-            previousLayerRepresentations,
+            previousOrWeighted,
             poolWeights
         );
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
         Variable<Matrix> elementwiseMax = new ElementwiseMax(neighborhoodActivations, subGraph.adjacency);
 
-        Variable<Matrix> selfPreviousLayer =  new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
+        Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);
         Variable<Matrix> neighbors = MatrixMultiplyWithTransposedSecondOperand.of(elementwiseMax, neighborsWeights);
         Variable<Matrix> sum = new MatrixSum(List.of(self, neighbors));
