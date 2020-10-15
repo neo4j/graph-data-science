@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.UniformNeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -29,7 +31,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
+public class WeightedMaxPoolAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
@@ -42,7 +44,7 @@ public class WeightedMaxPoolAggregatingLayer implements WeightedLayer {
 
     private long randomState;
 
-    WeightedMaxPoolAggregatingLayer(
+    public WeightedMaxPoolAggregatingLayer(
         RelationshipWeightsFunction relationshipWeightsFunction,
         long sampleSize,
         Weights<Matrix> poolWeights,

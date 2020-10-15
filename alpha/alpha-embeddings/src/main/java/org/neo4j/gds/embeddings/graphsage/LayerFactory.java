@@ -22,6 +22,9 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
+import org.neo4j.gds.embeddings.graphsage.weighted.RelationshipWeightsFunction;
+import org.neo4j.gds.embeddings.graphsage.weighted.WeightedMaxPoolAggregatingLayer;
+import org.neo4j.gds.embeddings.graphsage.weighted.WeightedMeanAggregatingLayer;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -31,6 +34,10 @@ public final class LayerFactory {
     private LayerFactory() {}
 
     public static Layer createLayer(LayerConfig layerConfig) {
+        return createLayer((s, t, w) -> 1.0D, layerConfig);
+    }
+
+    public static Layer createLayer(RelationshipWeightsFunction relationshipWeightsFunction, LayerConfig layerConfig) {
         int rows = layerConfig.rows();
         int cols = layerConfig.cols();
 
@@ -41,6 +48,43 @@ public final class LayerFactory {
             cols,
             activationFunction.weightInitBound(rows, cols)
         );
+
+        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.WEIGHTED_MEAN) {
+            return new WeightedMeanAggregatingLayer(
+                relationshipWeightsFunction,
+                weights,
+                layerConfig.sampleSize(),
+                activationFunction.activationFunction()
+            );
+        }
+
+        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.WEIGHTED_POOL) {
+            Weights<Matrix> poolWeights = weights;
+
+            Weights<Matrix> selfWeights = generateWeights(
+                rows,
+                cols,
+                activationFunction.weightInitBound(rows, cols)
+            );
+
+            Weights<Matrix> neighborsWeights = generateWeights(
+                rows,
+                rows,
+                activationFunction.weightInitBound(rows, rows)
+            );
+
+            Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
+
+            return new WeightedMaxPoolAggregatingLayer(
+                relationshipWeightsFunction,
+                layerConfig.sampleSize(),
+                poolWeights,
+                selfWeights,
+                neighborsWeights,
+                bias,
+                activationFunction.activationFunction()
+            );
+        }
 
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
             return new MeanAggregatingLayer(weights, layerConfig.sampleSize(), activationFunction.activationFunction());

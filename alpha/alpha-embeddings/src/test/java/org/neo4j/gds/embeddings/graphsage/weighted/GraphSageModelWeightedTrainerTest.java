@@ -21,7 +21,9 @@ package org.neo4j.gds.embeddings.graphsage.weighted;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageWeightedTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.Orientation;
@@ -52,7 +54,7 @@ class GraphSageModelWeightedTrainerTest {
 
     private Graph graph;
     private HugeObjectArray<double[]> features;
-    private ImmutableGraphSageWeightedTrainConfig.Builder configBuilder;
+    private ImmutableGraphSageTrainConfig.Builder configBuilder;
 
     @BeforeEach
     void setUp() {
@@ -74,7 +76,7 @@ class GraphSageModelWeightedTrainerTest {
 
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
-        configBuilder = ImmutableGraphSageWeightedTrainConfig.builder()
+        configBuilder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
@@ -90,15 +92,15 @@ class GraphSageModelWeightedTrainerTest {
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
-        WeightedLayer[] layers = result.layers();
+        Layer[] layers = result.layers();
         assertEquals(2, layers.length);
-        WeightedLayer first = layers[0];
+        Layer first = layers[0];
         List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
         assertEquals(1, firstWeights.size());
 
         // First layer is (embeddingDimension x features.length)
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstWeights.get(0).dimensions());
-        WeightedLayer second = layers[1];
+        Layer second = layers[1];
         List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
         assertEquals(1, secondWeights.size());
 
@@ -116,10 +118,10 @@ class GraphSageModelWeightedTrainerTest {
         var trainModel = new GraphSageModelWeightedTrainer(graph, config, new TestLog());
 
         GraphSageModelWeightedTrainer.ModelTrainResult result = trainModel.train(graph, features);
-        WeightedLayer[] layers = result.layers();
+        Layer[] layers = result.layers();
         assertEquals(2, layers.length);
 
-        WeightedLayer first = layers[0];
+        Layer first = layers[0];
         List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
         assertEquals(4, firstWeights.size());
 
@@ -132,7 +134,7 @@ class GraphSageModelWeightedTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, firstLayerNeighborsWeights);
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, firstLayerBias);
 
-        WeightedLayer second = layers[1];
+        Layer second = layers[1];
         List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
         assertEquals(4, secondWeights.size());
 

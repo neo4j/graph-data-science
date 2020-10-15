@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.weighted;
 
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -27,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class WeightedMeanAggregatingLayer implements WeightedLayer {
+public class WeightedMeanAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
     private final RelationshipWeightsFunction relationshipWeightsFunction;
@@ -36,7 +38,7 @@ public class WeightedMeanAggregatingLayer implements WeightedLayer {
     private long randomState;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
-    WeightedMeanAggregatingLayer(
+    public WeightedMeanAggregatingLayer(
         RelationshipWeightsFunction relationshipWeightsFunction,
         Weights<Matrix> weights,
         long sampleSize,

@@ -23,6 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 import org.neo4j.gds.embeddings.graphsage.BatchProvider;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.LayerFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -54,7 +55,7 @@ import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamCo
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelWeightedTrainer {
-    private final WeightedLayer[] layers;
+    private final Layer[] layers;
     private final Log log;
     private final BatchProvider batchProvider;
     private final double learningRate;
@@ -63,21 +64,22 @@ public class GraphSageModelWeightedTrainer {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
+    private final int negativeSampleWeight;
     private double degreeProbabilityNormalizer;
 
     private final RelationshipWeightsFunction relationshipWeightsFunction;
 
-    public GraphSageModelWeightedTrainer(Graph graph, GraphSageWeightedTrainConfig config, Log log) {
+    public GraphSageModelWeightedTrainer(Graph graph, GraphSageTrainConfig config, Log log) {
 
-        boolean useWeights = config.useWeights();
+        boolean useWeights = config.relationshipWeightProperty() != null;
 
         relationshipWeightsFunction = useWeights ?
             graph::relationshipProperty :
             (source, target, defaultValue) -> 1.0d;
 
         this.layers = config.layerConfigs().stream()
-            .map(layerConfig -> WeightedLayerFactory.createLayer(relationshipWeightsFunction, layerConfig))
-            .toArray(WeightedLayer[]::new);
+            .map(layerConfig -> LayerFactory.createLayer(relationshipWeightsFunction, layerConfig))
+            .toArray(Layer[]::new);
         this.log = log;
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
@@ -86,6 +88,7 @@ public class GraphSageModelWeightedTrainer {
         this.epochs = config.epochs();
         this.maxIterations = config.maxIterations();
         this.maxSearchDepth = config.searchDepth();
+        this.negativeSampleWeight = config.negativeSampleWeight();
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
@@ -141,7 +144,7 @@ public class GraphSageModelWeightedTrainer {
         int epoch,
         int batchIndex
     ) {
-        for (WeightedLayer layer : layers) {
+        for (Layer layer : layers) {
             layer.generateNewRandomState();
         }
 
@@ -276,9 +279,9 @@ public class GraphSageModelWeightedTrainer {
 
         Map<String, Double> epochLosses();
 
-        WeightedLayer[] layers();
+        Layer[] layers();
 
-        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, WeightedLayer[] layers) {
+        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, Layer[] layers) {
             return ImmutableModelTrainResult.builder()
                 .startLoss(startLoss)
                 .epochLosses(epochLosses)
