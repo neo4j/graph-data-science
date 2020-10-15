@@ -50,7 +50,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageTrainConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
-    @Procedure(name = "gds.alpha.graphSage.train", mode = Mode.READ)
+    @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
     public Stream<TrainResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -66,7 +66,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Description(ESTIMATE_DESCRIPTION)
-    @Procedure(name = "gds.alpha.graphSage.train.estimate", mode = Mode.READ)
+    @Procedure(name = "gds.beta.graphSage.train.estimate", mode = Mode.READ)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

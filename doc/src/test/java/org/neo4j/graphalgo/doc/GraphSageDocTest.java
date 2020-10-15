@@ -41,7 +41,7 @@ class GraphSageDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/alpha/graph-sage/graph-sage.adoc";
+        return "algorithms/beta/graph-sage/graph-sage.adoc";
     }
 
     @Override

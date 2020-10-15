@@ -46,7 +46,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
 
         String mutatePropertyKey = "embedding";
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .mutateMode()
             .addParameter("mutateProperty", mutatePropertyKey)
             .addParameter("modelName", modelName)
@@ -76,7 +76,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
         train(16, "mean", ActivationFunction.SIGMOID);
 
         String query = GdsCypher.call().implicitCreation(config)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .mutateMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)

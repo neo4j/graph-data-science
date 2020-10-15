@@ -143,7 +143,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
     void train(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
         String trainQuery = GdsCypher.call()
             .explicitCreation(graphName)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
             .addParameter("embeddingDimension", embeddingDimension)

@@ -45,7 +45,7 @@ import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.GRAPHSA
 public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSageResult, GraphSageStreamProc.GraphSageStreamResult, GraphSageStreamConfig> {
 
     @Description(GRAPHSAGE_DESCRIPTION)
-    @Procedure(name = "gds.alpha.graphSage.stream", mode = Mode.READ)
+    @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)
     public Stream<GraphSageStreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -53,7 +53,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         return stream(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.alpha.graphSage.stream.estimate", mode = Mode.READ)
+    @Procedure(value = "gds.beta.graphSage.stream.estimate", mode = Mode.READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

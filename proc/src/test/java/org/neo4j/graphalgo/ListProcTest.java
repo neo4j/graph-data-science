@@ -100,14 +100,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
-        "gds.alpha.graphSage.mutate",
-        "gds.alpha.graphSage.mutate.estimate",
-        "gds.alpha.graphSage.stream",
-        "gds.alpha.graphSage.stream.estimate",
-        "gds.alpha.graphSage.train",
-        "gds.alpha.graphSage.train.estimate",
-        "gds.alpha.graphSage.write",
-        "gds.alpha.graphSage.write.estimate",
+        "gds.beta.graphSage.mutate",
+        "gds.beta.graphSage.mutate.estimate",
+        "gds.beta.graphSage.stream",
+        "gds.beta.graphSage.stream.estimate",
+        "gds.beta.graphSage.train",
+        "gds.beta.graphSage.train.estimate",
+        "gds.beta.graphSage.write",
+        "gds.beta.graphSage.write.estimate",
 
         "gds.beta.fastRPExtended.mutate",
         "gds.beta.fastRPExtended.mutate.estimate",

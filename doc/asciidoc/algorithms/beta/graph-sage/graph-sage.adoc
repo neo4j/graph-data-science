@@ -1,5 +1,5 @@
 [[algorithms-embeddings-graph-sage]]
-[.alpha]
+[.beta]
 = GraphSAGE
 
 [abstract]
@@ -29,7 +29,7 @@ For more information on this algorithm see:
 .Run GraphSAGE in stream mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.graphSage.stream(
+CALL gds.beta.graphSage.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -57,7 +57,7 @@ include::specific-configuration.adoc[]
 .Run GraphSAGE in write mode on a graph stored in the catalog.
 [source, cypher]
 ----
-CALL gds.alpha.graphSage.write(
+CALL gds.beta.graphSage.write(
   graphName: String,
   configuration: Map
 )
@@ -96,7 +96,7 @@ include::specific-configuration.adoc[]
 .Run GraphSAGE in train mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.graphSage.train(
+CALL gds.beta.graphSage.train(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -133,7 +133,7 @@ include::../../shared/syntax-anonymous-graphs.adoc[]
 .Run GraphSAGE in write mode on an anonymous graph.
 [source, cypher]
 ----
-CALL gds.alpha.graphSage.write(
+CALL gds.beta.graphSage.write(
   configuration: Map
 )
 YIELD
@@ -220,7 +220,7 @@ NOTE: The names specified in the `nodePropertyNames` configuration parameter mus
 
 [source, cypher, role=query-example, no-result=true]
 ----
-CALL gds.alpha.graphSage.train(
+CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'exampleTrainModel',
@@ -239,12 +239,12 @@ WARNING: The `train` procedure will raise an error if there are no relationships
 === Stream
 
 To generate embeddings and stream them back to the client we can use the stream mode.
-We must first train a model, which we do using the `gds.alpha.graphSage.train` procedure.
+We must first train a model, which we do using the `gds.beta.graphSage.train` procedure.
 
 [[graph-sage-trained-model-example]]
 [source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
-CALL gds.alpha.graphSage.train(
+CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'graphSage',
@@ -259,7 +259,7 @@ Once we have trained a model (named `'graphSage'`) we can use it to generate and
 
 [source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
-CALL gds.alpha.graphSage.stream(
+CALL gds.beta.graphSage.stream(
   'persons',
   {
     modelName: 'graphSage'
@@ -290,7 +290,7 @@ Below is an example of how to achieve this.
 --
 [source, cypher, role=query-example, no-result=true, group=graphSage]
 ----
-CALL gds.alpha.graphSage.write(
+CALL gds.beta.graphSage.write(
   'persons',
   {
     writeProperty: 'embedding',

@@ -45,7 +45,7 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
         train(embeddingDimension, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)
@@ -68,7 +68,7 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
         train(42, "mean", ActivationFunction.SIGMOID);
 
         String query = GdsCypher.call().implicitCreation(config)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)

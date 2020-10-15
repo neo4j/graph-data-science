@@ -43,7 +43,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage.GraphSageResult, GraphSageMutateProc.MutateResult, GraphSageMutateConfig> {
 
-    @Procedure(value = "gds.alpha.graphSage.mutate", mode = Mode.READ)
+    @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -56,7 +56,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.graphSage.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

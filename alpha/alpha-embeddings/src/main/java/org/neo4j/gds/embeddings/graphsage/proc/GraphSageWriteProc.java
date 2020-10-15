@@ -42,7 +42,7 @@ import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.getNode
 
 public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSageResult, GraphSageWriteProc.GraphSageWriteResult, GraphSageWriteConfig> {
 
-    @Procedure(name = "gds.alpha.graphSage.write", mode = Mode.WRITE)
+    @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPHSAGE_DESCRIPTION)
     public Stream<GraphSageWriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(value = "gds.alpha.graphSage.write.estimate", mode = Mode.READ)
+    @Procedure(value = "gds.beta.graphSage.write.estimate", mode = Mode.READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

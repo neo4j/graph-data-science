@@ -189,7 +189,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         String graphSageTrainQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
             .addParameter("embeddingDimension", embeddingDimension)
@@ -201,7 +201,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         String graphSageStreamQuery = GdsCypher
             .call()
             .explicitCreation(TEST_GRAPH)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("modelName", graphSageModel)
             .yields();

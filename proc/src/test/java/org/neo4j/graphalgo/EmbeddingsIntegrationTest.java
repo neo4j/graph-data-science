@@ -146,7 +146,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         String graphSageTrainQuery = GdsCypher
             .call()
             .explicitCreation("newGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("rp0", "rp1", "rp2", "node2vec0", "node2vec1", "node2vec2"))
             .addParameter("embeddingDimension", embeddingDimension)
@@ -157,7 +157,7 @@ class EmbeddingsIntegrationTest extends BaseProcTest {
         String graphSageStreamQuery = GdsCypher
             .call()
             .explicitCreation("newGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("modelName", graphSageModel)
             .yields();

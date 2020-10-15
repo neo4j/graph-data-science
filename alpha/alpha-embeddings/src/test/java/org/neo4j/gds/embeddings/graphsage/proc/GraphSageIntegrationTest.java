@@ -81,7 +81,7 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
 
     private void stream() {
         String streamQuery = GdsCypher.call().explicitCreation("embeddingsGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)

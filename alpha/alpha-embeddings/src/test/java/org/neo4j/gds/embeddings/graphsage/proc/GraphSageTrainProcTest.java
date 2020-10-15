@@ -71,7 +71,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         String modelName = "gsModel";
         String graphName = "embeddingsGraph";
         String train = GdsCypher.call().explicitCreation(graphName)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
             .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
@@ -144,7 +144,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         String modelName = "gsModel";
         String train = GdsCypher.call().explicitCreation(graphName)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
             .addParameter("projectedFeatureSize", 5)
@@ -209,7 +209,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 .relationshipProjections(RelationshipProjections.fromString("REL")
                 ).build()
         )
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
             .addParameter("degreeAsProperty", true)
@@ -236,7 +236,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var relationshipQuery = "MATCH (n:King)-[:REL]-(k:King) RETURN id(n) AS source, id(k) AS target";
 
         var train =
-            "CALL gds.alpha.graphSage.train({" +
+            "CALL gds.beta.graphSage.train({" +
             "   modelName: $modelName," +
             "   nodeQuery: $nodeQuery," +
             "   relationshipQuery: $relationshipQuery," +
@@ -267,7 +267,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void shouldFailOnMissingNodeProperties() {
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
             .addParameter("nodePropertyNames", List.of("age", "missing_1", "missing_2"))
@@ -323,7 +323,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     @Test
     void estimates() {
         String query = GdsCypher.call().explicitCreation(graphName)
-            .algo("gds.alpha.graphSage")
+            .algo("gds.beta.graphSage")
             .trainEstimation()
             .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
