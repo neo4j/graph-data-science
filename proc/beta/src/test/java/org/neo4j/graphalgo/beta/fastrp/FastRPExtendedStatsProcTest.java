@@ -29,16 +29,16 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.List;
 import java.util.Optional;
 
-class FastRPEStatsProcTest extends FastRPEProcTest<FastRPEStatsConfig> {
+class FastRPExtendedStatsProcTest extends FastRPExtendedProcTest<FastRPExtendedStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPEStatsConfig>> getProcedureClazz() {
-        return FastRPEStatsProc.class;
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPExtendedStatsConfig>> getProcedureClazz() {
+        return FastRPExtendedStatsProc.class;
     }
 
     @Override
-    public FastRPEStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return FastRPEStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public FastRPExtendedStatsConfig createConfig(CypherMapWrapper mapWrapper) {
+        return FastRPExtendedStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test
@@ -47,7 +47,7 @@ class FastRPEStatsProcTest extends FastRPEProcTest<FastRPEStatsConfig> {
             .withNodeLabel("Node")
             .withRelationshipType("REL")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .algo("gds.beta.fastRPE")
+            .algo("gds.beta.fastRPExtended")
             .statsMode()
             .addParameter("embeddingDimension", 4)
             .addParameter("propertyDimension", 2)

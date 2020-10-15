@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.MutatePropertyProc;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -35,25 +35,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.fastrp.FastRPECompanion.DESCRIPTION;
+import static org.neo4j.graphalgo.beta.fastrp.FastRPExtendedCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-public class FastRPEMutateProc extends MutatePropertyProc<FastRP, FastRP, FastRPEMutateProc.MutateResult, FastRPEMutateConfig> {
+public class FastRPExtendedWriteProc extends WriteProc<FastRP, FastRP, FastRPExtendedWriteProc.WriteResult, FastRPExtendedWriteConfig> {
 
-    @Procedure(value = "gds.beta.fastRPE.mutate", mode = READ)
+    @Procedure(value = "gds.beta.fastRPExtended.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ComputationResult<FastRP, FastRP, FastRPEMutateConfig> computationResult = compute(
+    )  {
+        ComputationResult<FastRP, FastRP, FastRPExtendedWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return mutate(computationResult);
+        return write(computationResult);
     }
 
-    @Procedure(value = "gds.beta.fastRPE.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.fastRPExtended.write.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -63,68 +64,69 @@ public class FastRPEMutateProc extends MutatePropertyProc<FastRP, FastRP, FastRP
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPEMutateConfig> computationResult) {
-        return FastRPECompanion.getNodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPEMutateConfig> computeResult) {
-        return new MutateResult.Builder();
-    }
-
-    @Override
-    protected FastRPEMutateConfig newConfig(
+    protected FastRPExtendedWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return FastRPEMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPExtendedWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, FastRPEMutateConfig> algorithmFactory() {
-        return new FastRPEFactory<>();
+    protected AlgorithmFactory<FastRP, FastRPExtendedWriteConfig> algorithmFactory() {
+        return new FastRPExtendedFactory<>();
     }
 
-    public static final class MutateResult {
+    @Override
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPExtendedWriteConfig> computationResult) {
+        return FastRPExtendedCompanion.getNodeProperties(computationResult);
+    }
 
-        public final long nodePropertiesWritten;
-        public final long mutateMillis;
+    @Override
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPExtendedWriteConfig> computeResult) {
+        return new WriteResult.Builder();
+    }
+
+    public static final class WriteResult {
+
         public final long nodeCount;
+        public final long nodePropertiesWritten;
         public final long createMillis;
         public final long computeMillis;
+        public final long writeMillis;
         public final Map<String, Object> configuration;
 
-        MutateResult(
+        WriteResult(
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long mutateMillis,
-            Map<String, Object> config
+            long writeMillis,
+            Map<String, Object> configuration
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
-            this.mutateMillis = mutateMillis;
-            this.configuration = config;
+            this.writeMillis = writeMillis;
+            this.configuration = configuration;
         }
 
-        static final class Builder extends AbstractResultBuilder<MutateResult> {
+        static class Builder extends AbstractResultBuilder<WriteResult> {
 
             @Override
-            public MutateResult build() {
-                return new MutateResult(
+            public WriteResult build() {
+                return new WriteResult(
                     nodeCount,
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
-                    mutateMillis,
+                    writeMillis,
                     config.toMap()
                 );
             }
         }
     }
+
 }

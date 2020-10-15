@@ -24,13 +24,13 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 
-final class FastRPECompanion {
+final class FastRPExtendedCompanion {
 
-    static final String DESCRIPTION = "The FastRPE algorithm produces node embeddings via the extended fastrp algorithm";
+    static final String DESCRIPTION = "The FastRPExtended algorithm produces node embeddings via random projection of nodes and their properties";
 
-    private FastRPECompanion() {}
+    private FastRPExtendedCompanion() {}
 
-    static <CONFIG extends FastRPEBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
+    static <CONFIG extends FastRPExtendedBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
         return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
     }
 }

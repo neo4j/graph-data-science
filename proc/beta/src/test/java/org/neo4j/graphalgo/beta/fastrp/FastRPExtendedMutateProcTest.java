@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.functions.NodePropertyFunc;
 import java.util.List;
 import java.util.Optional;
 
-class FastRPEMutateProcTest extends FastRPEProcTest<FastRPEMutateConfig> {
+class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtendedMutateConfig> {
 
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
@@ -42,13 +42,13 @@ class FastRPEMutateProcTest extends FastRPEProcTest<FastRPEMutateConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPEMutateConfig>> getProcedureClazz() {
-        return FastRPEMutateProc.class;
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPExtendedMutateConfig>> getProcedureClazz() {
+        return FastRPExtendedMutateProc.class;
     }
 
     @Override
-    public FastRPEMutateConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPEMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
+    public FastRPExtendedMutateConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPExtendedMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Override
@@ -80,7 +80,7 @@ class FastRPEMutateProcTest extends FastRPEProcTest<FastRPEMutateConfig> {
             .withRelationshipType("REL")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .algo("gds.beta.fastRPE")
+            .algo("gds.beta.fastRPExtended")
             .mutateMode()
             .addParameter("mutateProperty", "embedding")
             .addParameter("embeddingDimension", embeddingDimension)

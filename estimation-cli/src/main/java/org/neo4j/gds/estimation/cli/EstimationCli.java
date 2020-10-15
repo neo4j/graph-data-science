@@ -210,7 +210,7 @@ public class EstimationCli implements Runnable {
             if (procedureName.startsWith("gds.fastRP")) {
                 actualConfig.put("embeddingDimension", 128);
             }
-            if (procedureName.startsWith("gds.beta.fastRPE")) {
+            if (procedureName.startsWith("gds.beta.fastRPExtended")) {
                 actualConfig.put("embeddingDimension", 128);
                 actualConfig.put("propertyDimension", 64);
             }

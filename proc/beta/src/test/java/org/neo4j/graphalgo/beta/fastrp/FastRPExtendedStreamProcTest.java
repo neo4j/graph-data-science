@@ -23,49 +23,38 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Optional;
 
-class FastRPEWriteProcTest extends FastRPEProcTest<FastRPEWriteConfig>
-    implements WritePropertyConfigTest<FastRP, FastRPEWriteConfig, FastRP> {
+@SuppressWarnings("unchecked")
+class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtendedStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPEWriteConfig>> getProcedureClazz() {
-        return FastRPEWriteProc.class;
+    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPExtendedStreamConfig>> getProcedureClazz() {
+        return FastRPExtendedStreamProc.class;
     }
 
     @Override
-    public FastRPEWriteConfig createConfig(CypherMapWrapper userInput) {
-        return FastRPEWriteConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
-    }
-
-    @Override
-    public CypherMapWrapper createMinimalConfig(CypherMapWrapper userInput) {
-        CypherMapWrapper minimalConfig = super.createMinimalConfig(userInput);
-
-        if (!minimalConfig.containsKey("writeProperty")) {
-            return minimalConfig.withString("writeProperty", "embedding");
-        }
-        return minimalConfig;
+    public FastRPExtendedStreamConfig createConfig(CypherMapWrapper userInput) {
+        return FastRPExtendedStreamConfig.of(getUsername(), Optional.empty(), Optional.empty(), userInput);
     }
 
     @Test
     void shouldNotCrash() {
         int embeddingDimension = 128;
+        int propertyDimension = 127;
         String query = GdsCypher.call()
             .withNodeLabel("Node")
             .withRelationshipType("REL")
             .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .algo("gds.beta.fastRPE")
-            .writeMode()
+            .algo("gds.beta.fastRPExtended")
+            .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("propertyDimension", embeddingDimension/2)
+            .addParameter("propertyDimension", propertyDimension)
             .addParameter("nodePropertyNames", List.of("f1", "f2"))
-            .addParameter("writeProperty", "embedding")
             .yields();
 
         runQuery(query);

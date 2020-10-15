@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface FastRPEBaseConfig extends FastRPBaseConfig {
+public interface FastRPExtendedBaseConfig extends FastRPBaseConfig {
 
     @Override
     @Value.Check

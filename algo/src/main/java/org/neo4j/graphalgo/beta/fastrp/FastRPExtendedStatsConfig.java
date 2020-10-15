@@ -28,15 +28,15 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPEStatsConfig extends FastRPEBaseConfig {
+public interface FastRPExtendedStatsConfig extends FastRPExtendedBaseConfig {
 
-    static FastRPEStatsConfig of(
+    static FastRPExtendedStatsConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new FastRPEStatsConfigImpl(
+        return new FastRPExtendedStatsConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

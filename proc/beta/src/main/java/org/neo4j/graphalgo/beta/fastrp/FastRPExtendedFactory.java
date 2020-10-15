@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public class FastRPEFactory<CONFIG extends FastRPEBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
+public class FastRPExtendedFactory<CONFIG extends FastRPExtendedBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
 
     @Override
     public FastRP build(

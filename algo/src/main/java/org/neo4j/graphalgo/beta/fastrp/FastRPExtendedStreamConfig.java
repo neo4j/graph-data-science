@@ -22,22 +22,21 @@ package org.neo4j.graphalgo.beta.fastrp;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPEWriteConfig extends FastRPEBaseConfig, WritePropertyConfig {
+public interface FastRPExtendedStreamConfig extends FastRPExtendedBaseConfig {
 
-    static FastRPEWriteConfig of(
+    static FastRPExtendedStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new FastRPEWriteConfigImpl(
+        return new FastRPExtendedStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

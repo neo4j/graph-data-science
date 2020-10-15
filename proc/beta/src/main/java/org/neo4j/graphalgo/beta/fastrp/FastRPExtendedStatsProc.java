@@ -21,40 +21,37 @@ package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.fastrp.FastRPECompanion.DESCRIPTION;
+import static org.neo4j.graphalgo.beta.fastrp.FastRPExtendedCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPEStreamProc extends StreamProc<FastRP, FastRP, FastRPEStreamProc.StreamResult, FastRPEStreamConfig> {
+public class FastRPExtendedStatsProc extends StatsProc<FastRP, FastRP, FastRPExtendedStatsProc.StatsResult, FastRPExtendedStatsConfig> {
 
-    @Procedure(value = "gds.beta.fastRPE.stream", mode = READ)
-    @Description(FastRPECompanion.DESCRIPTION)
-    public Stream<StreamResult> stream(
+    @Procedure(value = "gds.beta.fastRPExtended.stats", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<StatsResult> stats(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP, FastRPEStreamConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP, FastRPExtendedStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return stream(computationResult);
+        return stats(computationResult);
     }
-
-    @Procedure(value = "gds.beta.fastRPE.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.fastRPExtended.stats.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -63,48 +60,57 @@ public class FastRPEStreamProc extends StreamProc<FastRP, FastRP, FastRPEStreamP
         return computeEstimate(graphNameOrConfig, configuration);
     }
 
+
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPEStreamConfig> computationResult) {
-        return FastRPECompanion.getNodeProperties(computationResult);
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPExtendedStatsConfig> computeResult) {
+        return new StatsResult.Builder();
     }
 
     @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
-    }
-
-    @Override
-    protected FastRPEStreamConfig newConfig(
+    protected FastRPExtendedStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return FastRPEStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return FastRPExtendedStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<FastRP, FastRPEStreamConfig> algorithmFactory() {
-        return new FastRPEFactory<>();
+    protected AlgorithmFactory<FastRP, FastRPExtendedStatsConfig> algorithmFactory() {
+        return new FastRPExtendedFactory<>();
     }
 
-    public static final class StreamResult {
-        public final long nodeId;
-        public final List<Number> embedding;
+    public static final class StatsResult {
 
-        StreamResult(long nodeId, float[] embedding) {
-            this.nodeId = nodeId;
-            this.embedding = arrayToList(embedding);
+        public final long nodeCount;
+        public final long createMillis;
+        public final long computeMillis;
+        public final Map<String, Object> configuration;
+
+        StatsResult(
+            long nodeCount,
+            long createMillis,
+            long computeMillis,
+            Map<String, Object> config
+        ) {
+            this.nodeCount = nodeCount;
+            this.createMillis = createMillis;
+            this.computeMillis = computeMillis;
+            this.configuration = config;
         }
 
-        static List<Number> arrayToList(float[] values) {
-            var floats = new ArrayList<Number>(values.length);
-            for (float value : values) {
-                floats.add(value);
+        static final class Builder extends AbstractResultBuilder<StatsResult> {
+
+            @Override
+            public StatsResult build() {
+                return new StatsResult(
+                    nodeCount,
+                    createMillis,
+                    computeMillis,
+                    config.toMap()
+                );
             }
-            return floats;
         }
     }
 }
