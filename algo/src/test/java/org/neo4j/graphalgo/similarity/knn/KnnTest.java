@@ -22,7 +22,14 @@ package org.neo4j.graphalgo.similarity.knn;
 import com.carrotsearch.hppc.LongArrayList;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -32,6 +39,7 @@ import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Comparator;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -112,6 +120,37 @@ class KnnTest {
             .doesNotHaveDuplicates()
             .isSortedAccordingTo(Comparator.naturalOrder())
             .hasSizeLessThanOrEqualTo(expectedNeighbors.length);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyProperties")
+    void testNonExistingProperties(NodeProperties nodeProperties) {
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("knn")
+            .topK(2)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+        var knn = new Knn(
+            graph.nodeCount(),
+            knnConfig,
+            SimilarityComputer.ofProperty(nodeProperties, "knn"),
+            knnContext
+        );
+        var result = knn.compute();
+
+        assertThat(result)
+            .isNotNull()
+            .extracting(Knn.Result::size)
+            .isEqualTo(3L);
+    }
+
+    static Stream<NodeProperties> emptyProperties() {
+        return Stream.of(
+            (DoubleNodeProperties) nodeId -> Double.NaN,
+            new NullPropertyMap.DoubleNullPropertyMap(Double.NaN),
+            (FloatArrayNodeProperties) nodeId -> new float[]{},
+            (DoubleArrayNodeProperties) nodeId -> new double[]{}
+        );
     }
 
     @Test

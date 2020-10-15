@@ -127,7 +127,7 @@ class NeighborList {
     ) {
         for (LongCursor neighbor : neighbors) {
             long element = neighbor.value;
-            double similarity = similarityComputer.similarity(baseNodeId, element);
+            double similarity = similarityComputer.safeSimilarity(baseNodeId, element);
             add(element, similarity, random);
         }
     }

@@ -78,7 +78,7 @@ final class GenerateRandomNeighbors implements BiLongConsumer {
             for (var chosenCursor : chosen) {
                 var neighborNode = chosenCursor.value;
                 assert nodeId != neighborNode;
-                var similarity = computer.similarity(nodeId, neighborNode);
+                var similarity = computer.safeSimilarity(nodeId, neighborNode);
                 neighbors.add(neighborNode, similarity, rng);
             }
 

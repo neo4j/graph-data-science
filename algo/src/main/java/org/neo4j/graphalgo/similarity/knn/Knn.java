@@ -447,7 +447,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             assert base != joiner;
             assert n > 1 && k > 0;
 
-            var similarity = computer.similarity(base, joiner);
+            var similarity = computer.safeSimilarity(base, joiner);
             var neighbors = allNeighbors.get(base);
             synchronized (neighbors) {
                 var k2 = neighbors.size();
