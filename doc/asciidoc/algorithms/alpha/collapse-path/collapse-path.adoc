@@ -1,22 +1,22 @@
-[[algorithms-traversal-to-relationship]]
+[[algorithms-collapse-path]]
 [.alpha]
-= Traversal to Relationship
+= Collapse Path
 
 [abstract]
 --
-This section describes the Traversal to Relationship algorithm in the Neo4j Graph Data Science library.
+This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
 --
 
 This topic includes:
 
-* <<algorithms-traversal-to-relationship-intro, Introduction>>
-* <<algorithms-traversal-to-relationship-syntax, Syntax>>
-* <<algorithms-traversal-to-relationship-examples, Examples>>
+* <<algorithms-collapse-path-intro, Introduction>>
+* <<algorithms-collapse-path-syntax, Syntax>>
+* <<algorithms-collapse-path-examples, Examples>>
 
-[[algorithms-traversal-to-relationship-intro]]
+[[algorithms-collapse-path-intro]]
 == Introduction
 
-The Traversal to Relationship algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of the traversal.
+The Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of the traversal.
 The algorithm is intended to support the creation of monopartite graphs required by many graph algorithms.
 
 The main input for the algorithm is a list of relationship types.
@@ -25,7 +25,7 @@ Only nodes reached after traversing every relationship type specified are used a
 Exactly one relationship is created for every pair of nodes for which at least one path from start to end node exists.
 
 
-[[algorithms-traversal-to-relationship-syntax]]
+[[algorithms-collapse-path-syntax]]
 == Syntax
 
 .Random Projection syntax per mode
@@ -34,10 +34,10 @@ Exactly one relationship is created for every pair of nodes for which at least o
 
 [.include-with-muate]
 ======
-.Run Traversal to Relationship in mutate mode on a named graph.
+.Run Collapse Path in mutate mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.traversalToRelationship.mutate(
+CALL gds.alpha.collapsePath.mutate(
   graphName: String,
   configuration: Map
 )
@@ -74,7 +74,7 @@ include::specific-configuration.adoc[]
 ======
 ====
 
-[[algorithms-traversal-to-relationship-examples]]
+[[algorithms-collapse-path-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
@@ -132,7 +132,7 @@ Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in t
 --
 [source, cypher]
 ----
-CALL gds.alpha.traversalToRelationship.mutate(
+CALL gds.alpha.collapsePath.mutate(
   'persons',
   {
     relationshipTypes: ['PLAYS', 'PLAYED_BY'],

@@ -20,7 +20,7 @@ RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 
 [NOTE]
 ====
-For certain Cypher patterns, the same behaviour can be achieved using the <<algorithms-traversal-to-relationship, Traversal to Relationship>> algorithm in combination with native projections.
+For certain Cypher patterns, the same behaviour can be achieved using the <<algorithms-collapse-path, Collapse Path>> algorithm in combination with native projections.
 ====
 
 Cypher projections are especially useful during the development phase.

@@ -20,24 +20,24 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.walking.TraversalToRelationshipMutateProc;
+import org.neo4j.graphalgo.walking.CollapsePathMutateProc;
 
 import java.util.Arrays;
 import java.util.List;
 
-class TraversalToRelationshipDocTest extends DocTestBase {
+class CollapsePathDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
-            TraversalToRelationshipMutateProc.class,
+            CollapsePathMutateProc.class,
             GraphCreateProc.class
         );
     }
 
     @Override
     String adocFile() {
-        return "algorithms/alpha/traversal-to-relationship/traversal-to-relationship.adoc";
+        return "algorithms/alpha/collapse-path/collapse-path.adoc";
     }
 
 }

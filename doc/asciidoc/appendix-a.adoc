@@ -205,6 +205,8 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.closeness.write`
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
+.1+<.^|<<algorithms-collapse-path, Collapse Path>>
+| `gds.alpha.collapsePath.mutate`
 .2+<.^|<<algorithms-degree-centrality, Degree Centrality>>
 | `gds.alpha.degree.stream`
 | `gds.alpha.degree.write`
@@ -212,8 +214,6 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
 | `gds.alpha.eigenvector.stream`
 | `gds.alpha.eigenvector.write`
-.1+<.^|<<algorithms-traversal-to-relationship, Traversal to Relationship>>
-| `gds.alpha.traversalToRelationship.mutate`
 .2+<.^|<<alpha-algorithms-yens-k-shortest-path, K-Shortest Paths>>
 | `gds.alpha.kShortestPaths.stream`
 | `gds.alpha.kShortestPaths.write`

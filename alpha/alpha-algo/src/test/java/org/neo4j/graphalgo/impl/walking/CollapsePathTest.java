@@ -39,7 +39,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 @GdlExtension
-class TraversalToRelationshipTest {
+class CollapsePathTest {
 
     private static final String EXPECTED_WITHOUT_LOOPS =
         "CREATE" +
@@ -114,7 +114,7 @@ class TraversalToRelationshipTest {
     void testCreatingRelationships() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        var config = ImmutableTraversalToRelationshipConfig
+        var config = ImmutableCollapsePathConfig
             .builder()
             .concurrency(2)
             .relationshipTypes(List.of("TOOK", "TOOK"))
@@ -122,7 +122,7 @@ class TraversalToRelationshipTest {
             .allowSelfLoops(false)
             .build();
 
-        Relationships relationships = new TraversalToRelationship(
+        Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
             config,
             Pools.DEFAULT,
@@ -137,7 +137,7 @@ class TraversalToRelationshipTest {
     void testAllowCreatingSelfLoops() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        var config = ImmutableTraversalToRelationshipConfig
+        var config = ImmutableCollapsePathConfig
             .builder()
             .concurrency(2)
             .relationshipTypes(List.of("TOOK", "TOOK"))
@@ -145,7 +145,7 @@ class TraversalToRelationshipTest {
             .allowSelfLoops(true)
             .build();
 
-        Relationships relationships = new TraversalToRelationship(
+        Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
             config,
             Pools.DEFAULT,
@@ -158,7 +158,7 @@ class TraversalToRelationshipTest {
 
     @Test
     void runWithDifferentRelationshipTypes() {
-        var config = ImmutableTraversalToRelationshipConfig
+        var config = ImmutableCollapsePathConfig
             .builder()
             .concurrency(2)
             .relationshipTypes(List.of("TOOK", "TAKEN_BY"))
@@ -166,7 +166,7 @@ class TraversalToRelationshipTest {
             .allowSelfLoops(false)
             .build();
 
-        Relationships relationships = new TraversalToRelationship(
+        Relationships relationships = new CollapsePath(
             new Graph[]{tookGraph, takenByGraph},
             config,
             Pools.DEFAULT,

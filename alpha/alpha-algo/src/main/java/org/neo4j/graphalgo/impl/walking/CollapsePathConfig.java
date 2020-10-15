@@ -34,7 +34,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface TraversalToRelationshipConfig extends AlgoBaseConfig, MutateRelationshipConfig {
+public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipConfig {
 
     List<String> relationshipTypes();
 
@@ -43,13 +43,13 @@ public interface TraversalToRelationshipConfig extends AlgoBaseConfig, MutateRel
         return false;
     };
 
-    static TraversalToRelationshipConfig of(
+    static CollapsePathConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new TraversalToRelationshipConfigImpl(
+        return new CollapsePathConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

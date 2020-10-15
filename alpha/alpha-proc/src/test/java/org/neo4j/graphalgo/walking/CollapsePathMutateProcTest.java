@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.impl.walking.TraversalToRelationship;
-import org.neo4j.graphalgo.impl.walking.TraversalToRelationshipConfig;
+import org.neo4j.graphalgo.impl.walking.CollapsePath;
+import org.neo4j.graphalgo.impl.walking.CollapsePathConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -43,9 +43,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
-    AlgoBaseProcTest<TraversalToRelationship, TraversalToRelationshipConfig, Relationships>,
-    MutateRelationshipsTest<TraversalToRelationship, TraversalToRelationshipConfig, Relationships> {
+class CollapsePathMutateProcTest extends BaseProcTest implements
+    AlgoBaseProcTest<CollapsePath, CollapsePathConfig, Relationships>,
+    MutateRelationshipsTest<CollapsePath, CollapsePathConfig, Relationships> {
 
     @Override
     public String createQuery() {
@@ -92,8 +92,8 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<TraversalToRelationship, Relationships, TraversalToRelationshipConfig>> getProcedureClazz() {
-        return TraversalToRelationshipMutateProc.class;
+    public Class<? extends AlgoBaseProc<CollapsePath, Relationships, CollapsePathConfig>> getProcedureClazz() {
+        return CollapsePathMutateProc.class;
     }
 
     @Override
@@ -111,8 +111,8 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
     }
 
     @Override
-    public TraversalToRelationshipConfig createConfig(CypherMapWrapper mapWrapper) {
-        return TraversalToRelationshipConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public CollapsePathConfig createConfig(CypherMapWrapper mapWrapper) {
+        return CollapsePathConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override
@@ -130,7 +130,7 @@ class TraversalToRelationshipMutateProcTest extends BaseProcTest implements
             .call()
             .withAnyLabel()
             .withRelationshipType("KNOWS")
-            .algo("gds.alpha.traversalToRelationship")
+            .algo("gds.alpha.collapsePath")
             .mutateMode()
             .addParameter("relationshipTypes", List.of("KNOWS", "KNOWS"))
             .addParameter("mutateRelationshipType", "FoF")

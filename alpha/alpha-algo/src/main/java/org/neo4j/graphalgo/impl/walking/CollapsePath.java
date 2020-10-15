@@ -40,15 +40,15 @@ import org.neo4j.graphalgo.impl.msbfs.MultiSourceBFS;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class TraversalToRelationship extends Algorithm<TraversalToRelationship, Relationships> {
+public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
 
     private final Graph[] graphs;
     private final long nodeCount;
-    private final TraversalToRelationshipConfig config;
+    private final CollapsePathConfig config;
     private final ExecutorService executorService;
     private final AllocationTracker allocationTracker;
 
-    public TraversalToRelationship(Graph[] graphs, TraversalToRelationshipConfig config, ExecutorService executorService, AllocationTracker allocationTracker) {
+    public CollapsePath(Graph[] graphs, CollapsePathConfig config, ExecutorService executorService, AllocationTracker allocationTracker) {
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
         this.config = config;
@@ -110,7 +110,7 @@ public class TraversalToRelationship extends Algorithm<TraversalToRelationship, 
     }
 
     @Override
-    public TraversalToRelationship me() {
+    public CollapsePath me() {
         return this;
     }
 

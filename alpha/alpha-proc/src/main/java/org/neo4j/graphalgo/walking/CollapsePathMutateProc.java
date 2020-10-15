@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.impl.walking.TraversalToRelationship;
-import org.neo4j.graphalgo.impl.walking.TraversalToRelationshipConfig;
+import org.neo4j.graphalgo.impl.walking.CollapsePath;
+import org.neo4j.graphalgo.impl.walking.CollapsePathConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,9 +44,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRelationship, Relationships, TraversalToRelationshipMutateProc.MutateResult, TraversalToRelationshipConfig> {
+public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
 
-    @Procedure(name = "gds.alpha.traversalToRelationship.mutate", mode = READ)
+    @Procedure(name = "gds.alpha.collapsePath.mutate", mode = READ)
     @Description("")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -57,12 +57,12 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
     }
 
     @Override
-    protected ComputationResult<TraversalToRelationship, Relationships, TraversalToRelationshipConfig> compute(
+    protected ComputationResult<CollapsePath, Relationships, CollapsePathConfig> compute(
         Object graphNameOrConfig, Map<String, Object> configuration, boolean releaseAlgorithm, boolean releaseTopology
     ) {
-        ImmutableComputationResult.Builder<TraversalToRelationship, Relationships, TraversalToRelationshipConfig> builder = ImmutableComputationResult.builder();
+        ImmutableComputationResult.Builder<CollapsePath, Relationships, CollapsePathConfig> builder = ImmutableComputationResult.builder();
 
-        Pair<TraversalToRelationshipConfig, Optional<String>> input = processInput(
+        Pair<CollapsePathConfig, Optional<String>> input = processInput(
             graphNameOrConfig,
             configuration
         );
@@ -80,7 +80,7 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
 
         var tracker = allocationTracker();
 
-        TraversalToRelationship algo = new TraversalToRelationship(graphs, config, Pools.DEFAULT, tracker);
+        CollapsePath algo = new CollapsePath(graphs, config, Pools.DEFAULT, tracker);
         builder.algorithm(algo);
 
         try (ProgressTimer timer = ProgressTimer.start(builder::computeMillis)) {
@@ -104,19 +104,19 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
     }
 
     @Override
-    protected TraversalToRelationshipConfig newConfig(
+    protected CollapsePathConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return TraversalToRelationshipConfig.of(username, graphName, maybeImplicitCreate, config);
+        return CollapsePathConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<TraversalToRelationship, Relationships, TraversalToRelationshipConfig> computationResult
+        ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computationResult
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
             computationResult.graphStore().addRelationshipType(
@@ -168,12 +168,12 @@ public class TraversalToRelationshipMutateProc extends MutateProc<TraversalToRel
     }
 
     @Override
-    protected AlgorithmFactory<TraversalToRelationship, TraversalToRelationshipConfig> algorithmFactory() {
-        throw new UnsupportedOperationException("TraversalToRelationship does not support the AlgorithmFactory");
+    protected AlgorithmFactory<CollapsePath, CollapsePathConfig> algorithmFactory() {
+        throw new UnsupportedOperationException("CollapsePath does not support the AlgorithmFactory");
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<TraversalToRelationship, Relationships, TraversalToRelationshipConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<CollapsePath, Relationships, CollapsePathConfig> computeResult) {
         return new MutateResult.Builder();
     }
 }
