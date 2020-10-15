@@ -22,7 +22,16 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
+import java.util.OptionalLong;
 
 public interface NeighborhoodSampler {
     List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed);
+
+    default OptionalLong sampleOne(Graph graph, long nodeId, long randomSeed) {
+        List<Long> samples = sample(graph, nodeId, 0, randomSeed);
+        if (samples.size() < 1) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(samples.get(0));
+    }
 }

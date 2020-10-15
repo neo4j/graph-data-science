@@ -27,6 +27,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+
 public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     private final RelationshipWeights relationshipWeights;
     private final SubGraph subGraph;
@@ -46,7 +48,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         this.adjacency = subGraph.adjacency;
         this.selfAdjacency = subGraph.selfAdjacency;
         this.rows = adjacency.length;
-        this.cols = parent.dimension(1);
+        this.cols = parent.dimension(COLUMNS_INDEX);
     }
 
     @Override
@@ -55,19 +57,19 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
         double[] means = new double[adjacency.length * cols];
-        for (int source = 0; source < adjacency.length; source++) {
-            int sourceId = selfAdjacency[source];
+        for (int sourceIndex = 0; sourceIndex < adjacency.length; sourceIndex++) {
+            int sourceId = selfAdjacency[sourceIndex];
             long originalSourceId = subGraph.nextNodes[sourceId];
             int selfAdjacencyOfSourceOffset = sourceId * cols;
-            int sourceOffset = source * cols;
-            int[] neighbors = adjacency[source];
+            int sourceOffset = sourceIndex * cols;
+            int[] neighbors = adjacency[sourceIndex];
             int numberOfNeighbors = neighbors.length;
             for (int col = 0; col < cols; col++) {
                 means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
             }
-            for (int target : neighbors) {
-                int targetOffset = target * cols;
-                long originalTargetId = subGraph.nextNodes[target];
+            for (int targetIndex : neighbors) {
+                int targetOffset = targetIndex * cols;
+                long originalTargetId = subGraph.nextNodes[targetIndex];
                 double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
                 for (int col = 0; col < cols; col++) {
                     means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);

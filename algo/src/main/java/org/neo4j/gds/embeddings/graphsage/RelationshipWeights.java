@@ -21,10 +21,11 @@ package org.neo4j.gds.embeddings.graphsage;
 
 public interface RelationshipWeights {
 
-    RelationshipWeights DEFAULT_WEIGHT = (source, target, defaultValue) -> 1.0d;
+    double DEFAULT_VALUE = 1.0D;
+    RelationshipWeights DEFAULT_WEIGHT = (source, target, defaultValue) -> DEFAULT_VALUE;
 
     default double weight(long source, long target) {
-        return weight(source, target, 1.0d);
+        return weight(source, target, DEFAULT_VALUE);
     }
 
     double weight(long source, long target, double defaultValue);
