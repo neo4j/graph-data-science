@@ -36,10 +36,13 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -56,7 +59,7 @@ public final class RandomGraphGenerator {
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
     private final Optional<PropertyProducer> maybeRelationshipPropertyProducer;
-    private final Map<NodeLabel, PropertyProducer> nodePropertyProducers;
+    private final Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers;
 
     public RandomGraphGenerator(
         long nodeCount,
@@ -64,7 +67,7 @@ public final class RandomGraphGenerator {
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
-        Map<NodeLabel, PropertyProducer> nodePropertyProducers,
+        Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers,
         Optional<PropertyProducer> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Orientation orientation,
@@ -192,18 +195,27 @@ public final class RandomGraphGenerator {
     }
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
-        var propertyToLabel = new HashMap<String, NodeLabel>();
+        var propertyToLabels = new HashMap<String, List<NodeLabel>>();
         var propertyToArray = new HashMap<String, HugeDoubleArray>();
 
-        nodePropertyProducers.forEach((nodeLabel, propertyProducer) -> {
-            propertyToLabel.put(propertyProducer.getPropertyName(), nodeLabel);
-            propertyToArray.put(
-                propertyProducer.getPropertyName(),
-                HugeDoubleArray.newArray(nodeCount, allocationTracker)
-            );
-        });
+        nodePropertyProducers.forEach((nodeLabel, propertyProducers) ->
+            propertyProducers.forEach(propertyProducer -> {
+                    propertyToLabels
+                        .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
+                        .add(nodeLabel);
+                    propertyToArray.put(
+                        propertyProducer.getPropertyName(),
+                        HugeDoubleArray.newArray(nodeCount, allocationTracker)
+                    );
+                }
+            ));
 
-        var propertyProducers = nodePropertyProducers.values();
+        // Extract all property producers
+        var propertyProducers = nodePropertyProducers
+            .values()
+            .stream()
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
 
         // Fill property arrays
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
@@ -215,23 +227,30 @@ public final class RandomGraphGenerator {
         }
 
         // Construct union node properties
-        Map<String, NodeProperties> unionProperties = propertyToLabel.entrySet().stream().collect(Collectors.toMap(
+        Map<String, NodeProperties> unionProperties = propertyToLabels.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             entry -> {
                 var propertyKey = entry.getKey();
-                var nodeLabel = entry.getValue();
+                var nodeLabels = entry.getValue();
                 var nodeProperties = propertyToArray.get(propertyKey).asNodeProperties();
-                return new UnionNodeProperties(idMap, Map.of(nodeLabel, nodeProperties));
+                var nodeLabelToProperties = nodeLabels
+                    .stream()
+                    .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> (NodeProperties) nodeProperties));
+
+                return new UnionNodeProperties(idMap, nodeLabelToProperties);
             }
         ));
 
         // Create a corresponding node schema
         var nodeSchemaBuilder = NodeSchema.builder();
-        unionProperties.forEach((propertyKey, property) -> nodeSchemaBuilder.addProperty(
-            propertyToLabel.get(propertyKey),
-            propertyKey,
-            property.valueType()
-        ));
+        unionProperties.forEach((propertyKey, property) -> {
+            propertyToLabels.get(propertyKey).forEach(nodeLabel ->
+                nodeSchemaBuilder.addProperty(
+                    nodeLabel,
+                    propertyKey,
+                    property.valueType()
+                ));
+        });
 
         return ImmutableNodePropertiesAndSchema.builder()
             .nodeProperties(unionProperties)
