@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
@@ -49,7 +48,6 @@ public interface GraphSageTrainConfig extends
     BatchSizeConfig,
     IterationsConfig,
     ToleranceConfig,
-    NodePropertiesConfig,
     EmbeddingDimensionConfig,
     RelationshipWeightConfig
 {
@@ -60,6 +58,11 @@ public interface GraphSageTrainConfig extends
     @Value.Default
     default int embeddingDimension() {
         return 64;
+    }
+
+    @Value.Default
+    default List<String> nodePropertyNames() {
+        return List.of();
     }
 
     @Value.Default

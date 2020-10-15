@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 public final class GraphSageTestGraph {
 
     public static final String GDL =
+        " CREATE" +
         "  (n0:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
         ", (n1:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
         ", (n2:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
