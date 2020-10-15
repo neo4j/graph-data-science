@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -47,16 +48,18 @@ class FastRPTest extends AlgoTestBase {
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
         .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+        .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
+        .nodePropertyNames(List.of("f1", "f2"))
         .addIterationWeight(1.0D)
         .build();
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node1)" +
-        ", (b:Node1)" +
-        ", (c:Node2)" +
-        ", (d:Isolated)" +
-        ", (e:Isolated)" +
+        "  (a:Node1 {f1: 0.4, f2: 1.3})" +
+        ", (b:Node1 {f1: 2.1, f2: 0.5})" +
+        ", (c:Node2 {f1: -0.3, f2: 0.8})" +
+        ", (d:Isolated {f1: 2.5, f2: -8.1})" +
+        ", (e:Isolated {f1: -0.6, f2: 0.5})" +
         ", (a)-[:REL {weight: 2.0}]->(b)" +
         ", (b)-[:REL {weight: 1.0}]->(a)" +
         ", (a)-[:REL {weight: 1.0}]->(c)" +
@@ -74,6 +77,7 @@ class FastRPTest extends AlgoTestBase {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Node1")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
 
         Graph graph = graphLoader.graph();
@@ -102,6 +106,7 @@ class FastRPTest extends AlgoTestBase {
             .api(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
 
         Graph graph = graphLoader.graph();
@@ -133,6 +138,7 @@ class FastRPTest extends AlgoTestBase {
             .api(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .addRelationshipProperty("weight", "weight", DefaultValue.of(1.0), Aggregation.NONE)
             .build();
 
@@ -173,6 +179,7 @@ class FastRPTest extends AlgoTestBase {
             .api(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
 
         Graph graph = graphLoader.graph();
@@ -216,6 +223,7 @@ class FastRPTest extends AlgoTestBase {
         GraphLoader graphLoader = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Isolated")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
 
         Graph graph = graphLoader.graph();
@@ -252,7 +260,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_784, estimate.min);
+        assertEquals(159_808, estimate.min);
     }
 
     @Test
@@ -267,7 +275,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_784, estimate.min);
+        assertEquals(159_808, estimate.min);
     }
 
     @Test

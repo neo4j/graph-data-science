@@ -27,6 +27,10 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
+import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStatsProc;
+import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStreamProc;
+import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedWriteProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
@@ -118,6 +122,11 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.beta.fastRPExtended.mutate.estimate",
+        "gds.beta.fastRPExtended.stats.estimate",
+        "gds.beta.fastRPExtended.stream.estimate",
+        "gds.beta.fastRPExtended.write.estimate",
+
         "gds.beta.k1coloring.mutate.estimate",
         "gds.beta.k1coloring.stats.estimate",
         "gds.beta.k1coloring.stream.estimate",
@@ -367,6 +376,11 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
+            runEstimation(new FastRPExtendedMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPExtendedWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+
             runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new K1ColoringStatsProc()::estimate),
             runEstimation(new K1ColoringStreamProc()::estimate),

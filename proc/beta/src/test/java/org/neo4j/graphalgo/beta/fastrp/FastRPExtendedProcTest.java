@@ -17,13 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.graphalgo.beta.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -31,20 +29,15 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
+public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<FastRP, CONFIG, FastRP>,
     MemoryEstimateTest<FastRP, CONFIG, FastRP> {
 
@@ -110,53 +103,4 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
             .yields();
         runQuery(graphCreateQuery);
     }
-
-    abstract GdsCypher.ExecutionModes mode();
-
-    @Test
-    void acceptsIntegerIterationWeights() {
-        var query = GdsCypher
-            .call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
-            .algo("fastRP")
-            .executionMode(mode())
-            .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())
-            .addParameter("embeddingDimension", 64)
-            .addParameter("iterationWeights", List.of(1, 2L, 3.0))
-            .yields();
-
-        // doesn't crash
-        runQuery(query);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidWeights")
-    void validatesWeights(List<?> iterationWeights, String messagePart) {
-        var query = GdsCypher
-            .call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
-            .algo("fastRP")
-            .executionMode(mode())
-            .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())
-            .addParameter("embeddingDimension", 64)
-            .addPlaceholder("iterationWeights", "iterationWeights")
-            .yields();
-
-        var exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(query, Map.of("iterationWeights", iterationWeights))
-        );
-        assertThat(exception).getRootCause().isInstanceOf(IllegalArgumentException.class).hasMessageContaining(messagePart);
-    }
-
-    private static Stream<Arguments> invalidWeights() {
-        return Stream.of(
-            Arguments.of(List.of(), "must not be empty"),
-            Arguments.of(List.of(1, "2"), "Iteration weights must be numbers"),
-            Arguments.of(Arrays.asList(1, null), "Iteration weights must be numbers")
-        );
-    }
-
 }

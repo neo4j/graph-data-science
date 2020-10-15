@@ -28,7 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPStatsConfig extends FastRPBaseConfig {
+public interface FastRPStatsConfig extends FastRPBaseProductionConfig {
 
     static FastRPStatsConfig of(
         String username,

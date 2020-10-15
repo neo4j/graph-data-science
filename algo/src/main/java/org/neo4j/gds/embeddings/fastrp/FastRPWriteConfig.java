@@ -29,7 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface FastRPWriteConfig extends FastRPBaseConfig, WritePropertyConfig {
+public interface FastRPWriteConfig extends FastRPBaseProductionConfig, WritePropertyConfig {
 
     static FastRPWriteConfig of(
         String username,

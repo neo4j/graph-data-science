@@ -19,28 +19,37 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+import java.util.List;
 
-@ValueClass
-@Configuration
-public interface FastRPStreamConfig extends FastRPBaseProductionConfig {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-    static FastRPStreamConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new FastRPStreamConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
+public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
+
+    @Override
+    @Configuration.Ignore
+    default List<String> nodePropertyNames() {
+        return List.of();
     }
+
+    @Override
+    @Configuration.Ignore
+    default int propertyDimension() {
+        return 0;
+    }
+
+    @Value.Check
+    default void validate() {
+        List<? extends Number> iterationWeights = iterationWeights();
+        FastRPBaseConfig.validateCommon(iterationWeights);
+        if (embeddingDimension() < 1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The value of embeddingDimension is %s, but must be at least 1",
+                embeddingDimension()
+            ));
+        }
+    }
+
 }
