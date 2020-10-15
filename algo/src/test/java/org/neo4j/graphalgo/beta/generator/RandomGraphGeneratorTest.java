@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RandomGraphGeneratorTest {
 
@@ -166,6 +168,32 @@ class RandomGraphGeneratorTest {
             });
             return true;
         });
+    }
+
+    @Test
+    void shouldGenerateNodeLabels() {
+        NodeLabel[] aLabel = new NodeLabel[]{NodeLabel.of("A")};
+        NodeLabel[] bLabel = new NodeLabel[]{NodeLabel.of("B")};
+
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodeLabelProducer(nodeId -> nodeId % 2 == 0 ? aLabel : bLabel)
+            .build()
+            .generate();
+
+        graph.forEachNode(nodeId -> {
+                var nodeLabels = graph.nodeLabels(nodeId);
+                assertEquals(1, nodeLabels.size());
+                if (nodeId % 2 == 0) {
+                    assertTrue(nodeLabels.contains(NodeLabel.of("A")), formatWithLocale("node %d should have label A", nodeId));
+                } else {
+                    assertTrue(nodeLabels.contains(NodeLabel.of("B")), formatWithLocale("node %d should have label B", nodeId));
+                }
+                return true;
+            }
+        );
     }
 
     @Test
