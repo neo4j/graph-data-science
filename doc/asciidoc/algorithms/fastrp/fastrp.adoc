@@ -8,8 +8,8 @@ This section describes the Fast Random Projection (FastRP) node embedding algori
 
 This topic includes:
 
-* <<algorithms-embeddings-fastrp-introduction>>
-
+* <<algorithms-embeddings-fastrp-introduction, Introduction>>
+* <<algorithms-embeddings-fastrp-parameter-tuning, Tuning algorithm parameters>>
 * <<algorithms-embeddings-fastrp-syntax, Syntax>>
 ** <<algorithms-embeddings-fastrp-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-embeddings-fastrp-examples, Examples>>
@@ -19,7 +19,6 @@ This topic includes:
 ** <<algorithms-embeddings-fastrp-examples-mutate, Mutate>>
 ** <<algorithms-embeddings-fastrp-examples-write, Write>>
 ** <<algorithms-embeddings-fastrp-examples-weighted, Weighted>>
-* <<algorithms-embeddings-fastrp-parameter-tuning, Hyperparameter tuning>>
 
 
 [[algorithms-embeddings-fastrp-introduction]]
@@ -55,6 +54,54 @@ For more information on this algorithm see:
 
 * https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
 * https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
+
+
+[[algorithms-embeddings-fastrp-parameter-tuning]]
+== Tuning algorithm parameters
+
+In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
+This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
+We will go through each of the configuration parameters and explain how they behave.
+
+For statistically sound results, it is a good idea to reserve a test set excluded from parameter tuning.
+After hyperparameter tuning has been made, the embedding with the best settings can then be evaluated using a downstream machine learning task on the test set.
+To construct such a set you may want to create a node label in the graph using cypher that represents a subgraph without the test data.
+
+
+=== Embedding Dimension
+
+The optimal value for `embeddingDimension` depends on the number of nodes in the graph.
+Since the amount of information the embedding can encode is limited by the `embeddingDimension`, a larger graph will tend to require a higher embedding dimension.
+A typical value is a power of two in the range 128 - 1024.
+A value of at least 256 gives good results on graphs with as many as 200000 nodes, but in general increasing the dimension improves results.
+Increasing embedding dimension will however increase memory requirements and runtime linearly.
+
+
+=== Normalization strength
+
+The normalization strength is used to control how node degree influences the embedding.
+Using a negative value will downplay the importance of high degree neighbors, while a positive value will instead increase their importance.
+The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
+In the original paper, hyperparameter tuning was done on the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
+
+
+=== Iteration weights
+
+By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
+The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of length `i`.
+If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`, for any integer `k`.
+In particular, the third iteration will in this case contain features depending both on direct neighbors and nodes at distance three.
+It is good to have at least one non-zero weight in an even and in an odd position.
+Typically, using at least a few iterations, for example three, is recommended.
+However, a too high value will consider nodes far away and may not be informative or even be detrimental.
+The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
+
+
+=== Orientation
+
+Choosing the right orientation when creating the graph may have the single biggest impact.
+The FastRP algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
+If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
 
 
 [[algorithms-embeddings-fastrp-syntax]]
@@ -391,49 +438,3 @@ YIELD nodeId, embedding
 | 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
 |===
 --
-
-
-[[algorithms-embeddings-fastrp-parameter-tuning]]
-== Tuning algorithm parameters
-
-In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
-This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
-We will go through each of the configuration parameters and explain how they behave.
-
-For statistically sound results, it is a good idea to reserve a test set excluded from parameter tuning.
-After hyperparameter tuning has been made, the embedding with the best settings can then be evaluated using a downstream machine learning task on the test set.
-To construct such a set you may want to create a node label in the graph using cypher that represents a subgraph without the test data.
-
-=== Embedding Dimension
-
-The optimal value for `embeddingDimension` depends on the number of nodes in the graph.
-Since the amount of information the embedding can encode is limited by the `embeddingDimension`, a larger graph will tend to require a higher embedding dimension.
-A typical value is a power of two in the range 128 - 1024.
-A value of at least 256 gives good results on graphs with as many as 200000 nodes, but in general increasing the dimension improves results.
-Increasing embedding dimension will however increase memory requirements and runtime linearly.
-
-=== Normalization strength
-
-The normalization strength is used to control how node degree influences the embedding.
-Using a negative value will downplay the importance of high degree neighbors, while a positive value will instead increase their importance.
-The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
-In the original paper, hyperparameter tuning was done on the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
-
-=== Iteration weights
-
-By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
-The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of length `i`.
-If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`, for any integer `k`.
-In particular, the third iteration will in this case contain features depending both on direct neighbors and nodes at distance three.
-It is good to have at least one non-zero weight in an even and in an odd position.
-Typically, using at least a few iterations, for example three, is recommended.
-However, a too high value will consider nodes far away and may not be informative or even be detrimental.
-The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
-
-
-=== Orientation
-Choosing the right orientation when creating the graph may have the single biggest impact.
-The FastRP algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
-If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
-
-
