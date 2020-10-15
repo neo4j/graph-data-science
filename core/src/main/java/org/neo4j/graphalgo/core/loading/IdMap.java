@@ -167,6 +167,9 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
+        if (labelInformation.isEmpty() && label.equals(NodeLabel.ALL_NODES)) {
+            return true;
+        }
         BitSet bitSet = labelInformation.get(label);
         return bitSet != null && bitSet.get(nodeId);
     }
