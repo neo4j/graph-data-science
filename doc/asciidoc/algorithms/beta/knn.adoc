@@ -341,7 +341,15 @@ include::../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.beta.knn.stream('myGraph', {topK: 1, randomSeed: 42, nodeWeightProperty: 'age'})
+CALL gds.beta.knn.stream('myGraph', {
+    topK: 1,
+    nodeWeightProperty: 'age',
+    // The following parameters are not strictly required
+    // but will make the result more stable
+    randomSeed: 42,
+    sampleRate: 1.0,
+    deltaThreshold: 0.0
+})
 YIELD node1, node2, similarity
 RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
 ORDER BY similarity DESCENDING, Person1, Person2
