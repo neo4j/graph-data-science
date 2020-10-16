@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -32,7 +31,6 @@ import java.util.Optional;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface BFSPregelConfig extends PregelConfig {
-    @Value
     long startNode();
 
     static BFSPregelConfig of(
