@@ -1,2 +1,6 @@
 In this section we will show examples of running the {algorithm-name} algorithm on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
+We will do this on a small {graph-description} graph of a handful nodes connected in a particular pattern.
+The example graph looks like this:
+
+image::{image-file}[align="center"]
