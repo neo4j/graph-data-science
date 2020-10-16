@@ -1,0 +1,2 @@
+In this section we will show examples of running the {algorithm-name} algorithm on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
