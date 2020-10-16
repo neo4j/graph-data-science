@@ -302,44 +302,54 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-embeddings-fastrp-examples]]
 == Examples
 
+:algorithm-name: FastRP node embedding
+include::../shared/examples-intro.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=setup-query]
 ----
 CREATE
-  (Dan:Person),
-  (Annie:Person),
-  (Matt:Person),
-  (Jeff:Person),
-  (Brie:Person),
-  (Elsa:Person),
-  (John:Person),
+  (dan:Person {name: 'Dan'}),
+  (annie:Person {name: 'Annie'}),
+  (matt:Person {name: 'Matt'}),
+  (jeff:Person {name: 'Jeff'}),
+  (brie:Person {name: 'Brie'}),
+  (elsa:Person {name: 'Elsa'}),
+  (john:Person {name: 'John'}),
 
-  (Dan)-[:REL {weight: 1.0}]->(Annie),
-  (Dan)-[:REL {weight: 1.0}]->(Matt),
-  (Annie)-[:REL {weight: 1.0}]->(Matt),
-  (Annie)-[:REL {weight: 1.0}]->(Jeff),
-  (Annie)-[:REL {weight: 1.0}]->(Brie),
-  (Matt)-[:REL {weight: 3.5}]->(Brie),
-  (Brie)-[:REL {weight: 1.0}]->(Elsa),
-  (Brie)-[:REL {weight: 2.0}]->(Jeff),
-  (John)-[:REL {weight: 1.0}]->(Jeff);
+  (dan)-[:KNOWS {weight: 1.0}]->(annie),
+  (dan)-[:KNOWS {weight: 1.0}]->(matt),
+  (annie)-[:KNOWS {weight: 1.0}]->(matt),
+  (annie)-[:KNOWS {weight: 1.0}]->(jeff),
+  (annie)-[:KNOWS {weight: 1.0}]->(brie),
+  (matt)-[:KNOWS {weight: 3.5}]->(brie),
+  (brie)-[:KNOWS {weight: 1.0}]->(elsa),
+  (brie)-[:KNOWS {weight: 2.0}]->(jeff),
+  (john)-[:KNOWS {weight: 1.0}]->(jeff);
 ----
 
+This graph represents seven people who know one another.
+A relationship property `weight` denotes the strength of the knowledge between two persons.
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we will use the `UNDIRECTED` orientation.
+This is because the FastRP algorithm has been measured to compute more predictive node embeddings in undirected graphs.
+We will also add the `weight` relationship property which we will make use of when running the weighted version of FastRP.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
   'persons',
   'Person',
   {
-    REL: {
+    KNOWS: {
       orientation: 'UNDIRECTED',
-        properties: {
-           weight: {
-             property: 'weight',
-             defaultValue: 1.0
-           }
-        }
+      properties: 'weight'
     }
 })
 ----
