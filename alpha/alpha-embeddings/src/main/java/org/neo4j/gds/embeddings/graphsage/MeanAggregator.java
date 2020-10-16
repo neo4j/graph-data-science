@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithRelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiMean;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.WeightedMultiMean;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
@@ -54,20 +54,21 @@ public class MeanAggregator implements Aggregator {
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        var previousOrWeighted = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
+        Variable<Matrix> means = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
             // Weighted with respect to the Relationship Weights
-            new MatrixMultiplyWithRelationshipWeights(
+            new WeightedMultiMean(
                 previousLayerRepresentations,
                 relationshipWeightsFunction,
-                subGraph,
+                subGraph
+            )
+        ).orElse(
+            new MultiMean(
+                previousLayerRepresentations,
                 subGraph.adjacency,
                 subGraph.selfAdjacency
             )
-        ).orElse(previousLayerRepresentations);
-
-        Variable<Matrix> means = new MultiMean(previousOrWeighted, subGraph.adjacency,
-            subGraph.selfAdjacency
         );
+
         Variable<Matrix> product = MatrixMultiplyWithTransposedSecondOperand.of(means, weights);
         return activationFunction.apply(product);
     }
