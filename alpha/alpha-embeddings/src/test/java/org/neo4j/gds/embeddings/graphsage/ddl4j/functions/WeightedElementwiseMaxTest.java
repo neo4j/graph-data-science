@@ -63,9 +63,6 @@ class WeightedElementwiseMaxTest extends GraphSageBaseTest implements FiniteDiff
     @Inject
     private IdFunction idFunction;
 
-
-    private Weights<Matrix> weights;
-
     @Test
     void shouldApplyWeightsToEmbeddings() {
         long[] ids = new long[]{
