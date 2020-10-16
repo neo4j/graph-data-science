@@ -267,8 +267,12 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-node-similarity-examples]]
 == Examples
 
-Consider the graph created by the following Cypher statement:
+:algorithm-name: {algorithm}
+:graph-description: knowledge
+:image-file: TODO.png
+include::../shared/examples-intro.adoc[]
 
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'})

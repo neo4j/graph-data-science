@@ -306,10 +306,11 @@ The results are the same as for running write mode with a named graph, see the <
 == Examples
 
 :algorithm-name: FastRP node embedding
+:graph-description: social network
+:image-file: TODO.png
 include::../shared/examples-intro.adoc[]
 
-Consider the graph created by the following Cypher statement:
-
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
 CREATE
