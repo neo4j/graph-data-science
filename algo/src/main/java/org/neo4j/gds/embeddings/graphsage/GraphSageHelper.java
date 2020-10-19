@@ -219,7 +219,14 @@ public final class GraphSageHelper {
             var nodeFeatures = new double[featureCount];
 
             for (int i = 0; i < nodeProperties.size(); i++) {
-                nodeFeatures[i] = nodeProperties.get(i).doubleValue(nodeId);
+                double doubleValue = nodeProperties.get(i).doubleValue(nodeId);
+                if (Double.isNaN(doubleValue)) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Missing node property for property key `%s`. Consider using a default value in the property projection.",
+                        config.nodePropertyNames().get(i)
+                    ));
+                }
+                nodeFeatures[i] = doubleValue;
             }
 
             if (config.degreeAsProperty()) {
