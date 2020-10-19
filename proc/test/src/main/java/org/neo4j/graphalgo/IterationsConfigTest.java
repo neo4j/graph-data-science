@@ -20,11 +20,14 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface IterationsConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends IterationsConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -33,5 +36,15 @@ public interface IterationsConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("maxIterations", 42));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals(42, config.maxIterations());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-42, 0})
+    default void invalidIterations(int maxIterations) {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("maxIterations", maxIterations));
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> createConfig(createMinimalConfig(mapWrapper)))
+            .withMessageContaining("`maxIterations` must be greater than 0");
     }
 }
