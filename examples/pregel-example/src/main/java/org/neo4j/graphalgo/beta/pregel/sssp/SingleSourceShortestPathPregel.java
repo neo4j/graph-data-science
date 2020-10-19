@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel.sssp;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -88,7 +87,6 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     @Configuration("SingleSourceShortestPathPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
     interface SingleSourceShortestPathPregelConfig extends PregelConfig {
-        @Value
         long startNode();
 
         static SingleSourceShortestPathPregelConfig of(
