@@ -191,20 +191,23 @@ public final class GraphStoreInput implements CompatInput {
                         for (var label : labels) {
                             if (nodeStore.nodeProperties.containsKey(label)) {
                                 for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
-                                    visitor.property(
-                                        propertyKeyAndValue.getKey(),
-                                        propertyKeyAndValue.getValue().getObject(id)
-                                    );
+                                    var value = propertyKeyAndValue.getValue().getObject(id);
+                                    if (value != null) {
+                                        visitor.property(propertyKeyAndValue.getKey(), value);
+                                    }
                                 }
                             }
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
                     for (var propertyKeyAndValue : nodeStore.nodeProperties.get(ALL_NODES.name).entrySet()) {
-                        visitor.property(
-                            propertyKeyAndValue.getKey(),
-                            propertyKeyAndValue.getValue().getObject(id)
-                        );
+                        var value = propertyKeyAndValue.getValue().getObject(id);
+                        if (value != null) {
+                            visitor.property(
+                                propertyKeyAndValue.getKey(),
+                                value
+                            );
+                        }
                     }
                 }
 
