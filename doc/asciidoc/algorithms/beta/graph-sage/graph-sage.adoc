@@ -16,6 +16,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 For more information on this algorithm see:
 
 * https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs." 2018.^]
+* https://arxiv.org/pdf/1911.10232.pdf[Amit Pande, Kai Ni and Venkataramani Kini. "SWAG: Item Recommendations using Convolutions on Weighted Graphs." 2019.^]
 
 [[algorithms-embeddings-graph-sage-syntax]]
 == Syntax
@@ -167,15 +168,15 @@ CREATE
   (Elsa:Person{ name: 'Elsa', age: 32, height: 158, weight: 55 }),
   (John:Person{ name: 'John', age: 35, height: 172, weight: 76 }),
 
-  (Dan)-[:REL]->(Annie),
-  (Dan)-[:REL]->(Matt),
-  (Annie)-[:REL]->(Matt),
-  (Annie)-[:REL]->(Jeff),
-  (Annie)-[:REL]->(Brie),
-  (Matt)-[:REL]->(Brie),
-  (Brie)-[:REL]->(Elsa),
-  (Brie)-[:REL]->(Jeff),
-  (John)-[:REL]->(Jeff);
+  (Dan)-[:REL { relWeight: 1.0 }]->(Annie),
+  (Dan)-[:REL { relWeight: 1.6 }]->(Matt),
+  (Annie)-[:REL { relWeight: 0.1 }]->(Matt),
+  (Annie)-[:REL { relWeight: 3.0 }]->(Jeff),
+  (Annie)-[:REL { relWeight: 1.2 }]->(Brie),
+  (Matt)-[:REL { relWeight: 10.0 }]->(Brie),
+  (Brie)-[:REL { relWeight: 1.0 }]->(Elsa),
+  (Brie)-[:REL { relWeight: 2.2 }]->(Jeff),
+  (John)-[:REL { relWeight: 5.0 }]->(Jeff);
 ----
 
 [source, cypher, role=graph-create-query]
@@ -185,25 +186,13 @@ CALL gds.graph.create(
   {
     Person: {
       label: 'Person',
-      properties: {
-        age: {
-          property: 'age',
-          defaultValue: 1.0
-        },
-        height: {
-         property: 'height',
-         defaultValue: 1.0
-        },
-        weight: {
-         property: 'weight',
-         defaultValue: 1.0
-       }
-     }
+      properties: ['age', 'height', 'weight']
     }
   }, {
     R: {
       type: 'REL',
-      orientation: 'UNDIRECTED'
+      orientation: 'UNDIRECTED',
+      properties: ['relWeight']
     }
 })
 ----
@@ -234,6 +223,30 @@ CALL gds.beta.graphSage.train(
 ----
 
 WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
+
+==== Train with relationship weights
+
+The GraphSage implementation supports training using relationship weights.
+Higher relationship weight between nodes signifies that the nodes should have more similar embedding values.
+
+[source, cypher, role=query-example, no-result=true]
+----
+CALL gds.beta.graphSage.train(
+  'persons',
+  {
+    modelName: 'weightedTrainedModel',
+    nodePropertyNames: ['age', 'height', 'weight'],
+    aggregator: 'mean',
+    activationFunction: 'sigmoid',
+    sampleSizes: [25, 10],
+    degreeAsProperty: true,
+    relationshipWeightProperty: 'relWeight'
+  }
+)
+----
+
+Relationship weights are only used during GraphSage training.
+The trained models can then be used to stream or write back the generated node embeddings.
 
 
 === Stream
