@@ -218,11 +218,10 @@ public final class RandomGraphGenerator {
             .collect(Collectors.toSet());
 
         // Fill property arrays
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            for (var propertyProducer : propertyProducers) {
-                propertyToArray
-                    .get(propertyProducer.getPropertyName())
-                    .set(nodeId, propertyProducer.getPropertyValue(random));
+        for (var propertyProducer : propertyProducers) {
+            var array = propertyToArray.get(propertyProducer.getPropertyName());
+            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+               array.set(nodeId, propertyProducer.getPropertyValue(random));
             }
         }
 
