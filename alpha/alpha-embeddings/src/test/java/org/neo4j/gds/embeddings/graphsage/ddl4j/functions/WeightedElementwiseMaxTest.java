@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class MatrixMultiplyWithRelationshipWeightsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
+class WeightedElementwiseMaxTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
@@ -82,19 +82,17 @@ class MatrixMultiplyWithRelationshipWeightsTest extends GraphSageBaseTest implem
             1, 1, 1, // u1
             1, 1, 1, // u2
             1, 1, 1, // d1
-            1, 1, 1, // d2
+            3, 3, 3, // d2
             1, 1, 1, // d3
             1, 1, 1 // d4
         };
 
         MatrixConstant userEmbeddings = new MatrixConstant(userEmbeddingsData, 6, 3);
         ctx.forward(userEmbeddings);
-        MatrixMultiplyWithRelationshipWeights weightedEmbeddings = new MatrixMultiplyWithRelationshipWeights(
+        WeightedElementwiseMax weightedEmbeddings = new WeightedElementwiseMax(
             userEmbeddings,
             graph::relationshipProperty,
-            subGraph,
-            subGraph.adjacency,
-            subGraph.selfAdjacency
+            subGraph
         );
 
         Matrix matrix = weightedEmbeddings.apply(ctx);
@@ -102,8 +100,8 @@ class MatrixMultiplyWithRelationshipWeightsTest extends GraphSageBaseTest implem
         double[] expected = new double[] {
             5.0, 5.0, 5.0, // d1
             2.0, 2.0, 2.0, // d2
-            3.0, 3.0, 3.0, // d3
-            3.0, 3.0, 3.0 // d4
+            2.0, 2.0, 2.0, // d3
+            3.0, 3.0, 3.0, // d4
         };
 
         assertThat(matrix.data()).isEqualTo(expected);
@@ -126,22 +124,21 @@ class MatrixMultiplyWithRelationshipWeightsTest extends GraphSageBaseTest implem
 
         double[] userEmbeddingsData = new double[] {
             1, 1, 1, // u1
-            1, 1, 1, // u2
-            1, 1, 1, // d1
-            1, 1, 1, // d2
-            1, 1, 1, // d3
-            1, 1, 1 // d4
+            2, 2, 2, // u2
+            3, 3, 3, // d1
+            4, 4, 4, // d2
+            5, 5, 5, // d3
+            6, 6, 6 // d4
         };
 
         Weights<Matrix> weights = new Weights<>(new Matrix(userEmbeddingsData, 6, 3));
 
         finiteDifferenceShouldApproximateGradient(
             weights,
-            new ElementSum(List.of(new MatrixMultiplyWithRelationshipWeights(weights,
+            new ElementSum(List.of(new WeightedElementwiseMax(
+                weights,
                 graph::relationshipProperty,
-                subGraph,
-                subGraph.adjacency,
-                subGraph.selfAdjacency
+                subGraph
             )))
         );
     }

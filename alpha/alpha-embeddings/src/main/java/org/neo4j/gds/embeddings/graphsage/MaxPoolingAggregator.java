@@ -21,11 +21,11 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementwiseMax;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithRelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixVectorSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Slice;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.WeightedElementwiseMax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
@@ -68,23 +68,19 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> previousLayerRepresentations,
         SubGraph subGraph
     ) {
-        var previousOrWeighted = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
-            // Weighted with respect to the Relationship Weights
-            new MatrixMultiplyWithRelationshipWeights(
-                previousLayerRepresentations,
-                relationshipWeightsFunction,
-                subGraph,
-                subGraph.adjacency,
-                subGraph.selfAdjacency
-            )
-        ).orElse(previousLayerRepresentations);
         Variable<Matrix> weightedPreviousLayer = MatrixMultiplyWithTransposedSecondOperand.of(
-            previousOrWeighted,
+            previousLayerRepresentations,
             poolWeights
         );
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
-        Variable<Matrix> elementwiseMax = new ElementwiseMax(neighborhoodActivations, subGraph.adjacency);
+
+        Variable<Matrix> elementwiseMax = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(
+            relationshipWeightsFunction ->
+                // Weighted with respect to the Relationship Weights
+                new WeightedElementwiseMax(neighborhoodActivations, relationshipWeightsFunction, subGraph)
+        ).orElse(new ElementwiseMax(neighborhoodActivations, subGraph.adjacency));
+
 
         Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
         Variable<Matrix> self = MatrixMultiplyWithTransposedSecondOperand.of(selfPreviousLayer, selfWeights);

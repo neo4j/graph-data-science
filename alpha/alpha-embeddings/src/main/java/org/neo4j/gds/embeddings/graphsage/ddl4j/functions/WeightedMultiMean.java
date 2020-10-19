@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
 
-public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<Matrix> {
+public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     private final RelationshipWeightsFunction relationshipWeightsFunction;
     private final SubGraph subGraph;
     private final int[][] adjacency;
@@ -35,18 +35,16 @@ public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<
     private final int rows;
     private final int cols;
 
-    public MatrixMultiplyWithRelationshipWeights(
+    public WeightedMultiMean(
         Variable<Matrix> parent,
         RelationshipWeightsFunction relationshipWeightsFunction,
-        SubGraph subGraph,
-        int[][] adjacency,
-        int[] selfAdjacency
+        SubGraph subGraph
     ) {
-        super(parent, Dimensions.matrix(adjacency.length, parent.dimension(1)));
+        super(parent, Dimensions.matrix(subGraph.adjacency.length, parent.dimension(1)));
         this.relationshipWeightsFunction = relationshipWeightsFunction;
         this.subGraph = subGraph;
-        this.adjacency = adjacency;
-        this.selfAdjacency = selfAdjacency;
+        this.adjacency = subGraph.adjacency;
+        this.selfAdjacency = subGraph.selfAdjacency;
         this.rows = adjacency.length;
         this.cols = parent.dimension(1);
     }
@@ -56,56 +54,59 @@ public class MatrixMultiplyWithRelationshipWeights extends SingleParentVariable<
         Variable<?> parent = parent();
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
-        double[] weightedData = new double[adjacency.length * cols];
+        double[] means = new double[adjacency.length * cols];
         for (int source = 0; source < adjacency.length; source++) {
             int sourceId = selfAdjacency[source];
             long originalSourceId = subGraph.nextNodes[sourceId];
+            int selfAdjacencyOfSourceOffset = sourceId * cols;
             int sourceOffset = source * cols;
             int[] neighbors = adjacency[source];
+            int numberOfNeighbors = neighbors.length;
+            for (int col = 0; col < cols; col++) {
+                means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
+            }
             for (int target : neighbors) {
                 int targetOffset = target * cols;
                 long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId); //TODO normalize weights
+                double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
                 for (int col = 0; col < cols; col++) {
-                    weightedData[sourceOffset + col] += parentData[targetOffset + col] * relationshipWeight;
+                    means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
             }
         }
 
-        return new Matrix(weightedData, this.rows, this.cols);
-    }
-
-    @Override
-    public boolean requireGradient() {
-        return true;
+        return new Matrix(means, this.rows, this.cols);
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> result = ctx.data(parent).zeros();
+        double[] multiMeanGradient = ctx.gradient(this).data();
 
-        double[] weightedGradient = ctx.gradient(this).data();
+        Tensor<?> result = ctx.data(parent).zeros();
 
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
                 int sourceId = selfAdjacency[row];
                 long originalSourceId = subGraph.nextNodes[sourceId];
 
+                int degree = adjacency[row].length + 1;
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
+                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
                     int neighborElementIndex = neighbor * cols + col;
-                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId); //TODO normalize weights
-                    double newValue = weightedGradient[gradientElementIndex] * relationshipWeight;
                     result.addDataAt(
                         neighborElementIndex,
-                        newValue
+                        1d / degree * (multiMeanGradient[gradientElementIndex] * relationshipWeight)
                     );
                 }
+                result.addDataAt(
+                    sourceId * cols + col,
+                    1d / degree * multiMeanGradient[gradientElementIndex]
+                );
             }
         }
 
         return result;
-
     }
 }
