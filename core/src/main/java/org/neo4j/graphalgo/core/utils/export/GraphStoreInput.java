@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
@@ -35,6 +36,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Map;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
@@ -191,23 +193,14 @@ public final class GraphStoreInput implements CompatInput {
                         for (var label : labels) {
                             if (nodeStore.nodeProperties.containsKey(label)) {
                                 for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
-                                    var value = propertyKeyAndValue.getValue().getObject(id);
-                                    if (value != null) {
-                                        visitor.property(propertyKeyAndValue.getKey(), value);
-                                    }
+                                    exportProperty(visitor, propertyKeyAndValue);
                                 }
                             }
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
                     for (var propertyKeyAndValue : nodeStore.nodeProperties.get(ALL_NODES.name).entrySet()) {
-                        var value = propertyKeyAndValue.getValue().getObject(id);
-                        if (value != null) {
-                            visitor.property(
-                                propertyKeyAndValue.getKey(),
-                                value
-                            );
-                        }
+                        exportProperty(visitor, propertyKeyAndValue);
                     }
                 }
 
@@ -216,6 +209,13 @@ public final class GraphStoreInput implements CompatInput {
                 return true;
             }
             return false;
+        }
+
+        private void exportProperty(InputEntityVisitor visitor, Map.Entry<String, NodeProperties> propertyKeyAndValue) {
+            var value = propertyKeyAndValue.getValue().getObject(id);
+            if (value != null) {
+                visitor.property(propertyKeyAndValue.getKey(), value);
+            }
         }
     }
 
