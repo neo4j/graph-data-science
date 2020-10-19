@@ -189,13 +189,11 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             .isThrownBy(() -> {
                 CypherMapWrapper invalidConfig = CypherMapWrapper.create(configMap)
                     .withNumber("topK", 0)
-                    .withNumber("sampleRate", 0.0)
-                    .withNumber("maxIterations", 0);
+                    .withNumber("sampleRate", 0.0);
                 proc.newConfig(Optional.empty(), invalidConfig);
             })
             .withMessageContaining("`topK` must be within [1")
-            .withMessageContaining("`sampleRate` must be within (0.00, 1.00]")
-            .withMessageContaining("`maxIterations` must be within [1"));
+            .withMessageContaining("`sampleRate` must be within (0.00, 1.00]"));
     }
 
     static Stream<Arguments> allGraphVariations() {

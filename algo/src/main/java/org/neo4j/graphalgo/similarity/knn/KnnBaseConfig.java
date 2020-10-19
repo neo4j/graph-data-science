@@ -63,7 +63,6 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
 
     @Override
     @Value.Default
-    @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 100;
     }
