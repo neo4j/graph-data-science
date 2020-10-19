@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
@@ -106,5 +109,33 @@ class GraphSageHelperTest {
                 )
             )
         );
+    }
+
+    @Nested
+    class MissingProperties {
+
+        @GdlGraph
+        private static final String DB_CYPHER = "CREATE " +
+                                                "  (a { prop: 1 })" +
+                                                ", (b)" +
+                                                ", (a)-[:REL]->(b)";
+
+        @Inject
+        Graph graph;
+
+        @Test
+        void shouldThrowOnMissingProperties() {
+            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("foo")
+                .nodePropertyNames(Set.of("prop"))
+                .build();
+
+            assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> GraphSageHelper.initializeFeatures(
+                    graph,
+                    graphSageTrainConfig,
+                    AllocationTracker.empty()))
+                .withMessageContaining("Missing node property for property key `prop`");
+        }
     }
 }
