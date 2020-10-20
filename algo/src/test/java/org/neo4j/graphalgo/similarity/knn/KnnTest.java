@@ -20,8 +20,11 @@
 package org.neo4j.graphalgo.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
@@ -47,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
+@ExtendWith(SoftAssertionsExtension.class)
 class KnnTest {
 
     @GdlGraph
@@ -151,6 +155,31 @@ class KnnTest {
             (FloatArrayNodeProperties) nodeId -> new float[]{},
             (DoubleArrayNodeProperties) nodeId -> new double[]{}
         );
+    }
+
+    @Test
+    void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
+        var nodeProperties = (DoubleNodeProperties) nodeId -> nodeId == 0 ? Double.NaN : 42.1337;
+        var knn = new Knn(
+            graph.nodeCount(),
+            ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").topK(1).build(),
+            SimilarityComputer.ofProperty(nodeProperties, "knn"),
+            ImmutableKnnContext.builder().build()
+        );
+
+        var result = knn.compute();
+
+        softly.assertThat(result)
+            .isNotNull()
+            .extracting(Knn.Result::size)
+            .isEqualTo(3L);
+
+        long nodeAId = idFunction.of("a");
+        long nodeBId = idFunction.of("b");
+        long nodeCId = idFunction.of("c");
+
+        softly.assertThat(result.neighborsOf(nodeBId)).doesNotContain(nodeAId);
+        softly.assertThat(result.neighborsOf(nodeCId)).doesNotContain(nodeAId);
     }
 
     @Test
