@@ -44,7 +44,7 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.similarity.nil.NullGraph;
+import org.neo4j.graphalgo.gdl.GdlGraphs;
 import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
@@ -392,7 +392,7 @@ class GraphSageAlgorithmFactoryTest {
         );
         var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
-                new NullGraph(),
+                GdlGraphs.EMPTY,
                 multiLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance()
@@ -410,7 +410,7 @@ class GraphSageAlgorithmFactoryTest {
         );
         var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
             .build(
-                new NullGraph(),
+                GdlGraphs.EMPTY,
                 singleLabelConfig,
                 AllocationTracker.empty(),
                 NullLog.getInstance()
