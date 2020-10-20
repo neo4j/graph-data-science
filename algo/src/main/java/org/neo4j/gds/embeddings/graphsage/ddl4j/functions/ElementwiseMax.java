@@ -24,6 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.core.utils.DoubleUtil;
 
 public class ElementwiseMax extends SingleParentVariable<Matrix> {
     private final int[][] adjacencyMatrix;
@@ -77,7 +78,7 @@ public class ElementwiseMax extends SingleParentVariable<Matrix> {
                 for (int neighbor : neighbors) {
                     int thisElementIndex = row * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
-                    if (parentData[neighborElementIndex] == thisData[thisElementIndex]) {
+                    if (DoubleUtil.compareDoubles(parentData[neighborElementIndex], thisData[thisElementIndex])) {
                         result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex]);
                     }
                 }
