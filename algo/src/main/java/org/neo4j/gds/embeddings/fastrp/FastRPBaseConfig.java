@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
