@@ -451,7 +451,9 @@ We can however see that the algorithm has successfully processed all seven nodes
 [[algorithms-embeddings-fastrp-examples-mutate]]
 === Mutate
 
-[role=query-example, no-result=true]
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
@@ -459,23 +461,24 @@ We can however see that the algorithm has successfully processed all seven nodes
 CALL gds.fastRP.mutate(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
-    mutateProperty: 'embedding'
+    embeddingDimension: 8,
+    mutateProperty: 'fastrp-embedding'
   }
 )
-YIELD nodePropertiesWritten, mutateMillis
-
+YIELD nodePropertiesWritten
 ----
 
 [opts=header]
 .Results
 |===
-| nodePropertiesWritten | mutateMillis
-| 7                     | 0
+| nodePropertiesWritten
+| 7
 |===
 --
+
+The returned result is similar to the `stats` example.
+Additionally, the graph 'persons' now has a node property `fastrp-embedding` which stores the node embedding for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
 
 
 [[algorithms-embeddings-fastrp-examples-write]]
