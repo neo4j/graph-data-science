@@ -26,6 +26,9 @@ import org.neo4j.values.storable.Values;
 import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+
 @FunctionalInterface
 public interface LongNodeProperties extends NodeProperties {
 
@@ -49,7 +52,11 @@ public interface LongNodeProperties extends NodeProperties {
 
     @Override
     default double doubleValue(long nodeId) {
-        return longValue(nodeId);
+        long value = longValue(nodeId);
+        if (value == LONG_DEFAULT_FALLBACK) {
+            return DOUBLE_DEFAULT_FALLBACK;
+        }
+        return value;
     };
 
     @Override
