@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -49,6 +51,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -275,5 +278,13 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", 0.85));
         CONFIG config = createConfig(createMinimalConfig(mapWrapper));
         assertEquals(0.85, config.dampingFactor());
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {-1, 1})
+    void shouldFailOnInvalidDampingFactor(double dampingFactor) {
+        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", dampingFactor));
+        var ex = assertThrows(IllegalArgumentException.class, () -> createConfig(createMinimalConfig(mapWrapper)));
+        assertEquals("Value for `dampingFactor` must be within [0.00, 1.00).", ex.getMessage());
     }
 }
