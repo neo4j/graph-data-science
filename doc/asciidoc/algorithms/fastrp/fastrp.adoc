@@ -424,29 +424,28 @@ However, this does not necessarily mean that the pairwise distances of two node 
 [[algorithms-embeddings-fastrp-examples-stats]]
 === Stats
 
-[role=query-example, no-result=true]
+:stats-syntax: algorithms-embeddings-fastrp-syntax
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
-CALL gds.fastRP.stats(
-  'persons',
-  {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71
-  }
-)
-YIELD createMillis, computeMillis
+CALL gds.fastRP.stats('persons', { embeddingDimension: 3 })
+YIELD nodeCount
 ----
 
 [opts=header]
 .Results
 |===
-| createMillis | computeMillis
-| 0            | 5
+| nodeCount
+| 7
 |===
 --
+
+The `stats` mode does not currently offer any statistical results for the embeddings themselves.
+We can however see that the algorithm has successfully processed all seven nodes in our example graph.
 
 
 [[algorithms-embeddings-fastrp-examples-mutate]]
