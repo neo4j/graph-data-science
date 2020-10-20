@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @GdlExtension
@@ -141,6 +143,9 @@ class GraphSageHelperTest {
         @Inject
         Graph graph;
 
+        @Inject
+        IdFunction idFunction;
+
         @Test
         void shouldThrowOnMissingProperties() {
             GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
@@ -153,7 +158,9 @@ class GraphSageHelperTest {
                     graph,
                     graphSageTrainConfig,
                     AllocationTracker.empty()))
-                .withMessageContaining("Missing node property for property key `prop`");
+                .withMessageContaining(
+                    formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
+                );
         }
     }
 }
