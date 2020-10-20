@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.graphsage;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
@@ -40,7 +40,6 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMO
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
-// TODO: move it to algo package
 public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends AbstractAlgorithmFactory<GraphSage, CONFIG> {
 
     public GraphSageAlgorithmFactory() {
