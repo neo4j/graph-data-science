@@ -516,6 +516,10 @@ Additionally, each of the seven nodes now has a new property `fastrp-embedding` 
 [[algorithms-embeddings-fastrp-examples-weighted]]
 === Weighted
 
+By default, the algorithm is considering the relationships of the graph to be unweighted.
+To change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
+Below is an example of running the weighted variant of algorithm.
+
 [role=query-example, no-result=true]
 --
 .The following will run the algorithm, and stream results:
@@ -524,9 +528,7 @@ Additionally, each of the seven nodes now has a new property `fastrp-embedding` 
 CALL gds.fastRP.stream(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
+    embeddingDimension: 4,
     relationshipWeightProperty: 'weight'
   }
 )
@@ -537,12 +539,14 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
-| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
-| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
-| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
-| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
-| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
-| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+| 0      | [-0.55106115, 1.6823332, -0.66182184, -0.57873607]
+| 1      | [-0.38195288, 1.7911794, -0.54085857, -0.5870274]
+| 2      | [-0.4431507, 1.7395904, -0.4842358, -0.6109262]
+| 3      | [0.0018629134, 1.8233799, -0.3473827, -0.56145287]
+| 4      | [-0.2862969, 1.8058168, -0.4418158, -0.51601917]
+| 5      | [-0.26784867, 1.8103647, -0.28934777, -0.5363705]
+| 6      | [0.14821936, 1.8630133, -0.13068157, -0.46493164]
 |===
 --
+
+Since the initial state of the algorithm is randomised, it isn't possible to intuitively analyse the effect of the relationship weights.
