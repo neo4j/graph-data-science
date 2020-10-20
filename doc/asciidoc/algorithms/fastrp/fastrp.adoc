@@ -384,19 +384,15 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [[algorithms-embeddings-fastrp-examples-stream]]
 === Stream
 
+:stream-details: For example, we can collect the results and pass them into a similarity algorithm.
+include::../shared/examples-stream-intro.adoc[]
+
 [role=query-example, no-result=true]
 --
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.fastRP.stream(
-  'persons',
-  {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71
-  }
-)
+CALL gds.fastRP.stream('persons', { embeddingDimension: 3 })
 YIELD nodeId, embedding
 ----
 
@@ -404,15 +400,19 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
-| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
-| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
-| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
-| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
-| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
-| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+| 0      | [-1.0168722, 2.000039, 0.8686633]
+| 1      | [-1.1853837, 2.0166488, 0.55430746]
+| 2      | [-0.64757454, 2.254217, 0.2790558]
+| 3      | [0.054054752, 2.2928863, 0.2753105]
+| 4      | [-1.2682186, 1.7526158, 0.9458506]
+| 5      | [-0.42385957, 2.2773507, 0.20764782]
+| 6      | [-1.1808083, 1.5593154, 0.6784344]
 |===
 --
+
+The results of the algorithm are not very intuitively interpretable, as the node embedding format is a mathematical abstraction of the node within its neighborhood, designed for machine learning programs.
+What we can see is that the embeddings have three elements (as configured using `embeddingDimension`) and that the numbers are relatively small (they all fit in the range of `[-2, 3]`).
+The magnitude of the numbers is controlled by the `embeddingDimension`, the number of nodes in the graph, and by the fact that FastRP performs euclidean normalization on the intermediate embedding vectors.
 
 [NOTE]
 ====
