@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
-public interface TrainConfig {
+public interface ModelConfig {
 
     String MODEL_NAME_KEY = "name";
     String MODEL_TYPE_KEY = "type";
