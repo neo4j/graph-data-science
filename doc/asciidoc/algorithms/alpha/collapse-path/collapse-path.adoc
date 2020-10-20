@@ -16,7 +16,8 @@ This topic includes:
 [[algorithms-collapse-path-intro]]
 == Introduction
 
-The Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of the traversal.
+The Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal.
+In other words, the path between the start node and the end node is collapsed into a single relationship (a direct path).
 The algorithm is intended to support the creation of monopartite graphs required by many graph algorithms.
 
 The main input for the algorithm is a list of relationship types.
