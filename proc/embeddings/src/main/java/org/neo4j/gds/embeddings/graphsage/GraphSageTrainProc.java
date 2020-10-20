@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -91,8 +92,9 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
 
     @Override
     protected void validateConfigsAndGraphStore(
-        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageTrainConfig config
+        GraphStoreWithConfig graphStoreWithConfig, GraphSageTrainConfig config
     ) {
+        var graphStore = graphStoreWithConfig.graphStore();
         var nodeLabels = graphStore.nodeLabels();
         if (!config.isMultiLabel()) {
             // all properties exist on all labels

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -49,7 +50,8 @@ public interface GraphSageTrainConfig extends
     IterationsConfig,
     ToleranceConfig,
     EmbeddingDimensionConfig,
-    RelationshipWeightConfig
+    RelationshipWeightConfig,
+    NodePropertiesConfig
 {
 
     int PROJECTED_FEATURE_DIMENSION = -1;
@@ -58,11 +60,6 @@ public interface GraphSageTrainConfig extends
     @Value.Default
     default int embeddingDimension() {
         return 64;
-    }
-
-    @Value.Default
-    default List<String> nodePropertyNames() {
-        return List.of();
     }
 
     @Value.Default

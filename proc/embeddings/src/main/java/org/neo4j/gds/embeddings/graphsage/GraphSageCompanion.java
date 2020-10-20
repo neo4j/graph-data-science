@@ -20,10 +20,15 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 public final class GraphSageCompanion {
 
@@ -35,4 +40,20 @@ public final class GraphSageCompanion {
     public static <T extends GraphSageBaseConfig> DoubleArrayNodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
         return computationResult.result().embeddings()::get;
     }
+
+    /**
+     * Validate the train config that is stored on the model with the graph store that is used to compute embeddings.
+     */
+    static void validateTrainConfig(
+        GraphStoreWithConfig graphStoreWithConfig,
+        GraphSageBaseConfig config
+    ) {
+        GraphStoreValidation.validate(
+            graphStoreWithConfig,
+            ModelCatalog
+                .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
+                .trainConfig()
+        );
+    }
+
 }
