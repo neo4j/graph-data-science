@@ -392,7 +392,7 @@ include::../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.fastRP.stream('persons', { embeddingDimension: 3 })
+CALL gds.fastRP.stream('persons', { embeddingDimension: 4 })
 YIELD nodeId, embedding
 ----
 
@@ -400,18 +400,18 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-1.0168722, 2.000039, 0.8686633]
-| 1      | [-1.1853837, 2.0166488, 0.55430746]
-| 2      | [-0.64757454, 2.254217, 0.2790558]
-| 3      | [0.054054752, 2.2928863, 0.2753105]
-| 4      | [-1.2682186, 1.7526158, 0.9458506]
-| 5      | [-0.42385957, 2.2773507, 0.20764782]
-| 6      | [-1.1808083, 1.5593154, 0.6784344]
+| 0      | [-0.03523557, 0.8080418, -1.6324315, -0.82438976]
+| 1      | [7.3822774E-4, 0.9315331, -1.5840955, -0.73341024]
+| 2      | [-0.047208663, 0.80095035, -1.5542624, -0.8575211]
+| 3      | [0.06738296, 0.7497308, -1.4601052, -0.8149969]
+| 4      | [-0.0044725314, 1.0199871, -1.441534, -0.72904325]
+| 5      | [-0.15570015, 0.9881253, -1.4144595, -0.73383045]
+| 6      | [0.24555062, 0.7544494, -1.4108207, -0.65637124]
 |===
 --
 
 The results of the algorithm are not very intuitively interpretable, as the node embedding format is a mathematical abstraction of the node within its neighborhood, designed for machine learning programs.
-What we can see is that the embeddings have three elements (as configured using `embeddingDimension`) and that the numbers are relatively small (they all fit in the range of `[-2, 3]`).
+What we can see is that the embeddings have four elements (as configured using `embeddingDimension`) and that the numbers are relatively small (they all fit in the range of `[-2, 2]`).
 The magnitude of the numbers is controlled by the `embeddingDimension`, the number of nodes in the graph, and by the fact that FastRP performs euclidean normalization on the intermediate embedding vectors.
 
 [NOTE]
