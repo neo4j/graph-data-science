@@ -24,6 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
@@ -39,6 +41,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class MultiLabelGraphSageTrainTest {
@@ -103,6 +108,43 @@ class MultiLabelGraphSageTrainTest {
         Model<ModelData, GraphSageTrainConfig> model = multiLabelGraphSageTrain.compute();
         assertThat(model.data().featureFunction()).isExactlyInstanceOf(MultiLabelFeatureFunction.class);
 
+    }
+
+    @Test
+    void runsTrainingOnMultiLabelGraph() {
+        String modelName = "gsModel";
+
+        var graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+            .concurrency(1)
+            .projectedFeatureSize(5)
+            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .activationFunction(ActivationFunction.SIGMOID)
+            .embeddingDimension(64)
+            .degreeAsProperty(true)
+            .modelName(modelName)
+            .build();
+
+        var graphSageTrain = new MultiLabelGraphSageTrain(
+            graph,
+            graphSageTrainConfig,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+
+        var model = graphSageTrain.compute();
+
+        assertEquals(modelName, model.name());
+        assertEquals(GraphSage.MODEL_TYPE, model.algoType());
+
+        GraphSageTrainConfig trainConfig = model.trainConfig();
+        assertNotNull(trainConfig);
+        assertEquals(1, trainConfig.concurrency());
+        assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases"), trainConfig.nodePropertyNames());
+        assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
+        assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
+        assertEquals(64, trainConfig.embeddingDimension());
+        assertTrue(trainConfig.degreeAsProperty());
     }
 
     private static Stream<Arguments> featureSizes() {
