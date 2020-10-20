@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
@@ -47,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class FastRPTest extends AlgoTestBase {
 
@@ -334,6 +336,9 @@ class FastRPTest extends AlgoTestBase {
         @Inject
         Graph graph;
 
+        @Inject
+        IdFunction idFunction;
+
         @Test
         void shouldFailWhenNodePropertiesAreMissing() {
             FastRP fastRP = new FastRP(
@@ -348,7 +353,9 @@ class FastRPTest extends AlgoTestBase {
             );
 
             assertThatThrownBy(fastRP::initRandomVectors)
-                .hasMessageContaining("Missing node property for property key `prop`");
+                .hasMessageContaining(
+                    formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
+                );
         }
     }
 }
