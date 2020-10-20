@@ -27,8 +27,14 @@ dependencies {
     implementation(
             [group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: ver.'bouncy-castle'],
             [group: 'io.jsonwebtoken', name: 'jjwt-impl', version: ver.'jjwt'],
-            [group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt'],
+//            [group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt'],
     )
+
+    // Set hardcoded version of jackson-databind until there is a new version of jjwt-jackson
+    implementation(group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt') {
+        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
+    }
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 
     testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
