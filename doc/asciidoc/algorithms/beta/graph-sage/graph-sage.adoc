@@ -224,10 +224,10 @@ CALL gds.beta.graphSage.train(
 
 WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
 
-==== Train with relationship weights
+=== Train with relationship weights
 
 The GraphSage implementation supports training using relationship weights.
-Higher relationship weight between nodes signifies that the nodes should have more similar embedding values.
+Greater relationship weight between nodes signifies that the nodes should have more similar embedding values.
 
 [source, cypher, role=query-example, no-result=true]
 ----

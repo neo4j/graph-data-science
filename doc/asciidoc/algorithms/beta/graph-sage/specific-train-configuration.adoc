@@ -16,6 +16,6 @@
 | searchDepth                | Integer       | 5         | yes      | Depth of a RandomWalk when sampling neighbors during training. This is used when computing the loss function.
 | negativeSampleWeight       | Integer       | 20        | yes      | The weight of the negative samples. This is used when computing the loss function.
 | degreeAsProperty           | Boolean       | false     | yes      | Whether or not to use the degree of the node as a node property.
-| relationshipWeightProperty | String        | null      | yes      | The property name of relationship that contain weight. Must be numeric.
+| relationshipWeightProperty | String        | null      | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
 5+| *Note*: At least one of `nodePropertyNames` and `degreeAsProperty` have to be specified.
 |===
