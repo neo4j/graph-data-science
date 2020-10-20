@@ -43,6 +43,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP> {
 
+    private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
     private final Graph graph;
     private final int concurrency;
@@ -145,7 +146,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     void initRandomVectors() {
         progressLogger.logMessage("Initialising Random Vectors :: Start");
 
-        long batchSize = (graph.nodeCount() / concurrency) / 2;
+        long batchSize = concurrency == 1 ? graph.nodeCount() : Math.max((graph.nodeCount() / concurrency) / 2, MIN_BATCH_SIZE);
         float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
             .stream()
@@ -160,7 +161,9 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     void propagateEmbeddings() {
-        long batchSize = (graph.nodeCount() / concurrency) / 2;
+        long batchSize = concurrency == 1
+            ? graph.nodeCount()
+            : Math.max(((graph.relationshipCount() + graph.nodeCount()) / concurrency) / 2, MIN_BATCH_SIZE);
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
