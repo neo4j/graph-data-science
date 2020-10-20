@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.graphsage;
+package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -30,35 +29,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageMutateConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
-import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.similarity.nil.NullGraph;
-import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
@@ -77,10 +58,10 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-class GraphSageAlgorithmFactoryTest {
+class GraphSageTrainAlgorithmFactoryTest {
 
     @BeforeAll
-    static void setup() {
+    static void setUp() {
         GdsEdition.instance().setToEnterpriseEdition();
     }
 
@@ -88,31 +69,49 @@ class GraphSageAlgorithmFactoryTest {
     @ParameterizedTest
     @MethodSource("parameters")
     void memoryEstimation(
-        GraphSageBaseConfig gsConfig,
+        GraphSageTrainConfig config,
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
-        var trainConfig = gsConfig.trainConfig();
+        var concurrency = config.concurrency();
+        var layerConfigs = config.layerConfigs();
+
+        // initial layers
+        // rows - embeddingDimension, cols - feature size (first layer), embedding size every other layer
+        //  applies to the weights
+        //  weights = double[rows * cols], 1x for mean, 2x for maxpooling, double[row * row] for maxpooling, double[rows] bias for maxpooling
+        var layersMemory = layerConfigs.stream().mapToLong(layerConfig -> {
+            var weightDimensions = layerConfig.rows() * layerConfig.cols();
+            var weightsMemory = sizeOfDoubleArray(weightDimensions);
+            Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
+            if (aggregatorType == Aggregator.AggregatorType.POOL) {
+                // selfWeights
+                weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
+                // neighborsWeights
+                weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
+                // bias
+                weightsMemory += sizeOfDoubleArray(layerConfig.rows());
+            }
+            return weightsMemory;
+        }).sum();
 
         // features: HugeOA[nodeCount * double[featureSize]]
-        var initialFeaturesArray = sizeOfDoubleArray(gsConfig.trainConfig().featuresSize());
+        var initialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
 
-        // result: HugeOA[nodeCount * double[embeddingDimension]]
-        var resultFeaturesArray = sizeOfDoubleArray(gsConfig.trainConfig().embeddingDimension());
-        var resultFeaturesMemory = hugeObjectArraySize.applyAsLong(resultFeaturesArray);
+        var batchSize = config.batchSize();
+        var totalBatchSize = 3 * batchSize;
 
-        // batches:
-        // per thread:
+        // embeddings
+        // subgraphs
 
-        var minBatchNodeCount = (long) gsConfig.batchSize();
-        var maxBatchNodeCount = (long) gsConfig.batchSize();
+        var minBatchNodeCount = (long) totalBatchSize;
+        var maxBatchNodeCount = (long) totalBatchSize;
 
         var batchSizes = new ArrayList<LongLongPair>();
         // additional final layer size
-        batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
+        batchSizes.add(pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        var layerConfigs = gsConfig.trainConfig().layerConfigs();
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
 
@@ -154,7 +153,7 @@ class GraphSageAlgorithmFactoryTest {
             maxBatchNodeCount = maxNextNodeCount;
 
             // add next layer's sizes
-            batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
+            batchSizes.add(pair(minBatchNodeCount, maxBatchNodeCount));
         }
 
         Collections.reverse(batchSizes);
@@ -179,8 +178,8 @@ class GraphSageAlgorithmFactoryTest {
                 var maxMeans = sizeOfDoubleArray(maxNodeCount * featureOrEmbeddingSize);
 
                 //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minProduct = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxProduct = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minProduct = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxProduct = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //   activation function = same as input
                 var minActivation = minProduct;
@@ -193,8 +192,8 @@ class GraphSageAlgorithmFactoryTest {
                 var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingDimension]
-                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * trainConfig.embeddingDimension());
-                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * trainConfig.embeddingDimension());
+                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * config.embeddingDimension());
+                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * config.embeddingDimension());
 
                 // MatrixVectorSum = shape is matrix input == weightedPreviousLayer
                 var minBiasedWeightedPreviousLayer = minWeightedPreviousLayer;
@@ -205,20 +204,20 @@ class GraphSageAlgorithmFactoryTest {
                 var maxNeighborhoodActivations = maxBiasedWeightedPreviousLayer;
 
                 //  ElementwiseMax - double[iterNodeCount * embeddingDimension]
-                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //  Slice - double[iterNodeCount * embeddingDimension]
-                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minSelf = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxSelf = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minSelf = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxSelf = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minNeighbors = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minNeighbors = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
+                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
                 //  MatrixSum - new double[iterNodeCount * embeddingDimension]
                 var minSum = minSelf;
@@ -241,14 +240,14 @@ class GraphSageAlgorithmFactoryTest {
 
         // normalize rows = same as input (output of aggregator)
         var lastLayerBatchNodeCount = batchSizes.get(batchSizes.size() - 1);
-        var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * trainConfig.embeddingDimension());
-        var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * trainConfig.embeddingDimension());
+        var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * config.embeddingDimension());
+        var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * config.embeddingDimension());
         aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
         var firstLayerBatchNodeCount = batchSizes.get(0);
-        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainConfig.featuresSize());
-        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainConfig.featuresSize());
+        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * config.featuresSize());
+        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * config.featuresSize());
         aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(
@@ -256,173 +255,133 @@ class GraphSageAlgorithmFactoryTest {
             aggregatorMemories.stream()
         ).reduce(MemoryRange.empty(), MemoryRange::add);
 
-        var concurrency = gsConfig.concurrency();
         var evaluateLossMemory = lossFunctionMemory.times(concurrency);
 
-        var expectedMemory = evaluateLossMemory
-            .add(MemoryRange.of(initialFeaturesMemory))
-            .add(MemoryRange.of(resultFeaturesMemory))
-            .add(MemoryRange.of(40L)); // GraphSage.class
+        // adam optimizer
+        //  copy of weight for every layer
+        var initialAdamMemory = layerConfigs.stream().mapToLong(layerConfig -> {
+            var weightDimensions = layerConfig.rows() * layerConfig.cols();
+            var momentumTermsMemory = sizeOfDoubleArray(weightDimensions);
+            var velocityTermsMemory = momentumTermsMemory;
 
-        var actualTree = new GraphSageAlgorithmFactory<>()
-            .memoryEstimation(gsConfig).estimate(GraphDimensions.of(nodeCount), concurrency);
+            return momentumTermsMemory + velocityTermsMemory;
+        }).sum();
 
-        MemoryRange actual = actualTree.memoryUsage();
+        var updateAdamMemory = layerConfigs.stream().mapToLong(layerConfig -> {
+            var weightDimensions = layerConfig.rows() * layerConfig.cols();
+            // adam update
 
-        assertEquals(expectedMemory.min, actual.min);
-        assertEquals(expectedMemory.max, actual.max);
+            //  new momentum
+            //   1 copy of weights
+            //   1 copy of momentum terms (same dim as weights)
+            // not part of peak usage as update peak is larger
+            @SuppressWarnings("unused")
+            var newMomentum = 2 * weightDimensions;
+
+            //  new velocity
+            //   2 copies of weights
+            //   1 copy of momentum terms (same dim as weights)
+            // not part of peak usage as update peak is larger
+            @SuppressWarnings("unused")
+            var newVelocity = 3 * weightDimensions;
+
+            //  mCaps
+            //   copy of momentumTerm (size of weights)
+            var mCaps = weightDimensions;
+
+            //  vCaps
+            //   copy of velocityTerm (size of weights)
+            var vCaps = weightDimensions;
+
+            //  updating weights
+            //   2 copies of mCap, 1 copy of vCap
+            var updateWeights = 2 * mCaps + vCaps;
+
+            var updateMemory = updateWeights + mCaps + vCaps;
+
+            return updateMemory;
+        }).sum();
+
+        var backwardsLossFunctionMemory =
+            aggregatorMemories.stream().reduce(MemoryRange.empty(), MemoryRange::add);
+
+        var trainOnBatchMemory =
+            lossFunctionMemory
+                .add(backwardsLossFunctionMemory)
+                .add(MemoryRange.of(updateAdamMemory));
+
+        var trainOnEpoch = trainOnBatchMemory
+            .times(concurrency)
+            .add(MemoryRange.of(initialAdamMemory));
+
+        var trainMemory =
+            trainOnEpoch
+                .max(evaluateLossMemory)
+                .add(MemoryRange.of(initialFeaturesMemory));
+
+        var expectedResidentMemory = MemoryRange.of(layersMemory);
+        var expectedPeakMemory = trainMemory
+            .add(expectedResidentMemory)
+            .add(MemoryRange.of(40L)); // For GraphSage.class
+
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+            .memoryEstimation(config)
+            .estimate(GraphDimensions.of(nodeCount), concurrency);
+
+        assertEquals(expectedPeakMemory, actualEstimation.memoryUsage());
+        assertThat(actualEstimation.residentMemory())
+            .isPresent()
+            .map(MemoryTree::memoryUsage)
+            .contains(expectedResidentMemory);
     }
 
     @Test
     void memoryEstimationTreeStructure() {
-        var trainConfig = ImmutableGraphSageTrainConfig
+        var config = ImmutableGraphSageTrainConfig
             .builder()
+            .username("userName")
             .modelName("modelName")
             .sampleSizes(List.of(1L, 2L))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .degreeAsProperty(true)
             .build();
 
-        var model = Model.of(
-            "",
-            "modelName",
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
-            trainConfig
-        );
-
-        ModelCatalog.set(model);
-
-        var gsConfig = ImmutableGraphSageStreamConfig
-            .builder()
-            .modelName("modelName")
-            .build();
-
-        var actualEstimation = new GraphSageAlgorithmFactory<>()
-            .memoryEstimation(gsConfig)
+        var actualEstimation = new GraphSageTrainAlgorithmFactory()
+            .memoryEstimation(config)
             .estimate(GraphDimensions.of(1337), 42);
 
         assertThat(flatten(actualEstimation)).containsExactly(
-            pair(0, "GraphSage"),
-            pair(1, TEMPORARY_MEMORY),
-            pair(2, "this.instance"),
-            pair(2, "initialFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages"),
-            pair(2, "concurrentBatches"),
-            pair(3, "computationGraph"),
-            pair(4, "subgraphs"),
-            pair(5, "subgraph 1"),
-            pair(5, "subgraph 2"),
-            pair(4, "forward"),
-            pair(5, "firstLayer"),
-            pair(5, "MEAN 1"),
-            pair(5, "MEAN 2"),
-            pair(5, "normalizeRows"),
-            pair(2, "resultFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages")
-        );
-    }
-
-    @Test
-    void memoryEstimationMutateTreeStructure() {
-        var trainConfig = ImmutableGraphSageTrainConfig
-            .builder()
-            .modelName("modelName")
-            .sampleSizes(List.of(1L, 2L))
-            .aggregator(Aggregator.AggregatorType.MEAN)
-            .degreeAsProperty(true)
-            .build();
-
-        var model = Model.of(
-            "",
-            "modelName",
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
-            trainConfig
-        );
-
-        ModelCatalog.set(model);
-
-        var gsConfig = ImmutableGraphSageMutateConfig
-            .builder()
-            .modelName("modelName")
-            .mutateProperty("foo")
-            .build();
-
-        var actualEstimation = new GraphSageAlgorithmFactory<>()
-            .memoryEstimation(gsConfig)
-            .estimate(GraphDimensions.of(1337), 42);
-
-        assertThat(flatten(actualEstimation)).containsExactly(
-            pair(0, "GraphSage"),
+            pair(0, "GraphSageTrain"),
             pair(1, RESIDENT_MEMORY),
-            pair(2, "resultFeatures"),
-            pair(3, "instance"),
-            pair(3, "data"),
-            pair(3, "pages"),
+            pair(2, "weights"),
+            pair(3, "layer 1"),
+            pair(3, "layer 2"),
             pair(1, TEMPORARY_MEMORY),
             pair(2, "this.instance"),
             pair(2, "initialFeatures"),
             pair(3, "instance"),
             pair(3, "data"),
             pair(3, "pages"),
-            pair(2, "concurrentBatches"),
-            pair(3, "computationGraph"),
-            pair(4, "subgraphs"),
-            pair(5, "subgraph 1"),
-            pair(5, "subgraph 2"),
-            pair(4, "forward"),
-            pair(5, "firstLayer"),
-            pair(5, "MEAN 1"),
-            pair(5, "MEAN 2"),
-            pair(5, "normalizeRows")
+            pair(2, "trainOnEpoch"),
+            pair(3, "initialAdamOptimizer"),
+            pair(3, "concurrentBatches"),
+            pair(4, "trainOnBatch"),
+            pair(5, "computationGraph"),
+            pair(6, "subgraphs"),
+            pair(7, "subgraph 1"),
+            pair(7, "subgraph 2"),
+            pair(6, "forward"),
+            pair(7, "firstLayer"),
+            pair(7, "MEAN 1"),
+            pair(7, "MEAN 2"),
+            pair(7, "normalizeRows"),
+            pair(6, "backward"),
+            pair(7, "firstLayer"),
+            pair(7, "MEAN 1"),
+            pair(7, "MEAN 2"),
+            pair(7, "normalizeRows"),
+            pair(5, "updateAdamOptimizer")
         );
-    }
-
-    @Test
-    void shouldCreateCorrectAlgorithmInstance() {
-        var multiLabelConfig = GraphSageTrainConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.create(Map.of(
-                "modelName", "graphSageModel",
-                "degreeAsProperty", true,
-                "projectedFeatureSize", 42
-            ))
-        );
-        var multiLabelAlgo = new GraphSageTrainAlgorithmFactory()
-            .build(
-                new NullGraph(),
-                multiLabelConfig,
-                AllocationTracker.empty(),
-                NullLog.getInstance()
-            );
-        assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
-
-        var singleLabelConfig = GraphSageTrainConfig.of(
-            "",
-            Optional.empty(),
-            Optional.empty(),
-            CypherMapWrapper.create(Map.of(
-                "modelName", "graphSageModel",
-                "degreeAsProperty", true
-            ))
-        );
-        var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
-            .build(
-                new NullGraph(),
-                singleLabelConfig,
-                AllocationTracker.empty(),
-                NullLog.getInstance()
-            );
-        assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }
 
     private static List<IntObjectPair<String>> flatten(MemoryTree memoryTree) {
@@ -437,8 +396,8 @@ class GraphSageAlgorithmFactoryTest {
     }
 
     static Stream<Arguments> parameters() {
-        var smallNodeCounts = List.of(1L, 10L, 100L, 10_000L);
-        var largeNodeCounts = List.of(11000000000L, 100000000000L);
+        var smallNodeCounts = List.of(1L, 100L, 10_000L);
+        var largeNodeCounts = List.of(11_000_000_000L, 100_000_000_000L);
         var nodeCounts = Stream.concat(
             smallNodeCounts.stream().map(nc -> {
                 var hugeObjectArrayPages = sizeOfObjectArray(nc);
@@ -499,7 +458,7 @@ class GraphSageAlgorithmFactoryTest {
                             embeddingDimensions.stream().flatMap(embeddingDimension ->
                                 degreesAsProperty.stream().flatMap(degreeAsProperty ->
                                     nodePropertySizes.stream().map(nodePropertySize -> {
-                                        var trainConfig = ImmutableGraphSageTrainConfig
+                                        var config = ImmutableGraphSageTrainConfig
                                             .builder()
                                             .modelName(modelName)
                                             .username(userName)
@@ -516,27 +475,8 @@ class GraphSageAlgorithmFactoryTest {
                                             )
                                             .build();
 
-                                        var model = Model.of(
-                                            userName,
-                                            modelName,
-                                            "graphSage",
-                                            GraphSchema.empty(),
-                                            ModelData.of(new Layer[]{}, GraphSageHelper::features),
-                                            trainConfig
-                                        );
-
-                                        ModelCatalog.set(model);
-
-                                        var streamConfig = ImmutableGraphSageStreamConfig
-                                            .builder()
-                                            .concurrency(concurrency)
-                                            .modelName(modelName)
-                                            .username(userName)
-                                            .batchSize(batchSize)
-                                            .build();
-
                                         return arguments(
-                                            streamConfig,
+                                            config,
                                             nodeCount,
                                             hugeObjectArraySize
                                         );
@@ -550,49 +490,9 @@ class GraphSageAlgorithmFactoryTest {
         });
     }
 
-    @Test
-    void mutateHasPersistentPart() {
-        var modelName = "modelName";
-
-        var trainConfig = ImmutableGraphSageTrainConfig
-            .builder()
-            .modelName(modelName)
-            .degreeAsProperty(true)
-            .build();
-
-        var model = Model.of(
-            "",
-            modelName,
-            "graphSage",
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
-            trainConfig
-        );
-
-        ModelCatalog.set(model);
-
-        var config = ImmutableGraphSageMutateConfig
-            .builder()
-            .modelName(modelName)
-            .mutateProperty("foo")
-            .build();
-
-        var actualTree = new GraphSageAlgorithmFactory<>()
-            .memoryEstimation(config).estimate(GraphDimensions.of(10000), 4);
-
-        MemoryRange actual = actualTree.memoryUsage();
-
-        assertEquals(6861816, actual.min);
-        assertEquals(18593016, actual.max);
-
-        assertThat(actualTree.residentMemory())
-            .isPresent()
-            .map(MemoryTree::memoryUsage)
-            .contains(MemoryRange.of(5320040L));
-    }
-
     @AfterEach
     void tearDown() {
         ModelCatalog.removeAllLoadedModels();
     }
+
 }
