@@ -42,7 +42,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.similarity.nil.NullGraphStore;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -300,7 +300,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var exception = assertThrows(
             IllegalArgumentException.class,
             () -> proc.validateConfigsAndGraphStore(
-                new NullGraphStore(db.databaseId()),
+                GdlFactory.of("", db.databaseId()).build().graphStore(),
                 GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
                 config
             )
@@ -312,7 +312,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         return Stream.of(
             Arguments.of(
                 PROJECTED_FEATURE_SIZE,
-                "Node properties [foo] not found in graph with node properties: [] in all node labels: ['']"
+                "Node properties [foo] not found in graph with node properties: [] in all node labels: ['__ALL__']"
             ), Arguments.of(
                 5,
                 "Each property set in `nodePropertyNames` must exist for one label. Missing properties: [foo]"
