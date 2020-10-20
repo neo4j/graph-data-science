@@ -48,11 +48,12 @@ public final class GraphSageCompanion {
         GraphStoreWithConfig graphStoreWithConfig,
         GraphSageBaseConfig config
     ) {
+        var trainConfig = ModelCatalog
+            .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
+            .trainConfig();
         GraphStoreValidation.validate(
             graphStoreWithConfig,
-            ModelCatalog
-                .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
-                .trainConfig()
+            trainConfig
         );
     }
 

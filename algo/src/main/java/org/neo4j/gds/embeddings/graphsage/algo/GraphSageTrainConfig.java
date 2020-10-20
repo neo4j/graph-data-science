@@ -51,8 +51,7 @@ public interface GraphSageTrainConfig extends
     ToleranceConfig,
     EmbeddingDimensionConfig,
     RelationshipWeightConfig,
-    FeaturePropertiesConfig
-{
+    FeaturePropertiesConfig {
 
     int PROJECTED_FEATURE_DIMENSION = -1;
 
@@ -122,6 +121,12 @@ public interface GraphSageTrainConfig extends
     @Value.Default
     default int projectedFeatureDimension() {
         return PROJECTED_FEATURE_DIMENSION;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default boolean forAllLabels() {
+        return false;
     }
 
     @Configuration.Ignore
@@ -196,5 +201,4 @@ public interface GraphSageTrainConfig extends
             .tolerance(tolerance)
             .build();
     }
-
 }
