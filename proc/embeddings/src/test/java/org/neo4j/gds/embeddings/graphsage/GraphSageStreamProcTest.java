@@ -17,59 +17,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.graphsage;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class GraphSageWriteProcTest extends GraphSageBaseProcTest {
+class GraphSageStreamProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.graphsage.graphsage.GraphSageBaseProcTest#configVariations")
-    void testWriting(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
+    @MethodSource("org.neo4j.gds.embeddings.graphsage.GraphSageBaseProcTest#configVariations")
+    void testStreaming(int embeddingDimension, String aggregator, ActivationFunction activationFunction) {
         train(embeddingDimension, aggregator, activationFunction);
 
         String query = GdsCypher.call().explicitCreation("embeddingsGraph")
             .algo("gds.beta.graphSage")
-            .writeMode()
-            .addParameter("writeProperty", "embedding")
+            .streamMode()
+            .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertNotNull(row.get("nodeCount"));
-            assertNotNull(row.get("nodePropertiesWritten"));
-            assertNotNull(row.get("createMillis"));
-            assertNotNull(row.get("computeMillis"));
-            assertNotNull(row.get("writeMillis"));
-            assertNotNull(row.get("configuration"));
+        runQueryWithRowConsumer(query, Map.of("embeddingDimension", embeddingDimension), row -> {
+            Number nodeId = row.getNumber("nodeId");
+            assertNotNull(nodeId);
+
+            Object o = row.get("embedding");
+            assertTrue(o instanceof List);
+            Collection<Double> nodeEmbeddings = (List<Double>) o;
+            assertEquals(embeddingDimension, nodeEmbeddings.size());
         });
-
-        List<Map<String, Object>> results = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
-            results.add(Map.of("size", (long)embeddingDimension));
-        }
-
-        assertCypherResult(
-            "MATCH (n:King) RETURN size(n.embedding) AS size",
-            results
-        );
     }
-
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
     @MethodSource("missingNodeProperties")
@@ -78,10 +68,9 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
         String query = GdsCypher.call().implicitCreation(config)
             .algo("gds.beta.graphSage")
-            .writeMode()
+            .streamMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)
-            .addParameter("writeProperty", modelName)
             .yields();
 
         String expectedFail = formatWithLocale("Node properties [%s] not found in graph with node properties: [%s] in all node labels: ['%s']", nodeProperties, graphProperties, label);

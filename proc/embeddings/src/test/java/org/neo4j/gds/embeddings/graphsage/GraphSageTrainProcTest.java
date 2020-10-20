@@ -17,16 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.graphsage;
+package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
@@ -117,24 +113,21 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     void runsTrainingOnMultiLabelGraph() {
         clearDb();
         GraphStoreCatalog.removeAllLoadedGraphs();
-        runQuery(GraphSageTestGraph.GDL);
+        runQuery("CREATE (:A {a1: 1.0, a2: 2.0})-[:REL]->(:B {b1: 42.0, b2: 1337.0})");
 
         String query = GdsCypher.call()
             .withNodeLabel(
-                "Restaurant",
-                NodeProjection.of("Restaurant", PropertyMappings.of(
-                    PropertyMapping.of("numEmployees"),
-                    PropertyMapping.of("rating")
+                "A",
+                NodeProjection.of("A", PropertyMappings.of(
+                    PropertyMapping.of("a1"),
+                    PropertyMapping.of("a2")
                 ))
             ).withNodeLabel(
-                "Dish",
-                NodeProjection.of("Dish", PropertyMappings.of(
-                    PropertyMapping.of("numIngredients"),
-                    PropertyMapping.of("rating")
+                "B",
+                NodeProjection.of("B", PropertyMappings.of(
+                    PropertyMapping.of("b1"),
+                    PropertyMapping.of("b2")
                 ))
-            ).withNodeLabel(
-                "Customer",
-                NodeProjection.of("Customer", PropertyMappings.of(PropertyMapping.of("numPurchases")))
             )
             .withAnyRelationshipType()
             .graphCreate(graphName)
@@ -146,13 +139,9 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         String train = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("concurrency", 1)
             .addParameter("projectedFeatureSize", 5)
-            .addParameter("nodePropertyNames", List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
-            .addParameter("aggregator", "mean")
-            .addParameter("activationFunction", "sigmoid")
+            .addParameter("nodePropertyNames", List.of("a1", "a2", "b1", "b2"))
             .addParameter("embeddingDimension", 64)
-            .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
 
@@ -179,12 +168,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
-        assertEquals(1, trainConfig.concurrency());
-        assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases"), trainConfig.nodePropertyNames());
-        assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
-        assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
+        assertEquals(List.of("a1", "a2", "b1", "b2"), trainConfig.nodePropertyNames());
         assertEquals(64, trainConfig.embeddingDimension());
-        assertTrue(trainConfig.degreeAsProperty());
     }
 
     @Test
