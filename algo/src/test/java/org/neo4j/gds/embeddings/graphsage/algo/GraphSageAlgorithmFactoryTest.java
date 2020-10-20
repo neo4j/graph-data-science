@@ -82,17 +82,16 @@ class GraphSageAlgorithmFactoryTest {
     @MethodSource("parameters")
     void memoryEstimation(
         GraphSageBaseConfig gsConfig,
+        GraphSageTrainConfig trainConfig,
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
-        var trainConfig = gsConfig.trainConfig();
-
         // features: HugeOA[nodeCount * double[featureSize]]
-        var initialFeaturesArray = sizeOfDoubleArray(gsConfig.trainConfig().featuresSize());
+        var initialFeaturesArray = sizeOfDoubleArray(trainConfig.featuresSize());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
 
         // result: HugeOA[nodeCount * double[embeddingDimension]]
-        var resultFeaturesArray = sizeOfDoubleArray(gsConfig.trainConfig().embeddingDimension());
+        var resultFeaturesArray = sizeOfDoubleArray(trainConfig.embeddingDimension());
         var resultFeaturesMemory = hugeObjectArraySize.applyAsLong(resultFeaturesArray);
 
         // batches:
@@ -105,7 +104,7 @@ class GraphSageAlgorithmFactoryTest {
         // additional final layer size
         batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        var layerConfigs = gsConfig.trainConfig().layerConfigs();
+        var layerConfigs = trainConfig.layerConfigs();
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
 
@@ -530,6 +529,7 @@ class GraphSageAlgorithmFactoryTest {
 
                                         return arguments(
                                             streamConfig,
+                                            trainConfig,
                                             nodeCount,
                                             hugeObjectArraySize
                                         );

@@ -19,28 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 
-import java.util.List;
-
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, FeaturePropertiesConfig {
-
-    @Configuration.Ignore
-    default GraphSageTrainConfig trainConfig() {
-        return ModelCatalog
-            .get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class)
-            .trainConfig();
-    }
-
-    @Override
-    @Configuration.Ignore
-    default List<String> featureProperties() {
-        return trainConfig().featureProperties();
-    }
-}
+public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, FeaturePropertiesConfig {}
