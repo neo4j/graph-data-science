@@ -484,7 +484,9 @@ To find out how to inspect the new schema of the in-memory graph, see <<catalog-
 [[algorithms-embeddings-fastrp-examples-write]]
 === Write
 
-[role=query-example, no-result=true]
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm in `write` mode:
 [source, cypher]
@@ -492,23 +494,23 @@ To find out how to inspect the new schema of the in-memory graph, see <<catalog-
 CALL gds.fastRP.write(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
-    writeProperty: 'embedding'
+    embeddingDimension: 8,
+    writeProperty: 'fastrp-embedding'
   }
 )
-YIELD nodePropertiesWritten, writeMillis
-
+YIELD nodePropertiesWritten
 ----
 
 [opts=header]
 .Results
 |===
-| nodePropertiesWritten | mutateMillis
-| 7                     | 212
+| nodePropertiesWritten
+| 7
 |===
 --
+
+The returned result is similar to the `stats` example.
+Additionally, each of the seven nodes now has a new property `fastrp-embedding` in the Neo4j database, containing the node embedding for that node.
 
 
 [[algorithms-embeddings-fastrp-examples-weighted]]
