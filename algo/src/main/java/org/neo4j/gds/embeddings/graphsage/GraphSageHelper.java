@@ -222,8 +222,9 @@ public final class GraphSageHelper {
                 double doubleValue = nodeProperties.get(i).doubleValue(nodeId);
                 if (Double.isNaN(doubleValue)) {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "Missing node property for property key `%s`. Consider using a default value in the property projection.",
-                        config.nodePropertyNames().get(i)
+                        "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",
+                        config.nodePropertyNames().get(i),
+                        graph.toOriginalNodeId(nodeId)
                     ));
                 }
                 nodeFeatures[i] = doubleValue;
