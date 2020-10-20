@@ -307,6 +307,12 @@ public final class GraphSageHelper {
     }
 
     private static NodeLabel labelOf(Graph graph, long n) {
-        return graph.nodeLabels(n).stream().findFirst().get();
+        var nodeLabels = graph.nodeLabels(n);
+        if (nodeLabels.size() != 1) {
+            throw new IllegalArgumentException(
+                formatWithLocale("Each node must have exactly one label: nodeId=%d, labels=%s", n, nodeLabels)
+            );
+        }
+        return graph.nodeLabels(n).iterator().next();
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -30,12 +31,14 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @GdlExtension
 class GraphSageHelperTest {
@@ -55,6 +58,22 @@ class GraphSageHelperTest {
         for(int i = 0; i < actual.size(); i++) {
             assertThat(actual.get(i)).containsExactlyInAnyOrder(expected.get(i));
         }
+    }
+
+    @Test
+    void shouldValidateSingleLabelPerNode() {
+        var graph = GdlFactory.of("(:Foo:Bar)").build().graphStore().getUnion();
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .modelName("foo")
+            .nodePropertyNames(Set.of("dummyProp"))
+            .projectedFeatureSize(42)
+            .build();
+        var exception = assertThrows(IllegalArgumentException.class, () ->
+            GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty())
+        );
+        assertThat(exception).hasMessage(
+            "Each node must have exactly one label: nodeId=0, labels=[NodeLabel{name='Bar'}, NodeLabel{name='Foo'}]"
+        );
     }
 
     static Stream<Arguments> parameters() {
