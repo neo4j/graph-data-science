@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.core.model;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends TrainConfig & BaseConfig> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     String username();
 
@@ -44,7 +44,7 @@ public interface Model<DATA, CONFIG extends TrainConfig & BaseConfig> {
 
     ZonedDateTime creationTime();
 
-    static <D, C extends TrainConfig & BaseConfig> Model<D, C> of(
+    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
         String username,
         String name,
         String algoType,

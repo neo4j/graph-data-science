@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 
 import java.util.Collections;
@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 
 public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>>,
     TRAIN_RESULT,
-    TRAIN_CONFIG extends TrainConfig & AlgoBaseConfig>
+    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
     extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
 
     protected TrainResult trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult) {
@@ -59,7 +59,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends TrainConfig & AlgoBaseConfig> TrainResult(
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> TrainResult(
             Model<TRAIN_RESULT, TRAIN_CONFIG> trainedModel,
             long trainMillis,
             long nodeCount,
@@ -81,7 +81,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             this.trainMillis = trainMillis;
         }
 
-        private <TRAIN_CONFIG extends TrainConfig & AlgoBaseConfig> Map<String, Object> anonymousGraphResult(
+        private <TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> Map<String, Object> anonymousGraphResult(
             long nodeCount,
             long relationshipCount,
             TRAIN_CONFIG trainConfig

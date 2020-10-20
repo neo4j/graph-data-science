@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Map;
@@ -31,7 +31,7 @@ import java.util.Map;
 @ValueClass
 @Configuration("TestTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface TestTrainConfig extends BaseConfig, TrainConfig {
+public interface TestTrainConfig extends BaseConfig, ModelConfig {
 
     @Value.Default
     default String dummyConfigProperty() {

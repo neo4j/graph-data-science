@@ -56,8 +56,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_DIMENSION;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
