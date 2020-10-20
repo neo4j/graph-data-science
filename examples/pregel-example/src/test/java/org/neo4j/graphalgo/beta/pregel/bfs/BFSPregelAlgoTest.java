@@ -57,8 +57,46 @@ class BFSPregelAlgoTest {
         ", (e)-[:TYPE]->(g)" +
         ", (f)-[:TYPE]->(g)";
 
+    @GdlGraph(graphNamePrefix = "parent")
+    private static final String PARENT_GRAPH =
+        "CREATE" +
+        "  (a) " +
+        ", (b)" +
+        ", (c)" +
+        ", (d)" +
+        ", (e)" +
+        ", (f)" +
+        ", (g)" +
+        ", (h)" +
+        ", (i)" +
+        ", (j)" +
+        ", (a)-[:TYPE]->(b)" +
+        ", (a)-[:TYPE]->(d)" +
+        ", (a)-[:TYPE]->(f)" +
+        ", (b)-[:TYPE]->(a)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (b)-[:TYPE]->(d)" +
+        ", (c)-[:TYPE]->(a)" +
+        ", (c)-[:TYPE]->(b)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (d)-[:TYPE]->(a)" +
+        ", (d)-[:TYPE]->(b)" +
+        ", (d)-[:TYPE]->(c)" +
+        ", (d)-[:TYPE]->(g)" +
+        ", (d)-[:TYPE]->(i)" +
+        ", (e)-[:TYPE]->(b)" +
+        ", (f)-[:TYPE]->(b)" +
+        ", (i)-[:TYPE]->(a)" +
+        ", (i)-[:TYPE]->(b)" +
+        ", (i)-[:TYPE]->(d)" +
+        ", (j)-[:TYPE]->(b)" +
+        ", (j)-[:TYPE]->(e)";
+
     @Inject
     private TestGraph graph;
+    
+    @Inject
+    private TestGraph parentGraph;
 
     @Test
     void levelBfs() {
@@ -116,7 +154,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(3, result.ranIterations());
+        assertEquals(4, result.ranIterations());
 
         var expected = Map.of(
             "a", 0L,
@@ -130,5 +168,43 @@ class BFSPregelAlgoTest {
         );
 
         TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
+    }
+
+    @Test
+    void parentBugTest() {
+        int maxIterations = 10;
+
+        var config = ImmutableBFSPregelConfig.builder()
+            .maxIterations(maxIterations)
+            .startNode(parentGraph.toOriginalNodeId("a"))
+            .build();
+
+        var pregelJob = Pregel.create(
+            parentGraph,
+            config,
+            new BFSParentPregel(),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        var expected = Map.of(
+            "a", parentGraph.toOriginalNodeId("a"),
+            "b", parentGraph.toOriginalNodeId("a"),
+            "c", parentGraph.toOriginalNodeId("b"),
+            "d", parentGraph.toOriginalNodeId("a"),
+            "e", BFSParentPregel.NOT_FOUND,
+            "f", parentGraph.toOriginalNodeId("a"),
+            "g", parentGraph.toOriginalNodeId("d"),
+            "h", BFSParentPregel.NOT_FOUND,
+            "i", parentGraph.toOriginalNodeId("d"),
+            "j", BFSParentPregel.NOT_FOUND
+        );
+
+        var result = pregelJob.run();
+
+        assertTrue(result.didConverge(), "Algorithm did not converge.");
+        assertEquals(3, result.ranIterations());
+
+        TestSupport.assertLongValues(parentGraph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
     }
 }

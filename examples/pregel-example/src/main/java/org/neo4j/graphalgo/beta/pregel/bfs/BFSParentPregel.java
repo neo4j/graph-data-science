@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 @PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
 public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
 
-    private static final long NOT_FOUND = Long.MAX_VALUE;
+    public static final long NOT_FOUND = Long.MAX_VALUE;
     public static final String PARENT = "parent";
 
     @Override
@@ -64,8 +64,11 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
                     currentParent = Long.min(currentParent, msg.longValue());
                 }
 
-                context.setNodeValue(PARENT, currentParent);
-                context.sendToNeighbors(nodeId);
+                // only send message if a parent existed
+                if (currentParent != NOT_FOUND) {
+                    context.setNodeValue(PARENT, currentParent);
+                    context.sendToNeighbors(nodeId);
+                }
             }
             context.voteToHalt();
         }
