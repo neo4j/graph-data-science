@@ -432,7 +432,7 @@ include::../shared/examples-stats-intro.adoc[]
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
-CALL gds.fastRP.stats('persons', { embeddingDimension: 3 })
+CALL gds.fastRP.stats('persons', { embeddingDimension: 8 })
 YIELD nodeCount
 ----
 
