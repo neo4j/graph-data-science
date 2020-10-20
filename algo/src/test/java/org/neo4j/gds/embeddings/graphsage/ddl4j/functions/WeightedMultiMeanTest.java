@@ -100,7 +100,7 @@ class WeightedMultiMeanTest extends GraphSageBaseTest implements FiniteDifferenc
         double[] expected = new double[] {
             3.0, 3.0, 3.0, // d1
             1.5, 1.5, 1.5, // d2
-            1.3333333333333333, 1.3333333333333333, 1.3333333333333333, // d3
+            4.0/3.0, 4.0/3.0, 4.0/3.0, // d3
             2.0, 2.0, 2.0, // d4
         };
 
