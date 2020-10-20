@@ -150,7 +150,7 @@ public abstract class AlgoBaseProc<
 
     protected void validateGraphStore(GraphStore graphStore) {}
 
-    protected void validateConfigsAndGraphStore(GraphStore graphStore, GraphCreateConfig graphCreateConfig, CONFIG config) {}
+    protected void validateConfigsAndGraphStore(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {}
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -327,7 +327,7 @@ public abstract class AlgoBaseProc<
         validateConfigs(graphCandidate.config(), config);
         var graphStore = graphCandidate.graphStore();
         validateGraphStore(graphStore);
-        validateConfigsAndGraphStore(graphStore, graphCandidate.config(), config);
+        validateConfigsAndGraphStore(graphCandidate, config);
         return graphStore;
     }
 

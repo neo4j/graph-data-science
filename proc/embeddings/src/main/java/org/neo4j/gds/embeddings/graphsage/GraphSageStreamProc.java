@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -81,6 +82,14 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         });
     }
 
+    @Override
+    protected void validateConfigsAndGraphStore(
+        GraphStoreWithConfig graphStoreWithConfig,
+        GraphSageStreamConfig config
+    ) {
+        GraphSageCompanion.validateTrainConfig(graphStoreWithConfig, config);
+        super.validateConfigsAndGraphStore(graphStoreWithConfig, config);
+    }
 
     @Override
     protected GraphSageStreamConfig newConfig(
