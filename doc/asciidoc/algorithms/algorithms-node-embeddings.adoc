@@ -1,4 +1,4 @@
-[[node-embeddings]]
+[[algorithms-node-embeddings]]
 = Node embeddings
 
 [abstract]
@@ -17,11 +17,11 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 ** <<algorithms-embeddings-graph-sage, GraphSAGE>>
 
 * Alpha
-** <<algorithms-embeddings-node2vec, Node2Vec>>
+** <<alpha-algorithms-embeddings-node2vec, Node2Vec>>
 
 
 include::fastrp/fastrp.adoc[leveloffset=+1]
 
 include::beta/graph-sage/graph-sage.adoc[leveloffset=+1]
 
-include::node-embeddings/node2vec.adoc[leveloffset=+1]
+include::alpha/node2vec/node2vec.adoc[leveloffset=+1]

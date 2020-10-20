@@ -1,5 +1,8 @@
 [[algorithms-embeddings-fastrp]]
 = Fast Random Projection
+:entity: node
+:result: embedding
+:algorithm: FastRP
 
 [abstract]
 --
@@ -8,8 +11,8 @@ This section describes the Fast Random Projection (FastRP) node embedding algori
 
 This topic includes:
 
-* <<algorithms-embeddings-fastrp-introduction>>
-
+* <<algorithms-embeddings-fastrp-introduction, Introduction>>
+* <<algorithms-embeddings-fastrp-parameter-tuning, Tuning algorithm parameters>>
 * <<algorithms-embeddings-fastrp-syntax, Syntax>>
 ** <<algorithms-embeddings-fastrp-syntax-anonymous, Anonymous graphs>>
 * <<algorithms-embeddings-fastrp-examples, Examples>>
@@ -19,14 +22,13 @@ This topic includes:
 ** <<algorithms-embeddings-fastrp-examples-mutate, Mutate>>
 ** <<algorithms-embeddings-fastrp-examples-write, Write>>
 ** <<algorithms-embeddings-fastrp-examples-weighted, Weighted>>
-* <<algorithms-embeddings-fastrp-parameter-tuning, Hyperparameter tuning>>
 
 
 [[algorithms-embeddings-fastrp-introduction]]
 == Introduction
 
 Fast Random Projection, or FastRP for short, is a node embedding algorithm in the family of random projection algorithms.
-These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which, one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
+These algorithms are theoretically backed by the Johnsson-Lindenstrauss lemma according to which one can project _n_ vectors of _arbitrary_ dimension into _O(log(n))_ dimensions and still approximately preserve pairwise distances among the points.
 In fact, a linear projection chosen in a random way satisfies this property.
 
 Such techniques therefore allow for aggressive dimensionality reduction while preserving most of the distance information.
@@ -35,7 +37,7 @@ This means that two nodes that have similar neighborhoods should be assigned sim
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
-The algorithm then iteratively constructs _intermediate_ embeddings by averaging neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
+The algorithm then iteratively constructs _intermediate_ embeddings by averaging either neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
 
 In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
 
@@ -48,8 +50,8 @@ In order to make use of this, the `relationshipWeightProperty` parameter should 
 The original algorithm is intended only for undirected graphs.
 We support running on both on directed graphs and undirected graph.
 For directed graphs we consider only the outgoing neighbors when computing the intermediate embeddings for a node.
-Therefore, using the orientations NATURAL, REVERSE and UNDIRECTED will all give different embeddings.
-In general, it is recommended to first use UNDIRECTED as this is what the original algorithm was evaluated on.
+Therefore, using the orientations `NATURAL`, `REVERSE` or `UNDIRECTED` will all give different embeddings.
+In general, it is recommended to first use `UNDIRECTED` as this is what the original algorithm was evaluated on.
 
 For more information on this algorithm see:
 
@@ -57,8 +59,73 @@ For more information on this algorithm see:
 * https://core.ac.uk/download/pdf/82724427.pdf[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 
+[[algorithms-embeddings-fastrp-parameter-tuning]]
+== Tuning algorithm parameters
+
+In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
+This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
+We will go through each of the configuration parameters and explain how they behave.
+
+For statistically sound results, it is a good idea to reserve a test set excluded from parameter tuning.
+After selecting a set of parameter values, the embedding quality can be evaluated using a downstream machine learning task on the test set.
+By varying the parameter values and studying the precision of the machine learning task, it is possible to deduce the parameter values that best fit the concrete dataset and use case.
+To construct such a set you may want to use a dedicated node label in the graph to denote a subgraph without the test data.
+
+
+=== Embedding dimension
+
+The embedding dimension is the length of the produced vectors.
+A greater dimension offers a greater precision, but is more costly to operate over.
+
+The optimal embedding dimension depends on the number of nodes in the graph.
+Since the amount of information the embedding can encode is limited by its dimension, a larger graph will tend to require a greater embedding dimension.
+A typical value is a power of two in the range 128 - 1024.
+A value of at least 256 gives good results on graphs in the order of 10^5^ nodes, but in general increasing the dimension improves results.
+Increasing embedding dimension will however increase memory requirements and runtime linearly.
+
+
+=== Normalization strength
+
+The normalization strength is used to control how node degrees influence the embedding.
+Using a negative value will downplay the importance of high degree neighbors, while a positive value will instead increase their importance.
+The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
+In the original paper, hyperparameter tuning was done in the range of `[-1,0]` (no positive values), but we have found cases where a positive normalization strengths gives better results.
+
+
+=== Iteration weights
+
+The iteration weights parameter control two aspects: the number of iterations, and their relative impact on the final node embedding.
+The parameter is a list of numbers, indicating one iteration per number where the number is the weight applied to that iteration.
+
+In each iteration, the algorithm will expand across all relationships in the graph.
+This has some implications:
+
+* With a single iteration, only direct neighbors will be considered for each node embedding.
+* With two iterations, direct neighbors and second-degree neighbors will be considered for each node embedding.
+* With three iterations, direct neighbors, second-degree neighbors, and third-degree neighbors will be considered for each node embedding.
+Direct neighbors may be reached twice, in different iterations.
+* In general, the embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of length `i`.
+If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`, for any integer `k`.
+* In particular, a node may reach back to itself on each even iteration (depending on the direction in the graph).
+
+It is good to have at least one non-zero weight in an even and in an odd position.
+Typically, using at least a few iterations, for example three, is recommended.
+However, a too high value will consider nodes far away and may not be informative or even be detrimental.
+The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
+Of course, a greater number of iterations will also take more time to complete.
+
+
+=== Orientation
+
+Choosing the right orientation when creating the graph may have the single greatest impact.
+The FastRP algorithm is designed to work with undirected graphs, and we expect this to be the best in most cases.
+If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
+
+
 [[algorithms-embeddings-fastrp-syntax]]
 == Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
 
 .FastRP syntax per mode
 [.tabbed-example]
@@ -66,6 +133,7 @@ For more information on this algorithm see:
 
 [.include-with-stream]
 ======
+
 .Run FastRP in stream mode on a named graph.
 [source, cypher]
 ----
@@ -84,29 +152,27 @@ include::../common-configuration/common-stream-stats-configuration-named-graph.a
 include::specific-configuration.adoc[]
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header"]
 |===
 | Name      | Type         | Description
-| nodeId    | Integer      | The Neo4j node ID.
-| embedding | List<Float>  | The computed node embedding.
+| nodeId    | Integer      | Node ID.
+| embedding | List<Float>  | FastRP node embedding.
 |===
 ======
 
-[.include-with-write]
+[.include-with-stats]
 ======
-.Run FastRP in write mode on a graph stored in the catalog.
+
+.Run FastRP in stats mode on a named graph.
 [source, cypher]
 ----
-CALL gds.fastRP.write(
+CALL gds.fastRP.stats(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   nodeCount: Integer,
-  propertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
-  writeMillis: Integer,
   configuration: Map
 ----
 
@@ -119,15 +185,90 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name               | Type                 | Description
-| nodeCount          | Integer              | The number of nodes processed.
-| propertiesWritten  | Integer              | The number of node properties written.
-| createMillis       | Integer              | Milliseconds for loading data.
-| computeMillis      | Integer              | Milliseconds for running the algorithm.
-| writeMillis        | Integer              | Milliseconds for writing result data back to Neo4j.
-| configuration      | Map                  | The configuration used for running the algorithm.
+| Name          | Type    | Description
+| nodeCount     | Integer | Number of nodes processed.
+| createMillis  | Integer | Milliseconds for creating the graph.
+| computeMillis | Integer | Milliseconds for running the algorithm.
+| configuration | Map     | Configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run FastRP in mutate mode on a named graph.
+[source, cypher]
+----
+CALL gds.fastRP.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | Number of nodes processed.
+| nodePropertiesWritten | Integer | Number of node properties written.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration         | Map     | Configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-write]
+======
+
+.Run FastRP in write mode on a named graph.
+[source, cypher]
+----
+CALL gds.fastRP.write(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name                  | Type    | Description
+| nodeCount             | Integer | Number of nodes processed.
+| nodePropertiesWritten | Integer | Number of node properties written.
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration         | Map     | Configuration used for running the algorithm.
+|===
+
+======
+
 ====
 
 
@@ -144,7 +285,7 @@ CALL gds.fastRP.write(
 )
 YIELD
   nodeCount: Integer,
-  propertiesWritten: Integer,
+  nodePropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
@@ -156,8 +297,6 @@ include::../common-configuration/common-configuration-anonymous-graph.adoc[]
 include::specific-configuration.adoc[]
 
 The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-fastrp-syntax, write mode syntax above>>.
-
-
 
 
 [[algorithms-embeddings-fastrp-examples]]
@@ -391,49 +530,3 @@ YIELD nodeId, embedding
 | 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
 |===
 --
-
-
-[[algorithms-embeddings-fastrp-parameter-tuning]]
-== Tuning algorithm parameters
-
-In order to improve the embedding quality using FastRP on one of your graphs, it is possible to tune the algorithm parameters.
-This process of finding the best parameters for your specific use case and graph is typically referred to as https://en.wikipedia.org/wiki/Hyperparameter_optimization[hyperparameter tuning].
-We will go through each of the configuration parameters and explain how they behave.
-
-For statistically sound results, it is a good idea to reserve a test set excluded from parameter tuning.
-After hyperparameter tuning has been made, the embedding with the best settings can then be evaluated using a downstream machine learning task on the test set.
-To construct such a set you may want to create a node label in the graph using cypher that represents a subgraph without the test data.
-
-=== Embedding Dimension
-
-The optimal value for `embeddingDimension` depends on the number of nodes in the graph.
-Since the amount of information the embedding can encode is limited by the `embeddingDimension`, a larger graph will tend to require a higher embedding dimension.
-A typical value is a power of two in the range 128 - 1024.
-A value of at least 256 gives good results on graphs with as many as 200000 nodes, but in general increasing the dimension improves results.
-Increasing embedding dimension will however increase memory requirements and runtime linearly.
-
-=== Normalization strength
-
-The normalization strength is used to control how node degree influences the embedding.
-Using a negative value will downplay the importance of high degree neighbors, while a positive value will instead increase their importance.
-The optimal normalization strength depends on the graph and on the task that the embeddings will be used for.
-In the original paper, hyperparameter tuning was done on the range `[-1,0]`, but we have found a case where slightly positive normalization strength gave better results.
-
-=== Iteration weights
-
-By selecting `iterationWeights`, it is possible both to set the number of iterations and the weight given to the embedding resulting from each iteration.
-The embedding corresponding to the `i`:th iteration contains features depending on nodes reachable with paths of length `i`.
-If the graph is undirected, then a node reachable with a path of length `L` can also be reached with length `L+2k`, for any integer `k`.
-In particular, the third iteration will in this case contain features depending both on direct neighbors and nodes at distance three.
-It is good to have at least one non-zero weight in an even and in an odd position.
-Typically, using at least a few iterations, for example three, is recommended.
-However, a too high value will consider nodes far away and may not be informative or even be detrimental.
-The intuition here is that as the projections reach further away from the node, the less specific the neighborhood becomes.
-
-
-=== Orientation
-Choosing the right orientation when creating the graph may have the single biggest impact.
-The FastRP algorithm is designed only to work with undirected graphs, and we expect this to be the best in most cases.
-If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
-
-
