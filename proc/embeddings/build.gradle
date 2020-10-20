@@ -9,9 +9,6 @@ dependencies {
 
     api project(':proc-common')
 
-    // TODO remove
-    implementation project(':alpha-embeddings')
-
     implementation(
         project(':neo4j-adapter')
     )
