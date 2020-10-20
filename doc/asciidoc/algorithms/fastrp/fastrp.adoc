@@ -38,6 +38,8 @@ Conversely, two nodes that are not similar should be not be assigned similar emb
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging either neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
+In each iteration, the intermediate embedding is normalised using a https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[standard euclidean norm].
+That is, each element in the embedding is divided by the square root of the sum of squares of the emdedding elements.
 
 In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
 
