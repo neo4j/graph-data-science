@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.proc;
+package org.neo4j.gds.embeddings.graphsage.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.proc.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, GraphSageTrainConfig> {
