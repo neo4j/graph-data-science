@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.proc;
+package org.neo4j.gds.embeddings.graphsage.graphsage;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 class GraphSageMutateProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.embeddings.graphsage.proc.GraphSageBaseProcTest#configVariations")
+    @MethodSource("org.neo4j.gds.embeddings.graphsage.graphsage.GraphSageBaseProcTest#configVariations")
     void testWriting(int embeddingSize, String aggregator, ActivationFunction activationFunction) {
         train(embeddingSize, aggregator, activationFunction);
 
