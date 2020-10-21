@@ -59,7 +59,8 @@ function tabTheSource($content) {
             modes.push(mode);
             $modeBlocks[mode] = $(this);
         });
-        if (modes.length > 1) {
+
+        if (modes.length >= 1) {
             snippets.push({
                 '$exampleBlock': $exampleBlock,
                 'modes': modes,
@@ -101,7 +102,8 @@ function tabTheSource($content) {
             }
             $wrapper.append($content);
 
-            if (storedMode) {
+            // Do not check the storedMode when there is only one mode in the documentation.
+            if (storedMode && modes.length > 1) {
                 if (mode === storedMode) {
                     $li.addClass('active');
                     $content.addClass('active');
