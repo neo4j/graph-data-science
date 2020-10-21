@@ -54,6 +54,11 @@ public class FilteredNodeProperties implements NodeProperties {
     }
 
     @Override
+    public long[] longArrayValue(long nodeId) {
+        return properties.longArrayValue(translateId(nodeId));
+    }
+
+    @Override
     public Object getObject(long nodeId) {
         return properties.getObject(translateId(nodeId));
     }
