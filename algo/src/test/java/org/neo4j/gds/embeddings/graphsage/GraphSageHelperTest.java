@@ -170,9 +170,9 @@ class GraphSageHelperTest {
         @GdlGraph
         private static final String DB_CYPHER =
             " CREATE" +
-            "  (n0:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})" +
-            ", (n1:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})" +
-            ", (n2:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})";
+            "  (n0:Restaurant {dummyProp: 5, numEmployees: 2, rating: 7})" +
+            ", (n1:Restaurant {dummyProp: 5, numEmployees: 2, rating: 7})" +
+            ", (n2:Restaurant {dummyProp: 5, numEmployees: 2, rating: 7})";
 
         @Test
         void shouldInitializeFeaturesCorrectly() {
