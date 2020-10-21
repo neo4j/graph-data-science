@@ -14,8 +14,7 @@ window.docMeta = (async function () {
     neo4jPageId = href.replace(baseUri, '');
   }
 
-  const versionsUrl =
-    'https://neo4j.com/docs/graph-data-science/gds-doc-versions.json';
+  const versionsUrl = unversionedDocBaseUri + 'gds-doc-versions.json';
   const availableDocVersions = await jQuery.ajax({
     type: 'GET',
     url: versionsUrl,
