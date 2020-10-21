@@ -27,7 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -239,8 +238,8 @@ public final class GraphSageHelper {
         GraphSageTrainConfig config,
         HugeObjectArray<double[]> features
     ) {
-        var propertiesPerNodeLabel = propertiesPerNodeLabel(graph, config);
-        var featureCountPerNodeLabel = propertiesPerNodeLabel.entrySet().stream()
+        var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
+        var featureCountPerNodeLabel = filteredKeysPerLabel.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().size()
@@ -250,13 +249,13 @@ public final class GraphSageHelper {
 
         features.setAll(nodeId -> {
             var nodeLabel = labelOf(graph, nodeId);
-            var relevantProperties = propertiesPerNodeLabel.get(nodeLabel);
+            var filteredKeys = filteredKeysPerLabel.get(nodeLabel);
             var featureCount = featureCountPerNodeLabel.get(nodeLabel);
             var nodeFeatures = new double[featureCount];
 
             int i = 0;
-            for (NodeProperties relevantProperty : relevantProperties) {
-                nodeFeatures[i++] = relevantProperty.doubleValue(nodeId);
+            for (String propertyKey : filteredKeys) {
+                nodeFeatures[i++] = getCheckedDoubleNodeProperty(graph, propertyKey, nodeId);
             }
 
             if (config.degreeAsProperty()) {
@@ -294,7 +293,7 @@ public final class GraphSageHelper {
             .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().keySet()));
     }
 
-    private static Map<NodeLabel, Set<NodeProperties>> propertiesPerNodeLabel(Graph graph, GraphSageTrainConfig config) {
+    private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, GraphSageTrainConfig config) {
         return propertyKeysPerNodeLabel(graph)
             .entrySet()
             .stream()
@@ -303,7 +302,6 @@ public final class GraphSageHelper {
                 e -> config.nodePropertyNames()
                     .stream()
                     .filter(e.getValue()::contains)
-                    .map(graph::nodeProperties)
                     .collect(Collectors.toSet())
             ));
     }
