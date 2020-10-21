@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
+import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -219,14 +220,7 @@ public final class GraphSageHelper {
             var nodeFeatures = new double[featureCount];
 
             for (int i = 0; i < nodeProperties.size(); i++) {
-                double doubleValue = nodeProperties.get(i).doubleValue(nodeId);
-                if (Double.isNaN(doubleValue)) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",
-                        config.nodePropertyNames().get(i),
-                        graph.toOriginalNodeId(nodeId)
-                    ));
-                }
+                double doubleValue = getCheckedDoubleNodeProperty(graph, config.nodePropertyNames().get(i), nodeId);
                 nodeFeatures[i] = doubleValue;
             }
 
