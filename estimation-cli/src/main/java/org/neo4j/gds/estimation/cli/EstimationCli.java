@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.function.Predicate.isEqual;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
@@ -81,6 +80,10 @@ public class EstimationCli implements Runnable {
 
     private static final double GRAPH_CREATE_PEAK_MEMORY_FACTOR = 1.5;
     private static final double DEFAULT_PEAK_MEMORY_FACTOR = 1.0;
+    public static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
+        "gds.testProc.test.estimate",
+        "gds.beta.graphSage"
+    );
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -323,8 +326,8 @@ public class EstimationCli implements Runnable {
                 var definedName = annotation.name();
                 var procName = definedName.trim().isEmpty() ? valueName : definedName;
                 return Stream.of(procName)
-                    .filter(s -> s.endsWith(".estimate"))
-                    .filter(not(isEqual("gds.testProc.test.estimate")))
+                    .filter(name -> name.endsWith(".estimate"))
+                    .filter(not(name -> EXCLUDED_PROCEDURE_PREFIXES.stream().anyMatch(name::startsWith)))
                     .map(name -> ImmutableProcedureMethod.of(name, method));
             })
             .sorted(Comparator.comparing(ProcedureMethod::name, String.CASE_INSENSITIVE_ORDER));
