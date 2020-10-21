@@ -46,11 +46,19 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
         this.projectedFeatureSize = projectedFeatureSize;
     }
 
+    /**
+     * This method expects the graph to be validated beforehand, such that each node has exactly one label
+     * See feature initialization in {@link GraphSageHelper}.
+     *
+     * @param nodeIds batch of node IDs
+     * @param features the global property array
+     * @return Create a matrix variable around a batch of nodes.
+     */
     @Override
     public Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
         NodeLabel[] labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
-            labels[i] = graph.nodeLabels(nodeIds[i]).stream().findFirst().get();
+            labels[i] = graph.nodeLabels(nodeIds[i]).iterator().next();
         }
         return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureSize, labels);
     }
