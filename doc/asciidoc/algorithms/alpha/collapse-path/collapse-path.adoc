@@ -29,11 +29,11 @@ Exactly one relationship is created for every pair of nodes for which at least o
 [[algorithms-collapse-path-syntax]]
 == Syntax
 
-.Random Projection syntax per mode
+.Collapse Path syntax per mode
 [.tabbed-example]
 ====
 
-[.include-with-muate]
+[.include-with-mutate]
 ======
 .Run Collapse Path in mutate mode on a named graph.
 [source, cypher]
