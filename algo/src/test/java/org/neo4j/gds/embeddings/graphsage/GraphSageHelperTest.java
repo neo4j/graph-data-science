@@ -163,4 +163,33 @@ class GraphSageHelperTest {
                 );
         }
     }
+
+    @Nested
+    class LongPropertyValues {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            " CREATE" +
+            "  (n0:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})" +
+            ", (n1:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})" +
+            ", (n2:Restaurant {dummyProp: 5, numEmployees: 2,   rating: 7})";
+
+        @Test
+        void shouldInitializeFeaturesCorrectly() {
+            var config = ImmutableGraphSageTrainConfig.builder()
+                .modelName("foo")
+                .nodePropertyNames(Set.of("dummyProp", "numEmployees", "rating"))
+                .build();
+
+            var actual = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
+
+            var expected = HugeObjectArray.newArray(double[].class, 3, AllocationTracker.empty());
+            expected.setAll(i -> new double[] {5.0, 2.0, 7.0});
+
+            assertEquals(expected.size(), actual.size());
+            for (int i = 0; i < actual.size(); i++) {
+                assertThat(actual.get(i)).containsExactlyInAnyOrder(expected.get(i));
+            }
+        }
+    }
 }
