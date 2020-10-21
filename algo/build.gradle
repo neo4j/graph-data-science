@@ -15,7 +15,9 @@ dependencies {
     implementation(
         project(":annotations")
     )
-    implementation group: 'org.ejml', name: 'ejml-all', version: ver.ejml
+
+    implementation group: 'org.ejml', name: 'ejml-core', version: ver.ejml
+    implementation group: 'org.ejml', name: 'ejml-ddense', version: ver.ejml
 
     compileOnly group: 'org.jetbrains',          name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
