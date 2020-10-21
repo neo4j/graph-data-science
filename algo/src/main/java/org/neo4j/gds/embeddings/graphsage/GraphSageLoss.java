@@ -78,12 +78,12 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
     }
 
     private double affinity(Tensor<?> embeddingData, int nodeId, int otherNodeId) {
-        int dimensionSize = combinedEmbeddings.dimension(COLUMNS_INDEX);
+        int embeddingDimension = combinedEmbeddings.dimension(COLUMNS_INDEX);
         double sum = 0;
-        int embeddingSize = nodeId * dimensionSize;
-        int otherEmbeddingSize = otherNodeId * dimensionSize;
-        for (int i = 0; i < dimensionSize; i++) {
-            sum += embeddingData.dataAt(embeddingSize + i) * embeddingData.dataAt(otherEmbeddingSize + i);
+        int embeddingOffset = nodeId * embeddingDimension;
+        int otherEmbeddingOffset = otherNodeId * embeddingDimension;
+        for (int i = 0; i < embeddingDimension; i++) {
+            sum += embeddingData.dataAt(embeddingOffset + i) * embeddingData.dataAt(otherEmbeddingOffset + i);
         }
         return sum;
     }
