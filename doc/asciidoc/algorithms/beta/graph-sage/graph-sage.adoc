@@ -64,7 +64,7 @@ CALL gds.beta.graphSage.mutate(
 )
 YIELD
   nodeCount: Integer,
-  propertiesWritten: Integer,
+  nodePropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
@@ -80,13 +80,13 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name               | Type                 | Description
-| nodesCount         | Integer              | The number of nodes processed.
-| propertiesWritten  | Integer              | The number of node properties written.
-| createMillis       | Integer              | Milliseconds for loading data.
-| computeMillis      | Integer              | Milliseconds for running the algorithm.
-| writeMillis        | Integer              | Milliseconds for writing result data back to the in-memory graph.
-| configuration      | Map                  | The configuration used for running the algorithm.
+| Name                  | Type                 | Description
+| nodesCount            | Integer              | The number of nodes processed.
+| nodePropertiesWritten | Integer              | The number of node properties written.
+| createMillis          | Integer              | Milliseconds for loading data.
+| computeMillis         | Integer              | Milliseconds for running the algorithm.
+| mutateMillis          | Integer              | Milliseconds for writing result data back to the in-memory graph.
+| configuration         | Map                  | The configuration used for running the algorithm.
 |===
 ======
 
