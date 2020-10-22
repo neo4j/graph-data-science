@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.function.TriFunction;
+public interface RelationshipWeights {
 
-public interface RelationshipWeightsFunction extends TriFunction<Long, Long, Double, Double> {
-
-    RelationshipWeightsFunction UNWEIGHTED = (source, target, defaultValue) -> 1.0d;
+    double DEFAULT_VALUE = 1.0D;
+    RelationshipWeights UNWEIGHTED = (source, target, defaultValue) -> DEFAULT_VALUE;
 
     default double weight(long source, long target) {
-        return weight(source, target, 1.0d);
+        return weight(source, target, DEFAULT_VALUE);
     }
 
-    default double weight(long source, long target, double defaultValue) {
-        return apply(source, target, defaultValue);
-    }
+    double weight(long source, long target, double defaultValue);
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -27,8 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
+import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
+
 public class WeightedMultiMean extends SingleParentVariable<Matrix> {
-    private final RelationshipWeightsFunction relationshipWeightsFunction;
+    private final RelationshipWeights relationshipWeights;
     private final SubGraph subGraph;
     private final int[][] adjacency;
     private final int[] selfAdjacency;
@@ -37,16 +39,16 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
 
     public WeightedMultiMean(
         Variable<Matrix> parent,
-        RelationshipWeightsFunction relationshipWeightsFunction,
+        RelationshipWeights relationshipWeights,
         SubGraph subGraph
     ) {
         super(parent, Dimensions.matrix(subGraph.adjacency.length, parent.dimension(1)));
-        this.relationshipWeightsFunction = relationshipWeightsFunction;
+        this.relationshipWeights = relationshipWeights;
         this.subGraph = subGraph;
         this.adjacency = subGraph.adjacency;
         this.selfAdjacency = subGraph.selfAdjacency;
         this.rows = adjacency.length;
-        this.cols = parent.dimension(1);
+        this.cols = parent.dimension(COLUMNS_INDEX);
     }
 
     @Override
@@ -55,20 +57,20 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
         Tensor<?> parentTensor = ctx.data(parent);
         double[] parentData = parentTensor.data();
         double[] means = new double[adjacency.length * cols];
-        for (int source = 0; source < adjacency.length; source++) {
-            int sourceId = selfAdjacency[source];
+        for (int sourceIndex = 0; sourceIndex < adjacency.length; sourceIndex++) {
+            int sourceId = selfAdjacency[sourceIndex];
             long originalSourceId = subGraph.nextNodes[sourceId];
             int selfAdjacencyOfSourceOffset = sourceId * cols;
-            int sourceOffset = source * cols;
-            int[] neighbors = adjacency[source];
+            int sourceOffset = sourceIndex * cols;
+            int[] neighbors = adjacency[sourceIndex];
             int numberOfNeighbors = neighbors.length;
             for (int col = 0; col < cols; col++) {
                 means[sourceOffset + col] += parentData[selfAdjacencyOfSourceOffset + col] / (numberOfNeighbors + 1);
             }
-            for (int target : neighbors) {
-                int targetOffset = target * cols;
-                long originalTargetId = subGraph.nextNodes[target];
-                double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+            for (int targetIndex : neighbors) {
+                int targetOffset = targetIndex * cols;
+                long originalTargetId = subGraph.nextNodes[targetIndex];
+                double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
                 for (int col = 0; col < cols; col++) {
                     means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
@@ -93,7 +95,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
                 int gradientElementIndex = row * cols + col;
                 for (int neighbor : adjacency[row]) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
-                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+                    double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId); //TODO normalize weights
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
+import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
@@ -30,32 +30,32 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
-    private final double beta = 1d;
+    private final double beta = 1D;
     private final Random random;
 
     public WeightedNeighborhoodSampler() {
         this.random = new Random();
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomState) {
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
 
-        Pair<Double, Double> minMax = minMax(graph, nodeId);
+        DoubleDoublePair minMax = minMax(graph, nodeId);
         double min = minMax.getOne();
         double max = minMax.getTwo();
 
         graph.concurrentCopy().forEachRelationship(
             nodeId,
-            1.0d,
+            RelationshipWeights.DEFAULT_VALUE,
             (source, target, weight) -> {
                 if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
                     return false;
                 }
 
                 double probability = (min == max) ?
-                    randomDouble(randomState, source, target, graph.nodeCount()) :
+                    randomDouble(randomSeed, source, target, graph.nodeCount()) :
                     (1.0 - Math.pow((weight - min) / (max - min), beta));
 
                 if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
@@ -74,12 +74,12 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         return random.nextDouble();
     }
 
-    private Pair<Double, Double> minMax(Graph graph, long nodeId) {
+    private DoubleDoublePair minMax(Graph graph, long nodeId) {
         var maxQ = BoundedLongPriorityQueue.max(1);
         var minQ = BoundedLongPriorityQueue.min(1);
         graph.concurrentCopy().forEachRelationship(
             nodeId,
-            1.0d,
+            RelationshipWeights.DEFAULT_VALUE,
             (source, target, weight) -> {
                 maxQ.offer(target, weight);
                 minQ.offer(target, weight);
@@ -90,6 +90,6 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         var min = minQ.priorities().max().orElse(0D);
         var max = maxQ.priorities().min().orElse(0D);
 
-        return Tuples.pair(min, max);
+        return PrimitiveTuples.pair(min, max);
     }
 }

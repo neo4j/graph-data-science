@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration
 public interface LayerConfig {
     int rows();
     int cols();

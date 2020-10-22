@@ -32,7 +32,7 @@ public class MaxPoolAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
-    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
+    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -42,7 +42,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private long randomState;
 
     public MaxPoolAggregatingLayer(
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         long sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,

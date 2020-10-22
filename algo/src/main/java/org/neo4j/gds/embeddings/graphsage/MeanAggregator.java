@@ -38,12 +38,12 @@ import java.util.function.Function;
 */
 public class MeanAggregator implements Aggregator {
 
-    private final Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction;
+    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MeanAggregator(
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction,
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         Weights<Matrix> weights,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {

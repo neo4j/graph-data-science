@@ -39,7 +39,7 @@ import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.UNWEIGHTED;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.UNWEIGHTED;
 
 class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
@@ -52,7 +52,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "20, 9.732264700198973",
         "50, 24.239937336323717"
     })
-    void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
+    void shouldComputeLossBatchSizeOne(int negativeSamplingFactor, double expectedLoss) {
         Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
@@ -62,7 +62,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, negativeSamplingFactor);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -79,7 +79,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "20, 31.48307971498508",
         "50, 76.87999339630119"
     })
-    void shouldComputeLoss(int Q, double expectedLoss) {
+    void shouldComputeLoss(int negativeSamplingFactor, double expectedLoss) {
         Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
@@ -95,7 +95,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             9, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, negativeSamplingFactor);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
