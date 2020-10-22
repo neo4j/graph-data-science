@@ -77,7 +77,11 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
         this.graph = graph;
         this.startNode = Math.toIntExact(graph.toMappedNodeId(startNode));
         this.delta = delta;
-        this.iDelta = (int) (multiplier * delta);
+        this.iDelta = Math.toIntExact(Math.round(multiplier * delta));
+        if (iDelta <= 0) {
+            throw new IllegalArgumentException("Choose a higher delta value");
+        }
+
         nodeCount = Math.toIntExact(graph.nodeCount());
         distance = new AtomicLongArray(nodeCount);
         buckets = new Buckets(nodeCount);
@@ -94,21 +98,6 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
      */
     public ShortestPathDeltaStepping withExecutorService(ExecutorService executorService) {
         this.executorService = executorService;
-        return this;
-    }
-
-    /**
-     * set the multiplier used to scale up double weights to integers
-     *
-     * @param multiplier the multiplier
-     * @return itself for method chaining
-     */
-    public ShortestPathDeltaStepping withMultiplier(int multiplier) {
-        if (multiplier < 1) {
-            throw new IllegalArgumentException("multiplier must be >= 1");
-        }
-        this.multiplier = multiplier;
-        this.iDelta = (int) (multiplier * delta);
         return this;
     }
 
