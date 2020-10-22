@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
+import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
@@ -35,6 +36,7 @@ class GraphSageDocTest extends DocTestBase {
             GraphCreateProc.class,
             GraphSageTrainProc.class,
             GraphSageStreamProc.class,
+            GraphSageMutateProc.class,
             GraphSageWriteProc.class
         );
     }
