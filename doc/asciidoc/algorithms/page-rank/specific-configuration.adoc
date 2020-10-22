@@ -5,6 +5,6 @@
 | dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
 | tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric. Negative Weights are ignored.
 | sourceNodes                | List    | []        | yes      | A set of nodes to use for computing Personalized Page Rank.
 |===

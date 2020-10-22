@@ -485,7 +485,9 @@ YIELD nodePropertiesWritten, ranIterations
 === Weighted
 
 By default, the algorithm is considering the relationships of the graph to be `unweighted`, to change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
-Below is an example of running the algorithm using this property.
+In the `weighted` case, the previous score of a node send to its neighbors, is multiplied by the relationship weight and then divided by the sum of the weights of its outgoing relationships.
+If the value of the relationship property is negative it will be ignored during computation.
+Below is an example of running the algorithm using the relationship property.
 
 [role=query-example]
 --
