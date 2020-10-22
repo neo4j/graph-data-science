@@ -38,6 +38,8 @@ Conversely, two nodes that are not similar should be not be assigned similar emb
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
 The algorithm then iteratively constructs _intermediate_ embeddings by averaging either neighboring intermediate embeddings from the previous iteration, or the generated random vectors during the first iteration.
+In each iteration, the intermediate embedding is normalised using a https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[standard euclidean norm].
+That is, each element in the embedding is divided by the square root of the sum of squares of the emdedding elements.
 
 In the end, the resulting embedding for each node is a weighted sum of the intermediate embeddings, where the weights are a configuration parameter called `iterationWeights`.
 
@@ -302,44 +304,54 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-embeddings-fastrp-examples]]
 == Examples
 
+:algorithm-name: FastRP node embedding
+include::../shared/examples-intro.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=setup-query]
 ----
 CREATE
-  (Dan:Person),
-  (Annie:Person),
-  (Matt:Person),
-  (Jeff:Person),
-  (Brie:Person),
-  (Elsa:Person),
-  (John:Person),
+  (dan:Person {name: 'Dan'}),
+  (annie:Person {name: 'Annie'}),
+  (matt:Person {name: 'Matt'}),
+  (jeff:Person {name: 'Jeff'}),
+  (brie:Person {name: 'Brie'}),
+  (elsa:Person {name: 'Elsa'}),
+  (john:Person {name: 'John'}),
 
-  (Dan)-[:REL {weight: 1.0}]->(Annie),
-  (Dan)-[:REL {weight: 1.0}]->(Matt),
-  (Annie)-[:REL {weight: 1.0}]->(Matt),
-  (Annie)-[:REL {weight: 1.0}]->(Jeff),
-  (Annie)-[:REL {weight: 1.0}]->(Brie),
-  (Matt)-[:REL {weight: 3.5}]->(Brie),
-  (Brie)-[:REL {weight: 1.0}]->(Elsa),
-  (Brie)-[:REL {weight: 2.0}]->(Jeff),
-  (John)-[:REL {weight: 1.0}]->(Jeff);
+  (dan)-[:KNOWS {weight: 1.0}]->(annie),
+  (dan)-[:KNOWS {weight: 1.0}]->(matt),
+  (annie)-[:KNOWS {weight: 1.0}]->(matt),
+  (annie)-[:KNOWS {weight: 1.0}]->(jeff),
+  (annie)-[:KNOWS {weight: 1.0}]->(brie),
+  (matt)-[:KNOWS {weight: 3.5}]->(brie),
+  (brie)-[:KNOWS {weight: 1.0}]->(elsa),
+  (brie)-[:KNOWS {weight: 2.0}]->(jeff),
+  (john)-[:KNOWS {weight: 1.0}]->(jeff);
 ----
 
+This graph represents seven people who know one another.
+A relationship property `weight` denotes the strength of the knowledge between two persons.
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+For the relationships we will use the `UNDIRECTED` orientation.
+This is because the FastRP algorithm has been measured to compute more predictive node embeddings in undirected graphs.
+We will also add the `weight` relationship property which we will make use of when running the weighted version of FastRP.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=graph-create-query]
 ----
 CALL gds.graph.create(
   'persons',
   'Person',
   {
-    REL: {
+    KNOWS: {
       orientation: 'UNDIRECTED',
-        properties: {
-           weight: {
-             property: 'weight',
-             defaultValue: 1.0
-           }
-        }
+      properties: 'weight'
     }
 })
 ----
@@ -372,19 +384,15 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [[algorithms-embeddings-fastrp-examples-stream]]
 === Stream
 
+:stream-details: For example, we can collect the results and pass them into a similarity algorithm.
+include::../shared/examples-stream-intro.adoc[]
+
 [role=query-example, no-result=true]
 --
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.fastRP.stream(
-  'persons',
-  {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71
-  }
-)
+CALL gds.fastRP.stream('persons', { embeddingDimension: 4 })
 YIELD nodeId, embedding
 ----
 
@@ -392,15 +400,19 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
-| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
-| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
-| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
-| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
-| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
-| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+| 0      | [-0.03523557, 0.8080418, -1.6324315, -0.82438976]
+| 1      | [7.3822774E-4, 0.9315331, -1.5840955, -0.73341024]
+| 2      | [-0.047208663, 0.80095035, -1.5542624, -0.8575211]
+| 3      | [0.06738296, 0.7497308, -1.4601052, -0.8149969]
+| 4      | [-0.0044725314, 1.0199871, -1.441534, -0.72904325]
+| 5      | [-0.15570015, 0.9881253, -1.4144595, -0.73383045]
+| 6      | [0.24555062, 0.7544494, -1.4108207, -0.65637124]
 |===
 --
+
+The results of the algorithm are not very intuitively interpretable, as the node embedding format is a mathematical abstraction of the node within its neighborhood, designed for machine learning programs.
+What we can see is that the embeddings have four elements (as configured using `embeddingDimension`) and that the numbers are relatively small (they all fit in the range of `[-2, 2]`).
+The magnitude of the numbers is controlled by the `embeddingDimension`, the number of nodes in the graph, and by the fact that FastRP performs euclidean normalization on the intermediate embedding vectors.
 
 [NOTE]
 ====
@@ -412,35 +424,36 @@ However, this does not necessarily mean that the pairwise distances of two node 
 [[algorithms-embeddings-fastrp-examples-stats]]
 === Stats
 
-[role=query-example, no-result=true]
+:stats-syntax: algorithms-embeddings-fastrp-syntax
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher]
 ----
-CALL gds.fastRP.stats(
-  'persons',
-  {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71
-  }
-)
-YIELD createMillis, computeMillis
+CALL gds.fastRP.stats('persons', { embeddingDimension: 8 })
+YIELD nodeCount
 ----
 
 [opts=header]
 .Results
 |===
-| createMillis | computeMillis
-| 0            | 5
+| nodeCount
+| 7
 |===
 --
+
+The `stats` mode does not currently offer any statistical results for the embeddings themselves.
+We can however see that the algorithm has successfully processed all seven nodes in our example graph.
 
 
 [[algorithms-embeddings-fastrp-examples-mutate]]
 === Mutate
 
-[role=query-example, no-result=true]
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
@@ -448,29 +461,32 @@ YIELD createMillis, computeMillis
 CALL gds.fastRP.mutate(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
-    mutateProperty: 'embedding'
+    embeddingDimension: 8,
+    mutateProperty: 'fastrp-embedding'
   }
 )
-YIELD nodePropertiesWritten, mutateMillis
-
+YIELD nodePropertiesWritten
 ----
 
 [opts=header]
 .Results
 |===
-| nodePropertiesWritten | mutateMillis
-| 7                     | 0
+| nodePropertiesWritten
+| 7
 |===
 --
+
+The returned result is similar to the `stats` example.
+Additionally, the graph 'persons' now has a node property `fastrp-embedding` which stores the node embedding for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
 
 
 [[algorithms-embeddings-fastrp-examples-write]]
 === Write
 
-[role=query-example, no-result=true]
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
 --
 .The following will run the algorithm in `write` mode:
 [source, cypher]
@@ -478,27 +494,31 @@ YIELD nodePropertiesWritten, mutateMillis
 CALL gds.fastRP.write(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
-    writeProperty: 'embedding'
+    embeddingDimension: 8,
+    writeProperty: 'fastrp-embedding'
   }
 )
-YIELD nodePropertiesWritten, writeMillis
-
+YIELD nodePropertiesWritten
 ----
 
 [opts=header]
 .Results
 |===
-| nodePropertiesWritten | mutateMillis
-| 7                     | 212
+| nodePropertiesWritten
+| 7
 |===
 --
+
+The returned result is similar to the `stats` example.
+Additionally, each of the seven nodes now has a new property `fastrp-embedding` in the Neo4j database, containing the node embedding for that node.
 
 
 [[algorithms-embeddings-fastrp-examples-weighted]]
 === Weighted
+
+By default, the algorithm is considering the relationships of the graph to be unweighted.
+To change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
+Below is an example of running the weighted variant of algorithm.
 
 [role=query-example, no-result=true]
 --
@@ -508,9 +528,7 @@ YIELD nodePropertiesWritten, writeMillis
 CALL gds.fastRP.stream(
   'persons',
   {
-    iterationWeights: [0.0, 0.34, 2.1],
-    embeddingDimension: 3,
-    normalizationStrength: -0.71,
+    embeddingDimension: 4,
     relationshipWeightProperty: 'weight'
   }
 )
@@ -521,12 +539,14 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-1.9220695495605469,0.8281561136245728,-0.23398679494857788]
-| 1      | [-0.9239899516105652,1.9944313764572144,-0.5190169811248779]
-| 2      | [-0.8023543953895569,2.028059959411621,0.4712531268596649]
-| 3      | [-1.2199127674102783,1.1800869703292847,1.1962001323699951]
-| 4      | [-1.746078610420227,0.5176445245742798,-0.9333235621452332]
-| 5      | [0.0782150849699974,1.6632782220840454,0.7139096260070801]
-| 6      | [-0.8536702990531921,1.0019549131393433,-1.374551773071289]
+| 0      | [-0.55106115, 1.6823332, -0.66182184, -0.57873607]
+| 1      | [-0.38195288, 1.7911794, -0.54085857, -0.5870274]
+| 2      | [-0.4431507, 1.7395904, -0.4842358, -0.6109262]
+| 3      | [0.0018629134, 1.8233799, -0.3473827, -0.56145287]
+| 4      | [-0.2862969, 1.8058168, -0.4418158, -0.51601917]
+| 5      | [-0.26784867, 1.8103647, -0.28934777, -0.5363705]
+| 6      | [0.14821936, 1.8630133, -0.13068157, -0.46493164]
 |===
 --
+
+Since the initial state of the algorithm is randomised, it isn't possible to intuitively analyse the effect of the relationship weights.
