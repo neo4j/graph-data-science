@@ -51,7 +51,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.DEFAULT_WEIGHT;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -106,7 +106,7 @@ public class GraphSageModelTrainer {
         // TODO: do not store in a field but pass as parameter
         relationshipWeights = useWeights ?
             graph::relationshipProperty :
-            DEFAULT_WEIGHT;
+            UNWEIGHTED;
 
         Optional<RelationshipWeights> maybeRelationshipWeightsFunction = useWeights ?
             Optional.of(relationshipWeights) :
