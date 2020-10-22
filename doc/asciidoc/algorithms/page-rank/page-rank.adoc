@@ -39,7 +39,7 @@ image::page-rank-formula.svg[align="center"]
 where,
 
 * we assume that a page _A_ has pages _T~1~_ to _T~n~_ which point to it.
-* _d_ is a damping factor which can be set between 0 and 1.
+* _d_ is a damping factor which can be set between 0 (inclusive) and 1 (exclusive).
 It is usually set to 0.85.
 * _C(A)_ is defined as the number of links going out of page _A_.
 
@@ -565,7 +565,7 @@ Note that the nodes 'About', 'Link' and 'Product' now have the same score, while
 [[algorithms-page-rank-examples-damping]]
 === Damping Factor
 
-The damping factor configuration parameter accepts values between 0 and 1.
+The damping factor configuration parameter accepts values between 0 (inclusive) and 1 (exclusive).
 If its value is too high then problems of sinks and spider traps may occur, and the values may oscillate so that the algorithm does not converge.
 If it's too low then all scores are pushed towards 1, and the result will not sufficiently reflect the structure of the graph.
 
