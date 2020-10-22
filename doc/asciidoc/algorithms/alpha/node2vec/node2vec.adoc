@@ -75,7 +75,7 @@ YIELD
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../common-configuration/common-write-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -93,7 +93,6 @@ include::specific-configuration.adoc[]
 |===
 ======
 ====
-
 
 
 [[algorithms-embeddings-node2vec-syntax-anonymous]]
@@ -121,7 +120,6 @@ include::../../common-configuration/common-configuration-anonymous-graph.adoc[]
 include::specific-configuration.adoc[]
 
 The results are the same as for running write mode with a named graph, see the <<algorithms-embeddings-node2vec-syntax, write mode syntax above>>.
-
 
 
 [[algorithms-embeddings-node2vec-examples]]
