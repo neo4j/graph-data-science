@@ -10,10 +10,14 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
 
     compileOnly project(':core')
 
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+
+    testCompileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
+    testCompileOnly         group: 'org.ejml',                 name: 'ejml-ddense',           version: ver.'ejml'
 
     testImplementation project(':test-utils')
     testImplementation project(':core')

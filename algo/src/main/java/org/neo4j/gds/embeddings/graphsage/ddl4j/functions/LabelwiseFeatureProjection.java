@@ -21,13 +21,13 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.core.utils.la.EjmlUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
             );
             DMatrixRMaj wrappedNodeFeatures = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
             DMatrixRMaj product = new DMatrixRMaj(weights.dimension(0), 1);
-            MatrixMatrixMult_DDRM.multTransB(wrappedWeights, wrappedNodeFeatures, product);
+            EjmlUtil.multTransB(wrappedWeights, wrappedNodeFeatures, product, index -> (index < projectedFeatureSize));
             System.arraycopy(
                 product.getData(),
                 0,
