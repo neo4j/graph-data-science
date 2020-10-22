@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 public interface RelationshipWeights {
 
     double DEFAULT_VALUE = 1.0D;
-    RelationshipWeights DEFAULT_WEIGHT = (source, target, defaultValue) -> DEFAULT_VALUE;
+    RelationshipWeights UNWEIGHTED = (source, target, defaultValue) -> DEFAULT_VALUE;
 
     default double weight(long source, long target) {
         return weight(source, target, DEFAULT_VALUE);
