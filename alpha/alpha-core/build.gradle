@@ -10,7 +10,6 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
-    compileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
 
     compileOnly project(':core')
 
