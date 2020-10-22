@@ -146,7 +146,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     void initRandomVectors() {
         progressLogger.logMessage("Initialising Random Vectors :: Start");
 
-        long batchSize = concurrency == 1 ? graph.nodeCount() : Math.max((graph.nodeCount() / concurrency) / 2, MIN_BATCH_SIZE);
+        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
             .stream()
@@ -161,9 +161,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     void propagateEmbeddings() {
-        long batchSize = concurrency == 1
-            ? graph.nodeCount()
-            : Math.max(((graph.relationshipCount() + graph.nodeCount()) / concurrency) / 2, MIN_BATCH_SIZE);
+        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
@@ -305,7 +303,6 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
                 embeddingA.set(nodeId, new float[embeddingDimension]);
             }
             progressLogger.logProgress(partition.nodeCount());
-
         }
 
         private float[] computeRandomVector(long nodeId, Random random, double probability, float entryValue) {
@@ -332,6 +329,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         private final HugeObjectArray<float[]> localCurrent;
         private final HugeObjectArray<float[]> localPrevious;
         private final double iterationWeight;
+        private final Graph concurrentGraph;
 
         private PropagateEmbeddingsTask(
             Partition partition,
@@ -343,12 +341,12 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
             this.localCurrent = localCurrent;
             this.localPrevious = localPrevious;
             this.iterationWeight = iterationWeight;
+            this.concurrentGraph = graph.concurrentCopy();
         }
 
         @Override
         public void run() {
             long degrees = 0;
-            Graph concurrentGraph = graph.concurrentCopy();
             for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
                 float[] embedding = embeddings.get(nodeId);
                 float[] currentEmbedding = localCurrent.get(nodeId);
