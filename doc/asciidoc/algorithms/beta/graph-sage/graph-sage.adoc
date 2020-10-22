@@ -53,6 +53,43 @@ include::specific-configuration.adoc[]
 |===
 ======
 
+[.include-with-mutate]
+======
+.Run GraphSAGE in mutate mode on a graph stored in the catalog.
+[source, cypher]
+----
+CALL gds.beta.graphSage.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeCount: Integer,
+  propertiesWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name               | Type                 | Description
+| nodesCount         | Integer              | The number of nodes processed.
+| propertiesWritten  | Integer              | The number of node properties written.
+| createMillis       | Integer              | Milliseconds for loading data.
+| computeMillis      | Integer              | Milliseconds for running the algorithm.
+| writeMillis        | Integer              | Milliseconds for writing result data back to the in-memory graph.
+| configuration      | Map                  | The configuration used for running the algorithm.
+|===
+======
+
 [.include-with-write]
 ======
 .Run GraphSAGE in write mode on a graph stored in the catalog.
@@ -294,6 +331,33 @@ CALL gds.beta.graphSage.stream(
 |===
 
 NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
+
+=== Mutate
+
+The <<graph-sage-trained-model-example, model trained as part of the stream example>> can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
+Below is an example of how to achieve this.
+
+--
+[source, cypher, role=query-example, no-result=true, group=graphSage]
+----
+CALL gds.beta.graphSage.mutate(
+  'persons',
+  {
+    mutateProperty: 'inMemoryEmbedding',
+    modelName: 'graphSage'
+  }
+) YIELD
+  nodeCount,
+  nodePropertiesWritten
+----
+
+[opts=header]
+.Results
+|===
+| nodeCount | nodePropertiesWritten
+| 7         | 7
+|===
+--
 
 === Write
 
