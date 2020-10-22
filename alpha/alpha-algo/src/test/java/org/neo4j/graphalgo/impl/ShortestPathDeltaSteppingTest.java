@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 /**         5     5      5
@@ -85,7 +86,7 @@ final class ShortestPathDeltaSteppingTest {
         ", (x)-[:TYPE {cost:2}]->(s)"; // create cycle
 
     @GdlGraph(graphNamePrefix = "largeWeights")
-    private static final String LARGE_WEIGTS_CYPHER = "CREATE (a)-[:TYPE {cost: 100000}]->(b)";
+    private static final String LARGE_WEIGHTS_CYPHER = "CREATE (a)-[:TYPE {cost: 100000}]->(b)";
 
     @Inject
     private static TestGraph graph;
@@ -123,11 +124,25 @@ final class ShortestPathDeltaSteppingTest {
 
     @Test
     void handleLargeDistances() {
-        var ssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 3);
+        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 3);
 
-        var sp = ssp.compute().getShortestPaths();
+        var sp = sssp.compute().getShortestPaths();
 
-        assertNotEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(largeWeightsGraph.toMappedNodeId("b"))], 0.1);
+        assertNotEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(largeWeightsGraph.toMappedNodeId("b"))]);
+    }
+
+    @Test
+    void failOnLowDeltaAndLargeDistance() {
+        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-5);
+
+        assertThrows(ArithmeticException.class, () -> sssp.compute());
+    }
+
+    @Test
+    void failOnTooSmallDelta() {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-12));
     }
 
 }
