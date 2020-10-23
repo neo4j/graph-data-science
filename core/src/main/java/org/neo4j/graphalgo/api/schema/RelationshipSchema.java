@@ -33,7 +33,7 @@ import java.util.Set;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType> {
+public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, ValueType> {
     Map<RelationshipType, Map<String, ValueType>> properties();
 
     @Override

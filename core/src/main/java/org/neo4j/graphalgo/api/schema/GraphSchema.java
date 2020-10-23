@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.api.schema;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.Set;
@@ -65,8 +64,8 @@ public interface GraphSchema {
             .build();
     }
 
-    static String forValueType(ValueType vt) {
-        return vt.cypherName();
+    static <PS> String forPropertySchema(PS propertySchema) {
+        return propertySchema.toString();
     }
 
     static GraphSchema empty() {

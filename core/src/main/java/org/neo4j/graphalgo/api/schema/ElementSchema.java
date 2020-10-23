@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +28,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, I>, I extends ElementIdentifier> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extends ElementIdentifier, PS> {
 
-    Map<I, Map<String, ValueType>> properties();
+    Map<I, Map<String, PS>> properties();
 
     SELF filter(Set<I> elementIdentifieresToKeep);
 
@@ -46,12 +45,12 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I>, I extends El
                 .stream()
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
-                    innerEntry -> GraphSchema.forValueType(innerEntry.getValue()))
+                    innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue()))
                 )
         ));
     }
 
-    default Map<I, Map<String, ValueType>> filterProperties(Set<I> identifiersToKeep) {
+    default Map<I, Map<String, PS>> filterProperties(Set<I> identifiersToKeep) {
         return properties()
             .entrySet()
             .stream()
@@ -60,7 +59,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I>, I extends El
 
     }
 
-    default Map<I, Map<String, ValueType>> unionProperties(Map<I, Map<String, ValueType>> rightProperties) {
+    default Map<I, Map<String, PS>> unionProperties(Map<I, Map<String, PS>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()
