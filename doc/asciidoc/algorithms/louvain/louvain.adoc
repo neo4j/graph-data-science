@@ -263,22 +263,23 @@ include::../shared/examples-intro.adoc[]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (nAlice:User {name: 'Alice', seed: 42})
-CREATE (nBridget:User {name: 'Bridget', seed: 42})
-CREATE (nCharles:User {name: 'Charles', seed: 42})
-CREATE (nDoug:User {name: 'Doug'})
-CREATE (nMark:User {name: 'Mark'})
-CREATE (nMichael:User {name: 'Michael'})
+CREATE
+  (nAlice:User {name: 'Alice', seed: 42}),
+  (nBridget:User {name: 'Bridget', seed: 42}),
+  (nCharles:User {name: 'Charles', seed: 42}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
 
-CREATE (nAlice)-[:LINK {weight: 1}]->(nBridget)
-CREATE (nAlice)-[:LINK {weight: 1}]->(nCharles)
-CREATE (nCharles)-[:LINK {weight: 1}]->(nBridget)
+  (nAlice)-[:LINK {weight: 1}]->(nBridget),
+  (nAlice)-[:LINK {weight: 1}]->(nCharles),
+  (nCharles)-[:LINK {weight: 1}]->(nBridget),
 
-CREATE (nAlice)-[:LINK {weight: 5}]->(nDoug)
+  (nAlice)-[:LINK {weight: 5}]->(nDoug),
 
-CREATE (nMark)-[:LINK {weight: 1}]->(nDoug)
-CREATE (nMark)-[:LINK {weight: 1}]->(nMichael)
-CREATE (nMichael)-[:LINK {weight: 1}]->(nMark);
+  (nMark)-[:LINK {weight: 1}]->(nDoug),
+  (nMark)-[:LINK {weight: 1}]->(nMichael),
+  (nMichael)-[:LINK {weight: 1}]->(nMark);
 ----
 
 This graph has two clusters of _Users_, that are closely connected.
