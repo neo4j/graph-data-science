@@ -173,7 +173,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
                 var featureOrEmbeddingSize = layerConfig.cols();
 
-                //   multi mean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
+                //   [Weighted]MultiMean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
                 var minMeans = sizeOfDoubleArray(minNodeCount * featureOrEmbeddingSize);
                 var maxMeans = sizeOfDoubleArray(maxNodeCount * featureOrEmbeddingSize);
 
@@ -203,7 +203,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                 var minNeighborhoodActivations = minBiasedWeightedPreviousLayer;
                 var maxNeighborhoodActivations = maxBiasedWeightedPreviousLayer;
 
-                //  ElementwiseMax - double[iterNodeCount * embeddingDimension]
+                //  [Weighted]ElementwiseMax - double[iterNodeCount * embeddingDimension]
                 var minElementwiseMax = sizeOfDoubleArray(minNodeCount * config.embeddingDimension());
                 var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * config.embeddingDimension());
 
