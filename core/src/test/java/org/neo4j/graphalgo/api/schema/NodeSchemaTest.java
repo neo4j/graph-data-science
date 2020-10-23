@@ -46,17 +46,14 @@ class NodeSchemaTest {
                 "baz",
                 NodePropertySchema.of(
                     ValueType.DOUBLE,
-                    Optional.of(defaultValue),
-                    Optional.of(aggregation)
+                    Optional.of(defaultValue)
                 )
             ).build();
 
         NodePropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
-        assertTrue(nodePropertySchema.maybeAggregation().isPresent());
         assertTrue(nodePropertySchema.maybeDefaultValue().isPresent());
 
         assertEquals(defaultValue, nodePropertySchema.maybeDefaultValue().get());
-        assertEquals(aggregation, nodePropertySchema.maybeAggregation().get());
     }
 
     @Test

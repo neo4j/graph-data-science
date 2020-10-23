@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class GraphSchemaIntegrationTest extends BaseTest {
+class GraphSchemaIntegrationTest extends BaseTest {
 
     private static String DB_CYPHER = "CREATE" +
                                       "  (a:Node {prop: 1})" +
@@ -77,7 +77,7 @@ public class GraphSchemaIntegrationTest extends BaseTest {
                 PropertyMapping.of("prop")
             ),
             Arguments.of(
-                NodePropertySchema.of(ValueType.LONG, Optional.of(DefaultValue.of(1337)), Optional.empty()),
+                NodePropertySchema.of(ValueType.LONG, Optional.of(DefaultValue.of(1337))),
                 PropertyMapping.of("prop", 1337)
             )
         );

@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.api.schema.NodePropertySchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -111,8 +110,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyMapping.propertyKey(),
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
-                    propertyMapping.aggregation() == Aggregation.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.aggregation())
+                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue())
                 )
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
@@ -159,7 +157,6 @@ public final class CSRGraphStore implements GraphStore {
                     ImmutablePropertyMapping.Builder propertyMappingBuilder = ImmutablePropertyMapping
                         .builder()
                         .propertyKey(entry.getKey());
-                    entry.getValue().maybeAggregation().ifPresent(propertyMappingBuilder::aggregation);
                     entry.getValue().maybeDefaultValue().ifPresent(propertyMappingBuilder::defaultValue);
                     return propertyMappingBuilder.build();
                 },
@@ -617,8 +614,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyName,
                     NodePropertySchema.of(
                         nodeProperty.type(),
-                        nodeProperty.maybeDefaultValue(),
-                        nodeProperty.maybeAggregation()
+                        nodeProperty.maybeDefaultValue()
                     ));
             }));
 
