@@ -17,17 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.la;
+package org.neo4j.graphalgo.core.utils.matrix;
 
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix1Row;
 
 import java.util.function.IntPredicate;
 
-public final class EjmlUtil {
+public final class MatrixUtil {
 
     /**
-     * Modified version of MatrixMatrixMult_DDRM#multTransB with a simple predicate based mask
+     * Modified version of Ejml implementation.
+     *
+     * @see <a href="https://github.com/lessthanoptimal/ejml/blob/v0.39/main/ejml-ddense/src/org/ejml/dense/row/mult/MatrixMatrixMult_DDRM.java#L317">MatrixMatrixMult_DDRM#multTransB</a>
      */
     public static void multTransB(DMatrix1Row a, DMatrix1Row b, DMatrix1Row c, IntPredicate mask) {
         if (a == c || b == c)
@@ -62,5 +64,5 @@ public final class EjmlUtil {
         }
     }
 
-    private EjmlUtil() {}
+    private MatrixUtil() {}
 }
