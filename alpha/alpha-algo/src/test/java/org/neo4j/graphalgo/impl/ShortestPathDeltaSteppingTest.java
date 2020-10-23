@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 /**         5     5      5
@@ -85,46 +85,64 @@ final class ShortestPathDeltaSteppingTest {
 
         ", (x)-[:TYPE {cost:2}]->(s)"; // create cycle
 
-    @Inject
-    private static Graph graph;
+    @GdlGraph(graphNamePrefix = "largeWeights")
+    private static final String LARGE_WEIGHTS_CYPHER = "CREATE (a)-[:TYPE {cost: 100000}]->(b)";
 
     @Inject
-    private IdFunction idFunction;
+    private static TestGraph graph;
 
-    private static long head, tail;
-
-    @BeforeEach
-    void setup() {
-        head = idFunction.of("s");
-        tail = idFunction.of("x");
-    }
+    @Inject
+    private static TestGraph largeWeightsGraph;
 
     @Test
     void testSequential() {
-        var sssp = new ShortestPathDeltaStepping(graph, head, 3);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3);
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))],0.1);
     }
 
     @Test
     void testParallel() {
-        var sssp = new ShortestPathDeltaStepping(graph, head, 3)
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"), 3)
                 .withExecutorService(Executors.newFixedThreadPool(3));
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId(tail))],0.1);
+        assertEquals(8, sp[Math.toIntExact(graph.toMappedNodeId("x"))],0.1);
     }
 
     @Test
     void distanceToNodeInDifferentComponentShouldBeInfinity() {
-        var sssp = new ShortestPathDeltaStepping(graph, head,3);
+        var sssp = new ShortestPathDeltaStepping(graph, graph.toOriginalNodeId("s"),3);
 
         var sp = sssp.compute().getShortestPaths();
 
-        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId(idFunction.of("z")))],0.1);
+        assertEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(graph.toMappedNodeId("z"))],0.1);
+    }
+
+    @Test
+    void handleLargeDistances() {
+        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 3);
+
+        var sp = sssp.compute().getShortestPaths();
+
+        assertNotEquals(Double.POSITIVE_INFINITY, sp[Math.toIntExact(largeWeightsGraph.toMappedNodeId("b"))]);
+    }
+
+    @Test
+    void failOnLowDeltaAndLargeDistance() {
+        var sssp = new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-5);
+
+        assertThrows(ArithmeticException.class, () -> sssp.compute());
+    }
+
+    @Test
+    void failOnTooSmallDelta() {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> new ShortestPathDeltaStepping(largeWeightsGraph, largeWeightsGraph.toOriginalNodeId("a"), 1e-12));
     }
 
 }
