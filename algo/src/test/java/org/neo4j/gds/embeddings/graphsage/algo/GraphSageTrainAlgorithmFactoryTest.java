@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.IntStream;
@@ -51,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_DIMENSION;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -89,8 +89,8 @@ class GraphSageTrainAlgorithmFactoryTest {
             var minNumProperties = config.degreeAsProperty() ? 2 : 1;
             var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
             maxNumProperties += 1; // Add one for the label
-            var minWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * maxNumProperties);
+            var minWeightsMemory = sizeOfDoubleArray(config.featuresSize() * minNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray(config.featuresSize() * maxNumProperties);
 
             weightsPerLabel = weightsPerLabel
                 .add(MemoryRange.of(minWeightsMemory, maxWeightsMemory))
@@ -506,7 +506,10 @@ class GraphSageTrainAlgorithmFactoryTest {
         var embeddingDimensions = List.of(64, 256);
         var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
-        var projectedFeatureDimensions = List.of(/* single label */ PROJECTED_FEATURE_DIMENSION, /* multi label */ 42);
+        var projectedFeatureDimensions = List.of(
+            /* single label */ Optional.<Integer>empty(),
+            /* multi label  */ Optional.of(42)
+        );
         var labelCounts = List.of(1, 42);
         var sampleSizesList = List.of(List.of(5L, 100L));
 
@@ -523,7 +526,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                                     projectedFeatureDimensions.stream().flatMap(projectedFeatureDimension ->
                                         labelCounts.stream()
                                             // For the single-label case we don't care about the label count
-                                            .limit(projectedFeatureDimension == PROJECTED_FEATURE_DIMENSION ? 1 : labelCounts.size())
+                                            .limit(projectedFeatureDimension.isEmpty() ? 1 : labelCounts.size())
                                             .flatMap(labelCount ->
                                             featurePropertySizes.stream().map(featurePropertySize -> {
                                                 var testName = formatWithLocale(
@@ -548,6 +551,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                     .aggregator(aggregator)
                                                     .embeddingDimension(embeddingDimension)
                                                     .degreeAsProperty(degreeAsProperty)
+                                                    .projectedFeatureDimension(projectedFeatureDimension)
                                                     .featureProperties(
                                                         IntStream.range(0, featurePropertySize)
                                                             .mapToObj(i -> String.valueOf('a' + i))
@@ -560,14 +564,6 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                     .nodeCount(nodeCount)
                                                     .estimationNodeLabelCount(labelCount)
                                                     .build();
-
-                                                if (projectedFeatureDimension > 0) {
-                                                    config = ImmutableGraphSageTrainConfig
-                                                        .builder()
-                                                        .from(config)
-                                                        .projectedFeatureDimension(projectedFeatureDimension)
-                                                        .build();
-                                                }
 
                                                 return arguments(
                                                     testName,

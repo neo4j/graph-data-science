@@ -121,8 +121,8 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
             var minNumProperties = config.degreeAsProperty() ? 2 : 1;
             var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
             maxNumProperties++; // Add one for the label
-            var minWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * maxNumProperties);
+            var minWeightsMemory = sizeOfDoubleArray(config.featuresSize() * minNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray(config.featuresSize() * maxNumProperties);
             var weightByLabelMemory = MemoryRange.of(minWeightsMemory, maxWeightsMemory).times(labelCount);
 
             estimationsBuilder.fixed("weightsByLabel", weightByLabelMemory);

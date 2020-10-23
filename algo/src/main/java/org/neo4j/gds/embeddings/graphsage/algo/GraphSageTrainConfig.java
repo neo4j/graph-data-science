@@ -57,8 +57,6 @@ public interface GraphSageTrainConfig extends
     RelationshipWeightConfig,
     FeaturePropertiesConfig {
 
-    int PROJECTED_FEATURE_DIMENSION = -1;
-
     @Override
     @Value.Default
     default int embeddingDimension() {
@@ -121,11 +119,7 @@ public interface GraphSageTrainConfig extends
         return false;
     }
 
-    // TODO: Can use Optional
-    @Value.Default
-    default int projectedFeatureDimension() {
-        return PROJECTED_FEATURE_DIMENSION;
-    }
+    Optional<Integer> projectedFeatureDimension();
 
     @Override
     @Configuration.Ignore
@@ -153,14 +147,12 @@ public interface GraphSageTrainConfig extends
 
     @Configuration.Ignore
     default boolean isMultiLabel() {
-        return projectedFeatureDimension() > 0;
+        return projectedFeatureDimension().isPresent();
     }
 
     @Configuration.Ignore
     default int featuresSize() {
-        return isMultiLabel()
-            ? projectedFeatureDimension()
-            : featureProperties().size() + (degreeAsProperty() ? 1 : 0);
+        return projectedFeatureDimension().orElse(featureProperties().size() + (degreeAsProperty() ? 1 : 0));
     }
 
     @Value.Check

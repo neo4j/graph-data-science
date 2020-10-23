@@ -20,9 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
@@ -45,7 +42,6 @@ import org.neo4j.graphdb.QueryExecutionException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
@@ -55,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_DIMENSION;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
@@ -270,16 +265,15 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(expectedFail, throwable.getMessage());
     }
 
-    @ParameterizedTest(name = "projected feature dimension = {0}")
-    @MethodSource("parameters")
-    void shouldValidateLabelsAndProperties(int projectedFeatureDimension, String expectedMessage) {
+    @Test
+    void shouldValidateLabelsAndPropertiesWithFeatureDimension() {
         var proc = new GraphSageTrainProc();
         var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(), Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
                     "featureProperties", List.of("foo"),
-                    "projectedFeatureDimension", projectedFeatureDimension
+                    "projectedFeatureDimension", 5
                 )
             )
         );
@@ -293,18 +287,34 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 config
             )
         );
-        assertThat(exception).hasMessage(expectedMessage);
+        assertThat(exception).hasMessage(
+            "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
+        );
     }
 
-    static Stream<Arguments> parameters() {
-        return Stream.of(
-            Arguments.of(
-                PROJECTED_FEATURE_DIMENSION,
-                "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
-            ), Arguments.of(
-                5,
-                "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
+    @Test
+    void shouldValidateLabelsAndPropertiesWithoutFeatureDimension() {
+        var proc = new GraphSageTrainProc();
+        var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(), Optional.empty(),
+            CypherMapWrapper.create(
+                Map.of(
+                    "modelName", GraphSageBaseProcTest.modelName,
+                    "featureProperties", List.of("foo")
+                )
             )
+        );
+        var exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> proc.validateConfigsAndGraphStore(
+                ImmutableGraphStoreWithConfig.of(
+                    GdlFactory.of("", db.databaseId()).build().graphStore(),
+                    GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
+                ),
+                config
+            )
+        );
+        assertThat(exception).hasMessage(
+            "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
         );
     }
 
