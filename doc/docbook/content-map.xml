@@ -34,6 +34,8 @@
             </d:tocentry>
             <d:tocentry linkend="anonymous-graph"><?dbhtml filename="management-ops/anonymous-graph/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="node-properties"><?dbhtml filename="management-ops/node-properties/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
             </d:tocentry>
         </d:tocentry>
