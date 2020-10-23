@@ -23,23 +23,27 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.utils.CloseableThreadLocal;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP> {
 
+    private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
     private final Graph graph;
     private final int concurrency;
@@ -140,28 +144,24 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     void initRandomVectors() {
-        double probability = 1.0f / (2.0f * SPARSITY);
-        float sqrtSparsity = (float) Math.sqrt(SPARSITY);
-        float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
-        ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
-
         progressLogger.logMessage("Initialising Random Vectors :: Start");
-        ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-            int degree = graph.degree(nodeId);
-            float scaling = degree == 0
-                ? 1.0f
-                : (float) Math.pow(degree, normalizationStrength);
 
-            float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-            float[] randomVector = computeRandomVector(nodeId, random.get(), probability, entryValue);
-            embeddingB.set(nodeId, randomVector);
-            embeddingA.set(nodeId, new float[this.embeddingDimension]);
-            progressLogger.logProgress();
-        });
+        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
+        float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
+        List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
+            .stream()
+            .map(partition -> new InitRandomVectorTask(
+                partition,
+                sqrtEmbeddingDimension
+            ))
+            .collect(Collectors.toList());
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
         progressLogger.logMessage("Initialising Random Vectors :: Finished");
     }
 
     void propagateEmbeddings() {
+        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
@@ -170,68 +170,17 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
             double iterationWeight = iterationWeights.get(i).doubleValue();
 
-            try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
-                ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
-                    float[] embedding = embeddings.get(nodeId);
-                    float[] currentEmbedding = localCurrent.get(nodeId);
-                    Arrays.fill(currentEmbedding, 0.0f);
-
-                    // Collect and combine the neighbour embeddings
-                    concurrentGraphCopy.get().forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
-                        embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
-                        return true;
-                    });
-
-                    // Normalize neighbour embeddings
-                    var degree = graph.degree(nodeId);
-                    int adjustedDegree = degree == 0 ? 1 : degree;
-                    double degreeScale = 1.0f / adjustedDegree;
-                    multiplyArrayValues(currentEmbedding, degreeScale);
-                    l2Normalize(currentEmbedding);
-
-                    // Update the result embedding
-                    updateEmbeddings(iterationWeight, embedding, currentEmbedding);
-
-                    progressLogger.logProgress(degree);
-                });
-            }
+            List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
+                .stream()
+                .map(partition -> new PropagateEmbeddingsTask(
+                    partition,
+                    localCurrent,
+                    localPrevious,
+                    iterationWeight))
+                .collect(Collectors.toList());
+            ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));
-        }
-    }
-
-    private float[] computeRandomVector(long nodeId, Random random, double probability, float entryValue) {
-        float[] randomVector = new float[embeddingDimension];
-        for (int i = 0; i < embeddingDimension; i++) {
-            randomVector[i] = computeRandomEntry(random, probability, entryValue);
-        }
-        for (int j = 0; j < nodePropertyNames.size(); j++) {
-            String feature = nodePropertyNames.get(j);
-            double featureValue = getCheckedDoubleNodeProperty(graph, feature, nodeId);
-            if (featureValue != 0.0D) {
-                for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
-                    randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
-                }
-            }
-        }
-        return randomVector;
-    }
-
-    private float computeRandomEntry(Random random, double probability, float entryValue) {
-        double randomValue = random.nextDouble();
-
-        if (randomValue < probability) {
-            return entryValue;
-        } else if (randomValue < probability * 2.0f) {
-            return -entryValue;
-        } else {
-            return 0.0f;
-        }
-    }
-
-    private void updateEmbeddings(double weight, float[] embedding, float[] newEmbedding) {
-        for (int i = 0; i < embedding.length; i++) {
-            embedding[i] += weight * newEmbedding[i];
         }
     }
 
@@ -247,7 +196,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         }
     }
 
-    private void multiplyArrayValues(float[] lhs, double scalar) {
+    private static void multiplyArrayValues(float[] lhs, double scalar) {
         for (int i = 0; i < lhs.length; i++) {
             lhs[i] *= scalar;
         }
@@ -262,6 +211,24 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         double scaling = 1 / sqrtSum;
         for (int i = 0; i < array.length; i++) {
             array[i] *= scaling;
+        }
+    }
+
+    private static void updateEmbeddings(double weight, float[] embedding, float[] newEmbedding) {
+        for (int i = 0; i < embedding.length; i++) {
+            embedding[i] += weight * newEmbedding[i];
+        }
+    }
+
+    private static float computeRandomEntry(Random random, double probability, float entryValue) {
+        double randomValue = random.nextDouble();
+
+        if (randomValue < probability) {
+            return entryValue;
+        } else if (randomValue < probability * 2.0f) {
+            return -entryValue;
+        } else {
+            return 0.0f;
         }
     }
 
@@ -303,5 +270,106 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private interface EmbeddingCombiner {
         void combine(float[] into, float[] add, double weight);
+    }
+
+    private final class InitRandomVectorTask implements Runnable {
+
+        final double probability = 1.0f / (2.0f * SPARSITY);
+        final float sqrtSparsity = (float) Math.sqrt(SPARSITY);
+
+        private final Partition partition;
+        private final float sqrtEmbeddingDimension;
+
+        private InitRandomVectorTask(
+            Partition partition,
+            float sqrtEmbeddingDimension
+        ) {
+            this.partition = partition;
+            this.sqrtEmbeddingDimension = sqrtEmbeddingDimension;
+        }
+
+        @Override
+        public void run() {
+            HighQualityRandom random = new HighQualityRandom();
+            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+                int degree = graph.degree(nodeId);
+                float scaling = degree == 0
+                    ? 1.0f
+                    : (float) Math.pow(degree, normalizationStrength);
+
+                float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
+                float[] randomVector = computeRandomVector(nodeId, random, probability, entryValue);
+                embeddingB.set(nodeId, randomVector);
+                embeddingA.set(nodeId, new float[embeddingDimension]);
+            }
+            progressLogger.logProgress(partition.nodeCount());
+        }
+
+        private float[] computeRandomVector(long nodeId, Random random, double probability, float entryValue) {
+            float[] randomVector = new float[embeddingDimension];
+            for (int i = 0; i < embeddingDimension; i++) {
+                randomVector[i] = computeRandomEntry(random, probability, entryValue);
+            }
+            for (int j = 0; j < nodePropertyNames.size(); j++) {
+                String feature = nodePropertyNames.get(j);
+                double featureValue = getCheckedDoubleNodeProperty(graph, feature, nodeId);
+                if (featureValue != 0.0D) {
+                    for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
+                        randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
+                    }
+                }
+            }
+            return randomVector;
+        }
+    }
+
+    private final class PropagateEmbeddingsTask implements Runnable {
+
+        private final Partition partition;
+        private final HugeObjectArray<float[]> localCurrent;
+        private final HugeObjectArray<float[]> localPrevious;
+        private final double iterationWeight;
+        private final Graph concurrentGraph;
+
+        private PropagateEmbeddingsTask(
+            Partition partition,
+            HugeObjectArray<float[]> localCurrent,
+            HugeObjectArray<float[]> localPrevious,
+            double iterationWeight
+        ) {
+            this.partition = partition;
+            this.localCurrent = localCurrent;
+            this.localPrevious = localPrevious;
+            this.iterationWeight = iterationWeight;
+            this.concurrentGraph = graph.concurrentCopy();
+        }
+
+        @Override
+        public void run() {
+            long degrees = 0;
+            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+                float[] embedding = embeddings.get(nodeId);
+                float[] currentEmbedding = localCurrent.get(nodeId);
+                Arrays.fill(currentEmbedding, 0.0f);
+
+                // Collect and combine the neighbour embeddings
+                concurrentGraph.forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
+                    embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
+                    return true;
+                });
+
+                // Normalize neighbour embeddings
+                var degree = graph.degree(nodeId);
+                int adjustedDegree = degree == 0 ? 1 : degree;
+                double degreeScale = 1.0f / adjustedDegree;
+                multiplyArrayValues(currentEmbedding, degreeScale);
+                l2Normalize(currentEmbedding);
+
+                // Update the result embedding
+                updateEmbeddings(iterationWeight, embedding, currentEmbedding);
+                degrees += degree;
+            }
+            progressLogger.logProgress(degrees);
+        }
     }
 }
