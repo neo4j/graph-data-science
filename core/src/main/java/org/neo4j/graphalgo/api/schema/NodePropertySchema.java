@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api.schema;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Optional;
 
@@ -30,11 +31,17 @@ public interface NodePropertySchema extends PropertySchema {
 
     Optional<DefaultValue> maybeDefaultValue();
 
+    Optional<Aggregation> maybeAggregation();
+
     static NodePropertySchema of(ValueType valueType) {
-        return ImmutableNodePropertySchema.of(valueType, Optional.empty());
+        return ImmutableNodePropertySchema.of(valueType, Optional.empty(), Optional.empty());
     }
 
-    static NodePropertySchema of(ValueType valueType, Optional<DefaultValue> maybeDefaultValue) {
-        return ImmutableNodePropertySchema.of(valueType, maybeDefaultValue);
+    static NodePropertySchema of(
+        ValueType valueType,
+        Optional<DefaultValue> maybeDefaultValue,
+        Optional<Aggregation> maybeAggregation
+    ) {
+        return ImmutableNodePropertySchema.of(valueType, maybeDefaultValue, maybeAggregation);
     }
 }
