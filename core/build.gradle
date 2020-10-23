@@ -22,9 +22,13 @@ dependencies {
             [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
             [group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core'],
             [group: 'io.jsonwebtoken', name: 'jjwt-api', version: ver.'jjwt'],
-            [group: 'org.ejml', name: 'ejml-core', version: ver.'ejml'],
-            [group: 'org.ejml', name: 'ejml-ddense', version: ver.ejml],
     )
+    api([group: 'org.ejml', name: 'ejml-core', version: ver.'ejml']) {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    }
+    api([group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml']) {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    }
 
     implementation(
             [group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: ver.'bouncy-castle'],
