@@ -52,7 +52,7 @@ public interface GraphSageTrainConfig extends
     RelationshipWeightConfig
 {
 
-    int PROJECTED_FEATURE_SIZE = -1;
+    int PROJECTED_FEATURE_DIMENSION = -1;
 
     @Override
     @Value.Default
@@ -123,8 +123,8 @@ public interface GraphSageTrainConfig extends
 
     // TODO: Can use Optional
     @Value.Default
-    default int projectedFeatureSize() {
-        return PROJECTED_FEATURE_SIZE;
+    default int projectedFeatureDimension() {
+        return PROJECTED_FEATURE_DIMENSION;
     }
 
     @Configuration.Ignore
@@ -147,13 +147,13 @@ public interface GraphSageTrainConfig extends
 
     @Configuration.Ignore
     default boolean isMultiLabel() {
-        return projectedFeatureSize() > 0;
+        return projectedFeatureDimension() > 0;
     }
 
     @Configuration.Ignore
     default int featuresSize() {
         return isMultiLabel()
-            ? projectedFeatureSize()
+            ? projectedFeatureDimension()
             : nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
     }
 

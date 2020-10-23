@@ -39,27 +39,27 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
     private final long[] nodeIds;
     private final HugeObjectArray<double[]> features;
     private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
-    private final int projectedFeatureSize;
+    private final int projectedFeatureDimension;
     private final NodeLabel[] labels;
 
     public LabelwiseFeatureProjection(
         long[] nodeIds,
         HugeObjectArray<double[]> features,
         Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
-        int projectedFeatureSize,
+        int projectedFeatureDimension,
         NodeLabel[] labels
     ) {
-        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, projectedFeatureSize});
+        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, projectedFeatureDimension});
         this.nodeIds = nodeIds;
         this.features = features;
         this.weightsByLabel = weightsByLabel;
-        this.projectedFeatureSize = projectedFeatureSize;
+        this.projectedFeatureDimension = projectedFeatureDimension;
         this.labels = labels;
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        double[] data = new double[nodeIds.length * projectedFeatureSize];
+        double[] data = new double[nodeIds.length * projectedFeatureDimension];
         IntStream.range(0, nodeIds.length).forEach(i -> {
             long nodeId = nodeIds[i];
             NodeLabel label = labels[i];
@@ -78,11 +78,11 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
                 product.getData(),
                 0,
                 data,
-                i * projectedFeatureSize,
-                projectedFeatureSize
+                i * projectedFeatureDimension,
+                projectedFeatureDimension
             );
         });
-        return new Matrix(data, nodeIds.length, projectedFeatureSize);
+        return new Matrix(data, nodeIds.length, projectedFeatureDimension);
     }
 
     @Override

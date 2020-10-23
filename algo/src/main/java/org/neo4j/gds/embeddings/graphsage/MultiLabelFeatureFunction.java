@@ -34,16 +34,16 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
 
     private final Graph graph;
     private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
-    private final int projectedFeatureSize;
+    private final int projectedFeatureDimension;
 
     public MultiLabelFeatureFunction(
         Graph graph,
         Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
-        int projectedFeatureSize
+        int projectedFeatureDimension
     ) {
         this.graph = graph;
         this.weightsByLabel = weightsByLabel;
-        this.projectedFeatureSize = projectedFeatureSize;
+        this.projectedFeatureDimension = projectedFeatureDimension;
     }
 
     /**
@@ -60,6 +60,6 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
         for (int i = 0; i < nodeIds.length; i++) {
             labels[i] = graph.nodeLabels(nodeIds[i]).iterator().next();
         }
-        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureSize, labels);
+        return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureDimension, labels);
     }
 }

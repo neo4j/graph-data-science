@@ -70,7 +70,7 @@ class GraphSageHelperTest {
         var config = ImmutableGraphSageTrainConfig.builder()
             .modelName("foo")
             .nodePropertyNames(Set.of("dummyProp"))
-            .projectedFeatureSize(42)
+            .projectedFeatureDimension(42)
             .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
             GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty())
@@ -101,7 +101,7 @@ class GraphSageHelperTest {
                 ImmutableGraphSageTrainConfig.builder()
                     .modelName("foo")
                     .nodePropertyNames(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
-                    .projectedFeatureSize(5)
+                    .projectedFeatureDimension(5)
                     .build(),
                 HugeObjectArray.of(
                     new double[]{5.0, 2.0, 1.0},

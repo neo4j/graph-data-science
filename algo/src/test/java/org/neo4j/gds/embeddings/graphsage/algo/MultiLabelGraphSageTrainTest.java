@@ -64,7 +64,7 @@ class MultiLabelGraphSageTrainTest {
             .embeddingDimension(64)
             .modelName("foo")
             .degreeAsProperty(degreeAsProperty)
-            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
+            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
@@ -95,7 +95,7 @@ class MultiLabelGraphSageTrainTest {
         var config = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .modelName("foo")
-            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
+            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
@@ -116,7 +116,7 @@ class MultiLabelGraphSageTrainTest {
 
         var graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
             .concurrency(1)
-            .projectedFeatureSize(5)
+            .projectedFeatureDimension(5)
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
@@ -151,15 +151,15 @@ class MultiLabelGraphSageTrainTest {
         var builder = ImmutableGraphSageTrainConfig.builder()
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
-            .projectedFeatureSize(PROJECTED_FEATURE_SIZE)
+            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .modelName("foo");
         return Stream.of(
             Arguments.of(
                 "default", builder.build()
             ), Arguments.of(
-                "larger projection", builder.projectedFeatureSize(10).build()
+                "larger projection", builder.projectedFeatureDimension(10).build()
             ), Arguments.of(
-                "smaller projection", builder.projectedFeatureSize(2).build()
+                "smaller projection", builder.projectedFeatureDimension(2).build()
             )
         );
 

@@ -62,7 +62,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig> compute() {
-        FeatureFunction featureFunction = new MultiLabelFeatureFunction(graph, weightsByLabel, config.projectedFeatureSize());
+        FeatureFunction featureFunction = new MultiLabelFeatureFunction(graph, weightsByLabel, config.projectedFeatureDimension());
         GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, progressLogger, featureFunction, weightsByLabel.values());
 
         GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
@@ -97,7 +97,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
                 // Label is used as a property
                 numProperties += 1;
                 //TODO: how should we initialize the values in the matrix?
-                return generateWeights(config.projectedFeatureSize(), numProperties, WEIGHT_BOUND);
+                return generateWeights(config.projectedFeatureDimension(), numProperties, WEIGHT_BOUND);
             }));
     }
 }
