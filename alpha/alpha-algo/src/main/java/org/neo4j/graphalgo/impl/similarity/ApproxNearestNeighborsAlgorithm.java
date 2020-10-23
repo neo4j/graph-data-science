@@ -285,7 +285,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         }
 
         IdMap idMap = nodesBuilder.build();
-        return new IdsAndProperties(idMap, Collections.emptyMap());
+        return IdsAndProperties.of(idMap, Collections.emptyMap());
     }
 
     private int mergeConsumers(Iterable<NeighborhoodTask> neighborhoodTasks, AnnTopKConsumer[] topKConsumers) {

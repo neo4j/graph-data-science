@@ -21,36 +21,19 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeProperties;
 
 import java.util.Map;
 
-public class IdsAndProperties {
+@ValueClass
+public interface IdsAndProperties {
 
-    final IdMap idMap;
-    private final Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties;
+    IdMap idMap();
 
-    public static IdsAndProperties of(
-        IdMap hugeIdMap,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties
-    ) {
-        return new IdsAndProperties(
-            hugeIdMap,
-            properties
-        );
-    }
+    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
 
-
-    public IdsAndProperties(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
-        this.idMap = idMap;
-        this.properties = properties;
-    }
-
-    public IdMap idMap() {
-        return idMap;
-    }
-
-    public Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties() {
-        return properties;
+    static IdsAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
+        return ImmutableIdsAndProperties.of(idMap, properties);
     }
 }
