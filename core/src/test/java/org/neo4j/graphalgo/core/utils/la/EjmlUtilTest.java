@@ -23,16 +23,23 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class EjmlUtilTest {
+class EjmlUtilTest {
+
     @Test
     void multTransBWithMask() {
-        var matrix = DMatrixRMaj.wrap(3, 3, new double[]{1,2,3,4,5,6,7,8,9});
-        var maskedResult = new DMatrixRMaj(3,3);
-        IntPredicate mask = (index) -> (index >= 4);
+        int size = 1000;
+
+        var raw = new double[size * size];
+        Arrays.fill(raw, 42);
+
+        var matrix = DMatrixRMaj.wrap(size, size, raw);
+        var maskedResult = new DMatrixRMaj(size, size);
+        IntPredicate mask = index -> index < size / 2;
         EjmlUtil.multTransB(matrix, matrix, maskedResult, mask);
 
         var originalResult = maskedResult.createLike();

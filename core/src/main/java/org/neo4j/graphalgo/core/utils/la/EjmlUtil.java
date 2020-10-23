@@ -24,42 +24,43 @@ import org.ejml.data.DMatrix1Row;
 
 import java.util.function.IntPredicate;
 
-public class EjmlUtil {
+public final class EjmlUtil {
+
     /**
-     * modified version of MatrixMatrixMult_DDRM#multTransB with a simple predicate based mask
+     * Modified version of MatrixMatrixMult_DDRM#multTransB with a simple predicate based mask
      */
-    public static void multTransB(DMatrix1Row a , DMatrix1Row b , DMatrix1Row c, IntPredicate shouldBeComputed)
-    {
-        if( a == c || b == c )
+    public static void multTransB(DMatrix1Row a, DMatrix1Row b, DMatrix1Row c, IntPredicate mask) {
+        if (a == c || b == c)
             throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
-        else if( a.numCols != b.numCols ) {
+        else if (a.numCols != b.numCols) {
             throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
         }
-        c.reshape(a.numRows,b.numRows);
+        c.reshape(a.numRows, b.numRows);
 
-        int cIndex = 0;
         int aIndexStart = 0;
+        int cIndex = 0;
 
-        for( int xA = 0; xA < a.numRows; xA++ ) {
+        for (int xA = 0; xA < a.numRows; xA++) {
             int end = aIndexStart + b.numCols;
             int indexB = 0;
-                for (int xB = 0; xB < b.numRows; xB++) {
-                    if(shouldBeComputed.test(cIndex)) {
-                        int indexA = aIndexStart;
-                        double total = 0;
+            for (int xB = 0; xB < b.numRows; xB++) {
+                if (mask.test(cIndex)) {
+                    int indexA = aIndexStart;
+                    double total = 0;
 
-                        while (indexA < end) {
-                            total += a.get(indexA++) * b.get(indexB++);
-                        }
-
-                        c.set(cIndex, total);
-                    } else {
-                        indexB += b.numCols;
+                    while (indexA < end) {
+                        total += a.get(indexA++) * b.get(indexB++);
                     }
-                    cIndex++;
-                }
 
+                    c.set(cIndex, total);
+                } else {
+                    indexB += b.numCols;
+                }
+                cIndex++;
+            }
             aIndexStart += a.numCols;
         }
     }
+
+    private EjmlUtil() {}
 }
