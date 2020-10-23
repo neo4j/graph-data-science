@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP> {
@@ -206,7 +207,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         }
         for (int j = 0; j < nodePropertyNames.size(); j++) {
             String feature = nodePropertyNames.get(j);
-            double featureValue = graph.nodeProperties(feature).doubleValue(nodeId);
+            double featureValue = getCheckedDoubleNodeProperty(graph, feature, nodeId);
             if (featureValue != 0.0D) {
                 for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
                     randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];

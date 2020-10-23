@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
@@ -35,13 +36,19 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class FastRPTest extends AlgoTestBase {
 
@@ -314,5 +321,41 @@ class FastRPTest extends AlgoTestBase {
             3,
             logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
         );
+    }
+
+    @Nested
+    @GdlExtension
+    class MissingProperties {
+
+        @GdlGraph
+        private static final String DB_CYPHER = "CREATE" +
+                                                "  (a { prop: 1 })" +
+                                                ", (b)" +
+                                                ", (a)-[:REL]->(b)";
+
+        @Inject
+        Graph graph;
+
+        @Inject
+        IdFunction idFunction;
+
+        @Test
+        void shouldFailWhenNodePropertiesAreMissing() {
+            FastRP fastRP = new FastRP(
+                graph,
+                FastRPBaseConfig.builder()
+                    .embeddingDimension(64)
+                    .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
+                    .addNodePropertyName("prop")
+                    .build(),
+                progressLogger,
+                AllocationTracker.empty()
+            );
+
+            assertThatThrownBy(fastRP::initRandomVectors)
+                .hasMessageContaining(
+                    formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
+                );
+        }
     }
 }
