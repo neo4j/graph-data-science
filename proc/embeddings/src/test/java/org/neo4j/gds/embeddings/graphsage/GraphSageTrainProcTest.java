@@ -20,6 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.GdsCypher;
@@ -331,5 +333,19 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertCypherResult(query, List.of(Map.of(
             "requiredMemory", "[5133 KiB ... 5257 KiB]"
         )));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-10, -1, 0})
+    void featureDimensionValidation(int projectedFeatureDimension) {
+        String query = GdsCypher.call().explicitCreation(graphName)
+            .algo("gds.beta.graphSage")
+            .trainEstimation()
+            .addParameter("degreeAsProperty", true)
+            .addParameter("modelName", modelName)
+            .addParameter("projectedFeatureDimension", projectedFeatureDimension)
+            .yields();
+
+        assertError(query, "Value for `projectedFeatureDimension` was `" + projectedFeatureDimension);
     }
 }

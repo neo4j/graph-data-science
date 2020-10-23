@@ -110,7 +110,8 @@ class CypherMapWrapperTest {
 
         assertEquals(String.format(
             Locale.ENGLISH,
-            "Value for `value` must be within %s%.2f, %.2f%s.",
+            "Value for `value` was `%s`, but must be within the range %s%.2f, %.2f%s.",
+            value,
             minInclusive ? "[" : "(",
             min,
             max,
@@ -137,7 +138,8 @@ class CypherMapWrapperTest {
 
         assertEquals(String.format(
             Locale.ENGLISH,
-            "Value for `value` must be within %s%d, %d%s.",
+            "Value for `value` was `%s`, but must be within the range %s%d, %d%s.",
+            value,
             minInclusive ? "[" : "(",
             min,
             max,

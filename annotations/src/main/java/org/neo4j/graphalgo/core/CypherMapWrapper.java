@@ -257,7 +257,7 @@ public final class CypherMapWrapper {
         boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
 
         if (!meetsLowerBound || !meetsUpperBound) {
-            throw outOfRangeError(key, Integer.toString(min), Integer.toString(max), minInclusive, maxInclusive);
+            throw outOfRangeError(key, value, Integer.toString(min), Integer.toString(max), minInclusive, maxInclusive);
         }
 
         return value;
@@ -277,6 +277,7 @@ public final class CypherMapWrapper {
         if (!meetsLowerBound || !meetsUpperBound) {
             throw outOfRangeError(
                 key,
+                value,
                 String.format(Locale.ENGLISH, "%.2f", min),
                 String.format(Locale.ENGLISH, "%.2f", max),
                 minInclusive,
@@ -501,6 +502,7 @@ public final class CypherMapWrapper {
 
     private static IllegalArgumentException outOfRangeError(
         String key,
+        Number value,
         String min,
         String max,
         boolean minInclusive,
@@ -508,8 +510,9 @@ public final class CypherMapWrapper {
     ) {
         return new IllegalArgumentException(String.format(
             Locale.ENGLISH,
-            "Value for `%s` must be within %s%s, %s%s.",
+            "Value for `%s` was `%s`, but must be within the range %s%s, %s%s.",
             key,
+            value,
             minInclusive ? "[" : "(",
             min,
             max,
