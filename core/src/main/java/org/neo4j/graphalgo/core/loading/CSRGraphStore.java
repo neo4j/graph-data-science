@@ -111,7 +111,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyMapping.propertyKey(),
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue()), // TODO: check for other default values like double fallback value
+                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
                     propertyMapping.aggregation() == Aggregation.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.aggregation())
                 )
             ));
