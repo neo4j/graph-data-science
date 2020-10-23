@@ -162,6 +162,14 @@ public interface GraphSageTrainConfig extends
                 "GraphSage requires at least one property. Either `featureProperties` or `degreeAsProperty` must be set."
             );
         }
+        projectedFeatureDimension().ifPresent(value -> CypherMapWrapper.validateIntegerRange(
+            "projectedFeatureDimension",
+            value,
+            1,
+            Integer.MAX_VALUE,
+            true,
+            true
+        ));
     }
 
     static GraphSageTrainConfig of(
