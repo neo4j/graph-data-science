@@ -49,7 +49,7 @@ class GraphSageTrainConfigTest {
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
                 "degreeAsProperty", true,
-                "projectedFeatureSize", 42
+                "projectedFeatureDimension", 42
             ))
         );
         assertTrue(multiLabelConfig.isMultiLabel());

@@ -91,7 +91,7 @@ class GraphSageEmbeddingsGeneratorTest {
             .modelName(MODEL_NAME)
             .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(EMBEDDING_DIMENSION)
-            .projectedFeatureSize(5)
+            .projectedFeatureDimension(5)
             .build();
 
         var trainer = new MultiLabelGraphSageTrain(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty());
