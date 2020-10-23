@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_SIZE;
+import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_DIMENSION;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
@@ -139,7 +139,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         String train = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("projectedFeatureSize", 5)
+            .addParameter("projectedFeatureDimension", 5)
             .addParameter("nodePropertyNames", List.of("a1", "a2", "b1", "b2"))
             .addParameter("embeddingDimension", 64)
             .addParameter("modelName", modelName)
@@ -269,16 +269,16 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals(expectedFail, throwable.getMessage());
     }
 
-    @ParameterizedTest(name = "projected feature size = {0}")
+    @ParameterizedTest(name = "projected feature dimension = {0}")
     @MethodSource("parameters")
-    void shouldValidateLabelsAndProperties(int projectedFeatureSize, String expectedMessage) {
+    void shouldValidateLabelsAndProperties(int projectedFeatureDimension, String expectedMessage) {
         var proc = new GraphSageTrainProc();
         var config = GraphSageTrainConfig.of(getUsername(), Optional.empty(), Optional.empty(),
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
                     "nodePropertyNames", List.of("foo"),
-                    "projectedFeatureSize", projectedFeatureSize
+                    "projectedFeatureDimension", projectedFeatureDimension
                 )
             )
         );
@@ -296,7 +296,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
     static Stream<Arguments> parameters() {
         return Stream.of(
             Arguments.of(
-                PROJECTED_FEATURE_SIZE,
+                PROJECTED_FEATURE_DIMENSION,
                 "Node properties [foo] not found in graph with node properties: [] in all node labels: ['__ALL__']"
             ), Arguments.of(
                 5,
