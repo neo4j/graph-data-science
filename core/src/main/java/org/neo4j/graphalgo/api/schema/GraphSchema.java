@@ -64,8 +64,8 @@ public interface GraphSchema {
             .build();
     }
 
-    static <PS> String forPropertySchema(PS propertySchema) {
-        return propertySchema.toString();
+    static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
+        return propertySchema.valueType().cypherName(); // TODO: add default value and aggregation
     }
 
     static GraphSchema empty() {

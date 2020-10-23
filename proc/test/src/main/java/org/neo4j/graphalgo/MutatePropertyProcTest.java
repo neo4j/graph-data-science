@@ -71,7 +71,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, R
         assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
     }
 
-    default boolean containsMutateProperty(Map<?, Map<String, PropertySchema>> entitySchema) {
+    default <PS extends PropertySchema> boolean containsMutateProperty(Map<?, Map<String, PS>> entitySchema) {
         return entitySchema
             .values()
             .stream()
