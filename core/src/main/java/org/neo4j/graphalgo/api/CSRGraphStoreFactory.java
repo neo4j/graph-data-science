@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
@@ -54,7 +56,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
     ) {
         int relTypeCount = dimensions.relationshipTypeTokens().size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
             AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
@@ -76,10 +78,10 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
             PropertyMappings propertyMappings = projection.properties();
             if (!propertyMappings.isEmpty()) {
-                Map<String, Relationships.Properties> propertyMap = propertyMappings
+                Map<PropertyMapping, Relationships.Properties> propertyMap = propertyMappings
                     .enumerate()
                     .collect(Collectors.toMap(
-                        propertyIndexAndMapping -> propertyIndexAndMapping.getTwo().propertyKey(),
+                        IntObjectPair::getTwo,
                         propertyIndexAndMapping -> ImmutableProperties.of(
                             relationshipsBuilder.properties(propertyIndexAndMapping.getOne()),
                             relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),

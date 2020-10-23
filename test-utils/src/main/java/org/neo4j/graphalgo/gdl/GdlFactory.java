@@ -137,7 +137,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             .filter(entry -> entry.getValue().getOne().isPresent())
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> Map.of(entry.getValue().getOne().get(), entry.getValue().getTwo().properties().get())
+                entry -> Map.of(PropertyMapping.of(entry.getValue().getOne().get()), entry.getValue().getTwo().properties().get())
             ));
         CSRGraphStore graphStore = CSRGraphStore.of(
             databaseId,

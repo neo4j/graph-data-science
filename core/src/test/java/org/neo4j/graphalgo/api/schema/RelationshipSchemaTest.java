@@ -21,8 +21,11 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +33,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RelationshipSchemaTest {
+
+    @Test
+    void testDefaultValuesAndAggregation() {
+        var relType = RelationshipType.of("BAR");
+
+        DefaultValue defaultValue = DefaultValue.of(42.0D);
+        Aggregation aggregation = Aggregation.COUNT;
+        var relationshipSchema = RelationshipSchema.builder()
+            .addProperty(
+                relType,
+                "baz",
+                RelationshipPropertySchema.of(
+                    ValueType.DOUBLE,
+                    Optional.of(defaultValue),
+                    Optional.of(aggregation)
+                )
+            ).build();
+
+        RelationshipPropertySchema relationshipPropertySchema = relationshipSchema.properties().get(relType).get("baz");
+        assertTrue(relationshipPropertySchema.maybeDefaultValue().isPresent());
+        assertTrue(relationshipPropertySchema.maybeAggregation().isPresent());
+
+        assertEquals(defaultValue, relationshipPropertySchema.maybeDefaultValue().get());
+        assertEquals(aggregation, relationshipPropertySchema.maybeAggregation().get());
+    }
 
     @Test
     void testFiltering() {

@@ -17,46 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
 @ValueClass
-public interface RelationshipProperty {
-
-    String key();
-
-    NumberType type();
-
-    GraphStore.PropertyState state();
-
-    Relationships.Properties values();
-
-    Optional<DefaultValue> maybeDefaultValue();
+public interface RelationshipPropertySchema extends NodePropertySchema {
 
     Optional<Aggregation> maybeAggregation();
 
-    static RelationshipProperty of(
-        String key,
-        NumberType type,
-        GraphStore.PropertyState state,
-        Relationships.Properties values
-    ) {
-        return ImmutableRelationshipProperty.of(key, type, state, values, Optional.empty(), Optional.empty());
+    static RelationshipPropertySchema of(ValueType valueType) {
+        return ImmutableRelationshipPropertySchema.of(valueType, Optional.empty(), Optional.empty());
     }
 
-    static RelationshipProperty of(
-        String key,
-        NumberType type,
-        GraphStore.PropertyState state,
-        Relationships.Properties values,
+    static RelationshipPropertySchema of(
+        ValueType valueType,
         Optional<DefaultValue> maybeDefaultValue,
         Optional<Aggregation> maybeAggregation
     ) {
-        return ImmutableRelationshipProperty.of(key, type, state, values, maybeDefaultValue, maybeAggregation);
+        return ImmutableRelationshipPropertySchema.of(valueType, maybeDefaultValue, maybeAggregation);
     }
+
 }

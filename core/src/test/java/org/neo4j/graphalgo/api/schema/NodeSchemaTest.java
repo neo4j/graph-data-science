@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Optional;
 import java.util.Set;
@@ -39,7 +38,6 @@ class NodeSchemaTest {
         var label = NodeLabel.of("Foo");
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
-        Aggregation aggregation = Aggregation.COUNT;
         var nodeSchema = NodeSchema.builder()
             .addProperty(
                 label,

@@ -28,10 +28,13 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +57,8 @@ class GraphSchemaIntegrationTest extends BaseTest {
     }
 
     @ParameterizedTest
-    @MethodSource(value = "propertyMappingsAndExpectedResults")
-    void computesCorrectSchema(NodePropertySchema expectedSchema, PropertyMapping propertyMapping) {
+    @MethodSource(value = "nodePropertyMappingsAndExpectedResults")
+    void computesCorrectNodeSchema(NodePropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = new StoreLoaderBuilder()
             .api(db)
             .addNodeProjection(
@@ -70,7 +73,24 @@ class GraphSchemaIntegrationTest extends BaseTest {
         assertEquals(expectedSchema, graph.schema().nodeSchema().properties().get(NodeLabel.of("Node")).get("prop"));
     }
 
-    private static Stream<Arguments> propertyMappingsAndExpectedResults() {
+    @ParameterizedTest
+    @MethodSource(value = "relationshipPropertyMappingsAndExpectedResults")
+    void computesCorrectRelationshipSchema(RelationshipPropertySchema expectedSchema, PropertyMapping propertyMapping) {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .addRelationshipProjection(
+                RelationshipProjection.builder()
+                    .type("REL")
+                    .properties(PropertyMappings.of(List.of(propertyMapping)))
+                    .build()
+            )
+            .build()
+            .graph();
+
+        assertEquals(expectedSchema, graph.schema().relationshipSchema().properties().get(RelationshipType.of("REL")).get("relProp"));
+    }
+
+    private static Stream<Arguments> nodePropertyMappingsAndExpectedResults() {
         return Stream.of(
             Arguments.of(
                 NodePropertySchema.of(ValueType.LONG),
@@ -79,6 +99,19 @@ class GraphSchemaIntegrationTest extends BaseTest {
             Arguments.of(
                 NodePropertySchema.of(ValueType.LONG, Optional.of(DefaultValue.of(1337))),
                 PropertyMapping.of("prop", 1337)
+            )
+        );
+    }
+
+    private static Stream<Arguments> relationshipPropertyMappingsAndExpectedResults() {
+        return Stream.of(
+            Arguments.of(
+                RelationshipPropertySchema.of(ValueType.DOUBLE),
+                PropertyMapping.of("relProp")
+            ),
+            Arguments.of(
+                RelationshipPropertySchema.of(ValueType.DOUBLE, Optional.of(DefaultValue.of(1337.0D)), Optional.of(Aggregation.MAX)),
+                PropertyMapping.of("relProp", 1337.0D, Aggregation.MAX)
             )
         );
     }
