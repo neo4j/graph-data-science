@@ -23,6 +23,7 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
@@ -49,7 +50,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
         int projectedFeatureDimension,
         NodeLabel[] labels
     ) {
-        super(new ArrayList<>(weightsByLabel.values()), new int[]{nodeIds.length, projectedFeatureDimension});
+        super(new ArrayList<>(weightsByLabel.values()), Dimensions.matrix(nodeIds.length, projectedFeatureDimension));
         this.nodeIds = nodeIds;
         this.features = features;
         this.weightsByLabel = weightsByLabel;
