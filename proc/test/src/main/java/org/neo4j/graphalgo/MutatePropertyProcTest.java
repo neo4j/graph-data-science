@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -70,11 +71,11 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, R
         assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
     }
 
-    default boolean containsMutateProperty(Map<?, Map<String, ValueType>> entitySchema) {
+    default boolean containsMutateProperty(Map<?, Map<String, PropertySchema>> entitySchema) {
         return entitySchema
             .values()
             .stream()
-            .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()) == mutatePropertyType());
+            .anyMatch(props -> props.containsKey(mutateProperty()) && props.get(mutateProperty()).valueType() == mutatePropertyType());
     }
 
     @Test

@@ -116,6 +116,6 @@ class RelationshipSchemaTest {
         );
         assertTrue(ex
             .getMessage()
-            .contains("Combining schema entries with value type {bar=DOUBLE} and {bar=LONG} is not supported."));
+            .contains("Combining schema entries with value type {bar=PropertySchema{valueType=DOUBLE}} and {bar=PropertySchema{valueType=LONG}} is not supported."));
     }
 }

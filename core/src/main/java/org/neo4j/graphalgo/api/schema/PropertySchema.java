@@ -27,5 +27,7 @@ public interface PropertySchema {
 
     ValueType valueType();
 
-
+    static PropertySchema of(ValueType valueType) {
+        return ImmutablePropertySchema.of(valueType);
+    }
 }

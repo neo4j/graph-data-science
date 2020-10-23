@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extends ElementIdentifier, PS> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extends ElementIdentifier, PS extends PropertySchema> {
 
     Map<I, Map<String, PS>> properties();
 
@@ -73,7 +73,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extend
                 Map.Entry::getKey,
                 Map.Entry::getValue,
                 (leftType, rightType) -> {
-                    if (leftType != rightType) {
+                    if (leftType.valueType() != rightType.valueType()) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Combining schema entries with value type %s and %s is not supported.",
                             left,

@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -593,7 +594,7 @@ public final class CSRGraphStore implements GraphStore {
 
         nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
-                nodePropsBuilder.addProperty(label, propertyName, nodeProperty.type());
+                nodePropsBuilder.addProperty(label, propertyName, PropertySchema.of(nodeProperty.type()));
             }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
@@ -610,7 +611,7 @@ public final class CSRGraphStore implements GraphStore {
                 relationshipPropsBuilder.addProperty(
                     type,
                     propertyName,
-                    ValueType.fromNumberType(relationshipProperty.type())
+                    PropertySchema.of(ValueType.fromNumberType(relationshipProperty.type()))
                 );
             });
         });
