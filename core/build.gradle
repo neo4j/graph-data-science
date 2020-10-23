@@ -14,9 +14,6 @@ dependencies {
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
 
-    compileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
-
-
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
@@ -24,7 +21,9 @@ dependencies {
             [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
             [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
             [group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core'],
-            [group: 'io.jsonwebtoken', name: 'jjwt-api', version: ver.'jjwt']
+            [group: 'io.jsonwebtoken', name: 'jjwt-api', version: ver.'jjwt'],
+            [group: 'org.ejml', name: 'ejml-core', version: ver.'ejml'],
+            [group: 'org.ejml', name: 'ejml-ddense', version: ver.ejml],
     )
 
     implementation(
@@ -44,8 +43,6 @@ dependencies {
     testCompileOnly group: 'org.immutables',    name: 'builder',            version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
     testCompileOnly group: 'org.neo4j',         name: 'neo4j',              version: ver.'neo4j'
-    testCompileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
-    testCompileOnly         group: 'org.ejml',                 name: 'ejml-ddense',           version: ver.'ejml'
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

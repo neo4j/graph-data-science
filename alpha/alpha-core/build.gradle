@@ -15,9 +15,6 @@ dependencies {
 
     compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
 
-    testCompileOnly         group: 'org.ejml',                 name: 'ejml-core',           version: ver.'ejml'
-    testCompileOnly         group: 'org.ejml',                 name: 'ejml-ddense',           version: ver.'ejml'
-
     testImplementation project(':test-utils')
     testImplementation project(':core')
 }
