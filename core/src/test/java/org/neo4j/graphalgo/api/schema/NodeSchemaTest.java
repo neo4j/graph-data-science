@@ -21,8 +21,11 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,6 +33,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodeSchemaTest {
+
+    @Test
+    void testDefaultValuesAndAggregation() {
+        var label = NodeLabel.of("Foo");
+
+        DefaultValue defaultValue = DefaultValue.of(42.0D);
+        Aggregation aggregation = Aggregation.COUNT;
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(
+                label,
+                "baz",
+                NodePropertySchema.of(
+                    ValueType.DOUBLE,
+                    Optional.of(defaultValue),
+                    Optional.of(aggregation)
+                )
+            ).build();
+
+        NodePropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
+        assertTrue(nodePropertySchema.maybeAggregation().isPresent());
+        assertTrue(nodePropertySchema.maybeDefaultValue().isPresent());
+
+        assertEquals(defaultValue, nodePropertySchema.maybeDefaultValue().get());
+        assertEquals(aggregation, nodePropertySchema.maybeAggregation().get());
+    }
 
     @Test
     void testFiltering() {
@@ -115,6 +143,6 @@ class NodeSchemaTest {
         );
         assertTrue(ex
             .getMessage()
-            .contains("Combining schema entries with value type {bar=PropertySchema{valueType=DOUBLE}} and {bar=PropertySchema{valueType=LONG}} is not supported."));
+            .contains("Combining schema entries with value type {bar=DOUBLE} and {bar=LONG} is not supported."));
     }
 }

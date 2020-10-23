@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
+
+import java.util.Optional;
 
 @ValueClass
 public
@@ -33,12 +36,30 @@ interface NodeProperty {
 
     NodeProperties values();
 
+    Optional<DefaultValue> maybeDefaultValue();
+
+    Optional<Aggregation> maybeAggregation();
+
     @Configuration.Ignore
     default ValueType type() {
         return values().valueType();
     };
 
-    static NodeProperty of(String key, GraphStore.PropertyState origin, NodeProperties values) {
-        return ImmutableNodeProperty.of(key, origin, values);
+    static NodeProperty of(
+        String key,
+        GraphStore.PropertyState origin,
+        NodeProperties values
+    ) {
+        return ImmutableNodeProperty.of(key, origin, values, Optional.empty(), Optional.empty());
+    }
+
+    static NodeProperty of(
+        String key,
+        GraphStore.PropertyState origin,
+        NodeProperties values,
+        Optional<DefaultValue> maybeDefaultValue,
+        Optional<Aggregation> maybeAggregation
+    ) {
+        return ImmutableNodeProperty.of(key, origin, values, maybeDefaultValue, maybeAggregation);
     }
 }

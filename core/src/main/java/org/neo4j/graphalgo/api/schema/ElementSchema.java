@@ -76,8 +76,8 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extend
                     if (leftType.valueType() != rightType.valueType()) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Combining schema entries with value type %s and %s is not supported.",
-                            left,
-                            right
+                            left.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType())),
+                            right.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().valueType()))
                         ));
                     } else {
                         return leftType;

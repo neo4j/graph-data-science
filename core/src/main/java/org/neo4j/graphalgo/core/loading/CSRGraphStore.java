@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -38,6 +41,7 @@ import org.neo4j.graphalgo.api.schema.NodePropertySchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -92,7 +96,7 @@ public final class CSRGraphStore implements GraphStore {
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         IdMap nodes,
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties,
         int concurrency,
@@ -101,9 +105,15 @@ public final class CSRGraphStore implements GraphStore {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
         nodeProperties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
-            propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
-                propertyKey,
-                NodeProperty.of(propertyKey, PropertyState.PERSISTENT, propertyValues)
+            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putNodeProperty(
+                propertyMapping.propertyKey(),
+                NodeProperty.of(
+                    propertyMapping.propertyKey(),
+                    PropertyState.PERSISTENT,
+                    propertyValues,
+                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue()), // TODO: check for other default values like double fallback value
+                    propertyMapping.aggregation() == Aggregation.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.aggregation())
+                )
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
@@ -141,12 +151,19 @@ public final class CSRGraphStore implements GraphStore {
 
         Map<RelationshipType, Relationships.Topology> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
 
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
             ALL_NODES,
-            graph.availableNodeProperties().stream().collect(toMap(
-                Function.identity(),
-                graph::nodeProperties
+            graph.schema().nodeSchema().properties().values().stream().flatMap(map -> map.entrySet().stream()).collect(toMap(
+                entry -> {
+                    ImmutablePropertyMapping.Builder propertyMappingBuilder = ImmutablePropertyMapping
+                        .builder()
+                        .propertyKey(entry.getKey());
+                    entry.getValue().maybeAggregation().ifPresent(propertyMappingBuilder::aggregation);
+                    entry.getValue().maybeDefaultValue().ifPresent(propertyMappingBuilder::defaultValue);
+                    return propertyMappingBuilder.build();
+                },
+                entry -> graph.nodeProperties(entry.getKey())
             ))
         );
 
@@ -595,7 +612,14 @@ public final class CSRGraphStore implements GraphStore {
 
         nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
-                nodePropsBuilder.addProperty(label, propertyName, NodePropertySchema.of(nodeProperty.type()));
+                nodePropsBuilder.addProperty(
+                    label,
+                    propertyName,
+                    NodePropertySchema.of(
+                        nodeProperty.type(),
+                        nodeProperty.maybeDefaultValue(),
+                        nodeProperty.maybeAggregation()
+                    ));
             }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
