@@ -53,7 +53,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     class Builder extends ImmutableNodeSchema.Builder {
 
         public Builder addProperty(NodeLabel key, String propertyName, ValueType valueType) {
-            return addProperty(key, propertyName, PropertySchema.of(valueType));
+            return addProperty(key, propertyName, PropertySchema.of(valueType, valueType.defaultFallbackValue()));
         }
 
         public Builder addProperty(NodeLabel key, String propertyName, PropertySchema propertySchema) {

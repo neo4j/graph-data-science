@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,17 +45,16 @@ class RelationshipSchemaTest {
                 "baz",
                 RelationshipPropertySchema.of(
                     ValueType.DOUBLE,
-                    Optional.of(defaultValue),
-                    Optional.of(aggregation)
+                    defaultValue,
+                    aggregation
                 )
             ).build();
 
         RelationshipPropertySchema relationshipPropertySchema = relationshipSchema.properties().get(relType).get("baz");
-        assertTrue(relationshipPropertySchema.maybeDefaultValue().isPresent());
-        assertTrue(relationshipPropertySchema.maybeAggregation().isPresent());
+        assertTrue(relationshipPropertySchema.defaultValue().isUserDefined());
 
-        assertEquals(defaultValue, relationshipPropertySchema.maybeDefaultValue().get());
-        assertEquals(aggregation, relationshipPropertySchema.maybeAggregation().get());
+        assertEquals(defaultValue, relationshipPropertySchema.defaultValue());
+        assertEquals(aggregation, relationshipPropertySchema.aggregation());
     }
 
     @Test

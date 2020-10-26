@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.values.storable.Value;
@@ -111,7 +112,7 @@ public class CypherNodePropertyImporter {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), DefaultValue.of(Double.NaN)),
+                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), ValueType.DOUBLE.defaultFallbackValue()),
                     builderEntry -> builderEntry.getValue().build()
                 ))
             ));

@@ -23,8 +23,6 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
-import java.util.Optional;
-
 @ValueClass
 public
 interface NodeProperty {
@@ -35,7 +33,7 @@ interface NodeProperty {
 
     NodeProperties values();
 
-    Optional<DefaultValue> maybeDefaultValue();
+    DefaultValue defaultValue();
 
     @Configuration.Ignore
     default ValueType type() {
@@ -47,15 +45,15 @@ interface NodeProperty {
         GraphStore.PropertyState origin,
         NodeProperties values
     ) {
-        return ImmutableNodeProperty.of(key, origin, values, Optional.empty());
+        return ImmutableNodeProperty.of(key, origin, values, values.valueType().defaultFallbackValue());
     }
 
     static NodeProperty of(
         String key,
         GraphStore.PropertyState origin,
         NodeProperties values,
-        Optional<DefaultValue> maybeDefaultValue
+        DefaultValue defaultValue
     ) {
-        return ImmutableNodeProperty.of(key, origin, values, maybeDefaultValue);
+        return ImmutableNodeProperty.of(key, origin, values, defaultValue);
     }
 }

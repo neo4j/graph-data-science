@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
-import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -111,7 +110,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyMapping.propertyKey(),
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue())
+                    propertyMapping.defaultValue().isUserDefined() ? propertyMapping.defaultValue() : propertyValues.valueType().defaultFallbackValue()
                 )
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
@@ -127,8 +126,8 @@ public final class CSRGraphStore implements GraphStore {
                     NumberType.FLOATING_POINT,
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue() == DefaultValue.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.defaultValue()),
-                    propertyMapping.aggregation() == Aggregation.DEFAULT ? Optional.empty() : Optional.of(propertyMapping.aggregation())
+                    propertyMapping.defaultValue().isUserDefined() ? propertyMapping.defaultValue() : ValueType.fromNumberType(NumberType.FLOATING_POINT).defaultFallbackValue(),
+                    propertyMapping.aggregation()
                 )
             ));
             relationshipPropertyStores.put(relationshipType, builder.build());
@@ -166,7 +165,7 @@ public final class CSRGraphStore implements GraphStore {
                     ImmutablePropertyMapping.Builder propertyMappingBuilder = ImmutablePropertyMapping
                         .builder()
                         .propertyKey(entry.getKey());
-                    entry.getValue().maybeDefaultValue().ifPresent(propertyMappingBuilder::defaultValue);
+                    propertyMappingBuilder.defaultValue(entry.getValue().defaultValue());
                     return propertyMappingBuilder.build();
                 },
                 entry -> graph.nodeProperties(entry.getKey())
@@ -189,16 +188,15 @@ public final class CSRGraphStore implements GraphStore {
                 .get();
 
             String propertyKey = relationshipProperty.get();
-            ImmutablePropertyMapping.Builder propertyMappingBuilder = ImmutablePropertyMapping
-                .builder()
-                .propertyKey(propertyKey);
-
-            relationshipPropertySchema.maybeDefaultValue().ifPresent(propertyMappingBuilder::defaultValue);
-            relationshipPropertySchema.maybeAggregation().ifPresent(propertyMappingBuilder::aggregation);
+            PropertyMapping propertyMapping = PropertyMapping.of(
+                propertyKey,
+                relationshipPropertySchema.defaultValue(),
+                relationshipPropertySchema.aggregation()
+            );
 
             relationshipProperties = singletonMap(
                 relationshipType,
-                singletonMap(propertyMappingBuilder.build(), relationships.properties().get())
+                singletonMap(propertyMapping, relationships.properties().get())
             );
         }
 
@@ -515,7 +513,14 @@ public final class CSRGraphStore implements GraphStore {
             }
             return builder.putIfAbsent(
                 propertyKey,
-                RelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, properties)
+                RelationshipProperty.of(
+                    propertyKey,
+                    propertyType,
+                    PropertyState.TRANSIENT,
+                    properties,
+                    ValueType.fromNumberType(propertyType).defaultFallbackValue(),
+                    Aggregation.NONE
+                )
             ).build();
         });
     }
@@ -645,7 +650,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyName,
                     PropertySchema.of(
                         nodeProperty.type(),
-                        nodeProperty.maybeDefaultValue()
+                        nodeProperty.defaultValue()
                     ));
             }));
 
@@ -665,8 +670,8 @@ public final class CSRGraphStore implements GraphStore {
                     propertyName,
                     RelationshipPropertySchema.of(
                         ValueType.fromNumberType(relationshipProperty.type()),
-                        relationshipProperty.maybeDefaultValue(),
-                        relationshipProperty.maybeAggregation()
+                        relationshipProperty.defaultValue(),
+                        relationshipProperty.aggregation()
                     )
                 );
             });

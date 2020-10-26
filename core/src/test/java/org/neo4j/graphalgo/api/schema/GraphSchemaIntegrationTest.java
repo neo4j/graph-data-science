@@ -96,7 +96,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
                 PropertyMapping.of("prop")
             ),
             Arguments.of(
-                PropertySchema.of(ValueType.LONG, Optional.of(DefaultValue.of(1337))),
+                PropertySchema.of(ValueType.LONG, DefaultValue.of(1337)),
                 PropertyMapping.of("prop", 1337)
             )
         );
@@ -109,8 +109,8 @@ class GraphSchemaIntegrationTest extends BaseTest {
                 PropertyMapping.of("relProp")
             ),
             Arguments.of(
-                RelationshipPropertySchema.of(ValueType.DOUBLE, Optional.of(DefaultValue.of(1337.0D)), Optional.of(Aggregation.MAX)),
-                PropertyMapping.of("relProp", 1337.0D, Aggregation.MAX)
+                RelationshipPropertySchema.of(ValueType.DOUBLE, DefaultValue.of(1337.0D), Aggregation.MAX),
+                PropertyMapping.of("relProp", DefaultValue.of(1337.0D), Aggregation.MAX)
             )
         );
     }

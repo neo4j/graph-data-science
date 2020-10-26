@@ -24,23 +24,23 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
-import java.util.Optional;
-
 @ValueClass
 public interface RelationshipPropertySchema extends PropertySchema {
 
-    Optional<Aggregation> maybeAggregation();
+    Aggregation aggregation();
 
-    static RelationshipPropertySchema of(ValueType valueType) {
-        return ImmutableRelationshipPropertySchema.of(valueType, Optional.empty(), Optional.empty());
+    static RelationshipPropertySchema of(
+        ValueType valueType
+    ) {
+        return ImmutableRelationshipPropertySchema.of(valueType, valueType.defaultFallbackValue(), Aggregation.DEFAULT);
     }
 
     static RelationshipPropertySchema of(
         ValueType valueType,
-        Optional<DefaultValue> maybeDefaultValue,
-        Optional<Aggregation> maybeAggregation
+        DefaultValue defaultValue,
+        Aggregation aggregation
     ) {
-        return ImmutableRelationshipPropertySchema.of(valueType, maybeDefaultValue, maybeAggregation);
+        return ImmutableRelationshipPropertySchema.of(valueType, defaultValue, aggregation);
     }
 
 }

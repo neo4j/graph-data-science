@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,14 +43,13 @@ class NodeSchemaTest {
                 "baz",
                 PropertySchema.of(
                     ValueType.DOUBLE,
-                    Optional.of(defaultValue)
+                    defaultValue
                 )
             ).build();
 
         PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
-        assertTrue(nodePropertySchema.maybeDefaultValue().isPresent());
-
-        assertEquals(defaultValue, nodePropertySchema.maybeDefaultValue().get());
+        assertTrue(nodePropertySchema.defaultValue().isUserDefined());
+        assertEquals(defaultValue, nodePropertySchema.defaultValue());
     }
 
     @Test

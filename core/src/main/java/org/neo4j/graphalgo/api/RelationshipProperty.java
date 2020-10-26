@@ -23,8 +23,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.values.storable.NumberType;
 
-import java.util.Optional;
-
 @ValueClass
 public interface RelationshipProperty {
 
@@ -36,27 +34,18 @@ public interface RelationshipProperty {
 
     Relationships.Properties values();
 
-    Optional<DefaultValue> maybeDefaultValue();
+    DefaultValue defaultValue();
 
-    Optional<Aggregation> maybeAggregation();
-
-    static RelationshipProperty of(
-        String key,
-        NumberType type,
-        GraphStore.PropertyState state,
-        Relationships.Properties values
-    ) {
-        return ImmutableRelationshipProperty.of(key, type, state, values, Optional.empty(), Optional.empty());
-    }
+    Aggregation aggregation();
 
     static RelationshipProperty of(
         String key,
         NumberType type,
         GraphStore.PropertyState state,
         Relationships.Properties values,
-        Optional<DefaultValue> maybeDefaultValue,
-        Optional<Aggregation> maybeAggregation
+        DefaultValue defaultValue,
+        Aggregation aggregation
     ) {
-        return ImmutableRelationshipProperty.of(key, type, state, values, maybeDefaultValue, maybeAggregation);
+        return ImmutableRelationshipProperty.of(key, type, state, values, defaultValue, aggregation);
     }
 }
