@@ -30,12 +30,21 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 @ServiceProvider
 public class EnterpriseLicensingSettings implements SettingsDeclaration {
 
-    private static final String ENTERPRISE_LICENSE_FILE = "gds.enterprise.licenseFile";
+    public static final String ENTERPRISE_LICENSED = "gds.enterprise.licensed";
+    public static final String ENTERPRISE_LICENSE_FILE = "gds.enterprise.licenseFile";
 
     @Description("Sets the location of the file that contains the key to unlock the Enterprise Edition of the Neo4j Graph Data Science library")
     public static Setting<String> enterpriseLicenseFile = newBuilder(
         ENTERPRISE_LICENSE_FILE,
         SettingValueParsers.STRING,
         null
+    ).build();
+
+    @Description("Deprecated. Used to unlock the Enterprise Edition of the Neo4j Graph Data Science library")
+    @Deprecated
+    public static Setting<Boolean> enterpriseUnlocked = newBuilder(
+        ENTERPRISE_LICENSED,
+        SettingValueParsers.BOOL,
+        false
     ).build();
 }

@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.neo4j.graphalgo.compat.EnterpriseLicensingSettings.ENTERPRISE_LICENSED;
+import static org.neo4j.graphalgo.compat.EnterpriseLicensingSettings.ENTERPRISE_LICENSE_FILE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ServiceProvider
@@ -73,6 +75,15 @@ public final class EnterpriseLicensingExtension extends ExtensionFactory<Enterpr
                     } else {
                         gdsEdition.setToInvalidLicense(checkResult.message());
                     }
+                } else if (dependencies.config().get(Settings.enterpriseUnlocked())) {
+                    gdsEdition.setToInvalidLicense(
+                        formatWithLocale(
+                            "The '%s' setting was removed. Use '%s' instead to set the license key.",
+                            ENTERPRISE_LICENSED,
+                            ENTERPRISE_LICENSE_FILE
+                        )
+                    );
+                    return;
                 }
             }
 

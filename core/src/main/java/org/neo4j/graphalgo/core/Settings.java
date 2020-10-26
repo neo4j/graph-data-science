@@ -49,6 +49,11 @@ public final class Settings {
         return EnterpriseLicensingSettings.enterpriseLicenseFile;
     }
 
+    @Deprecated
+    public static Setting<Boolean> enterpriseUnlocked() {
+        return EnterpriseLicensingSettings.enterpriseUnlocked;
+    }
+
     public static Setting<Boolean> boltEnabled() {
         return BoltConnector.enabled;
     }
