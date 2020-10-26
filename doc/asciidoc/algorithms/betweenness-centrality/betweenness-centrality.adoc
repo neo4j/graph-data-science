@@ -282,13 +282,10 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-betweenness-centrality-examples]]
 == Examples
 
-In this section we will show examples of executing the Betweenness Centrality algorithm on a concrete graph.
-The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
-We will do this on a small social network graph of a handful nodes connected in a particular pattern.
-The example graph looks like this:
-
-[[algorithms-betweenness-centrality-examples-graph]]
-image::betweenness_centrality.png[]
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: betweenness_centrality.png
+include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
@@ -403,7 +400,7 @@ ORDER BY name ASC
 --
 
 We note that the 'Carol' node has the highest score, followed by the 'Frank' node.
-Studying the <<algorithms-betweenness-centrality-examples-graph, example graph>> we can see that these nodes are in bottleneck positions in the graph.
+Studying the <<algorithms-betweenness-centrality-examples, example graph>> we can see that these nodes are in bottleneck positions in the graph.
 The 'Carol' node connects the 'Alice' and 'Bob' nodes to all other nodes, which increases its score.
 In particular, the shortest path from 'Alice' or 'Bob' to any other reachable node passes through 'Carol'.
 Similarly, all shortest paths that lead to the 'Gale' node passes through the 'Frank' node.

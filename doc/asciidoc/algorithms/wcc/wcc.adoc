@@ -245,13 +245,10 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-wcc-examples]]
 == Examples
 
-In this section we will show examples of executing the Weakly Connected Components algorithm on a concrete graph.
-The intention is to illustrate what the results look like and to provide a guide in how to make use of the algorithm in a real setting.
-We will do this on a small social network graph of a handful nodes connected in a particular pattern.
-The example graph looks like this:
-
-[[algorithms-wcc-examples-graph]]
-image::wcc-graph.svg[align="center"]
+:algorithm-name: {algorithm}
+:graph-description: user network
+:image-file: wcc-graph.svg
+include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
@@ -345,7 +342,7 @@ ORDER BY componentId, name
 --
 
 The result shows that the algorithm identifies two components.
-This can be verified in the <<algorithms-wcc-examples-graph, example graph>>.
+This can be verified in the <<algorithms-wcc-examples, example graph>>.
 
 The default behaviour of the algorithm is to run `unweighted`, e.g. without using `relationship` weights.
 The `weighted` option will be demonstrated in <<algorithms-wcc-examples-weighted>>
@@ -373,7 +370,7 @@ YIELD componentCount
 |===
 --
 
-The result shows that `myGraph` has two components and this can be verified by looking at the <<algorithms-wcc-examples-graph, example graph>>.
+The result shows that `myGraph` has two components and this can be verified by looking at the <<algorithms-wcc-examples, example graph>>.
 
 
 [[algorithms-wcc-examples-mutate]]
