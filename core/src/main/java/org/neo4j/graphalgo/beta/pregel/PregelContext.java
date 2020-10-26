@@ -215,6 +215,15 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
         }
 
         /**
+         * Returns the node value for the given node-id and node schema key.
+         *
+         * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a long array
+         */
+        public long[] longArrayNodeValue(String key, long id) {
+            return computeStep.longArrayNodeValue(key, id);
+        }
+
+        /**
          * Returns the node value for the given node schema key.
          *
          * @throws java.lang.IllegalArgumentException if the key does not exist or the value is not a double array
