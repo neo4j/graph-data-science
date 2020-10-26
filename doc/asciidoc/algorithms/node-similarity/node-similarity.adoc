@@ -267,29 +267,34 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-node-similarity-examples]]
 == Examples
 
-Consider the graph created by the following Cypher statement:
+:algorithm-name: {algorithm}
+:graph-description: knowledge
+:image-file: node-similarity.svg
+include::../shared/examples-intro.adoc[]
 
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (alice:Person {name: 'Alice'})
-CREATE (bob:Person {name: 'Bob'})
-CREATE (carol:Person {name: 'Carol'})
-CREATE (dave:Person {name: 'Dave'})
-CREATE (eve:Person {name: 'Eve'})
-CREATE (guitar:Instrument {name: 'Guitar'})
-CREATE (synth:Instrument {name: 'Synthesizer'})
-CREATE (bongos:Instrument {name: 'Bongos'})
-CREATE (trumpet:Instrument {name: 'Trumpet'})
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bob:Person {name: 'Bob'}),
+  (carol:Person {name: 'Carol'}),
+  (dave:Person {name: 'Dave'}),
+  (eve:Person {name: 'Eve'}),
+  (guitar:Instrument {name: 'Guitar'}),
+  (synth:Instrument {name: 'Synthesizer'}),
+  (bongos:Instrument {name: 'Bongos'}),
+  (trumpet:Instrument {name: 'Trumpet'}),
 
-CREATE (alice)-[:LIKES]->(guitar)
-CREATE (alice)-[:LIKES]->(synth)
-CREATE (alice)-[:LIKES {strength: 0.5}]->(bongos)
-CREATE (bob)-[:LIKES]->(guitar)
-CREATE (bob)-[:LIKES]->(synth)
-CREATE (carol)-[:LIKES]->(bongos)
-CREATE (dave)-[:LIKES]->(guitar)
-CREATE (dave)-[:LIKES]->(synth)
-CREATE (dave)-[:LIKES]->(bongos);
+  (alice)-[:LIKES]->(guitar),
+  (alice)-[:LIKES]->(synth),
+  (alice)-[:LIKES {strength: 0.5}]->(bongos),
+  (bob)-[:LIKES]->(guitar),
+  (bob)-[:LIKES]->(synth),
+  (carol)-[:LIKES]->(bongos),
+  (dave)-[:LIKES]->(guitar),
+  (dave)-[:LIKES]->(synth),
+  (dave)-[:LIKES]->(bongos);
 ----
 
 This bipartite graph has two node sets, Person nodes and Instrument nodes.
