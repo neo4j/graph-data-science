@@ -350,4 +350,8 @@
     </Match>
     <!-- /Low priority report -->
 
+    <Match>
+        <Bug pattern="UWF_NULL_FIELD"/>
+    </Match>
+
 </FindBugsFilter>
