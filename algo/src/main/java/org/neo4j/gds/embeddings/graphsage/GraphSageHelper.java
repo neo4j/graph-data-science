@@ -138,13 +138,13 @@ public final class GraphSageHelper {
             var maxNodeCount = maxBatchNodeCounts.get(i + 1);
 
             if (i == 0) {
-                var featureSize = config.featuresSize();
+                var featureSize = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
                 MemoryRange firstLayerMemory = MemoryRange.of(
                     sizeOfDoubleArray(minPreviousNodeCount * featureSize),
                     sizeOfDoubleArray(maxPreviousNodeCount * featureSize)
                 );
                 if (isMultiLabel) {
-                    firstLayerMemory.add(MemoryRange.of(sizeOfDoubleArray(featureSize)));
+                    firstLayerMemory = firstLayerMemory.add(MemoryRange.of(sizeOfDoubleArray(config.projectedFeatureDimension())));
                 }
                 aggregatorsBuilder.fixed("firstLayer", firstLayerMemory);
             }

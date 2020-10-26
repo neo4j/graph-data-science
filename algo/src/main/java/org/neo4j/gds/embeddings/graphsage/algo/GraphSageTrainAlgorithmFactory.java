@@ -106,7 +106,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         var isMultiLabel = config.isMultiLabel();
 
         var perNodeFeaturesMemory = MemoryRange.of(
-            sizeOfDoubleArray(isMultiLabel ? config.degreeAsProperty() ? 1 : 0 : config.featuresSize()),
+            sizeOfDoubleArray(isMultiLabel ? config.degreeAsProperty() ? 2 : 1 : config.featuresSize()),
             sizeOfDoubleArray(config.featuresSize())
         );
         var initialFeaturesMemory = HugeObjectArray.memoryEstimation(MemoryEstimations.of("", perNodeFeaturesMemory));
@@ -118,11 +118,11 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
             .field("this.instance", GraphSage.class);
 
         if (isMultiLabel) {
-            var minNumProperties = config.degreeAsProperty() ? 1 : 0;
-            var maxNumProperties = config.featuresSize();
-            var featureSize = config.featuresSize();
-            var minWeightsMemory = sizeOfDoubleArray(featureSize * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(featureSize * maxNumProperties);
+            var minNumProperties = config.degreeAsProperty() ? 2 : 1;
+            var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
+            maxNumProperties++; // Add one for the label
+            var minWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * minNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * maxNumProperties);
             var weightByLabelMemory = MemoryRange.of(minWeightsMemory, maxWeightsMemory).times(labelCount);
 
             estimationsBuilder.fixed("weightsByLabel", weightByLabelMemory);
