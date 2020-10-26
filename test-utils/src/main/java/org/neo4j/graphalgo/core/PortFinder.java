@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
 
 public class PortFinder {
     public static int freePort() {
-        var random = new Random();
+        Random random = new Random();
         return IntStream.concat(
             IntStream.of(1337, 13370),
             random.ints(1024, 65536)
