@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -119,14 +120,18 @@ abstract class CypherRecordLoader<R> {
         return result;
     }
 
-    private void validateMandatoryColumns(List<String> allColumns) {
-        Set<String> missingColumns = new HashSet<>(getMandatoryColumns());
+    private void validateMandatoryColumns(Collection<String> allColumns) {
+        var missingColumns = new HashSet<>(getMandatoryColumns());
         missingColumns.removeAll(allColumns);
         if (!missingColumns.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Invalid %s query, required column(s) not found: '%s'",
+                "Invalid %s query, required column(s) not found: '%s' - did you specify %s?",
                 queryType().toLowerCase(),
-                String.join("', '", missingColumns)
+                StringJoining.join(missingColumns, "', '"),
+                StringJoining.joinVerbose(
+                    missingColumns.stream()
+                        .map(column -> "'AS " + column + "'")
+                        .collect(Collectors.toList()))
             ));
         }
     }

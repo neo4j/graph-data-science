@@ -51,10 +51,12 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
@@ -1356,7 +1359,7 @@ class GraphCreateProcTest extends BaseProcTest {
             "   'RETURN 0 AS source, 1 AS target'" +
             ")";
 
-        assertError(query, "Invalid node query, required column(s) not found: 'id'");
+        assertError(query, "Invalid node query, required column(s) not found: 'id' - did you specify 'AS id'?");
     }
 
     @ParameterizedTest
@@ -1375,9 +1378,13 @@ class GraphCreateProcTest extends BaseProcTest {
             "   '%s'" +
             ")", returnClause);
 
+        var missingColumnsArray = Arrays.asList(missingColumns.split(","));
         assertError(query, formatWithLocale(
-            "Invalid relationship query, required column(s) not found: '%s'",
-            String.join("', '", missingColumns.split(","))
+            "Invalid relationship query, required column(s) not found: '%s' - did you specify %s?",
+            StringJoining.join(missingColumnsArray, "', '"),
+            StringJoining.joinVerbose(missingColumnsArray.stream()
+                .map(c -> "'AS " + c + "'")
+                .collect(Collectors.toList()))
         ));
     }
 
