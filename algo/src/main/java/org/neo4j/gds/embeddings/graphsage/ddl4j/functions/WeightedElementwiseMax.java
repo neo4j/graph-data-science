@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
+import org.neo4j.graphalgo.core.utils.DoubleUtil;
 
 public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
     private final RelationshipWeightsFunction relationshipWeightsFunction;
@@ -101,7 +102,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
                     int thisElementIndex = source * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
-                    if (parentData[neighborElementIndex] * relationshipWeight == thisData[thisElementIndex]) {
+                    if (DoubleUtil.compareWithDefaultThreshold(parentData[neighborElementIndex] * relationshipWeight, thisData[thisElementIndex])) {
                         result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex] * relationshipWeight);
                     }
                 }
