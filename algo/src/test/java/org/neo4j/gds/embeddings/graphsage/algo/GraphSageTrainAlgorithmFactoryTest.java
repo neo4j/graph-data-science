@@ -441,7 +441,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         var concurrencies = List.of(1, 4, 42);
         var batchSizes = List.of(1, 100, 10_000);
-        var nodePropertySizes = List.of(1, 9, 42);
+        var featurePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);
         var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
@@ -457,7 +457,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                         aggregators.stream().flatMap(aggregator ->
                             embeddingDimensions.stream().flatMap(embeddingDimension ->
                                 degreesAsProperty.stream().flatMap(degreeAsProperty ->
-                                    nodePropertySizes.stream().map(nodePropertySize -> {
+                                    featurePropertySizes.stream().map(featurePropertySize -> {
                                         var config = ImmutableGraphSageTrainConfig
                                             .builder()
                                             .modelName(modelName)
@@ -468,8 +468,8 @@ class GraphSageTrainAlgorithmFactoryTest {
                                             .aggregator(aggregator)
                                             .embeddingDimension(embeddingDimension)
                                             .degreeAsProperty(degreeAsProperty)
-                                            .nodePropertyNames(
-                                                IntStream.range(0, nodePropertySize)
+                                            .featureProperties(
+                                                IntStream.range(0, featurePropertySize)
                                                     .mapToObj(i -> String.valueOf('a' + i))
                                                     .collect(toList())
                                             )

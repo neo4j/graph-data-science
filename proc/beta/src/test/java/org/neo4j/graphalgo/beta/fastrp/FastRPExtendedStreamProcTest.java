@@ -54,7 +54,7 @@ class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtended
             .streamMode()
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("propertyDimension", propertyDimension)
-            .addParameter("nodePropertyNames", List.of("f1", "f2"))
+            .addParameter("featureProperties", List.of("f1", "f2"))
             .yields();
 
         runQuery(query);

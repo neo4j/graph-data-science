@@ -30,7 +30,7 @@ public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
 
     @Override
     @Configuration.Ignore
-    default List<String> nodePropertyNames() {
+    default List<String> featureProperties() {
         return List.of();
     }
 

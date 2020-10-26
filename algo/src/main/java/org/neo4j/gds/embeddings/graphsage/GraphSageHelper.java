@@ -208,7 +208,7 @@ public final class GraphSageHelper {
         HugeObjectArray<double[]> features
     ) {
         var nodeProperties =
-            config.nodePropertyNames()
+            config.featureProperties()
                 .stream()
                 .map(graph::nodeProperties)
                 .collect(toList());
@@ -219,7 +219,7 @@ public final class GraphSageHelper {
             var nodeFeatures = new double[featureCount];
 
             for (int i = 0; i < nodeProperties.size(); i++) {
-                double doubleValue = getCheckedDoubleNodeProperty(graph, config.nodePropertyNames().get(i), nodeId);
+                double doubleValue = getCheckedDoubleNodeProperty(graph, config.featureProperties().get(i), nodeId);
                 nodeFeatures[i] = doubleValue;
             }
 
@@ -299,7 +299,7 @@ public final class GraphSageHelper {
             .stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> config.nodePropertyNames()
+                e -> config.featureProperties()
                     .stream()
                     .filter(e.getValue()::contains)
                     .collect(Collectors.toSet())

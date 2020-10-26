@@ -70,7 +70,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
-            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
+            .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingDimension", 64)
@@ -102,7 +102,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
         assertEquals(1, trainConfig.concurrency());
-        assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.nodePropertyNames());
+        assertEquals(List.of("age", "birth_year", "death_year"), trainConfig.featureProperties());
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
@@ -140,7 +140,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("projectedFeatureDimension", 5)
-            .addParameter("nodePropertyNames", List.of("a1", "a2", "b1", "b2"))
+            .addParameter("featureProperties", List.of("a1", "a2", "b1", "b2"))
             .addParameter("embeddingDimension", 64)
             .addParameter("modelName", modelName)
             .yields();
@@ -168,7 +168,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
-        assertEquals(List.of("a1", "a2", "b1", "b2"), trainConfig.nodePropertyNames());
+        assertEquals(List.of("a1", "a2", "b1", "b2"), trainConfig.featureProperties());
         assertEquals(64, trainConfig.embeddingDimension());
     }
 
@@ -196,7 +196,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         )
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
+            .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
@@ -225,7 +225,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             "   modelName: $modelName," +
             "   nodeQuery: $nodeQuery," +
             "   relationshipQuery: $relationshipQuery," +
-            "   nodePropertyNames: ['age', 'birth_year', 'death_year']," +
+            "   featureProperties: ['age', 'birth_year', 'death_year']," +
             "   degreeAsProperty: true" +
             "})";
 
@@ -255,7 +255,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("concurrency", 1)
-            .addParameter("nodePropertyNames", List.of("age", "missing_1", "missing_2"))
+            .addParameter("featureProperties", List.of("age", "missing_1", "missing_2"))
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingDimension", 42)
@@ -277,7 +277,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             CypherMapWrapper.create(
                 Map.of(
                     "modelName", GraphSageBaseProcTest.modelName,
-                    "nodePropertyNames", List.of("foo"),
+                    "featureProperties", List.of("foo"),
                     "projectedFeatureDimension", projectedFeatureDimension
                 )
             )
@@ -300,7 +300,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 "Node properties [foo] not found in graph with node properties: [] in all node labels: ['__ALL__']"
             ), Arguments.of(
                 5,
-                "Each property set in `nodePropertyNames` must exist for one label. Missing properties: [foo]"
+                "Each property set in `featureProperties` must exist for one label. Missing properties: [foo]"
             )
         );
     }

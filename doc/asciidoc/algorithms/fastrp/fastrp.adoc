@@ -562,7 +562,7 @@ include::../beta-aspect-note.adoc[]
 Most real-world graphs contain node properties which store information about the nodes and what they represent.
 An embedding algorithm which can process the node properties as features and incorporate them in the embeddings can therefore be advantageous.
 
-The extended FastRP algorithm (FastRPExtended) has the additional configuration parameters `nodePropertyNames` and `propertyDimension`.
+The extended FastRP algorithm (FastRPExtended) has the additional configuration parameters `featureProperties` and `propertyDimension`.
 Each node property specified in the former is associated with a randomly generated vector of dimension `propertyDimension`.
 Each node is then initialized with a vector of size `embeddingDimension` formed by concatenation of two parts:
 The first part is formed like in the original algorithm, and the second one is a linear combination of the property vectors, using the property values of the node as weights.
@@ -721,7 +721,7 @@ Memory estimation for FastRPExtended works similarly to FastRP, which we can see
 .The following will estimate the memory requirements for FastRPExtended:
 [source, cypher]
 ----
-CALL gds.beta.fastRPExtended.stream.estimate('persons', {embeddingDimension: 128, propertyDimension: 64, nodePropertyNames: ['p1', 'p2']})
+CALL gds.beta.fastRPExtended.stream.estimate('persons', {embeddingDimension: 128, propertyDimension: 64, featureProperties: ['p1', 'p2']})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
 

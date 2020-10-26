@@ -23,13 +23,13 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, NodePropertiesConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, TrainConfig, FeaturePropertiesConfig {
 
     @Configuration.Ignore
     default GraphSageTrainConfig trainConfig() {
@@ -40,7 +40,7 @@ public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, Tr
 
     @Override
     @Configuration.Ignore
-    default List<String> nodePropertyNames() {
-        return trainConfig().nodePropertyNames();
+    default List<String> featureProperties() {
+        return trainConfig().featureProperties();
     }
 }

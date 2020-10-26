@@ -61,7 +61,7 @@ public interface GraphSageTrainConfig extends
     }
 
     @Value.Default
-    default List<String> nodePropertyNames() {
+    default List<String> featureProperties() {
         return List.of();
     }
 
@@ -154,14 +154,14 @@ public interface GraphSageTrainConfig extends
     default int featuresSize() {
         return isMultiLabel()
             ? projectedFeatureDimension()
-            : nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
+            : featureProperties().size() + (degreeAsProperty() ? 1 : 0);
     }
 
     @Value.Check
     default void validate() {
-        if (nodePropertyNames().isEmpty() && !degreeAsProperty()) {
+        if (featureProperties().isEmpty() && !degreeAsProperty()) {
             throw new IllegalArgumentException(
-                "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set."
+                "GraphSage requires at least one property. Either `featureProperties` or `degreeAsProperty` must be set."
             );
         }
     }
@@ -186,7 +186,7 @@ public interface GraphSageTrainConfig extends
         Aggregator.AggregatorType aggregator,
         int batchSize,
         int embeddingDimension,
-        List<String> nodePropertyNames,
+        List<String> featureProperties,
         double tolerance
     ) {
         return ImmutableGraphSageTrainConfig.builder()
@@ -195,7 +195,7 @@ public interface GraphSageTrainConfig extends
             .aggregator(aggregator)
             .batchSize(batchSize)
             .embeddingDimension(embeddingDimension)
-            .nodePropertyNames(nodePropertyNames)
+            .featureProperties(featureProperties)
             .tolerance(tolerance)
             .build();
     }

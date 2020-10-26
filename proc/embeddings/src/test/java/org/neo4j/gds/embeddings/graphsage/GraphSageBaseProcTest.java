@@ -144,7 +144,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
             .explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("nodePropertyNames", List.of("age", "birth_year", "death_year"))
+            .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("activationFunction", activationFunction)
             .addParameter("degreeAsProperty", true)

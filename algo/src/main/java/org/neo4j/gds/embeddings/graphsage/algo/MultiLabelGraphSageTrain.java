@@ -90,7 +90,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> {
-                int numProperties = (int) config.nodePropertyNames().stream().filter(e.getValue()::contains).count();
+                int numProperties = (int) config.featureProperties().stream().filter(e.getValue()::contains).count();
                 if (config.degreeAsProperty()) {
                     numProperties += 1;
                 }
