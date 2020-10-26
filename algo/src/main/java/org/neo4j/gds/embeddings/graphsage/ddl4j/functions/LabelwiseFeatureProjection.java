@@ -73,7 +73,7 @@ public class LabelwiseFeatureProjection extends AbstractVariable<Matrix> {
             );
             DMatrixRMaj wrappedNodeFeatures = DMatrixRMaj.wrap(1, nodeFeatures.length, nodeFeatures);
             DMatrixRMaj product = new DMatrixRMaj(weights.dimension(0), 1);
-            MatrixUtil.multTransB(wrappedWeights, wrappedNodeFeatures, product, index -> (index < projectedFeatureSize));
+            MatrixUtil.multTransB(wrappedWeights, wrappedNodeFeatures, product, index -> (index < projectedFeatureDimension));
             System.arraycopy(
                 product.getData(),
                 0,
