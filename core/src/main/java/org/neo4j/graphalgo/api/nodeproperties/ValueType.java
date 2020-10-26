@@ -30,7 +30,7 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.longDefaultValue();
         }
     },
@@ -41,7 +41,7 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.doubleDefaultValue();
         }
     },
@@ -52,7 +52,7 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.doubleArrayDefaultValue();
         }
     },
@@ -63,7 +63,7 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.floatArrayDefaultValue();
         }
     },
@@ -74,7 +74,7 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.longArrayDefaultValue();
         }
     },
@@ -85,14 +85,14 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultValue() {
+        public DefaultValue defaultFallbackValue() {
             return DefaultValue.DEFAULT;
         }
     };
 
     public abstract String cypherName();
 
-    public abstract DefaultValue defaultValue();
+    public abstract DefaultValue defaultFallbackValue();
 
     public static ValueType fromNumberType(NumberType nt) {
         switch (nt) {
