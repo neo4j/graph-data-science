@@ -46,6 +46,34 @@ public final class DefaultValue {
         }
     }
 
+    public static DefaultValue intDefaultValue() {
+        return DefaultValue.of(INTEGER_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue longDefaultValue() {
+        return DefaultValue.of(LONG_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue doubleDefaultValue() {
+        return DefaultValue.of(DOUBLE_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue floatDefaultValue() {
+        return DefaultValue.of(FLOAT_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue longArrayDefaultValue() {
+        return DefaultValue.DEFAULT;
+    }
+
+    public static DefaultValue floatArrayDefaultValue() {
+        return DefaultValue.DEFAULT;
+    }
+
+    public static DefaultValue doubleArrayDefaultValue() {
+        return DefaultValue.DEFAULT;
+    }
+
     private DefaultValue(@Nullable Object defaultValue) {
         this.defaultValue = defaultValue;
     }
