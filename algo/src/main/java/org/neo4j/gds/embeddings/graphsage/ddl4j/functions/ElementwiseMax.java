@@ -78,7 +78,7 @@ public class ElementwiseMax extends SingleParentVariable<Matrix> {
                 for (int neighbor : neighbors) {
                     int thisElementIndex = row * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
-                    if (DoubleUtil.compareDoubles(parentData[neighborElementIndex], thisData[thisElementIndex])) {
+                    if (DoubleUtil.compareWithDefaultThreshold(parentData[neighborElementIndex], thisData[thisElementIndex])) {
                         result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex]);
                     }
                 }

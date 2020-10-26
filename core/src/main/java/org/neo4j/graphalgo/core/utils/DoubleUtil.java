@@ -25,11 +25,11 @@ public final class DoubleUtil {
 
     private DoubleUtil() {}
 
-    public static boolean compareDoubles(double lhs, double rhs) {
-        return compareDoubles(lhs, rhs, DEFAULT_THRESHOLD);
+    public static boolean compareWithDefaultThreshold(double lhs, double rhs) {
+        return compareWithThreshold(lhs, rhs, DEFAULT_THRESHOLD);
     }
 
-    public static boolean compareDoubles(double lhs, double rhs, double epsilon) {
+    public static boolean compareWithThreshold(double lhs, double rhs, double epsilon) {
         return Math.abs(lhs - rhs) < epsilon;
     }
 }

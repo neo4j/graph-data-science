@@ -102,7 +102,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
                     int thisElementIndex = source * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
-                    if (DoubleUtil.compareDoubles(parentData[neighborElementIndex] * relationshipWeight, thisData[thisElementIndex])) {
+                    if (DoubleUtil.compareWithDefaultThreshold(parentData[neighborElementIndex] * relationshipWeight, thisData[thisElementIndex])) {
                         result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex] * relationshipWeight);
                     }
                 }
