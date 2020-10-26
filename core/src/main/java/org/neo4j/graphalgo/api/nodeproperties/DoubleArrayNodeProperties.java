@@ -58,9 +58,4 @@ public interface DoubleArrayNodeProperties extends NodeProperties {
     default ValueType valueType() {
         return ValueType.DOUBLE_ARRAY;
     };
-
-    @Override
-    default double doubleValue(long nodeId) {
-        throw new UnsupportedOperationException("double is not supported");
-    };
 }
