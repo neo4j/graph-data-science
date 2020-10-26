@@ -42,13 +42,13 @@ class NodeSchemaTest {
             .addProperty(
                 label,
                 "baz",
-                NodePropertySchema.of(
+                PropertySchema.of(
                     ValueType.DOUBLE,
                     Optional.of(defaultValue)
                 )
             ).build();
 
-        NodePropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
+        PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
         assertTrue(nodePropertySchema.maybeDefaultValue().isPresent());
 
         assertEquals(defaultValue, nodePropertySchema.maybeDefaultValue().get());

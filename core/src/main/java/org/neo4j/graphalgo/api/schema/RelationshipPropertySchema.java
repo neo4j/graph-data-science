@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import java.util.Optional;
 
 @ValueClass
-public interface RelationshipPropertySchema extends NodePropertySchema {
+public interface RelationshipPropertySchema extends PropertySchema {
 
     Optional<Aggregation> maybeAggregation();
 

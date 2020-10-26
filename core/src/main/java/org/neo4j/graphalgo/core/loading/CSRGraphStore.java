@@ -37,8 +37,8 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.NodePropertySchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -643,7 +643,7 @@ public final class CSRGraphStore implements GraphStore {
                 nodePropsBuilder.addProperty(
                     label,
                     propertyName,
-                    NodePropertySchema.of(
+                    PropertySchema.of(
                         nodeProperty.type(),
                         nodeProperty.maybeDefaultValue()
                     ));

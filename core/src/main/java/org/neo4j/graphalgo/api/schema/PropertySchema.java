@@ -20,14 +20,27 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+
+import java.util.Optional;
 
 @ValueClass
 public interface PropertySchema {
 
     ValueType valueType();
 
+    Optional<DefaultValue> maybeDefaultValue();
+
     static PropertySchema of(ValueType valueType) {
-        return ImmutablePropertySchema.of(valueType);
+        return ImmutablePropertySchema.of(valueType, Optional.empty());
     }
+
+    static PropertySchema of(
+        ValueType valueType,
+        Optional<DefaultValue> maybeDefaultValue
+    ) {
+        return ImmutablePropertySchema.of(valueType, maybeDefaultValue);
+    }
+
 }
