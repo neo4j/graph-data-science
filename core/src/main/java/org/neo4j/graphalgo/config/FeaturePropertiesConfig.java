@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.List;
 
-public interface NodePropertiesConfig {
+public interface FeaturePropertiesConfig {
     @Value.Default
-    default List<String> nodePropertyNames() {
+    default List<String> featureProperties() {
         return List.of();
     }
 

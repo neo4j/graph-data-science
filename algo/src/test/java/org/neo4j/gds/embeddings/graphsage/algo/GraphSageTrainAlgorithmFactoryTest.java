@@ -87,7 +87,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         if (config.isMultiLabel()) {
             var minNumProperties = config.degreeAsProperty() ? 2 : 1;
-            var maxNumProperties = config.nodePropertyNames().size() + (config.degreeAsProperty() ? 1 : 0);
+            var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
             maxNumProperties += 1; // Add one for the label
             var minWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * minNumProperties);
             var maxWeightsMemory = sizeOfDoubleArray(config.projectedFeatureDimension() * maxNumProperties);
@@ -502,7 +502,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         var concurrencies = List.of(1, 42);
         var batchSizes = List.of(1, 100, 10_000);
-        var nodePropertySizes = List.of(1, 9, 42);
+        var featurePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);
         var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
@@ -525,35 +525,35 @@ class GraphSageTrainAlgorithmFactoryTest {
                                             // For the single-label case we don't care about the label count
                                             .limit(projectedFeatureDimension == PROJECTED_FEATURE_DIMENSION ? 1 : labelCounts.size())
                                             .flatMap(labelCount ->
-                                            nodePropertySizes.stream().map(nodePropertySize -> {
-                                                var testName = formatWithLocale(
-                                                    "concurrency: %s, batchSize: %s, aggregator: %s, embeddings: %s, degreeAsProp: %s, projected: %s, labels: %s, features: %s, nodes: %s",
-                                                    concurrency,
-                                                    batchSize,
-                                                    aggregator,
-                                                    embeddingDimension,
-                                                    degreeAsProperty,
-                                                    projectedFeatureDimension,
-                                                    labelCount,
-                                                    nodePropertySize,
-                                                    nodeCount
-                                                );
-                                                var config = ImmutableGraphSageTrainConfig
-                                                    .builder()
-                                                    .modelName(modelName)
-                                                    .username(userName)
-                                                    .concurrency(concurrency)
-                                                    .sampleSizes(sampleSizes)
-                                                    .batchSize(batchSize)
-                                                    .aggregator(aggregator)
-                                                    .embeddingDimension(embeddingDimension)
-                                                    .degreeAsProperty(degreeAsProperty)
-                                                    .nodePropertyNames(
-                                                        IntStream.range(0, nodePropertySize)
-                                                            .mapToObj(i -> String.valueOf('a' + i))
-                                                            .collect(toList())
-                                                    )
-                                                    .build();
+                                                featurePropertySizes.stream().map(featurePropertySize -> {
+                                                    var testName = formatWithLocale(
+                                                        "concurrency: %s, batchSize: %s, aggregator: %s, embeddings: %s, degreeAsProp: %s, projected: %s, labels: %s, features: %s, nodes: %s",
+                                                        concurrency,
+                                                        batchSize,
+                                                        aggregator,
+                                                        embeddingDimension,
+                                                        degreeAsProperty,
+                                                        projectedFeatureDimension,
+                                                        labelCount,
+                                                        featurePropertySize,
+                                                        nodeCount
+                                                    );
+                                                    var config = ImmutableGraphSageTrainConfig
+                                                        .builder()
+                                                        .modelName(modelName)
+                                                        .username(userName)
+                                                        .concurrency(concurrency)
+                                                        .sampleSizes(sampleSizes)
+                                                        .batchSize(batchSize)
+                                                        .aggregator(aggregator)
+                                                        .embeddingDimension(embeddingDimension)
+                                                        .degreeAsProperty(degreeAsProperty)
+                                                        .featureProperties(
+                                                            IntStream.range(0, featurePropertySize)
+                                                                .mapToObj(i -> String.valueOf('a' + i))
+                                                                .collect(toList())
+                                                        )
+                                                        .build();
 
                                                 var dimensions = ImmutableGraphDimensions
                                                     .builder()

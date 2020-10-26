@@ -98,7 +98,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         var nodeLabels = graphStore.nodeLabels();
         if (!config.isMultiLabel()) {
             // all properties exist on all labels
-            List<String> missingProperties = config.nodePropertyNames()
+            List<String> missingProperties = config.featureProperties()
                 .stream()
                 .filter(weightProperty -> !graphStore.hasNodeProperty(nodeLabels, weightProperty))
                 .collect(Collectors.toList());
@@ -113,10 +113,10 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         } else {
             // each property exists on at least one label
             var allProperties = graphStore.nodePropertyKeys().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            var missingProperties = config.nodePropertyNames().stream().filter(key -> !allProperties.contains(key)).collect(Collectors.toSet());
+            var missingProperties = config.featureProperties().stream().filter(key -> !allProperties.contains(key)).collect(Collectors.toSet());
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Each property set in `nodePropertyNames` must exist for one label. Missing properties: %s",
+                    "Each property set in `featureProperties` must exist for one label. Missing properties: %s",
                     missingProperties
                 ));
             }

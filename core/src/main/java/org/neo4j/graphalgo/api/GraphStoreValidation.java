@@ -23,9 +23,9 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
@@ -67,9 +67,9 @@ public final class GraphStoreValidation {
                 ));
             }
         }
-        if (config instanceof NodePropertiesConfig) {
-            var nodePropertiesConfig = (NodePropertiesConfig) config;
-            List<String> weightProperties = nodePropertiesConfig.nodePropertyNames();
+        if (config instanceof FeaturePropertiesConfig) {
+            var nodePropertiesConfig = (FeaturePropertiesConfig) config;
+            List<String> weightProperties = nodePropertiesConfig.featureProperties();
             List<String> missingProperties;
             if (nodePropertiesConfig.propertiesMustExistForEachNodeLabel()) {
                  missingProperties = weightProperties

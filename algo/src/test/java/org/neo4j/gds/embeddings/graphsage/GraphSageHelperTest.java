@@ -69,7 +69,7 @@ class GraphSageHelperTest {
         var graph = GdlFactory.of("(:Foo:Bar)").build().graphStore().getUnion();
         var config = ImmutableGraphSageTrainConfig.builder()
             .modelName("foo")
-            .nodePropertyNames(Set.of("dummyProp"))
+            .featureProperties(Set.of("dummyProp"))
             .projectedFeatureDimension(42)
             .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
@@ -93,14 +93,14 @@ class GraphSageHelperTest {
                 "single label",
                 ImmutableGraphSageTrainConfig.builder()
                     .modelName("foo")
-                    .nodePropertyNames(Set.of("dummyProp"))
+                    .featureProperties(Set.of("dummyProp"))
                     .build(),
                     singleLabelProperties
             ), Arguments.of(
                 "multi label",
                 ImmutableGraphSageTrainConfig.builder()
                     .modelName("foo")
-                    .nodePropertyNames(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
+                    .featureProperties(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
                     .projectedFeatureDimension(5)
                     .build(),
                 HugeObjectArray.of(
@@ -150,7 +150,7 @@ class GraphSageHelperTest {
         void shouldThrowOnMissingProperties() {
             GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
                 .modelName("foo")
-                .nodePropertyNames(Set.of("prop"))
+                .featureProperties(Set.of("prop"))
                 .build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -178,7 +178,7 @@ class GraphSageHelperTest {
         void shouldInitializeFeaturesCorrectly() {
             var config = ImmutableGraphSageTrainConfig.builder()
                 .modelName("foo")
-                .nodePropertyNames(Set.of("dummyProp", "numEmployees", "rating"))
+                .featureProperties(Set.of("dummyProp", "numEmployees", "rating"))
                 .build();
 
             var actual = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());

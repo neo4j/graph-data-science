@@ -56,7 +56,7 @@ class FastRPTest extends AlgoTestBase {
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
         .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
         .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
-        .nodePropertyNames(List.of("f1", "f2"))
+        .featureProperties(List.of("f1", "f2"))
         .addIterationWeight(1.0D)
         .build();
 
@@ -346,7 +346,7 @@ class FastRPTest extends AlgoTestBase {
                 FastRPBaseConfig.builder()
                     .embeddingDimension(64)
                     .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
-                    .addNodePropertyName("prop")
+                    .addFeatureProperty("prop")
                     .build(),
                 progressLogger,
                 AllocationTracker.empty()

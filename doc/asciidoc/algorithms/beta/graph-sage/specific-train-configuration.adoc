@@ -7,7 +7,7 @@
 | aggregator                 | String        | "mean"    | yes      | What aggregator to be used by the layers. Supported values are "mean" and "pool".
 | activationFunction         | String        | "sigmoid" | yes      | The activation function to be used in the model architecture. Supported values are "sigmoid" and "relu".
 | sampleSizes                | List<Integer> | [25, 10]  | yes      | A list of Integer values, the size of the list determines the number of layers and the values determine how many nodes will be sampled by the layers.
-| nodePropertyNames          | List<String>  | []        | yes      | A list of node property names. All property names must exist in the in-memory graph and be of type Float.
+| featureProperties          | List<String>  | []        | yes      | A list of node property names. All property names must exist in the in-memory graph and be of type Float.
 | batchSize                  | Integer       | 100       | yes      | The number of nodes per batch.
 | tolerance                  | Float         | 1e-4      | yes      | Tolerance controls the training cycles. The training will complete when the loss change is lower than the tolerance value, regardless of other halting criteria.
 | learningRate               | Float         | 0.1       | yes      | Controls the size of updates during training.
@@ -17,5 +17,5 @@
 | negativeSampleWeight       | Integer       | 20        | yes      | The weight of the negative samples. This is used when computing the loss function.
 | degreeAsProperty           | Boolean       | false     | yes      | Whether or not to use the degree of the node as a node property.
 | relationshipWeightProperty | String        | null      | yes      | The relationship property that contains the weight. If `null`, the graph is treated as unweighted. Must be numeric.
-5+| *Note*: At least one of `nodePropertyNames` and `degreeAsProperty` have to be specified.
+5+| *Note*: At least one of `featureProperties` and `degreeAsProperty` has to be specified.
 |===

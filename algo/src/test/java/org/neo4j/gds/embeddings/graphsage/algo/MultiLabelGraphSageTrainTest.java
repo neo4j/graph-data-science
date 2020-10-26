@@ -60,7 +60,7 @@ class MultiLabelGraphSageTrainTest {
     @ValueSource(booleans = {true, false})
     void shouldRunWithOrWithoutDegreeAsProperty(boolean degreeAsProperty) {
         var config = ImmutableGraphSageTrainConfig.builder()
-            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
             .modelName("foo")
             .degreeAsProperty(degreeAsProperty)
@@ -93,7 +93,7 @@ class MultiLabelGraphSageTrainTest {
     @Test
     void shouldStoreMultiLabelFeatureFunctionInModel() {
         var config = ImmutableGraphSageTrainConfig.builder()
-            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .modelName("foo")
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .build();
@@ -117,7 +117,7 @@ class MultiLabelGraphSageTrainTest {
         var graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
             .concurrency(1)
             .projectedFeatureDimension(5)
-            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
             .embeddingDimension(64)
@@ -140,7 +140,7 @@ class MultiLabelGraphSageTrainTest {
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
         assertEquals(1, trainConfig.concurrency());
-        assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases"), trainConfig.nodePropertyNames());
+        assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases"), trainConfig.featureProperties());
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
@@ -149,7 +149,7 @@ class MultiLabelGraphSageTrainTest {
 
     private static Stream<Arguments> featureSizes() {
         var builder = ImmutableGraphSageTrainConfig.builder()
-            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .modelName("foo");

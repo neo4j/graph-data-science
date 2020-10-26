@@ -191,7 +191,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .explicitCreation(TEST_GRAPH)
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("nodePropertyNames", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
+            .addParameter("featureProperties", List.of("pageRank", "louvain", "labelPropagation", "wcc"))
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("modelName", graphSageModel)
             .yields();

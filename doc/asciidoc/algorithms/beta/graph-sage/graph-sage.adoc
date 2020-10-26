@@ -240,7 +240,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 Before we are able to generate node embeddings we need to train a model.
 Below is an example of how to do that.
 
-NOTE: The names specified in the `nodePropertyNames` configuration parameter must exist in the in-memory graph.
+NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
 
 [source, cypher, role=query-example, no-result=true]
 ----
@@ -248,7 +248,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'exampleTrainModel',
-    nodePropertyNames: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'height', 'weight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
@@ -270,7 +270,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'weightedTrainedModel',
-    nodePropertyNames: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'height', 'weight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
@@ -296,7 +296,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'graphSage',
-    nodePropertyNames: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'height', 'weight'],
     embeddingDimension: 3,
     degreeAsProperty: true
   }

@@ -501,7 +501,7 @@ class GraphSageAlgorithmFactoryTest {
                                             .aggregator(aggregator)
                                             .embeddingDimension(embeddingDimension)
                                             .degreeAsProperty(degreeAsProperty)
-                                            .nodePropertyNames(
+                                            .featureProperties(
                                                 IntStream.range(0, nodePropertySize)
                                                     .mapToObj(i -> String.valueOf('a' + i))
                                                     .collect(toList())
