@@ -99,12 +99,12 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
                     int neighborElementIndex = neighbor * cols + col;
                     result.addDataAt(
                         neighborElementIndex,
-                        1d / degree * (multiMeanGradient[gradientElementIndex] * relationshipWeight)
+                        (1d / degree) * (multiMeanGradient[gradientElementIndex] * relationshipWeight)
                     );
                 }
                 result.addDataAt(
                     sourceId * cols + col,
-                    1d / degree * multiMeanGradient[gradientElementIndex]
+                    (1d / degree) * multiMeanGradient[gradientElementIndex]
                 );
             }
         }
