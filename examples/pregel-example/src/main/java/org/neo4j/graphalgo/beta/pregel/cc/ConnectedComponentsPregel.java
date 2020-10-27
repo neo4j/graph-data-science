@@ -70,5 +70,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
             context.setNodeValue(COMPONENT, newComponentId);
             context.sendToNeighbors(newComponentId);
         }
+
+        context.voteToHalt();
     }
 }
