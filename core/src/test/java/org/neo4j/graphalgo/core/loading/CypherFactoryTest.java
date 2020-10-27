@@ -73,12 +73,12 @@ class CypherFactoryTest extends BaseTest {
     @Test
     void testLoadCypher() {
         clearDb();
-        String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4})-[:REL {prop: 2}]->(n3)" +
+        String query = " CREATE (n1 {partition: 6})-[:REL {prop: 1}]->(n2 {foo: 4.0})-[:REL {prop: 2}]->(n3)" +
                        " CREATE (n1)-[:REL {prop: 3}]->(n3)" +
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
         runQuery(query);
 
-        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0.0) AS partition , COALESCE(n.foo, 5.0) AS foo";
+        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0) AS partition , COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
                       "RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)";
 
