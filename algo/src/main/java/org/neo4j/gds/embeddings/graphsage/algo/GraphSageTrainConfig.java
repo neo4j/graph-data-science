@@ -125,7 +125,7 @@ public interface GraphSageTrainConfig extends
 
     @Override
     @Configuration.Ignore
-    default boolean forAllLabels() {
+    default boolean propertiesMustExistForEachNodeLabel() {
         return false;
     }
 

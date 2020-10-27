@@ -71,7 +71,7 @@ public final class GraphStoreValidation {
             var nodePropertiesConfig = (FeaturePropertiesConfig) config;
             List<String> weightProperties = nodePropertiesConfig.featureProperties();
             List<String> missingProperties;
-            if (nodePropertiesConfig.forAllLabels()) {
+            if (nodePropertiesConfig.propertiesMustExistForEachNodeLabel()) {
                  missingProperties = weightProperties
                     .stream()
                     .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
