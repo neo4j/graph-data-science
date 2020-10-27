@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.MUTATE;
@@ -40,8 +41,8 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     public static final String COMPONENT = "component";
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
-        return new Pregel.NodeSchema.Builder().add(COMPONENT, ValueType.LONG).build();
+    public PregelSchema schema() {
+        return new PregelSchema.Builder().add(COMPONENT, ValueType.LONG).build();
     }
 
     @Override

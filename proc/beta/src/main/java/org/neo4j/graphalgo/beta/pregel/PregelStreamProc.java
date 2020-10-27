@@ -44,7 +44,7 @@ public abstract class PregelStreamProc<
         var result = computationResult.result().nodeValues();
         return LongStream.range(IdMapping.START_NODE_ID, computationResult.graph().nodeCount()).mapToObj(nodeId -> {
             Map<String, Object> values = result.schema().elements().stream().collect(Collectors.toMap(
-                Pregel.Element::propertyKey,
+                Element::propertyKey,
                 element -> {
                     switch (element.propertyType()) {
                         case LONG:

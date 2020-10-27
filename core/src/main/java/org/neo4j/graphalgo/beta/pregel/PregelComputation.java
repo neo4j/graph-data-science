@@ -31,7 +31,7 @@ package org.neo4j.graphalgo.beta.pregel;
  */
 public interface PregelComputation<C extends PregelConfig> {
     /**
-     * The node schema describes the node property layout.
+     * The schema describes the node property layout.
      * A node property can be composed of multiple primitive
      * values, such as double or long, as well as arrays of
      * those. Each part of that composite schema is named
@@ -39,16 +39,17 @@ public interface PregelComputation<C extends PregelConfig> {
      * <br>
      * Example:
      * <pre>
-     * public Pregel.NodeSchema nodeSchema() {
-     *      return new NodeSchemaBuilder()
-     *          .putElement("key", ValueType.LONG)
+     * public PregelSchema schema() {
+     *      return new PregelSchema.Builder()
+     *          .add("key", ValueType.LONG)
+     *          .add("privateKey", ValueType.LONG, Visibility.PRIVATE)
      *          .build();
      * }
      * </pre>
      *
-     * @see org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder
+     * @see org.neo4j.graphalgo.beta.pregel.PregelSchema
      */
-    Pregel.NodeSchema nodeSchema();
+    PregelSchema schema();
 
     /**
      * The init method is called in the beginning of the first

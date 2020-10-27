@@ -33,7 +33,7 @@ import java.util.Queue;
 public class ConfigurationHasNoFactoryMethod implements PregelComputation<ConfigurationHasNoFactoryMethod.ComputationConfig> {
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
+    public PregelSchema nodeSchema() {
         return null;
     }
 

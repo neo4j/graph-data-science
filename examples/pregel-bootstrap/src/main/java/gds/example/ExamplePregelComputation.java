@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -39,9 +40,9 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     public static final String KEY = "key";
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
+    public PregelSchema schema() {
         // Declare a node schema with a single node value of type Long
-        return new Pregel.NodeSchema.Builder().add(KEY, ValueType.LONG).build();
+        return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
     }
 
     @Override
