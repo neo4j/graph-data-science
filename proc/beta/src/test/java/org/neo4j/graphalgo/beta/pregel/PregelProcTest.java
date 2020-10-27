@@ -311,11 +311,11 @@ public class PregelProcTest extends BaseProcTest {
 
                 @Override
                 public Pregel.NodeSchema nodeSchema() {
-                    return new NodeSchemaBuilder()
-                        .putElement(LONG_KEY, ValueType.LONG)
-                        .putElement(DOUBLE_KEY, ValueType.DOUBLE)
-                        .putElement(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
-                        .putElement(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
+                    return new Pregel.NodeSchema.Builder()
+                        .add(LONG_KEY, ValueType.LONG)
+                        .add(DOUBLE_KEY, ValueType.DOUBLE)
+                        .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
+                        .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                         .build();
                 }
 

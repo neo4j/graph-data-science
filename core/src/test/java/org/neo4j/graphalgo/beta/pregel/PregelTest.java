@@ -136,21 +136,21 @@ class PregelTest {
 
     static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(1, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_096L),
-            Arguments.of(10, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_816L),
-            Arguments.of(1, new NodeSchemaBuilder()
-                    .putElement("key1", ValueType.LONG)
-                    .putElement("key2", ValueType.DOUBLE)
-                    .putElement("key3", ValueType.LONG_ARRAY)
-                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+            Arguments.of(1, new Pregel.NodeSchema.Builder().add("key", ValueType.LONG).build(), 4_884_096L),
+            Arguments.of(10, new Pregel.NodeSchema.Builder().add("key", ValueType.LONG).build(), 4_884_816L),
+            Arguments.of(1, new Pregel.NodeSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 6_884_168L
             ),
-            Arguments.of(10, new NodeSchemaBuilder()
-                    .putElement("key1", ValueType.LONG)
-                    .putElement("key2", ValueType.DOUBLE)
-                    .putElement("key3", ValueType.LONG_ARRAY)
-                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+            Arguments.of(10, new Pregel.NodeSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 6_884_888L
             )
@@ -226,8 +226,8 @@ class PregelTest {
 
         @Override
         public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder()
-                .putElement(KEY, ValueType.DOUBLE)
+            return new Pregel.NodeSchema.Builder()
+                .add(KEY, ValueType.DOUBLE)
                 .build();
         }
 
@@ -261,7 +261,7 @@ class PregelTest {
 
         @Override
         public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder().putElement(KEY, ValueType.DOUBLE).build();
+            return new Pregel.NodeSchema.Builder().add(KEY, ValueType.DOUBLE).build();
         }
 
         @Override
@@ -294,11 +294,11 @@ class PregelTest {
 
         @Override
         public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder()
-                .putElement(LONG_KEY, ValueType.LONG)
-                .putElement(DOUBLE_KEY, ValueType.DOUBLE)
-                .putElement(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
-                .putElement(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
+            return new Pregel.NodeSchema.Builder()
+                .add(LONG_KEY, ValueType.LONG)
+                .add(DOUBLE_KEY, ValueType.DOUBLE)
+                .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
+                .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                 .build();
         }
 
