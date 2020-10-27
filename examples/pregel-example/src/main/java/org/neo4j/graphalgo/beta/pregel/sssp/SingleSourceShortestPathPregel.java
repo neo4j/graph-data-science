@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.pregel.sssp;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -43,7 +42,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     @Override
     public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder().putElement(DISTANCE, ValueType.LONG).build();
+        return new Pregel.NodeSchema.Builder().add(DISTANCE, ValueType.LONG).build();
     }
 
     @Override

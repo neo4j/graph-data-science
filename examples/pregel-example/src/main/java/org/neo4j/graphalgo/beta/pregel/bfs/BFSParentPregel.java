@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -39,9 +38,7 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
 
     @Override
     public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder()
-            .putElement(PARENT, ValueType.LONG)
-            .build();
+        return new Pregel.NodeSchema.Builder().add(PARENT, ValueType.LONG).build();
     }
 
     @Override

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel.triangleCount;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
@@ -41,9 +40,9 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
 
     @Override
     public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder()
-            .putElement(TRIANGLE_COUNT, ValueType.LONG)
-            .putElement(NEIGHBOURS, ValueType.LONG_ARRAY)
+        return new Pregel.NodeSchema.Builder()
+            .add(TRIANGLE_COUNT, ValueType.LONG)
+            .add(NEIGHBOURS, ValueType.LONG_ARRAY)
             .build();
     }
 

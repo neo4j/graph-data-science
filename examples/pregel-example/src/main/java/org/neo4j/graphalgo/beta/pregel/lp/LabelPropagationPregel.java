@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel.lp;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -40,7 +39,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
 
     @Override
     public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder().putElement(LABEL_KEY, ValueType.LONG).build();
+        return new Pregel.NodeSchema.Builder().add(LABEL_KEY, ValueType.LONG).build();
     }
 
     @Override

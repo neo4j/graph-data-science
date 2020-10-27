@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -45,9 +44,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
     @Override
     public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder()
-            .putElement(PAGE_RANK, ValueType.DOUBLE)
-            .build();
+        return new Pregel.NodeSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
     }
 
     @Override

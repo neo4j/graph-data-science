@@ -22,7 +22,6 @@ package gds.example;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
@@ -42,7 +41,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     @Override
     public Pregel.NodeSchema nodeSchema() {
         // Declare a node schema with a single node value of type Long
-        return new NodeSchemaBuilder().putElement(KEY, ValueType.LONG).build();
+        return new Pregel.NodeSchema.Builder().add(KEY, ValueType.LONG).build();
     }
 
     @Override

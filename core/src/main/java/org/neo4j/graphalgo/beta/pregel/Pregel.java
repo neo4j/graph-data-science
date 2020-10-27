@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
 import org.jetbrains.annotations.NotNull;
@@ -45,12 +44,13 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -627,23 +627,40 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
     }
 
+    enum Visibility {
+        PRIVATE, PUBLIC
+    }
+
     @ValueClass
     public interface NodeSchema {
-        List<Element> elements();
+        Set<Element> elements();
+
+        class Builder {
+
+            private Set<Element> elements = new HashSet<>();
+
+            public Builder add(String propertyKey, ValueType propertyType) {
+                return add(propertyKey, propertyType, Visibility.PUBLIC);
+            }
+
+            public Builder add(String propertyKey, ValueType propertyType, Visibility visibility) {
+                elements.add(ImmutableElement.of(propertyKey, propertyType, visibility));
+                return this;
+            }
+
+            public NodeSchema build() {
+                return ImmutableNodeSchema.of(elements);
+            }
+        }
     }
 
     @ValueClass
     public interface Element {
         String propertyKey();
+        @Value.Auxiliary
         ValueType propertyType();
-    }
-
-    @Builder.Factory
-    static NodeSchema nodeSchema(Map<String, ValueType> elements) {
-        return ImmutableNodeSchema.of(elements.entrySet().stream()
-            .map(entry -> ImmutableElement.of(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList())
-        );
+        @Value.Auxiliary
+        Visibility visibility();
     }
 
     @ValueClass
