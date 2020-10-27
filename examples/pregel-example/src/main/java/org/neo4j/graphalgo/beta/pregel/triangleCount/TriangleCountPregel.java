@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
@@ -39,8 +40,8 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
     private static final String NEIGHBOURS = "NEIGHBOURS";
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
-        return new Pregel.NodeSchema.Builder()
+    public PregelSchema schema() {
+        return new PregelSchema.Builder()
             .add(TRIANGLE_COUNT, ValueType.LONG)
             .add(NEIGHBOURS, ValueType.LONG_ARRAY)
             .build();

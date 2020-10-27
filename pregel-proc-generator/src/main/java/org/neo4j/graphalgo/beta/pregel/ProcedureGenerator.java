@@ -205,8 +205,8 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(MemoryEstimation.class)
                 .addParameter(pregelSpec.configTypeName(), "configuration")
-                .addStatement("var nodeSchema = new $T().nodeSchema()", computationClassName(pregelSpec, ""))
-                .addStatement("return $T.memoryEstimation(nodeSchema)", Pregel.class)
+                .addStatement("var schema = new $T().schema()", computationClassName(pregelSpec, ""))
+                .addStatement("return $T.memoryEstimation(schema)", Pregel.class)
                 .build()
             )
             .build();

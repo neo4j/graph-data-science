@@ -38,7 +38,7 @@ public class BaseClassHasNoEmptyConstructor implements PregelComputation<PregelC
     }
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
+    public PregelSchema nodeSchema() {
         return null;
     }
 

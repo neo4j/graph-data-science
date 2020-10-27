@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 public class Computation implements PregelComputation<PregelConfig> {
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
+    public PregelSchema nodeSchema() {
         return null;
     }
 

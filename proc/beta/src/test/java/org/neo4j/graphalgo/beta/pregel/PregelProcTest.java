@@ -310,8 +310,8 @@ public class PregelProcTest extends BaseProcTest {
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override
-                public Pregel.NodeSchema nodeSchema() {
-                    return new Pregel.NodeSchema.Builder()
+                public PregelSchema schema() {
+                    return new PregelSchema.Builder()
                         .add(LONG_KEY, ValueType.LONG)
                         .add(DOUBLE_KEY, ValueType.DOUBLE)
                         .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)

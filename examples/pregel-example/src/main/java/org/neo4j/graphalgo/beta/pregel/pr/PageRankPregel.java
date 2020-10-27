@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -43,8 +44,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     private static boolean weighted;
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
-        return new Pregel.NodeSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
+    public PregelSchema schema() {
+        return new PregelSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
     }
 
     @Override
