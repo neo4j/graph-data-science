@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -79,6 +80,7 @@ public class PregelProcTest extends BaseProcTest {
             assertEquals(42.0D, values.get(CompositeTestAlgorithm.DOUBLE_KEY));
             assertArrayEquals(new long[]{1, 3, 3, 7}, (long[]) values.get(CompositeTestAlgorithm.LONG_ARRAY_KEY));
             assertArrayEquals(new double[]{1, 9, 8, 4}, (double[]) values.get(CompositeTestAlgorithm.DOUBLE_ARRAY_KEY));
+            assertFalse(values.containsKey(CompositeTestAlgorithm.PRIVATE_LONG_KEY));
         });
     }
 
@@ -96,11 +98,12 @@ public class PregelProcTest extends BaseProcTest {
         runQuery(query);
 
         var validationQuery = formatWithLocale(
-            "MATCH (n) RETURN n.%5$s%s AS long, n.%5$s%s AS double, n.%5$s%s AS long_array, n.%5$s%s AS double_array",
+            "MATCH (n) RETURN n.%6$s%s AS long, n.%6$s%s AS double, n.%6$s%s AS long_array, n.%6$s%s AS double_array, exists(n.%6$s%s) AS exists",
             CompositeTestAlgorithm.LONG_KEY,
             CompositeTestAlgorithm.DOUBLE_KEY,
             CompositeTestAlgorithm.LONG_ARRAY_KEY,
             CompositeTestAlgorithm.DOUBLE_ARRAY_KEY,
+            CompositeTestAlgorithm.PRIVATE_LONG_KEY,
             writePrefix
         );
 
@@ -109,7 +112,8 @@ public class PregelProcTest extends BaseProcTest {
                 "long", 42L,
                 "double", 42.0D,
                 "long_array", new long[] {1, 3, 3, 7},
-                "double_array", new double[] {1, 9, 8, 4}
+                "double_array", new double[] {1, 9, 8, 4},
+                "exists", false
             )
         ));
     }
@@ -300,6 +304,7 @@ public class PregelProcTest extends BaseProcTest {
         static final String DOUBLE_KEY = "double";
         static final String LONG_ARRAY_KEY = "long_array";
         static final String DOUBLE_ARRAY_KEY = "double_array";
+        static final String PRIVATE_LONG_KEY = "long_private";
 
         private final Pregel<PregelConfig> pregelJob;
 
@@ -316,6 +321,7 @@ public class PregelProcTest extends BaseProcTest {
                         .add(DOUBLE_KEY, ValueType.DOUBLE)
                         .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
                         .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
+                        .add(PRIVATE_LONG_KEY, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
                         .build();
                 }
 

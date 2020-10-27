@@ -29,7 +29,12 @@ import java.util.Set;
 @ValueClass
 public interface PregelSchema {
 
+    enum Visibility {
+        PUBLIC, PRIVATE
+    }
+
     Set<Element> elements();
+
 
     class Builder {
 
@@ -56,9 +61,6 @@ interface Element {
     @Value.Auxiliary
     ValueType propertyType();
     @Value.Auxiliary
-    Visibility visibility();
+    PregelSchema.Visibility visibility();
 }
 
-enum Visibility {
-    PUBLIC, PRIVATE
-}
