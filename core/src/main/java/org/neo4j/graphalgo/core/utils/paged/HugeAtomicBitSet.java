@@ -27,19 +27,22 @@ import static org.neo4j.graphalgo.core.utils.ArrayUtil.MAX_ARRAY_LENGTH;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class HugeAtomicBitSet {
-    private static final int NUM_BITS = 64;
+    private static final int NUM_BITS = Long.SIZE;
 
     private final HugeAtomicLongArray bits;
     private final long numBits;
+    private final int remainder;
 
     public static HugeAtomicBitSet create(long size, AllocationTracker tracker) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
-        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, tracker), size);
+        int remainder = (int) (size % NUM_BITS);
+        return new HugeAtomicBitSet(HugeAtomicLongArray.newArray(wordsSize, tracker), size, remainder);
     }
 
-    private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits) {
+    private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {
         this.bits = bits;
         this.numBits = numBits;
+        this.remainder = remainder;
     }
 
     /**
@@ -199,6 +202,20 @@ public final class HugeAtomicBitSet {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns true iff all bits are set.
+     * <p>
+     * Note: this method is not thread-safe.
+     */
+    public boolean allSet() {
+        for (long wordIndex = 0; wordIndex < bits.size() - 1; wordIndex++) {
+            if (Long.bitCount(bits.get(wordIndex)) < NUM_BITS) {
+                return false;
+            }
+        }
+        return Long.bitCount(bits.get(bits.size() - 1)) >= remainder;
     }
 
     /**
