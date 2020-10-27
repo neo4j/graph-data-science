@@ -9,6 +9,8 @@ This chapter explains advanced details with regards to common Neo4j components.
 This chapter is divided into the following sections:
 
 * <<transaction-handling>>
+* <<fabric>>
 
 
 include::transaction-handling.adoc[leveloffset=+1]
+include::fabric.adoc[leveloffset=+1]
