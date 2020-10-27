@@ -43,7 +43,7 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
     public PregelSchema schema() {
         return new PregelSchema.Builder()
             .add(TRIANGLE_COUNT, ValueType.LONG)
-            .add(NEIGHBOURS, ValueType.LONG_ARRAY)
+            .add(NEIGHBOURS, ValueType.LONG_ARRAY, PregelSchema.Visibility.PRIVATE)
             .build();
     }
 
