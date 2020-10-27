@@ -1,0 +1,79 @@
+[[fabric]]
+= Using GDS and Fabric
+
+[abstract]
+--
+This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment.
+--
+
+Neo4j Fabric is a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
+For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/current/fabric/introduction/?ref=blog[documentation].
+
+This section includes:
+
+* <<fabric-shard>>
+
+//- Single Shard Queries
+//  - Concept
+//  - Setup
+//  - examples
+//- GDS on the proxy
+//  - Concept
+//  - Setup
+//  - examples
+//- Limitations
+
+[[fabric-shard]]
+== Running GDS on the Shards
+
+In this mode of using GDS in a Fabric environment, the GDS operations are executed on the shards.
+The graph projections and algorithms are then executed on each shard individually, and the results can be combined via the Fabric proxy.
+This scenario is useful, if the graph is partitioned into disjoint subgraphs across shards, i.e. there is no logical relationship between nodes on different shards.
+Another usecase is to replicate the graph's topology across multiples shards, where some shards act as operational and others as analytical databases.
+
+[[fabric-shard-setup]]
+=== Setup
+
+In this scenario we need to set up the shards to run the Neo4j Graph Data Science library.
+
+Every shard that will run the Graph Data Science library should be configured just as a standalone GDS database would be, for more information see <<installation, Installation>>.
+
+The Fabric proxy nodes do not require any special configuration, the GDS library jar file is not needed.
+In general proxy should be configured to handle the amount of data received from the shards.
+
+[[fabric-shard-examples]]
+=== Examples
+
+Let's assume we have a fabric setup with two shards.
+On shard functions as the operational database and holds a graph with the schema `(Person)-[KNOWS]->(Person)`.
+Every `Person` node also stores a unique identifier `id` and the persons `name` and possibly other properties.
+
+The other shard, the analytical database, stores a graph with the same data, except that the only property is the unique person identifier.
+
+Using Fabric we can now calculate the PageRank score for each Person and retrieve it together with the name of that Person.
+
+[source, cypher]
+----
+CALL {
+  USE FABRIC_DB_NAME.ANALYTICS_DB
+  CALL gds.pagerank.stream({nodeProjection: 'Person', relationshipProjection: 'KNOWS'})
+  YIELD id AS nodeId, pageRank
+  RETURN gds.util.asNode(nodeId).id as personId, pageRank
+}
+CALL {
+  USE FABRIC_DB_NAME.OPERATIONAL_DB
+  WITH personId
+  MATCH (p {id: personId})
+  RETURN p.name AS name
+}
+RETURN name, personId, pageRank
+----
+
+The query first connects to the analytical database where the PageRank is calculated on an anonymous graph.
+The algorithm results are then streamed back to the proxy, together with the unique node id.
+For every row returned by the first subquery, the operational database is then queried for the persons name, again using the unique node id to identify the `Person` node across the shards.
+
+
+
+
+
