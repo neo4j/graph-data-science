@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  *
@@ -65,18 +64,10 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
             }
             // to later allow sorted merge
             Arrays.sort(neighbours);
-            // dummy message to get next iteration
-            context.sendTo(context.nodeId(), 0);
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {
             long[] neighbours = context.longArrayNodeValue(NEIGHBOURS);
             long nodeA = context.nodeId();
             long trianglesFromNodeA = 0;
-
-            // Consume dummy message
-            Iterator<Double> iterator = messages.iterator();
-            while(iterator.hasNext()) {
-                iterator.next();
-            }
 
             long lastNodeB = -1;
             for (long nodeB : neighbours) {
@@ -120,7 +111,7 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
             // free arrays again
             context.setNodeValue(NEIGHBOURS, (long[]) null);
             long triangles = context.longNodeValue(TRIANGLE_COUNT);
-            for (Double message : messages) {
+            for (Double ignored : messages) {
                 triangles++;
             }
 

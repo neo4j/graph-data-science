@@ -61,7 +61,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
                 context.setNodeValue(LEVEL, level);
                 context.sendToNeighbors(level + 1);
             }
-            context.voteToHalt();
         }
+        context.voteToHalt();
     }
 }
