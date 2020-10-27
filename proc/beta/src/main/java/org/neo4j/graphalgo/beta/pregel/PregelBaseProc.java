@@ -43,33 +43,36 @@ final class PregelBaseProc {
         var schema = compositeNodeValue.schema();
         // TODO change this to generic prefix setting
 
-        return schema.elements().stream().map(schemaElement -> {
+        return schema.elements()
+            .stream()
+            .filter(element -> element.visibility() == PregelSchema.Visibility.PUBLIC)
+            .map(element -> {
+                var propertyKey = element.propertyKey();
 
-            var propertyKey = schemaElement.propertyKey();
+                NodeProperties nodeProperties;
+                switch (element.propertyType()) {
+                    case LONG:
+                        nodeProperties = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
+                        break;
+                    case DOUBLE:
+                        nodeProperties = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
+                        break;
+                    case LONG_ARRAY:
+                        nodeProperties = (LongArrayNodeProperties) compositeNodeValue.longArrayProperties(propertyKey)::get;
+                        break;
+                    case DOUBLE_ARRAY:
+                        nodeProperties = (DoubleArrayNodeProperties) compositeNodeValue.doubleArrayProperties(
+                            propertyKey)::get;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
+                }
 
-            NodeProperties nodeProperties;
-            switch (schemaElement.propertyType()) {
-                case LONG:
-                    nodeProperties = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
-                    break;
-                case DOUBLE:
-                    nodeProperties = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
-                    break;
-                case LONG_ARRAY:
-                    nodeProperties = (LongArrayNodeProperties) compositeNodeValue.longArrayProperties(propertyKey)::get;
-                    break;
-                case DOUBLE_ARRAY:
-                    nodeProperties = (DoubleArrayNodeProperties) compositeNodeValue.doubleArrayProperties(propertyKey)::get;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unsupported property type: " + schemaElement.propertyType());
-            }
-
-            return ImmutableNodeProperty.of(
-                formatWithLocale("%s%s", propertyPrefix, propertyKey),
-                nodeProperties
-            );
-        }).collect(Collectors.toList());
+                return ImmutableNodeProperty.of(
+                    formatWithLocale("%s%s", propertyPrefix, propertyKey),
+                    nodeProperties
+                );
+            }).collect(Collectors.toList());
     }
 
     private PregelBaseProc() {}
