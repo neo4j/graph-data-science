@@ -34,7 +34,7 @@ public interface NodePropertiesConfig {
      * Returns true iff all properties must exist for each node label.
      */
     @Configuration.Ignore
-    default boolean forAllLabels() {
+    default boolean propertiesMustExistForEachNodeLabel() {
         return true;
     }
 }
