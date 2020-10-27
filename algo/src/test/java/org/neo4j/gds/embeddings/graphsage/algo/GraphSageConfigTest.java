@@ -19,12 +19,20 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,5 +71,120 @@ class GraphSageTrainConfigTest {
             ))
         );
         assertFalse(singleLabelConfig.isMultiLabel());
+    }
+
+    @Nested
+    class MultiLabelGraphSageConfigProcTest {
+
+        private static final String GRAPH =
+            "CREATE" +
+            "  (dan:Person {age: 20, height: 185, weight: 75})," +
+            "  (annie:Person {age: 12, height: 124, weight: 42})," +
+            "  (matt:Person {age: 67, height: 170, weight: 80})," +
+            "  (jeff:Person {age: 45, height: 192, weight: 85})," +
+            "  (brie:Person {age: 27, height: 176, weight: 57})," +
+            "  (elsa:Person {age: 32, height: 158, weight: 55})," +
+            "  (john:Person {age: 35, height: 172, weight: 76})," +
+            "  (dan)-[:KNOWS]->(annie)," +
+            "  (dan)-[:KNOWS]->(matt)," +
+            "  (annie)-[:KNOWS]->(matt)," +
+            "  (annie)-[:KNOWS]->(jeff)," +
+            "  (annie)-[:KNOWS]->(brie)," +
+            "  (matt)-[:KNOWS]->(brie)," +
+            "  (brie)-[:KNOWS]->(elsa)," +
+            "  (brie)-[:KNOWS]->(jeff)," +
+            "  (john)-[:KNOWS]->(jeff)," +
+            "  (guitar:Instrument {cost: 1337.0})," +
+            "  (synth:Instrument {cost: 1337.0})," +
+            "  (bongos:Instrument {cost: 42.0})," +
+            "  (trumpet:Instrument {cost: 1337.0})," +
+            "  (dan)-[:LIKES]->(guitar)," +
+            "  (dan)-[:LIKES]->(synth)," +
+            "  (dan)-[:LIKES]->(bongos)," +
+            "  (annie)-[:LIKES]->(guitar)," +
+            "  (annie)-[:LIKES]->(synth)," +
+            "  (matt)-[:LIKES]->(bongos)," +
+            "  (brie)-[:LIKES]->(guitar)," +
+            "  (brie)-[:LIKES]->(synth)," +
+            "  (brie)-[:LIKES]->(bongos)," +
+            "  (john)-[:LIKES]->(trumpet)";
+
+        private GraphStoreWithConfig store;
+
+        @BeforeEach
+        void setUp() {
+            store = ImmutableGraphStoreWithConfig.of(
+                GdlFactory.of(GRAPH).build().graphStore(),
+                GraphCreateFromStoreConfig.emptyWithName("", "persons")
+            );
+        }
+
+        @Test
+        void testMissingPropertyForSingleLabel() {
+            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("singleLabel")
+                .addFeatureProperties("doesnotexist")
+                .addNodeLabel("Person")
+                .build();
+
+            assertThatIllegalArgumentException().isThrownBy(
+                () -> singleLabelConfig.validateAgainstGraphStore(store)
+            ).withMessage("Node properties [doesnotexist] not found in graph with node properties: [weight, age, height] in all node labels: ['Person']");
+        }
+
+        @Test
+        void testMissingPropertyForMultiLabel() {
+            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("singleLabel")
+                .addFeatureProperties("doesnotexist")
+                .addNodeLabels("Person", "Instrument")
+                .projectedFeatureDimension(4)
+                .build();
+
+            assertThatIllegalArgumentException().isThrownBy(
+                () -> singleLabelConfig.validateAgainstGraphStore(store)
+            ).withMessage("Each property set in `nodePropertyNames` must exist for one label. Missing properties: [doesnotexist]");
+        }
+
+        @Test
+        void testMissingPropertyForAnyMultiLabel() {
+            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("singleLabel")
+                .addFeatureProperties("age")
+                .addNodeLabels("Person", "Instrument")
+                .projectedFeatureDimension(4)
+                .build();
+
+            assertThatIllegalArgumentException().isThrownBy(
+                () -> singleLabelConfig.validateAgainstGraphStore(store)
+            ).withMessage("Each label must have at least one of the properties set in `nodePropertyNames`. Labels with missing properties: ['Instrument']");
+        }
+
+        @Test
+        void testValidConfiguration() {
+            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("singleLabel")
+                .addFeatureProperties("age", "height", "weight")
+                .addNodeLabel("Person")
+                .addRelationshipType("KNOWS")
+                .build();
+
+            assertThatNoException().isThrownBy(
+                () -> singleLabelConfig.validateAgainstGraphStore(store)
+            );
+
+            var multiLabelConfig = ImmutableGraphSageTrainConfig.builder()
+                .from(singleLabelConfig)
+                .addFeatureProperties("cost")
+                .modelName("multiLabel")
+                .addNodeLabel("Instrument")
+                .addRelationshipType("KNOWS")
+                .projectedFeatureDimension(4)
+                .build();
+
+            assertThatNoException().isThrownBy(
+                () -> multiLabelConfig.validateAgainstGraphStore(store)
+            );
+        }
     }
 }
