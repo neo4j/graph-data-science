@@ -195,23 +195,41 @@ Consider the graph created by the following Cypher statement:
 [source, cypher, role=setup-query]
 ----
 CREATE
-  (Dan:Person{ name: 'Dan', age: 20, height: 185, weight: 75 }),
-  (Annie:Person{ name: 'Annie', age: 12, height: 124, weight: 42 }),
-  (Matt:Person{ name: 'Matt', age: 67, height: 170, weight: 80 }),
-  (Jeff:Person{ name: 'Jeff', age: 45, height: 192, weight: 85 }),
-  (Brie:Person{ name: 'Brie', age: 27, height: 176, weight: 57 }),
-  (Elsa:Person{ name: 'Elsa', age: 32, height: 158, weight: 55 }),
-  (John:Person{ name: 'John', age: 35, height: 172, weight: 76 }),
+  // Persons
+  (dan:Person {name: 'Dan', age: 20, height: 185, weight: 75}),
+  (annie:Person {name: 'Annie', age: 12, height: 124, weight: 42}),
+  (matt:Person {name: 'Matt', age: 67, height: 170, weight: 80}),
+  (jeff:Person {name: 'Jeff', age: 45, height: 192, weight: 85}),
+  (brie:Person {name: 'Brie', age: 27, height: 176, weight: 57}),
+  (elsa:Person {name: 'Elsa', age: 32, height: 158, weight: 55}),
+  (john:Person {name: 'John', age: 35, height: 172, weight: 76}),
 
-  (Dan)-[:REL { relWeight: 1.0 }]->(Annie),
-  (Dan)-[:REL { relWeight: 1.6 }]->(Matt),
-  (Annie)-[:REL { relWeight: 0.1 }]->(Matt),
-  (Annie)-[:REL { relWeight: 3.0 }]->(Jeff),
-  (Annie)-[:REL { relWeight: 1.2 }]->(Brie),
-  (Matt)-[:REL { relWeight: 10.0 }]->(Brie),
-  (Brie)-[:REL { relWeight: 1.0 }]->(Elsa),
-  (Brie)-[:REL { relWeight: 2.2 }]->(Jeff),
-  (John)-[:REL { relWeight: 5.0 }]->(Jeff);
+  (dan)-[:KNOWS {relWeight: 1.0}]->(annie),
+  (dan)-[:KNOWS {relWeight: 1.6}]->(matt),
+  (annie)-[:KNOWS {relWeight: 0.1}]->(matt),
+  (annie)-[:KNOWS {relWeight: 3.0}]->(jeff),
+  (annie)-[:KNOWS {relWeight: 1.2}]->(brie),
+  (matt)-[:KNOWS {relWeight: 10.0}]->(brie),
+  (brie)-[:KNOWS {relWeight: 1.0}]->(elsa),
+  (brie)-[:KNOWS {relWeight: 2.2}]->(jeff),
+  (john)-[:KNOWS {relWeight: 5.0}]->(jeff),
+
+  // Instruments
+  (guitar:Instrument {name: 'Guitar', cost: 1337.0}),
+  (synth:Instrument {name: 'Synthesizer', cost: 1337.0}),
+  (bongos:Instrument {name: 'Bongos', cost: 42.0}),
+  (trumpet:Instrument {name: 'Trumpet', cost: 1337.0}),
+
+  (dan)-[:LIKES]->(guitar),
+  (dan)-[:LIKES]->(synth),
+  (dan)-[:LIKES]->(bongos),
+  (annie)-[:LIKES]->(guitar),
+  (annie)-[:LIKES]->(synth),
+  (matt)-[:LIKES]->(bongos),
+  (brie)-[:LIKES]->(guitar),
+  (brie)-[:LIKES]->(synth),
+  (brie)-[:LIKES]->(bongos),
+  (john)-[:LIKES]->(trumpet)
 ----
 
 [source, cypher, role=graph-create-query]
@@ -222,12 +240,20 @@ CALL gds.graph.create(
     Person: {
       label: 'Person',
       properties: ['age', 'height', 'weight']
+    },
+    Instrument: {
+      label: 'Instrument',
+      properties: ['cost']
     }
   }, {
-    R: {
-      type: 'REL',
+    KNOWS: {
+      type: 'KNOWS',
       orientation: 'UNDIRECTED',
       properties: ['relWeight']
+    },
+    LIKES: {
+      type: 'LIKES',
+      orientation: 'UNDIRECTED'
     }
 })
 ----
@@ -252,12 +278,46 @@ CALL gds.beta.graphSage.train(
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
-    degreeAsProperty: true
+    degreeAsProperty: true,
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 )
 ----
 
 WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
+
+=== Train with multiple node labels
+
+In order to work with multiple labels, we need to project the feature properties into a common feature space of the same dimension.
+By specifying `projectedFeatureDimension`, two things happen:
+
+. A property representing the label is added to the feature properties for that label
+. The feature properties for each label are projected into a feature vector of a shared dimension
+
+Because of this projection, labels with different sets of properties can be used as input for GraphSAGE.
+The properties for all nodes are still given in the `featureProperties` configuration parameter.
+
+The projection happens by generating a matrix of random weights per label.
+This matrix has the same number of columns as feature properties for that label.
+The number of rows is the projected feature dimension.
+By multiplying a nodes' values with the weight matrix for its label, we arrive at a feature vector of the shared dimension.
+
+[source, cypher, role=query-example, no-result=true]
+----
+CALL gds.beta.graphSage.train(
+  'persons',
+  {
+    modelName: 'multiLabelModel',
+    nodePropertyNames: ['age', 'height', 'weight', 'cost'],
+    projectedFeatureDimension: 4,
+    nodeLabels: ['Person', 'Instrument'],
+    relationshipTypes: ['KNOWS', 'LIKES']
+  }
+)
+----
+
+Without using `projectedFeatureDimension`, GraphSAGE can only operate on a monopartite graph.
 
 === Train with relationship weights
 
@@ -275,14 +335,15 @@ CALL gds.beta.graphSage.train(
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
     degreeAsProperty: true,
-    relationshipWeightProperty: 'relWeight'
+    relationshipWeightProperty: 'relWeight',
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 )
 ----
 
 Relationship weights are only used during GraphSage training.
 The trained models can then be used to stream or write back the generated node embeddings.
-
 
 === Stream
 
@@ -298,7 +359,9 @@ CALL gds.beta.graphSage.train(
     modelName: 'graphSage',
     featureProperties: ['age', 'height', 'weight'],
     embeddingDimension: 3,
-    degreeAsProperty: true
+    degreeAsProperty: true,
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 )
 ----
@@ -310,7 +373,9 @@ Once we have trained a model (named `'graphSage'`) we can use it to generate and
 CALL gds.beta.graphSage.stream(
   'persons',
   {
-    modelName: 'graphSage'
+    modelName: 'graphSage',
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 )
 ----
@@ -342,7 +407,9 @@ CALL gds.beta.graphSage.mutate(
   'persons',
   {
     mutateProperty: 'inMemoryEmbedding',
-    modelName: 'graphSage'
+    modelName: 'graphSage',
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 ) YIELD
   nodeCount,
@@ -369,7 +436,9 @@ CALL gds.beta.graphSage.write(
   'persons',
   {
     writeProperty: 'embedding',
-    modelName: 'graphSage'
+    modelName: 'graphSage',
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 ) YIELD
   nodeCount,

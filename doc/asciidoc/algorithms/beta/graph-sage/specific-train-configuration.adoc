@@ -8,6 +8,7 @@
 | activationFunction         | String        | "sigmoid" | yes      | The activation function to be used in the model architecture. Supported values are "sigmoid" and "relu".
 | sampleSizes                | List<Integer> | [25, 10]  | yes      | A list of Integer values, the size of the list determines the number of layers and the values determine how many nodes will be sampled by the layers.
 | featureProperties          | List<String>  | []        | yes      | A list of node property names. All property names must exist in the in-memory graph and be of type Float.
+| projectedFeatureDimension  | Integer       | n/a       | yes      | <TODO:> The dimension to which features will be projected
 | batchSize                  | Integer       | 100       | yes      | The number of nodes per batch.
 | tolerance                  | Float         | 1e-4      | yes      | Tolerance controls the training cycles. The training will complete when the loss change is lower than the tolerance value, regardless of other halting criteria.
 | learningRate               | Float         | 0.1       | yes      | Controls the size of updates during training.
