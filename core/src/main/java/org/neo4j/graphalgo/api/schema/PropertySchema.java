@@ -31,7 +31,7 @@ public interface PropertySchema {
     DefaultValue defaultValue();
 
     static PropertySchema of(ValueType valueType) {
-        return ImmutablePropertySchema.of(valueType, valueType.defaultFallbackValue());
+        return ImmutablePropertySchema.of(valueType, valueType.fallbackValue());
     }
 
     static PropertySchema of(ValueType valueType, DefaultValue defaultValue) {

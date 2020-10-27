@@ -28,9 +28,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extends ElementIdentifier, PS extends PropertySchema> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHEMA>, I extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
 
-    Map<I, Map<String, PS>> properties();
+    Map<I, Map<String, PROPERTY_SCHEMA>> properties();
 
     SELF filter(Set<I> elementIdentifieresToKeep);
 
@@ -50,7 +50,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extend
         ));
     }
 
-    default Map<I, Map<String, PS>> filterProperties(Set<I> identifiersToKeep) {
+    default Map<I, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<I> identifiersToKeep) {
         return properties()
             .entrySet()
             .stream()
@@ -59,7 +59,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PS>, I extend
 
     }
 
-    default Map<I, Map<String, PS>> unionProperties(Map<I, Map<String, PS>> rightProperties) {
+    default Map<I, Map<String, PROPERTY_SCHEMA>> unionProperties(Map<I, Map<String, PROPERTY_SCHEMA>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()

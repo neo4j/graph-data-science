@@ -29,10 +29,8 @@ public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();
 
-    static RelationshipPropertySchema of(
-        ValueType valueType
-    ) {
-        return ImmutableRelationshipPropertySchema.of(valueType, valueType.defaultFallbackValue(), Aggregation.DEFAULT);
+    static RelationshipPropertySchema of(ValueType valueType) {
+        return ImmutableRelationshipPropertySchema.of(valueType, valueType.fallbackValue(), Aggregation.DEFAULT);
     }
 
     static RelationshipPropertySchema of(

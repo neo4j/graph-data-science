@@ -106,10 +106,11 @@ public abstract class PropertyMapping {
             }
 
             Object defaultValue = propertyMap.get(DEFAULT_VALUE_KEY);
+            boolean isUserDefined = propertyMap.containsKey(DEFAULT_VALUE_KEY);
             return PropertyMapping.of(
                 propertyKey,
                 neoPropertyKey,
-                DefaultValue.of(defaultValue, propertyMap.containsKey(DEFAULT_VALUE_KEY)),
+                DefaultValue.of(defaultValue, isUserDefined),
                 aggregation
             );
         } else {

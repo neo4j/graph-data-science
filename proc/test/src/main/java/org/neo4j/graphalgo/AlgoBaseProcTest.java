@@ -345,7 +345,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         configMap.put(NODE_PROPERTIES_KEY, Map.ofEntries(ImmutablePropertyMapping
                             .builder()
                             .propertyKey(nodeProperty)
-                            .defaultValue(DefaultValue.doubleDefaultValue())
+                            .defaultValue(DefaultValue.forDouble())
                             .build()
                             .toObject(false)
                         ));

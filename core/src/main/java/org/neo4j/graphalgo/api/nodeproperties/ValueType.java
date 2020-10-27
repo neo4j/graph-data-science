@@ -30,8 +30,8 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
-            return DefaultValue.longDefaultValue();
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forLong();
         }
     },
     DOUBLE {
@@ -41,8 +41,8 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
-            return DefaultValue.doubleDefaultValue();
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forDouble();
         }
     },
     DOUBLE_ARRAY {
@@ -52,8 +52,8 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
-            return DefaultValue.doubleArrayDefaultValue();
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forDoubleArray();
         }
     },
     FLOAT_ARRAY {
@@ -63,8 +63,8 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
-            return DefaultValue.floatArrayDefaultValue();
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forFloatArray();
         }
     },
     LONG_ARRAY {
@@ -74,8 +74,8 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
-            return DefaultValue.longArrayDefaultValue();
+        public DefaultValue fallbackValue() {
+            return DefaultValue.forLongArray();
         }
     },
     UNKNOWN {
@@ -85,14 +85,14 @@ public enum ValueType {
         }
 
         @Override
-        public DefaultValue defaultFallbackValue() {
+        public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
     };
 
     public abstract String cypherName();
 
-    public abstract DefaultValue defaultFallbackValue();
+    public abstract DefaultValue fallbackValue();
 
     public static ValueType fromNumberType(NumberType nt) {
         switch (nt) {

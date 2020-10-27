@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NodeSchemaTest {
 
     @Test
-    void testDefaultValuesAndAggregation() {
+    void testDefaultValues() {
         var label = NodeLabel.of("Foo");
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);

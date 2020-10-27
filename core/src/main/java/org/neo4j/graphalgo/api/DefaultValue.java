@@ -56,31 +56,31 @@ public final class DefaultValue {
         return of(defaultValue, false);
     }
 
-    public static DefaultValue intDefaultValue() {
+    public static DefaultValue forInt() {
         return DefaultValue.ofFallBackValue(INTEGER_DEFAULT_FALLBACK);
     }
 
-    public static DefaultValue longDefaultValue() {
+    public static DefaultValue forLong() {
         return DefaultValue.ofFallBackValue(LONG_DEFAULT_FALLBACK);
     }
 
-    public static DefaultValue doubleDefaultValue() {
+    public static DefaultValue forDouble() {
         return DefaultValue.ofFallBackValue(DOUBLE_DEFAULT_FALLBACK);
     }
 
-    public static DefaultValue floatDefaultValue() {
+    public static DefaultValue forFloat() {
         return DefaultValue.ofFallBackValue(FLOAT_DEFAULT_FALLBACK);
     }
 
-    public static DefaultValue longArrayDefaultValue() {
+    public static DefaultValue forLongArray() {
         return DefaultValue.DEFAULT;
     }
 
-    public static DefaultValue floatArrayDefaultValue() {
+    public static DefaultValue forFloatArray() {
         return DefaultValue.DEFAULT;
     }
 
-    public static DefaultValue doubleArrayDefaultValue() {
+    public static DefaultValue forDoubleArray() {
         return DefaultValue.DEFAULT;
     }
 

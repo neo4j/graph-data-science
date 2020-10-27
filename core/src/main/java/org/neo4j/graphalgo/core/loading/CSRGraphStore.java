@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -110,7 +111,9 @@ public final class CSRGraphStore implements GraphStore {
                     propertyMapping.propertyKey(),
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue().isUserDefined() ? propertyMapping.defaultValue() : propertyValues.valueType().defaultFallbackValue()
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : propertyValues.valueType().fallbackValue()
                 )
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
@@ -126,7 +129,9 @@ public final class CSRGraphStore implements GraphStore {
                     NumberType.FLOATING_POINT,
                     PropertyState.PERSISTENT,
                     propertyValues,
-                    propertyMapping.defaultValue().isUserDefined() ? propertyMapping.defaultValue() : ValueType.fromNumberType(NumberType.FLOATING_POINT).defaultFallbackValue(),
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
                     propertyMapping.aggregation()
                 )
             ));
@@ -157,21 +162,49 @@ public final class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType = RelationshipType.of(relationshipTypeString);
         Map<RelationshipType, Relationships.Topology> topology = singletonMap(relationshipType, relationships.topology());
 
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = constructNodePropertiesFromGraph(graph);
+
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = constructRelationshipPropertiesFromGraph(
+            graph,
+            relationshipProperty,
+            relationships,
+            relationshipType
+        );
+
+        return CSRGraphStore.of(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+    }
+
+    @NotNull
+    private static Map<NodeLabel, Map<PropertyMapping, NodeProperties>> constructNodePropertiesFromGraph(HugeGraph graph) {
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = new HashMap<>();
         nodeProperties.put(
             ALL_NODES,
-            graph.schema().nodeSchema().properties().values().stream().flatMap(map -> map.entrySet().stream()).collect(toMap(
-                entry -> {
-                    ImmutablePropertyMapping.Builder propertyMappingBuilder = ImmutablePropertyMapping
+            graph
+                .schema()
+                .nodeSchema()
+                .properties()
+                .values()
+                .stream()
+                .flatMap(map -> map.entrySet().stream())
+                .collect(toMap(
+                    entry -> ImmutablePropertyMapping
                         .builder()
-                        .propertyKey(entry.getKey());
-                    propertyMappingBuilder.defaultValue(entry.getValue().defaultValue());
-                    return propertyMappingBuilder.build();
-                },
-                entry -> graph.nodeProperties(entry.getKey())
-            ))
+                        .propertyKey(entry.getKey())
+                        .defaultValue(entry.getValue().defaultValue())
+                        .build(),
+                    entry -> graph.nodeProperties(entry.getKey())
+                ))
         );
+        return nodeProperties;
+    }
 
+    @NotNull
+    private static Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> constructRelationshipPropertiesFromGraph(
+        HugeGraph graph,
+        Optional<String> relationshipProperty,
+        Relationships relationships,
+        RelationshipType relationshipType
+    ) {
         Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = Collections.emptyMap();
         if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
             Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
@@ -179,7 +212,13 @@ public final class CSRGraphStore implements GraphStore {
                 .relationshipSchema()
                 .properties()
                 .get(relationshipType);
-            assert relationshipPropertySchemas.size() == 1;
+
+            if (relationshipPropertySchemas.size() != 1) {
+                throw new IllegalStateException(formatWithLocale(
+                    "Relationship schema is expected to have exactly one property but had %s",
+                    relationshipPropertySchemas.size()
+                ));
+            }
 
             RelationshipPropertySchema relationshipPropertySchema = relationshipPropertySchemas
                 .values()
@@ -199,8 +238,7 @@ public final class CSRGraphStore implements GraphStore {
                 singletonMap(propertyMapping, relationships.properties().get())
             );
         }
-
-        return CSRGraphStore.of(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+        return relationshipProperties;
     }
 
     private CSRGraphStore(
@@ -518,7 +556,7 @@ public final class CSRGraphStore implements GraphStore {
                     propertyType,
                     PropertyState.TRANSIENT,
                     properties,
-                    ValueType.fromNumberType(propertyType).defaultFallbackValue(),
+                    ValueType.fromNumberType(propertyType).fallbackValue(),
                     Aggregation.NONE
                 )
             ).build();

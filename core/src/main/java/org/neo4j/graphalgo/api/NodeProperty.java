@@ -45,7 +45,7 @@ interface NodeProperty {
         GraphStore.PropertyState origin,
         NodeProperties values
     ) {
-        return ImmutableNodeProperty.of(key, origin, values, values.valueType().defaultFallbackValue());
+        return ImmutableNodeProperty.of(key, origin, values, values.valueType().fallbackValue());
     }
 
     static NodeProperty of(

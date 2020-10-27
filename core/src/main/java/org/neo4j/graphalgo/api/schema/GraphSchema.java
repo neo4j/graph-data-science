@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface GraphSchema {
@@ -65,7 +66,7 @@ public interface GraphSchema {
     }
 
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
-        return propertySchema.valueType().cypherName(); // TODO: add default value and aggregation
+        return formatWithLocale("%s (defaultValue: %s)", propertySchema.valueType().cypherName(), propertySchema.defaultValue());
     }
 
     static GraphSchema empty() {

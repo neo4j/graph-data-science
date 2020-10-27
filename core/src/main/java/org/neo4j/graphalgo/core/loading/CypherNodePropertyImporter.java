@@ -112,7 +112,7 @@ public class CypherNodePropertyImporter {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
-                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), ValueType.DOUBLE.defaultFallbackValue()),
+                    builderEntry -> PropertyMapping.of(builderEntry.getKey(), ValueType.DOUBLE.fallbackValue()),
                     builderEntry -> builderEntry.getValue().build()
                 ))
             ));
