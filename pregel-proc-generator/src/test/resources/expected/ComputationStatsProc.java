@@ -71,8 +71,8 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
 
             @Override
             public MemoryEstimation memoryEstimation(PregelConfig configuration) {
-                var nodeSchema = new Computation().nodeSchema();
-                return Pregel.memoryEstimation(nodeSchema);
+                var schema = new Computation().schema();
+                return Pregel.memoryEstimation(schema);
             }
         };
     }
