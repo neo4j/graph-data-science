@@ -66,7 +66,14 @@ public interface GraphSchema {
     }
 
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
-        return formatWithLocale("%s (defaultValue: %s)", propertySchema.valueType().cypherName(), propertySchema.defaultValue());
+        if (propertySchema instanceof RelationshipPropertySchema) {
+            return formatWithLocale(
+                "%s (%s, Aggregation.%s)",
+                propertySchema.valueType().cypherName(),
+                propertySchema.defaultValue(),
+                ((RelationshipPropertySchema) propertySchema).aggregation());
+        }
+        return formatWithLocale("%s (%s)", propertySchema.valueType().cypherName(), propertySchema.defaultValue());
     }
 
     static GraphSchema empty() {
