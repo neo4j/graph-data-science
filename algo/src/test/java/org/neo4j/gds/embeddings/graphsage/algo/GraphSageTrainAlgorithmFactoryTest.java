@@ -74,7 +74,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("parameters")
     void memoryEstimation(
-        String testName,
+        @SuppressWarnings("unused") String testName,
         GraphSageTrainConfig config,
         GraphDimensions graphDimensions,
         LongUnaryOperator hugeObjectArraySize
@@ -117,14 +117,10 @@ class GraphSageTrainAlgorithmFactoryTest {
         }).sum();
 
         // features: HugeOA[nodeCount * double[featureSize]]
-        long minInitialFeaturesArray, maxInitialFeaturesArray;
-        if (config.isMultiLabel()) {
-            minInitialFeaturesArray = sizeOfDoubleArray(config.degreeAsProperty() ? 2 : 1);
-            maxInitialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
-        } else {
-            minInitialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
-            maxInitialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
-        }
+        long minInitialFeaturesArray = config.isMultiLabel()
+            ? sizeOfDoubleArray(config.degreeAsProperty() ? 2 : 1)
+            : sizeOfDoubleArray(config.featuresSize());
+        long maxInitialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
         var minInitialFeaturesMemory = hugeObjectArraySize.applyAsLong(minInitialFeaturesArray);
         var maxInitialFeaturesMemory = hugeObjectArraySize.applyAsLong(maxInitialFeaturesArray);
         var initialFeaturesMemory = MemoryRange.of(minInitialFeaturesMemory, maxInitialFeaturesMemory);
@@ -276,13 +272,14 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
         var firstLayerBatchNodeCount = batchSizes.get(0);
-        var featureSize = config.nodePropertyNames().size() + (config.degreeAsProperty() ? 1 : 0);
+        var featureSize = config.featuresSize();
         var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * featureSize);
         var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * featureSize);
         if (config.isMultiLabel()) {
-            // product of weights x nodeFeatures, per node in loop, so peaks only for one node
-            minFirstLayerMemory += sizeOfDoubleArray(config.featuresSize());
-            maxFirstLayerMemory += sizeOfDoubleArray(config.featuresSize());
+            // For every node, 1 row of features is multiplied with the transposed matrix of weights-rows x 1 col
+            // creating a new array of `projectedFeatureDimension` length, which is the same as config.featuresSize()
+            minFirstLayerMemory += sizeOfDoubleArray(featureSize);
+            maxFirstLayerMemory += sizeOfDoubleArray(featureSize);
         }
         aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
