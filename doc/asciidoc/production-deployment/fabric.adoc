@@ -9,10 +9,9 @@ This section describes how the Neo4j Graph Data Science library can be used in a
 Neo4j Fabric is a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
 For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/current/fabric/introduction/?ref=blog[documentation].
 
-This section includes:
-
-* <<fabric-shard>>
-* <<fabric-proxy>>
+A typical Neo4j Fabric setup consists of two components: one or more shards that hold the data and one or more Fabric proxies that coordinate the distributed queries.
+Currently, the way of running the Neo4j Graph Data Science library in a Fabric deployment is to run GDS on the shards.
+Executing GDS on a Fabric proxy is currently not supported.
 
 [[fabric-shard]]
 == Running GDS on the Shards
@@ -67,68 +66,6 @@ For every row returned by the first subquery, the operational database is then q
 [[fabric-shard-limitations]]
 === Limitations
 
-* It is not possible to run algorithms across shards, see <<fabric-proxy>>
-
-[[fabric-proxy]]
-== Running GDS on the Fabric Proxy
-
-In this mode of using GDS in a Fabric environment, the GDS operations are executed on the Fabric proxy.
-This allows to create a graph projection which includes data from multiple shards.
-
-[[fabric-proxy-setup]]
-=== Setup
-
-In this scenario we need to set up the fabric proxy to run the Neo4j Graph Data Science library.
-The installation procedure is very similar to what is described in the `Server` section of the <<installation, Installation guide>>.
-
-The fabric shards do not require the GDS library and can be configured just as any other Neo4j database.
-
-[[fabric-proxy-examples]]
-=== Examples
-
-Let's assume we have a graph with the schema `(Person)-[KNOWS]->(Person)`.
-This graph is partitioned into two shards, e.g. on shard stores all information about people in North America and the other one about people in Europe.
-Now we can use the Fabric proxy to project a graph that contains the data from both graphs.
-In order to fetch nodes and relationships from multiple shards we use Fabric queries as Cypher projections.
-
-[source, cypher]
-----
-CALL gds.graph.create.cypher(
- 'myGraph',
- 'CALL {
-    USE FABRIC_DB_NAME.NORTH_AMERICA
-    MATCH (p:Person)
-    RETURN p.id as id, p.name as name
-  } RETURN id, name
-  UNION
-  CALL {
-    USE FABRIC_DB_NAME.EUROPA
-    MATCH (p:Person)
-    RETURN p.id as id, p.name as name
-  } RETURN id, name
- ',
- 'CALL {
-    USE FABRIC_DB_NAME.NORTH_AMERICA
-    MATCH (p1:Person)-[KNOWS]-(p2:Person)
-    RETURN p1.id as source, p2.id as target
-  } RETURN source, target
-  UNION
-  CALL {
-    USE FABRIC_DB_NAME.EUROPA
-    MATCH (p1:Person)-[KNOWS]-(p2:Person)
-    RETURN p1.id as source, p2.id as target
-  } RETURN source, target
- '
-) YIELD nodeCount
-RETURN nodeCount
-----
-
-
-[[fabric-proxy-limitations]]
-=== Limitations
-
-* Only cypher projections are allowed. Native loading is not supported.
-* Data from all shards must fit on the proxy.
-* Writing results back to the shards is not supported.
+* It is not possible to run algorithms across shards.
 
 
