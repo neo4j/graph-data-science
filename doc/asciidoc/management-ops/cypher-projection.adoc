@@ -138,8 +138,9 @@ Similar to the default native projection, we can load node and relationship prop
 Both node and relationship queries must return their respective mandatory columns, i.e., `id`, `source` and `target`.
 If a query returns additional columns, those columns are used as node and relationship properties, respectively.
 
-The values stored in property columns need to be numeric.
-If a value is `null` a default value (`Double.NaN`) is loaded instead.
+Node property values can be of any supported type.
+Relationship property values need to be of numeric type.
+If a value is `null` a default value of the determined property type is loaded instead.
 If we want to use a different default value, the `coalesce` function can be used.
 For more information about the supported property types see <<node-properties, Node Properties>>.
 

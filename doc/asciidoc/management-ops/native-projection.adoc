@@ -460,6 +460,7 @@ Similar to node properties, relationship projections support specifying relation
 We can specify multiple relationship properties for each relationship projection using relationship property mappings.
 A relationship property mapping maps a user-defined property key to a property key in the Neo4j database.
 The parameter is configured using a map in which each key refers to a user-defined property key.
+Relationships only support numeric properties.
 
 The following map-like syntax shows the general way of defining relationship property mappings:
 
