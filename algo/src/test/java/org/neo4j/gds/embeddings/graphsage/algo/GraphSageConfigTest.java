@@ -147,20 +147,6 @@ class GraphSageTrainConfigTest {
         }
 
         @Test
-        void testMissingPropertyForAnyMultiLabel() {
-            var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
-                .modelName("singleLabel")
-                .addFeatureProperties("age")
-                .addNodeLabels("Person", "Instrument")
-                .projectedFeatureDimension(4)
-                .build();
-
-            assertThatIllegalArgumentException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store)
-            ).withMessage("Each label must have at least one of the properties set in `nodePropertyNames`. Labels with missing properties: ['Instrument']");
-        }
-
-        @Test
         void testValidConfiguration() {
             var singleLabelConfig = ImmutableGraphSageTrainConfig.builder()
                 .modelName("singleLabel")

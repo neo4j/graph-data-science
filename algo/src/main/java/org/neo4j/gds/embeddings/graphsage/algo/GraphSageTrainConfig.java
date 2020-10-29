@@ -245,21 +245,6 @@ public interface GraphSageTrainConfig extends
                     missingProperties
                 ));
             }
-
-            var labelsWithoutProperties = nodeLabels
-                .stream()
-                .filter(nodeLabel -> graphStore
-                    .nodePropertyKeys(nodeLabel)
-                    .stream()
-                    .noneMatch(nodePropertyNames::contains))
-                .map(NodeLabel::name)
-                .collect(Collectors.toSet());
-            if (!labelsWithoutProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Each label must have at least one of the properties set in `featureProperties`. Labels with missing properties: %s",
-                    StringJoining.join(labelsWithoutProperties)
-                ));
-            }
         }
     }
 }
