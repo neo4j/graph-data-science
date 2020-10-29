@@ -300,10 +300,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         return Stream.of(
             Arguments.of(
                 PROJECTED_FEATURE_DIMENSION,
-                "Node properties [foo] not found in graph with node properties: [] in all node labels: ['__ALL__']"
+                "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
             ), Arguments.of(
                 5,
-                "Each property set in `featureProperties` must exist for one label. Missing properties: [foo]"
+                "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
             )
         );
     }

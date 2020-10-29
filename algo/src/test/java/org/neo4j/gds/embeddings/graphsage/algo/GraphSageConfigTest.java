@@ -129,7 +129,7 @@ class GraphSageTrainConfigTest {
 
             assertThatIllegalArgumentException().isThrownBy(
                 () -> singleLabelConfig.validateAgainstGraphStore(store)
-            ).withMessage("Node properties [doesnotexist] not found in graph with node properties: [weight, age, height] in all node labels: ['Person']");
+            ).withMessage("The following node properties are not present for each label in the graph: [doesnotexist]. Properties that exist for each label are [weight, age, height]");
         }
 
         @Test
@@ -143,7 +143,7 @@ class GraphSageTrainConfigTest {
 
             assertThatIllegalArgumentException().isThrownBy(
                 () -> singleLabelConfig.validateAgainstGraphStore(store)
-            ).withMessage("Each property set in `nodePropertyNames` must exist for one label. Missing properties: [doesnotexist]");
+            ).withMessage("Each property set in `featureProperties` must exist for at least one label. Missing properties: [doesnotexist]");
         }
 
         @Test
