@@ -249,6 +249,7 @@ public class GraphSageModelTrainer {
         Variable<Scalar> lossFunction = new GraphSageLoss(
             relationshipWeights,
             embeddingVariable,
+            totalBatch,
             negativeSampleWeight
         );
 
