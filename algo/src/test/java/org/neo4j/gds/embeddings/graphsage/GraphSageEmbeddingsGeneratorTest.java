@@ -58,7 +58,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var config = ImmutableGraphSageTrainConfig.builder()
             .aggregator(aggregatorType)
             .embeddingDimension(EMBEDDING_DIMENSION)
-            .nodePropertyNames(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
+            .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
             .build();
         var features = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
@@ -89,7 +89,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var config = ImmutableGraphSageTrainConfig.builder()
             .aggregator(aggregatorType)
             .modelName(MODEL_NAME)
-            .nodePropertyNames(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(EMBEDDING_DIMENSION)
             .projectedFeatureDimension(5)
             .build();

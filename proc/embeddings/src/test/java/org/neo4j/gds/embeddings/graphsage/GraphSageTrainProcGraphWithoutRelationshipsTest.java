@@ -74,7 +74,7 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
         String train = GdsCypher.call().explicitCreation(GRAPH_NAME)
             .algo("gds.beta.graphSage")
             .trainMode()
-            .addParameter("nodePropertyNames", List.of("age"))
+            .addParameter("featureProperties", List.of("age"))
             .addParameter("embeddingDimension", 1)
             .addParameter("modelName", modelName)
             .yields();

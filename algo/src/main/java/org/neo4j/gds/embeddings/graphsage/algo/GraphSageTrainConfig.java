@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.config.NodePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -51,7 +51,7 @@ public interface GraphSageTrainConfig extends
     ToleranceConfig,
     EmbeddingDimensionConfig,
     RelationshipWeightConfig,
-    NodePropertiesConfig {
+    FeaturePropertiesConfig {
 
     int PROJECTED_FEATURE_DIMENSION = -1;
 
@@ -156,14 +156,14 @@ public interface GraphSageTrainConfig extends
     default int featuresSize() {
         return isMultiLabel()
             ? projectedFeatureDimension()
-            : nodePropertyNames().size() + (degreeAsProperty() ? 1 : 0);
+            : featureProperties().size() + (degreeAsProperty() ? 1 : 0);
     }
 
     @Value.Check
     default void validate() {
-        if (nodePropertyNames().isEmpty() && !degreeAsProperty()) {
+        if (featureProperties().isEmpty() && !degreeAsProperty()) {
             throw new IllegalArgumentException(
-                "GraphSage requires at least one property. Either `nodePropertyNames` or `degreeAsProperty` must be set."
+                "GraphSage requires at least one property. Either `featureProperties` or `degreeAsProperty` must be set."
             );
         }
     }
@@ -188,7 +188,7 @@ public interface GraphSageTrainConfig extends
         Aggregator.AggregatorType aggregator,
         int batchSize,
         int embeddingDimension,
-        List<String> nodePropertyNames,
+        List<String> featureProperties,
         double tolerance
     ) {
         return ImmutableGraphSageTrainConfig.builder()
@@ -197,7 +197,7 @@ public interface GraphSageTrainConfig extends
             .aggregator(aggregator)
             .batchSize(batchSize)
             .embeddingDimension(embeddingDimension)
-            .nodePropertyNames(nodePropertyNames)
+            .featureProperties(featureProperties)
             .tolerance(tolerance)
             .build();
     }

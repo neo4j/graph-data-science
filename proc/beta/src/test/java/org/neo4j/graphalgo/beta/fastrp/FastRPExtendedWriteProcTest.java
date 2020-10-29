@@ -64,7 +64,7 @@ class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedW
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("propertyDimension", embeddingDimension/2)
-            .addParameter("nodePropertyNames", List.of("f1", "f2"))
+            .addParameter("featureProperties", List.of("f1", "f2"))
             .addParameter("writeProperty", "embedding")
             .yields();
 

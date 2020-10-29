@@ -48,7 +48,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private final Graph graph;
     private final int concurrency;
     private final float normalizationStrength;
-    private final List<String> nodePropertyNames;
+    private final List<String> featureProperties;
     private final float[][] propertyVectors;
     private final HugeObjectArray<float[]> embeddings;
     private final HugeObjectArray<float[]> embeddingA;
@@ -64,7 +64,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
             .builder(FastRP.class)
             .fixed(
                 "propertyVectors",
-                MemoryUsage.sizeOfFloatArray(config.nodePropertyNames().size() * config.propertyDimension())
+                MemoryUsage.sizeOfFloatArray(config.featureProperties().size() * config.propertyDimension())
             )
             .add("embeddings", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
             .add("embeddingA", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfFloatArray(config.embeddingDimension())))
@@ -80,9 +80,9 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     ) {
         this.graph = graph;
         this.progressLogger = progressLogger;
-        this.nodePropertyNames = config.nodePropertyNames();
+        this.featureProperties = config.featureProperties();
 
-        this.propertyVectors = new float[nodePropertyNames.size()][config.propertyDimension()];
+        this.propertyVectors = new float[featureProperties.size()][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
@@ -135,7 +135,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
         double probability = 1.0f / (2.0f * SPARSITY);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
-        for (int i = 0; i < nodePropertyNames.size(); i++) {
+        for (int i = 0; i < featureProperties.size(); i++) {
             this.propertyVectors[i] = new float[propertyDimension];
             for (int d = 0; d < propertyDimension; d++) {
                 this.propertyVectors[i][d] = computeRandomEntry(random.get(), probability, entryValue);
@@ -310,8 +310,8 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
             for (int i = 0; i < embeddingDimension; i++) {
                 randomVector[i] = computeRandomEntry(random, probability, entryValue);
             }
-            for (int j = 0; j < nodePropertyNames.size(); j++) {
-                String feature = nodePropertyNames.get(j);
+            for (int j = 0; j < featureProperties.size(); j++) {
+                String feature = featureProperties.get(j);
                 double featureValue = getCheckedDoubleNodeProperty(graph, feature, nodeId);
                 if (featureValue != 0.0D) {
                     for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
