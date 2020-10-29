@@ -33,7 +33,7 @@ public final class LayerFactory {
 
     static Layer createLayer(
         LayerConfig layerConfig,
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction
     ) {
         int rows = layerConfig.rows();
         int cols = layerConfig.cols();

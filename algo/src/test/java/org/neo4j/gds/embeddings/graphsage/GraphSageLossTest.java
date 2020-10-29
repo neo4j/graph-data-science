@@ -31,15 +31,20 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.Optional;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.UNWEIGHTED;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.UNWEIGHTED;
 
 class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
 
@@ -52,7 +57,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "20, 9.732264700198973",
         "50, 24.239937336323717"
     })
-    void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
+    void shouldComputeLossBatchSizeOne(int negativeSamplingFactor, double expectedLoss) {
         Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
@@ -62,7 +67,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2}, negativeSamplingFactor);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -79,7 +84,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         "20, 31.48307971498508",
         "50, 76.87999339630119"
     })
-    void shouldComputeLoss(int Q, double expectedLoss) {
+    void shouldComputeLoss(int negativeSamplingFactor, double expectedLoss) {
         Variable<Matrix> combinedEmbeddings = new MatrixConstant(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
@@ -95,7 +100,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             9, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, Q);
+        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, negativeSamplingFactor);
 
         Tensor<?> lossData = ctx.forward(lossVar);
         assertNotNull(lossData);
@@ -113,13 +118,13 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             3, 3
         ));
 
-        finiteDifferenceShouldApproximateGradient(combinedEmbeddings, new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, 5));
+        finiteDifferenceShouldApproximateGradient(combinedEmbeddings, new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2}, 5));
 
     }
 
     @Override
     public double epsilon() {
-        return 1e-6;
+        return 1e-8;
     }
 
     @Nested
@@ -130,7 +135,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
         private static final String DB_CYPHER =
             "CREATE" +
             "  (u1:User { id: 0 })" +
-            ", (u1:User { id: 1 })" +
+            ", (u2:User { id: 1 })" +
             ", (d1:Dish { id: 2 })" +
             ", (d2:Dish { id: 3 })" +
             ", (d3:Dish { id: 4 })" +
@@ -142,16 +147,19 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
             ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
         @Inject
+        private GraphStore graphStore;
+
+        @Inject
         private Graph graph;
 
         @ParameterizedTest
         @CsvSource({
-            "1, 0.7860038017832255",
-            "4, 2.2367710653956996",
-            "8, 4.171127416878998",
-            "12, 6.105483768362297",
-            "20, 9.974196471328893",
-            "50, 24.481869107453637"
+            "1, 0.5440720306533048",
+            "4, 1.9948392942657789",
+            "8, 3.9291956457490773",
+            "12, 5.863551997232376",
+            "20, 9.732264700198973",
+            "50, 24.239937336323717"
         })
         void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
             Variable<Matrix> combinedEmbeddings = new MatrixConstant(
@@ -163,12 +171,52 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
                 3, 3
             );
 
-            Variable<Scalar> lossVar = new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, Q);
+            Variable<Scalar> lossVar = new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 2}, Q);
 
             Tensor<?> lossData = ctx.forward(lossVar);
             assertNotNull(lossData);
 
             assertEquals(expectedLoss, lossData.dataAt(0));
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+            "1, 1.0881440613066096",
+            "4, 3.9896785885315578",
+            "8, 7.858391291498155",
+            "12, 11.727103994464752",
+            "20, 19.464529400397947",
+            "50, 48.47987467264743"
+        })
+        void shouldComputeOnFilteredGraph(int Q, double expectedLoss) {
+            Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
+                new double[]{
+                    1.5, -1, 0.75,  // nodeId
+                    1.5, -1, 0.75,  // nodeId
+                    1, -0.75, 0.7,  // positive nodeId
+                    1, -0.75, 0.7,  // positive nodeId
+                    -0.1, 0.4, 0.1,  // negative nodeId
+                    -0.1, 0.4, 0.1  // negative nodeId
+                },
+                6, 3
+            ));
+
+            var filteredGraph = graphStore.getGraph(
+                Set.of(NodeLabel.of("User")),
+                graphStore.relationshipTypes(),
+                Optional.of("times")
+            );
+            Variable<Scalar> lossVar = new GraphSageLoss(filteredGraph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 0, 0, 1, 0}, Q);
+
+            Tensor<?> lossData = ctx.forward(lossVar);
+            assertNotNull(lossData);
+
+            assertEquals(expectedLoss, lossData.dataAt(0));
+
+            finiteDifferenceShouldApproximateGradient(
+                combinedEmbeddings,
+                lossVar
+            );
         }
 
         @Test
@@ -184,7 +232,7 @@ class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTes
 
             finiteDifferenceShouldApproximateGradient(
                 combinedEmbeddings,
-                new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, 5)
+                new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 2}, 5)
             );
 
         }

@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -50,7 +51,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction.UNWEIGHTED;
+import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -70,7 +71,7 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
-    private RelationshipWeightsFunction relationshipWeightsFunction;
+    private RelationshipWeights relationshipWeights;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
         this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
@@ -103,12 +104,12 @@ public class GraphSageModelTrainer {
         Map<String, Double> epochLosses = new TreeMap<>();
 
         // TODO: do not store in a field but pass as parameter
-        relationshipWeightsFunction = useWeights ?
+        relationshipWeights = useWeights ?
             graph::relationshipProperty :
             UNWEIGHTED;
 
-        Optional<RelationshipWeightsFunction> maybeRelationshipWeightsFunction = useWeights ?
-            Optional.of(relationshipWeightsFunction) :
+        Optional<RelationshipWeights> maybeRelationshipWeightsFunction = useWeights ?
+            Optional.of(relationshipWeights) :
             Optional.empty();
 
         // TODO: do not store in a field but pass as parameter
@@ -246,8 +247,9 @@ public class GraphSageModelTrainer {
         Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(
-            relationshipWeightsFunction,
+            relationshipWeights,
             embeddingVariable,
+            totalBatch,
             negativeSampleWeight
         );
 
@@ -262,9 +264,9 @@ public class GraphSageModelTrainer {
                 NeighborhoodSampler neighborhoodSampler = useWeights ?
                     new WeightedNeighborhoodSampler() :
                     new UniformNeighborhoodSampler();
-                List<Long> samples = neighborhoodSampler.sample(graph, currentNode.get(), 1, 0);
-                if (samples.size() == 1) {
-                    currentNode.set(samples.get(0));
+                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId, 0);
+                if (maybeSample.isPresent()) {
+                    currentNode.set(maybeSample.getAsLong());
                 } else {
                     // terminate
                     searchDepth = 0;

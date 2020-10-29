@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.neo4j.gds.embeddings.graphsage.RelationshipWeightsFunction;
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.core.utils.DoubleUtil;
 
 public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
-    private final RelationshipWeightsFunction relationshipWeightsFunction;
+    private final RelationshipWeights relationshipWeights;
     private final SubGraph subGraph;
     private final int[] selfAdjacency;
     private final int[][] adjacencyMatrix;
@@ -38,11 +38,11 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
     public WeightedElementwiseMax(
         Variable<?> parent,
-        RelationshipWeightsFunction relationshipWeightsFunction,
+        RelationshipWeights relationshipWeights,
         SubGraph subGraph
     ) {
         super(parent, Dimensions.matrix(subGraph.adjacency.length, parent.dimension(1)));
-        this.relationshipWeightsFunction = relationshipWeightsFunction;
+        this.relationshipWeights = relationshipWeights;
         this.adjacencyMatrix = subGraph.adjacency;
         this.selfAdjacency = subGraph.selfAdjacency;
         this.subGraph = subGraph;
@@ -64,7 +64,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
                         long originalTargetId = subGraph.nextNodes[neighbor];
-                        double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+                        double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
                         int neighborElementIndex = neighbor * cols + col;
                         max.setDataAt(
                             resultElementIndex,
@@ -98,7 +98,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {
                     long originalTargetId = subGraph.nextNodes[neighbor];
-                    double relationshipWeight = relationshipWeightsFunction.weight(originalSourceId, originalTargetId);
+                    double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
 
                     int thisElementIndex = source * cols + col;
                     int neighborElementIndex = neighbor * cols + col;
