@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -318,7 +317,7 @@ public abstract class AlgoBaseProc<
             GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
             GraphStore graphStore = loader.graphStore();
 
-            graphCandidate = ImmutableGraphStoreWithConfig.of(graphStore, createConfig);
+            graphCandidate = GraphStoreWithConfig.of(graphStore, createConfig);
         } else {
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
