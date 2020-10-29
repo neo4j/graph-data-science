@@ -29,11 +29,11 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,12 +43,21 @@ class CypherMapWrapperTest {
 
     @Test
     void shouldConvertOptional() {
-        Map<String, Object> map = Map.of("foo", 1L, "bar", "actualBar");
-        CypherMapWrapper wrapper = CypherMapWrapper.create(map);
+        CypherMapWrapper wrapper = CypherMapWrapper.create(Map.of("foo", 1L, "bar", "actualBar"));
 
-        assertEquals(Optional.of(1L), wrapper.getOptional("foo", Long.class));
-        assertEquals(Optional.of("actualBar"), wrapper.getOptional("bar", String.class));
-        assertEquals(Optional.<String>empty(), wrapper.getOptional("baz", String.class));
+        assertThat(wrapper.getOptional("foo", Long.class)).contains(1L);
+        assertThat(wrapper.getOptional("foo", Integer.class)).contains(1);
+        assertThat(wrapper.getOptional("bar", String.class)).contains("actualBar");
+        assertThat(wrapper.getOptional("baz", String.class)).isEmpty();
+    }
+
+    @Test
+    void failsWhenLongIsTooLarge() {
+        long tooLarge = Integer.MAX_VALUE + 1L;
+        CypherMapWrapper wrapper = CypherMapWrapper.create(Map.of("foo", tooLarge));
+
+        assertThat(wrapper.getOptional("foo", Long.class)).contains(tooLarge);
+        assertThrows(ArithmeticException.class, () -> wrapper.getOptional("foo", Integer.class));
     }
 
     @Test
