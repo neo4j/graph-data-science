@@ -70,6 +70,30 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 ====
 
 
+[[algorithms-knn-introduction-similarity]]
+=== Similarity measures
+
+The similarity measure used in the KNN algorithm depends on the type of the relationship properties.
+KNN supports both scalar numeric values as well as lists of numbers.
+
+Scalar numeric property::
+
+When the property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
+
+image::equations/knn-scalar-similarity.svg[align="center"]
+
+List of integers::
+
+When the property is a list of integers, the similarity is computed as one divided by  one plus the number of unequal numbers in the list:
+
+image::equations/knn-integer-list-similarity.svg[align="center"]
+
+List of floating-point numbers::
+
+When the property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
+See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm for more details.
+
+
 [[algorithms-knn-syntax]]
 == Syntax
 
