@@ -76,10 +76,13 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
+        var trainConfig = ModelCatalog
+            .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
+            .trainConfig();
         return MemoryEstimations.setup(
             "",
             graphDimensions -> withNodeCount(
-                config.trainConfig(),
+                trainConfig,
                 graphDimensions.nodeCount(),
                 config instanceof MutateConfig
             )

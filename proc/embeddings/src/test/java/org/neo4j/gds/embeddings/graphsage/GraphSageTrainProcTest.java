@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -56,8 +57,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig.PROJECTED_FEATURE_DIMENSION;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.TrainConfig.MODEL_TYPE_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
@@ -285,8 +286,10 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         var exception = assertThrows(
             IllegalArgumentException.class,
             () -> proc.validateConfigsAndGraphStore(
-                GdlFactory.of("", db.databaseId()).build().graphStore(),
-                GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
+                ImmutableGraphStoreWithConfig.of(
+                    GdlFactory.of("", db.databaseId()).build().graphStore(),
+                    GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
+                ),
                 config
             )
         );

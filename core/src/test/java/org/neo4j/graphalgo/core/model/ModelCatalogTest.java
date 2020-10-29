@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
@@ -384,7 +384,7 @@ class ModelCatalogTest {
     @ValueClass
     @Configuration("ModelCatalogTestTrainConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    interface ModelCatalogTestTrainConfig extends BaseConfig, TrainConfig {
+    interface ModelCatalogTestTrainConfig extends BaseConfig, ModelConfig {
 
         static ModelCatalogTestTrainConfig of() {
             return ImmutableModelCatalogTestTrainConfig.of("username", "modelName");

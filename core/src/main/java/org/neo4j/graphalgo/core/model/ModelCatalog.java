@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 
 import java.util.Collection;
@@ -46,7 +46,7 @@ public final class ModelCatalog {
         });
     }
 
-    public static <D, C extends TrainConfig & BaseConfig> Model<D, C> get(
+    public static <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
         String username, String modelName, Class<D> dataClass, Class<C> configClass
     ) {
         return getUserCatalog(username).get(modelName, dataClass, configClass);
@@ -97,7 +97,7 @@ public final class ModelCatalog {
             userModels.put(model.name(), model);
         }
 
-        public <D, C extends TrainConfig & BaseConfig> Model<D, C> get(
+        public <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
             String modelName,
             Class<D> dataClass,
             Class<C> configClass

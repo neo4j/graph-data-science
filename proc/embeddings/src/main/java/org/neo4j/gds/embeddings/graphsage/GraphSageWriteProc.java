@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -59,6 +60,15 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    protected void validateConfigsAndGraphStore(
+        GraphStoreWithConfig graphStoreWithConfig,
+        GraphSageWriteConfig config
+    ) {
+        GraphSageCompanion.validateTrainConfig(graphStoreWithConfig, config);
+        super.validateConfigsAndGraphStore(graphStoreWithConfig, config);
     }
 
     @Override

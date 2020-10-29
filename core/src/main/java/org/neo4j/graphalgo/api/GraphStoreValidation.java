@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,11 +68,19 @@ public final class GraphStoreValidation {
             }
         }
         if (config instanceof FeaturePropertiesConfig) {
-            List<String> weightProperties = ((FeaturePropertiesConfig) config).featureProperties();
-            List<String> missingProperties = weightProperties
-                .stream()
-                .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
-                .collect(Collectors.toList());
+            var nodePropertiesConfig = (FeaturePropertiesConfig) config;
+            List<String> weightProperties = nodePropertiesConfig.featureProperties();
+            List<String> missingProperties;
+            if (nodePropertiesConfig.propertiesMustExistForEachNodeLabel()) {
+                 missingProperties = weightProperties
+                    .stream()
+                    .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
+                    .collect(Collectors.toList());
+            } else {
+                var availableProperties = filterLabels.stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
+                missingProperties = new ArrayList<>(weightProperties);
+                missingProperties.removeAll(availableProperties);
+            }
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Node properties %s not found in graph with node properties: %s in all node labels: %s",

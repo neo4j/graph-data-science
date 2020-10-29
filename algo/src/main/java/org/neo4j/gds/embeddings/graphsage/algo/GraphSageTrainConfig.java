@@ -30,9 +30,10 @@ import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
-import org.neo4j.graphalgo.config.TrainConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.ArrayList;
@@ -44,13 +45,13 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageTrainConfig extends
     AlgoBaseConfig,
-    TrainConfig,
+    ModelConfig,
     BatchSizeConfig,
     IterationsConfig,
     ToleranceConfig,
     EmbeddingDimensionConfig,
-    RelationshipWeightConfig
-{
+    RelationshipWeightConfig,
+    FeaturePropertiesConfig {
 
     int PROJECTED_FEATURE_DIMENSION = -1;
 
@@ -58,11 +59,6 @@ public interface GraphSageTrainConfig extends
     @Value.Default
     default int embeddingDimension() {
         return 64;
-    }
-
-    @Value.Default
-    default List<String> featureProperties() {
-        return List.of();
     }
 
     @Value.Default
@@ -125,6 +121,12 @@ public interface GraphSageTrainConfig extends
     @Value.Default
     default int projectedFeatureDimension() {
         return PROJECTED_FEATURE_DIMENSION;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default boolean propertiesMustExistForEachNodeLabel() {
+        return false;
     }
 
     @Configuration.Ignore
@@ -199,5 +201,4 @@ public interface GraphSageTrainConfig extends
             .tolerance(tolerance)
             .build();
     }
-
 }
