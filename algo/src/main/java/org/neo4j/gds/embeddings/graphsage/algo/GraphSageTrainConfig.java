@@ -28,17 +28,21 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
@@ -200,5 +204,45 @@ public interface GraphSageTrainConfig extends
             .featureProperties(featureProperties)
             .tolerance(tolerance)
             .build();
+    }
+
+    @Configuration.Ignore
+    default void validateAgainstGraphStore(GraphStoreWithConfig graphStoreWithConfig) {
+        var graphStore = graphStoreWithConfig.graphStore();
+        var nodeLabels = this.nodeLabelIdentifiers(graphStore);
+        var nodePropertyNames = this.featureProperties();
+        if (!this.isMultiLabel()) {
+            // all properties exist on all labels
+            List<String> missingProperties = nodePropertyNames
+                .stream()
+                .filter(weightProperty -> !graphStore.hasNodeProperty(nodeLabels, weightProperty))
+                .collect(Collectors.toList());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The following node properties are not present for each label in the graph: %s. Properties that exist for each label are %s",
+                    missingProperties,
+                    graphStore.nodePropertyKeys(nodeLabels)
+                ));
+            }
+        } else {
+            // each property exists on at least one label
+            var allProperties =
+                graphStore.nodePropertyKeys()
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> nodeLabels.contains(entry.getKey()))
+                    .flatMap(entry -> entry.getValue().stream())
+                    .collect(Collectors.toSet());
+            var missingProperties = nodePropertyNames
+                .stream()
+                .filter(key -> !allProperties.contains(key))
+                .collect(Collectors.toSet());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
+                    missingProperties
+                ));
+            }
+        }
     }
 }
