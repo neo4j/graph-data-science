@@ -290,6 +290,8 @@ public final class CypherMapWrapper {
     static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
         if (canHardCastToDouble(expectedType, value)) {
             return expectedType.cast(((Number) value).doubleValue());
+        } else if (expectedType.equals(Integer.class) && value instanceof Long) {
+            return expectedType.cast(Math.toIntExact((Long) value));
         } else if (!expectedType.isInstance(value)) {
             String message = String.format(
                 Locale.ENGLISH,

@@ -13,4 +13,5 @@ dependencies {
 
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter
+    testImplementation group: 'org.assertj',      name: 'assertj-core',       version: ver.'assertj'
 }
