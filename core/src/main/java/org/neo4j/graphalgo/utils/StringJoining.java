@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.utils;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +32,10 @@ public final class StringJoining {
 
     public static String join(Stream<String> alternatives) {
         return join(alternatives.collect(Collectors.toList()));
+    }
+
+    public static String join(Stream<String> alternatives, CharSequence delimiter) {
+        return join(alternatives.collect(Collectors.toList()), delimiter);
     }
 
     public static String join(Collection<String> alternatives) {
@@ -48,5 +53,18 @@ public final class StringJoining {
         CharSequence suffix
     ) {
         return alternatives.stream().sorted().collect(joining(delimiter, prefix, suffix));
+    }
+
+    public static String joinVerbose(Collection<String> alternatives) {
+        if (alternatives.size() == 1) {
+            return join(alternatives, ", ");
+        }
+        if (alternatives.size() == 2) {
+            return join(alternatives, " and ");
+        }
+        return joinVerbose(List.of(
+            join(alternatives.stream().limit(alternatives.size() - 1), ", "),
+            alternatives.stream().skip(alternatives.size() - 1).findFirst().get()
+        ));
     }
 }
