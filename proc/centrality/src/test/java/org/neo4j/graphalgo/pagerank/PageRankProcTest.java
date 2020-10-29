@@ -49,9 +49,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
@@ -283,8 +283,11 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
     @ParameterizedTest
     @ValueSource(doubles = {-1, 1})
     void shouldFailOnInvalidDampingFactor(double dampingFactor) {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("dampingFactor", dampingFactor));
-        var ex = assertThrows(IllegalArgumentException.class, () -> createConfig(createMinimalConfig(mapWrapper)));
-        assertEquals("Value for `dampingFactor` must be within [0.00, 1.00).", ex.getMessage());
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> createConfig(createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+                "dampingFactor",
+                dampingFactor
+            )))))
+            .withMessageContainingAll("dampingFactor", String.valueOf(dampingFactor), "[0.00, 1.00)");
     }
 }
