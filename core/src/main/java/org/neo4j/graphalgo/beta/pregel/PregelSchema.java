@@ -35,7 +35,6 @@ public interface PregelSchema {
 
     Set<Element> elements();
 
-
     class Builder {
 
         private final Set<Element> elements = new HashSet<>();
