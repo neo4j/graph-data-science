@@ -67,12 +67,10 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         double loss = IntStream.range(0, batchSize).mapToDouble(nodeIdOffset -> {
             int positiveNodeOffset = nodeIdOffset + batchSize;
             int negativeNodeOffset = nodeIdOffset + negativeNodesOffset;
-            long nodeId = batch[nodeIdOffset];
-            long positiveNodeId = batch[positiveNodeOffset];
             double positiveAffinity = affinity(embeddingData, nodeIdOffset, positiveNodeOffset);
             double negativeAffinity = affinity(embeddingData, nodeIdOffset, negativeNodeOffset);
 
-            return -relationshipWeightFactor(nodeId, positiveNodeId) * Math.log(Sigmoid.sigmoid(positiveAffinity))
+            return -relationshipWeightFactor(batch[nodeIdOffset], batch[positiveNodeOffset]) * Math.log(Sigmoid.sigmoid(positiveAffinity))
                    - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
         }).sum();
         return new Scalar(loss);
@@ -86,11 +84,11 @@ public class GraphSageLoss extends SingleParentVariable<Scalar> {
         return Math.pow(relationshipWeight, ALPHA);
     }
 
-    private double affinity(Tensor<?> embeddingData, int nodeId, int otherNodeId) {
+    private double affinity(Tensor<?> embeddingData, int nodeIdOffset, int otherNodeIdOffset) {
         int embeddingDimension = combinedEmbeddings.dimension(COLUMNS_INDEX);
         double sum = 0;
-        int embeddingOffset = nodeId * embeddingDimension;
-        int otherEmbeddingOffset = otherNodeId * embeddingDimension;
+        int embeddingOffset = nodeIdOffset * embeddingDimension;
+        int otherEmbeddingOffset = otherNodeIdOffset * embeddingDimension;
         for (int i = 0; i < embeddingDimension; i++) {
             sum += embeddingData.dataAt(embeddingOffset + i) * embeddingData.dataAt(otherEmbeddingOffset + i);
         }
