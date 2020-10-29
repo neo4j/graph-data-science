@@ -180,7 +180,7 @@ public final class GraphStoreCatalog {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphStoreWithConfig graphStoreWithConfig = ImmutableGraphStoreWithConfig.of(graphStore, config);
+            GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
 
             if (graphsByName.putIfAbsent(userCatalogKey, graphStoreWithConfig) != null) {
                 throw new IllegalStateException(formatWithLocale(

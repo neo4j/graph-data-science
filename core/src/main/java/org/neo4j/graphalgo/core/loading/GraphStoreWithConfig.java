@@ -28,4 +28,8 @@ public interface GraphStoreWithConfig {
     GraphStore graphStore();
 
     GraphCreateConfig config();
+
+    static GraphStoreWithConfig of(GraphStore graphStore, GraphCreateConfig config) {
+        return ImmutableGraphStoreWithConfig.of(graphStore, config);
+    }
 }
