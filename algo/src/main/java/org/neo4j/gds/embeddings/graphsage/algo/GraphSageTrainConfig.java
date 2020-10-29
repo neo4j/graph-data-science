@@ -221,10 +221,9 @@ public interface GraphSageTrainConfig extends
                 .collect(Collectors.toList());
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Node properties %s not found in graph with node properties: %s in all node labels: %s",
+                    "The following node properties are not present for each label in the graph: %s. Properties that exist for each label are %s",
                     missingProperties,
-                    graphStore.nodePropertyKeys(nodeLabels),
-                    StringJoining.join(nodeLabels.stream().map(NodeLabel::name))
+                    graphStore.nodePropertyKeys(nodeLabels)
                 ));
             }
         } else {
@@ -242,7 +241,7 @@ public interface GraphSageTrainConfig extends
                 .collect(Collectors.toSet());
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Each property set in `featureProperties` must exist for one label. Missing properties: %s",
+                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
                     missingProperties
                 ));
             }
