@@ -190,4 +190,16 @@ class HugeAtomicBitSetTest {
         atomicBitSet.flip(23);
         assertTrue(atomicBitSet.isEmpty());
     }
+
+    @Test
+    void testAllSet() {
+        var atomicBitSet = HugeAtomicBitSet.create(42, AllocationTracker.empty());
+        assertFalse(atomicBitSet.allSet());
+        atomicBitSet.set(23);
+        assertFalse(atomicBitSet.allSet());
+        atomicBitSet.set(0, 42);
+        assertTrue(atomicBitSet.allSet());
+        atomicBitSet.flip(23);
+        assertFalse(atomicBitSet.allSet());
+    }
 }

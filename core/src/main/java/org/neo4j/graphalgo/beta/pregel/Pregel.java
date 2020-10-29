@@ -196,8 +196,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
             runComputeSteps(computeSteps, iterations, prevMessageBits);
 
-            // No messages have been sent
-            if (messageBits.isEmpty()) {
+            // No messages have been sent and all nodes voted to halt
+            if (messageBits.isEmpty() && voteBits.allSet()) {
                 didConverge = true;
                 break;
             }
