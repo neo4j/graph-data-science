@@ -48,9 +48,9 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -181,14 +181,13 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     @ParameterizedTest(name = "parameter: {0}, value: {1}")
     @CsvSource(value = {"topN, -2", "bottomN, -2", "topK, -2", "bottomK, -2", "topK, 0", "bottomK, 0"})
     void shouldThrowForInvalidTopsAndBottoms(String parameter, long value) {
-        String message = formatWithLocale("Value for `%s` must be within", parameter);
-        CypherMapWrapper input = baseUserInput().withNumber(parameter, value);
+        var input = baseUserInput().withNumber(parameter, value);
 
-        IllegalArgumentException illegalArgumentException = assertThrows(
-            IllegalArgumentException.class,
-            () -> config(input)
-        );
-        assertThat(illegalArgumentException.getMessage(), containsString(message));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> {
+                config(input);
+            })
+            .withMessageContainingAll(parameter, String.valueOf(value));
     }
 
     @ParameterizedTest
@@ -207,28 +206,21 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
 
     @Test
     void shouldThrowIfDegreeCutoffSetToZero() {
-        CypherMapWrapper input = baseUserInput().withNumber("degreeCutoff", 0);
+        var input = baseUserInput().withNumber("degreeCutoff", 0);
 
-        IllegalArgumentException illegalArgumentException = assertThrows(
-            IllegalArgumentException.class,
-            () -> config(input)
-        );
-        assertThat(illegalArgumentException.getMessage(), is(formatWithLocale("Value for `degreeCutoff` must be within [1, %d].", Integer.MAX_VALUE)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> config(input))
+            .withMessageContainingAll("degreeCutoff", "0", "[1, 2147483647]");
     }
 
     @ParameterizedTest
     @ValueSource(doubles = {-4.2, 4.2})
     void shouldThrowIfSimilarityCutoffIsOutOfRange(double cutoff) {
-        CypherMapWrapper input = baseUserInput().withNumber("similarityCutoff", cutoff);
+        var input = baseUserInput().withNumber("similarityCutoff", cutoff);
 
-        IllegalArgumentException illegalArgumentException = assertThrows(
-            IllegalArgumentException.class,
-            () -> config(input)
-        );
-        assertThat(
-            illegalArgumentException.getMessage(),
-            is(formatWithLocale("Value for `similarityCutoff` must be within [%.2f, %.2f].", 0D, 1D))
-        );
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> config(input))
+            .withMessageContainingAll("similarityCutoff", String.valueOf(cutoff), "[0.00, 1.00]");
     }
 
     @Test

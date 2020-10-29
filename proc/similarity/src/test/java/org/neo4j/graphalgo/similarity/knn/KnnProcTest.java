@@ -192,8 +192,8 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
                     .withNumber("sampleRate", 0.0);
                 proc.newConfig(Optional.empty(), invalidConfig);
             })
-            .withMessageContaining("`topK` must be within [1")
-            .withMessageContaining("`sampleRate` must be within (0.00, 1.00]"));
+            .withMessageContainingAll("`topK`", "0", "[1, 2147483647]")
+            .withMessageContainingAll("`sampleRate`", "0.00", "(0.00, 1.00]"));
     }
 
     static Stream<Arguments> allGraphVariations() {
