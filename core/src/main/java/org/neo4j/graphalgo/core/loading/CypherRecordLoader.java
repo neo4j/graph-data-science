@@ -20,10 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.apache.commons.compress.utils.Lists;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -31,7 +30,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -44,10 +42,6 @@ abstract class CypherRecordLoader<R> {
 
     enum QueryType {
         NODE, RELATIONSHIP;
-
-        String capitalize() {
-            return name().substring(0, 1) + name().substring(1).toLowerCase(Locale.ENGLISH);
-        }
 
         String toLowerCase() {
             return name().toLowerCase(Locale.ENGLISH);
@@ -119,38 +113,19 @@ abstract class CypherRecordLoader<R> {
         return result;
     }
 
-    private void validateMandatoryColumns(List<String> allColumns) {
-        Set<String> missingColumns = new HashSet<>(getMandatoryColumns());
+    private void validateMandatoryColumns(Collection<String> allColumns) {
+        var missingColumns = new HashSet<>(getMandatoryColumns());
         missingColumns.removeAll(allColumns);
         if (!missingColumns.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Invalid %s query, required column(s) not found: '%s'",
+                "Invalid %s query, required column(s) not found: '%s' - did you specify %s?",
                 queryType().toLowerCase(),
-                String.join("', '", missingColumns)
+                StringJoining.join(missingColumns, "', '"),
+                StringJoining.joinVerbose(
+                    missingColumns.stream()
+                        .map(column -> "'AS " + column + "'")
+                        .collect(Collectors.toList()))
             ));
         }
     }
-
-    void validatePropertyColumns(
-        Collection<String> propertyColumns,
-        PropertyMappings propertyMappings
-    ) {
-        List<String> invalidNodeProperties = propertyMappings
-            .mappings()
-            .stream()
-            .map(PropertyMapping::neoPropertyKey)
-            .filter(k -> !propertyColumns.contains(k))
-            .collect(Collectors.toList());
-
-        if (!invalidNodeProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "%s properties not found: '%s'. Available properties from the %s query are: '%s'",
-                queryType().capitalize(),
-                String.join("', '", invalidNodeProperties),
-                queryType().toLowerCase(),
-                String.join("', '", propertyColumns)
-            ));
-        }
-    }
-
 }
