@@ -136,21 +136,21 @@ class PregelTest {
 
     static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(1, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_096L),
-            Arguments.of(10, new NodeSchemaBuilder().putElement("key", ValueType.LONG).build(), 4_884_816L),
-            Arguments.of(1, new NodeSchemaBuilder()
-                    .putElement("key1", ValueType.LONG)
-                    .putElement("key2", ValueType.DOUBLE)
-                    .putElement("key3", ValueType.LONG_ARRAY)
-                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), 4_884_096L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), 4_884_816L),
+            Arguments.of(1, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 6_884_168L
             ),
-            Arguments.of(10, new NodeSchemaBuilder()
-                    .putElement("key1", ValueType.LONG)
-                    .putElement("key2", ValueType.DOUBLE)
-                    .putElement("key3", ValueType.LONG_ARRAY)
-                    .putElement("key4", ValueType.DOUBLE_ARRAY)
+            Arguments.of(10, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 6_884_888L
             )
@@ -159,7 +159,7 @@ class PregelTest {
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void memoryEstimation(int concurrency, Pregel.NodeSchema nodeSchema, long expectedBytes) {
+    void memoryEstimation(int concurrency, PregelSchema pregelSchema, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
@@ -167,7 +167,7 @@ class PregelTest {
 
         assertEquals(
             MemoryRange.of(expectedBytes).max,
-            Pregel.memoryEstimation(nodeSchema).estimate(dimensions, concurrency).memoryUsage().max
+            Pregel.memoryEstimation(pregelSchema).estimate(dimensions, concurrency).memoryUsage().max
         );
     }
 
@@ -225,9 +225,9 @@ class PregelTest {
         static final String KEY = "value";
 
         @Override
-        public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder()
-                .putElement(KEY, ValueType.DOUBLE)
+        public PregelSchema schema() {
+            return new PregelSchema.Builder()
+                .add(KEY, ValueType.DOUBLE)
                 .build();
         }
 
@@ -260,8 +260,8 @@ class PregelTest {
         static final String KEY = "value";
 
         @Override
-        public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder().putElement(KEY, ValueType.DOUBLE).build();
+        public PregelSchema schema() {
+            return new PregelSchema.Builder().add(KEY, ValueType.DOUBLE).build();
         }
 
         @Override
@@ -293,12 +293,12 @@ class PregelTest {
         static final String DOUBLE_ARRAY_KEY = "double_array";
 
         @Override
-        public Pregel.NodeSchema nodeSchema() {
-            return new NodeSchemaBuilder()
-                .putElement(LONG_KEY, ValueType.LONG)
-                .putElement(DOUBLE_KEY, ValueType.DOUBLE)
-                .putElement(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
-                .putElement(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
+        public PregelSchema schema() {
+            return new PregelSchema.Builder()
+                .add(LONG_KEY, ValueType.LONG)
+                .add(DOUBLE_KEY, ValueType.DOUBLE)
+                .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
+                .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                 .build();
         }
 

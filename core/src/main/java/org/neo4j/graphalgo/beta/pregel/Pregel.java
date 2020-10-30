@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +28,6 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -50,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -92,13 +89,13 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 graph,
                 config,
                 computation,
-                CompositeNodeValue.of(computation.nodeSchema(), graph.nodeCount(), config.concurrency(), tracker),
+                CompositeNodeValue.of(computation.schema(), graph.nodeCount(), config.concurrency(), tracker),
                 executor,
                 tracker
         );
     }
 
-    public static MemoryEstimation memoryEstimation(NodeSchema nodeSchema) {
+    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema) {
         return MemoryEstimations.builder(Pregel.class)
             .perNode("message bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perNode("previous message bits", MemoryUsage::sizeOfHugeAtomicBitset)
@@ -121,7 +118,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 MemoryEstimations.setup("", (dimensions, concurrency) -> {
                     var builder = MemoryEstimations.builder();
 
-                    nodeSchema.elements().forEach(element -> {
+                    pregelSchema.elements().forEach(element -> {
                         var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
 
                         switch (element.propertyType()) {
@@ -444,13 +441,13 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static final class CompositeNodeValue {
 
-        private final NodeSchema nodeSchema;
+        private final PregelSchema pregelSchema;
         private final Map<String, Object> properties;
 
-        static CompositeNodeValue of(NodeSchema nodeSchema, long nodeCount, int concurrency, AllocationTracker tracker) {
+        static CompositeNodeValue of(PregelSchema pregelSchema, long nodeCount, int concurrency, AllocationTracker tracker) {
             Map<String, Object> properties = new HashMap<>();
 
-            nodeSchema.elements().forEach(element -> {
+            pregelSchema.elements().forEach(element -> {
                 switch(element.propertyType()) {
                     case DOUBLE:
                         var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
@@ -487,19 +484,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 }
             });
 
-            return new CompositeNodeValue(nodeSchema, properties);
+            return new CompositeNodeValue(pregelSchema, properties);
         }
 
         private CompositeNodeValue(
-            NodeSchema nodeSchema,
+            PregelSchema pregelSchema,
             Map<String, Object> properties
         ) {
-            this.nodeSchema = nodeSchema;
+            this.pregelSchema = pregelSchema;
             this.properties = properties;
         }
 
-        public NodeSchema schema() {
-            return nodeSchema;
+        public PregelSchema schema() {
+            return pregelSchema;
         }
 
         public HugeDoubleArray doubleProperties(String propertyKey) {
@@ -625,25 +622,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 return (next = queue.poll()) != null;
             }
         }
-    }
-
-    @ValueClass
-    public interface NodeSchema {
-        List<Element> elements();
-    }
-
-    @ValueClass
-    public interface Element {
-        String propertyKey();
-        ValueType propertyType();
-    }
-
-    @Builder.Factory
-    static NodeSchema nodeSchema(Map<String, ValueType> elements) {
-        return ImmutableNodeSchema.of(elements.entrySet().stream()
-            .map(entry -> ImmutableElement.of(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList())
-        );
     }
 
     @ValueClass

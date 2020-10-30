@@ -39,7 +39,7 @@ class CompositeNodeValueTest {
         ValueType valueType,
         BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
     ) {
-        var schema = new NodeSchemaBuilder().putElement("KEY", valueType).build();
+        var schema = new PregelSchema.Builder().add("KEY", valueType).build();
         var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
 
         var ex = assertThrows(
@@ -58,7 +58,7 @@ class CompositeNodeValueTest {
         ValueType valueType,
         BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
     ) {
-        var schema = new NodeSchemaBuilder().putElement("KEY", valueType).build();
+        var schema = new PregelSchema.Builder().add("KEY", valueType).build();
         var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
 
         var ex = assertThrows(

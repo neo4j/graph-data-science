@@ -23,11 +23,11 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.NodeSchemaBuilder;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -43,8 +43,8 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     static final String DISTANCE = "DISTANCE";
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
-        return new NodeSchemaBuilder().putElement(DISTANCE, ValueType.LONG).build();
+    public PregelSchema schema() {
+        return new PregelSchema.Builder().add(DISTANCE, ValueType.LONG).build();
     }
 
     @Override

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.procedure.Description;
@@ -38,7 +39,7 @@ public class BaseClassHasNoEmptyConstructor implements PregelComputation<PregelC
     }
 
     @Override
-    public Pregel.NodeSchema nodeSchema() {
+    public PregelSchema schema() {
         return null;
     }
 
