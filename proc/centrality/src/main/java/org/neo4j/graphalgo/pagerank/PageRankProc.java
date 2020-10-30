@@ -39,10 +39,7 @@ final class PageRankProc {
         procResultBuilder
             .withDidConverge(!computeResult.isGraphEmpty() && result.didConverge())
             .withRanIterations(!computeResult.isGraphEmpty() ? result.iterations() : 0)
-            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().result()::score : null)
-            .withCreateMillis(computeResult.createMillis())
-            .withComputeMillis(computeResult.computeMillis())
-            .withConfig(computeResult.config());
+            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().result()::score : null);
 
         return procResultBuilder;
     }
