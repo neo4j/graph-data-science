@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -63,7 +64,10 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankStatsConfig> computeResult) {
-        return PageRankProc.resultBuilder(new StatsResult.Builder(callContext), computeResult);
+        return PageRankProc.resultBuilder(
+            new StatsResult.Builder(callContext, computeResult.config().concurrency()),
+            computeResult
+        );
     }
 
     @Override
@@ -90,7 +94,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         StatsResult(
             long ranIterations,
             boolean didConverge,
-            Map<String, Object> centralityDistribution,
+            @Nullable Map<String, Object> centralityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
@@ -104,8 +108,8 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
 
         static class Builder extends PageRankProc.PageRankResultBuilder<StatsResult> {
 
-            Builder(ProcedureCallContext context) {
-                super(context);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override
@@ -113,7 +117,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
                 return new StatsResult(
                     ranIterations,
                     didConverge,
-                    distribution(),
+                    centralityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

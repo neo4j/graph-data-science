@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -84,7 +85,10 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
-        return PageRankProc.resultBuilder(new MutateResult.Builder(callContext), computeResult);
+        return PageRankProc.resultBuilder(
+            new MutateResult.Builder(callContext, computeResult.config().concurrency()),
+            computeResult
+        );
     }
 
     public static final class MutateResult extends PageRankStatsProc.StatsResult {
@@ -95,7 +99,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
         MutateResult(
             long ranIterations,
             boolean didConverge,
-            Map<String, Object> centralityDistribution,
+            @Nullable Map<String, Object> centralityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
@@ -119,8 +123,8 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
 
         static class Builder extends PageRankProc.PageRankResultBuilder<MutateResult> {
 
-            Builder(ProcedureCallContext context) {
-                super(context);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override
@@ -128,7 +132,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
                 return new MutateResult(
                     ranIterations,
                     didConverge,
-                    distribution(),
+                    centralityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
