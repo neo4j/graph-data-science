@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -154,6 +155,15 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         long indexStart = System.nanoTime();
         progressLogger.logMessage("Property Index Scan :: Start");
 
+        var parallelIndexScan = GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
+        // In order to avoid a race between preparing the importers and the flag being toggled,
+        // we set the concurrency to 1 if we don't import in parallel.
+        //
+        // !! NOTE !!
+        //   If you end up changing this logic
+        //   you need to add a check for the feature flag to IndexedNodePropertyImporter
+        var concurrency = parallelIndexScan ? this.concurrency : 1;
+
         var indexScanningImporters = properties.indexedProperties()
             .entrySet()
             .stream()
@@ -162,6 +172,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                 .mappings()
                 .stream()
                 .map(mappingAndIndex -> new IndexedNodePropertyImporter(
+                    concurrency,
                     transaction,
                     labelAndProperties.getKey(),
                     mappingAndIndex.property(),
@@ -169,6 +180,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                     hugeIdMap,
                     progressLogger,
                     terminationFlag,
+                    threadPool,
                     tracker
                 ))
             ).collect(Collectors.toList());
@@ -176,9 +188,17 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var expectedProperties = ((long) indexScanningImporters.size()) * hugeIdMap.nodeCount();
         var remainingVolume = progressLogger.reset(expectedProperties);
 
+        if (!parallelIndexScan) {
+            // While we don't scan the index in parallel, try to at least scan all properties in parallel
+            ParallelUtil.run(indexScanningImporters, threadPool);
+        }
         long recordsImported = 0L;
-        ParallelUtil.run(indexScanningImporters, threadPool);
         for (IndexedNodePropertyImporter propertyImporter : indexScanningImporters) {
+            if (parallelIndexScan) {
+                // If we run in parallel, we need to run the importers one after another, as they will
+                // parallelize internally
+                propertyImporter.run();
+            }
             var nodeLabel = propertyImporter.nodeLabel();
             var storeProperties = nodeProperties.computeIfAbsent(nodeLabel, ignore -> new HashMap<>());
             storeProperties.put(propertyImporter.mapping(), propertyImporter.build());

@@ -87,6 +87,19 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()));
     }
 
+    @Procedure("gds.features.useParallelPropertyValueIndex")
+    @Description("Toggle whether the property value index should be read in parallel during node property loading. Only works if usePropertyValueIndex is set as well")
+    public void useParallelPropertyValueIndex(@Name(value = "useParallelPropertyValueIndex") boolean useParallelPropertyValueIndex) {
+        GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.toggle(useParallelPropertyValueIndex);
+    }
+
+    @Procedure("gds.features.useParallelPropertyValueIndex.reset")
+    @Description("Set the behavior of whether to use the property value index to the default. That value is returned.")
+    public Stream<FeatureState> resetUseParallelPropertyValueIndex() {
+        GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()));
+    }
+
     @Procedure("gds.features.maxArrayLengthShift")
     @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two.")
     public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {

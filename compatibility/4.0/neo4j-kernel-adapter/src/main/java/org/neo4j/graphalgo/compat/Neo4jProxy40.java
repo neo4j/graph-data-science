@@ -38,6 +38,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -223,6 +224,18 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
         Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues
     ) throws Exception {
         dataRead.nodeIndexScan(index, cursor, indexOrder, needsValues);
+    }
+
+    @Override
+    public void nodeIndexSeek(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues,
+        IndexQuery query
+    ) throws Exception {
+        dataRead.nodeIndexSeek(index, cursor, indexOrder, needsValues, query);
     }
 
     @Override

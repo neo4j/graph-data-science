@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 
@@ -116,6 +117,25 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertEquals(false, USE_PROPERTY_VALUE_INDEX.isEnabled());
+    }
+
+    @Test
+    void toggleUseParallelPropertyValueIndex() {
+        var useParallelPropertyValueIndex = USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled();
+        runQuery("CALL gds.features.useParallelPropertyValueIndex($value)", Map.of("value", !useParallelPropertyValueIndex));
+        assertEquals(!useParallelPropertyValueIndex, USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
+        runQuery("CALL gds.features.useParallelPropertyValueIndex($value)", Map.of("value", useParallelPropertyValueIndex));
+        assertEquals(useParallelPropertyValueIndex, USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
+    }
+
+    @Test
+    void resetUseParallelPropertyValueIndex() {
+        USE_PARALLEL_PROPERTY_VALUE_INDEX.reset();
+        assertCypherResult(
+            "CALL gds.features.useParallelPropertyValueIndex.reset()",
+            List.of(Map.of("enabled", false))
+        );
+        assertEquals(false, USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
     @Test

@@ -31,7 +31,8 @@ public enum GdsFeatureToggles {
     USE_PRE_AGGREGATION(false),
     SKIP_ORPHANS(false),
     USE_KERNEL_TRACKER(false),
-    USE_PROPERTY_VALUE_INDEX(false);
+    USE_PROPERTY_VALUE_INDEX(false),
+    USE_PARALLEL_PROPERTY_VALUE_INDEX(false);
 
     public boolean isEnabled() {
         return current.get();
