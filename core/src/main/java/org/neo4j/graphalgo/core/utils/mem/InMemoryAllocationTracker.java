@@ -21,25 +21,25 @@ package org.neo4j.graphalgo.core.utils.mem;
 
 import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 public class InMemoryAllocationTracker implements AllocationTracker {
 
-    private final AtomicLong count = new AtomicLong();
+    private final LongAdder count = new LongAdder();
 
     @Override
     public void add(long bytes) {
-        count.addAndGet(bytes);
+        count.add(bytes);
     }
 
     @Override
     public void remove(long bytes) {
-        count.addAndGet(-bytes);
+        count.add(-bytes);
     }
 
     @Override
     public long trackedBytes() {
-        return count.get();
+        return count.sum();
     }
 
     public static AllocationTracker create() {
