@@ -260,21 +260,33 @@ CALL gds.beta.graphSage.train(
 
 WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
 
+
 === Train with multiple node labels
 
-In order to work with multiple labels, we need to project the feature properties into a common feature space of the same dimension.
-By specifying `projectedFeatureDimension`, two things happen:
+In this section we describe how to train on a graph with multiple labels.
+The different labels may have different sets of properties.
+To run on such a graph, GraphSAGE is run in _multi-label mode_, in which the feature properties are projected into a common feature space.
+Therefore, all nodes have feature vectors of the same dimension after the projection.
+
+The projection for a label is linear and given by a matrix of weights.
+The weights for each label are learned jointly with the other weights of the GraphSAGE model.
+
+In the multi-label mode, the following is applied prior to the usual aggregation layers:
 
 . A property representing the label is added to the feature properties for that label
 . The feature properties for each label are projected into a feature vector of a shared dimension
 
-Because of this projection, labels with different sets of properties can be used as input for GraphSAGE.
-The properties for all nodes are still given in the `featureProperties` configuration parameter.
+The projected feature dimension is configured with `projectedFeatureDimension`, and specifying it enables the multi-label mode.
 
-The projection happens by generating a matrix of random weights per label.
-This matrix has the same number of columns as feature properties for that label.
-The number of rows is the projected feature dimension.
-By multiplying a nodes' values with the weight matrix for its label, we arrive at a feature vector of the shared dimension.
+The feature properties used for a label are those present in the `featureProperties` configuration parameter which exist in the graph for that label.
+In the multi-label mode, it is no longer required that all labels have all the specified properties.
+
+
+==== Assumptions
+
+- A requirement for multi-label mode is that each node belongs to exactly one label.
+- A GraphSAGE model trained in this mode must be applied on graphs with the same schema with regards to node labels and properties.
+
 
 ==== Examples
 
@@ -283,7 +295,6 @@ In order to demonstrate GraphSAGE with multiple labels, we need to add a few mor
 [source, cypher, role=setup-query]
 ----
 CREATE
-  // Adding Instruments
   (guitar:Instrument {name: 'Guitar', cost: 1337.0}),
   (synth:Instrument {name: 'Synthesizer', cost: 1337.0}),
   (bongos:Instrument {name: 'Bongos', cost: 42.0}),
@@ -326,7 +337,7 @@ CALL gds.graph.create(
 })
 ----
 
-We can now run GraphSAGE on that graph by specifying the `projectedFeatureDimension` parameter.
+We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
 
 [source, cypher, role=query-example, no-result=true]
 ----
@@ -340,7 +351,6 @@ CALL gds.beta.graphSage.train(
 )
 ----
 
-Without using `projectedFeatureDimension`, GraphSAGE can only operate on a monopartite graph.
 
 === Train with relationship weights
 
