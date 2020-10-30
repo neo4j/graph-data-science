@@ -54,6 +54,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     @Override
     public void compute(PregelContext.ComputeContext<ExamplePregelComputation.ExampleConfig> context, Pregel.Messages messages) {
         // Silence is golden
+        context.voteToHalt();
     }
 
     @ValueClass
