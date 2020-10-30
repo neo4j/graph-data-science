@@ -35,6 +35,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+
 public final class CommunityStatistics {
 
     private static final long EMPTY_COMMUNITY = 0L;
@@ -148,7 +150,7 @@ public final class CommunityStatistics {
         var communityCount = 0L;
 
         if (concurrency == 1) {
-            histogram = new Histogram(5);
+            histogram = new Histogram(HISTOGRAM_PRECISION_DEFAULT);
             var capacity = communitySizes.getCapacity();
 
             for (long communityId = 0; communityId < capacity; communityId++) {
@@ -177,7 +179,7 @@ public final class CommunityStatistics {
                     highestTrackableValue = task.histogram.getMaxValue();
                 }
             }
-            histogram = new Histogram(highestTrackableValue, 5);
+            histogram = new Histogram(highestTrackableValue, HISTOGRAM_PRECISION_DEFAULT);
             for (CountAndRecordTask task : tasks) {
                 histogram.add(task.histogram);
             }
@@ -278,7 +280,7 @@ public final class CommunityStatistics {
         CountAndRecordTask(HugeSparseLongArray communitySizes, Partition partition) {
             this.communitySizes = communitySizes;
             this.partition = partition;
-            this.histogram = new Histogram(5);
+            this.histogram = new Histogram(HISTOGRAM_PRECISION_DEFAULT);
         }
 
         @Override
