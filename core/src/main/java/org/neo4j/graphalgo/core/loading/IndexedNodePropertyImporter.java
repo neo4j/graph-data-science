@@ -196,12 +196,13 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         IndexReadSession indexReadSession,
         NodeValueIndexCursor indexCursor
     ) throws Exception {
+        var anyValue = IndexQuery.range(this.propertyId, ValueGroup.NUMBER);
         // find min value
-        Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.ASCENDING, true);
+        Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.ASCENDING, true, anyValue);
         var min = findFirst(indexCursor);
         if (min.isPresent()) {
             // find max value
-            Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.DESCENDING, true);
+            Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.DESCENDING, true, anyValue);
             var max = findFirst(indexCursor);
             if (max.isPresent()) {
                 var minValue = min.getAsDouble();
