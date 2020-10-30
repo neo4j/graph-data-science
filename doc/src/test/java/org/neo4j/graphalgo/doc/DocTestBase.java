@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
 import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
 
 import java.io.File;
@@ -51,6 +52,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -172,13 +174,21 @@ abstract class DocTestBase extends BaseProcTest {
                         });
                         return true;
                     });
+                } catch (QueryExecutionException e) {
+                    fail("query failed: " + query, e);
                 }
             });
         };
     }
 
     private QueryConsumingTreeProcessor.QueryExampleNoResultConsumer defaultQueryExampleNoResultConsumer() {
-        return this::runQuery;
+        return (query) -> {
+            try {
+                runQuery(query);
+            } catch (QueryExecutionException e) {
+                fail("query failed: " + query, e);
+            }
+        };
     }
 
     private String valueToString(Object value) {

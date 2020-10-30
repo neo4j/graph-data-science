@@ -195,23 +195,24 @@ Consider the graph created by the following Cypher statement:
 [source, cypher, role=setup-query]
 ----
 CREATE
-  (Dan:Person{ name: 'Dan', age: 20, height: 185, weight: 75 }),
-  (Annie:Person{ name: 'Annie', age: 12, height: 124, weight: 42 }),
-  (Matt:Person{ name: 'Matt', age: 67, height: 170, weight: 80 }),
-  (Jeff:Person{ name: 'Jeff', age: 45, height: 192, weight: 85 }),
-  (Brie:Person{ name: 'Brie', age: 27, height: 176, weight: 57 }),
-  (Elsa:Person{ name: 'Elsa', age: 32, height: 158, weight: 55 }),
-  (John:Person{ name: 'John', age: 35, height: 172, weight: 76 }),
+  // Persons
+  (dan:Person {name: 'Dan', age: 20, height: 185, weight: 75}),
+  (annie:Person {name: 'Annie', age: 12, height: 124, weight: 42}),
+  (matt:Person {name: 'Matt', age: 67, height: 170, weight: 80}),
+  (jeff:Person {name: 'Jeff', age: 45, height: 192, weight: 85}),
+  (brie:Person {name: 'Brie', age: 27, height: 176, weight: 57}),
+  (elsa:Person {name: 'Elsa', age: 32, height: 158, weight: 55}),
+  (john:Person {name: 'John', age: 35, height: 172, weight: 76}),
 
-  (Dan)-[:REL { relWeight: 1.0 }]->(Annie),
-  (Dan)-[:REL { relWeight: 1.6 }]->(Matt),
-  (Annie)-[:REL { relWeight: 0.1 }]->(Matt),
-  (Annie)-[:REL { relWeight: 3.0 }]->(Jeff),
-  (Annie)-[:REL { relWeight: 1.2 }]->(Brie),
-  (Matt)-[:REL { relWeight: 10.0 }]->(Brie),
-  (Brie)-[:REL { relWeight: 1.0 }]->(Elsa),
-  (Brie)-[:REL { relWeight: 2.2 }]->(Jeff),
-  (John)-[:REL { relWeight: 5.0 }]->(Jeff);
+  (dan)-[:KNOWS {relWeight: 1.0}]->(annie),
+  (dan)-[:KNOWS {relWeight: 1.6}]->(matt),
+  (annie)-[:KNOWS {relWeight: 0.1}]->(matt),
+  (annie)-[:KNOWS {relWeight: 3.0}]->(jeff),
+  (annie)-[:KNOWS {relWeight: 1.2}]->(brie),
+  (matt)-[:KNOWS {relWeight: 10.0}]->(brie),
+  (brie)-[:KNOWS {relWeight: 1.0}]->(elsa),
+  (brie)-[:KNOWS {relWeight: 2.2}]->(jeff),
+  (john)-[:KNOWS {relWeight: 5.0}]->(jeff)
 ----
 
 [source, cypher, role=graph-create-query]
@@ -224,8 +225,8 @@ CALL gds.graph.create(
       properties: ['age', 'height', 'weight']
     }
   }, {
-    R: {
-      type: 'REL',
+    KNOWS: {
+      type: 'KNOWS',
       orientation: 'UNDIRECTED',
       properties: ['relWeight']
     }
@@ -259,6 +260,98 @@ CALL gds.beta.graphSage.train(
 
 WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
 
+
+=== Train with multiple node labels
+
+In this section we describe how to train on a graph with multiple labels.
+The different labels may have different sets of properties.
+To run on such a graph, GraphSAGE is run in _multi-label mode_, in which the feature properties are projected into a common feature space.
+Therefore, all nodes have feature vectors of the same dimension after the projection.
+
+The projection for a label is linear and given by a matrix of weights.
+The weights for each label are learned jointly with the other weights of the GraphSAGE model.
+
+In the multi-label mode, the following is applied prior to the usual aggregation layers:
+
+. A property representing the label is added to the feature properties for that label
+. The feature properties for each label are projected into a feature vector of a shared dimension
+
+The projected feature dimension is configured with `projectedFeatureDimension`, and specifying it enables the multi-label mode.
+
+The feature properties used for a label are those present in the `featureProperties` configuration parameter which exist in the graph for that label.
+In the multi-label mode, it is no longer required that all labels have all the specified properties.
+
+
+==== Assumptions
+
+- A requirement for multi-label mode is that each node belongs to exactly one label.
+- A GraphSAGE model trained in this mode must be applied on graphs with the same schema with regards to node labels and properties.
+
+
+==== Examples
+
+In order to demonstrate GraphSAGE with multiple labels, we need to add a few more nodes and relationships to the example Graph.
+
+[source, cypher, role=setup-query]
+----
+CREATE
+  (guitar:Instrument {name: 'Guitar', cost: 1337.0}),
+  (synth:Instrument {name: 'Synthesizer', cost: 1337.0}),
+  (bongos:Instrument {name: 'Bongos', cost: 42.0}),
+  (trumpet:Instrument {name: 'Trumpet', cost: 1337.0}),
+
+  (dan)-[:LIKES]->(guitar),
+  (dan)-[:LIKES]->(synth),
+  (dan)-[:LIKES]->(bongos),
+  (annie)-[:LIKES]->(guitar),
+  (annie)-[:LIKES]->(synth),
+  (matt)-[:LIKES]->(bongos),
+  (brie)-[:LIKES]->(guitar),
+  (brie)-[:LIKES]->(synth),
+  (brie)-[:LIKES]->(bongos),
+  (john)-[:LIKES]->(trumpet)
+----
+
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'persons_with_instruments',
+  {
+    Person: {
+      label: 'Person',
+      properties: ['age', 'height', 'weight']
+    },
+    Instrument: {
+      label: 'Instrument',
+      properties: ['cost']
+    }
+  }, {
+    KNOWS: {
+      type: 'KNOWS',
+      orientation: 'UNDIRECTED'
+    },
+    LIKES: {
+      type: 'LIKES',
+      orientation: 'UNDIRECTED'
+    }
+})
+----
+
+We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
+
+[source, cypher, role=query-example, no-result=true]
+----
+CALL gds.beta.graphSage.train(
+  'persons_with_instruments',
+  {
+    modelName: 'multiLabelModel',
+    featureProperties: ['age', 'height', 'weight', 'cost'],
+    projectedFeatureDimension: 4
+  }
+)
+----
+
+
 === Train with relationship weights
 
 The GraphSage implementation supports training using relationship weights.
@@ -275,14 +368,15 @@ CALL gds.beta.graphSage.train(
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
     degreeAsProperty: true,
-    relationshipWeightProperty: 'relWeight'
+    relationshipWeightProperty: 'relWeight',
+    nodeLabels: ['Person'],
+    relationshipTypes: ['KNOWS']
   }
 )
 ----
 
 Relationship weights are only used during GraphSage training.
 The trained models can then be used to stream or write back the generated node embeddings.
-
 
 === Stream
 
