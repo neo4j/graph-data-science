@@ -22,9 +22,8 @@ package org.neo4j.graphalgo.betweenness;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 final class BetweennessCentralityProc {
@@ -41,73 +40,16 @@ final class BetweennessCentralityProc {
         return new BetweennessCentralityFactory<>();
     }
 
-    static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends BetweennessCentralityBaseConfig> AbstractCentralityResultBuilder<PROC_RESULT> resultBuilder(
         BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult,
-        ProcedureCallContext callContext
+        AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult
     ) {
-        var computeStatistics = callContext.outputFields().anyMatch(f ->
-            f.equalsIgnoreCase("minimumScore") ||
-            f.equalsIgnoreCase("maximumScore") ||
-            f.equalsIgnoreCase("scoreSum")
-        );
-
-        var result = computeResult.result();
-        if (result != null && computeStatistics) {
-            ProgressTimer timer = ProgressTimer.start();
-            procResultBuilder = computeStatistics(procResultBuilder, result);
-            procResultBuilder.withPostProcessingMillis(timer.getDuration());
-        }
-
-        return procResultBuilder.withConfig(computeResult.config());
+        return procResultBuilder.withCentralityFunction(computeResult.result() != null ? computeResult.result()::get : null);
     }
 
-    private static <PROC_RESULT> BetweennessCentralityResultBuilder<PROC_RESULT> computeStatistics(
-        BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
-        HugeAtomicDoubleArray result
-    ) {
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
-        double sum = 0.0;
-        for (long i = 0; i < result.size(); i++) {
-            double c = result.get(i);
-            if (c < min) {
-                min = c;
-            }
-            if (c > max) {
-                max = c;
-            }
-            sum += c;
-        }
-        return procResultBuilder
-            .minimumScore(min)
-            .maximumScore(max)
-            .scoreSum(sum);
-    }
-
-    abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractResultBuilder<PROC_RESULT> {
-
-        double minimumScore, maximumScore, scoreSum = -1;
-        long postProcessingMillis = 0;
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> minimumScore(double minimumScore) {
-            this.minimumScore = minimumScore;
-            return this;
-        }
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> maximumScore(double maximumScore) {
-            this.maximumScore = maximumScore;
-            return this;
-        }
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> scoreSum(double scoreSum) {
-            this.scoreSum = scoreSum;
-            return this;
-        }
-
-        BetweennessCentralityResultBuilder<PROC_RESULT> withPostProcessingMillis(long postProcessingMillis) {
-            this.postProcessingMillis = postProcessingMillis;
-            return this;
+    abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
+        BetweennessCentralityResultBuilder(ProcedureCallContext callContext, int concurrency) {
+            super(callContext, concurrency);
         }
     }
 }

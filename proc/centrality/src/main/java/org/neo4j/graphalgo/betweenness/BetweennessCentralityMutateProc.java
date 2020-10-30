@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -87,7 +89,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(), computeResult, callContext);
+        return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
     }
 
     public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
@@ -101,15 +103,11 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
             long computeMillis,
             long postProcessingMillis,
             long mutateMillis,
-            double minCentrality,
-            double maxCentrality,
-            double sumCentrality,
+            @Nullable Map<String, Object> centralityDistribution,
             Map<String, Object> config
         ) {
             super(
-                minCentrality,
-                maxCentrality,
-                sumCentrality,
+                centralityDistribution,
                 createMillis,
                 computeMillis,
                 postProcessingMillis,
@@ -121,17 +119,19 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<MutateResult> {
 
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
+            }
+
             @Override
-            public MutateResult build() {
+            public MutateResult buildResult() {
                 return new MutateResult(
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
                     mutateMillis,
-                    minimumScore,
-                    maximumScore,
-                    scoreSum,
+                    centralityHistogramOrNull(),
                     config.toMap()
                 );
             }

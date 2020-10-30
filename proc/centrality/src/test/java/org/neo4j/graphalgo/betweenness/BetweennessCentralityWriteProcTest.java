@@ -26,12 +26,13 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class BetweennessCentralityWriteProcTest
     extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig>
@@ -70,17 +71,19 @@ class BetweennessCentralityWriteProcTest
             .addParameter("writeProperty", DEFAULT_RESULT_PROPERTY)
             .yields();
 
-        assertCypherResult(query, List.of(Map.of(
-            "minimumScore", 0.0,
-            "maximumScore", 4.0,
-            "scoreSum", 10.0,
-            "nodePropertiesWritten", 5L,
-            "createMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "postProcessingMillis", greaterThan(-1L),
-            "writeMillis", greaterThan(-1L),
-            "configuration", isA(Map.class)
-        )));
+        runQueryWithRowConsumer(query, row ->
+        {
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(0.0, centralityDistribution.get("min"));
+            assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
+
+            assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("writeMillis").longValue()));
+            assertEquals(5L, row.getNumber("nodePropertiesWritten"));
+        });
     }
 
 }
