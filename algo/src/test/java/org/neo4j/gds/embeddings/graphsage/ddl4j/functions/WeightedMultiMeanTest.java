@@ -46,7 +46,7 @@ class WeightedMultiMeanTest extends GraphSageBaseTest implements FiniteDifferenc
     private static final String DB_CYPHER =
         "CREATE" +
         "  (u1:User { id: 0 })" +
-        ", (u1:User { id: 1 })" +
+        ", (u2:User { id: 1 })" +
         ", (d1:Dish { id: 2 })" +
         ", (d2:Dish { id: 3 })" +
         ", (d3:Dish { id: 4 })" +
