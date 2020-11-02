@@ -71,6 +71,7 @@ class GraphSageEmbeddingsGeneratorTest {
             result.layers(),
             config.batchSize(),
             config.concurrency(),
+            config.isWeighted(),
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
@@ -102,6 +103,7 @@ class GraphSageEmbeddingsGeneratorTest {
             model.data().layers(),
             config.batchSize(),
             config.concurrency(),
+            config.isWeighted(),
             model.data().featureFunction(),
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()

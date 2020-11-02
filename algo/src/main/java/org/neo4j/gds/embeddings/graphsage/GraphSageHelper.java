@@ -56,6 +56,7 @@ public final class GraphSageHelper {
 
     public static Variable<Matrix> embeddings(
         Graph graph,
+        boolean useWeights,
         long[] nodeIds,
         HugeObjectArray<double[]> features,
         Layer[] layers,
@@ -66,7 +67,7 @@ public final class GraphSageHelper {
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
             .collect(Collectors.toList());
         Collections.reverse(neighborhoodFunctions);
-        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
+        List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph, useWeights);
 
         Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
             subGraphs.get(subGraphs.size() - 1).nextNodes,

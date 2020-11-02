@@ -26,7 +26,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
-import org.neo4j.kernel.api.exceptions.index.ExceptionDuringFlipKernelException;
 
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 
@@ -71,13 +70,9 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
             for (int targetIndex : neighbors) {
                 int targetOffset = targetIndex * cols;
                 long originalTargetId = subGraph.nextNodes[targetIndex];
-                try {
-                    double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
-                    for (int col = 0; col < cols; col++) {
-                        means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
-                    }
-                } catch (Exception e) {
-                    getClass();
+                double relationshipWeight = relationshipWeights.weight(originalSourceId, originalTargetId);
+                for (int col = 0; col < cols; col++) {
+                    means[sourceOffset + col] += (parentData[targetOffset + col] * relationshipWeight) / (numberOfNeighbors + 1);
                 }
             }
         }

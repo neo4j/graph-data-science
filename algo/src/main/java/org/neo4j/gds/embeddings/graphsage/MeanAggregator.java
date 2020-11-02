@@ -29,7 +29,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 /*
@@ -38,23 +37,20 @@ import java.util.function.Function;
 */
 public class MeanAggregator implements Aggregator {
 
-    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MeanAggregator(
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         Weights<Matrix> weights,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
         this.weights = weights;
         this.activationFunction = activationFunction;
     }
 
     @Override
     public Variable<Matrix> aggregate(Variable<Matrix> previousLayerRepresentations, SubGraph subGraph) {
-        Variable<Matrix> means = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
+        Variable<Matrix> means = subGraph.maybeRelationshipWeightsFunction.<Variable<Matrix>>map(relationshipWeightsFunction ->
             // Weighted with respect to the Relationship Weights
             new WeightedMultiMean(
                 previousLayerRepresentations,

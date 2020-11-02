@@ -128,6 +128,12 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
+    @Value.Derived
+    default boolean isWeighted() {
+        return relationshipWeightProperty() != null;
+    }
+
+    @Configuration.Ignore
     default List<LayerConfig> layerConfigs() {
         List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
         for (int i = 0; i < sampleSizes().size(); i++) {

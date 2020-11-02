@@ -23,7 +23,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -32,8 +31,7 @@ public final class LayerFactory {
     private LayerFactory() {}
 
     static Layer createLayer(
-        LayerConfig layerConfig,
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction
+        LayerConfig layerConfig
     ) {
         int rows = layerConfig.rows();
         int cols = layerConfig.cols();
@@ -48,7 +46,6 @@ public final class LayerFactory {
 
         if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
             return new MeanAggregatingLayer(
-                maybeRelationshipWeightsFunction,
                 weights,
                 layerConfig.sampleSize(),
                 activationFunction.activationFunction()
@@ -73,7 +70,6 @@ public final class LayerFactory {
             Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
 
             return new MaxPoolAggregatingLayer(
-                maybeRelationshipWeightsFunction,
                 layerConfig.sampleSize(),
                 poolWeights,
                 selfWeights,

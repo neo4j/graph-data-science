@@ -20,22 +20,26 @@
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
 import org.neo4j.gds.embeddings.graphsage.NeighborhoodFunction;
+import org.neo4j.gds.embeddings.graphsage.RelationshipWeights;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SubGraph {
     public final int[][] adjacency;
     public final int[] selfAdjacency;
     public final long[] nextNodes;
+    public Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
 
-    private SubGraph(int[][] adjacency, int[] selfAdjacency, long[] nextNodes) {
+    private SubGraph(int[][] adjacency, int[] selfAdjacency, long[] nextNodes, Optional<RelationshipWeights> maybeRelationshipWeightsFunction) {
         this.adjacency = adjacency;
         this.selfAdjacency = selfAdjacency;
         this.nextNodes = nextNodes;
+        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
     }
 
     public static List<SubGraph> buildSubGraphs(
@@ -43,11 +47,20 @@ public class SubGraph {
         List<NeighborhoodFunction> neighborhoodFunctions,
         Graph graph
     ) {
+        return buildSubGraphs(nodeIds, neighborhoodFunctions, graph, false);
+    }
+
+    public static List<SubGraph> buildSubGraphs(
+        long[] nodeIds,
+        List<NeighborhoodFunction> neighborhoodFunctions,
+        Graph graph,
+        boolean useWeights
+    ) {
         List<SubGraph> result = new ArrayList<>();
         long[] previousNodes = nodeIds;
 
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
-            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph);
+            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, relationshipWeightFunction(graph, useWeights));
             result.add(lastGraph);
             previousNodes = lastGraph.nextNodes;
         }
@@ -55,6 +68,10 @@ public class SubGraph {
     }
 
     static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
+        return buildSubGraph(nodeIds, neighborhoodFunction, graph, relationshipWeightFunction(graph, false));
+    }
+
+    static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, Optional<RelationshipWeights> maybeRelationshipWeightsFunction) {
         int[][] adjacency = new int[nodeIds.length][];
         int[] selfAdjacency = new int[nodeIds.length];
         LocalIdMap idmap = new LocalIdMap();
@@ -73,7 +90,13 @@ public class SubGraph {
                 .toArray();
             adjacency[internalId] = neighborInternalIds;
         });
-        return new SubGraph(adjacency, selfAdjacency, idmap.originalIds());
+        return new SubGraph(adjacency, selfAdjacency, idmap.originalIds(), maybeRelationshipWeightsFunction);
+    }
+
+    private static Optional<RelationshipWeights> relationshipWeightFunction(Graph graph, boolean useWeights) {
+        return useWeights ?
+            Optional.of(graph::relationshipProperty) :
+            Optional.empty();
     }
 
 }
