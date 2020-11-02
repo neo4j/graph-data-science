@@ -108,6 +108,16 @@ public class NodePropertyExporter extends StatementApi {
                 executorService
             );
         }
+
+        @Override
+        String taskName() {
+            return "WriteNodeProperties";
+        }
+
+        @Override
+        long taskVolume() {
+            return nodeCount;
+        }
     }
 
     public interface WriteConsumer {
