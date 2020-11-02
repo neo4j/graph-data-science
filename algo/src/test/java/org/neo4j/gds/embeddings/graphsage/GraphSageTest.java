@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
@@ -49,9 +50,9 @@ import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphSageTest {
 
-    private static final int NODE_COUNT = 20;
+    private static final int NODE_COUNT = 10000;
     private static final int FEATURES_COUNT = 1;
-    private static final int EMBEDDING_DIMENSION = 64;
+    private static final int EMBEDDING_DIMENSION = 4;
     private static final String MODEL_NAME = "graphSageModel";
 
     private Graph graph;
@@ -64,7 +65,7 @@ class GraphSageTest {
             .nodeCount(NODE_COUNT)
             .averageDegree(3)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(123L)
+            .relationshipPropertyProducer(PropertyProducer.fixed("weight", 1.0))
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
@@ -84,9 +85,11 @@ class GraphSageTest {
     }
 
     @Test
-    void testLogging() {
+    void differentTrainAndPredictionGraph() {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
+            .relationshipWeightProperty("weight")
+            .concurrency(1)
             .build();
 
         var modelTrainer = new GraphSageModelTrainer(trainConfig, ProgressLogger.NULL_LOGGER);
@@ -104,7 +107,50 @@ class GraphSageTest {
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
             .modelName(MODEL_NAME)
-            .batchSize(1)
+            .concurrency(4)
+            .batchSize(2)
+            .build();
+
+        RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
+            .nodeCount(2000)
+            .averageDegree(3)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .relationshipPropertyProducer(PropertyProducer.fixed("weight", 1.0))
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.empty())
+            .build();
+        graph = randomGraphGenerator.generate();
+
+        var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
+        var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        graphSage.compute();
+    }
+
+    @Test
+    void testLogging() {
+        var trainConfig = configBuilder
+            .modelName(MODEL_NAME)
+            .batchSize(10)
+            .build();
+
+        var modelTrainer = new GraphSageModelTrainer(trainConfig, ProgressLogger.NULL_LOGGER);
+        var layers = modelTrainer.train(graph, features).layers();
+        var model = Model.of(
+            "",
+            MODEL_NAME,
+            "graphSage",
+            GraphSchema.empty(),
+            ModelData.of(layers, GraphSageHelper::features),
+            trainConfig
+        );
+        ModelCatalog.set(model);
+
+        var streamConfig = ImmutableGraphSageStreamConfig
+            .builder()
+            .modelName(MODEL_NAME)
+            .batchSize(10)
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
