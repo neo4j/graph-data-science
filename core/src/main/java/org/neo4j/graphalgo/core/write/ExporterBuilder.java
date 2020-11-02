@@ -53,11 +53,15 @@ public abstract class ExporterBuilder<T> {
 
     public abstract T build();
 
+    abstract String taskName();
+
+    abstract long taskVolume();
+
     public ExporterBuilder<T> withLog(Log log) {
         // Due to another bug, writeConcurrency is 0 by default which is handled in ParallelUtil
         // We mimic this here and will resolve this together with the bugfix
         var failSafeConcurrency = writeConcurrency == 0 ? 1 : writeConcurrency;
-        progressLogger = new BatchingProgressLogger(log, nodeCount, "WriteNodeProperties", failSafeConcurrency);
+        progressLogger = new BatchingProgressLogger(log, taskVolume(), taskName(), failSafeConcurrency);
         return this;
     }
 
