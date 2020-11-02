@@ -44,7 +44,7 @@ class Neo4jVersionTest {
         "4.2-foo, V_4_2",
         "4.2.1, V_4_2",
         "4.2.1-foo, V_4_2",
-        "dev, V_4_2",
+        "dev, V_4_3",
         "aura, V_4_2",
     })
     void testParse(CharSequence input, Neo4jVersion expected) {
