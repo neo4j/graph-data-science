@@ -82,10 +82,6 @@ public final class RelationshipExporter extends StatementApi {
 
         @Override
         public RelationshipExporter build() {
-            ProgressLogger progressLogger = loggerAdapter == null
-                ? ProgressLogger.NULL_LOGGER
-                : loggerAdapter;
-
             return new RelationshipExporter(
                 tx,
                 graph,

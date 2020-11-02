@@ -21,8 +21,11 @@ package org.neo4j.graphalgo.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
@@ -36,11 +39,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class NodePropertyExporterTest extends BaseTest {
 
@@ -137,6 +142,53 @@ class NodePropertyExporterTest extends BaseTest {
     @Test
     void stopsParallelExportingWhenTransactionHasBeenTerminated() {
         transactionTerminationTest(Pools.DEFAULT);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void progressLogging(boolean parallel) {
+        // given a graph of 20 nodes
+        runQuery("UNWIND range(1, 20) AS i CREATE (:A)");
+        Graph graph = new StoreLoaderBuilder().api(db).addNodeLabel("A").build().graph();
+
+        // with a node exporter
+        var log = new TestLog();
+        var exporterBuilder = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).withLog(log);
+        if (parallel) {
+            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
+        }
+        var exporter = exporterBuilder.build();
+
+        // when writing properties
+        exporter.write("newProp1", (LongNodeProperties) nodeId -> 1L);
+
+        // then assert messages
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "WriteNodeProperties :: Start",
+                "WriteNodeProperties 5%",
+                "WriteNodeProperties 10%",
+                "WriteNodeProperties 15%",
+                "WriteNodeProperties 20%",
+                "WriteNodeProperties 25%",
+                "WriteNodeProperties 30%",
+                "WriteNodeProperties 35%",
+                "WriteNodeProperties 40%",
+                "WriteNodeProperties 45%",
+                "WriteNodeProperties 50%",
+                "WriteNodeProperties 55%",
+                "WriteNodeProperties 60%",
+                "WriteNodeProperties 65%",
+                "WriteNodeProperties 70%",
+                "WriteNodeProperties 75%",
+                "WriteNodeProperties 80%",
+                "WriteNodeProperties 85%",
+                "WriteNodeProperties 90%",
+                "WriteNodeProperties 95%",
+                "WriteNodeProperties 100%",
+                "WriteNodeProperties :: Finished"
+            );
     }
 
     private void transactionTerminationTest(ExecutorService executorService) {
