@@ -33,12 +33,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class MaxPoolingAggregator implements Aggregator {
 
-    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -46,15 +44,12 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
 
     MaxPoolingAggregator(
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
-
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
@@ -75,7 +70,7 @@ public class MaxPoolingAggregator implements Aggregator {
         Variable<Matrix> biasedWeightedPreviousLayer = new MatrixVectorSum(weightedPreviousLayer, bias);
         Variable<Matrix> neighborhoodActivations = activationFunction.apply(biasedWeightedPreviousLayer);
 
-        Variable<Matrix> elementwiseMax = maybeRelationshipWeightsFunction.<Variable<Matrix>>map(
+        Variable<Matrix> elementwiseMax = subGraph.maybeRelationshipWeightsFunction.<Variable<Matrix>>map(
             relationshipWeightsFunction ->
                 // Weighted with respect to the Relationship Weights
                 new WeightedElementwiseMax(neighborhoodActivations, relationshipWeightsFunction, subGraph)

@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.TreeMap;
@@ -71,7 +70,6 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
-    private RelationshipWeights relationshipWeights;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
         this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
@@ -103,18 +101,8 @@ public class GraphSageModelTrainer {
         progressLogger.logStart();
         Map<String, Double> epochLosses = new TreeMap<>();
 
-        // TODO: do not store in a field but pass as parameter
-        relationshipWeights = useWeights ?
-            graph::relationshipProperty :
-            UNWEIGHTED;
-
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction = useWeights ?
-            Optional.of(relationshipWeights) :
-            Optional.empty();
-
-        // TODO: do not store in a field but pass as parameter
         this.layers = layerConfigs.stream()
-            .map(layerConfig -> LayerFactory.createLayer(layerConfig, maybeRelationshipWeightsFunction))
+            .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
         degreeProbabilityNormalizer = LongStream
@@ -244,10 +232,10 @@ public class GraphSageModelTrainer {
                 neighborBatch(graph, batch),
                 negativeBatch(graph, batch.length)
             )).toArray();
-        Variable<Matrix> embeddingVariable = embeddings(graph, totalBatch, features, this.layers, featureFunction);
+        Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, this.layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(
-            relationshipWeights,
+            useWeights ? graph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
             totalBatch,
             negativeSampleWeight

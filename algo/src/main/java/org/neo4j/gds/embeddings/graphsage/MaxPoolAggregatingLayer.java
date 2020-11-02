@@ -24,7 +24,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
@@ -32,7 +31,6 @@ public class MaxPoolAggregatingLayer implements Layer {
 
     private final UniformNeighborhoodSampler sampler;
     private final long sampleSize;
-    private final Optional<RelationshipWeights> maybeRelationshipWeightsFunction;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -42,7 +40,6 @@ public class MaxPoolAggregatingLayer implements Layer {
     private long randomState;
 
     public MaxPoolAggregatingLayer(
-        Optional<RelationshipWeights> maybeRelationshipWeightsFunction,
         long sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
@@ -50,7 +47,6 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Vector> bias,
         Function<Variable<Matrix>, Variable<Matrix>> activationFunction
     ) {
-        this.maybeRelationshipWeightsFunction = maybeRelationshipWeightsFunction;
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
@@ -72,7 +68,6 @@ public class MaxPoolAggregatingLayer implements Layer {
     @Override
     public Aggregator aggregator() {
         return new MaxPoolingAggregator(
-            this.maybeRelationshipWeightsFunction,
             this.poolWeights,
             this.selfWeights,
             this.neighborsWeights,
