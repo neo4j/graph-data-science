@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
@@ -40,7 +41,7 @@ import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 public class AllocationTrackerProcTest extends BaseProcTest {
 
     // Small enough so the Neo4j create query doesn't exceed the limit,
-    // large enough so the GDS create query does.
+    // large enough so the GDS algo query does.
     private static final String DB_CYPHER = "UNWIND range(0, 4096) AS x CREATE ()";
     private static final String EXCEPTION_NAME = "MemoryLimitExceededException";
 
@@ -54,7 +55,7 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         runQuery(DB_CYPHER);
-        registerProcedures(GraphCreateProc.class, AllocationTrackingTestProc.class);
+        registerProcedures(GraphCreateProc.class, FastRPStreamProc.class, AllocationTrackingTestProc.class);
     }
 
     @Test
@@ -62,7 +63,9 @@ public class AllocationTrackerProcTest extends BaseProcTest {
     void shouldFailOnMemoryLimitExceeded() {
         String cypher = GdsCypher.call()
             .loadEverything()
-            .graphCreate("foo")
+            .algo("fastRP")
+            .streamMode()
+            .addParameter("embeddingDimension", 1024)
             .yields();
         USE_KERNEL_TRACKER.enableAndRun(
             () -> {

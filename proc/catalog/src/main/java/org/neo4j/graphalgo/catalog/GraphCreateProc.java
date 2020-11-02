@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -144,6 +145,15 @@ public class GraphCreateProc extends CatalogProc {
 
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
+    }
+
+    /**
+     * This is (temporarily) overridden due to a performance regression
+     * caused by tracking memory allocation during graph creation.
+     */
+    @Override
+    protected AllocationTracker allocationTracker() {
+        return AllocationTracker.empty();
     }
 
     private GraphCreateResult createGraph(GraphCreateConfig config) {
