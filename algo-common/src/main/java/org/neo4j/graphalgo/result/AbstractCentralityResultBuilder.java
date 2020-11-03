@@ -53,7 +53,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
         )).orElse(null);
     }
 
-    private LongToDoubleFunction centralityFunction = null;
+    protected LongToDoubleFunction centralityFunction = null;
 
     protected AbstractCentralityResultBuilder(
         ProcedureCallContext callContext,
@@ -76,7 +76,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     public WRITE_RESULT build() {
         final ProgressTimer timer = ProgressTimer.start();
 
-        if (centralityFunction != null) {
+        if (buildHistogram && centralityFunction != null) {
             maybeCentralityHistogram = Optional.of(CentralityStatistics.histogram(nodeCount, centralityFunction,Pools.DEFAULT, concurrency));
         }
         timer.stop();

@@ -96,8 +96,7 @@ public class BetweennessCentralityMutateProcTest
             .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)
             .yields();
 
-        runQueryWithRowConsumer(query, row ->
-        {
+        runQueryWithRowConsumer(query, row -> {
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
             assertNotNull(centralityDistribution);
             assertEquals(0.0, centralityDistribution.get("min"));

@@ -56,14 +56,37 @@ public class BetweennessCentralityStatsProcTest extends BetweennessCentralityPro
             .withAnyRelationshipType()
             .algo("betweenness")
             .statsMode()
-            .yields();
+            .yields("centralityDistribution", "createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
 
-        runQueryWithRowConsumer(query, row ->
-        {
+        runQueryWithRowConsumer(query, row -> {
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
             assertNotNull(centralityDistribution);
             assertEquals(0.0, centralityDistribution.get("min"));
             assertEquals(4.0, (double) centralityDistribution.get("max"), 1e-4);
+            assertEquals(10.0, row.getNumber("scoreSum"));
+
+
+            assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
+            assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
+        });
+    }
+
+    @Test
+    void testStatsWithDeprecatedFields() {
+        String query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .algo("betweenness")
+            .statsMode()
+            .yields("createMillis", "computeMillis", "postProcessingMillis", "minimumScore", "maximumScore", "scoreSum");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(0.0, row.getNumber("minimumScore"));
+            assertEquals(4.0, row.getNumber("maximumScore"));
+            assertEquals(10.0, row.getNumber("scoreSum"));
+
 
             assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
             assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));

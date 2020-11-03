@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.Locale;
+
 final class BetweennessCentralityProc {
 
     static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
@@ -44,12 +46,61 @@ final class BetweennessCentralityProc {
         BetweennessCentralityResultBuilder<PROC_RESULT> procResultBuilder,
         AlgoBaseProc.ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult
     ) {
-        return procResultBuilder.withCentralityFunction(computeResult.result() != null ? computeResult.result()::get : null);
+        if (computeResult.result() != null) {
+            HugeAtomicDoubleArray centrality = computeResult.result();
+
+            if (procResultBuilder.computeDeprecatedStats) {
+                double min = Double.MAX_VALUE;
+                double max = Double.MIN_VALUE;
+                double sum = 0.0;
+                for (long i = centrality.size() - 1; i >= 0; i--) {
+                    double c = centrality.get(i);
+                    if (c < min) {
+                        min = c;
+                    }
+                    if (c > max) {
+                        max = c;
+                    }
+                    sum += c;
+                }
+
+                procResultBuilder
+                    .minCentrality(min)
+                    .maxCentrality(max)
+                    .sumCentrality(sum);
+            }
+
+            procResultBuilder.withCentralityFunction(computeResult.result()::get);
+        }
+        return procResultBuilder;
     }
 
     abstract static class BetweennessCentralityResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
+        double minCentrality = -1;
+        double maxCentrality = -1;
+        double sumCentrality = -1;
+        boolean computeDeprecatedStats;
+
         BetweennessCentralityResultBuilder(ProcedureCallContext callContext, int concurrency) {
             super(callContext, concurrency);
+            this.computeDeprecatedStats = callContext
+                .outputFields()
+                .anyMatch(s -> s.toLowerCase(Locale.ENGLISH).contains("score"));
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> minCentrality(double minCentrality) {
+            this.minCentrality = minCentrality;
+            return this;
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> maxCentrality(double maxCentrality) {
+            this.maxCentrality = maxCentrality;
+            return this;
+        }
+
+        BetweennessCentralityResultBuilder<PROC_RESULT> sumCentrality(double sumCentrality) {
+            this.sumCentrality = sumCentrality;
+            return this;
         }
     }
 }

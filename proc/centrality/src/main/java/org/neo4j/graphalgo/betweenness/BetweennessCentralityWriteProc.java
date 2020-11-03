@@ -107,9 +107,12 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             long postProcessingMillis,
             long writeMillis,
             @Nullable Map<String, Object> centralityDistribution,
+            double sumCentrality,
+            double minCentrality,
+            double maxCentrality,
             Map<String, Object> config
         ) {
-            super(centralityDistribution, createMillis, computeMillis, postProcessingMillis, config);
+            super(centralityDistribution, sumCentrality, minCentrality, maxCentrality, createMillis, computeMillis, postProcessingMillis, config);
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.writeMillis = writeMillis;
         }
@@ -129,6 +132,9 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
                     postProcessingMillis,
                     writeMillis,
                     centralityHistogramOrNull(),
+                    sumCentrality,
+                    minCentrality,
+                    maxCentrality,
                     config.toMap()
                 );
             }
