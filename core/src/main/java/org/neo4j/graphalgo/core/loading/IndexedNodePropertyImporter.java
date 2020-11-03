@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -45,6 +44,7 @@ import org.neo4j.values.storable.ValueGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.concurrent.ExecutorService;
 
@@ -53,7 +53,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private final NodeLabel nodeLabel;
     private final PropertyMapping mapping;
     private final IndexDescriptor index;
-    private final @Nullable IndexQuery indexQuery;
+    private final Optional<IndexQuery> indexQuery;
     private final IdMapping idMap;
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
@@ -81,7 +81,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             nodeLabel,
             mapping,
             index,
-            null,
+            Optional.empty(),
             idMap,
             progressLogger,
             terminationFlag,
@@ -95,14 +95,14 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         );
     }
 
-    private IndexedNodePropertyImporter(IndexedNodePropertyImporter from, @NotNull IndexQuery indexQuery) {
+    private IndexedNodePropertyImporter(IndexedNodePropertyImporter from, IndexQuery indexQuery) {
         this(
             from.concurrency,
             from.tx,
             from.nodeLabel,
             from.mapping,
             from.index,
-            indexQuery,
+            Optional.of(indexQuery),
             from.idMap,
             from.progressLogger,
             from.terminationFlag,
@@ -118,7 +118,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         NodeLabel nodeLabel,
         PropertyMapping mapping,
         IndexDescriptor index,
-        @Nullable IndexQuery indexQuery,
+        Optional<IndexQuery> indexQuery,
         IdMapping idMap,
         ProgressLogger progressLogger,
         TerminationFlag terminationFlag,
@@ -154,9 +154,9 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             Neo4jProxy.memoryTracker(ktx)
         )) {
             var indexReadSession = read.indexReadSession(index);
-            if (indexQuery != null) {
+            if (indexQuery.isPresent()) {
                 // if indexQuery is not null, we are a parallel batch
-                Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.NONE, true, indexQuery);
+                Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.NONE, true, indexQuery.get());
             } else {
                 // we don't need to check to feature flag, as we set the concurrency to 1 in ScanningNodesImporter
                 if (concurrency > 1 && ParallelUtil.canRunInParallel(executorService)) {
