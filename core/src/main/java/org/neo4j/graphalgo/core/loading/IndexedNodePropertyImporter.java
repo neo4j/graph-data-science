@@ -229,21 +229,19 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     }
 
     private OptionalDouble findFirst(NodeValueIndexCursor indexCursor) {
+        var numberOfProperties = indexCursor.numberOfProperties();
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var node = indexCursor.nodeReference();
                 var nodeId = idMap.toMappedNodeId(node);
                 if (nodeId >= 0) {
-                    var numberOfProperties = indexCursor.numberOfProperties();
                     for (int i = 0; i < numberOfProperties; i++) {
                         var propertyKey = indexCursor.propertyKey(i);
                         if (propertyId == propertyKey) {
                             var propertyValue = indexCursor.propertyValue(i);
-                            if (propertyValue != null && propertyValue.valueGroup() == ValueGroup.NUMBER) {
-                                var number = ((NumberValue) propertyValue).doubleValue();
-                                if (Double.isFinite(number)) {
-                                    return OptionalDouble.of(number);
-                                }
+                            var number = ((NumberValue) propertyValue).doubleValue();
+                            if (Double.isFinite(number)) {
+                                return OptionalDouble.of(number);
                             }
                         }
                     }
@@ -254,12 +252,12 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     }
 
     private void importFromCursor(NodeValueIndexCursor indexCursor) {
+        var numberOfProperties = indexCursor.numberOfProperties();
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var node = indexCursor.nodeReference();
                 var nodeId = idMap.toMappedNodeId(node);
                 if (nodeId >= 0) {
-                    var numberOfProperties = indexCursor.numberOfProperties();
                     for (int i = 0; i < numberOfProperties; i++) {
                         var propertyKey = indexCursor.propertyKey(i);
                         if (propertyId == propertyKey) {
