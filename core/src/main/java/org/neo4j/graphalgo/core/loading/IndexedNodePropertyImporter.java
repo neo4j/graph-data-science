@@ -158,7 +158,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 // if indexQuery is not null, we are a parallel batch
                 Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.NONE, true, indexQuery.get());
             } else {
-                // we don't need to check to feature flag, as we set the concurrency to 1 in ScanningNodesImporter
+                // we don't need to check the feature flag, as we set the concurrency to 1 in ScanningNodesImporter
                 if (concurrency > 1 && ParallelUtil.canRunInParallel(executorService)) {
                     // try to import in parallel, see if we can find a range
                     var parallelJobs = prepareParallelScan(read, indexReadSession, indexCursor);
@@ -168,7 +168,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                     }
                 }
                 // do a single threaded scan if:
-                // feature flag was off, or concurrency is 1, or the thread pool is not usable, or we couldn't fina a valid range
+                // feature flag was off, or concurrency is 1, or the thread pool is not usable, or we couldn't find a valid range
                 Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.NONE, true);
             }
             importFromCursor(indexCursor);
