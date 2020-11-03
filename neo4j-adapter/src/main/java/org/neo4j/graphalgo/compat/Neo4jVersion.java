@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.kernel.internal.Version;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -43,34 +44,28 @@ public enum Neo4jVersion {
         }
     }
 
-    static final String OVERRIDE_VERSION_PROPERTY = "org.neo4j.gds.neo4j-version.override";
-
     public static Neo4jVersion findNeo4jVersion() {
         return parse(neo4jVersion());
     }
 
     static String neo4jVersion() {
         // Aura relevant implementation detail
-        // First, we read the Neo4j Kernel version
-        // This version is determined by checking for (in order)
-        //   - unsupported.neo4j.custom.version system property
-        //   - Implementation-Version property in META-INF/MANIFEST.MF
-        //   - "dev"
-        // For on-prem deployments, this will get us the correct version
-        // Aura override the version using the System property to something else
-        // where we no longer would deliver the correct version.
-        // As a consequence, we will introduce our own System property,
-        // where one can set the correct Version. Using this System property,
-        // Aura is free to set the correct version for GDS without any workarounds.
-        // If that is not defined, we will use the Neo4j Kernel Version
-        // but will try to check for special Aura version string and treat that differently
-
-        var neo4jVersion = System.getProperty(OVERRIDE_VERSION_PROPERTY);
-        if (neo4jVersion == null || neo4jVersion.isBlank()) {
-            neo4jVersion = Version.getNeo4jVersion();
-        }
-        if (neo4jVersion.contains("aura") || neo4jVersion.contains("Aura")) {
-            neo4jVersion = "aura";
+        //
+        // We don't call `Version.getNeo4jVersion()` directly, as this one
+        // allows for a system property override. This override is used
+        // by Aura for reasons relevant to them.
+        // The version set by Aura does not necessarily reflect the actual Neo4j version,
+        // that is, they might set the version to `4.0-Aura` while Neo4j is actually at version 4.2.x.
+        //
+        // For this reason, we read the _actual_ Neo4j version without checking the override property.
+        var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "dev");
+        // some versions have a build thing attached at the end
+        // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
+        // This regex follows the logic from org.neo4j.kernel.internal.Version.parseReleaseVersion
+        var pattern = Pattern.compile("^(\\d+\\.\\d+(:?\\.\\d+)?(:?-?[^,]+)?)");
+        var matcher = pattern.matcher(neo4jVersion);
+        if (matcher.find()) {
+            return matcher.group(1);
         }
         return neo4jVersion;
     }

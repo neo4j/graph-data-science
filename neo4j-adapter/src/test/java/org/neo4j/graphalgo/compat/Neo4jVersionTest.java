@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,52 +52,5 @@ class Neo4jVersionTest {
     @Test
     void defaultToKernelVersion() {
         assertEquals(Version.getKernel().getReleaseVersion(), Neo4jVersion.neo4jVersion());
-    }
-
-    @Test
-    void hasSystemPropertyOverride() {
-        var version = "1.3.3.7";
-        withSystemProperty(
-            Neo4jVersion.OVERRIDE_VERSION_PROPERTY,
-            version,
-            () -> assertEquals(version, Neo4jVersion.neo4jVersion())
-        );
-    }
-
-    @Test
-    @Disabled("the Version from Neo4j is initialized once on JVM startup, " +
-              "not on every check. It also stores the result in a static final field. " +
-              "We would need to perform some magic, either mocking, heavy reflection, forking a new JVM, etc" +
-              "For now, let's disable this as we don't _really_ need to test Neo4j functionality")
-    void hasNeo4jSystemPropertyOverride() {
-        var version = "2.1.8.4";
-        withSystemProperty(
-            "unsupported.neo4j.custom.version",
-            version,
-            () -> assertEquals(version, Neo4jVersion.neo4jVersion())
-        );
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"4.0-aura", "4.0.aura", "4.2-aura", "4.2.aura", "4.0-AuraFoo", "4.0-AuraBar"})
-    void recognizesAuraVersion(String version) {
-        withSystemProperty(
-            Neo4jVersion.OVERRIDE_VERSION_PROPERTY,
-            version,
-            () -> assertEquals("aura", Neo4jVersion.neo4jVersion())
-        );
-    }
-
-    private void withSystemProperty(String name, String value, Runnable test) {
-        var old = System.setProperty(name, value);
-        try {
-            test.run();
-        } finally {
-            if (old == null) {
-                System.clearProperty(name);
-            } else {
-                System.setProperty(name, old);
-            }
-        }
     }
 }
