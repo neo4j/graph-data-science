@@ -50,9 +50,9 @@ import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphSageTest {
 
-    private static final int NODE_COUNT = 10000;
+    private static final int NODE_COUNT = 20;
     private static final int FEATURES_COUNT = 1;
-    private static final int EMBEDDING_DIMENSION = 4;
+    private static final int EMBEDDING_DIMENSION = 64;
     private static final String MODEL_NAME = "graphSageModel";
 
     private Graph graph;
@@ -66,6 +66,7 @@ class GraphSageTest {
             .averageDegree(3)
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .relationshipPropertyProducer(PropertyProducer.fixed("weight", 1.0))
+            .seed(123L)
             .aggregation(Aggregation.SINGLE)
             .orientation(Orientation.UNDIRECTED)
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
@@ -121,10 +122,10 @@ class GraphSageTest {
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .allocationTracker(AllocationTracker.empty())
             .build();
-        graph = randomGraphGenerator.generate();
+        var trainGraph = randomGraphGenerator.generate();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        var graphSage = algorithmFactory.build(trainGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
         graphSage.compute();
     }
 
@@ -132,7 +133,6 @@ class GraphSageTest {
     void testLogging() {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
-            .batchSize(10)
             .build();
 
         var modelTrainer = new GraphSageModelTrainer(trainConfig, ProgressLogger.NULL_LOGGER);
@@ -150,7 +150,7 @@ class GraphSageTest {
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
             .modelName(MODEL_NAME)
-            .batchSize(10)
+            .batchSize(1)
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
