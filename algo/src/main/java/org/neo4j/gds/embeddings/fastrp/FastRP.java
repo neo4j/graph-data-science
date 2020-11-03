@@ -86,6 +86,8 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
+        // Each of the above arrays will contain a float array of size `embeddingDimension` for each node.
+        tracker.add(3 * graph.nodeCount() * MemoryUsage.sizeOfFloatArray(config.embeddingDimension()));
 
         this.embeddingDimension = config.embeddingDimension();
         this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();
