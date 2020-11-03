@@ -28,6 +28,10 @@ task checkLicensesFile {
 shadowJar {
     dependsOn checkLicensesFile
 
+    if (project.hasProperty("gdsDropVersion")) {
+        version project.property("gdsDropVersion")
+    }
+
     mergeServiceFiles()
     archiveBaseName.set("neo4j-graph-data-science")
     archiveClassifier.set("standalone")
