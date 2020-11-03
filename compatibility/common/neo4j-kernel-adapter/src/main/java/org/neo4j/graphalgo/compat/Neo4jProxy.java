@@ -200,13 +200,24 @@ public final class Neo4jProxy {
         IMPL.nodeLabelScan(dataRead, label, cursor);
     }
 
-    public static void nodeIndexScan(Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues )
-    throws Exception {
+    public static void nodeIndexScan(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues
+    ) throws Exception {
         IMPL.nodeIndexScan(dataRead, index, cursor, indexOrder, needsValues);
     }
 
-    public static void nodeIndexSeek(Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues, IndexQuery query )
-    throws Exception {
+    public static void nodeIndexSeek(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues,
+        IndexQuery query
+    ) throws Exception {
         IMPL.nodeIndexSeek(dataRead, index, cursor, indexOrder, needsValues, query);
     }
 

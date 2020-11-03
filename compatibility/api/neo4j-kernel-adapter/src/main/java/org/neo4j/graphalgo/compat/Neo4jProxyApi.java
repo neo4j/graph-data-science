@@ -146,9 +146,22 @@ public interface Neo4jProxyApi {
 
     void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor);
 
-    void nodeIndexScan(Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues) throws Exception;
+    void nodeIndexScan(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues
+    ) throws Exception;
 
-    void nodeIndexSeek(Read dataRead, IndexReadSession index, NodeValueIndexCursor cursor, IndexOrder indexOrder, boolean needsValues, IndexQuery query) throws Exception;
+    void nodeIndexSeek(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues,
+        IndexQuery query
+    ) throws Exception;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
 
