@@ -42,7 +42,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-    private final long allocatedMemory;
     private byte[][] pages;
 
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
@@ -121,17 +120,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
     public TransientAdjacencyList(byte[][] pages) {
         this.pages = pages;
-        this.allocatedMemory = memoryOfPages(pages);
-    }
-
-    private static long memoryOfPages(byte[][] pages) {
-        long memory = MemoryUsage.sizeOfObjectArray(pages.length);
-        for (byte[] page : pages) {
-            if (page != null) {
-                memory += MemoryUsage.sizeOfByteArray(page.length);
-            }
-        }
-        return memory;
     }
 
     @Override
@@ -154,32 +142,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public Cursor cursor(long offset) {
-        return new Cursor(pages).init(offset);
-    }
-
-    @Override
-    public DecompressingCursor rawDecompressingCursor() {
+    public AdjacencyCursor rawDecompressingCursor() {
         return new DecompressingCursor(pages);
-    }
-
-    @Override
-    public DecompressingCursor decompressingCursor(long offset) {
-        return rawDecompressingCursor().init(offset);
-    }
-
-    /**
-     * Initialise the given cursor with the given offset
-     */
-    public static Cursor cursor(Cursor reuse, long offset) {
-        return reuse.init(offset);
-    }
-
-    /**
-     * Initialise the given cursor with the given offset
-     */
-    public static DecompressingCursor decompressingCursor(DecompressingCursor reuse, long offset) {
-        return reuse.init(offset);
     }
 
     public static final class Cursor extends MutableIntValue implements PropertyCursor {
@@ -213,7 +177,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
             return value;
         }
 
-        Cursor init(long fromIndex) {
+        @Override
+        public Cursor init(long fromIndex) {
             this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             this.offset = indexInPage(fromIndex, PAGE_MASK);
             this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
@@ -241,21 +206,23 @@ public final class TransientAdjacencyList implements AdjacencyList {
             this.decompress = new AdjacencyDecompressingReader();
         }
 
-        DecompressingCursor init(long fromIndex) {
+        @Override
+        public void init(long fromIndex) {
             maxTargets = decompress.reset(
                 pages[pageIndex(fromIndex, PAGE_SHIFT)],
                 indexInPage(fromIndex, PAGE_MASK));
             currentPosition = 0;
-            return this;
         }
 
         /**
          * Copy iteration state from another cursor without changing {@code other}.
          */
-        void copyFrom(DecompressingCursor other) {
-            decompress.copyFrom(other.decompress);
-            currentPosition = other.currentPosition;
-            maxTargets = other.maxTargets;
+        @Override
+        public void copyFrom(AdjacencyCursor other) {
+            var theOther = ((DecompressingCursor) other);
+            decompress.copyFrom(theOther.decompress);
+            currentPosition = theOther.currentPosition;
+            maxTargets = theOther.maxTargets;
         }
 
         @Override
@@ -295,7 +262,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
          * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
          * will return {@code false}
          */
-        long skipUntil(long target) {
+        @Override
+        public long skipUntil(long target) {
             long value = decompress.skipUntil(target, remaining(), this);
             this.currentPosition += this.value;
             return value;
@@ -308,7 +276,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
          * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
          * will return {@code false}
          */
-        long advance(long target) {
+        @Override
+        public long advance(long target) {
             int targetsLeftToBeDecoded = remaining();
             if(targetsLeftToBeDecoded <= 0) {
                 return AdjacencyCursor.NOT_FOUND;

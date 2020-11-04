@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.core.utils.export;
 import com.carrotsearch.hppc.ObjectObjectHashMap;
 import com.carrotsearch.hppc.ObjectObjectMap;
 import com.carrotsearch.hppc.procedures.ObjectObjectProcedure;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
@@ -31,29 +33,29 @@ import java.util.Map;
 
 class CompositeRelationshipIterator {
 
-    private final TransientAdjacencyList adjacencyList;
-    private final TransientAdjacencyOffsets adjacencyOffsets;
-    private final Map<String, TransientAdjacencyList> propertyLists;
-    private final ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsets;
+    private final AdjacencyList adjacencyList;
+    private final AdjacencyOffsets adjacencyOffsets;
+    private final Map<String, ? extends AdjacencyList> propertyLists;
+    private final ObjectObjectMap<String, AdjacencyOffsets> propertyOffsets;
 
     private final String[] propertyKeys;
-    private final TransientAdjacencyList.DecompressingCursor cursorCache;
-    private final ObjectObjectMap<String, TransientAdjacencyList.Cursor> propertyCursorCache;
+    private final AdjacencyCursor cursorCache;
+    private final ObjectObjectMap<String, PropertyCursor> propertyCursorCache;
 
     CompositeRelationshipIterator(
-        TransientAdjacencyList adjacencyList,
-        TransientAdjacencyOffsets adjacencyOffsets,
-        Map<String, TransientAdjacencyList> propertyLists,
-        Map<String, TransientAdjacencyOffsets> propertyOffsets
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
+        Map<String, ? extends AdjacencyList> propertyLists,
+        Map<String, ? extends AdjacencyOffsets> propertyOffsets
     ) {
         this(adjacencyList, adjacencyOffsets, propertyLists, hppcCopy(propertyOffsets));
     }
 
     private CompositeRelationshipIterator(
-        TransientAdjacencyList adjacencyList,
-        TransientAdjacencyOffsets adjacencyOffsets,
-        Map<String, TransientAdjacencyList> propertyLists,
-        ObjectObjectMap<String, TransientAdjacencyOffsets> propertyOffsets
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets,
+        Map<String, ? extends AdjacencyList> propertyLists,
+        ObjectObjectMap<String, AdjacencyOffsets> propertyOffsets
     ) {
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
@@ -67,8 +69,8 @@ class CompositeRelationshipIterator {
         this.propertyLists.forEach((key, list) -> this.propertyCursorCache.put(key, list.rawCursor()));
     }
 
-    private static ObjectObjectMap<String, TransientAdjacencyOffsets> hppcCopy(Map<String, TransientAdjacencyOffsets> offsets) {
-        var map = new ObjectObjectHashMap<String, TransientAdjacencyOffsets>(offsets.size());
+    private static ObjectObjectMap<String, AdjacencyOffsets> hppcCopy(Map<String, ? extends AdjacencyOffsets> offsets) {
+        var map = new ObjectObjectHashMap<String, AdjacencyOffsets>(offsets.size());
         offsets.forEach(map::put);
         return map;
     }
@@ -89,16 +91,12 @@ class CompositeRelationshipIterator {
         }
 
         // init adjacency cursor
-        var adjacencyCursor = TransientAdjacencyList.decompressingCursor(cursorCache, offset);
+        var adjacencyCursor = cursorCache.initializedTo(offset);
         // init property cursors
         for (var propertyKey : propertyKeys) {
-            propertyCursorCache.put(
-                propertyKey,
-                TransientAdjacencyList.cursor(
-                    propertyCursorCache.get(propertyKey),
-                    propertyOffsets.get(propertyKey).get(sourceId)
-                )
-            );
+            var propertyOffset = propertyOffsets.get(propertyKey).get(sourceId);
+            var propertyCursor = propertyCursorCache.get(propertyKey).init(propertyOffset);
+            propertyCursorCache.put(propertyKey, propertyCursor);
         }
 
         // in-step iteration of adjacency and property cursors
@@ -107,12 +105,11 @@ class CompositeRelationshipIterator {
             visitor.endId(adjacencyCursor.nextVLong());
             visitor.type(relType);
 
-            propertyCursorCache.forEach((ObjectObjectProcedure<String, TransientAdjacencyList.Cursor>) (propertyKey, propertyCursor) -> {
-                visitor.property(
+            propertyCursorCache.forEach((ObjectObjectProcedure<String, PropertyCursor>)
+                (propertyKey, propertyCursor) -> visitor.property(
                     propertyKey,
                     Double.longBitsToDouble(propertyCursor.nextLong())
-                );
-            });
+                ));
 
             visitor.endOfEntity();
         }

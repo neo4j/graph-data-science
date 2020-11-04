@@ -19,14 +19,16 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.DecompressingCursor> {
+public class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
-    private final TransientAdjacencyList adjacency;
+    private final AdjacencyList adjacency;
     private final AdjacencyOffsets offsets;
 
-    HugeGraphIntersect(final TransientAdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
+    HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         super(
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
@@ -39,32 +41,12 @@ public class HugeGraphIntersect extends GraphIntersect<TransientAdjacencyList.De
     }
 
     @Override
-    protected long skipUntil(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
-        return cursor.skipUntil(nodeId);
-    }
-
-    @Override
-    protected long advance(TransientAdjacencyList.DecompressingCursor cursor, long nodeId) {
-        return cursor.advance(nodeId);
-    }
-
-    @Override
-    protected void copyFrom(
-        TransientAdjacencyList.DecompressingCursor sourceCursor, TransientAdjacencyList.DecompressingCursor targetCursor
-    ) {
-        targetCursor.copyFrom(sourceCursor);
-    }
-
-    @Override
-    public TransientAdjacencyList.DecompressingCursor cursor(
-        long node,
-        TransientAdjacencyList.DecompressingCursor reuse
-    ) {
+    public AdjacencyCursor cursor(long node, AdjacencyCursor reuse) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return TransientAdjacencyList.decompressingCursor(reuse, offset);
+        return super.cursor(offset, reuse);
     }
 
     @Override

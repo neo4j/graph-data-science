@@ -27,7 +27,9 @@ public interface AdjacencyList extends AutoCloseable {
 
     PropertyCursor rawCursor();
 
-    PropertyCursor cursor(long offset);
+    default PropertyCursor cursor(long offset) {
+        return rawCursor().init(offset);
+    }
 
     /**
      * Returns a new, uninitialized delta cursor.
@@ -37,7 +39,9 @@ public interface AdjacencyList extends AutoCloseable {
     /**
      * Get a new cursor initialised on the given offset
      */
-    AdjacencyCursor decompressingCursor(long offset);
+    default AdjacencyCursor decompressingCursor(long offset) {
+        return rawDecompressingCursor().initializedTo(offset);
+    }
 
     @Override
     void close();

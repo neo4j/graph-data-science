@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.api;
 
 public interface PropertyCursor extends AutoCloseable {
+    /**
+     * Initialize this cursor to point to the given {@code index}.
+     */
+    PropertyCursor init(long index);
 
     /**
      * Return true iff there is at least one more target to decode.

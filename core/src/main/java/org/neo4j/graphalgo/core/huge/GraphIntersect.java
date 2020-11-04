@@ -68,7 +68,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         CURSOR neighboursAMain = cursor(nodeA, cache);
 
         // find first neighbour B of A with id > A
-        long nodeB = skipUntil(neighboursAMain, nodeA);
+        long nodeB = neighboursAMain.skipUntil(nodeA);
         // if there is no such neighbour -> no triangle (or we already found it)
         if (nodeB == NOT_FOUND) {
             return;
@@ -95,16 +95,16 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             if (degreeFilter.test(nodeB)) {
                 neighboursB = cursor(nodeB, neighboursB);
                 // find first neighbour Cb of B with id > B
-                nodeCfromB = skipUntil(neighboursB, nodeB);
+                nodeCfromB = neighboursB.skipUntil(nodeB);
 
                 // if B had no neighbors, find a new B
                 if (nodeCfromB != NOT_FOUND) {
                     // copy the state of A's cursor
-                    copyFrom(neighboursAMain, neighboursA);
+                    neighboursA.copyFrom(neighboursAMain);
 
                     if (degreeFilter.test(nodeCfromB)) {
                         // find the first neighbour Ca of A with id >= Cb
-                        nodeCfromA = advance(neighboursA, nodeCfromB);
+                        nodeCfromA = neighboursA.advance(nodeCfromB);
                         triangleC = checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                     }
 
@@ -115,7 +115,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                         if (degreeFilter.test(nodeCfromB)) {
                             if (nodeCfromB > nodeCfromA) {
                                 // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
-                                nodeCfromA = advance(neighboursA, nodeCfromB);
+                                nodeCfromA = neighboursA.advance(nodeCfromB);
                             }
                             triangleC = checkForAndEmitTriangle(
                                 consumer,
@@ -132,7 +132,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     // so if there are more neighbours Cb of B
                     if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
-                        nodeCfromB = advance(neighboursB, nodeCfromA);
+                        nodeCfromB = neighboursB.advance(nodeCfromA);
                         if (degreeFilter.test(nodeCfromB)) {
                             checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                         }
@@ -141,7 +141,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             }
 
             // skip until the next neighbour B of A with id > (current) B
-            nodeB = skipUntil(neighboursAMain, nodeB);
+            nodeB = neighboursAMain.skipUntil(nodeB);
         }
     }
 
@@ -162,28 +162,10 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         return triangleC;
     }
 
-    /**
-     * Get the node id strictly greater than ({@literal >}) the provided {@code target}.
-     * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-     * id that is large enough.
-     *
-     * @return the smallest node id in the cursor greater than the target.
-     */
-    protected abstract long skipUntil(CURSOR cursor, long target);
-
-    /**
-     * Get the node id greater than or equal ({@literal >=}) to the provided {@code target}.
-     * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-     * id that is large enough.
-     * Will always take at least one step.
-     *
-     * @return the smallest node id in the cursor greater than or equal to the target.
-     */
-    protected abstract long advance(CURSOR cursor, long target);
-
-    protected abstract void copyFrom(CURSOR sourceCursor, CURSOR targetCursor);
-
-    protected abstract CURSOR cursor(long node, CURSOR reuse);
+    protected CURSOR cursor(long node, CURSOR reuse) {
+        reuse.init(node);
+        return reuse;
+    }
 
     protected abstract int degree(long node);
 }

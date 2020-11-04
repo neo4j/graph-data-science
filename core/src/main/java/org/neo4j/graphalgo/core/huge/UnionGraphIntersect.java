@@ -42,29 +42,16 @@ class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
     }
 
     @Override
-    protected long skipUntil(CompositeAdjacencyCursor cursor, long nodeId) {
-        return cursor.skipUntil(nodeId);
-    }
-
-    @Override
-    protected long advance(CompositeAdjacencyCursor cursor, long nodeId) {
-        return cursor.advance(nodeId);
-    }
-
-    @Override
-    protected void copyFrom(CompositeAdjacencyCursor sourceCursor, CompositeAdjacencyCursor targetCursor) {
-        targetCursor.copyFrom(sourceCursor);
-    }
-
-    @Override
     protected CompositeAdjacencyCursor cursor(long nodeId, CompositeAdjacencyCursor reuse) {
         var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.adjacencyLists().size());
         var cursors = reuse.cursors();
         var emptyCursors = empty.cursors();
 
-        compositeAdjacencyList.forEachOffset(nodeId, ((index, offset, hasAdjacency) -> adjacencyCursors.add(index, hasAdjacency
-            ? TransientAdjacencyList.decompressingCursor((TransientAdjacencyList.DecompressingCursor) cursors.get(index), offset)
-            : emptyCursors.get(index)
+        compositeAdjacencyList.forEachOffset(nodeId, ((index, offset, hasAdjacency) -> adjacencyCursors.add(
+            index,
+            hasAdjacency
+                ? cursors.get(index).initializedTo(offset)
+                : emptyCursors.get(index)
         )));
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }

@@ -50,18 +50,14 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors;
     }
 
-    void copyFrom(CompositeAdjacencyCursor other) {
-        List<AdjacencyCursor> otherCursors = other.cursors();
-        for (int i = 0; i < cursors.size(); i++) {
-            var cursor = (TransientAdjacencyList.DecompressingCursor) cursors.get(i);
-            var otherCursor = (TransientAdjacencyList.DecompressingCursor) otherCursors.get(i);
-            cursor.copyFrom(otherCursor);
-        }
-    }
-
     @Override
     public int size() {
-        return cursors.stream().mapToInt(AdjacencyCursor::size).sum();
+        int sum = 0;
+        for (var cursor : cursors) {
+            int size = cursor.size();
+            sum += size;
+        }
+        return sum;
     }
 
     @Override
@@ -86,7 +82,12 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public int remaining() {
-        return cursors.stream().mapToInt(AdjacencyCursor::remaining).sum();
+        int sum = 0;
+        for (var cursor : cursors) {
+            int remaining = cursor.remaining();
+            sum += remaining;
+        }
+        return sum;
     }
 
     @Override
@@ -94,7 +95,8 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         cursors.forEach(AdjacencyCursor::close);
     }
 
-    long skipUntil(long target) {
+    @Override
+    public long skipUntil(long target) {
         for (var cursor : cursors) {
             cursorQueue.remove(cursor);
             // an implementation aware cursor would probably be much faster and could skip whole blocks
@@ -110,7 +112,8 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursorQueue.isEmpty() ? AdjacencyCursor.NOT_FOUND : nextVLong();
     }
 
-    long advance(long target) {
+    @Override
+    public long advance(long target) {
         for (var cursor : cursors) {
             cursorQueue.remove(cursor);
             // an implementation aware cursor would probably be much faster and could skip whole blocks
@@ -124,5 +127,20 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         }
 
         return cursorQueue.isEmpty() ? AdjacencyCursor.NOT_FOUND : nextVLong();
+    }
+
+    @Override
+    public void copyFrom(AdjacencyCursor sourceCursor) {
+        var other = (CompositeAdjacencyCursor) sourceCursor;
+        List<AdjacencyCursor> otherCursors = other.cursors();
+        for (int i = 0; i < cursors.size(); i++) {
+            cursors.get(i).copyFrom(otherCursors.get(i));
+        }
+    }
+
+    @Override
+    public void init(long index) {
+        throw new UnsupportedOperationException(
+            "CompositeAdjacencyCursor does not support init, use CompositeAdjacencyList.decompressingCursor instead.");
     }
 }

@@ -24,6 +24,20 @@ public interface AdjacencyCursor extends AutoCloseable {
     long NOT_FOUND = -1;
 
     /**
+     * Initialize this cursor to point to the given {@code index}.
+     */
+    void init(long index);
+
+    /**
+     * Initialize this cursor to point to the given {@code index}.
+     * Returns this to allow chaining.
+     */
+    default AdjacencyCursor initializedTo(long index) {
+        this.init(index);
+        return this;
+    }
+
+    /**
      * Return how many targets can be decoded in total. This is equivalent to the degree.
      */
     int size();
@@ -49,6 +63,32 @@ public interface AdjacencyCursor extends AutoCloseable {
      * Return how many targets are still left to be decoded.
      */
     int remaining();
+
+    // DOCTODO: I think this documentation if either out of date or misleading.
+    //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
+    /**
+     * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
+     * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
+     * id that is large enough.
+     * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+     * will return {@code false}
+     */
+    long skipUntil(long nodeId);
+
+    /**
+     * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
+     * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
+     * id that is large enough.
+     * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+     * will return {@code false}
+     */
+    long advance(long nodeId);
+
+    /**
+     * Copies internal states from {@code sourceCursor} into {@code this} cursor.
+     * If the types don't match, the behavior is undefined.
+     */
+    void copyFrom(AdjacencyCursor sourceCursor);
 
     @Override
     void close();
