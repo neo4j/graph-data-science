@@ -28,7 +28,8 @@ import java.util.stream.Collectors;
 public enum Neo4jVersion {
     V_4_0,
     V_4_1,
-    V_4_2;
+    V_4_2,
+    V_4_3;
 
     @Override
     public String toString() {
@@ -39,6 +40,8 @@ public enum Neo4jVersion {
                 return "4.1";
             case V_4_2:
                 return "4.2";
+            case V_4_3:
+                return "4.3";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this + " (sad java 😞)");
         }
@@ -82,8 +85,10 @@ public enum Neo4jVersion {
                 return Neo4jVersion.V_4_1;
             case "4.2":
             case "aura":
-            case "dev":
                 return Neo4jVersion.V_4_2;
+            case "4.3":
+            case "dev":
+                return Neo4jVersion.V_4_3;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }
