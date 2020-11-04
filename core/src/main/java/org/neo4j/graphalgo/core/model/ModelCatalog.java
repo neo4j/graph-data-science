@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -186,7 +187,7 @@ public final class ModelCatalog {
                         ? formatWithLocale(" (Did you mean `%s`?).", similarStrings.get(0))
                         : formatWithLocale(" (Did you mean one of %s?).", StringJoining.join(similarStrings, "`, `", "[`", "`]"));
 
-                throw new IllegalArgumentException(formatWithLocale(
+                throw new NoSuchElementException(formatWithLocale(
                     "No model with model name `%s` was found%s",
                     modelName,
                     similarModels

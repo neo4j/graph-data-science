@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -200,22 +201,22 @@ class ModelCatalogTest {
         existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
 
         // test the get code path
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
+        var ex = assertThrows(
+            NoSuchElementException.class,
             () -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class)
         );
         assertEquals(expectedMessage, ex.getMessage());
 
         // test the list code path
         ex = assertThrows(
-            IllegalArgumentException.class,
+            NoSuchElementException.class,
             () -> ModelCatalog.list(USERNAME, searchModel)
         );
         assertEquals(expectedMessage, ex.getMessage());
 
         // test the drop code path
         ex = assertThrows(
-            IllegalArgumentException.class,
+            NoSuchElementException.class,
             () -> ModelCatalog.drop(USERNAME, searchModel)
         );
 
