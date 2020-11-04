@@ -79,7 +79,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private final NamedDatabaseId databaseId;
 
-    private final IdMap nodes;
+    private final NodeMapping nodes;
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
@@ -95,7 +95,7 @@ public final class CSRGraphStore implements GraphStore {
 
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
-        IdMap nodes,
+        NodeMapping nodes,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
@@ -243,7 +243,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private CSRGraphStore(
         NamedDatabaseId databaseId,
-        IdMap nodes,
+        NodeMapping nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
@@ -578,7 +578,7 @@ public final class CSRGraphStore implements GraphStore {
     ) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
-        Optional<IdMap> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel()
+        Optional<NodeMapping> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel()
             ? Optional.empty()
             : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
 

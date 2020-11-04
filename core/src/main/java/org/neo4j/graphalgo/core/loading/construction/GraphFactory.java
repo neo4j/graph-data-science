@@ -23,6 +23,8 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -32,7 +34,6 @@ import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Collections;
@@ -76,7 +77,7 @@ public final class GraphFactory {
 
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
-        IdMap nodes,
+        IdMapping nodes,
         Optional<Orientation> orientation,
         Optional<Boolean> loadRelationshipProperty,
         Optional<Aggregation> aggregation,
@@ -97,7 +98,7 @@ public final class GraphFactory {
         );
     }
 
-    public static HugeGraph create(IdMap idMap, Relationships relationships, AllocationTracker tracker) {
+    public static HugeGraph create(NodeMapping idMap, Relationships relationships, AllocationTracker tracker) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
         return create(
@@ -110,7 +111,7 @@ public final class GraphFactory {
     }
 
     public static HugeGraph create(
-        IdMap idMap,
+        NodeMapping idMap,
         NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
         Relationships relationships,

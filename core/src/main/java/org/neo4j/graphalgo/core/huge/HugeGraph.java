@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -88,32 +87,34 @@ public class HugeGraph implements CSRGraph {
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;
 
-    private final IdMap idMapping;
-    private final AllocationTracker tracker;
-    private final GraphSchema schema;
+    protected final NodeMapping idMapping;
+    protected final AllocationTracker tracker;
+    protected final GraphSchema schema;
 
-    private final Map<String, NodeProperties> nodeProperties;
+    protected final Map<String, NodeProperties> nodeProperties;
 
-    private final Orientation orientation;
+    protected final Orientation orientation;
 
-    private final long relationshipCount;
-    private AdjacencyList adjacencyList;
-    private AdjacencyOffsets adjacencyOffsets;
+    protected final long relationshipCount;
+    protected AdjacencyList adjacencyList;
+    protected AdjacencyOffsets adjacencyOffsets;
 
-    private final double defaultPropertyValue;
-    private @Nullable AdjacencyList properties;
-    private @Nullable AdjacencyOffsets propertyOffsets;
+    protected final double defaultPropertyValue;
+    @Nullable
+    protected AdjacencyList properties;
+    @Nullable
+    protected AdjacencyOffsets propertyOffsets;
 
     private AdjacencyCursor emptyCursor;
     private AdjacencyCursor cursorCache;
 
     private boolean canRelease = true;
 
-    private final boolean hasRelationshipProperty;
-    private final boolean isMultiGraph;
+    protected final boolean hasRelationshipProperty;
+    protected final boolean isMultiGraph;
 
     public static HugeGraph create(
-        IdMap nodes,
+        NodeMapping nodes,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         Relationships.Topology topology,
@@ -138,7 +139,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     public HugeGraph(
-        IdMap idMapping,
+        NodeMapping idMapping,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
@@ -174,7 +175,7 @@ public class HugeGraph implements CSRGraph {
         return idMapping.nodeCount();
     }
 
-    public IdMap idMap() {
+    public NodeMapping idMap() {
         return idMapping;
     }
 
@@ -429,8 +430,14 @@ public class HugeGraph implements CSRGraph {
                 propertyOffsets = null;
             }
         }
-        emptyCursor = null;
-        cursorCache = null;
+        if (emptyCursor != null) {
+            emptyCursor.close();
+            emptyCursor = null;
+        }
+        if (cursorCache != null) {
+            cursorCache.close();
+            cursorCache = null;
+        }
     }
 
     @Override

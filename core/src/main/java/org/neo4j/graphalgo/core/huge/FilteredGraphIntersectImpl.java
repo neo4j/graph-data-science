@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.IntersectionConsumer;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.loading.IdMap;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
@@ -31,10 +31,10 @@ import org.neo4j.graphalgo.core.loading.IdMap;
 
 class FilteredGraphIntersectImpl implements RelationshipIntersect {
 
-    private final IdMap filteredIdMap;
+    private final NodeMapping filteredIdMap;
     private final RelationshipIntersect wrappedRelationshipIntersect;
 
-    FilteredGraphIntersectImpl(IdMap filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
+    FilteredGraphIntersectImpl(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
         this.filteredIdMap = filteredIdMap;
         this.wrappedRelationshipIntersect = wrappedRelationshipIntersect;
     }

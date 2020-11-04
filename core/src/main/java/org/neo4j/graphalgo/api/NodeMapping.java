@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable {
@@ -37,4 +38,7 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
         return availableNodeLabels().size() == 1 && availableNodeLabels().contains(NodeLabel.ALL_NODES);
     }
 
+    default NodeMapping withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        throw new UnsupportedOperationException("This node mapping does not support label filtering");
+    }
 }

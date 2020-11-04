@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.ImmutableTopology;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
@@ -40,9 +40,9 @@ import java.util.function.LongPredicate;
 
 public class NodeFilteredGraph extends CSRFilterGraph {
 
-    private final IdMap filteredIdMap;
+    private final NodeMapping filteredIdMap;
 
-    public NodeFilteredGraph(CSRGraph graph, IdMap filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph graph, NodeMapping filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -182,7 +182,7 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     public Relationships.Topology relationshipTopology() {
         Relationships.Topology topology = graph.relationshipTopology();
 
-        TransientFilteredAdjacencyOffsets offsets = new TransientFilteredAdjacencyOffsets(
+        AdjacencyOffsets offsets = new TransientFilteredAdjacencyOffsets(
             filteredIdMap,
             topology.offsets()
         );

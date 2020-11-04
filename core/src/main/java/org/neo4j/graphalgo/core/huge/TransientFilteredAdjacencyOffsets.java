@@ -20,14 +20,14 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
-import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.api.NodeMapping;
 
 public class TransientFilteredAdjacencyOffsets implements AdjacencyOffsets {
 
-    private final IdMap filteredIdMap;
+    private final NodeMapping filteredIdMap;
     private final AdjacencyOffsets transientAdjacencyOffsets;
 
-    public TransientFilteredAdjacencyOffsets(IdMap filteredIdMap, AdjacencyOffsets transientAdjacencyOffsets) {
+    TransientFilteredAdjacencyOffsets(NodeMapping filteredIdMap, AdjacencyOffsets transientAdjacencyOffsets) {
         this.filteredIdMap = filteredIdMap;
         this.transientAdjacencyOffsets = transientAdjacencyOffsets;
     }

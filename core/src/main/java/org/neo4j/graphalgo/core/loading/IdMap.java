@@ -174,7 +174,8 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         return bitSet != null && bitSet.get(nodeId);
     }
 
-    IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         validateNodeLabelFilter(nodeLabels, labelInformation);
 
         if (labelInformation.isEmpty()) {
