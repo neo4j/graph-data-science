@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.result.CentralityResult;
 import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
@@ -66,17 +66,22 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         EigenvectorCentralityConfig config = computationResult.config();
         CentralityResult normalizedResults = normalization(config.normalization()).apply(stats);
 
-        AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+        AbstractCentralityResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder(callContext, config.concurrency())
             .withIterations(algorithm.iterations())
-            .withDampingFactor(algorithm.dampingFactor())
+            .withDampingFactor(algorithm.dampingFactor());
+
+        statsBuilder
             .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
-            .withComputeMillis(computationResult.computeMillis());
+            .withComputeMillis(computationResult.computeMillis())
+            .withNodeCount(graph.nodeCount());
 
         if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
+
+        statsBuilder.withCentralityFunction(normalizedResults::score);
 
         // NOTE: could not use `writeNodeProperties` just yet, as this requires changes to
         //  the Page Rank class and therefore to all product Page Rank procs as well.

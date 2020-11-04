@@ -82,7 +82,8 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
                     0,
                     computeResult.createMillis(),
                     0,
-                    computeResult.config().writeProperty()
+                    computeResult.config().writeProperty(),
+                    null
                 )
             );
         }
@@ -90,7 +91,8 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         DegreeCentralityConfig config = computeResult.config();
         DegreeCentrality algorithm = computeResult.algorithm();
 
-        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
+        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency())
+            .withCentralityFunction(algorithm.result()::score)
             .withNodeCount(graph.nodeCount());
 
 

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.closeness.ClosenessCentralityConfig;
 import org.neo4j.graphalgo.impl.closeness.MSClosenessCentrality;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -87,8 +87,9 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
         ClosenessCentralityConfig config = computationResult.config();
         Graph graph = computationResult.graph();
 
-        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
-            .withNodeCount(graph.nodeCount())
+        AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency());
+
+        builder.withNodeCount(graph.nodeCount())
             .withConfig(config)
             .withComputeMillis(computationResult.computeMillis())
             .withCreateMillis(computationResult.createMillis());
@@ -97,6 +98,8 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
             graph.release();
             return Stream.of(builder.build());
         }
+
+        builder.withCentralityFunction(algorithm.getCentrality()::get);
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, algorithm.getTerminationFlag())

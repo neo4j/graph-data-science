@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+
+import java.util.Map;
 
 public class CentralityScore {
 
@@ -37,30 +41,39 @@ public class CentralityScore {
     public static final class Stats {
         public final long nodes, createMillis, computeMillis, writeMillis;
         public final String writeProperty;
+        public final Map<String, Object> centralityDistribution;
 
         public Stats(
-                long nodes,
-                long createMillis,
-                long computeMillis,
-                long writeMillis,
-                String writeProperty) {
+            long nodes,
+            long createMillis,
+            long computeMillis,
+            long writeMillis,
+            String writeProperty,
+            @Nullable Map<String, Object> centralityDistribution
+            ) {
             this.nodes = nodes;
             this.createMillis = createMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.writeProperty = writeProperty;
+            this.centralityDistribution = centralityDistribution;
         }
 
-        public static final class Builder extends AbstractResultBuilder<Stats> {
+        public static final class Builder extends AbstractCentralityResultBuilder<Stats> {
 
-            public CentralityScore.Stats build() {
+            public Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
+            }
+
+            public CentralityScore.Stats buildResult() {
 
                 return new CentralityScore.Stats(
                     nodeCount,
                     createMillis,
                     computeMillis,
                     writeMillis,
-                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
+                    centralityHistogramOrNull()
                 );
             }
         }

@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
@@ -238,6 +239,10 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
             assertNotEquals(-1L, row.getNumber("createMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(expected.values().stream().max(Double::compareTo).get(), (Double) centralityDistribution.get("max"), 1e-2);
         });
 
         runQueryWithRowConsumer(

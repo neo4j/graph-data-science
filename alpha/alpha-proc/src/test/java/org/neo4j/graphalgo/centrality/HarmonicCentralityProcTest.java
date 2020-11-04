@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HarmonicCentralityProcTest extends BaseProcTest {
 
@@ -83,6 +84,10 @@ class HarmonicCentralityProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, row -> {
             assertEquals(5L, row.getNumber("nodes").longValue());
             assertEquals("centralityScore", row.getString("writeProperty"));
+
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(0.5, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
         var resultQuery = "MATCH (n) RETURN id(n) AS id, n.centralityScore AS centrality";

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.impl.closeness.HarmonicCentralityConfig;
 import org.neo4j.graphalgo.impl.harmonic.HarmonicCentrality;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -83,7 +83,9 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
         var config = computationResult.config();
         var graph = computationResult.graph();
 
-        AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
+        AbstractCentralityResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder(callContext, config.concurrency());
+
+        builder
             .withNodeCount(graph.nodeCount())
             .withConfig(config)
             .withComputeMillis(computationResult.computeMillis())
@@ -93,6 +95,8 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
             graph.release();
             return Stream.of(builder.build());
         }
+
+        builder.withCentralityFunction(computationResult.result()::getCentralityScore);
 
         try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, algorithm.getTerminationFlag())

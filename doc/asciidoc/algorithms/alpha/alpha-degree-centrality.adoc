@@ -48,7 +48,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 [source, cypher]
 ----
 CALL gds.alpha.degree.write(configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty
+YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty, centralityDistribution
 ----
 
 .Configuration
@@ -65,12 +65,13 @@ YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name          | Type    | Description
-| nodes         | int     | The number of nodes considered.
-| writeProperty | string  | The property name written back to.
-| createMillis  | int     | Milliseconds for loading data.
-| computeMillis | int     | Milliseconds for running the algorithm.
-| writeMillis   | int     | Milliseconds for writing result data back.
+| Name                   | Type      | Description
+| nodes                  | int       | The number of nodes considered.
+| writeProperty          | string    | The property name written back to.
+| createMillis           | int       | Milliseconds for loading data.
+| computeMillis          | int       | Milliseconds for running the algorithm.
+| writeMillis            | int       | Milliseconds for writing result data back.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
 |===
 
 .The following will run the algorithm and stream results:

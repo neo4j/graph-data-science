@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.results;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+
+import java.util.Map;
 
 public class PageRankScore {
 
@@ -38,15 +42,18 @@ public class PageRankScore {
         public final long nodes, iterations, createMillis, computeMillis, writeMillis;
         public final double dampingFactor;
         public final String writeProperty;
+        public final Map<String, Object> centralityDistribution;
 
         Stats(
-                long nodes,
-                long iterations,
-                long createMillis,
-                long computeMillis,
-                long writeMillis,
-                double dampingFactor,
-                String writeProperty) {
+            long nodes,
+            long iterations,
+            long createMillis,
+            long computeMillis,
+            long writeMillis,
+            double dampingFactor,
+            String writeProperty,
+            @Nullable Map<String, Object> centralityDistribution
+            ) {
             this.nodes = nodes;
             this.iterations = iterations;
             this.createMillis = createMillis;
@@ -54,12 +61,17 @@ public class PageRankScore {
             this.writeMillis = writeMillis;
             this.dampingFactor = dampingFactor;
             this.writeProperty = writeProperty;
+            this.centralityDistribution = centralityDistribution;
         }
 
-        public static final class Builder extends AbstractResultBuilder<Stats> {
+        public static final class Builder extends AbstractCentralityResultBuilder<Stats> {
 
             private long iterations;
             private double dampingFactor;
+
+            public Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
+            }
 
             public Builder withIterations(long iterations) {
                 this.iterations = iterations;
@@ -71,7 +83,7 @@ public class PageRankScore {
                 return this;
             }
 
-            public Stats build() {
+            public Stats buildResult() {
                 return new Stats(
                     nodeCount,
                     iterations,
@@ -79,7 +91,8 @@ public class PageRankScore {
                     computeMillis,
                     writeMillis,
                     dampingFactor,
-                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : ""
+                    config instanceof WritePropertyConfig ? ((WritePropertyConfig) config).writeProperty() : "",
+                    centralityHistogramOrNull()
                 );
             }
         }

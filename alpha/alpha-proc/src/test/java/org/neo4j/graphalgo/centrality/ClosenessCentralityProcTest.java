@@ -32,7 +32,11 @@ import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -102,13 +106,16 @@ class ClosenessCentralityProcTest extends BaseProcTest {
     void testClosenessWrite() {
         String query = gdsCypher()
             .writeMode()
-            .yields("nodes", "createMillis", "computeMillis", "writeMillis");
+            .yields();
 
         runQueryWithRowConsumer(query, row -> {
             assertNotEquals(-1L, row.getNumber("writeMillis"));
             assertNotEquals(-1L, row.getNumber("createMillis"));
             assertNotEquals(-1L, row.getNumber("computeMillis"));
             assertNotEquals(-1L, row.getNumber("nodes"));
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(1.0, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
         runQueryWithRowConsumer("MATCH (n) WHERE exists(n.centrality) RETURN id(n) AS id, n.centrality AS centrality", row -> {

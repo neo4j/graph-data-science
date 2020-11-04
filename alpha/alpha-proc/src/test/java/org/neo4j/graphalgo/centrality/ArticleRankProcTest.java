@@ -27,8 +27,11 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ArticleRankProcTest extends BaseProcTest {
 
@@ -132,6 +135,9 @@ class ArticleRankProcTest extends BaseProcTest {
             assertNotEquals(-1L, row.getNumber("createMillis").longValue());
             assertNotEquals(-1L, row.getNumber("computeMillis").longValue());
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
+            Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+            assertNotNull(centralityDistribution);
+            assertEquals(0.346, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
         String actual = runQuery(resultQuery, Result::resultAsString);

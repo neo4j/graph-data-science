@@ -33,6 +33,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
@@ -142,13 +143,17 @@ class DegreeCentralityProcTest extends BaseProcTest {
         String query = queryBuilder(REVERSE)
             .writeMode()
             .addParameter("relationshipWeightProperty", "foo")
-            .yields("writeMillis", "writeProperty");
+            .yields();
         runQueryWithRowConsumer(query, row -> {
                 assertEquals("degree", row.getString("writeProperty"));
                 assertTrue(
                     row.getNumber("writeMillis").intValue() >= 0,
                     "write time not set"
                 );
+
+                Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
+                assertNotNull(centralityDistribution);
+                assertEquals(incomingWeightedExpected.values().stream().max(Double::compareTo).get(), (Double) centralityDistribution.get("max"), 1e-2);
             }
         );
         assertResult("degree", incomingWeightedExpected);

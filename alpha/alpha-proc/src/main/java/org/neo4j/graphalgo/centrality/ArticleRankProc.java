@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
@@ -68,15 +68,22 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         AllocationTracker tracker = allocationTracker();
         Graph graph = computationResult.graph();
 
-        AbstractResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder()
+        AbstractCentralityResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder(callContext, config.concurrency())
+            .withIterations(algo.iterations())
+            .withDampingFactor(config.dampingFactor());
+
+        statsBuilder
             .withConfig(config)
             .withCreateMillis(computationResult.createMillis())
-            .withComputeMillis(computationResult.computeMillis());
+            .withComputeMillis(computationResult.computeMillis())
+            .withNodeCount(graph.nodeCount());
 
         if (graph.isEmpty()) {
             graph.release();
             return Stream.of(statsBuilder.build());
         }
+
+        statsBuilder.withCentralityFunction(algo.result()::score);
 
         log.info("ArticleRank: overall memory usage: %s", tracker.getUsageString());
 
