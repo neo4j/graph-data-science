@@ -109,7 +109,7 @@ class EigenvectorCentralityDocTest extends BaseProcTest {
         String expected = "+----------------------------------------------------+\n" +
                           "| nodes | iterations | dampingFactor | writeProperty |\n" +
                           "+----------------------------------------------------+\n" +
-                          "| 0     | 20         | 1.0           | \"eigenvector\" |\n" +
+                          "| 8     | 20         | 1.0           | \"eigenvector\" |\n" +
                           "+----------------------------------------------------+\n" +
                           "1 row\n";
 
@@ -159,7 +159,7 @@ class EigenvectorCentralityDocTest extends BaseProcTest {
         String expected = "+----------------------------------------------------+\n" +
                           "| nodes | iterations | dampingFactor | writeProperty |\n" +
                           "+----------------------------------------------------+\n" +
-                          "| 0     | 5          | 1.0           | \"eigenvector\" |\n" +
+                          "| 8     | 5          | 1.0           | \"eigenvector\" |\n" +
                           "+----------------------------------------------------+\n" +
                           "1 row\n";
 

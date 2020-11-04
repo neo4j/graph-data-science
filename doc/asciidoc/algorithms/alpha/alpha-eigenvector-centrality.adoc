@@ -176,7 +176,7 @@ YIELD nodes, iterations, dampingFactor, writeProperty
 [opts="header"]
 |===
 | nodes | iterations | dampingFactor | writeProperty
-| 0     | 20         | 1.0           | "eigenvector"
+| 8     | 20         | 1.0           | "eigenvector"
 |===
 
 By default, the scores returned by the Eigenvector Centrality are not normalized.
