@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.ConfigKeyValidation;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.StringSimilarity;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
@@ -178,7 +178,7 @@ public final class ModelCatalog {
         private Model<?, ?> get(String modelName) {
             Model<?, ?> model = userModels.get(modelName);
             if (model == null) {
-                var similarStrings = ConfigKeyValidation.similarStrings(modelName, userModels.keySet());
+                var similarStrings = StringSimilarity.similarStrings(modelName, userModels.keySet());
 
                 var similarModels = similarStrings.isEmpty()
                     ? "."
