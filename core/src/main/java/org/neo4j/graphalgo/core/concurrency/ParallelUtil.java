@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
@@ -196,7 +197,7 @@ public final class ParallelUtil {
         return batchSize;
     }
 
-    public static boolean canRunInParallel(final ExecutorService executor) {
+    public static boolean canRunInParallel(@Nullable ExecutorService executor) {
         return executor != null && !(executor.isShutdown() || executor.isTerminated());
     }
 

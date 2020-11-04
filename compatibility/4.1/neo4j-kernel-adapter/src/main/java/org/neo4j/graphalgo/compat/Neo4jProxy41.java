@@ -41,6 +41,7 @@ import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
+import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -220,6 +221,22 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
         dataRead.nodeIndexScan(index, cursor, indexQueryConstraints);
+    }
+
+    @Override
+    public void nodeIndexSeek(
+        Read dataRead,
+        IndexReadSession index,
+        NodeValueIndexCursor cursor,
+        IndexOrder indexOrder,
+        boolean needsValues,
+        IndexQuery query
+    ) throws Exception {
+        var indexQueryConstraints = indexOrder == IndexOrder.NONE
+            ? IndexQueryConstraints.unordered(needsValues)
+            : IndexQueryConstraints.constrained(indexOrder, needsValues);
+
+        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, query);
     }
 
     @Override
