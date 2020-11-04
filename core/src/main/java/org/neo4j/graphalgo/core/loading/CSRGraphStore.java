@@ -48,6 +48,7 @@ import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
@@ -73,7 +74,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class CSRGraphStore implements GraphStore {
+public class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
@@ -83,7 +84,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private final Map<NodeLabel, NodePropertyStore> nodeProperties;
 
-    private final Map<RelationshipType, Relationships.Topology> relationships;
+    protected final Map<RelationshipType, Relationships.Topology> relationships;
 
     private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
@@ -101,6 +102,40 @@ public final class CSRGraphStore implements GraphStore {
         Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
+    ) {
+        return of(
+            databaseId,
+            nodes,
+            nodeProperties,
+            relationships,
+            relationshipProperties,
+            concurrency,
+            tracker,
+            CSRGraphStore::new
+        );
+    }
+
+    public interface CSRGraphStoreConstructor<T> {
+        T construct(
+            NamedDatabaseId databaseId,
+            NodeMapping nodes,
+            Map<NodeLabel, NodePropertyStore> nodeProperties,
+            Map<RelationshipType, Relationships.Topology> relationships,
+            Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
+            int concurrency,
+            AllocationTracker tracker
+        );
+    }
+
+    public static <T extends CSRGraphStore> T of(
+        NamedDatabaseId databaseId,
+        NodeMapping nodes,
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
+        Map<RelationshipType, Relationships.Topology> relationships,
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
+        int concurrency,
+        AllocationTracker tracker,
+        CSRGraphStoreConstructor<T> constructor
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
         nodeProperties.forEach((nodeLabel, propertyMap) -> {
@@ -138,7 +173,7 @@ public final class CSRGraphStore implements GraphStore {
             relationshipPropertyStores.put(relationshipType, builder.build());
         });
 
-        return new CSRGraphStore(
+        return constructor.construct(
             databaseId,
             nodes,
             nodePropertyStores,
@@ -241,7 +276,7 @@ public final class CSRGraphStore implements GraphStore {
         return relationshipProperties;
     }
 
-    private CSRGraphStore(
+    protected CSRGraphStore(
         NamedDatabaseId databaseId,
         NodeMapping nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,
@@ -377,9 +412,12 @@ public final class CSRGraphStore implements GraphStore {
 
     @Override
     public long relationshipCount() {
-        return relationships.values().stream()
-            .mapToLong(Relationships.Topology::elementCount)
-            .sum();
+        long sum = 0L;
+        for (var topology : relationships.values()) {
+            long elementCount = topology.elementCount();
+            sum += elementCount;
+        }
+        return sum;
     }
 
     @Override
@@ -391,7 +429,9 @@ public final class CSRGraphStore implements GraphStore {
     public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
         return relTypes
             .stream()
-            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties.get(relType).containsKey(propertyKey));
+            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties
+                .get(relType)
+                .containsKey(propertyKey));
     }
 
     @Override
@@ -496,6 +536,31 @@ public final class CSRGraphStore implements GraphStore {
     @Override
     public void release() {
         createdGraphs.forEach(Graph::release);
+        releaseInternals();
+    }
+
+    private void releaseInternals() {
+        var closeables = Stream.<AutoCloseable>builder();
+        if (this.nodes instanceof AutoCloseable) {
+            closeables.accept((AutoCloseable) this.nodes);
+        }
+        this.relationships.values().forEach(rel -> closeables.add(rel.list()).add(rel.offsets()));
+        this.relationshipProperties.forEach((propertyName, properties) -> {
+            properties.values().forEach(prop -> closeables.add(prop.values().list()).add(prop.values().offsets()));
+        });
+
+        var errorWhileClosing = closeables.build().flatMap(closeable -> {
+            try {
+                closeable.close();
+                return Stream.empty();
+            } catch (Exception e) {
+                return Stream.of(e);
+            }
+        }).reduce(null, ExceptionUtil::chain);
+        if (errorWhileClosing != null) {
+            ExceptionUtil.throwIfUnchecked(errorWhileClosing);
+            throw new RuntimeException(errorWhileClosing);
+        }
     }
 
     @Override
