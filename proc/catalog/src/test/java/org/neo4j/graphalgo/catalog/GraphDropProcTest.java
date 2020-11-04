@@ -211,7 +211,7 @@ class GraphDropProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
-            formatWithLocale("Graph with name `%s` does not exist and can't be removed.", GRAPH_NAME)
+            formatWithLocale("No graph with graph name `%s` was found.", GRAPH_NAME)
         );
 
         assertCypherResult(

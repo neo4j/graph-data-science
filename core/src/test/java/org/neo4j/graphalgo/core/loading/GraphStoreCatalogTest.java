@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -30,10 +33,14 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 
@@ -116,5 +123,41 @@ class GraphStoreCatalogTest {
 
         assertTrue(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId1, "graph1"));
         assertFalse(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId1, "graph0"));
+    }
+
+    static Stream<Arguments> graphInput() {
+        return Stream.of(
+            Arguments.of(List.of(), "graph", "No graph with graph name `graph` was found."),
+            Arguments.of(List.of("graph0"), "graph1", "No graph with graph name `graph1` was found (Did you mean `graph0`?)."),
+            Arguments.of(List.of("graph0", "graph1"), "graph2", "No graph with graph name `graph2` was found (Did you mean one of [`graph0`, `graph1`]?)."),
+            Arguments.of(List.of("graph0", "graph1", "foobar"), "graph2", "No graph with graph name `graph2` was found (Did you mean one of [`graph0`, `graph1`]?).")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("graphInput")
+    void shouldThrowOnMissingGraph(Iterable<String> existingGraphs, String searchGraphName, String expectedMessage) {
+        var dummyDatabaseId = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
+        var dummyGraphStore = GdlFactory.of("()").build().graphStore();
+
+        existingGraphs.forEach(existingGraphName -> {
+            var config = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, existingGraphName);
+            GraphStoreCatalog.set(config, dummyGraphStore);
+        });
+
+        // test the get code path
+        var ex = assertThrows(
+            NoSuchElementException.class,
+            () -> GraphStoreCatalog.get(USER_NAME, dummyDatabaseId, searchGraphName)
+        );
+        assertEquals(expectedMessage, ex.getMessage());
+
+        // test the drop code path
+        ex = assertThrows(
+            NoSuchElementException.class,
+            () -> GraphStoreCatalog.remove(USER_NAME, dummyDatabaseId, searchGraphName, graphStoreWithConfig -> {}, true)
+        );
+
+        assertEquals(expectedMessage, ex.getMessage());
     }
 }
