@@ -36,6 +36,7 @@ public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final BatchProvider batchProvider;
     private final int concurrency;
+    private boolean isWeighted;
     private final FeatureFunction featureFunction;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
@@ -44,16 +45,18 @@ public class GraphSageEmbeddingsGenerator {
         Layer[] layers,
         int batchSize,
         int concurrency,
+        boolean isWeighted,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this(layers, batchSize, concurrency, GraphSageHelper::features, progressLogger, tracker);
+        this(layers, batchSize, concurrency, isWeighted, GraphSageHelper::features, progressLogger, tracker);
     }
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
         int batchSize,
         int concurrency,
+        boolean isWeighted,
         FeatureFunction featureFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
@@ -61,6 +64,7 @@ public class GraphSageEmbeddingsGenerator {
         this.layers = layers;
         this.batchProvider = new BatchProvider(batchSize);
         this.concurrency = concurrency;
+        this.isWeighted = isWeighted;
         this.featureFunction = featureFunction;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
@@ -82,7 +86,7 @@ public class GraphSageEmbeddingsGenerator {
             concurrency,
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddings(graph, batch, features, layers, featureFunction);
+                Variable<Matrix> embeddingVariable = embeddings(graph, isWeighted, batch, features, layers, featureFunction);
                 int cols = embeddingVariable.dimension(1);
                 double[] embeddings = ctx.forward(embeddingVariable).data();
 

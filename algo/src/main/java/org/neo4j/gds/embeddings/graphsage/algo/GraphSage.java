@@ -62,6 +62,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             layers,
             config.batchSize(),
             config.concurrency(),
+            model.trainConfig().isWeighted(),
             model.data().featureFunction(),
             progressLogger,
             tracker
