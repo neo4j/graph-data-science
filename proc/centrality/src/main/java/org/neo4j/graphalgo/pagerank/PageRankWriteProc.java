@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -70,7 +71,10 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult) {
-        return PageRankProc.resultBuilder(new WriteResult.Builder(callContext), computeResult);
+        return PageRankProc.resultBuilder(
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            computeResult
+        );
     }
 
     @Override
@@ -96,7 +100,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         WriteResult(
             long ranIterations,
             boolean didConverge,
-            Map<String, Object> centralityDistribution,
+            @Nullable Map<String, Object> centralityDistribution,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
@@ -119,8 +123,8 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
 
         static class Builder extends PageRankProc.PageRankResultBuilder<WriteResult> {
 
-            Builder(ProcedureCallContext context) {
-                super(context);
+            Builder(ProcedureCallContext context, int concurrency) {
+                super(context, concurrency);
             }
 
             @Override
@@ -128,7 +132,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
                 return new WriteResult(
                     ranIterations,
                     didConverge,
-                    distribution(),
+                    centralityHistogramOrNull(),
                     createMillis,
                     computeMillis,
                     postProcessingMillis,

@@ -99,7 +99,11 @@ public final class ParallelUtil {
     }
 
     public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
-        parallelStreamConsume(LongStream.range(0, graph.nodeCount()), concurrency, (stream) -> {
+        parallelForEachNode(graph.nodeCount(), concurrency, consumer);
+    }
+
+    public static void parallelForEachNode(long nodeCount, int concurrency, LongConsumer consumer) {
+        parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, (stream) -> {
             stream.forEach(consumer);
         });
     }

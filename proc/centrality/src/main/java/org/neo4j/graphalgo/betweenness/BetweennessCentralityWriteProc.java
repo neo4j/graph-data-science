@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -27,6 +28,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -87,7 +89,10 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new WriteResult.Builder(), computeResult, callContext);
+        return BetweennessCentralityProc.resultBuilder(
+            new WriteResult.Builder(callContext, computeResult.config().concurrency()),
+            computeResult
+        );
     }
 
     public static final class WriteResult extends BetweennessCentralityStatsProc.StatsResult {
@@ -101,37 +106,35 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
             long computeMillis,
             long postProcessingMillis,
             long writeMillis,
+            @Nullable Map<String, Object> centralityDistribution,
+            double sumCentrality,
             double minCentrality,
             double maxCentrality,
-            double sumCentrality,
             Map<String, Object> config
         ) {
-            super(
-                minCentrality,
-                maxCentrality,
-                sumCentrality,
-                createMillis,
-                computeMillis,
-                postProcessingMillis,
-                config
-            );
+            super(centralityDistribution, sumCentrality, minCentrality, maxCentrality, createMillis, computeMillis, postProcessingMillis, config);
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.writeMillis = writeMillis;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<WriteResult> {
 
+            protected Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
+            }
+
             @Override
-            public WriteResult build() {
+            public WriteResult buildResult() {
                 return new WriteResult(
                     nodePropertiesWritten,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
                     writeMillis,
-                    minimumScore,
-                    maximumScore,
-                    scoreSum,
+                    centralityHistogramOrNull(),
+                    sumCentrality,
+                    minCentrality,
+                    maxCentrality,
                     config.toMap()
                 );
             }

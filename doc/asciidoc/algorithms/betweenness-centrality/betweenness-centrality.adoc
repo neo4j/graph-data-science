@@ -127,9 +127,7 @@ CALL gds.betweenness.stats(
   configuration: Map
 )
 YIELD
-  minimumScore: Float,
-  maximumScore: Float,
-  scoreSum: Float,
+  centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
@@ -145,14 +143,12 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                 | Type    | Description
-| minimumScore         | Float   | Minimum centrality score.
-| maximumScore         | Float   | Maximum centrality score.
-| scoreSum             | Float   | Sum of all centrality scores.
-| createMillis         | Integer | Milliseconds for creating the graph.
-| computeMillis        | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis | Integer | Milliseconds for computing the statistics.
-| configuration        | Map     | Configuration used for running the algorithm.
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| configuration          | Map       | Configuration used for running the algorithm.
 |===
 ======
 
@@ -167,9 +163,7 @@ CALL gds.betweenness.mutate(
   configuration: Map
 )
 YIELD
-  minimumScore: Float,
-  maximumScore: Float,
-  scoreSum: Float,
+  centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
@@ -187,16 +181,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| minimumScore          | Float   | Minimum centrality score.
-| maximumScore          | Float   | Maximum centrality score.
-| scoreSum              | Float   | Sum of all centrality scores.
-| createMillis          | Integer | Milliseconds for creating the graph.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis  | Integer | Milliseconds for computing the statistics.
-| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
-| nodePropertiesWritten | Integer | Number of properties added to the in-memory graph.
-| configuration         | Map     | Configuration used for running the algorithm.
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
+| configuration          | Map       | Configuration used for running the algorithm.
 |===
 ======
 
@@ -211,9 +203,7 @@ CALL gds.betweenness.write(
   configuration: Map
 )
 YIELD
-  minimumScore: Float,
-  maximumScore: Float,
-  scoreSum: Float,
+  centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
@@ -231,16 +221,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| minimumScore          | Float   | Minimum centrality score.
-| maximumScore          | Float   | Maximum centrality score.
-| scoreSum              | Float   | Sum of all centrality scores.
-| createMillis          | Integer | Milliseconds for creating the graph.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis  | Integer | Milliseconds for computing the statistics.
-| writeMillis           | Integer | Milliseconds for writing result data back.
-| nodePropertiesWritten | Integer | Number of properties written to Neo4j.
-| configuration         | Map     | The configuration used for running the algorithm.
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 
 
@@ -261,9 +249,7 @@ CALL gds.betweenness.write(
   configuration: Map
 )
 YIELD
-  minimumScore: Float,
-  maximumScore: Float,
-  scoreSum: Float,
+  centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
@@ -422,20 +408,20 @@ include::../shared/examples-stats-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.betweenness.stats('myGraph')
-YIELD minimumScore, maximumScore, scoreSum
+YIELD centralityDistribution
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore
 ----
 
 .Results
 [opts="header"]
 |===
-| minimumScore | maximumScore | scoreSum
-| 0.0          | 8.0          | 19.0
+| minimumScore | meanScore
+| 0.0          | 2.714292253766741
 |===
 --
 
 Comparing this to the results we saw in the <<algorithms-betweenness-centrality-examples-stream, stream example>>, we can find our minimum and maximum values from the table.
-It is worth noting that unless the graph has a particular shape involving a directed cycle, the `minimumScore` value will almost always be zero.
-The `scoreSum` value can be used to compute an average centrality value by dividing over the number of nodes in the graph.
+It is worth noting that unless the graph has a particular shape involving a directed cycle, the minimum score will almost always be zero.
 
 
 [[algorithms-betweenness-centrality-examples-mutate]]
@@ -449,14 +435,15 @@ include::../shared/examples-mutate-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.betweenness.mutate('myGraph', { mutateProperty: 'betweenness' })
-YIELD minimumScore, maximumScore, scoreSum, nodePropertiesWritten
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| minimumScore | maximumScore | scoreSum | nodePropertiesWritten
-| 0.0          | 8.0          | 19.0     | 7
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 2.714292253766741          | 7
 |===
 --
 
@@ -476,14 +463,15 @@ include::../shared/examples-write-intro.adoc[]
 [source, cypher]
 ----
 CALL gds.betweenness.write('myGraph', { writeProperty: 'betweenness' })
-YIELD minimumScore, maximumScore, scoreSum, nodePropertiesWritten
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| minimumScore | maximumScore | scoreSum | nodePropertiesWritten
-| 0.0          | 8.0          | 19.0     | 7
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 2.714292253766741          | 7
 |===
 --
 

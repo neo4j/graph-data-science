@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardStatsResult;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -87,38 +89,48 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
 
     @Override
     protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig> computeResult) {
-        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(), computeResult, callContext);
+        return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
     }
 
     public static class StatsResult extends StandardStatsResult {
 
+        public final Map<String, Object> centralityDistribution;
+        @Deprecated
         public final double minimumScore;
+        @Deprecated
         public final double maximumScore;
+        @Deprecated
         public final double scoreSum;
 
         StatsResult(
+            @Nullable Map<String, Object> centralityDistribution,
+            double scoreSum,
             double minimumScore,
             double maximumScore,
-            double scoreSum,
             long createMillis,
             long computeMillis,
             long postProcessingMillis,
             Map<String, Object> configuration
         ) {
             super(createMillis, computeMillis, postProcessingMillis, configuration);
-            this.minimumScore = minimumScore;
+            this.centralityDistribution = centralityDistribution;
             this.maximumScore = maximumScore;
+            this.minimumScore = minimumScore;
             this.scoreSum = scoreSum;
         }
 
         static final class Builder extends BetweennessCentralityProc.BetweennessCentralityResultBuilder<StatsResult> {
+            protected Builder(ProcedureCallContext callContext, int concurrency) {
+                super(callContext, concurrency);
+            }
 
             @Override
-            public StatsResult build() {
+            public StatsResult buildResult() {
                 return new StatsResult(
-                    minimumScore,
-                    maximumScore,
-                    scoreSum,
+                    centralityHistogramOrNull(),
+                    sumCentrality,
+                    minCentrality,
+                    maxCentrality,
                     createMillis,
                     computeMillis,
                     postProcessingMillis,
