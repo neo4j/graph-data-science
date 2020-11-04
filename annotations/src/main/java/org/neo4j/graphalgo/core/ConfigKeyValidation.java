@@ -72,7 +72,7 @@ public final class ConfigKeyValidation {
         ));
     }
 
-    static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
+    public static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
         return candidates.stream()
             .map(candidate -> ImmutableStringAndScore.of(candidate, jaroWinkler(value, candidate)))
             .filter(candidate -> candidate.value() > REQUIRED_SIMILARITY)

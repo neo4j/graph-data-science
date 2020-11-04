@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.core.model;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -32,7 +35,9 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -176,15 +181,45 @@ class ModelCatalogTest {
         assertEquals("Community users can only store one model in the catalog", ex.getMessage());
     }
 
+    private static Model<Integer, TestTrainConfig> testModel(String name) {
+        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
+    }
 
-    @Test
-    void shouldThrowOnMissingModel() {
+    static Stream<Arguments> modelInput() {
+        return Stream.of(
+            Arguments.of(List.of(), "something", "No model with model name `something` was found."),
+            Arguments.of(List.of("model0"), "model1", "No model with model name `model1` was found (Did you mean `model0`?)."),
+            Arguments.of(List.of("model0", "model1"), "model2", "No model with model name `model2` was found (Did you mean one of [`model0`, `model1`]?)."),
+            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "No model with model name `model2` was found (Did you mean one of [`model0`, `model1`]?).")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("modelInput")
+    void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
+        existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
+
+        // test the get code path
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.get(USERNAME, "something", String.class, TestTrainConfig.class)
+            () -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class)
+        );
+        assertEquals(expectedMessage, ex.getMessage());
+
+        // test the list code path
+        ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.list(USERNAME, searchModel)
+        );
+        assertEquals(expectedMessage, ex.getMessage());
+
+        // test the drop code path
+        ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.drop(USERNAME, searchModel)
         );
 
-        assertEquals("No model with model name `something` was found.", ex.getMessage());
+        assertEquals(expectedMessage, ex.getMessage());
     }
 
     @Test
@@ -313,17 +348,7 @@ class ModelCatalogTest {
             () -> ModelCatalog.drop("fakeUser", "testModel")
         );
 
-        assertEquals("Model with name `testModel` does not exist and can't be removed.", ex.getMessage());
-    }
-
-    @Test
-    void failsWhenTryingToDropNonExistingModel() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> ModelCatalog.drop(USERNAME, "something")
-        );
-
-        assertEquals("Model with name `something` does not exist and can't be removed.", ex.getMessage());
+        assertEquals("No model with model name `testModel` was found.", ex.getMessage());
     }
 
     @Test

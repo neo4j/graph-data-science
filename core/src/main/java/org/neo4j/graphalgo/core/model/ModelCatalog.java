@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.core.ConfigKeyValidation;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Map;
@@ -140,14 +142,8 @@ public final class ModelCatalog {
         }
 
         public Model<?, ?> drop(String modelName) {
-            Model<?, ?> model = userModels.remove(modelName);
-            if (model == null) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Model with name `%s` does not exist and can't be removed.",
-                    modelName
-                ));
-            }
-            return model;
+            var model = get(modelName);
+            return userModels.remove(model.name());
         }
 
         public Collection<Model<?, ?>> list() {
@@ -182,9 +178,18 @@ public final class ModelCatalog {
         private Model<?, ?> get(String modelName) {
             Model<?, ?> model = userModels.get(modelName);
             if (model == null) {
+                var similarStrings = ConfigKeyValidation.similarStrings(modelName, userModels.keySet());
+
+                var similarModels = similarStrings.isEmpty()
+                    ? "."
+                    : similarStrings.size() == 1
+                        ? formatWithLocale(" (Did you mean `%s`?).", similarStrings.get(0))
+                        : formatWithLocale(" (Did you mean one of %s?).", StringJoining.join(similarStrings, "`, `", "[`", "`]"));
+
                 throw new IllegalArgumentException(formatWithLocale(
-                    "No model with model name `%s` was found.",
-                    modelName
+                    "No model with model name `%s` was found%s",
+                    modelName,
+                    similarModels
                 ));
             }
             return model;
