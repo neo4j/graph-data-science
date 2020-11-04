@@ -102,12 +102,12 @@ class ModelCatalogTest {
 
         ModelCatalog.set(model);
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
+        var ex = assertThrows(
+            NoSuchElementException.class,
             () -> ModelCatalog.get("fakeUser", "testModel", String.class, TestTrainConfig.class)
         );
 
-        assertEquals("No model with model name `testModel` was found.", ex.getMessage());
+        assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
         assertNotNull(model.creationTime());
     }
 
@@ -188,10 +188,10 @@ class ModelCatalogTest {
 
     static Stream<Arguments> modelInput() {
         return Stream.of(
-            Arguments.of(List.of(), "something", "No model with model name `something` was found."),
-            Arguments.of(List.of("model0"), "model1", "No model with model name `model1` was found (Did you mean `model0`?)."),
-            Arguments.of(List.of("model0", "model1"), "model2", "No model with model name `model2` was found (Did you mean one of [`model0`, `model1`]?)."),
-            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "No model with model name `model2` was found (Did you mean one of [`model0`, `model1`]?).")
+            Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
+            Arguments.of(List.of("model0"), "model1", "Model with name `model1` does not exist (Did you mean `model0`?)."),
+            Arguments.of(List.of("model0", "model1"), "model2", "Model with name `model2` does not exist (Did you mean one of [`model0`, `model1`]?)."),
+            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "Model with name `model2` does not exist (Did you mean one of [`model0`, `model1`]?).")
         );
     }
 
@@ -344,12 +344,12 @@ class ModelCatalogTest {
         );
         ModelCatalog.set(model);
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
+        var ex = assertThrows(
+            NoSuchElementException.class,
             () -> ModelCatalog.drop("fakeUser", "testModel")
         );
 
-        assertEquals("No model with model name `testModel` was found.", ex.getMessage());
+        assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
     }
 
     @Test

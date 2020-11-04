@@ -188,7 +188,7 @@ public final class ModelCatalog {
                         : formatWithLocale(" (Did you mean one of %s?).", StringJoining.join(similarStrings, "`, `", "[`", "`]"));
 
                 throw new NoSuchElementException(formatWithLocale(
-                    "No model with model name `%s` was found%s",
+                    "Model with name `%s` does not exist%s",
                     modelName,
                     similarModels
                 ));

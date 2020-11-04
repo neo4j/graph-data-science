@@ -227,7 +227,7 @@ public final class GraphStoreCatalog {
                         );
 
                 throw new NoSuchElementException(formatWithLocale(
-                    "No graph with graph name `%s` was found%s",
+                    "Graph with name `%s` does not exist%s",
                     graphName,
                     exceptionMessage
                 ));

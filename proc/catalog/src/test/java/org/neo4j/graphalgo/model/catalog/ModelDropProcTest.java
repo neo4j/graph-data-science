@@ -81,7 +81,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
         assertError(
             "CALL gds.beta.model.drop($modelName)",
             map("modelName", modelName),
-            formatWithLocale("No model with model name `%s` was found", modelName)
+            formatWithLocale("Model with name `%s` does not exist.", modelName)
         );
     }
 }
