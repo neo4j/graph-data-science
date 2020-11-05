@@ -22,17 +22,15 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeArrayBuilder;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public class HugeNodeImporter extends AbstractNodeImporter<HugeLongArrayBuilder, HugeArrayBuilder.BulkAdder<long[]>> {
+public class HugeNodeImporter extends AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> {
 
     public HugeNodeImporter(
-        HugeLongArrayBuilder idMapBuilder,
+        HugeInternalIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         AllocationTracker tracker

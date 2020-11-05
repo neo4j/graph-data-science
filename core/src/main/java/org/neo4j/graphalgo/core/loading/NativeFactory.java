@@ -39,8 +39,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeArrayBuilder;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -180,12 +178,12 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     }
 
     @NotNull
-    private InternalIdMappingBuilderFactory<HugeLongArrayBuilder, HugeArrayBuilder.BulkAdder<long[]>> internalIdMappingBuilderFactory() {
-        return nodeCount -> HugeLongArrayBuilder.of(nodeCount, loadingContext.tracker());
+    private InternalIdMappingBuilderFactory<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> internalIdMappingBuilderFactory() {
+        return nodeCount -> HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
 
     @NotNull
-    private NodeMappingBuilder<HugeLongArrayBuilder> nodeMappingBuilder() {
+    private NodeMappingBuilder<HugeInternalIdMappingBuilder> nodeMappingBuilder() {
         return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
             idMapBuilder,
             labelInformation,

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 
 import java.util.Map;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
 public final class IdMapBuilder {
 
     public static IdMap build(
-        HugeLongArrayBuilder idMapBuilder,
+        HugeInternalIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -62,7 +61,7 @@ public final class IdMapBuilder {
     }
 
     static IdMap buildChecked(
-        HugeLongArrayBuilder idMapBuilder,
+        HugeInternalIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,

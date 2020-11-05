@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -52,7 +51,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private final GraphDimensions outerDimensions;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    private final HugeLongArrayBuilder builder;
+    private final HugeInternalIdMappingBuilder builder;
     private final HugeNodeImporter importer;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
@@ -70,7 +69,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
-        this.builder = HugeLongArrayBuilder.of(nodeCount, loadingContext.tracker());
+        this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
         this.importer = new HugeNodeImporter(
             builder,
             new HashMap<>(),

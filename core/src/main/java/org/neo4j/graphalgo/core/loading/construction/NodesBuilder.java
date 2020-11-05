@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.HugeNodeImporter;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.util.Collections;
@@ -53,7 +53,7 @@ public class NodesBuilder {
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final HugeLongArrayBuilder hugeLongArrayBuilder;
+    private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
     private final HugeNodeImporter nodeImporter;
 
     private final Lock lock;
@@ -74,9 +74,9 @@ public class NodesBuilder {
         this.lock = new ReentrantLock(true);
 
         // TODO: why is this maxOriginalId + 1, couldn't itbe just nodeCount?
-        this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
+        this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
         this.nodeImporter = new HugeNodeImporter(
-            hugeLongArrayBuilder,
+            hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
             tracker
@@ -102,7 +102,7 @@ public class NodesBuilder {
         this.threadLocalBuilder.close();
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
-            hugeLongArrayBuilder,
+            hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             maxOriginalId,
             concurrency,

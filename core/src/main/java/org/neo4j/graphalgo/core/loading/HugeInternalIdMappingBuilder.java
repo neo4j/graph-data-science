@@ -17,37 +17,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.paged;
+package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
+public final class HugeInternalIdMappingBuilder implements InternalIdMappingBuilder<HugeInternalIdMappingBuilder.BulkAdder> {
 
-    private final Huge array;
+    private final HugeLongArray array;
     private final long capacity;
     private final AtomicLong allocationIndex;
-    private final CloseableThreadLocal<BulkAdder<Array>> adders;
+    private final CloseableThreadLocal<BulkAdder> adders;
 
-    HugeArrayBuilder(Huge array, long capacity) {
+    public static HugeInternalIdMappingBuilder of(long length, AllocationTracker tracker) {
+        HugeLongArray array = HugeLongArray.newArray(length, tracker);
+        return new HugeInternalIdMappingBuilder(array, length);
+    }
+
+    private HugeInternalIdMappingBuilder(HugeLongArray array, final long length) {
         this.array = array;
-        this.capacity = capacity;
+        this.capacity = length;
         this.allocationIndex = new AtomicLong();
         this.adders = CloseableThreadLocal.withInitial(this::newBulkAdder);
     }
 
-    private BulkAdder<Array> newBulkAdder() {
-        return new BulkAdder<>(array, array.newCursor());
+    @Override
+    public @Nullable HugeInternalIdMappingBuilder.BulkAdder allocate(int batchLength) {
+        return this.allocate((long) batchLength);
     }
 
-    public final BulkAdder<Array> allocate(final long nodes) {
+    private BulkAdder newBulkAdder() {
+        return new BulkAdder(array, array.newCursor());
+    }
+
+    public BulkAdder allocate(final long nodes) {
         long startIndex = allocationIndex.getAndAccumulate(nodes, this::upperAllocation);
         if (startIndex == capacity) {
             return null;
         }
-        BulkAdder<Array> adder = adders.get();
+        BulkAdder adder = adders.get();
         adder.reset(startIndex, upperAllocation(startIndex, nodes));
         return adder;
     }
@@ -56,7 +69,7 @@ public abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, H
         return Math.min(capacity, lower + nodes);
     }
 
-    public final Huge build() {
+    public HugeLongArray build() {
         adders.close();
         return array;
     }
@@ -65,21 +78,21 @@ public abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, H
         return capacity;
     }
 
-    public final long size() {
+    public long size() {
         return allocationIndex.get();
     }
 
-    public static final class BulkAdder<Array> implements IdMappingAllocator {
-        public Array buffer;
+    public static final class BulkAdder implements IdMappingAllocator {
+        public long[] buffer;
         public int offset;
         public int length;
         public long start;
-        private final HugeArray<Array, ?, ?> array;
-        private final HugeCursor<Array> cursor;
+        private final HugeLongArray array;
+        private final HugeCursor<long[]> cursor;
 
         private BulkAdder(
-                HugeArray<Array, ?, ?> array,
-                HugeCursor<Array> cursor) {
+                HugeLongArray array,
+                HugeCursor<long[]> cursor) {
             this.array = array;
             this.cursor = cursor;
         }
