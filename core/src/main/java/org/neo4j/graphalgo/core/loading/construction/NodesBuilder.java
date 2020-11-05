@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.AbstractNodeImporter;
 import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -54,7 +54,7 @@ public class NodesBuilder {
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
     private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
-    private final AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter;
+    private final NodeImporter nodeImporter;
 
     private final Lock lock;
 
@@ -75,7 +75,7 @@ public class NodesBuilder {
 
         // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
         this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
-        this.nodeImporter = new AbstractNodeImporter<>(
+        this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
@@ -130,10 +130,10 @@ public class NodesBuilder {
         private final HugeAtomicBitSet seenIds;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
-        private final AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter;
+        private final NodeImporter nodeImporter;
 
         ThreadLocalBuilder(
-            AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter,
+            NodeImporter nodeImporter,
             HugeAtomicBitSet seenIds,
             boolean hasLabelInformation,
             Function<NodeLabel, Integer> labelTokenIdFn

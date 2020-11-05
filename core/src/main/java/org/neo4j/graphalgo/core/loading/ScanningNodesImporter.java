@@ -122,7 +122,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             scanner,
             dimensions.nodeLabelTokens(),
             progressLogger,
-            new AbstractNodeImporter<>(
+            new NodeImporter(
                 idMapBuilder,
                 nodeLabelBitSetMapping,
                 labelTokenNodeLabelMapping,
