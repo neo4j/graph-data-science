@@ -29,13 +29,13 @@ import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -247,7 +247,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         return array;
     }
 
-    private Map<RelationshipType, Pair<Optional<String>, Relationships>> loadRelationships(IdMap nodes) {
+    private Map<RelationshipType, Pair<Optional<String>, Relationships>> loadRelationships(NodeMapping nodeMapping) {
         var propertyKeysByRelType = new HashMap<String, Optional<String>>();
 
         gdlHandler.getEdges()
@@ -258,7 +258,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 relTypeAndProperty -> GraphFactory.initRelationshipsBuilder()
-                    .nodes(nodes)
+                    .nodes(nodeMapping)
                     .orientation(graphCreateConfig.orientation())
                     .aggregation(graphCreateConfig.aggregation())
                     .loadRelationshipProperty(relTypeAndProperty.getValue().isPresent())
@@ -286,7 +286,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         // support GraphStores with zero relationships.
         if (relTypeImporters.isEmpty()) {
             relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphFactory.initRelationshipsBuilder()
-                .nodes(nodes)
+                .nodes(nodeMapping)
                 .orientation(graphCreateConfig.orientation())
                 .executorService(loadingContext.executor())
                 .tracker(loadingContext.tracker())

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -60,7 +61,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 @Value.Enclosing
 class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoader.LoadResult> {
 
-    private final IdMap idMap;
+    private final NodeMapping nodeMapping;
     private final Context loaderContext;
     private final GraphDimensions dimensionsAfterNodeLoading;
     private final Map<RelationshipProjection, LongAdder> relationshipCounters;
@@ -81,14 +82,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
     CypherRelationshipLoader(
         String relationshipQuery,
-        IdMap idMap,
+        NodeMapping nodeMapping,
         GraphDatabaseAPI api,
         GraphCreateFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
-        super(relationshipQuery, idMap.nodeCount(), api, config, loadingContext);
-        this.idMap = idMap;
+        super(relationshipQuery, nodeMapping.nodeCount(), api, config, loadingContext);
+        this.nodeMapping = nodeMapping;
         this.dimensionsAfterNodeLoading = dimensions;
         this.loaderContext = new Context();
         this.relationshipCounters = new HashMap<>();
@@ -169,7 +170,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         }
 
         RelationshipRowVisitor visitor = new RelationshipRowVisitor(
-            idMap,
+            nodeMapping,
             loaderContext,
             propertyKeyIdsByName,
             propertyDefaultValueByName,
@@ -239,7 +240,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             this.importerBuildersByType = new HashMap<>();
             this.allBuilders = new HashMap<>();
 
-            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), idMap.nodeCount());
+            ImportSizing importSizing = ImportSizing.of(cypherConfig.readConcurrency(), nodeMapping.nodeCount());
             this.pageSize = importSizing.pageSize();
             this.numberOfPages = importSizing.numberOfPages();
         }

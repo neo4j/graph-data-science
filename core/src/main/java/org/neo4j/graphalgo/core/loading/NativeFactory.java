@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjections;
@@ -38,6 +39,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.HugeArrayBuilder;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -164,14 +167,32 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             dimensions,
             loadingContext.transaction()
         );
-        return new ScanningNodesImporter(
+        return new ScanningNodesImporter<>(
             graphCreateConfig,
             loadingContext,
             dimensions,
             progressLogger,
             concurrency,
-            properties
+            properties,
+            internalIdMappingBuilderFactory(),
+            nodeMappingBuilder()
         ).call(loadingContext.log());
+    }
+
+    @NotNull
+    private InternalIdMappingBuilderFactory<HugeLongArrayBuilder, HugeArrayBuilder.BulkAdder<long[]>> internalIdMappingBuilderFactory() {
+        return nodeCount -> HugeLongArrayBuilder.of(nodeCount, loadingContext.tracker());
+    }
+
+    @NotNull
+    private NodeMappingBuilder<HugeLongArrayBuilder> nodeMappingBuilder() {
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+            idMapBuilder,
+            labelInformation,
+            graphDimensions.highestNeoId(),
+            concurrency,
+            tracker
+        );
     }
 
     private RelationshipImportResult loadRelationships(

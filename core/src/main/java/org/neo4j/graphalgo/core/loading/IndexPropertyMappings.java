@@ -244,7 +244,7 @@ final class IndexPropertyMappings {
     }
 
     @ValueClass
-    interface LoadablePropertyMappings {
+    public interface LoadablePropertyMappings {
 
         Map<NodeLabel, PropertyMappings> storedProperties();
 

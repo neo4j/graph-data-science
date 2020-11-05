@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMa
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayBuilder;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.math.BigDecimal;
@@ -50,25 +50,29 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 
-final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
+public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> extends ScanningRecordsImporter<NodeReference, IdsAndProperties> {
 
     private final GraphCreateFromStoreConfig graphCreateConfig;
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
     private final LoadablePropertyMappings properties;
+    private final InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory;
+    private final NodeMappingBuilder<BUILDER> nodeMappingBuilder;
 
     @Nullable
     private NativeNodePropertyImporter nodePropertyImporter;
-    private HugeLongArrayBuilder idMapBuilder;
+    private BUILDER idMapBuilder;
     private Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
 
-    ScanningNodesImporter(
+    public ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         int concurrency,
-        LoadablePropertyMappings properties
+        LoadablePropertyMappings properties,
+        InternalIdMappingBuilderFactory<BUILDER, ALLOCATOR> internalIdMappingBuilderFactory,
+        NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
             scannerFactory(dimensions),
@@ -81,6 +85,8 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
         this.properties = properties;
+        this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
+        this.nodeMappingBuilder = nodeMappingBuilder;
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
@@ -99,7 +105,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         ImportSizing sizing,
         StoreScanner<NodeReference> scanner
     ) {
-        idMapBuilder = HugeLongArrayBuilder.of(nodeCount, tracker);
+        idMapBuilder = internalIdMappingBuilderFactory.of(nodeCount);
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 
@@ -116,7 +122,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             scanner,
             dimensions.nodeLabelTokens(),
             progressLogger,
-            new HugeNodeImporter(
+            new AbstractNodeImporter<>(
                 idMapBuilder,
                 nodeLabelBitSetMapping,
                 labelTokenNodeLabelMapping,
@@ -129,10 +135,10 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
 
     @Override
     public IdsAndProperties build() {
-        IdMap hugeIdMap = IdMapBuilder.build(
+        var nodeMapping = nodeMappingBuilder.build(
             idMapBuilder,
             nodeLabelBitSetMapping,
-            dimensions.highestNeoId(),
+            dimensions,
             concurrency,
             tracker
         );
@@ -142,14 +148,14 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
             : nodePropertyImporter.result();
 
         if (!properties.indexedProperties().isEmpty()) {
-            importPropertiesFromIndex(hugeIdMap, nodeProperties);
+            importPropertiesFromIndex(nodeMapping, nodeProperties);
         }
 
-        return IdsAndProperties.of(hugeIdMap, nodeProperties);
+        return IdsAndProperties.of(nodeMapping, nodeProperties);
     }
 
     private void importPropertiesFromIndex(
-        IdMap hugeIdMap,
+        NodeMapping nodeMapping,
         Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties
     ) {
         long indexStart = System.nanoTime();
@@ -177,7 +183,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                     labelAndProperties.getKey(),
                     mappingAndIndex.property(),
                     mappingAndIndex.index(),
-                    hugeIdMap,
+                    nodeMapping,
                     progressLogger,
                     terminationFlag,
                     threadPool,
@@ -185,7 +191,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
                 ))
             ).collect(Collectors.toList());
 
-        var expectedProperties = ((long) indexScanningImporters.size()) * hugeIdMap.nodeCount();
+        var expectedProperties = ((long) indexScanningImporters.size()) * nodeMapping.nodeCount();
         var remainingVolume = progressLogger.reset(expectedProperties);
 
         if (!parallelIndexScan) {

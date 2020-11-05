@@ -23,6 +23,7 @@ import org.apache.commons.compress.utils.Sets;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphdb.Result;
 
@@ -43,7 +44,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN);
     static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
-    private final IdMap idMap;
+    private final NodeMapping nodeMapping;
     private final ObjectIntHashMap<String> propertyKeyIdsByName;
     private final ObjectDoubleHashMap<String> propertyDefaultValueByName;
     private final CypherRelationshipLoader.Context loaderContext;
@@ -66,7 +67,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private boolean throwOnUnMappedNodeIds;
 
     RelationshipRowVisitor(
-        IdMap idMap,
+        NodeMapping nodeMapping,
         CypherRelationshipLoader.Context loaderContext,
         ObjectIntHashMap<String> propertyKeyIdsByName,
         ObjectDoubleHashMap<String> propertyDefaultValueByName,
@@ -74,7 +75,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
         boolean isAnyRelTypeQuery,
         boolean throwOnUnMappedNodeIds
     ) {
-        this.idMap = idMap;
+        this.nodeMapping = nodeMapping;
         this.propertyKeyIdsByName = propertyKeyIdsByName;
         this.propertyDefaultValueByName = propertyDefaultValueByName;
         this.propertyCount = propertyKeyIdsByName.size();
@@ -129,7 +130,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 propertyReader = RelationshipImporter.preLoadedPropertyReader();
             }
             // Create thread-local relationship importer
-            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(idMap, bufferSize, propertyReader);
+            SingleTypeRelationshipImporter importer = importerBuilder.withBuffer(nodeMapping, bufferSize, propertyReader);
 
             localImporters.put(relationshipType, importer);
             localRelationshipIds.put(relationshipType, 0);
@@ -188,7 +189,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readTargetId(Result.ResultRow row) {
         long neoTargetId = row.getNumber(TARGET_COLUMN).longValue();
         if (neoTargetId != lastNeoTargetId) {
-            targetId = idMap.toMappedNodeId(neoTargetId);
+            targetId = nodeMapping.toMappedNodeId(neoTargetId);
             if (throwOnUnMappedNodeIds) {
                 validateTargetNodeIsLoaded(targetId, neoTargetId);
             }
@@ -199,7 +200,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private void readSourceId(Result.ResultRow row) {
         long neoSourceId = row.getNumber(SOURCE_COLUMN).longValue();
         if (neoSourceId != lastNeoSourceId) {
-            sourceId = idMap.toMappedNodeId(neoSourceId);
+            sourceId = nodeMapping.toMappedNodeId(neoSourceId);
             if (throwOnUnMappedNodeIds) {
                 validateSourceNodeIsLoaded(sourceId, neoSourceId);
             }

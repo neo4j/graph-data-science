@@ -20,25 +20,20 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Map;
 
-// TODO: rename to `NodeMappingAndProperties`
-@ValueClass
-public interface IdsAndProperties {
+public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? extends IdMappingAllocator>> {
 
-    NodeMapping idMap();
-
-    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
-
-    static IdsAndProperties of(
-        NodeMapping nodeMapping,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties
-    ) {
-        return ImmutableIdsAndProperties.of(nodeMapping, properties);
-    }
+    NodeMapping build(
+        BUILDER idMapBuilder,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        GraphDimensions graphDimensions,
+        int concurrency,
+        AllocationTracker tracker
+    );
 }

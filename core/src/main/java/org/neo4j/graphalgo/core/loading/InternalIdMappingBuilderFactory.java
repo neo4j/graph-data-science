@@ -19,26 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
+public interface InternalIdMappingBuilderFactory<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> {
 
-import java.util.Map;
-
-// TODO: rename to `NodeMappingAndProperties`
-@ValueClass
-public interface IdsAndProperties {
-
-    NodeMapping idMap();
-
-    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
-
-    static IdsAndProperties of(
-        NodeMapping nodeMapping,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties
-    ) {
-        return ImmutableIdsAndProperties.of(nodeMapping, properties);
-    }
+    BUILDER of(long size);
 }

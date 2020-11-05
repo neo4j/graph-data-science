@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -561,7 +562,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         default GraphStore buildGraphStore(
             NamedDatabaseId databaseId,
-            IdMap idMap,
+            NodeMapping nodeMapping,
             int concurrency,
             AllocationTracker tracker
         ) {
@@ -574,7 +575,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
             return CSRGraphStore.of(
                 databaseId,
-                idMap,
+                nodeMapping,
                 Collections.emptyMap(),
                 topology,
                 Collections.emptyMap(),
@@ -583,16 +584,16 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             );
         }
 
-        static RelationshipImporter of(IdMap idMap, ExecutorService executorService, AllocationTracker tracker) {
+        static RelationshipImporter of(NodeMapping nodeMapping, ExecutorService executorService, AllocationTracker tracker) {
             RelationshipsBuilder outImporter = GraphFactory.initRelationshipsBuilder()
-                .nodes(idMap)
+                .nodes(nodeMapping)
                 .orientation(Orientation.NATURAL)
                 .executorService(executorService)
                 .tracker(tracker)
                 .build();
 
             RelationshipsBuilder inImporter = GraphFactory.initRelationshipsBuilder()
-                .nodes(idMap)
+                .nodes(nodeMapping)
                 .orientation(Orientation.REVERSE)
                 .executorService(executorService)
                 .tracker(tracker)
