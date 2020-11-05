@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.api.schema;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.Set;
 
 import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface GraphSchema {
@@ -65,8 +65,15 @@ public interface GraphSchema {
             .build();
     }
 
-    static String forValueType(ValueType vt) {
-        return vt.cypherName();
+    static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
+        if (propertySchema instanceof RelationshipPropertySchema) {
+            return formatWithLocale(
+                "%s (%s, Aggregation.%s)",
+                propertySchema.valueType().cypherName(),
+                propertySchema.defaultValue(),
+                ((RelationshipPropertySchema) propertySchema).aggregation());
+        }
+        return formatWithLocale("%s (%s)", propertySchema.valueType().cypherName(), propertySchema.defaultValue());
     }
 
     static GraphSchema empty() {

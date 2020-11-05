@@ -84,7 +84,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
             storeLoaderBuilder.addNodeProperty(
                 ImmutablePropertyMapping.builder()
                     .propertyKey(nodeProperty)
-                    .defaultValue(DefaultValue.of(DefaultValue.DOUBLE_DEFAULT_FALLBACK))
+                    .defaultValue(DefaultValue.forDouble())
                     .build()
             );
         }

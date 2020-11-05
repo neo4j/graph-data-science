@@ -29,7 +29,7 @@ import static org.neo4j.graphalgo.utils.ValueConversion.exactDoubleToLong;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactLongToDouble;
 
 public final class DefaultValue {
-    public static final DefaultValue DEFAULT = new DefaultValue(null);
+    public static final DefaultValue DEFAULT = DefaultValue.ofFallBackValue(null);
     public static final int INTEGER_DEFAULT_FALLBACK = Integer.MIN_VALUE;
     public static final long LONG_DEFAULT_FALLBACK = Long.MIN_VALUE;
     public static final float FLOAT_DEFAULT_FALLBACK = Float.NaN;
@@ -38,16 +38,59 @@ public final class DefaultValue {
     @Nullable
     private final Object defaultValue;
 
+    private final boolean isUserDefined;
+
     public static DefaultValue of(Object defaultValue) {
+        return of(defaultValue, true);
+    }
+
+    public static DefaultValue of(@Nullable Object defaultValue, boolean isUserDefined) {
         if (defaultValue instanceof DefaultValue) {
             return (DefaultValue) defaultValue;
         } else {
-            return new DefaultValue(defaultValue);
+            return new DefaultValue(defaultValue, isUserDefined);
         }
     }
 
-    private DefaultValue(@Nullable Object defaultValue) {
+    private static DefaultValue ofFallBackValue(@Nullable Object defaultValue) {
+        return of(defaultValue, false);
+    }
+
+    public static DefaultValue forInt() {
+        return DefaultValue.ofFallBackValue(INTEGER_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue forLong() {
+        return DefaultValue.ofFallBackValue(LONG_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue forDouble() {
+        return DefaultValue.ofFallBackValue(DOUBLE_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue forFloat() {
+        return DefaultValue.ofFallBackValue(FLOAT_DEFAULT_FALLBACK);
+    }
+
+    public static DefaultValue forLongArray() {
+        return DefaultValue.DEFAULT;
+    }
+
+    public static DefaultValue forFloatArray() {
+        return DefaultValue.DEFAULT;
+    }
+
+    public static DefaultValue forDoubleArray() {
+        return DefaultValue.DEFAULT;
+    }
+
+    private DefaultValue(@Nullable Object defaultValue, boolean isUserDefined) {
         this.defaultValue = defaultValue;
+        this.isUserDefined = isUserDefined;
+    }
+
+    public boolean isUserDefined() {
+        return isUserDefined;
     }
 
     public long longValue() {

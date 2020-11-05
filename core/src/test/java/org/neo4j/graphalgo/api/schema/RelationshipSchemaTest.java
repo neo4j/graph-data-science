@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Set;
 
@@ -30,6 +32,30 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RelationshipSchemaTest {
+
+    @Test
+    void testDefaultValuesAndAggregation() {
+        var relType = RelationshipType.of("BAR");
+
+        DefaultValue defaultValue = DefaultValue.of(42.0D);
+        Aggregation aggregation = Aggregation.COUNT;
+        var relationshipSchema = RelationshipSchema.builder()
+            .addProperty(
+                relType,
+                "baz",
+                RelationshipPropertySchema.of(
+                    ValueType.DOUBLE,
+                    defaultValue,
+                    aggregation
+                )
+            ).build();
+
+        RelationshipPropertySchema relationshipPropertySchema = relationshipSchema.properties().get(relType).get("baz");
+        assertTrue(relationshipPropertySchema.defaultValue().isUserDefined());
+
+        assertEquals(defaultValue, relationshipPropertySchema.defaultValue());
+        assertEquals(aggregation, relationshipPropertySchema.aggregation());
+    }
 
     @Test
     void testFiltering() {

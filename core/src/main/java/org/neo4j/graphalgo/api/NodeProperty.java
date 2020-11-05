@@ -33,12 +33,27 @@ interface NodeProperty {
 
     NodeProperties values();
 
+    DefaultValue defaultValue();
+
     @Configuration.Ignore
     default ValueType type() {
         return values().valueType();
     };
 
-    static NodeProperty of(String key, GraphStore.PropertyState origin, NodeProperties values) {
-        return ImmutableNodeProperty.of(key, origin, values);
+    static NodeProperty of(
+        String key,
+        GraphStore.PropertyState origin,
+        NodeProperties values
+    ) {
+        return ImmutableNodeProperty.of(key, origin, values, values.valueType().fallbackValue());
+    }
+
+    static NodeProperty of(
+        String key,
+        GraphStore.PropertyState origin,
+        NodeProperties values,
+        DefaultValue defaultValue
+    ) {
+        return ImmutableNodeProperty.of(key, origin, values, defaultValue);
     }
 }

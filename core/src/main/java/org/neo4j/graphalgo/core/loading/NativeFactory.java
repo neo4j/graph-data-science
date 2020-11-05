@@ -199,7 +199,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext,
             dimensions,
             progressLogger,
-            idsAndProperties.idMap,
+            idsAndProperties.idMap(),
             allBuilders,
             concurrency
         ).call(loadingContext.log());

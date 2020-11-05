@@ -17,23 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.api.schema;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.NodeProperties;
-
-import java.util.Map;
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
 @ValueClass
-public interface IdsAndProperties {
+public interface RelationshipPropertySchema extends PropertySchema {
 
-    IdMap idMap();
+    Aggregation aggregation();
 
-    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
-
-    static IdsAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
-        return ImmutableIdsAndProperties.of(idMap, properties);
+    static RelationshipPropertySchema of(ValueType valueType) {
+        return ImmutableRelationshipPropertySchema.of(valueType, valueType.fallbackValue(), Aggregation.DEFAULT);
     }
+
+    static RelationshipPropertySchema of(
+        ValueType valueType,
+        DefaultValue defaultValue,
+        Aggregation aggregation
+    ) {
+        return ImmutableRelationshipPropertySchema.of(valueType, defaultValue, aggregation);
+    }
+
 }

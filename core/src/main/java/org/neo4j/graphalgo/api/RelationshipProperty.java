@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.values.storable.NumberType;
 
 @ValueClass
@@ -33,7 +34,18 @@ public interface RelationshipProperty {
 
     Relationships.Properties values();
 
-    static RelationshipProperty of(String key, NumberType type, GraphStore.PropertyState state, Relationships.Properties values) {
-        return ImmutableRelationshipProperty.of(key, type, state, values);
+    DefaultValue defaultValue();
+
+    Aggregation aggregation();
+
+    static RelationshipProperty of(
+        String key,
+        NumberType type,
+        GraphStore.PropertyState state,
+        Relationships.Properties values,
+        DefaultValue defaultValue,
+        Aggregation aggregation
+    ) {
+        return ImmutableRelationshipProperty.of(key, type, state, values, defaultValue, aggregation);
     }
 }

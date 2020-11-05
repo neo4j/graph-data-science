@@ -17,23 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.api.schema;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.NodeProperties;
-
-import java.util.Map;
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 @ValueClass
-public interface IdsAndProperties {
+public interface PropertySchema {
 
-    IdMap idMap();
+    ValueType valueType();
 
-    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
+    DefaultValue defaultValue();
 
-    static IdsAndProperties of(IdMap idMap, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
-        return ImmutableIdsAndProperties.of(idMap, properties);
+    static PropertySchema of(ValueType valueType) {
+        return ImmutablePropertySchema.of(valueType, valueType.fallbackValue());
+    }
+
+    static PropertySchema of(ValueType valueType, DefaultValue defaultValue) {
+        return ImmutablePropertySchema.of(valueType, defaultValue);
     }
 }

@@ -33,8 +33,7 @@ import java.util.Set;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType> {
-    Map<RelationshipType, Map<String, ValueType>> properties();
+public interface RelationshipSchema extends ElementSchema<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
     @Override
     default RelationshipSchema filter(Set<RelationshipType> relationshipTypesToKeep) {
@@ -70,7 +69,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         if (maybeProperty.isPresent()) {
             return RelationshipSchema
                 .builder()
-                .addProperty(relationshipType, maybeProperty.get(), ValueType.DOUBLE)
+                .addProperty(relationshipType, maybeProperty.get(), properties().get(relationshipType).get(maybeProperty.get()))
                 .build();
         } else {
             return RelationshipSchema
@@ -80,7 +79,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         }
     }
 
-    static RelationshipSchema of(Map<RelationshipType, Map<String, ValueType>> properties) {
+    static RelationshipSchema of(Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties) {
         return RelationshipSchema.builder().properties(properties).build();
     }
 
@@ -91,14 +90,18 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
     @AccessibleFields
     class Builder extends ImmutableRelationshipSchema.Builder {
 
+        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType) {
+            return addProperty(type, propertyName, RelationshipPropertySchema.of(valueType));
+        }
+
         public Builder addProperty(
             RelationshipType type,
             String propertyName,
-            ValueType relationshipProperty
+            RelationshipPropertySchema propertySchema
         ) {
             this.properties
                 .computeIfAbsent(type, ignore -> new LinkedHashMap<>())
-                .put(propertyName, relationshipProperty);
+                .put(propertyName, propertySchema);
             return this;
         }
 

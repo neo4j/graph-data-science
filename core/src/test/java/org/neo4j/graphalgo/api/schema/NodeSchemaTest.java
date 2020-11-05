@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Set;
@@ -30,6 +31,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodeSchemaTest {
+
+    @Test
+    void testDefaultValues() {
+        var label = NodeLabel.of("Foo");
+
+        DefaultValue defaultValue = DefaultValue.of(42.0D);
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(
+                label,
+                "baz",
+                PropertySchema.of(
+                    ValueType.DOUBLE,
+                    defaultValue
+                )
+            ).build();
+
+        PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
+        assertTrue(nodePropertySchema.defaultValue().isUserDefined());
+        assertEquals(defaultValue, nodePropertySchema.defaultValue());
+    }
 
     @Test
     void testFiltering() {
@@ -108,7 +129,6 @@ class NodeSchemaTest {
         var nodeSchema2 = NodeSchema.builder()
             .addProperty(label1, "bar", ValueType.LONG)
             .build();
-
 
         var ex = assertThrows(
             IllegalArgumentException.class,

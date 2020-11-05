@@ -30,8 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @ValueClass
-public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
-    Map<NodeLabel, Map<String, ValueType>> properties();
+public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, PropertySchema> {
 
     default NodeSchema filter(Set<NodeLabel> labelsToKeep) {
         return of(filterProperties(labelsToKeep));
@@ -42,7 +41,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
         return of(unionProperties(other.properties()));
     }
 
-    static NodeSchema of(Map<NodeLabel, Map<String, ValueType>> properties) {
+    static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {
         return NodeSchema.builder().properties(properties).build();
     }
 
@@ -53,10 +52,14 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel> {
     @AccessibleFields
     class Builder extends ImmutableNodeSchema.Builder {
 
-        public Builder addProperty(NodeLabel key, String propertyName, ValueType type) {
+        public Builder addProperty(NodeLabel key, String propertyName, ValueType valueType) {
+            return addProperty(key, propertyName, PropertySchema.of(valueType, valueType.fallbackValue()));
+        }
+
+        public Builder addProperty(NodeLabel key, String propertyName, PropertySchema propertySchema) {
             this.properties
                 .computeIfAbsent(key, ignore -> new LinkedHashMap<>())
-                .put(propertyName, type);
+                .put(propertyName, propertySchema);
 
             return this;
         }

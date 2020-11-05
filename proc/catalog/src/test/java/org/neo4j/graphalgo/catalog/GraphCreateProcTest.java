@@ -841,7 +841,7 @@ class GraphCreateProcTest extends BaseProcTest {
         String query = GdsCypher
             .call()
             .withNodeLabel("Node")
-            .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", 1.0, Aggregation.SUM))
+            .withRelationshipProperty(PropertyMapping.of("sumWeight", "weight", DefaultValue.of(1.0), Aggregation.SUM))
             .withRelationshipProperty(PropertyMapping.of("minWeight", "weight", Aggregation.MIN))
             .withRelationshipProperty(PropertyMapping.of("maxCost", "cost", Aggregation.MAX))
             .withRelationshipType("TYPE_1")

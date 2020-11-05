@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
@@ -35,7 +38,10 @@ import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -90,18 +96,25 @@ public final class CSRGraphStore implements GraphStore {
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         IdMap nodes,
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties,
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties,
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
         int concurrency,
         AllocationTracker tracker
     ) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
         nodeProperties.forEach((nodeLabel, propertyMap) -> {
             NodePropertyStore.Builder builder = NodePropertyStore.builder();
-            propertyMap.forEach((propertyKey, propertyValues) -> builder.putNodeProperty(
-                propertyKey,
-                NodeProperty.of(propertyKey, PropertyState.PERSISTENT, propertyValues)
+            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putNodeProperty(
+                propertyMapping.propertyKey(),
+                NodeProperty.of(
+                    propertyMapping.propertyKey(),
+                    PropertyState.PERSISTENT,
+                    propertyValues,
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : propertyValues.valueType().fallbackValue()
+                )
             ));
             nodePropertyStores.put(nodeLabel, builder.build());
         });
@@ -109,9 +122,18 @@ public final class CSRGraphStore implements GraphStore {
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
         relationshipProperties.forEach((relationshipType, propertyMap) -> {
             RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            propertyMap.forEach((propertyKey, propertyValues) -> builder.putRelationshipProperty(
-                propertyKey,
-                RelationshipProperty.of(propertyKey, NumberType.FLOATING_POINT, PropertyState.PERSISTENT, propertyValues)
+            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putRelationshipProperty(
+                propertyMapping.propertyKey(),
+                RelationshipProperty.of(
+                    propertyMapping.propertyKey(),
+                    NumberType.FLOATING_POINT,
+                    PropertyState.PERSISTENT,
+                    propertyValues,
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                    propertyMapping.aggregation()
+                )
             ));
             relationshipPropertyStores.put(relationshipType, builder.build());
         });
@@ -130,33 +152,93 @@ public final class CSRGraphStore implements GraphStore {
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         HugeGraph graph,
-        String relationshipType,
+        String relationshipTypeString,
         Optional<String> relationshipProperty,
         int concurrency,
         AllocationTracker tracker
     ) {
         Relationships relationships = graph.relationships();
 
-        Map<RelationshipType, Relationships.Topology> topology = singletonMap(RelationshipType.of(relationshipType), relationships.topology());
+        RelationshipType relationshipType = RelationshipType.of(relationshipTypeString);
+        Map<RelationshipType, Relationships.Topology> topology = singletonMap(relationshipType, relationships.topology());
 
-        Map<NodeLabel, Map<String, NodeProperties>> nodeProperties = new HashMap<>();
-        nodeProperties.put(
-            ALL_NODES,
-            graph.availableNodeProperties().stream().collect(toMap(
-                Function.identity(),
-                graph::nodeProperties
-            ))
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = constructNodePropertiesFromGraph(graph);
+
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = constructRelationshipPropertiesFromGraph(
+            graph,
+            relationshipProperty,
+            relationships,
+            relationshipType
         );
 
-        Map<RelationshipType, Map<String, Relationships.Properties>> relationshipProperties = Collections.emptyMap();
+        return CSRGraphStore.of(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+    }
+
+    @NotNull
+    private static Map<NodeLabel, Map<PropertyMapping, NodeProperties>> constructNodePropertiesFromGraph(HugeGraph graph) {
+        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = new HashMap<>();
+        nodeProperties.put(
+            ALL_NODES,
+            graph
+                .schema()
+                .nodeSchema()
+                .properties()
+                .values()
+                .stream()
+                .flatMap(map -> map.entrySet().stream())
+                .collect(toMap(
+                    entry -> ImmutablePropertyMapping
+                        .builder()
+                        .propertyKey(entry.getKey())
+                        .defaultValue(entry.getValue().defaultValue())
+                        .build(),
+                    entry -> graph.nodeProperties(entry.getKey())
+                ))
+        );
+        return nodeProperties;
+    }
+
+    @NotNull
+    private static Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> constructRelationshipPropertiesFromGraph(
+        HugeGraph graph,
+        Optional<String> relationshipProperty,
+        Relationships relationships,
+        RelationshipType relationshipType
+    ) {
+        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = Collections.emptyMap();
         if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
+            Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
+                .schema()
+                .relationshipSchema()
+                .properties()
+                .get(relationshipType);
+
+            if (relationshipPropertySchemas.size() != 1) {
+                throw new IllegalStateException(formatWithLocale(
+                    "Relationship schema is expected to have exactly one property but had %s",
+                    relationshipPropertySchemas.size()
+                ));
+            }
+
+            RelationshipPropertySchema relationshipPropertySchema = relationshipPropertySchemas
+                .values()
+                .stream()
+                .findFirst()
+                .get();
+
+            String propertyKey = relationshipProperty.get();
+            PropertyMapping propertyMapping = PropertyMapping.of(
+                propertyKey,
+                relationshipPropertySchema.defaultValue(),
+                relationshipPropertySchema.aggregation()
+            );
+
             relationshipProperties = singletonMap(
-                RelationshipType.of(relationshipType),
-                singletonMap(relationshipProperty.get(), relationships.properties().get())
+                relationshipType,
+                singletonMap(propertyMapping, relationships.properties().get())
             );
         }
-
-        return CSRGraphStore.of(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+        return relationshipProperties;
     }
 
     private CSRGraphStore(
@@ -469,7 +551,14 @@ public final class CSRGraphStore implements GraphStore {
             }
             return builder.putIfAbsent(
                 propertyKey,
-                RelationshipProperty.of(propertyKey, propertyType, PropertyState.TRANSIENT, properties)
+                RelationshipProperty.of(
+                    propertyKey,
+                    propertyType,
+                    PropertyState.TRANSIENT,
+                    properties,
+                    ValueType.fromNumberType(propertyType).fallbackValue(),
+                    Aggregation.NONE
+                )
             ).build();
         });
     }
@@ -498,6 +587,7 @@ public final class CSRGraphStore implements GraphStore {
             .map(relTypeAndCSR -> {
                 Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
+                RelationshipType relType = relTypeAndCSR.getKey();
                 var graphSchema = GraphSchema.of(
                     schema().nodeSchema(),
                     schema()
@@ -511,7 +601,7 @@ public final class CSRGraphStore implements GraphStore {
                     filteredNodeProperties,
                     relTypeAndCSR.getValue(),
                     maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-                        .get(relTypeAndCSR.getKey())
+                        .get(relType)
                         .get(propertyKey).values()),
                     tracker
                 );
@@ -593,7 +683,13 @@ public final class CSRGraphStore implements GraphStore {
 
         nodeProperties.forEach((label, propertyStore) ->
             propertyStore.nodeProperties().forEach((propertyName, nodeProperty) -> {
-                nodePropsBuilder.addProperty(label, propertyName, nodeProperty.type());
+                nodePropsBuilder.addProperty(
+                    label,
+                    propertyName,
+                    PropertySchema.of(
+                        nodeProperty.type(),
+                        nodeProperty.defaultValue()
+                    ));
             }));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
@@ -610,7 +706,11 @@ public final class CSRGraphStore implements GraphStore {
                 relationshipPropsBuilder.addProperty(
                     type,
                     propertyName,
-                    ValueType.fromNumberType(relationshipProperty.type())
+                    RelationshipPropertySchema.of(
+                        ValueType.fromNumberType(relationshipProperty.type()),
+                        relationshipProperty.defaultValue(),
+                        relationshipProperty.aggregation()
+                    )
                 );
             });
         });
