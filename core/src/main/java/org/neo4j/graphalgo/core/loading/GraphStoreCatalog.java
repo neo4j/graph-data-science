@@ -23,8 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.StringSimilarity;
-import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
@@ -34,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreCatalog {
@@ -205,24 +204,10 @@ public final class GraphStoreCatalog {
                     .map(UserCatalogKey::graphName)
                     .collect(Collectors.toList());
 
-                var similarGraphNames = StringSimilarity.similarStrings(
+                throw new NoSuchElementException(prettySuggestions(
+                    formatWithLocale("Graph with name `%s` does not exist.", graphName),
                     graphName,
                     availableGraphNames
-                );
-
-                var exceptionMessage = similarGraphNames.isEmpty()
-                    ? "."
-                    : similarGraphNames.size() == 1
-                        ? formatWithLocale(" (Did you mean `%s`?).", similarGraphNames.get(0))
-                        : formatWithLocale(
-                            " (Did you mean one of %s?).",
-                            StringJoining.join(similarGraphNames, "`, `", "[`", "`]")
-                        );
-
-                throw new NoSuchElementException(formatWithLocale(
-                    "Graph with name `%s` does not exist%s",
-                    graphName,
-                    exceptionMessage
                 ));
             }
 

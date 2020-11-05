@@ -120,9 +120,9 @@ class GraphStoreCatalogTest {
     static Stream<Arguments> graphInput() {
         return Stream.of(
             Arguments.of(List.of(), "graph", "Graph with name `graph` does not exist."),
-            Arguments.of(List.of("graph0"), "graph1", "Graph with name `graph1` does not exist (Did you mean `graph0`?)."),
-            Arguments.of(List.of("graph0", "graph1"), "graph2", "Graph with name `graph2` does not exist (Did you mean one of [`graph0`, `graph1`]?)."),
-            Arguments.of(List.of("graph0", "graph1", "foobar"), "graph2", "Graph with name `graph2` does not exist (Did you mean one of [`graph0`, `graph1`]?).")
+            Arguments.of(List.of("graph0"), "graph1", "Graph with name `graph1` does not exist. Did you mean `graph0`?"),
+            Arguments.of(List.of("graph0", "graph1"), "graph2", "Graph with name `graph2` does not exist. Did you mean one of [`graph0`, `graph1`]?"),
+            Arguments.of(List.of("graph0", "graph1", "foobar"), "graph2", "Graph with name `graph2` does not exist. Did you mean one of [`graph0`, `graph1`]?")
         );
     }
 

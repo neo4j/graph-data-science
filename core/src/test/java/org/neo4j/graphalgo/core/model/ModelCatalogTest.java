@@ -189,9 +189,9 @@ class ModelCatalogTest {
     static Stream<Arguments> modelInput() {
         return Stream.of(
             Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
-            Arguments.of(List.of("model0"), "model1", "Model with name `model1` does not exist (Did you mean `model0`?)."),
-            Arguments.of(List.of("model0", "model1"), "model2", "Model with name `model2` does not exist (Did you mean one of [`model0`, `model1`]?)."),
-            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "Model with name `model2` does not exist (Did you mean one of [`model0`, `model1`]?).")
+            Arguments.of(List.of("model0"), "model1", "Model with name `model1` does not exist. Did you mean `model0`?"),
+            Arguments.of(List.of("model0", "model1"), "model2", "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"),
+            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?")
         );
     }
 
