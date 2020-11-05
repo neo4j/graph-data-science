@@ -73,6 +73,7 @@ public class NodesBuilder {
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
 
+        // TODO: why is this maxOriginalId + 1, couldn't itbe just nodeCount?
         this.hugeLongArrayBuilder = HugeLongArrayBuilder.of(maxOriginalId + 1, tracker);
         this.nodeImporter = new HugeNodeImporter(
             hugeLongArrayBuilder,
