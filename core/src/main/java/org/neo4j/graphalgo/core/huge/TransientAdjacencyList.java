@@ -219,6 +219,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
          */
         @Override
         public void copyFrom(AdjacencyCursor other) {
+            assert(other instanceof DecompressingCursor);
             var theOther = ((DecompressingCursor) other);
             decompress.copyFrom(theOther.decompress);
             currentPosition = theOther.currentPosition;

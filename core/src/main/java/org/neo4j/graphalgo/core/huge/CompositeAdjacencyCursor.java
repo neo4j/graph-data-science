@@ -131,6 +131,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
 
     @Override
     public void copyFrom(AdjacencyCursor sourceCursor) {
+        assert(sourceCursor instanceof CompositeAdjacencyCursor);
         var other = (CompositeAdjacencyCursor) sourceCursor;
         List<AdjacencyCursor> otherCursors = other.cursors();
         for (int i = 0; i < cursors.size(); i++) {
