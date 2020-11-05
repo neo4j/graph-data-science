@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.StringSimilarity;
@@ -61,11 +59,6 @@ public final class GraphStoreCatalog {
             );
             return userCatalog;
         });
-    }
-
-    @TestOnly
-    public static Optional<Graph> getUnion(String username, NamedDatabaseId databaseId, String graphName) {
-        return getUserCatalog(username).getUnion(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
     public static boolean exists(String username, NamedDatabaseId databaseId, String graphName) {
@@ -241,18 +234,6 @@ public final class GraphStoreCatalog {
                 return Optional.empty();
             }
             return Optional.ofNullable(degreeDistributionByName.get(userCatalogKey));
-        }
-
-        /**
-         * A named graph is potentially split up into multiple sub-graphs.
-         * Each sub-graph has the same node set and represents a unique relationship type / property combination.
-         * This method returns the union of all subgraphs refered to by the given name.
-         */
-        private Optional<Graph> getUnion(UserCatalogKey userCatalogKey) {
-            return !exists(userCatalogKey) ? Optional.empty() : Optional.of(graphsByName
-                .get(userCatalogKey)
-                .graphStore()
-                .getUnion());
         }
 
         private boolean exists(UserCatalogKey userCatalogKey) {

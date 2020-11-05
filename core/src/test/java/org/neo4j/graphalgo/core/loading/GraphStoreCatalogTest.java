@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -95,13 +94,6 @@ class GraphStoreCatalogTest {
         assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
         GraphStoreCatalog.removeAllLoadedGraphs();
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
-    }
-
-    @Test
-    void getUnion() {
-        GraphStoreCatalog.set(CONFIG, graphStore);
-        var actual = GraphStoreCatalog.getUnion(USER_NAME, DATABASE_ID, GRAPH_NAME).get();
-        TestSupport.assertGraphEquals(graphStore.getUnion(), actual);
     }
 
     @Test

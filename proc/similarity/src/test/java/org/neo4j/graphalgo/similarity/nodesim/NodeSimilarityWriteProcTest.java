@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -37,7 +36,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -119,8 +117,6 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
 
         runQuery(loadQuery);
 
-        Graph simGraph = GraphStoreCatalog.getUnion(getUsername(), namedDatabaseId(), resultGraphName).orElse(null);
-        assertNotNull(simGraph);
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl(
@@ -163,7 +159,7 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
                         , 0.0
                     )
                 ),
-            simGraph
+            GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()
         );
     }
 

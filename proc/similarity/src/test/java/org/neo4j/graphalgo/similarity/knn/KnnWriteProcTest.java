@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.similarity.knn;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -33,7 +32,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
@@ -126,13 +124,9 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> {
 
         runQuery(loadQuery);
 
-        Graph simGraph = GraphStoreCatalog.getUnion(getUsername(), namedDatabaseId(), resultGraphName).orElse(null);
-        assertNotNull(simGraph);
         assertGraphEquals(
-            fromGdl(
-                "(a {id: 1})-[{w: 0.5}]->(b {id: 2}), (b)-[{w: 0.5}]->(a), (c {id: 3})-[{w: 0.25}]->(b)"
-            ),
-            simGraph
+            fromGdl("(a {id: 1})-[{w: 0.5}]->(b {id: 2}), (b)-[{w: 0.5}]->(a), (c {id: 3})-[{w: 0.25}]->(b)"),
+            GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()
         );
     }
 }
