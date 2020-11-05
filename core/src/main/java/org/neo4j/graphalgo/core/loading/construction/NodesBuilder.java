@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.AbstractNodeImporter;
 import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
-import org.neo4j.graphalgo.core.loading.HugeNodeImporter;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
@@ -54,7 +54,7 @@ public class NodesBuilder {
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
     private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
-    private final HugeNodeImporter nodeImporter;
+    private final AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter;
 
     private final Lock lock;
 
@@ -73,9 +73,9 @@ public class NodesBuilder {
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
 
-        // TODO: why is this maxOriginalId + 1, couldn't itbe just nodeCount?
+        // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
         this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
-        this.nodeImporter = new HugeNodeImporter(
+        this.nodeImporter = new AbstractNodeImporter<>(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
@@ -130,10 +130,10 @@ public class NodesBuilder {
         private final HugeAtomicBitSet seenIds;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
-        private final HugeNodeImporter nodeImporter;
+        private final AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter;
 
         ThreadLocalBuilder(
-            HugeNodeImporter nodeImporter,
+            AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> nodeImporter,
             HugeAtomicBitSet seenIds,
             boolean hasLabelInformation,
             Function<NodeLabel, Integer> labelTokenIdFn

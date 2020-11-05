@@ -46,7 +46,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long maxNeoId = 0;
     private final NodesBatchBuffer buffer;
     private final List<Map<String, Value>> cypherNodeProperties;
-    private final HugeNodeImporter importer;
+    private final AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> importer;
     private final boolean hasLabelInformation;
     private final CypherNodePropertyImporter propertyImporter;
 
@@ -55,7 +55,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     public NodeRowVisitor(
         NodesBatchBuffer buffer,
-        HugeNodeImporter importer,
+        AbstractNodeImporter<HugeInternalIdMappingBuilder, HugeInternalIdMappingBuilder.BulkAdder> importer,
         boolean hasLabelInformation,
         CypherNodePropertyImporter propertyImporter
     ) {
