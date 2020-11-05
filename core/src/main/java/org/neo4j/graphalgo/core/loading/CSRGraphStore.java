@@ -514,7 +514,7 @@ public class CSRGraphStore implements GraphStore {
             .keySet()
             .stream()
             .flatMap(relationshipType -> {
-                if (relationshipProperties.containsKey(relationshipType)) {
+                if (relationshipProperties.containsKey(relationshipType) && !relationshipProperties.get(relationshipType).isEmpty()) {
                     return relationshipProperties
                         .get(relationshipType)
                         .keySet()
