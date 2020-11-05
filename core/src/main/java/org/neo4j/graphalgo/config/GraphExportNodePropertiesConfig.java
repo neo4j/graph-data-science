@@ -36,7 +36,8 @@ import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
-public interface GraphExportNodePropertiesConfig extends BaseConfig {
+public interface GraphExportNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
+
     @Configuration.Parameter
     Optional<String> graphName();
 
@@ -54,11 +55,6 @@ public interface GraphExportNodePropertiesConfig extends BaseConfig {
         return nodeLabels().contains(PROJECT_ALL)
             ? graphStore.nodeLabels()
             : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-    }
-
-    @Value.Default
-    default int concurrency() {
-        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Ignore
