@@ -53,7 +53,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void failWhenNoSuchGraph() {
-        assertError("CALL gds.graph.deleteRelationships('foo', 'bar')", "Cannot find graph with name 'foo'");
+        assertError("CALL gds.graph.deleteRelationships('foo', 'bar')", "Graph with name `foo` does not exist.");
     }
 
     @Test

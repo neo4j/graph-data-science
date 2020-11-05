@@ -119,8 +119,8 @@ class GraphCreateProcTest extends BaseProcTest {
         String query1 = "CALL gds.testProc.test('nope', {writeProperty: 'p'})";
         String query2 = "CALL gds.testProc.test.estimate('nope', {writeProperty: 'p'})";
 
-        assertError(query1, "Cannot find graph with name 'nope'");
-        assertError(query2, "Cannot find graph with name 'nope'");
+        assertError(query1, "Graph with name `nope` does not exist.");
+        assertError(query2, "Graph with name `nope` does not exist.");
     }
 
     @Test

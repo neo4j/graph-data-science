@@ -93,7 +93,7 @@ class NodePropertyFuncTest  extends BaseProcTest {
     @Test
     void failsOnNonExistingGraph() {
         String query = "MATCH (n) RETURN gds.util.nodeProperty('noGraph', id(n), 'prop') AS prop";
-        assertError(query, "Cannot find graph with name 'noGraph'.");
+        assertError(query, "Graph with name `noGraph` does not exist.");
     }
 
     @Test
