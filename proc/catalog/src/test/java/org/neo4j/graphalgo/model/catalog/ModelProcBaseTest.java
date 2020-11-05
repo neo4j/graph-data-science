@@ -33,12 +33,12 @@ class ModelProcBaseTest extends BaseProcTest {
     static final Map<String, Map<String, Map<String, String>>> EXPECTED_SCHEMA = Map.of(
         "nodes", Map.of(
             "Node", Map.of(
-                "p", "Integer (DefaultValue(-9223372036854775808))"
+                "p", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"
             )
         ),
         "relationships", Map.of(
             "REL", Map.of(
-                "r", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"
+                "r", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"
             )
         )
     );

@@ -68,16 +68,14 @@ public interface GraphSchema {
     static <PS extends PropertySchema> String forPropertySchema(PS propertySchema) {
         if (propertySchema instanceof RelationshipPropertySchema) {
             return formatWithLocale(
-                "%s: %s (%s, %s, Aggregation.%s)",
-                propertySchema.key(),
+                "%s (%s, %s, Aggregation.%s)",
                 propertySchema.valueType().cypherName(),
                 propertySchema.defaultValue(),
                 propertySchema.state(),
                 ((RelationshipPropertySchema) propertySchema).aggregation());
         }
         return formatWithLocale(
-            "%s: %s (%s, %s)",
-            propertySchema.key(),
+            "%s (%s, %s)",
             propertySchema.valueType().cypherName(),
             propertySchema.defaultValue(),
             propertySchema.state()

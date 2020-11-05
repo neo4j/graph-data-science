@@ -64,10 +64,10 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
             map(
                 "schema", map(
                     "nodes", map("A", map(
-                        "foo", "Integer (DefaultValue(-9223372036854775808))",
-                        "baz", "Integer (DefaultValue(-9223372036854775808))"
+                        "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)",
+                        "baz", "Integer (DefaultValue(-9223372036854775808), TRANSIENT)"
                     )),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                 )
             )
         ));
@@ -83,10 +83,10 @@ class GraphSchemaWithMutationTest extends BaseProcTest {
                 map(
                     "schema",
                     map("nodes",
-                        map("A", map("foo", "Integer (DefaultValue(-9223372036854775808))")),
+                        map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                         "relationships",
-                        map("BOO", map("faz", "Float (DefaultValue(NaN), Aggregation.NONE)"),
-                            "REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                        map("BOO", map("faz", "Float (DefaultValue(NaN), TRANSIENT, Aggregation.NONE)"),
+                            "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                     )
                 )
             )

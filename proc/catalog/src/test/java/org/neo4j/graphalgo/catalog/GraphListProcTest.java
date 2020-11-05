@@ -223,8 +223,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808))")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                 )
             )
         ));
@@ -287,8 +287,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808))")),
-                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), Aggregation.NONE)"))
+                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships", map("REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))
                 )
             )
         ));
@@ -309,8 +309,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema", singletonList(
             map(
                 "schema", map(
-                    "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808))")),
-                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), Aggregation.NONE)"))
+                    "nodes", map(ALL_NODES.name, map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships", map(ALL_RELATIONSHIPS.name, map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"))
                 )
             )
         ));
@@ -547,11 +547,11 @@ class GraphListProcTest extends BaseProcTest {
             Collections.singletonList(map(
                 "schema", map(
                     "nodes", map(
-                        "all", map("foo", "Integer (DefaultValue(-9223372036854775808))"),
-                        "B", map("age", "Integer (DefaultValue(-9223372036854775808))")),
+                        "all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"),
+                        "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                     "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
+                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                 )))
         );
     }
@@ -570,10 +570,10 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("all", map("foo", "Integer (DefaultValue(-9223372036854775808))"), "B", map("age", "Integer (DefaultValue(-9223372036854775808))")),
+                    "nodes", map("all", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
                     "relationships",  map(
-                        "all", map("since", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"),
-                        "REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                        "all", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"),
+                        "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                 )))
         );
     }
@@ -592,8 +592,8 @@ class GraphListProcTest extends BaseProcTest {
         assertCypherResult("CALL gds.graph.list() YIELD schema",
             Collections.singletonList(map(
                 "schema", map(
-                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808))"), "B", map("age", "Integer (DefaultValue(-9223372036854775808))")),
-                    "relationships",  map("LIKES", map("since", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"), "REL", map("bar", "Float (DefaultValue(NaN), Aggregation.DEFAULT)"))
+                    "nodes", map("A", map("foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"), "B", map("age", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)")),
+                    "relationships",  map("LIKES", map("since", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"), "REL", map("bar", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)"))
                 )))
         );
     }
