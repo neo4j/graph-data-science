@@ -99,7 +99,7 @@ class TransientAdjacencyListTest {
 
         MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 16;
         long bestCaseAdjacencySize = 500;
         long worstCaseAdjacencySize = 500;
 
@@ -123,7 +123,7 @@ class TransientAdjacencyListTest {
 
         MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 16;
         long uncompressedAdjacencySize = 1200;
 
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
@@ -144,7 +144,7 @@ class TransientAdjacencyListTest {
 
         MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 16;
         long bestCaseAdjacencySize = 100_500_000_000L;
         long worstCaseAdjacencySize = 300_300_000_000L;
 
@@ -168,7 +168,7 @@ class TransientAdjacencyListTest {
 
         MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
-        long classSize = 24;
+        long classSize = 16;
 
         long uncompessedAdjacencySize = 800_400_000_000L;
 
