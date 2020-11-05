@@ -19,9 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-public final class HugeLongArrayBuilder extends HugeArrayBuilder<long[], HugeLongArray> {
+public final class HugeLongArrayBuilder extends HugeArrayBuilder<long[], HugeLongArray> implements InternalIdMappingBuilder<HugeArrayBuilder.BulkAdder<long[]>> {
 
     public static HugeLongArrayBuilder of(long length, AllocationTracker tracker) {
         HugeLongArray array = HugeLongArray.newArray(length, tracker);
@@ -30,5 +32,10 @@ public final class HugeLongArrayBuilder extends HugeArrayBuilder<long[], HugeLon
 
     private HugeLongArrayBuilder(HugeLongArray array, final long length) {
         super(array, length);
+    }
+
+    @Override
+    public @Nullable HugeLongArrayBuilder.BulkAdder<long[]> allocate(int batchLength) {
+        return this.allocate((long) batchLength);
     }
 }

@@ -19,11 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
+public abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
 
     private final Huge array;
     private final long capacity;
@@ -68,7 +69,7 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
         return allocationIndex.get();
     }
 
-    public static final class BulkAdder<Array> {
+    public static final class BulkAdder<Array> implements IdMappingAllocator {
         public Array buffer;
         public int offset;
         public int length;
@@ -100,6 +101,25 @@ abstract class HugeArrayBuilder<Array, Huge extends HugeArray<Array, ?, Huge>> {
             offset = cursor.offset;
             length = cursor.limit - cursor.offset;
             return true;
+        }
+
+        @Override
+        public long startId() {
+            return start;
+        }
+
+        @Override
+        public int insert(
+            long[] nodeIds, int length, PropertyAllocator propertyAllocator
+        ) {
+            int importedProperties = 0;
+            int batchOffset = 0;
+            while (nextBuffer()) {
+                System.arraycopy(nodeIds, batchOffset, this.buffer, this.offset, this.length);
+                importedProperties += propertyAllocator.allocateProperties(batchOffset, this.start, this.length);
+                batchOffset += this.length;
+            }
+            return importedProperties;
         }
     }
 }
