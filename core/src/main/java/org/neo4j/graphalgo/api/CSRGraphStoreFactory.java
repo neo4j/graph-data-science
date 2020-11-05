@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -30,11 +29,11 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -56,7 +55,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
     ) {
         int relTypeCount = dimensions.relationshipTypeTokens().size();
         Map<RelationshipType, Relationships.Topology> relationships = new HashMap<>(relTypeCount);
-        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties = new HashMap<>(relTypeCount);
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
             AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
@@ -78,29 +77,39 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
             PropertyMappings propertyMappings = projection.properties();
             if (!propertyMappings.isEmpty()) {
-                Map<PropertyMapping, Relationships.Properties> propertyMap = propertyMappings
-                    .enumerate()
-                    .collect(Collectors.toMap(
-                        IntObjectPair::getTwo,
-                        propertyIndexAndMapping -> ImmutableProperties.of(
-                            relationshipsBuilder.properties(propertyIndexAndMapping.getOne()),
-                            relationshipsBuilder.globalPropertyOffsets(propertyIndexAndMapping.getOne()),
-                            relationshipCount,
-                            projection.orientation(),
-                            projection.isMultiGraph(),
-                            propertyIndexAndMapping.getTwo().defaultValue().doubleValue() // This is fine because relationships currently only support doubles
+                propertyMappings.enumerate().forEach(propertyIndexAnMapping -> {
+                    int propertyIndex = propertyIndexAnMapping.getOne();
+                    PropertyMapping propertyMapping = propertyIndexAnMapping.getTwo();
+                    RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
+                    propertyStoreBuilder.putIfAbsent(
+                        propertyMapping.propertyKey(),
+                        RelationshipProperty.of(
+                            propertyMapping.propertyKey(),
+                            NumberType.FLOATING_POINT,
+                            GraphStore.PropertyState.PERSISTENT,
+                            ImmutableProperties.of(
+                                relationshipsBuilder.properties(),
+                                relationshipsBuilder.globalPropertyOffsets(propertyIndex),
+                                relationshipCount,
+                                projection.orientation(),
+                                projection.isMultiGraph(),
+                                propertyMapping.defaultValue().doubleValue() // This is fine because relationships currently only support doubles
+                            ),
+                            propertyMapping.defaultValue(),
+                            propertyMapping.aggregation()
                         )
-                    ));
-                relationshipProperties.put(relationshipType, propertyMap);
+                    );
+                    relationshipPropertyStores.put(relationshipType, propertyStoreBuilder.build());
+                });
             }
         });
 
-        return CSRGraphStore.of(
+        return new CSRGraphStore(
             loadingContext.api().databaseId(),
             idsAndProperties.idMap(),
             idsAndProperties.properties(),
             relationships,
-            relationshipProperties,
+            relationshipPropertyStores,
             graphCreateConfig.readConcurrency(),
             tracker
         );

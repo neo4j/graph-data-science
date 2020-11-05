@@ -19,24 +19,44 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.values.storable.NumberType;
 
 @ValueClass
 public interface RelationshipProperty {
 
-    String key();
-
-    NumberType type();
-
-    GraphStore.PropertyState state();
-
     Relationships.Properties values();
 
-    DefaultValue defaultValue();
+    RelationshipPropertySchema propertySchema();
 
-    Aggregation aggregation();
+    @Configuration.Ignore
+    default String key() {
+        return propertySchema().key();
+    }
+
+    @Configuration.Ignore
+    default ValueType valueType() {
+        return propertySchema().valueType();
+    }
+
+    @Configuration.Ignore
+    default DefaultValue defaultValue() {
+        return propertySchema().defaultValue();
+    }
+
+    @Configuration.Ignore
+    default GraphStore.PropertyState propertyState() {
+        return propertySchema().state();
+    }
+
+    @Configuration.Ignore
+    default Aggregation aggregation() {
+        return propertySchema().aggregation();
+    }
 
     static RelationshipProperty of(
         String key,
@@ -46,6 +66,9 @@ public interface RelationshipProperty {
         DefaultValue defaultValue,
         Aggregation aggregation
     ) {
-        return ImmutableRelationshipProperty.of(key, type, state, values, defaultValue, aggregation);
+        return ImmutableRelationshipProperty.of(
+            values,
+            RelationshipPropertySchema.of(key, ValueType.fromNumberType(type), defaultValue, state, aggregation)
+        );
     }
 }

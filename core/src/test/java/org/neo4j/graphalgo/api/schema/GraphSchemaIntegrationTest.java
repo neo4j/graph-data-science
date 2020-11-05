@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
@@ -92,11 +93,11 @@ class GraphSchemaIntegrationTest extends BaseTest {
     private static Stream<Arguments> nodePropertyMappingsAndExpectedResults() {
         return Stream.of(
             Arguments.of(
-                PropertySchema.of(ValueType.LONG),
+                PropertySchema.of("prop", ValueType.LONG),
                 PropertyMapping.of("prop")
             ),
             Arguments.of(
-                PropertySchema.of(ValueType.LONG, DefaultValue.of(1337)),
+                PropertySchema.of("prop", ValueType.LONG, DefaultValue.of(1337), GraphStore.PropertyState.PERSISTENT),
                 PropertyMapping.of("prop", 1337)
             )
         );
@@ -105,11 +106,17 @@ class GraphSchemaIntegrationTest extends BaseTest {
     private static Stream<Arguments> relationshipPropertyMappingsAndExpectedResults() {
         return Stream.of(
             Arguments.of(
-                RelationshipPropertySchema.of(ValueType.DOUBLE),
+                RelationshipPropertySchema.of("relProp", ValueType.DOUBLE),
                 PropertyMapping.of("relProp")
             ),
             Arguments.of(
-                RelationshipPropertySchema.of(ValueType.DOUBLE, DefaultValue.of(1337.0D), Aggregation.MAX),
+                RelationshipPropertySchema.of(
+                    "relProp",
+                    ValueType.DOUBLE,
+                    DefaultValue.of(1337.0D),
+                    GraphStore.PropertyState.PERSISTENT,
+                    Aggregation.MAX
+                ),
                 PropertyMapping.of("relProp", DefaultValue.of(1337.0D), Aggregation.MAX)
             )
         );

@@ -23,8 +23,12 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodeProperty;
+import org.neo4j.graphalgo.api.NodePropertyStore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 // TODO: rename to `NodeMappingAndProperties`
@@ -33,12 +37,25 @@ public interface IdsAndProperties {
 
     NodeMapping idMap();
 
-    Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties();
+    Map<NodeLabel, NodePropertyStore> properties();
 
-    static IdsAndProperties of(
-        NodeMapping nodeMapping,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties
-    ) {
-        return ImmutableIdsAndProperties.of(nodeMapping, properties);
+    static IdsAndProperties of(NodeMapping nodeMapping, Map<NodeLabel, Map<PropertyMapping, NodeProperties>> properties) {
+        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(properties.size());
+        properties.forEach((nodeLabel, propertyMap) -> {
+            NodePropertyStore.Builder builder = NodePropertyStore.builder();
+            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putNodeProperty(
+                propertyMapping.propertyKey(),
+                NodeProperty.of(
+                    propertyMapping.propertyKey(),
+                    GraphStore.PropertyState.PERSISTENT,
+                    propertyValues,
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : propertyValues.valueType().fallbackValue()
+                )
+            ));
+            nodePropertyStores.put(nodeLabel, builder.build());
+        });
+        return ImmutableIdsAndProperties.of(nodeMapping, nodePropertyStores);
     }
 }

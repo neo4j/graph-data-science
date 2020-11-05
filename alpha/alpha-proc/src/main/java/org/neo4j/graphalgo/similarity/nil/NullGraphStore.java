@@ -159,8 +159,8 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public NumberType relationshipPropertyType(String propertyKey) {
-        return NumberType.NO_NUMBER;
+    public ValueType relationshipPropertyType(String propertyKey) {
+        return ValueType.UNKNOWN;
     }
 
     @Override

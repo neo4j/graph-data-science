@@ -21,20 +21,25 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 @ValueClass
 public interface PropertySchema {
 
+    String key();
+
     ValueType valueType();
 
     DefaultValue defaultValue();
 
-    static PropertySchema of(ValueType valueType) {
-        return ImmutablePropertySchema.of(valueType, valueType.fallbackValue());
+    GraphStore.PropertyState state();
+
+    static PropertySchema of(String propertyKey, ValueType valueType) {
+        return ImmutablePropertySchema.of(propertyKey, valueType, valueType.fallbackValue(), GraphStore.PropertyState.PERSISTENT);
     }
 
-    static PropertySchema of(ValueType valueType, DefaultValue defaultValue) {
-        return ImmutablePropertySchema.of(valueType, defaultValue);
+    static PropertySchema of(String propertyKey, ValueType valueType, DefaultValue defaultValue, GraphStore.PropertyState propertyState) {
+        return ImmutablePropertySchema.of(propertyKey, valueType, defaultValue, propertyState);
     }
 }

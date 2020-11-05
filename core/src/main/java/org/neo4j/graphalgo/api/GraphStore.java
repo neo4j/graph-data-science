@@ -118,7 +118,7 @@ public interface GraphStore {
     }
 
 
-    NumberType relationshipPropertyType(String propertyKey);
+    ValueType relationshipPropertyType(String propertyKey);
 
     Set<String> relationshipPropertyKeys();
 

@@ -22,30 +22,45 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 
 @ValueClass
 public
 interface NodeProperty {
 
-    String key();
-
-    GraphStore.PropertyState state();
-
     NodeProperties values();
 
-    DefaultValue defaultValue();
+    PropertySchema propertySchema();
 
     @Configuration.Ignore
-    default ValueType type() {
-        return values().valueType();
-    };
+    default String key() {
+        return propertySchema().key();
+    }
+
+    @Configuration.Ignore
+    default ValueType valueType() {
+        return propertySchema().valueType();
+    }
+
+    @Configuration.Ignore
+    default DefaultValue defaultValue() {
+        return propertySchema().defaultValue();
+    }
+
+    @Configuration.Ignore
+    default GraphStore.PropertyState propertyState() {
+        return propertySchema().state();
+    }
 
     static NodeProperty of(
         String key,
         GraphStore.PropertyState origin,
         NodeProperties values
     ) {
-        return ImmutableNodeProperty.of(key, origin, values, values.valueType().fallbackValue());
+        return ImmutableNodeProperty.of(
+            values,
+            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), origin)
+        );
     }
 
     static NodeProperty of(
@@ -54,6 +69,9 @@ interface NodeProperty {
         NodeProperties values,
         DefaultValue defaultValue
     ) {
-        return ImmutableNodeProperty.of(key, origin, values, defaultValue);
+        return ImmutableNodeProperty.of(
+            values,
+            PropertySchema.of(key, values.valueType(), defaultValue, origin)
+        );
     }
 }

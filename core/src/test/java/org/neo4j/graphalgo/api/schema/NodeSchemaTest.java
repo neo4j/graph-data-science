@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api.schema;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Set;
@@ -37,17 +38,20 @@ class NodeSchemaTest {
         var label = NodeLabel.of("Foo");
 
         DefaultValue defaultValue = DefaultValue.of(42.0D);
+        String propertyName = "baz";
         var nodeSchema = NodeSchema.builder()
             .addProperty(
                 label,
-                "baz",
+                propertyName,
                 PropertySchema.of(
+                    propertyName,
                     ValueType.DOUBLE,
-                    defaultValue
+                    defaultValue,
+                    GraphStore.PropertyState.PERSISTENT
                 )
             ).build();
 
-        PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get("baz");
+        PropertySchema nodePropertySchema = nodeSchema.properties().get(label).get(propertyName);
         assertTrue(nodePropertySchema.defaultValue().isUserDefined());
         assertEquals(defaultValue, nodePropertySchema.defaultValue());
     }

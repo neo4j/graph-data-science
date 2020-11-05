@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
@@ -29,16 +30,24 @@ public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();
 
-    static RelationshipPropertySchema of(ValueType valueType) {
-        return ImmutableRelationshipPropertySchema.of(valueType, valueType.fallbackValue(), Aggregation.DEFAULT);
+    static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
+        return ImmutableRelationshipPropertySchema.of(
+            propertyKey,
+            valueType,
+            valueType.fallbackValue(),
+            GraphStore.PropertyState.PERSISTENT,
+            Aggregation.DEFAULT
+        );
     }
 
     static RelationshipPropertySchema of(
+        String propertyKey,
         ValueType valueType,
         DefaultValue defaultValue,
+        GraphStore.PropertyState propertyState,
         Aggregation aggregation
     ) {
-        return ImmutableRelationshipPropertySchema.of(valueType, defaultValue, aggregation);
+        return ImmutableRelationshipPropertySchema.of(propertyKey, valueType, defaultValue, propertyState, aggregation);
     }
 
 }

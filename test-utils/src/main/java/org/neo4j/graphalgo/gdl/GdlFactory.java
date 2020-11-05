@@ -28,11 +28,15 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipProperty;
+import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -48,6 +52,7 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
+import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -137,9 +142,21 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             .filter(entry -> entry.getValue().getOne().isPresent())
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                entry -> Map.of(PropertyMapping.of(entry.getValue().getOne().get()), entry.getValue().getTwo().properties().get())
+                entry -> RelationshipPropertyStore
+                    .builder()
+                    .putIfAbsent(
+                        entry.getValue().getOne().get(),
+                        RelationshipProperty.of(
+                            entry.getValue().getOne().get(),
+                            NumberType.FLOATING_POINT,
+                            GraphStore.PropertyState.PERSISTENT,
+                            entry.getValue().getTwo().properties().get(),
+                            ValueType.DOUBLE.fallbackValue(),
+                            Aggregation.NONE
+                        )
+                    ).build()
             ));
-        CSRGraphStore graphStore = CSRGraphStore.of(
+        CSRGraphStore graphStore = new CSRGraphStore(
             databaseId,
             nodes.idMap(),
             nodes.properties(),

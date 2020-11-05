@@ -24,13 +24,13 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.List;
@@ -125,8 +125,8 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         return LongStream
             .range(0, graphStore.nodeCount())
             .mapToObj(nodeId -> relationshipPropertyKeysAndValues.stream().flatMap(relTypeAndPropertyKeyAndValues -> {
-                NumberType valueType = graphStore.relationshipPropertyType(relTypeAndPropertyKeyAndValues.getMiddle());
-                DoubleFunction<Number> convertProperty = valueType == NumberType.FLOATING_POINT
+                ValueType valueType = graphStore.relationshipPropertyType(relTypeAndPropertyKeyAndValues.getMiddle());
+                DoubleFunction<Number> convertProperty = valueType == ValueType.DOUBLE
                     ? property -> property
                     : property -> (long) property;
 

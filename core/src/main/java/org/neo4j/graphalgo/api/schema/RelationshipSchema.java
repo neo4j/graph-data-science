@@ -91,7 +91,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
     class Builder extends ImmutableRelationshipSchema.Builder {
 
         public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType) {
-            return addProperty(type, propertyName, RelationshipPropertySchema.of(valueType));
+            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
         }
 
         public Builder addProperty(

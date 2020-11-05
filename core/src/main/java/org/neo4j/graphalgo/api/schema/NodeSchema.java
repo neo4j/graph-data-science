@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.api.schema;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Collections;
@@ -53,7 +54,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     class Builder extends ImmutableNodeSchema.Builder {
 
         public Builder addProperty(NodeLabel key, String propertyName, ValueType valueType) {
-            return addProperty(key, propertyName, PropertySchema.of(valueType, valueType.fallbackValue()));
+            return addProperty(key, propertyName, PropertySchema.of(propertyName, valueType, valueType.fallbackValue(), GraphStore.PropertyState.PERSISTENT));
         }
 
         public Builder addProperty(NodeLabel key, String propertyName, PropertySchema propertySchema) {

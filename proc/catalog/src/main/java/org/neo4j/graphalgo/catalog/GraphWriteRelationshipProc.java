@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphWriteRelationshipConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.core.write.RelationshipExporter;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 
 import java.util.Map;
@@ -91,10 +91,10 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             );
 
         if (config.relationshipProperty().isPresent()) {
-            NumberType propertyType = graphStore.relationshipPropertyType(config.relationshipProperty().get());
-            if (propertyType == NumberType.INTEGRAL) {
+            ValueType propertyType = graphStore.relationshipPropertyType(config.relationshipProperty().get());
+            if (propertyType == ValueType.LONG) {
                 builder.withRelationPropertyTranslator(relationshipProperty -> Values.longValue((long) relationshipProperty));
-            } else if (propertyType == NumberType.FLOATING_POINT) {
+            } else if (propertyType == ValueType.DOUBLE) {
                 builder.withRelationPropertyTranslator(Values::doubleValue);
             } else {
                 throw new UnsupportedOperationException("Writing non-numeric data is not supported.");
