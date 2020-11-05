@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -201,26 +202,19 @@ class ModelCatalogTest {
         existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
 
         // test the get code path
-        var ex = assertThrows(
-            NoSuchElementException.class,
-            () -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class)
-        );
-        assertEquals(expectedMessage, ex.getMessage());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class))
+            .withMessage(expectedMessage);
 
         // test the list code path
-        ex = assertThrows(
-            NoSuchElementException.class,
-            () -> ModelCatalog.list(USERNAME, searchModel)
-        );
-        assertEquals(expectedMessage, ex.getMessage());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> ModelCatalog.list(USERNAME, searchModel))
+            .withMessage(expectedMessage);
 
         // test the drop code path
-        ex = assertThrows(
-            NoSuchElementException.class,
-            () -> ModelCatalog.drop(USERNAME, searchModel)
-        );
-
-        assertEquals(expectedMessage, ex.getMessage());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> ModelCatalog.drop(USERNAME, searchModel))
+            .withMessage(expectedMessage);
     }
 
     @Test

@@ -37,9 +37,9 @@ import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 
@@ -138,18 +138,13 @@ class GraphStoreCatalogTest {
         });
 
         // test the get code path
-        var ex = assertThrows(
-            NoSuchElementException.class,
-            () -> GraphStoreCatalog.get(USER_NAME, dummyDatabaseId, searchGraphName)
-        );
-        assertEquals(expectedMessage, ex.getMessage());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> GraphStoreCatalog.get(USER_NAME, dummyDatabaseId, searchGraphName))
+            .withMessage(expectedMessage);
 
         // test the drop code path
-        ex = assertThrows(
-            NoSuchElementException.class,
-            () -> GraphStoreCatalog.remove(USER_NAME, dummyDatabaseId, searchGraphName, graphStoreWithConfig -> {}, true)
-        );
-
-        assertEquals(expectedMessage, ex.getMessage());
+        assertThatExceptionOfType(NoSuchElementException.class)
+            .isThrownBy(() -> GraphStoreCatalog.remove(USER_NAME, dummyDatabaseId, searchGraphName, graphStoreWithConfig -> {}, true))
+            .withMessage(expectedMessage);
     }
 }
