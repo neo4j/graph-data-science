@@ -20,13 +20,31 @@
 package org.neo4j.graphalgo.core;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class StringSimilarity {
+
+    private static final double REQUIRED_SIMILARITY = 0.8;
 
     private static final double MAX_SCORE = 1.0;
     private static final double MIN_SCORE = 0.0;
     private static final double WINKLER_SCALING = 0.1;
     private static final int MAX_PREFIX_LENGTH_BOOST = 4;
+
+    public static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
+        return similarStrings(value, candidates, REQUIRED_SIMILARITY);
+    }
+
+    public static List<String> similarStrings(CharSequence value, Collection<String> candidates, double requiredSimilarity) {
+        return candidates.stream()
+            .map(candidate -> ImmutableStringAndScore.of(candidate, jaroWinkler(value, candidate)))
+            .filter(candidate -> candidate.value() > requiredSimilarity)
+            .sorted()
+            .map(ConfigKeyValidation.StringAndScore::string)
+            .collect(Collectors.toList());
+    }
 
     public static double jaro(CharSequence s1, CharSequence s2) {
         int len1 = s1.length();

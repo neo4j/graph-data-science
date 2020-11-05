@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.core.ConfigKeyValidation.similarStrings;
+import static org.neo4j.graphalgo.core.StringSimilarity.similarStrings;
 
 /**
  * Wrapper around configuration options map

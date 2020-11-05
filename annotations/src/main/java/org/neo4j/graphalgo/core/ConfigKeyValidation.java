@@ -28,11 +28,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.jaroWinkler;
+import static org.neo4j.graphalgo.core.StringSimilarity.similarStrings;
 
 public final class ConfigKeyValidation {
-
-    private static final double REQUIRED_SIMILARITY = 0.8;
 
     private ConfigKeyValidation() {}
 
@@ -70,15 +68,6 @@ public final class ConfigKeyValidation {
             "Unexpected configuration keys: %s",
             String.join(", ", suggestions)
         ));
-    }
-
-    static List<String> similarStrings(CharSequence value, Collection<String> candidates) {
-        return candidates.stream()
-            .map(candidate -> ImmutableStringAndScore.of(candidate, jaroWinkler(value, candidate)))
-            .filter(candidate -> candidate.value() > REQUIRED_SIMILARITY)
-            .sorted()
-            .map(StringAndScore::string)
-            .collect(Collectors.toList());
     }
 
     @Value.Style(
