@@ -75,32 +75,15 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                 )
             );
 
-            PropertyMappings propertyMappings = projection.properties();
-            if (!propertyMappings.isEmpty()) {
-                propertyMappings.enumerate().forEach(propertyIndexAnMapping -> {
-                    int propertyIndex = propertyIndexAnMapping.getOne();
-                    PropertyMapping propertyMapping = propertyIndexAnMapping.getTwo();
-                    RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
-                    propertyStoreBuilder.putIfAbsent(
-                        propertyMapping.propertyKey(),
-                        RelationshipProperty.of(
-                            propertyMapping.propertyKey(),
-                            NumberType.FLOATING_POINT,
-                            GraphStore.PropertyState.PERSISTENT,
-                            ImmutableProperties.of(
-                                relationshipsBuilder.properties(),
-                                relationshipsBuilder.globalPropertyOffsets(propertyIndex),
-                                relationshipCount,
-                                projection.orientation(),
-                                projection.isMultiGraph(),
-                                propertyMapping.defaultValue().doubleValue() // This is fine because relationships currently only support doubles
-                            ),
-                            propertyMapping.defaultValue(),
-                            propertyMapping.aggregation()
-                        )
-                    );
-                    relationshipPropertyStores.put(relationshipType, propertyStoreBuilder.build());
-                });
+            if (!projection.properties().isEmpty()) {
+                relationshipPropertyStores.put(
+                    relationshipType,
+                    constructRelationshipPropertyStore(
+                        projection,
+                        relationshipsBuilder,
+                        relationshipCount
+                    )
+                );
             }
         });
 
@@ -113,6 +96,41 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             graphCreateConfig.readConcurrency(),
             tracker
         );
+    }
+
+    private RelationshipPropertyStore constructRelationshipPropertyStore(
+        RelationshipProjection projection,
+        org.neo4j.graphalgo.core.loading.RelationshipsBuilder relationshipsBuilder,
+        long relationshipCount
+    ) {
+        PropertyMappings propertyMappings = projection.properties();
+        RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+        propertyMappings.enumerate().forEach(propertyIndexAnMapping -> {
+            int propertyIndex = propertyIndexAnMapping.getOne();
+            PropertyMapping propertyMapping = propertyIndexAnMapping.getTwo();
+            propertyStoreBuilder.putIfAbsent(
+                propertyMapping.propertyKey(),
+                RelationshipProperty.of(
+                    propertyMapping.propertyKey(),
+                    NumberType.FLOATING_POINT,
+                    GraphStore.PropertyState.PERSISTENT,
+                    ImmutableProperties.of(
+                        relationshipsBuilder.properties(propertyIndex),
+                        relationshipsBuilder.globalPropertyOffsets(propertyIndex),
+                        relationshipCount,
+                        projection.orientation(),
+                        projection.isMultiGraph(),
+                        propertyMapping.defaultValue().doubleValue() // This is fine because relationships currently only support doubles
+                    ),
+                    propertyMapping.defaultValue(),
+                    propertyMapping.aggregation()
+                )
+            );
+        });
+
+
+        return propertyStoreBuilder.build();
     }
 
     protected void logLoadingSummary(GraphStore graphStore, Optional<AllocationTracker> tracker) {

@@ -283,9 +283,12 @@ public class CSRGraphStore implements GraphStore {
     ) {
         this.databaseId = databaseId;
         this.nodes = nodes;
-        this.nodeProperties = nodeProperties;
-        this.relationships = relationships;
-        this.relationshipProperties = relationshipProperties;
+
+        // make sure that the following maps are mutable
+        this.nodeProperties = new HashMap<>(nodeProperties);
+        this.relationships = new HashMap<>(relationships);
+        this.relationshipProperties = new HashMap<>(relationshipProperties);
+
         this.concurrency = concurrency;
         this.createdGraphs = new HashSet<>();
         this.modificationTime = TimeUtil.now();
