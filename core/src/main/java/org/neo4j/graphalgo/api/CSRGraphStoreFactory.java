@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -123,7 +124,9 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                         projection.isMultiGraph(),
                         propertyMapping.defaultValue().doubleValue() // This is fine because relationships currently only support doubles
                     ),
-                    propertyMapping.defaultValue(),
+                    propertyMapping.defaultValue().isUserDefined()
+                        ? propertyMapping.defaultValue()
+                        : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
                     propertyMapping.aggregation()
                 )
             );

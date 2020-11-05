@@ -264,7 +264,9 @@ public class CSRGraphStore implements GraphStore {
                         NumberType.FLOATING_POINT,
                         relationshipPropertySchema.state(),
                         relationships.properties().get(),
-                        relationshipPropertySchema.defaultValue(),
+                        relationshipPropertySchema.defaultValue().isUserDefined()
+                            ? relationshipPropertySchema.defaultValue()
+                            : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
                         relationshipPropertySchema.aggregation())
                 ).build()
             );
