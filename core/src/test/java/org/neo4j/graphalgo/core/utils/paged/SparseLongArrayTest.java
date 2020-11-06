@@ -81,4 +81,48 @@ class SparseLongArrayTest {
         assertEquals(NOT_FOUND, array.toMappedNodeId(24));
     }
 
+    @Test
+    void testForwardMapping() {
+        var array = new SparseLongArray(42);
+        array.set(23);
+        assertEquals(23, array.toOriginalNodeId(0));
+    }
+
+    @Test
+    void testForwardMappingNonExisting() {
+        var array = new SparseLongArray(42);
+        array.set(23);
+        assertEquals(0, array.toOriginalNodeId(1));
+    }
+
+    @Test
+    void testForwardMappingWithBlockEntries() {
+        var capacity = 8420;
+
+        var array = new SparseLongArray(capacity);
+        for (int i = 0; i < capacity; i+=11) {
+            array.set(i);
+        }
+        array.computeCounts();
+
+        for (int i = 0; i < capacity / 11; i++) {
+            assertEquals(i * 11, array.toOriginalNodeId(i), formatWithLocale("wrong original id for mapped id %d", i));
+        }
+    }
+
+    @Test
+    void testForwardMappingWithBlockEntriesNotFound() {
+        var capacity = 8420;
+
+        var array = new SparseLongArray(capacity);
+        for (int i = 0; i < capacity; i+=13) {
+            array.set(i);
+        }
+        array.computeCounts();
+        var nonExistingId = (capacity / 13) + 1;
+
+        for (int i = nonExistingId; i < capacity; i++) {
+            assertEquals(0, array.toOriginalNodeId(i), formatWithLocale("unexpected original id for mapped id %d", i));
+        }
+    }
 }

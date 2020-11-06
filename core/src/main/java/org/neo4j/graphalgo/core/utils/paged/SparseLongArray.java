@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 
 public class SparseLongArray {
@@ -66,6 +67,28 @@ public class SparseLongArray {
     }
 
     public long toOriginalNodeId(long mappedId) {
+        var startBlockIndex = ArrayUtil.binaryLookup(mappedId, blockCounts);
+        var array = this.array;
+        var blockStart = startBlockIndex * BLOCK_SIZE;
+        var blockEnd = Math.min((startBlockIndex + 1) * BLOCK_SIZE, array.length);
+        var idSoFar = blockCounts[startBlockIndex];
+        for (int blockIndex = blockStart; blockIndex < blockEnd; blockIndex++) {
+            var page = array[blockIndex];
+            var pos = 0;
+            var idsInPage = Long.bitCount(page);
+            if (idSoFar + idsInPage > mappedId) {
+                while (idSoFar <= mappedId) {
+                    if ((page & 1) == 1) {
+                        ++idSoFar;
+                    }
+                    page >>>= 1;
+                    ++pos;
+                }
+                return blockIndex * Long.SIZE + (pos - 1);
+            }
+            idSoFar += idsInPage;
+        }
+
         return 0;
     }
 
