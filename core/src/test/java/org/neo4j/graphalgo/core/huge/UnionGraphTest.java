@@ -19,17 +19,21 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @GdlExtension
 class UnionGraphTest {
@@ -37,10 +41,8 @@ class UnionGraphTest {
     @GdlGraph(graphNamePrefix = "natural")
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
     private static final String GDL = "()-->()-->()";
-
     @Inject
     TestGraph naturalGraph;
-
     @Inject
     TestGraph undirectedGraph;
 
@@ -51,6 +53,50 @@ class UnionGraphTest {
 
         assertFalse(unionGraph1.isUndirected());
         assertFalse(unionGraph2.isUndirected());
+    }
+
+
+    @GdlGraph(graphNamePrefix = "multiRelType")
+    private static final String MULTI_REL_TYPE_GDL =
+        "CREATE" +
+        "  (a:Node1)" +
+        ", (b:Node1)" +
+        ", (c:Node1)" +
+        ", (a)-[:REL1]->(b)" +
+        ", (a)-[:REL2]->(c)" +
+
+        ", (b)-[:REL1]->(a)" +
+        ", (b)-[:REL1]->(c)" +
+
+        ", (c)-[:REL2]->(a)" +
+        ", (c)-[:REL2]->(b)";
+
+    @Inject
+    GraphStore multiRelTypeGraphStore;
+
+    @Inject
+    IdFunction multiRelTypeIdFunction;
+
+    @Test
+    void testGetTargetOnMultiRelationshipTypeGraph() {
+        var combinations = List.of(
+            Triple.of(multiRelTypeIdFunction.of("a"), 0, multiRelTypeIdFunction.of("b")),
+            Triple.of(multiRelTypeIdFunction.of("a"), 1, multiRelTypeIdFunction.of("c")),
+            Triple.of(multiRelTypeIdFunction.of("b"), 0, multiRelTypeIdFunction.of("a")),
+            Triple.of(multiRelTypeIdFunction.of("b"), 1, multiRelTypeIdFunction.of("c")),
+            Triple.of(multiRelTypeIdFunction.of("c"), 0, multiRelTypeIdFunction.of("a")),
+            Triple.of(multiRelTypeIdFunction.of("c"), 1, multiRelTypeIdFunction.of("b"))
+        );
+
+        var graph = multiRelTypeGraphStore.getUnion();
+
+        combinations.forEach(combination -> {
+            var source = combination.getLeft();
+            var index = combination.getMiddle();
+            var expected = combination.getRight();
+
+            assertEquals(expected, graph.getTarget(source, index));
+        });
     }
 
 }
