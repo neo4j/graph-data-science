@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.util.Collections;
@@ -46,6 +47,7 @@ public class NodesBuilder {
     private final long maxOriginalId;
     private final int concurrency;
     private final AllocationTracker tracker;
+    private final SparseLongArray sparseLongArray;
 
     private int nextLabelId;
     private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
@@ -75,11 +77,13 @@ public class NodesBuilder {
 
         // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
         this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
+        sparseLongArray = new SparseLongArray(maxOriginalId + 1);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
-            tracker
+            tracker,
+            sparseLongArray
         );
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
@@ -103,6 +107,7 @@ public class NodesBuilder {
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
             hugeInternalIdMappingBuilder,
+            sparseLongArray,
             nodeLabelBitSetMap,
             maxOriginalId,
             concurrency,

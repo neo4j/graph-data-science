@@ -121,7 +121,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public long toOriginalNodeId(long nodeId) {
-        return graphIds.get(nodeId);
+        return sparseLongArray.toOriginalNodeId(nodeId);
     }
 
     @Override

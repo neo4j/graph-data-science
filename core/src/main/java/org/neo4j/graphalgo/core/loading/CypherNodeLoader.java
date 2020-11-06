@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -53,6 +54,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final HugeInternalIdMappingBuilder builder;
     private final NodeImporter importer;
+    private final SparseLongArray sparseLongArray;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
 
@@ -70,11 +72,13 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+        sparseLongArray = new SparseLongArray(nodeCount + 1);
         this.importer = new NodeImporter(
             builder,
             new HashMap<>(),
             labelTokenNodeLabelMapping,
-            loadingContext.tracker()
+            loadingContext.tracker(),
+            sparseLongArray
         );
     }
 
@@ -124,6 +128,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         try {
             idMap = IdMapBuilder.buildChecked(
                 builder,
+                sparseLongArray,
                 importer.nodeLabelBitSetMapping,
                 maxNodeId,
                 cypherConfig.readConcurrency(),

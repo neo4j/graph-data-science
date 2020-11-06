@@ -58,7 +58,7 @@ public class NodeImporter {
         this(idMapBuilder, nodeLabelBitSetMapping, labelTokenNodeLabelMapping, tracker, null);
     }
 
-    HugeNodeImporter(
+    public HugeNodeImporter(
         HugeLongArrayBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
@@ -139,8 +139,9 @@ public class NodeImporter {
         IdMappingAllocator.PropertyAllocator property = properties == null
             ? IdMappingAllocator.PropertyAllocator.EMPTY
             : ((batchOffset, start, length) -> {
-                for (int i = batchOffset; i < length; i++) {
-                    sparseLongArray.set(batch[i]);
+                for (int i = 0; i < length; i++) {
+                    var nodeId = batch[i + batchOffset];
+                    sparseLongArray.set(nodeId);
                 }
                 int batchImportedProperties = 0;
                 for (int i = 0; i < length; i++) {
