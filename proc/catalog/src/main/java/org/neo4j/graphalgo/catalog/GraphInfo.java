@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.neo4j.graphalgo.api.GraphStatistics.density;
 
@@ -37,6 +38,7 @@ public class GraphInfo {
     public final String database;
     public final String memoryUsage;
     public final long sizeInBytes;
+    public final Map<String, Object> detailSizeInBytes;
     public final Map<String, Object> nodeProjection;
     public final Map<String, Object> relationshipProjection;
     public final String nodeQuery;
@@ -53,6 +55,7 @@ public class GraphInfo {
         String database,
         String memoryUsage,
         long sizeInBytes,
+        Map<String, Object> detailSizeInBytes,
         Map<String, Object> nodeProjection,
         Map<String, Object> relationshipProjection,
         String nodeQuery,
@@ -67,6 +70,7 @@ public class GraphInfo {
         this.database = database;
         this.memoryUsage = memoryUsage;
         this.sizeInBytes = sizeInBytes;
+        this.detailSizeInBytes = detailSizeInBytes;
         this.nodeProjection = nodeProjection;
         this.relationshipProjection = relationshipProjection;
         this.nodeQuery = nodeQuery;
@@ -83,8 +87,24 @@ public class GraphInfo {
         var graphName = graphCreateConfig.graphName();
         var creationTime = graphCreateConfig.creationTime();
 
-        var sizeInBytes = MemoryUsage.sizeOf(graphStore);
-        var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
+        var memory = MemoryUsage.sizeOf2(graphStore);
+        assert memory != null;
+        var detailMemory = Map.of(
+            "total", memory.total(),
+            "nodes", Map.of(
+                "forwardMapping", memory.idMap().forwardMapping(),
+                "backwardMapping", memory.idMap().backwardMapping(),
+                "total", memory.idMap().total(),
+                "everything", Optional.ofNullable(memory.fields().get("nodes")).orElse(0L)
+            ),
+            "relationships", Map.of(
+                "offsets", memory.adjacencies().offsets(),
+                "adjacencyList", memory.adjacencies().list(),
+                "total", memory.adjacencies().total(),
+                "everything", Optional.ofNullable(memory.fields().get("relationships")).orElse(0L)
+            )
+        );
+        var memoryUsage = MemoryUsage.humanReadable(memory.total());
 
         var configVisitor = new Visitor();
         graphCreateConfig.accept(configVisitor);
@@ -93,7 +113,8 @@ public class GraphInfo {
             graphName,
             graphStore.databaseId().name(),
             memoryUsage,
-            sizeInBytes,
+            memory.total(),
+            detailMemory,
             configVisitor.nodeProjection,
             configVisitor.relationshipProjection,
             configVisitor.nodeQuery,
