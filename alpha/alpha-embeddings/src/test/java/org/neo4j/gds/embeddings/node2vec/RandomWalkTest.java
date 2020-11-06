@@ -43,12 +43,12 @@ class RandomWalkTest extends AlgoTestBase {
         ", (c:Node2)" +
         ", (d:Isolated)" +
         ", (e:Isolated)" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(a)" +
-        ", (a)-[:REL]->(c)" +
-        ", (c)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(b)";
+        ", (a)-[:REL1]->(b)" +
+        ", (b)-[:REL1]->(a)" +
+        ", (a)-[:REL1]->(c)" +
+        ", (c)-[:REL2]->(a)" +
+        ", (b)-[:REL2]->(c)" +
+        ", (c)-[:REL2]->(b)";
 
     @Test
     void testWithDefaultConfig() {
@@ -71,6 +71,29 @@ class RandomWalkTest extends AlgoTestBase {
         int expectedStepsInWalkForNode0 = config.walkLength() + 1;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
+
+    @Test
+    void testSampleFromMultipleRelationshipTypes() {
+        runQuery(DEFAULT_DB_CYPHER);
+        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
+        Graph graph = TestGraphLoader.from(db).withRelationshipTypes("REL1", "REL2").graph(NATIVE);
+        RandomWalk randomWalk = new RandomWalk(
+            graph,
+            config.walkLength(),
+            new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
+            config.concurrency(),
+            config.walksPerNode(),
+            config.walkBufferSize()
+        );
+
+        int expectedNumberOfWalks = config.walksPerNode() * 5;
+        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
+        assertEquals(expectedNumberOfWalks, result.size());
+        long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
+        int expectedStepsInWalkForNode0 = config.walkLength() + 1;
+        assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
+    }
+
 
     @Test
     void returnFactorShouldMakeWalksIncludeStartNodeMoreOften() {

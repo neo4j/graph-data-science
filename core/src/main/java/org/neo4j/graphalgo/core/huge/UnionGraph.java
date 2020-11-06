@@ -200,11 +200,17 @@ public final class UnionGraph implements CSRGraph {
      */
     @Override
     public long getTarget(long sourceNodeId, long index) {
-        return graphs.stream()
-                .mapToLong(g -> g.getTarget(sourceNodeId, index))
-                .filter(t -> t != HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND)
-                .findFirst()
-                .orElse(HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND);
+        var currentIndex = 0;
+
+        for (Graph graph : graphs) {
+            var degree = graph.degree(sourceNodeId);
+            if (currentIndex + degree > index) {
+                return graph.getTarget(sourceNodeId, index - currentIndex);
+            }
+            currentIndex += degree;
+        }
+
+        return HugeGraph.GetTargetConsumer.TARGET_NOT_FOUND;
     }
 
     @Override
