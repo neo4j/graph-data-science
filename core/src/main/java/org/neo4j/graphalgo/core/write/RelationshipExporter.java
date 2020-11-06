@@ -36,7 +36,6 @@ import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
@@ -82,10 +81,6 @@ public final class RelationshipExporter extends StatementApi {
 
         @Override
         public RelationshipExporter build() {
-            ProgressLogger progressLogger = loggerAdapter == null
-                ? ProgressLogger.NULL_LOGGER
-                : loggerAdapter;
-
             return new RelationshipExporter(
                 tx,
                 graph,
@@ -93,6 +88,16 @@ public final class RelationshipExporter extends StatementApi {
                 terminationFlag,
                 progressLogger
             );
+        }
+
+        @Override
+        String taskName() {
+            return "WriteRelationships";
+        }
+
+        @Override
+        long taskVolume() {
+            return graph.relationshipCount();
         }
     }
 
@@ -129,18 +134,15 @@ public final class RelationshipExporter extends StatementApi {
         Optional<String> maybePropertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
-
-        final AtomicLong progress = new AtomicLong(0L);
-
         final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
         final int propertyKeyToken = maybePropertyKey.map(this::getOrCreatePropertyToken).orElse(NO_SUCH_PROPERTY_KEY);
 
+        progressLogger.logStart();
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
         PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE)
             .stream()
             .map(partition -> createBatchRunnable(
-                progress,
                 relationshipToken,
                 propertyKeyToken,
                 partition.startNode(),
@@ -148,10 +150,10 @@ public final class RelationshipExporter extends StatementApi {
                 afterWriteConsumer
             ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
+        progressLogger.logFinish();
     }
 
     private Runnable createBatchRunnable(
-        AtomicLong progress,
         int relationshipToken,
         int propertyToken,
         long start,
@@ -167,7 +169,8 @@ public final class RelationshipExporter extends StatementApi {
                 ops,
                 propertyTranslator,
                 relationshipToken,
-                propertyToken
+                propertyToken,
+                progressLogger
             );
             if (afterWrite != null) {
                 writeConsumer = writeConsumer.andThen(afterWrite);
@@ -176,22 +179,10 @@ public final class RelationshipExporter extends StatementApi {
             for (long currentNode = start; currentNode < end; currentNode++) {
                 relationshipIterator.forEachRelationship(currentNode, Double.NaN, writeConsumer);
 
-                // Only log after writing relationships for 10_000 nodes
                 if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
-                    long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
-                    progressLogger.logProgress(
-                        currentProgress,
-                        nodeCount
-                    );
                     terminationFlag.assertRunning();
                 }
             }
-
-            // log progress for the last batch of written relationships
-            progressLogger.logProgress(
-                progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
-                nodeCount
-            );
         });
     }
 
@@ -202,19 +193,22 @@ public final class RelationshipExporter extends StatementApi {
         private final RelationshipPropertyTranslator propertyTranslator;
         private final int relTypeToken;
         private final int propertyToken;
+        private final ProgressLogger progressLogger;
 
         WriteConsumer(
             IdMapping idMapping,
             Write ops,
             RelationshipPropertyTranslator propertyTranslator,
             int relTypeToken,
-            int propertyToken
+            int propertyToken,
+            ProgressLogger progressLogger
         ) {
             this.idMapping = idMapping;
             this.ops = ops;
             this.propertyTranslator = propertyTranslator;
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
+            this.progressLogger = progressLogger;
         }
 
         @Override
@@ -225,6 +219,7 @@ public final class RelationshipExporter extends StatementApi {
                     relTypeToken,
                     idMapping.toOriginalNodeId(targetNodeId)
                 );
+                progressLogger.logProgress();
                 if (!Double.isNaN(property)) {
                     ops.relationshipSetProperty(
                         relId,
