@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -99,10 +98,6 @@ public class NodePropertyExporter extends StatementApi {
 
         @Override
         public NodePropertyExporter build() {
-            ProgressLogger progressLogger = loggerAdapter == null
-                ? ProgressLogger.NULL_LOGGER
-                : loggerAdapter;
-
             return new NodePropertyExporter(
                 tx,
                 nodeCount,
@@ -112,6 +107,16 @@ public class NodePropertyExporter extends StatementApi {
                 writeConcurrency,
                 executorService
             );
+        }
+
+        @Override
+        String taskName() {
+            return "WriteNodeProperties";
+        }
+
+        @Override
+        long taskVolume() {
+            return nodeCount;
         }
     }
 
@@ -190,18 +195,15 @@ public class NodePropertyExporter extends StatementApi {
             terminationFlag.assertRunning();
             long progress = 0L;
             Write ops = stmt.dataWrite();
+            progressLogger.logStart();
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
-                ++progress;
-                if (progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
-                    progressLogger.logProgress(progress, nodeCount);
+                progressLogger.logProgress();
+                if (++progress % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();
                 }
             }
-            progressLogger.logProgress(
-                nodeCount,
-                nodeCount
-            );
+            progressLogger.logFinish();
         });
     }
 
@@ -212,7 +214,6 @@ public class NodePropertyExporter extends StatementApi {
             MIN_BATCH_SIZE,
             MAX_BATCH_SIZE
         );
-        final AtomicLong progress = new AtomicLong(0L);
         final Collection<Runnable> runnables = LazyBatchCollection.of(
             nodeCount,
             batchSize,
@@ -223,26 +224,16 @@ public class NodePropertyExporter extends StatementApi {
                     Write ops = stmt.dataWrite();
                     for (long currentNode = start; currentNode < end; currentNode++) {
                         writer.accept(ops, currentNode);
+                        progressLogger.logProgress();
 
-                        // Only log every 10_000 written nodes
                         if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
-                            long currentProgress = progress.addAndGet(TerminationFlag.RUN_CHECK_NODE_COUNT);
-                            progressLogger.logProgress(
-                                currentProgress,
-                                nodeCount
-                            );
                             terminationFlag.assertRunning();
                         }
                     }
-
-                    // log progress for the last batch of written nodes
-                    progressLogger.logProgress(
-                        progress.addAndGet((end - start + 1) % TerminationFlag.RUN_CHECK_NODE_COUNT),
-                        nodeCount
-                    );
                 });
             }
         );
+        progressLogger.logStart();
         ParallelUtil.runWithConcurrency(
             concurrency,
             runnables,
@@ -252,5 +243,6 @@ public class NodePropertyExporter extends StatementApi {
             terminationFlag,
             executorService
         );
+        progressLogger.logFinish();
     }
 }

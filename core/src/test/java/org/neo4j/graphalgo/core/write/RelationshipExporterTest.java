@@ -20,18 +20,25 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
@@ -42,6 +49,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
 
 class RelationshipExporterTest extends BaseTest {
@@ -138,6 +146,53 @@ class RelationshipExporterTest extends BaseTest {
         });
         assertEquals(4, count.getValue());
         validateWrittenGraphWithoutProperties();
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void progressLogging(boolean parallel) {
+        // given a graph of 20 rels
+        // this abuses id mapping
+        Graph graph = GdlFactory.of("(a)-[:T]->(b),".repeat(20)).build().graphStore().getUnion();
+
+        // with a rel exporter
+        var log = new TestLog();
+        var exporterBuilder = RelationshipExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).withLog(log);
+        if (parallel) {
+            exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
+        }
+        var exporter = exporterBuilder.build();
+
+        // when writing properties
+        exporter.write("T");
+
+        // then assert messages
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "WriteRelationships :: Start",
+                "WriteRelationships 5%",
+                "WriteRelationships 10%",
+                "WriteRelationships 15%",
+                "WriteRelationships 20%",
+                "WriteRelationships 25%",
+                "WriteRelationships 30%",
+                "WriteRelationships 35%",
+                "WriteRelationships 40%",
+                "WriteRelationships 45%",
+                "WriteRelationships 50%",
+                "WriteRelationships 55%",
+                "WriteRelationships 60%",
+                "WriteRelationships 65%",
+                "WriteRelationships 70%",
+                "WriteRelationships 75%",
+                "WriteRelationships 80%",
+                "WriteRelationships 85%",
+                "WriteRelationships 90%",
+                "WriteRelationships 95%",
+                "WriteRelationships 100%",
+                "WriteRelationships :: Finished"
+            );
     }
 
     private RelationshipExporter setupExportTest(boolean includeProperties) {

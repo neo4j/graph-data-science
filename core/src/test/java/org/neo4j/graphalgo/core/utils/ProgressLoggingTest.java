@@ -24,28 +24,21 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.compat.WriterLogBuilder;
-import org.neo4j.graphalgo.core.write.ExporterBuilder;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 
 import java.io.StringWriter;
-import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ProgressLoggingTest extends BaseTest {
 
     private static final String PROPERTY = "property";
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
-
-    private Graph graph;
 
     @BeforeEach
     void setup() {
@@ -64,7 +57,7 @@ class ProgressLoggingTest extends BaseTest {
     void testLoad() {
         final StringWriter buffer = new StringWriter();
 
-        graph = new StoreLoaderBuilder()
+        new StoreLoaderBuilder()
             .api(db)
             .log(testLogger(buffer))
             .addNodeLabel(LABEL)
@@ -74,37 +67,10 @@ class ProgressLoggingTest extends BaseTest {
             .graph();
 
         final String output = buffer.toString();
-        assertTrue(output.length() > 0);
-        assertTrue(output.contains(GraphStoreFactory.TASK_LOADING));
-    }
 
-    @Test
-    void testWrite() {
-        graph = new StoreLoaderBuilder()
-            .api(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
-            .build()
-            .graph();
-
-        final StringWriter buffer = new StringWriter();
-
-        final int[] ints = new int[(int) graph.nodeCount()];
-        Arrays.fill(ints, -1);
-
-        NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE)
-            .withLog(testLogger(buffer))
-            .build()
-            .write(
-                "test",
-                (LongNodeProperties) (long nodeId) -> ints[(int) nodeId]
-            );
-
-        final String output = buffer.toString();
-
-        assertTrue(output.length() > 0);
-        assertTrue(output.contains(ExporterBuilder.TASK_EXPORT));
+        assertThat(output)
+            .isNotEmpty()
+            .contains(GraphStoreFactory.TASK_LOADING);
     }
 
     private static Log testLogger(StringWriter writer) {
