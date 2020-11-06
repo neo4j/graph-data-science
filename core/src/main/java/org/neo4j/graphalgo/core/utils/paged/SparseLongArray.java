@@ -19,51 +19,75 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
+
 public class SparseLongArray {
 
     public static final long NOT_FOUND = -1;
+    private static final int BLOCK_SIZE = 64;
 
-    private long[] array;
+    private final int size;
 
-    SparseLongArray(long capacity) {
-        var size = (int) (capacity / Long.SIZE);
-        this.array = new long[size + 1];
+    private final long[] array;
+    private final long[] blockCounts;
+
+    public SparseLongArray(long capacity) {
+        this.size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
+        this.array = new long[size];
+        int blocks = size / BLOCK_SIZE;
+        // blockCounts[0] is always 0
+        this.blockCounts = new long[blocks + 1];
     }
 
     public long toMappedNodeId(long originalId) {
-        var offset = (int) (originalId / Long.SIZE);
-        var posInLong = originalId % Long.SIZE;
+        var page = (int) (originalId / Long.SIZE);
+        var indexInPage = originalId % Long.SIZE;
 
         // Check if original id is contained
-        long mask = 1 << posInLong;
-        if ((mask & array[offset]) != mask) {
+        long mask = 1L << indexInPage;
+        if ((mask & array[page]) != mask) {
             return NOT_FOUND;
         }
 
+        var block = page / BLOCK_SIZE;
+        // Get the count from all previous blocks
+        var mappedId = blockCounts[block];
         // Count set bits up to original id
         var a = array;
-        var result = 0L;
-        // head
-        for (int i = 0; i < offset; i++) {
-            result += Long.bitCount(a[i]);
+        // Get count within current block
+        for (int pageIdx = page & ~ 63; pageIdx < page; pageIdx++) {
+            mappedId += Long.bitCount(a[pageIdx]);
         }
         // tail (long at offset)
-        var shift = Long.SIZE - posInLong - 1;
-        result += Long.bitCount(a[offset] << shift);
+        var shift = Long.SIZE - indexInPage - 1;
+        mappedId += Long.bitCount(a[page] << shift);
 
-        return result - 1;
+        return mappedId - 1;
     }
 
     public long toOriginalNodeId(long mappedId) {
         return 0;
     }
 
-    public void set(long originalId) {
-        var offset = (int) (originalId / Long.SIZE);
-        var posInLong = originalId % Long.SIZE;
+    public synchronized void set(long originalId) {
+        var page = (int) (originalId / Long.SIZE);
+        var indexInPage = originalId % Long.SIZE;
+        var mask = 1L << indexInPage;
+        array[page] |= mask;
+    }
 
-        var mask = 1L << posInLong;
-        array[offset] |= mask;
+    public void computeCounts() {
+        int size = this.size - BLOCK_SIZE;
+        long[] array = this.array;
+        long[] blockCounts = this.blockCounts;
+
+        long count = 0;
+        for (int block = 0; block < size; block += BLOCK_SIZE) {
+            for (int page = block; page < block + BLOCK_SIZE; page++) {
+                count += Long.bitCount(array[page]);
+            }
+            blockCounts[block / BLOCK_SIZE + 1] = count;
+        }
     }
 
 }

@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMa
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.math.BigDecimal;
@@ -63,6 +64,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     private NativeNodePropertyImporter nodePropertyImporter;
     private BUILDER idMapBuilder;
     private Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
+    private final SparseLongArray sparseLongArray;
 
     public ScanningNodesImporter(
         GraphCreateFromStoreConfig graphCreateConfig,
@@ -87,6 +89,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         this.properties = properties;
         this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
         this.nodeMappingBuilder = nodeMappingBuilder;
+        this.sparseLongArray = new SparseLongArray(dimensions.highestNeoId() + 1);
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
@@ -126,7 +129,8 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 idMapBuilder,
                 nodeLabelBitSetMapping,
                 labelTokenNodeLabelMapping,
-                tracker
+                tracker,
+                sparseLongArray
             ),
             nodePropertyImporter,
             terminationFlag
@@ -137,6 +141,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     public IdsAndProperties build() {
         var nodeMapping = nodeMappingBuilder.build(
             idMapBuilder,
+            sparseLongArray,
             nodeLabelBitSetMapping,
             dimensions,
             concurrency,

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
@@ -45,6 +46,7 @@ public class NodeImporter {
     final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final AllocationTracker tracker;
 
+    private final SparseLongArray sparseLongArray;
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
 
     public NodeImporter(
@@ -53,10 +55,21 @@ public class NodeImporter {
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         AllocationTracker tracker
     ) {
+        this(idMapBuilder, nodeLabelBitSetMapping, labelTokenNodeLabelMapping, tracker, null);
+    }
+
+    HugeNodeImporter(
+        HugeLongArrayBuilder idMapBuilder,
+        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        AllocationTracker tracker,
+        SparseLongArray sparseLongArray
+    ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
+        this.sparseLongArray = sparseLongArray;
     }
 
     public long importNodes(
@@ -126,6 +139,9 @@ public class NodeImporter {
         IdMappingAllocator.PropertyAllocator property = properties == null
             ? IdMappingAllocator.PropertyAllocator.EMPTY
             : ((batchOffset, start, length) -> {
+                for (int i = batchOffset; i < length; i++) {
+                    sparseLongArray.set(batch[i]);
+                }
                 int batchImportedProperties = 0;
                 for (int i = 0; i < length; i++) {
                     long localIndex = start + i;

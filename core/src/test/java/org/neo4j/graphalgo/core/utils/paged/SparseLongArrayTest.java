@@ -61,6 +61,20 @@ class SparseLongArrayTest {
     }
 
     @Test
+    void testBlockEntries() {
+        var capacity = 8420;
+
+        var array = new SparseLongArray(capacity);
+        for (int i = 0; i < capacity; i+=7) {
+            array.set(i);
+        }
+        array.computeCounts();
+        for (int i = 0; i < capacity; i+=7) {
+            assertEquals(i / 7, array.toMappedNodeId(i), formatWithLocale("wrong mapping for original id %d", i));
+        }
+    }
+
+    @Test
     void testNonExisting() {
         var array = new SparseLongArray(42);
         array.set(23);

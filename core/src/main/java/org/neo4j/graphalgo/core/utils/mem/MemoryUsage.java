@@ -321,11 +321,12 @@ public final class MemoryUsage {
 
     @ValueClass
     public interface IdMapMem {
+        long sparseLongArray();
         long forwardMapping();
         long backwardMapping();
         @Value.Derived
         default long total() {
-            return forwardMapping() + backwardMapping();
+            return forwardMapping() + backwardMapping() + sparseLongArray();
         }
     }
 
@@ -354,6 +355,7 @@ public final class MemoryUsage {
         var totalSize = new MutableLong();
         var graphWalker = new GraphWalker(thing);
 
+        var sparseLongArray = new MutableLong();
         var forwardMapping = new MutableLong();
         var backwardMapping = new MutableLong();
         var adjOffsets = new MutableLong();
@@ -370,6 +372,9 @@ public final class MemoryUsage {
                 .findFirst()
                 .ifPresent(field -> byField.computeIfAbsent(field, __ -> new MutableLong()).add(size));
 
+            if (path.startsWith(".nodes.sparseLongArray")) {
+                sparseLongArray.add(size);
+            }
             if (path.startsWith(".nodes.graphIds")) {
                 forwardMapping.add(size);
             }
@@ -389,6 +394,7 @@ public final class MemoryUsage {
         var builder = ImmutableDetailMem.builder()
             .total(totalSize.longValue())
             .idMap(ImmutableIdMapMem.builder()
+                .sparseLongArray(sparseLongArray.longValue())
                 .forwardMapping(forwardMapping.longValue())
                 .backwardMapping(backwardMapping.longValue())
                 .build()

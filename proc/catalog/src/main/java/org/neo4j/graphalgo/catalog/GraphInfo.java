@@ -92,6 +92,7 @@ public class GraphInfo {
         var detailMemory = Map.of(
             "total", memory.total(),
             "nodes", Map.of(
+                "sparseLongArray", memory.idMap().sparseLongArray(),
                 "forwardMapping", memory.idMap().forwardMapping(),
                 "backwardMapping", memory.idMap().backwardMapping(),
                 "total", memory.idMap().total(),

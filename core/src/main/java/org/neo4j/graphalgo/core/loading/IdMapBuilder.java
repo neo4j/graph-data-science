@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -38,6 +39,17 @@ public final class IdMapBuilder {
 
     public static IdMap build(
         HugeInternalIdMappingBuilder idMapBuilder,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        long highestNodeId,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        return build(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
+    }
+
+    public static IdMap build(
+        HugeLongArrayBuilder idMapBuilder,
+        SparseLongArray sparseLongArray,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -57,11 +69,29 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
+        return new IdMap(
+            graphIds,
+            nodeToGraphIds,
+            sparseLongArray,
+            convertedLabelInformation,
+            idMapBuilder.size(),
+            tracker
+        );
     }
 
     static IdMap buildChecked(
         HugeInternalIdMappingBuilder idMapBuilder,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        long highestNodeId,
+        int concurrency,
+        AllocationTracker tracker
+    ) throws DuplicateNodeIdException {
+        return buildChecked(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
+    }
+
+    static IdMap buildChecked(
+        HugeLongArrayBuilder idMapBuilder,
+        SparseLongArray sparseLongArray,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -81,7 +111,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
+        return new IdMap(graphIds, nodeToGraphIds, sparseLongArray, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 
     @NotNull

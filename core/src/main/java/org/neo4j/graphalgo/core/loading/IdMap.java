@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -83,9 +84,8 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         return ESTIMATION;
     }
 
-    /**
-     * initialize the map with pre-built sub arrays
-     */
+    private SparseLongArray sparseLongArray;
+
     public IdMap(
         HugeLongArray graphIds,
         HugeSparseLongArray nodeToGraphIds,
@@ -93,9 +93,23 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long nodeCount,
         AllocationTracker tracker
     ) {
+        this(graphIds, nodeToGraphIds, null, labelInformation, nodeCount, tracker);
+    }
+    /**
+     * initialize the map with pre-built sub arrays
+     */
+    public IdMap(
+        HugeLongArray graphIds,
+        HugeSparseLongArray nodeToGraphIds,
+        SparseLongArray sparseLongArray,
+        Map<NodeLabel, BitSet> labelInformation,
+        long nodeCount,
+        AllocationTracker tracker
+    ) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
+        this.sparseLongArray = sparseLongArray;
         this.nodeCount = nodeCount;
         this.tracker = tracker;
     }
