@@ -45,7 +45,7 @@ public final class CentralityUtils {
         IdMapping graph,
         TerminationFlag terminationFlag,
         CentralityResult result,
-        WritePropertyConfig configuration,
+        DegreeCentralityConfig configuration,
         AbstractResultBuilder<CentralityScore.Stats> statsBuilder
     ) {
         log.debug("Writing results");
