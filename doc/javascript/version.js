@@ -1,5 +1,5 @@
 window.docMeta = (async function () {
-  const version = '1.4-preview';
+  const version = '1.5-preview';
   const name = 'graph-data-science';
 
   const href = window.location.href;
