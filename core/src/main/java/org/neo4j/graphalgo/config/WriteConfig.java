@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.config;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface WriteConfig extends AlgoBaseConfig {
+public interface WriteConfig extends ConcurrencyConfig {
 
     String WRITE_CONCURRENCY_KEY = "writeConcurrency";
 

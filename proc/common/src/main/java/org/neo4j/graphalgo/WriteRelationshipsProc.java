@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -37,7 +38,7 @@ import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DE
 public abstract class WriteRelationshipsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
+    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
 
     @Override
     protected Stream<SimilarityWriteResult> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {

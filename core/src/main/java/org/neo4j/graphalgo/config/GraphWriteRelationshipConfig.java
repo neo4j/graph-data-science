@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.utils.StringJoining.join;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphWriteRelationshipConfig extends WriteConfig {
+public interface GraphWriteRelationshipConfig extends AlgoBaseConfig, WriteConfig {
 
     @Configuration.Parameter
     String relationshipType();
