@@ -27,8 +27,11 @@ import org.neo4j.graphalgo.centrality.degreecentrality.DegreeCentrality;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.CentralityScore;
+import org.neo4j.graphalgo.utils.CentralityUtils;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -93,16 +96,17 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
         AbstractResultBuilder<CentralityScore.Stats> builder = new CentralityScore.Stats.Builder()
             .withNodeCount(graph.nodeCount());
 
-
-        CentralityUtils.write(
-            api,
-            log,
-            computeResult.graph(),
-            algorithm.getTerminationFlag(),
-            algorithm.result(),
-            config,
-            builder
-        );
+        log.debug("Writing results");
+        String propertyName = config.writeProperty();
+        try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
+            NodePropertyExporter exporter = NodePropertyExporter
+                .builder(api, computeResult.graph(), algorithm.getTerminationFlag())
+                .withLog(log)
+                .parallel(Pools.DEFAULT, config.writeConcurrency())
+                .build();
+            algorithm.result().export(propertyName, exporter);
+        }
+        builder.withConfig(config);
 
         builder.withCreateMillis(computeResult.createMillis())
                 .withComputeMillis(computeResult.computeMillis());
