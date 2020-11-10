@@ -46,7 +46,7 @@ public class NodeImporter {
     final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final AllocationTracker tracker;
 
-    private final SparseLongArray sparseLongArray;
+    private final SparseLongArray.Builder sparseLongArrayBuilder;
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
 
     public NodeImporter(
@@ -63,13 +63,13 @@ public class NodeImporter {
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         AllocationTracker tracker,
-        SparseLongArray sparseLongArray
+        SparseLongArray.Builder sparseLongArrayBuilder
     ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
-        this.sparseLongArray = sparseLongArray;
+        this.sparseLongArrayBuilder = sparseLongArrayBuilder;
     }
 
     public long importNodes(
@@ -139,10 +139,7 @@ public class NodeImporter {
         IdMappingAllocator.PropertyAllocator property = properties == null
             ? IdMappingAllocator.PropertyAllocator.EMPTY
             : ((batchOffset, start, length) -> {
-                for (int i = 0; i < length; i++) {
-                    var nodeId = batch[i + batchOffset];
-                    sparseLongArray.set(nodeId);
-                }
+                sparseLongArrayBuilder.set(batch, batchOffset, length)
                 int batchImportedProperties = 0;
                 for (int i = 0; i < length; i++) {
                     long localIndex = start + i;

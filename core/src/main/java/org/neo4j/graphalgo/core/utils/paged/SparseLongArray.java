@@ -19,30 +19,42 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
-public class SparseLongArray {
+import java.lang.invoke.MethodHandles;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+public final class SparseLongArray implements AutoCloseable {
 
     public static final long NOT_FOUND = -1;
-    private static final int BLOCK_SIZE = 64;
+
+    static final int BLOCK_SIZE = 64;
+    private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
+    private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
     private final int size;
 
     private final long[] array;
     private final long[] blockCounts;
 
-    public SparseLongArray(long capacity) {
+    public static Builder create(long capacity) {
+        return new Builder(capacity);
+    }
+
+    private SparseLongArray(long capacity) {
         this.size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
         this.array = new long[size];
-        int blocks = size / BLOCK_SIZE;
-        // blockCounts[0] is always 0
-        this.blockCounts = new long[blocks + 1];
+        // blockCounts[0] is always 0, hence + 1
+        this.blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];
     }
 
     public long toMappedNodeId(long originalId) {
-        var page = (int) (originalId / Long.SIZE);
-        var indexInPage = originalId % Long.SIZE;
+        var page = (int) (originalId >>> BLOCK_SHIFT);
+        var indexInPage = originalId & BLOCK_MASK;
 
         // Check if original id is contained
         long mask = 1L << indexInPage;
@@ -50,13 +62,13 @@ public class SparseLongArray {
             return NOT_FOUND;
         }
 
-        var block = page / BLOCK_SIZE;
+        var block = page >>> BLOCK_SHIFT;
         // Get the count from all previous blocks
         var mappedId = blockCounts[block];
         // Count set bits up to original id
         var a = array;
         // Get count within current block
-        for (int pageIdx = page & ~ 63; pageIdx < page; pageIdx++) {
+        for (int pageIdx = page & ~BLOCK_MASK; pageIdx < page; pageIdx++) {
             mappedId += Long.bitCount(a[pageIdx]);
         }
         // tail (long at offset)
@@ -69,47 +81,117 @@ public class SparseLongArray {
     public long toOriginalNodeId(long mappedId) {
         var startBlockIndex = ArrayUtil.binaryLookup(mappedId, blockCounts);
         var array = this.array;
-        var blockStart = startBlockIndex * BLOCK_SIZE;
-        var blockEnd = Math.min((startBlockIndex + 1) * BLOCK_SIZE, array.length);
-        var idSoFar = blockCounts[startBlockIndex];
+        var blockStart = startBlockIndex << BLOCK_SHIFT;
+        var blockEnd = Math.min((startBlockIndex + 1) << BLOCK_SHIFT, array.length);
+        var originalId = blockCounts[startBlockIndex];
         for (int blockIndex = blockStart; blockIndex < blockEnd; blockIndex++) {
             var page = array[blockIndex];
             var pos = 0;
             var idsInPage = Long.bitCount(page);
-            if (idSoFar + idsInPage > mappedId) {
-                while (idSoFar <= mappedId) {
+            if (originalId + idsInPage > mappedId) {
+                while (originalId <= mappedId) {
                     if ((page & 1) == 1) {
-                        ++idSoFar;
+                        ++originalId;
                     }
                     page >>>= 1;
                     ++pos;
                 }
-                return blockIndex * Long.SIZE + (pos - 1);
+                return (blockIndex << BLOCK_SHIFT) + (pos - 1);
             }
-            idSoFar += idsInPage;
+            originalId += idsInPage;
         }
-
+        // Returning 0, since this is what the current
+        // IdMap implementation returns in that case.
         return 0;
     }
 
-    public synchronized void set(long originalId) {
-        var page = (int) (originalId / Long.SIZE);
-        var indexInPage = originalId % Long.SIZE;
+    @Override
+    public void close() {
+    }
+
+    private void set(long originalId) {
+        var page = (int) (originalId >>> BLOCK_SHIFT);
+        var indexInPage = originalId & BLOCK_MASK;
         var mask = 1L << indexInPage;
         array[page] |= mask;
     }
 
-    public void computeCounts() {
-        int size = this.size - BLOCK_SIZE;
-        long[] array = this.array;
-        long[] blockCounts = this.blockCounts;
+    @TestOnly
+    MethodHandles.Lookup lookup() {
+        return MethodHandles.lookup();
+    }
 
-        long count = 0;
-        for (int block = 0; block < size; block += BLOCK_SIZE) {
-            for (int page = block; page < block + BLOCK_SIZE; page++) {
-                count += Long.bitCount(array[page]);
+    static class SparseLongArrayCombiner implements Consumer<SparseLongArray> {
+
+        private final long capacity;
+        private SparseLongArray result;
+
+        SparseLongArrayCombiner(long capacity) {
+            this.capacity = capacity;
+        }
+
+        @Override
+        public void accept(SparseLongArray other) {
+            if (result == null) {
+                result = other;
+            } else {
+                int size = result.size;
+                for (int page = 0; page < size; page++) {
+                    result.array[page] |= other.array[page];
+                }
             }
-            blockCounts[block / BLOCK_SIZE + 1] = count;
+        }
+
+        SparseLongArray build() {
+            return result != null ? result : new SparseLongArray(capacity);
+        }
+    }
+
+    public static class Builder {
+
+        private final AutoCloseableThreadLocal<SparseLongArray> localArray;
+        private final SparseLongArrayCombiner combiner;
+
+        Builder(long capacity) {
+            this.combiner = new SparseLongArrayCombiner(capacity);
+            this.localArray = new AutoCloseableThreadLocal<>(
+                () -> new SparseLongArray(capacity),
+                Optional.of(combiner)
+            );
+        }
+
+        @TestOnly
+        void set(long originalId) {
+            localArray.get().set(originalId);
+        }
+
+        public void set(long[] originalIds, int offset, int length) {
+            var array = localArray.get();
+            for (int i = offset; i < offset + length; i++) {
+                // TODO: radix sort approach
+                array.set(originalIds[i]);
+            }
+        }
+
+        public SparseLongArray build() {
+            localArray.close();
+            return computeCounts(combiner.build());
+        }
+
+        private SparseLongArray computeCounts(SparseLongArray sparseLongArray) {
+            int size = sparseLongArray.size - BLOCK_SIZE;
+            long[] array = sparseLongArray.array;
+            long[] blockCounts = sparseLongArray.blockCounts;
+
+            long count = 0;
+            for (int block = 0; block < size; block += BLOCK_SIZE) {
+                for (int page = block; page < block + BLOCK_SIZE; page++) {
+                    count += Long.bitCount(array[page]);
+                }
+                blockCounts[(block >>> BLOCK_SHIFT) + 1] = count;
+            }
+
+            return sparseLongArray;
         }
     }
 

@@ -49,7 +49,7 @@ public final class IdMapBuilder {
 
     public static IdMap build(
         HugeLongArrayBuilder idMapBuilder,
-        SparseLongArray sparseLongArray,
+        SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -72,7 +72,7 @@ public final class IdMapBuilder {
         return new IdMap(
             graphIds,
             nodeToGraphIds,
-            sparseLongArray,
+            sparseLongArrayBuilder.build(),
             convertedLabelInformation,
             idMapBuilder.size(),
             tracker
@@ -91,7 +91,7 @@ public final class IdMapBuilder {
 
     static IdMap buildChecked(
         HugeLongArrayBuilder idMapBuilder,
-        SparseLongArray sparseLongArray,
+        SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -111,6 +111,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
+        var sparseLongArray = sparseLongArrayBuilder.build();
         return new IdMap(graphIds, nodeToGraphIds, sparseLongArray, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 

@@ -47,7 +47,7 @@ public class NodesBuilder {
     private final long maxOriginalId;
     private final int concurrency;
     private final AllocationTracker tracker;
-    private final SparseLongArray sparseLongArray;
+    private final SparseLongArray.Builder sparseLongArrayBuilder;
 
     private int nextLabelId;
     private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
@@ -77,13 +77,13 @@ public class NodesBuilder {
 
         // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
         this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
-        sparseLongArray = new SparseLongArray(maxOriginalId + 1);
+        this.sparseLongArrayBuilder = SparseLongArray.create(maxOriginalId + 1);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
             tracker,
-            sparseLongArray
+            sparseLongArrayBuilder
         );
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
@@ -107,7 +107,7 @@ public class NodesBuilder {
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
             hugeInternalIdMappingBuilder,
-            sparseLongArray,
+            sparseLongArrayBuilder,
             nodeLabelBitSetMap,
             maxOriginalId,
             concurrency,

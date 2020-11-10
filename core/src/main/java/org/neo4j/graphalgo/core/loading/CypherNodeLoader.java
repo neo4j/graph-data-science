@@ -54,7 +54,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final HugeInternalIdMappingBuilder builder;
     private final NodeImporter importer;
-    private final SparseLongArray sparseLongArray;
+    private final SparseLongArray.Builder sparseLongArrayBuilder;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
 
@@ -72,13 +72,13 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
-        sparseLongArray = new SparseLongArray(nodeCount + 1);
+        this.sparseLongArrayBuilder = SparseLongArray.create(nodeCount + 1);
         this.importer = new NodeImporter(
             builder,
             new HashMap<>(),
             labelTokenNodeLabelMapping,
             loadingContext.tracker(),
-            sparseLongArray
+            sparseLongArrayBuilder
         );
     }
 
@@ -128,7 +128,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         try {
             idMap = IdMapBuilder.buildChecked(
                 builder,
-                sparseLongArray,
+                sparseLongArrayBuilder,
                 importer.nodeLabelBitSetMapping,
                 maxNodeId,
                 cypherConfig.readConcurrency(),

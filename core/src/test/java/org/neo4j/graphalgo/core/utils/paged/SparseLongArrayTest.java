@@ -21,8 +21,18 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 
+import java.util.Arrays;
+import java.util.SplittableRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.BLOCK_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.NOT_FOUND;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -30,32 +40,33 @@ class SparseLongArrayTest {
 
     @Test
     void testEmpty() {
-        var array = new SparseLongArray(42);
+        var array = SparseLongArray.create(42).build();
         assertEquals(NOT_FOUND, array.toMappedNodeId(23));
     }
 
     @Test
     void testZeroEntry() {
-        var array = new SparseLongArray(42);
-        array.set(0);
-        assertEquals(0, array.toMappedNodeId(0));
+        var builder = SparseLongArray.create(42);
+        builder.set(0);
+        assertEquals(0, builder.build().toMappedNodeId(0));
     }
 
     @Test
     void testSingleEntry() {
-        var array = new SparseLongArray(42);
-        array.set(23);
-        assertEquals(0, array.toMappedNodeId(23));
+        var builder = SparseLongArray.create(42);
+        builder.set(23);
+        assertEquals(0, builder.build().toMappedNodeId(23));
     }
 
     @Test
     void testMultipleEntries() {
         var capacity = 128;
-        var array = new SparseLongArray(capacity);
-        for (int i = 0; i < capacity; i+=2) {
-            array.set(i);
+        var builder = SparseLongArray.create(capacity);
+        for (int i = 0; i < capacity; i += 2) {
+            builder.set(i);
         }
-        for (int i = 0; i < capacity; i+=2) {
+        var array = builder.build();
+        for (int i = 0; i < capacity; i += 2) {
             assertEquals(i / 2, array.toMappedNodeId(i), formatWithLocale("wrong mapping for original id %d", i));
         }
     }
@@ -64,46 +75,46 @@ class SparseLongArrayTest {
     void testBlockEntries() {
         var capacity = 8420;
 
-        var array = new SparseLongArray(capacity);
-        for (int i = 0; i < capacity; i+=7) {
-            array.set(i);
+        var builder = SparseLongArray.create(capacity);
+        for (int i = 0; i < capacity; i += 7) {
+            builder.set(i);
         }
-        array.computeCounts();
-        for (int i = 0; i < capacity; i+=7) {
+        var array = builder.build();
+        for (int i = 0; i < capacity; i += 7) {
             assertEquals(i / 7, array.toMappedNodeId(i), formatWithLocale("wrong mapping for original id %d", i));
         }
     }
 
     @Test
     void testNonExisting() {
-        var array = new SparseLongArray(42);
-        array.set(23);
-        assertEquals(NOT_FOUND, array.toMappedNodeId(24));
+        var builder = SparseLongArray.create(42);
+        builder.set(23);
+        assertEquals(NOT_FOUND, builder.build().toMappedNodeId(24));
     }
 
     @Test
     void testForwardMapping() {
-        var array = new SparseLongArray(42);
-        array.set(23);
-        assertEquals(23, array.toOriginalNodeId(0));
+        var builder = SparseLongArray.create(42);
+        builder.set(23);
+        assertEquals(23, builder.build().toOriginalNodeId(0));
     }
 
     @Test
     void testForwardMappingNonExisting() {
-        var array = new SparseLongArray(42);
-        array.set(23);
-        assertEquals(0, array.toOriginalNodeId(1));
+        var builder = SparseLongArray.create(42);
+        builder.set(23);
+        assertEquals(0, builder.build().toOriginalNodeId(1));
     }
 
     @Test
     void testForwardMappingWithBlockEntries() {
         var capacity = 8420;
 
-        var array = new SparseLongArray(capacity);
-        for (int i = 0; i < capacity; i+=11) {
-            array.set(i);
+        var builder = SparseLongArray.create(capacity);
+        for (int i = 0; i < capacity; i += 11) {
+            builder.set(i);
         }
-        array.computeCounts();
+        var array = builder.build();
 
         for (int i = 0; i < capacity / 11; i++) {
             assertEquals(i * 11, array.toOriginalNodeId(i), formatWithLocale("wrong original id for mapped id %d", i));
@@ -114,15 +125,101 @@ class SparseLongArrayTest {
     void testForwardMappingWithBlockEntriesNotFound() {
         var capacity = 8420;
 
-        var array = new SparseLongArray(capacity);
-        for (int i = 0; i < capacity; i+=13) {
-            array.set(i);
+        var builder = SparseLongArray.create(capacity);
+        for (int i = 0; i < capacity; i += 13) {
+            builder.set(i);
         }
-        array.computeCounts();
+        var array = builder.build();
+
         var nonExistingId = (capacity / 13) + 1;
 
         for (int i = nonExistingId; i < capacity; i++) {
             assertEquals(0, array.toOriginalNodeId(i), formatWithLocale("unexpected original id for mapped id %d", i));
         }
+    }
+
+    @Test
+    void testSetBatch() {
+        var batch = LongStream.range(0, 10_000).toArray();
+        var builder = SparseLongArray.create(10_000);
+        builder.set(batch, 5000, 5000);
+
+        var array = builder.build();
+
+        for (int i = 0; i < 5000; i++) {
+            assertEquals(i + 5000, array.toOriginalNodeId(i), formatWithLocale("wrong original id for mapped id %d", i));
+        }
+    }
+
+    @Test
+    void testSetParallel() {
+        int capacity = 10_000;
+        int batchSize = 1_000;
+        var builder = SparseLongArray.create(capacity);
+        var random = new SplittableRandom(42);
+
+        var tasks = IntStream
+            .range(0, 10)
+            .mapToObj(i -> new SetTask(random.split(), builder, batchSize, capacity))
+            .collect(Collectors.toList());
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        var array = builder.build();
+
+        var originalIds = tasks
+            .stream()
+            .flatMap(t -> Arrays.stream(t.longs).boxed())
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+
+        long mappedIds = 0;
+        for (long originalId = 0; originalId < capacity; originalId++) {
+            long mappedId = array.toMappedNodeId(originalId);
+            if (originalIds.contains(originalId)) {
+                assertEquals(mappedIds++, mappedId, formatWithLocale("wrong mapped id for original id %d", originalId));
+            } else {
+                assertEquals(NOT_FOUND, mappedId);
+            }
+        }
+    }
+
+    static class SetTask implements Runnable {
+        private final SparseLongArray.Builder builder;
+
+        private final long[] longs;
+
+        SetTask(SplittableRandom random, SparseLongArray.Builder builder, long size, int capacity) {
+            this.builder = builder;
+            this.longs = random.longs(size, 0, capacity).toArray();
+        }
+
+        @Override
+        public void run() {
+            builder.set(longs, 0, longs.length);
+        }
+    }
+
+    public static void assertBlockCounts(SparseLongArray sparseLongArray) throws Throwable {
+        var lookup = sparseLongArray.lookup();
+        var size = (int) lookup.findGetter(SparseLongArray.class, "size", int.class).invoke(sparseLongArray);
+        var array = (long[]) lookup.findGetter(SparseLongArray.class, "array", long[].class).invoke(sparseLongArray);
+        var actualBlockCounts = (long[]) lookup
+            .findGetter(SparseLongArray.class, "blockCounts", long[].class)
+            .invoke(sparseLongArray);
+        var expectedBlockCounts = new long[size / BLOCK_SIZE + 1];
+
+        int blocks = size - BLOCK_SIZE;
+
+        long count = 0;
+        for (int block = 0; block < blocks; block += BLOCK_SIZE) {
+            for (int page = block; page < block + BLOCK_SIZE; page++) {
+                count += Long.bitCount(array[page]);
+            }
+            expectedBlockCounts[block / BLOCK_SIZE + 1] = count;
+        }
+
+        assertArrayEquals(expectedBlockCounts, actualBlockCounts);
     }
 }
