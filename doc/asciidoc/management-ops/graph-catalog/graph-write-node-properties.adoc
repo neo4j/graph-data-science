@@ -16,7 +16,7 @@ CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'comm
 The above example requires all given properties to be present on at least one node projection, and the properties will be written for all such projections.
 
 The procedure can be configured to write just the properties for some specific node projections.
-In the following example, we ran an algorithm on a sub-graph and subsequently wrote the newly created property to Neo4j.
+In the following example, we run an algorithm on a sub-graph and subsequently write the newly created property to Neo4j.
 
 .Write node properties of a specific node projection to Neo4j:
 [source,cypher]
