@@ -7,10 +7,67 @@ This is similar to what the `write` execution mode does, but allows more fine-gr
 The properties to write are typically the `mutateProperty` values that were used when running algorithms.
 Properties that were added to the created graph at creation time will often already be present in the Neo4j database.
 
+
+== Syntax
+
+.Write node properties to Neo4j:
+[source,cypher]
+----
+CALL gds.graph.writeNodeProperties(
+  graphName: String,
+  nodeProperties: List<String>,
+  nodeLabels: List<String>,
+  configuration: Map
+) YIELD
+  graphName: String,
+  nodeProperties: List<String>,
+  writeMillis: Integer,
+  propertiesWritten: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name           | Type         | Default | Optional | Description
+| graphName      | String       | n/a     | no       | The name of a graph stored in the catalog.
+| nodeProperties | List<String> | n/a     | no       | Names of properties to write.
+| nodeLabels     | List<String> | ['*']   | yes      | Names of labels to write properties for.
+| configuration  | Map          | {}      | yes      | Configuration for algorithm-specifics and/or graph filtering.
+|===
+
+.Configuration parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for writing the properties to Neo4j.
+| writeConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the properties to Neo4j.
+|===
+
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name              | Type         | Description
+| graphName         | String       | Name of the graph.
+| nodeProperties    | List<String> | Names of written properties.
+| writeMillis       | Integer      | Milliseconds for writing properties to Neo4j.
+| propertiesWritten | Integer      | Number of properties written.
+|===
+
+
+== Examples
+
+To write the properties `'componentId'`, `'pageRank'`, `'communityId'` for all node projections in the graph `'my-graph'`  using 8 concurrent threads, use the following query:
+
 .Write multiple node properties to Neo4j:
 [source,cypher]
 ----
-CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
+CALL gds.graph.writeNodeProperties(
+  'my-graph',
+  ['componentId', 'pageRank', 'communityId'],
+  ['*'],
+  {writeConcurrency: 8}
+)
 ----
 
 The above example requires all given properties to be present on at least one node projection, and the properties will be written for all such projections.
