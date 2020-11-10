@@ -4,7 +4,7 @@
 Similar to streaming properties stored in an in-memory graph it is also possible to write those back to Neo4j.
 This is similar to what the `write` execution mode does, but allows more fine-grained control over the operations.
 
-The properties to write are typically the `writeProperty` values that were used when running algorithms.
+The properties to write are typically the `mutateProperty` values that were used when running algorithms.
 Properties that were added to the created graph at creation time will often already be present in the Neo4j database.
 
 .Write multiple node properties to Neo4j:
