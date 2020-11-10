@@ -33,6 +33,13 @@ allprojects {
         }
 
         test {
+            debugOptions {
+                enabled = project.hasProperty('test-debug')
+                port = 5425
+                server = true
+                suspend = true
+            }
+
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
