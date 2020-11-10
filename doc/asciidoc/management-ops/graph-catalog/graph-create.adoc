@@ -1,0 +1,57 @@
+[[catalog-graph-create]]
+= Creating graphs in the catalog
+
+A projected graph can be stored in the catalog under a user-defined name.
+Using that name, the graph can be referred to by any algorithm in the library.
+This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+
+There are two variants of projecting a graph from the Neo4j database into main memory:
+
+* <<native-projection, Native projection>>
+** Provides the best performance by reading from the Neo4j store files.
+Recommended to be used during both the development and the production phase.
+* <<cypher-projection, Cypher projection>>
+** The more flexible, expressive approach with lesser focus on performance.
+Recommended to be primarily used during the development phase.
+
+[NOTE]
+====
+There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
+====
+
+In this section, we will give brief examples on how to create a graph using either variant.
+For detailed information about the configuration of each variant, we refer to the dedicated sections.
+
+In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
+
+.Create a graph using a native projection:
+[source,cypher]
+----
+CALL gds.graph.create(
+    'my-native-graph',
+    'Person',
+    'LIKES'
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
+
+.Create a graph using a Cypher projection:
+[source,cypher]
+----
+CALL gds.graph.create.cypher(
+    'my-cypher-graph',
+    'MATCH (n:Person) RETURN id(n) AS id',
+    'MATCH (a:Person)-[:LIKES]->(b:Person) RETURN id(a) AS source, id(b) AS target'
+)
+YIELD graphName, nodeCount, relationshipCount, createMillis;
+----
+
+After creating the graphs in the catalog, we can refer to them in algorithms by using their name.
+
+.Run Page Rank on one of our created graphs:
+[source,cypher]
+----
+CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
+----

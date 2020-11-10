@@ -1,0 +1,102 @@
+[[catalog-graph-list]]
+= Listing graphs in the catalog
+
+Information about graphs in the catalog can be listed using the `gds.graph.list()` procedure.
+The procedure takes an optional parameter `graphName`:
+
+* If a graph name is given, only information for that graph will be listed.
+* If no graph name is given, information about all graphs will be listed.
+* If a graph name is given but not found in the catalog, an error will be raised.
+
+.List information about graphs in the catalog:
+[source,cypher]
+----
+CALL gds.graph.list(
+  graphName: String?
+) YIELD
+  graphName,
+  database,
+  nodeProjection,
+  relationshipProjection,
+  nodeQuery,
+  relationshipQuery,
+  nodeCount,
+  relationshipCount,
+  schema,
+  degreeDistribution,
+  density,
+  creationTime,
+  modificationTime,
+  sizeInBytes,
+  memoryUsage;
+----
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | Name of the graph.
+| database               | String   | Name of the database in which the graph has been created.
+| nodeProjection         | Map      | Node projection used to create the graph. If a Cypher projection was used, this will be a derived node projection.
+| relationshipProjection | Map      | Relationship projection used to create the graph. If a Cypher projection was used, this will be a derived relationship projection.
+| nodeQuery              | String   | Node query used to create the graph. If a native projection was used, this will be `null`.
+| relationshipQuery      | String   | Relationship query used to create the graph. If a native projection was used, this will be `null`.
+| nodeCount              | Integer  | Number of nodes in the graph.
+| relationshipCount      | Integer  | Number of relationships in the graph.
+| schema                 | Map      | Node labels, Relationship types and properties contained in the in-memory graph.
+| degreeDistribution     | Map      | Histogram of degrees in the graph.
+| density                | Float    | Density of the graph.
+| creationTime           | Datetime | Time when the graph was created.
+| modificationTime       | Datetime | Time when the graph was last modified.
+| sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
+| memoryUsage            | String   | Human readable description of `sizeInBytes`.
+|===
+
+The information contains basic statistics about the graph, e.g., the node and relationship count.
+The result field `creationTime` indicates when the graph was created in memory.
+The result field `modificationTime` indicates when the graph was updated by an algorithm running in `mutate` mode.
+
+The `database` column refers to the name of the database the corresponding graph has been created on.
+Referring to a named graph in a procedure is only allowed on the database it has been created on.
+
+The `schema` consists of information about the nodes and relationships stored in the graph.
+For each node label, the schema maps the label to its property keys and their corresponding property types.
+Similarly, the schema maps the relationship types to their property keys and property types.
+The property type is either `Integer`, `Float`, `List of Integer` or `List of Float`.
+
+The `degreeDistribution` field can be fairly time-consuming to compute for larger graphs.
+Its computation is cached per graph, so subsequent listing for the same graph will be fast.
+To avoid computing the degree distribution, specify a `YIELD` clause that omits it.
+Note that not specifying a `YIELD` clause is the same as requesting all possible return fields to be returned.
+
+The `density` is the result of `relationshipCount` divided by the maximal number of relationships for a simple graph with the given `nodeCount`.
+
+
+== Examples
+
+.List basic information about all graphs in the catalog:
+[source,cypher]
+----
+CALL gds.graph.list()
+YIELD graphName, nodeCount, relationshipCount, schema;
+----
+
+.List extended information about a specific named graph in the catalog:
+[source,cypher]
+----
+CALL gds.graph.list('my-cypher-graph')
+YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, schema, creationTime, modificationTime, memoryUsage;
+----
+
+.List all information about a specific named graph in the catalog:
+[source,cypher]
+----
+CALL gds.graph.list('my-native-graph')
+----
+
+.List information about the degree distribution of a specific graph:
+[source,cypher]
+----
+CALL gds.graph.list('my-cypher-graph')
+YIELD graphName, degreeDistribution;
+----
