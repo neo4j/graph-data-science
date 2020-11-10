@@ -26,7 +26,7 @@ CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId
 CALL gds.graph.writeNodeProperties('my-graph', ['componentId'], ['A'])
 ----
 
-When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied;
-It is then required that all projections have all of the given properties, and they will be written to Neo4j for all of the projections.
+When a list of projections not including the star projection (`'*'`) is specified, as in the example above, a different validation and execution is applied.
+In this case, it is required that all projections have all of the given properties, and they will be written to Neo4j for all of the projections.
 
-If any of the given projections is `'*'`, the procedure behaves like in the first example.
+If any of the given projections is the star projection, the procedure behaves like in the first example.
