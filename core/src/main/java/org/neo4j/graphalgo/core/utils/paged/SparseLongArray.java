@@ -28,7 +28,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public final class SparseLongArray implements AutoCloseable {
+public final class SparseLongArray {
 
     public static final long NOT_FOUND = -1;
 
@@ -36,12 +36,8 @@ public final class SparseLongArray implements AutoCloseable {
     private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
     private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
-    // The capacity of the internal array.
-    // We can store size * Long.SIZE ids.
-    private final int size;
-
     // Number of mapped ids. This is set via the builder.
-    private long idCount;
+    private final long idCount;
 
     // Each element (long) represents a page.
     // Each page represents 64 possible ids.
@@ -56,11 +52,10 @@ public final class SparseLongArray implements AutoCloseable {
         return new Builder(capacity);
     }
 
-    private SparseLongArray(long capacity) {
-        this.size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
-        this.array = new long[size];
-        // blockCounts[0] is always 0, hence + 1
-        this.blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];
+    private SparseLongArray(long idCount, long[] array, long[] blockCounts) {
+        this.idCount = idCount;
+        this.array = array;
+        this.blockCounts = blockCounts;
     }
 
     public long idCount() {
@@ -120,68 +115,31 @@ public final class SparseLongArray implements AutoCloseable {
         return 0;
     }
 
-    @Override
-    public void close() {
-    }
-
-    private void set(long originalId) {
-        var page = (int) (originalId >>> BLOCK_SHIFT);
-        var indexInPage = originalId & BLOCK_MASK;
-        var mask = 1L << indexInPage;
-        array[page] |= mask;
-    }
-
     @TestOnly
     MethodHandles.Lookup lookup() {
         return MethodHandles.lookup();
     }
 
-    static class SparseLongArrayCombiner implements Consumer<SparseLongArray> {
-
-        private final long capacity;
-        private SparseLongArray result;
-
-        SparseLongArrayCombiner(long capacity) {
-            this.capacity = capacity;
-        }
-
-        @Override
-        public void accept(SparseLongArray other) {
-            if (result == null) {
-                result = other;
-            } else {
-                int size = result.size;
-                for (int page = 0; page < size; page++) {
-                    result.array[page] |= other.array[page];
-                }
-            }
-        }
-
-        SparseLongArray build() {
-            return result != null ? result : new SparseLongArray(capacity);
-        }
-    }
-
     public static class Builder {
 
-        private final AutoCloseableThreadLocal<SparseLongArray> localArray;
+        private final AutoCloseableThreadLocal<ThreadLocalBuilder> localBuilders;
         private final SparseLongArrayCombiner combiner;
 
         Builder(long capacity) {
             this.combiner = new SparseLongArrayCombiner(capacity);
-            this.localArray = new AutoCloseableThreadLocal<>(
-                () -> new SparseLongArray(capacity),
+            this.localBuilders = new AutoCloseableThreadLocal<>(
+                () -> new ThreadLocalBuilder(capacity),
                 Optional.of(combiner)
             );
         }
 
         @TestOnly
         void set(long originalId) {
-            localArray.get().set(originalId);
+            localBuilders.get().set(originalId);
         }
 
         public void set(long[] originalIds, int offset, int length) {
-            var array = localArray.get();
+            var array = localBuilders.get();
             for (int i = offset; i < offset + length; i++) {
                 // TODO: radix sort approach
                 array.set(originalIds[i]);
@@ -189,15 +147,17 @@ public final class SparseLongArray implements AutoCloseable {
         }
 
         public SparseLongArray build() {
-            localArray.close();
+            localBuilders.close();
+
             return computeCounts(combiner.build());
         }
 
-        private SparseLongArray computeCounts(SparseLongArray sparseLongArray) {
-            int size = sparseLongArray.size;
-            int cappedSize = size - BLOCK_SIZE;
+        private SparseLongArray computeCounts(ThreadLocalBuilder sparseLongArray) {
             long[] array = sparseLongArray.array;
-            long[] blockCounts = sparseLongArray.blockCounts;
+            int size = array.length;
+            int cappedSize = size - BLOCK_SIZE;
+            // blockCounts[0] is always 0, hence + 1
+            long[] blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];;
 
             long count = 0;
             int block;
@@ -213,9 +173,53 @@ public final class SparseLongArray implements AutoCloseable {
                 count += Long.bitCount(array[page]);
             }
 
-            sparseLongArray.idCount = count;
+            return new SparseLongArray(count, array, blockCounts);
+        }
 
-            return sparseLongArray;
+        private static class ThreadLocalBuilder implements AutoCloseable {
+
+            private final long[] array;
+
+            ThreadLocalBuilder(long capacity) {
+                var size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
+                this.array = new long[size];
+            }
+
+            @Override
+            public void close() {
+            }
+            private void set(long originalId) {
+                var page = (int) (originalId >>> BLOCK_SHIFT);
+                var indexInPage = originalId & BLOCK_MASK;
+                var mask = 1L << indexInPage;
+                array[page] |= mask;
+            }
+        }
+
+        static class SparseLongArrayCombiner implements Consumer<ThreadLocalBuilder> {
+
+            private final long capacity;
+            private ThreadLocalBuilder result;
+
+            SparseLongArrayCombiner(long capacity) {
+                this.capacity = capacity;
+            }
+
+            @Override
+            public void accept(ThreadLocalBuilder other) {
+                if (result == null) {
+                    result = other;
+                } else {
+                    int size = result.array.length;
+                    for (int page = 0; page < size; page++) {
+                        result.array[page] |= other.array[page];
+                    }
+                }
+            }
+
+            ThreadLocalBuilder build() {
+                return result != null ? result : new ThreadLocalBuilder(capacity);
+            }
         }
     }
 
