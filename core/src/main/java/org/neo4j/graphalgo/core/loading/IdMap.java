@@ -117,7 +117,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public boolean contains(final long nodeId) {
-        return nodeToGraphIds.contains(nodeId);
+        return sparseLongArray.contains(nodeId);
     }
 
     @Override

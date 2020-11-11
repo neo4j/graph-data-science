@@ -88,6 +88,14 @@ public final class SparseLongArray {
         return mappedId - 1;
     }
 
+    public boolean contains(long originalId) {
+        var page = (int) (originalId >>> BLOCK_SHIFT);
+        var indexInPage = originalId & BLOCK_MASK;
+        // Check if original id is contained
+        long mask = 1L << indexInPage;
+        return (mask & array[page]) == mask;
+    }
+
     public long toOriginalNodeId(long mappedId) {
         var startBlockIndex = ArrayUtil.binaryLookup(mappedId, blockCounts);
         var array = this.array;
@@ -133,8 +141,8 @@ public final class SparseLongArray {
             );
         }
 
-//        @TestOnly
-public void set(long originalId) {
+        //        @TestOnly
+        public void set(long originalId) {
             localBuilders.get().set(originalId);
         }
 
@@ -157,7 +165,8 @@ public void set(long originalId) {
             int size = array.length;
             int cappedSize = size - BLOCK_SIZE;
             // blockCounts[0] is always 0, hence + 1
-            long[] blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];;
+            long[] blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];
+            ;
 
             long count = 0;
             int block;
@@ -188,6 +197,7 @@ public void set(long originalId) {
             @Override
             public void close() {
             }
+
             private void set(long originalId) {
                 var page = (int) (originalId >>> BLOCK_SHIFT);
                 var indexInPage = originalId & BLOCK_MASK;

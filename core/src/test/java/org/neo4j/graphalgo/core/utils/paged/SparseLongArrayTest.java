@@ -34,6 +34,8 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.BLOCK_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.NOT_FOUND;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -81,6 +83,31 @@ class SparseLongArrayTest {
             builder.set(i);
         }
         assertEquals(expectedIdCount, builder.build().idCount());
+    }
+
+    @Test
+    void testContains() {
+        var capacity = 8420;
+
+        var builder = SparseLongArray.builder(capacity);
+        for (int i = 0; i < capacity; i += 7) {
+            builder.set(i);
+        }
+
+        var array = builder.build();
+        for (int originalId = 0; originalId < capacity; originalId++) {
+            if (originalId % 7 == 0) {
+                assertTrue(
+                    array.contains(originalId),
+                    formatWithLocale("original id %d should be contained", originalId)
+                );
+            } else {
+                assertFalse(
+                    array.contains(originalId),
+                    formatWithLocale("original id %d should not be contained", originalId)
+                );
+            }
+        }
     }
 
     @Test
