@@ -36,6 +36,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RandomWalkTest extends AlgoTestBase {
 
+    private static final int NODE_COUNT = 5;
     private static final String DEFAULT_DB_CYPHER =
         "CREATE" +
         "  (a:Node1)" +
@@ -64,7 +65,7 @@ class RandomWalkTest extends AlgoTestBase {
             config.walkBufferSize()
         );
 
-        int expectedNumberOfWalks = config.walksPerNode() * 5;
+        int expectedNumberOfWalks = config.walksPerNode() * NODE_COUNT;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
@@ -93,7 +94,6 @@ class RandomWalkTest extends AlgoTestBase {
         int expectedStepsInWalkForNode0 = config.walkLength() + 1;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
-
 
     @Test
     void returnFactorShouldMakeWalksIncludeStartNodeMoreOften() {
