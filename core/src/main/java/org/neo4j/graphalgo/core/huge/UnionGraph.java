@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
@@ -39,9 +40,9 @@ import java.util.stream.Stream;
 public final class UnionGraph implements Graph {
 
     private final Graph first;
-    private final Collection<? extends Graph> graphs;
+    private final List<? extends Graph> graphs;
 
-    public static Graph of(Collection<? extends Graph> graphs) {
+    public static Graph of(List<? extends Graph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
@@ -51,7 +52,7 @@ public final class UnionGraph implements Graph {
         return new UnionGraph(graphs);
     }
 
-    private UnionGraph(Collection<? extends Graph> graphs) {
+    private UnionGraph(List<? extends Graph> graphs) {
         first = graphs.iterator().next();
         this.graphs = graphs;
     }
@@ -144,7 +145,13 @@ public final class UnionGraph implements Graph {
 
     @Override
     public int degree(long nodeId) {
-        return Math.toIntExact(graphs.stream().mapToLong(g -> g.degree(nodeId)).sum());
+        int degree = 0;
+
+        for (Graph graph : graphs) {
+            degree += graph.degree(nodeId);
+        }
+
+        return  degree;
     }
 
     @Override
