@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
 
     NodeMapping build(
         BUILDER idMapBuilder,
+        SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         GraphDimensions graphDimensions,
         int concurrency,

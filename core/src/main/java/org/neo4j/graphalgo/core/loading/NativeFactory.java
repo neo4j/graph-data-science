@@ -184,8 +184,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private NodeMappingBuilder<HugeInternalIdMappingBuilder> nodeMappingBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, sparseLongArrayBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
             idMapBuilder,
+            sparseLongArrayBuilder,
             labelInformation,
             graphDimensions.highestNeoId(),
             concurrency,

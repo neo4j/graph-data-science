@@ -37,18 +37,18 @@ import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
-    public static IdMap build(
-        HugeInternalIdMappingBuilder idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-        long highestNodeId,
-        int concurrency,
-        AllocationTracker tracker
-    ) {
-        return build(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
-    }
+//    public static IdMap build(
+//        HugeInternalIdMappingBuilder idMapBuilder,
+//        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+//        long highestNodeId,
+//        int concurrency,
+//        AllocationTracker tracker
+//    ) {
+//        return build(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
+//    }
 
     public static IdMap build(
-        HugeLongArrayBuilder idMapBuilder,
+        HugeInternalIdMappingBuilder idMapBuilder,
         SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
@@ -90,7 +90,7 @@ public final class IdMapBuilder {
     }
 
     static IdMap buildChecked(
-        HugeLongArrayBuilder idMapBuilder,
+        HugeInternalIdMappingBuilder idMapBuilder,
         SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
