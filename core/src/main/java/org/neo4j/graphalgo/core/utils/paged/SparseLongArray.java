@@ -36,9 +36,20 @@ public final class SparseLongArray implements AutoCloseable {
     private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
     private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
+    // The capacity of the internal array.
+    // We can store size * Long.SIZE ids.
     private final int size;
 
+    // Number of mapped ids. This is set via the builder.
+    private long idCount;
+
+    // Each element (long) represents a page.
+    // Each page represents 64 possible ids.
     private final long[] array;
+
+    // Each block represents BLOCK_SIZE pages. Each entry
+    // stores the number of ids mapped within all
+    // preceding blocks. This is set via the builder.
     private final long[] blockCounts;
 
     public static Builder create(long capacity) {
@@ -50,6 +61,10 @@ public final class SparseLongArray implements AutoCloseable {
         this.array = new long[size];
         // blockCounts[0] is always 0, hence + 1
         this.blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];
+    }
+
+    public long idCount() {
+        return idCount;
     }
 
     public long toMappedNodeId(long originalId) {
@@ -179,17 +194,26 @@ public final class SparseLongArray implements AutoCloseable {
         }
 
         private SparseLongArray computeCounts(SparseLongArray sparseLongArray) {
-            int size = sparseLongArray.size - BLOCK_SIZE;
+            int size = sparseLongArray.size;
+            int cappedSize = size - BLOCK_SIZE;
             long[] array = sparseLongArray.array;
             long[] blockCounts = sparseLongArray.blockCounts;
 
             long count = 0;
-            for (int block = 0; block < size; block += BLOCK_SIZE) {
+            int block;
+            for (block = 0; block < cappedSize; block += BLOCK_SIZE) {
                 for (int page = block; page < block + BLOCK_SIZE; page++) {
                     count += Long.bitCount(array[page]);
                 }
                 blockCounts[(block >>> BLOCK_SHIFT) + 1] = count;
             }
+
+            // Count the remaining ids in the tail.
+            for (int page = block; page < size; page++) {
+                count += Long.bitCount(array[page]);
+            }
+
+            sparseLongArray.idCount = count;
 
             return sparseLongArray;
         }

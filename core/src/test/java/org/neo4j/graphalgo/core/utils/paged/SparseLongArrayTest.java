@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
@@ -69,6 +71,16 @@ class SparseLongArrayTest {
         for (int i = 0; i < capacity; i += 2) {
             assertEquals(i / 2, array.toMappedNodeId(i), formatWithLocale("wrong mapping for original id %d", i));
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1024, 4096, 5000, 9999})
+    void testIdCount(int expectedIdCount) {
+        var builder = SparseLongArray.create(10_000);
+        for (int i = 0; i < expectedIdCount; i ++) {
+            builder.set(i);
+        }
+        assertEquals(expectedIdCount, builder.build().idCount());
     }
 
     @Test
