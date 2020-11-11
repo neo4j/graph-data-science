@@ -89,7 +89,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         this.properties = properties;
         this.internalIdMappingBuilderFactory = internalIdMappingBuilderFactory;
         this.nodeMappingBuilder = nodeMappingBuilder;
-        this.sparseLongArrayBuilder = SparseLongArray.create(dimensions.highestNeoId() + 1);
+        this.sparseLongArrayBuilder = SparseLongArray.builder(dimensions.highestNeoId() + 1);
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(

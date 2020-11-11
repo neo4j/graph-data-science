@@ -115,10 +115,12 @@ public final class HugeSparseLongArray {
         private final AllocationTracker tracker;
         private final ReentrantLock newPageLock;
 
+        // TODO: rename to builder
         public static Builder create(long size, AllocationTracker tracker) {
             return create(size, NOT_FOUND, tracker);
         }
 
+        // TODO: rename to builder
         public static Builder create(long size, long defaultValue, AllocationTracker tracker) {
             int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
             long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);

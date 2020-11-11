@@ -72,7 +72,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
-        this.sparseLongArrayBuilder = SparseLongArray.create(nodeCount + 1);
+        this.sparseLongArrayBuilder = SparseLongArray.builder(nodeCount + 1);
         this.importer = new NodeImporter(
             builder,
             new HashMap<>(),

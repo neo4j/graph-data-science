@@ -77,7 +77,7 @@ public class NodesBuilder {
 
         // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
         this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
-        this.sparseLongArrayBuilder = SparseLongArray.create(maxOriginalId + 1);
+        this.sparseLongArrayBuilder = SparseLongArray.builder(maxOriginalId + 1);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,

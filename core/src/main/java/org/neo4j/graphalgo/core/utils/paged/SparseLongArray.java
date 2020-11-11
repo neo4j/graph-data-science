@@ -48,7 +48,7 @@ public final class SparseLongArray {
     // preceding blocks. This is set via the builder.
     private final long[] blockCounts;
 
-    public static Builder create(long capacity) {
+    public static Builder builder(long capacity) {
         return new Builder(capacity);
     }
 
@@ -133,8 +133,8 @@ public final class SparseLongArray {
             );
         }
 
-        @TestOnly
-        void set(long originalId) {
+//        @TestOnly
+public void set(long originalId) {
             localBuilders.get().set(originalId);
         }
 

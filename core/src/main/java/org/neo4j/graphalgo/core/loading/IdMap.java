@@ -86,15 +86,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private SparseLongArray sparseLongArray;
 
-    public IdMap(
-        HugeLongArray graphIds,
-        HugeSparseLongArray nodeToGraphIds,
-        Map<NodeLabel, BitSet> labelInformation,
-        long nodeCount,
-        AllocationTracker tracker
-    ) {
-        this(graphIds, nodeToGraphIds, null, labelInformation, nodeCount, tracker);
-    }
     /**
      * initialize the map with pre-built sub arrays
      */
@@ -116,7 +107,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return nodeToGraphIds.get(nodeId);
+        return sparseLongArray.toMappedNodeId(nodeId);
     }
 
     @Override
@@ -131,7 +122,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public long nodeCount() {
-        return nodeCount;
+        return sparseLongArray.idCount();
     }
 
     @Override
@@ -152,9 +143,10 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     @Override
     public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
         return LazyBatchCollection.of(
-                nodeCount(),
-                batchSize,
-                IdIterable::new);
+            nodeCount(),
+            batchSize,
+            IdIterable::new
+        );
     }
 
     @Override
@@ -208,10 +200,15 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long newNodeCount = unionBitSet.cardinality();
         HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
 
+        var sparseLongArrayBuilder = SparseLongArray.builder(newNodeCount);
+
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
+            sparseLongArrayBuilder.set(nodeId);
             newGraphIds.set(cursor, nodeId);
             cursor++;
         }
+
+        var sparseLongArray = sparseLongArrayBuilder.build();
 
         HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
             newNodeCount,
@@ -225,7 +222,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
-        return new FilteredIdMap(newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount, tracker);
+        return new FilteredIdMap(
+            newGraphIds,
+            newNodeToGraphIds,
+            sparseLongArray,
+            newLabelInformation,
+            newNodeCount,
+            tracker
+        );
     }
 
     private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
@@ -247,11 +251,12 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         FilteredIdMap(
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
+            SparseLongArray sparseLongArray,
             Map<NodeLabel, BitSet> filteredLabelMap,
             long nodeCount,
             AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, tracker);
+            super(graphIds, nodeToGraphIds, sparseLongArray, filteredLabelMap, nodeCount, tracker);
         }
 
         @Override

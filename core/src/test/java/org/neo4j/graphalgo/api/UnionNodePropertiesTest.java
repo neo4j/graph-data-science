@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBu
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -74,6 +75,10 @@ class UnionNodePropertiesTest {
         Map<NodeLabel, NodeProperties> propertiesMap = new HashMap<>();
         propertiesMap.put(label, doubleNodeProperties);
 
+        var sparseLongArrayBuilder = SparseLongArray.builder(1);
+        sparseLongArrayBuilder.set(0);
+        var sparseLongArray = sparseLongArrayBuilder.build();
+
         HugeLongArray graphIds = HugeLongArray.newArray(1, AllocationTracker.empty());
         graphIds.setAll(i -> i);
 
@@ -86,6 +91,8 @@ class UnionNodePropertiesTest {
         bitSets.put(label, bitSet);
 
         return new UnionNodeProperties(
-            new IdMap(graphIds, builder.build(), bitSets, 1, AllocationTracker.empty()), propertiesMap);
+            new IdMap(graphIds, builder.build(), sparseLongArray, bitSets, 1, AllocationTracker.empty()),
+            propertiesMap
+        );
     }
 }

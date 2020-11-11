@@ -42,20 +42,20 @@ class SparseLongArrayTest {
 
     @Test
     void testEmpty() {
-        var array = SparseLongArray.create(42).build();
+        var array = SparseLongArray.builder(42).build();
         assertEquals(NOT_FOUND, array.toMappedNodeId(23));
     }
 
     @Test
     void testZeroEntry() {
-        var builder = SparseLongArray.create(42);
+        var builder = SparseLongArray.builder(42);
         builder.set(0);
         assertEquals(0, builder.build().toMappedNodeId(0));
     }
 
     @Test
     void testSingleEntry() {
-        var builder = SparseLongArray.create(42);
+        var builder = SparseLongArray.builder(42);
         builder.set(23);
         assertEquals(0, builder.build().toMappedNodeId(23));
     }
@@ -63,7 +63,7 @@ class SparseLongArrayTest {
     @Test
     void testMultipleEntries() {
         var capacity = 128;
-        var builder = SparseLongArray.create(capacity);
+        var builder = SparseLongArray.builder(capacity);
         for (int i = 0; i < capacity; i += 2) {
             builder.set(i);
         }
@@ -76,7 +76,7 @@ class SparseLongArrayTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1024, 4096, 5000, 9999})
     void testIdCount(int expectedIdCount) {
-        var builder = SparseLongArray.create(10_000);
+        var builder = SparseLongArray.builder(10_000);
         for (int i = 0; i < expectedIdCount; i ++) {
             builder.set(i);
         }
@@ -87,7 +87,7 @@ class SparseLongArrayTest {
     void testBlockEntries() {
         var capacity = 8420;
 
-        var builder = SparseLongArray.create(capacity);
+        var builder = SparseLongArray.builder(capacity);
         for (int i = 0; i < capacity; i += 7) {
             builder.set(i);
         }
@@ -99,21 +99,21 @@ class SparseLongArrayTest {
 
     @Test
     void testNonExisting() {
-        var builder = SparseLongArray.create(42);
+        var builder = SparseLongArray.builder(42);
         builder.set(23);
         assertEquals(NOT_FOUND, builder.build().toMappedNodeId(24));
     }
 
     @Test
     void testForwardMapping() {
-        var builder = SparseLongArray.create(42);
+        var builder = SparseLongArray.builder(42);
         builder.set(23);
         assertEquals(23, builder.build().toOriginalNodeId(0));
     }
 
     @Test
     void testForwardMappingNonExisting() {
-        var builder = SparseLongArray.create(42);
+        var builder = SparseLongArray.builder(42);
         builder.set(23);
         assertEquals(0, builder.build().toOriginalNodeId(1));
     }
@@ -122,7 +122,7 @@ class SparseLongArrayTest {
     void testForwardMappingWithBlockEntries() {
         var capacity = 8420;
 
-        var builder = SparseLongArray.create(capacity);
+        var builder = SparseLongArray.builder(capacity);
         for (int i = 0; i < capacity; i += 11) {
             builder.set(i);
         }
@@ -137,7 +137,7 @@ class SparseLongArrayTest {
     void testForwardMappingWithBlockEntriesNotFound() {
         var capacity = 8420;
 
-        var builder = SparseLongArray.create(capacity);
+        var builder = SparseLongArray.builder(capacity);
         for (int i = 0; i < capacity; i += 13) {
             builder.set(i);
         }
@@ -153,7 +153,7 @@ class SparseLongArrayTest {
     @Test
     void testSetBatch() {
         var batch = LongStream.range(0, 10_000).toArray();
-        var builder = SparseLongArray.create(10_000);
+        var builder = SparseLongArray.builder(10_000);
         builder.set(batch, 5000, 5000);
 
         var array = builder.build();
@@ -167,7 +167,7 @@ class SparseLongArrayTest {
     void testSetParallel() {
         int capacity = 10_000;
         int batchSize = 1_000;
-        var builder = SparseLongArray.create(capacity);
+        var builder = SparseLongArray.builder(capacity);
         var random = new SplittableRandom(42);
 
         var tasks = IntStream
