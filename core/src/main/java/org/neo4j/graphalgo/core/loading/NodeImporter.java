@@ -139,7 +139,6 @@ public class NodeImporter {
         IdMappingAllocator.PropertyAllocator property = properties == null
             ? IdMappingAllocator.PropertyAllocator.EMPTY
             : ((batchOffset, start, length) -> {
-                sparseLongArrayBuilder.set(batch, batchOffset, length);
                 int batchImportedProperties = 0;
                 for (int i = 0; i < length; i++) {
                     long localIndex = start + i;

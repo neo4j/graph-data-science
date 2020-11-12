@@ -75,7 +75,7 @@ class UnionNodePropertiesTest {
         Map<NodeLabel, NodeProperties> propertiesMap = new HashMap<>();
         propertiesMap.put(label, doubleNodeProperties);
 
-        var sparseLongArrayBuilder = SparseLongArray.builder(1);
+        var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(1);
         sparseLongArrayBuilder.set(0);
         var sparseLongArray = sparseLongArrayBuilder.build();
 

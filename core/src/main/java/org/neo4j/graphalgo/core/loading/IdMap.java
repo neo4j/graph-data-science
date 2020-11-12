@@ -200,7 +200,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long newNodeCount = unionBitSet.cardinality();
         HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
 
-        var sparseLongArrayBuilder = SparseLongArray.builder(newNodeCount);
+        var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(newNodeCount);
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             sparseLongArrayBuilder.set(nodeId);

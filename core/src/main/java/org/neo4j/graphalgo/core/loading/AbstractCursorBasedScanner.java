@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
@@ -57,7 +59,9 @@ abstract class AbstractCursorBasedScanner<
 
         @Override
         public int bulkSize() {
-            return prefetchSize * recordsPerPage;
+            // Need to make sure that we scan aligned to the super block size, as we are not
+            // allowed to write into the same bock multiple times
+            return (int) BitUtil.align(prefetchSize * recordsPerPage, SparseLongArray.SUPER_BLOCK_SIZE);
         }
 
         @Override
