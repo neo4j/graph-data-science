@@ -91,7 +91,7 @@ class UnionNodePropertiesTest {
         bitSets.put(label, bitSet);
 
         return new UnionNodeProperties(
-            new IdMap(graphIds, builder.build(), sparseLongArray, bitSets, 1, AllocationTracker.empty()),
+            new IdMap(/*graphIds, builder.build(), */sparseLongArray, bitSets, 1, AllocationTracker.empty()),
             propertiesMap
         );
     }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -73,5 +74,12 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanne
             transaction.dataRead(),
             Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer())
         );
+    }
+
+    @Override
+    boolean needsPatchingForLabelScanAlignment() {
+        var neo4jVersion = Neo4jVersion.findNeo4jVersion();
+        // Bug was fixed in 4.2 (#6156)
+        return neo4jVersion.compareTo(Neo4jVersion.V_4_2) < 0;
     }
 }

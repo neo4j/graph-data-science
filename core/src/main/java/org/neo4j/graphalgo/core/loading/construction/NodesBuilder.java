@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.LokiInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
@@ -55,7 +55,7 @@ public class NodesBuilder {
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
+    private final LokiInternalIdMappingBuilder hugeInternalIdMappingBuilder;
     private final NodeImporter nodeImporter;
 
     private final Lock lock;
@@ -76,7 +76,7 @@ public class NodesBuilder {
         this.lock = new ReentrantLock(true);
 
         // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
-        this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
+        this.hugeInternalIdMappingBuilder = LokiInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
         this.sparseLongArrayBuilder = SparseLongArray.builder(maxOriginalId + 1);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
@@ -147,7 +147,7 @@ public class NodesBuilder {
             this.labelTokenIdFn = labelTokenIdFn;
 
             this.buffer = new NodesBatchBufferBuilder()
-                .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
+                .capacity(SparseLongArray.toValidBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE))
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(false)
                 .build();

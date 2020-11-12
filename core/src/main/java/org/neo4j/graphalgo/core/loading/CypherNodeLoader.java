@@ -52,7 +52,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private final GraphDimensions outerDimensions;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    private final HugeInternalIdMappingBuilder builder;
+    private final LokiInternalIdMappingBuilder builder;
     private final NodeImporter importer;
     private final SparseLongArray.Builder sparseLongArrayBuilder;
     private long maxNodeId;
@@ -71,7 +71,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
-        this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+        this.builder = LokiInternalIdMappingBuilder.of(outerDimensions.highestNeoId() + 1, loadingContext.tracker());
         this.sparseLongArrayBuilder = SparseLongArray.builder(nodeCount + 1);
         this.importer = new NodeImporter(
             builder,

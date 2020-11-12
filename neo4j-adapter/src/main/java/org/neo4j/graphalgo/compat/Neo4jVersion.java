@@ -48,7 +48,11 @@ public enum Neo4jVersion {
     }
 
     public static Neo4jVersion findNeo4jVersion() {
-        return parse(neo4jVersion());
+        return Neo4jVersionHolder.VERSION;
+    }
+
+    private static final class Neo4jVersionHolder {
+        private static final Neo4jVersion VERSION = parse(neo4jVersion());
     }
 
     static String neo4jVersion() {

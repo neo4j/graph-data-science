@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -42,6 +41,7 @@ abstract class AbstractCursorBasedScanner<
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
         private final Scan<EntityCursor> scan;
+        private final boolean patchForLabelScanAlignment;
 
         private EntityCursor cursor;
 
@@ -50,25 +50,37 @@ abstract class AbstractCursorBasedScanner<
         ScanCursor(
             EntityCursor cursor,
             Reference reference,
-            Scan<EntityCursor> entityCursorScan
+            Scan<EntityCursor> entityCursorScan,
+            boolean patchForLabelScanAlignment
         ) {
             this.cursor = cursor;
             this.cursorReference = reference;
             this.scan = entityCursorScan;
+            this.patchForLabelScanAlignment = patchForLabelScanAlignment;
         }
 
         @Override
         public int bulkSize() {
-            // Need to make sure that we scan aligned to the super block size, as we are not
-            // allowed to write into the same bock multiple times
-            return (int) BitUtil.align(prefetchSize * recordsPerPage, SparseLongArray.SUPER_BLOCK_SIZE);
+            // We want to scan about 100 pages per bulk, so start with that value
+            var bulkSize = prefetchSize * recordsPerPage;
+
+            // We need to make sure that we scan aligned to the super block size, as we are not
+            // allowed to write into the same block multiple times.
+            bulkSize = SparseLongArray.toValidBatchSize(bulkSize);
+
+            // The label scan cursor on Neo4j <= 4.1 has a bug where it would add 64 to the bulks size
+            // even if the value is already divisible by 64. (#6156)
+            // We need to subtract 64 on those cases, to get a final bulk size of what we really want.
+            if (patchForLabelScanAlignment) {
+                bulkSize = Math.max(0, bulkSize - 64);
+            }
+
+            return bulkSize;
         }
 
         @Override
         public int bufferSize() {
-            // This isn't really aligning at 64 if the value is already divisible by 64
-            // but we have to follow the same logic that kernel is doing, which might be a bug
-            return (bulkSize() / Long.SIZE + 1) * Long.SIZE;
+            return bulkSize() + (patchForLabelScanAlignment ? Long.SIZE : 0);
         }
 
         @Override
@@ -148,7 +160,12 @@ abstract class AbstractCursorBasedScanner<
         if (scanCursor == null) {
             EntityCursor entityCursor = entityCursor(transaction);
             Reference reference = cursorReference(transaction, entityCursor);
-            scanCursor = new ScanCursor(entityCursor, reference, entityCursorScan);
+            scanCursor = new ScanCursor(
+                entityCursor,
+                reference,
+                entityCursorScan,
+                needsPatchingForLabelScanAlignment()
+            );
             this.cursors.set(scanCursor);
         }
 
@@ -169,4 +186,8 @@ abstract class AbstractCursorBasedScanner<
     abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
 
     abstract Reference cursorReference(KernelTransaction transaction, EntityCursor cursor);
+
+    boolean needsPatchingForLabelScanAlignment() {
+        return false;
+    }
 }

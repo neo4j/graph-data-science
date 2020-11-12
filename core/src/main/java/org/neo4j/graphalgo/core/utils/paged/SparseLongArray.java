@@ -54,6 +54,12 @@ public final class SparseLongArray {
     private final long[] sortedAllocationIndexes;
     private final int[] allocationToBlockIndexes;
 
+    public static int toValidBatchSize(int batchSize) {
+        // We need to make sure that we scan aligned to the super block size, as we are not
+        // allowed to write into the same block multiple times.
+        return (int) BitUtil.align(batchSize, SUPER_BLOCK_SIZE);
+    }
+
     public static Builder builder(long capacity) {
         return new Builder(capacity);
     }

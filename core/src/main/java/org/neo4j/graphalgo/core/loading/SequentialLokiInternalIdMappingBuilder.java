@@ -26,19 +26,19 @@ import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuilder<LokiInternalIdMappingBuilder.BulkAdder> {
+public final class SequentialLokiInternalIdMappingBuilder implements InternalIdMappingBuilder<SequentialLokiInternalIdMappingBuilder.BulkAdder> {
 
-    private final SparseLongArray.Builder builder;
+    private final SparseLongArray.SequentialBuilder builder;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static LokiInternalIdMappingBuilder of(long length, AllocationTracker tracker) {
-        var builder = SparseLongArray.builder(length);
-        return new LokiInternalIdMappingBuilder(builder, length);
+    public static SequentialLokiInternalIdMappingBuilder of(long length, AllocationTracker tracker) {
+        var builder = SparseLongArray.sequentialBuilder(length);
+        return new SequentialLokiInternalIdMappingBuilder(builder, length);
     }
 
-    private LokiInternalIdMappingBuilder(SparseLongArray.Builder builder, final long length) {
+    private SequentialLokiInternalIdMappingBuilder(SparseLongArray.SequentialBuilder builder, final long length) {
         this.builder = builder;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -46,7 +46,7 @@ public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuil
     }
 
     @Override
-    public @Nullable LokiInternalIdMappingBuilder.BulkAdder allocate(int batchLength) {
+    public @Nullable SequentialLokiInternalIdMappingBuilder.BulkAdder allocate(int batchLength) {
         return this.allocate((long) batchLength);
     }
 
@@ -82,11 +82,11 @@ public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuil
     }
 
     public static final class BulkAdder implements IdMappingAllocator {
-        private final SparseLongArray.Builder builder;
+        private final SparseLongArray.SequentialBuilder builder;
 
         private long allocationIndex;
 
-        private BulkAdder(SparseLongArray.Builder builder) {
+        private BulkAdder(SparseLongArray.SequentialBuilder builder) {
             this.builder = builder;
         }
 
@@ -103,7 +103,7 @@ public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuil
         public int insert(
             long[] nodeIds, int length, PropertyAllocator propertyAllocator
         ) {
-            builder.set(allocationIndex, nodeIds, 0, length);
+            builder.set(nodeIds, 0, length);
             return propertyAllocator.allocateProperties(0, allocationIndex, length);
         }
     }

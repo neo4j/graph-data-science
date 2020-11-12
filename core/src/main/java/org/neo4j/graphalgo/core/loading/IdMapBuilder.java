@@ -48,21 +48,21 @@ public final class IdMapBuilder {
 //    }
 
     public static IdMap build(
-        HugeInternalIdMappingBuilder idMapBuilder,
+        LokiInternalIdMappingBuilder idMapBuilder,
         SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) {
-        HugeLongArray graphIds = idMapBuilder.build();
-        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-            idMapBuilder.size(),
-            highestNodeId,
-            concurrency,
-            add(graphIds),
-            tracker
-        );
+        SparseLongArray graphIds = idMapBuilder.build();
+//        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
+//            idMapBuilder.size(),
+//            highestNodeId,
+//            concurrency,
+//            add(graphIds),
+//            tracker
+//        );
 
         var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
@@ -70,9 +70,9 @@ public final class IdMapBuilder {
         ));
 
         return new IdMap(
+//            graphIds,
+//            nodeToGraphIds,
             graphIds,
-            nodeToGraphIds,
-            sparseLongArrayBuilder.build(),
             convertedLabelInformation,
             idMapBuilder.size(),
             tracker
@@ -80,7 +80,7 @@ public final class IdMapBuilder {
     }
 
     static IdMap buildChecked(
-        HugeInternalIdMappingBuilder idMapBuilder,
+        LokiInternalIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -90,29 +90,29 @@ public final class IdMapBuilder {
     }
 
     static IdMap buildChecked(
-        HugeInternalIdMappingBuilder idMapBuilder,
+        LokiInternalIdMappingBuilder idMapBuilder,
         SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     ) throws DuplicateNodeIdException {
-        HugeLongArray graphIds = idMapBuilder.build();
-        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-            idMapBuilder.size(),
-            highestNodeId,
-            concurrency,
-            addChecked(graphIds),
-            tracker
-        );
+        SparseLongArray graphIds = idMapBuilder.build();
+//        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
+//            idMapBuilder.size(),
+//            highestNodeId,
+//            concurrency,
+//            addChecked(graphIds),
+//            tracker
+//        );
 
         var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e -> e.getValue().toBitSet()
         ));
 
-        var sparseLongArray = sparseLongArrayBuilder.build();
-        return new IdMap(graphIds, nodeToGraphIds, sparseLongArray, convertedLabelInformation, idMapBuilder.size(), tracker);
+//        var sparseLongArray = sparseLongArrayBuilder.build();
+        return new IdMap(/*graphIds, nodeToGraphIds, */graphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 
     @NotNull

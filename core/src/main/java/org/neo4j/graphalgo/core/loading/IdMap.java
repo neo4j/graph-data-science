@@ -90,15 +90,15 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
      * initialize the map with pre-built sub arrays
      */
     public IdMap(
-        HugeLongArray graphIds,
-        HugeSparseLongArray nodeToGraphIds,
+//        HugeLongArray graphIds,
+//        HugeSparseLongArray nodeToGraphIds,
         SparseLongArray sparseLongArray,
         Map<NodeLabel, BitSet> labelInformation,
         long nodeCount,
         AllocationTracker tracker
     ) {
-        this.graphIds = graphIds;
-        this.nodeToGraphIds = nodeToGraphIds;
+        this.graphIds = null;
+        this.nodeToGraphIds = null;
         this.labelInformation = labelInformation;
         this.sparseLongArray = sparseLongArray;
         this.nodeCount = nodeCount;
@@ -210,21 +210,21 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
         var sparseLongArray = sparseLongArrayBuilder.build();
 
-        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
-            newNodeCount,
-            nodeToGraphIds.getCapacity(),
-            concurrency,
-            IdMapBuilder.add(newGraphIds),
-            tracker
-        );
+//        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
+//            newNodeCount,
+//            newNodeCount, // TODO: remove sparseLongArray.capacity(),
+//            concurrency,
+//            IdMapBuilder.add(newGraphIds),
+//            tracker
+//        );
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
         return new FilteredIdMap(
-            newGraphIds,
-            newNodeToGraphIds,
+//            newGraphIds,
+//            newNodeToGraphIds,
             sparseLongArray,
             newLabelInformation,
             newNodeCount,
@@ -249,14 +249,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     private static class FilteredIdMap extends IdMap {
 
         FilteredIdMap(
-            HugeLongArray graphIds,
-            HugeSparseLongArray nodeToGraphIds,
+//            HugeLongArray graphIds,
+//            HugeSparseLongArray nodeToGraphIds,
             SparseLongArray sparseLongArray,
             Map<NodeLabel, BitSet> filteredLabelMap,
             long nodeCount,
             AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, sparseLongArray, filteredLabelMap, nodeCount, tracker);
+            super(/*graphIds, nodeToGraphIds, */sparseLongArray, filteredLabelMap, nodeCount, tracker);
         }
 
         @Override
