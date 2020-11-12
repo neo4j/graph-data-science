@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,10 +51,10 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
+public class LokiIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-        .builder(IdMap.class)
+        .builder(LokiIdMap.class)
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
@@ -71,53 +72,47 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
-    private final long nodeCount;
     private final AllocationTracker tracker;
 
     private final Map<NodeLabel, BitSet> labelInformation;
-
-    private final HugeLongArray graphIds;
-    private final HugeSparseLongArray nodeToGraphIds;
 
     public static MemoryEstimation memoryEstimation() {
         return ESTIMATION;
     }
 
+    private final SparseLongArray sparseLongArray;
+
     /**
      * initialize the map with pre-built sub arrays
      */
-    public IdMap(
-        HugeLongArray graphIds,
-        HugeSparseLongArray nodeToGraphIds,
+    public LokiIdMap(
+        SparseLongArray sparseLongArray,
         Map<NodeLabel, BitSet> labelInformation,
-        long nodeCount,
         AllocationTracker tracker
     ) {
-        this.graphIds = graphIds;
-        this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
-        this.nodeCount = nodeCount;
+        this.sparseLongArray = sparseLongArray;
         this.tracker = tracker;
     }
 
     @Override
     public long toMappedNodeId(long nodeId) {
-        return nodeToGraphIds.get(nodeId);
+        return sparseLongArray.toMappedNodeId(nodeId);
     }
 
     @Override
     public long toOriginalNodeId(long nodeId) {
-        return graphIds.get(nodeId);
+        return sparseLongArray.toOriginalNodeId(nodeId);
     }
 
     @Override
     public boolean contains(final long nodeId) {
-        return nodeToGraphIds.contains(nodeId);
+        return sparseLongArray.contains(nodeId);
     }
 
     @Override
     public long nodeCount() {
-        return nodeCount;
+        return sparseLongArray.idCount();
     }
 
     @Override
@@ -176,7 +171,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
-    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public LokiIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         validateNodeLabelFilter(nodeLabels, labelInformation);
 
         if (labelInformation.isEmpty()) {
@@ -195,28 +190,23 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         long newNodeCount = unionBitSet.cardinality();
         HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
 
+        var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(newNodeCount);
+
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
+            sparseLongArrayBuilder.set(nodeId);
             newGraphIds.set(cursor, nodeId);
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = IdMapBuilder.buildSparseNodeMapping(
-            newNodeCount,
-            nodeToGraphIds.getCapacity(),
-            concurrency,
-            IdMapBuilder.add(newGraphIds),
-            tracker
-        );
+        var sparseLongArray = sparseLongArrayBuilder.build();
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
         return new FilteredIdMap(
-            newGraphIds,
-            newNodeToGraphIds,
+            sparseLongArray,
             newLabelInformation,
-            newNodeCount,
             tracker
         );
     }
@@ -235,16 +225,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         }
     }
 
-    private static class FilteredIdMap extends IdMap {
+    private static class FilteredIdMap extends LokiIdMap {
 
         FilteredIdMap(
-            HugeLongArray graphIds,
-            HugeSparseLongArray nodeToGraphIds,
+            SparseLongArray sparseLongArray,
             Map<NodeLabel, BitSet> filteredLabelMap,
-            long nodeCount,
             AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, tracker);
+            super(sparseLongArray, filteredLabelMap, tracker);
         }
 
         @Override

@@ -47,7 +47,6 @@ public class NodeImporter {
     private final AllocationTracker tracker;
     private final IdMappingAllocator.PropertyAllocator propertyAllocator;
 
-
     public NodeImporter(
         InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,

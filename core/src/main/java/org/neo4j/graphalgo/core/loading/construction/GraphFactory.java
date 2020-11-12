@@ -60,11 +60,13 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
         Optional<Boolean> hasLabelInformation,
+        Optional<Integer> concurrency,
         Optional<AllocationTracker> tracker
     ) {
         return new NodesBuilder(
             maxOriginalId,
             hasLabelInformation.orElse(false),
+            concurrency.orElse(1),
             tracker.orElse(AllocationTracker.empty())
         );
     }

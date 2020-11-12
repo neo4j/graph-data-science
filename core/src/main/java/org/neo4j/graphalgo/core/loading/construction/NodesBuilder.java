@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
-import org.neo4j.graphalgo.core.loading.LokiInternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
@@ -44,6 +44,8 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class NodesBuilder {
 
+    private final long maxOriginalId;
+    private final int concurrency;
     private final AllocationTracker tracker;
 
     private int nextLabelId;
@@ -52,7 +54,7 @@ public class NodesBuilder {
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final LokiInternalIdMappingBuilder hugeInternalIdMappingBuilder;
+    private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
     private final NodeImporter nodeImporter;
 
     private final Lock lock;
@@ -60,8 +62,11 @@ public class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
+        int concurrency,
         AllocationTracker tracker
     ) {
+        this.maxOriginalId = maxOriginalId;
+        this.concurrency = concurrency;
         this.tracker = tracker;
         this.nextLabelId = 0;
         this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
@@ -71,7 +76,7 @@ public class NodesBuilder {
 
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
-        this.hugeInternalIdMappingBuilder = LokiInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
+        this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
@@ -102,6 +107,8 @@ public class NodesBuilder {
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
+            maxOriginalId,
+            concurrency,
             tracker
         );
     }

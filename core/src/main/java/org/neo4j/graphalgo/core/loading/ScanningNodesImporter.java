@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMa
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.math.BigDecimal;

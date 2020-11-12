@@ -277,6 +277,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxNeoId)
+            .concurrency(config.concurrency())
             .tracker(tracker)
             .build();
 

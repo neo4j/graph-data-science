@@ -51,10 +51,10 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private final GraphDimensions outerDimensions;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    private final LokiInternalIdMappingBuilder builder;
-    private final NodeImporter importer;
+    private final HugeInternalIdMappingBuilder builder;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
+    private NodeImporter importer;
 
     CypherNodeLoader(
         String nodeQuery,
@@ -69,16 +69,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
-        // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
-        // be able to include the highest possible id
-        this.builder = LokiInternalIdMappingBuilder.of(outerDimensions.highestNeoId() + 1, loadingContext.tracker());
-        this.importer = new NodeImporter(
-            builder,
-            new HashMap<>(),
-            labelTokenNodeLabelMapping,
-            true, // TODO: why?
-            loadingContext.tracker()
-        );
+        this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
 
     @Override
@@ -86,6 +77,14 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         Result queryResult = runLoadingQuery(tx);
 
         Collection<String> propertyColumns = getPropertyColumns(queryResult);
+
+        importer = new NodeImporter(
+            builder,
+            new HashMap<>(),
+            labelTokenNodeLabelMapping,
+            !propertyColumns.isEmpty(),
+            loadingContext.tracker()
+        );
 
         nodePropertyImporter = new CypherNodePropertyImporter(
             propertyColumns,
@@ -128,6 +127,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             idMap = IdMapBuilder.buildChecked(
                 builder,
                 importer.nodeLabelBitSetMapping,
+                maxNodeId,
+                cypherConfig.readConcurrency(),
                 loadingContext.tracker()
             );
         } catch (DuplicateNodeIdException e) {
