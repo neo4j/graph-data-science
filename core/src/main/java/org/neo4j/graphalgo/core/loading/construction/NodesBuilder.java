@@ -44,10 +44,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class NodesBuilder {
 
-    private final long maxOriginalId;
-    private final int concurrency;
     private final AllocationTracker tracker;
-    private final SparseLongArray.Builder sparseLongArrayBuilder;
 
     private int nextLabelId;
     private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
@@ -63,11 +60,8 @@ public class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
-        int concurrency,
         AllocationTracker tracker
     ) {
-        this.maxOriginalId = maxOriginalId;
-        this.concurrency = concurrency;
         this.tracker = tracker;
         this.nextLabelId = 0;
         this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
@@ -75,15 +69,14 @@ public class NodesBuilder {
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
 
-        // TODO: why is this maxOriginalId + 1, couldn't it be just nodeCount?
+        // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
+        // be able to include the highest possible id
         this.hugeInternalIdMappingBuilder = LokiInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
-        this.sparseLongArrayBuilder = SparseLongArray.builder(maxOriginalId + 1);
         this.nodeImporter = new NodeImporter(
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
-            tracker,
-            sparseLongArrayBuilder
+            tracker
         );
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
@@ -107,10 +100,7 @@ public class NodesBuilder {
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
             hugeInternalIdMappingBuilder,
-            sparseLongArrayBuilder,
             nodeLabelBitSetMap,
-            maxOriginalId,
-            concurrency,
             tracker
         );
     }

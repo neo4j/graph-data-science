@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
@@ -46,7 +45,6 @@ public class NodeImporter {
     final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final AllocationTracker tracker;
 
-    private final SparseLongArray.Builder sparseLongArrayBuilder;
     private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
 
     public NodeImporter(
@@ -55,21 +53,10 @@ public class NodeImporter {
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         AllocationTracker tracker
     ) {
-        this(idMapBuilder, nodeLabelBitSetMapping, labelTokenNodeLabelMapping, tracker, null);
-    }
-
-    public NodeImporter(
-        InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
-        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        AllocationTracker tracker,
-        SparseLongArray.Builder sparseLongArrayBuilder
-    ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
-        this.sparseLongArrayBuilder = sparseLongArrayBuilder;
     }
 
     public long importNodes(

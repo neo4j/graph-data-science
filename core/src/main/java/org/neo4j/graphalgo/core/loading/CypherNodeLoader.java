@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -54,7 +53,6 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final LokiInternalIdMappingBuilder builder;
     private final NodeImporter importer;
-    private final SparseLongArray.Builder sparseLongArrayBuilder;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
 
@@ -71,14 +69,14 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
+        // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
+        // be able to include the highest possible id
         this.builder = LokiInternalIdMappingBuilder.of(outerDimensions.highestNeoId() + 1, loadingContext.tracker());
-        this.sparseLongArrayBuilder = SparseLongArray.builder(nodeCount + 1);
         this.importer = new NodeImporter(
             builder,
             new HashMap<>(),
             labelTokenNodeLabelMapping,
-            loadingContext.tracker(),
-            sparseLongArrayBuilder
+            loadingContext.tracker()
         );
     }
 
@@ -128,10 +126,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         try {
             idMap = IdMapBuilder.buildChecked(
                 builder,
-                sparseLongArrayBuilder,
                 importer.nodeLabelBitSetMapping,
-                maxNodeId,
-                cypherConfig.readConcurrency(),
                 loadingContext.tracker()
             );
         } catch (DuplicateNodeIdException e) {

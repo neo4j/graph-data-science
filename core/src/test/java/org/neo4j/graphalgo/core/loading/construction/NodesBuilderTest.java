@@ -36,7 +36,6 @@ class NodesBuilderTest {
         int concurrency = 4;
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
-            .concurrency(concurrency)
             .build();
 
         ParallelUtil.parallelStreamConsume(
@@ -56,7 +55,6 @@ class NodesBuilderTest {
         int concurrency = 4;
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(attempts)
-            .concurrency(concurrency)
             .build();
 
         ParallelUtil.parallelStreamConsume(
@@ -80,7 +78,6 @@ class NodesBuilderTest {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(attempts)
             .hasLabelInformation(true)
-            .concurrency(concurrency)
             .build();
 
         ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(

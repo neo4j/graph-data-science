@@ -184,12 +184,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private NodeMappingBuilder<LokiInternalIdMappingBuilder> nodeMappingBuilder() {
-        return (idMapBuilder, sparseLongArrayBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
             idMapBuilder,
-            sparseLongArrayBuilder,
             labelInformation,
-            graphDimensions.highestNeoId(),
-            concurrency,
             tracker
         );
     }

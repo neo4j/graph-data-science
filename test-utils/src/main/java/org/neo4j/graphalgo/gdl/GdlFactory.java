@@ -172,7 +172,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(dimensions.highestNeoId())
             .hasLabelInformation(true)
-            .concurrency(1)
             .tracker(loadingContext.tracker())
             .build();
 

@@ -19,50 +19,22 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
-//    public static IdMap build(
-//        HugeInternalIdMappingBuilder idMapBuilder,
-//        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-//        long highestNodeId,
-//        int concurrency,
-//        AllocationTracker tracker
-//    ) {
-//        return build(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
-//    }
-
     public static IdMap build(
         LokiInternalIdMappingBuilder idMapBuilder,
-        SparseLongArray.Builder sparseLongArrayBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-        long highestNodeId,
-        int concurrency,
         AllocationTracker tracker
     ) {
         SparseLongArray graphIds = idMapBuilder.build();
-//        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-//            idMapBuilder.size(),
-//            highestNodeId,
-//            concurrency,
-//            add(graphIds),
-//            tracker
-//        );
 
         var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
@@ -70,8 +42,6 @@ public final class IdMapBuilder {
         ));
 
         return new IdMap(
-//            graphIds,
-//            nodeToGraphIds,
             graphIds,
             convertedLabelInformation,
             idMapBuilder.size(),
@@ -82,104 +52,16 @@ public final class IdMapBuilder {
     static IdMap buildChecked(
         LokiInternalIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-        long highestNodeId,
-        int concurrency,
-        AllocationTracker tracker
-    ) throws DuplicateNodeIdException {
-        return buildChecked(idMapBuilder, null, labelInformation, highestNodeId, concurrency, tracker);
-    }
-
-    static IdMap buildChecked(
-        LokiInternalIdMappingBuilder idMapBuilder,
-        SparseLongArray.Builder sparseLongArrayBuilder,
-        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-        long highestNodeId,
-        int concurrency,
         AllocationTracker tracker
     ) throws DuplicateNodeIdException {
         SparseLongArray graphIds = idMapBuilder.build();
-//        HugeSparseLongArray nodeToGraphIds = buildSparseNodeMapping(
-//            idMapBuilder.size(),
-//            highestNodeId,
-//            concurrency,
-//            addChecked(graphIds),
-//            tracker
-//        );
 
         var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             e -> e.getValue().toBitSet()
         ));
 
-//        var sparseLongArray = sparseLongArrayBuilder.build();
-        return new IdMap(/*graphIds, nodeToGraphIds, */graphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
-    }
-
-    @NotNull
-    static HugeSparseLongArray buildSparseNodeMapping(
-        long nodeCount,
-        long highestNodeId,
-        int concurrency,
-        Function<HugeSparseLongArray.Builder, BiLongConsumer> nodeAdder,
-        AllocationTracker tracker
-    ) {
-        HugeSparseLongArray.Builder nodeMappingBuilder = HugeSparseLongArray.Builder.create(
-            // We need to allocate space for `highestNode + 1` since we
-            // need to be able to store a node with `id = highestNodeId`.
-            highestNodeId + 1,
-            tracker
-        );
-        ParallelUtil.readParallel(concurrency, nodeCount, Pools.DEFAULT, nodeAdder.apply(nodeMappingBuilder));
-        return nodeMappingBuilder.build();
-    }
-
-    public static Function<HugeSparseLongArray.Builder, BiLongConsumer> add(HugeLongArray graphIds) {
-        return builder -> (start, end) -> addNodes(graphIds, builder, start, end);
-    }
-
-    private static Function<HugeSparseLongArray.Builder, BiLongConsumer> addChecked(HugeLongArray graphIds) {
-        return builder -> (start, end) -> addAndCheckNodes(graphIds, builder, start, end);
-    }
-
-    private static void addNodes(
-        HugeLongArray graphIds,
-        HugeSparseLongArray.Builder builder,
-        long startNode,
-        long endNode
-    ) {
-        try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                long internalId = cursor.base + offset;
-                for (int i = offset; i < limit; ++i, ++internalId) {
-                    builder.set(array[i], internalId);
-                }
-            }
-        }
-    }
-
-    private static void addAndCheckNodes(
-        HugeLongArray graphIds,
-        HugeSparseLongArray.Builder builder,
-        long startNode,
-        long endNode
-    ) throws DuplicateNodeIdException {
-        try (HugeCursor<long[]> cursor = graphIds.initCursor(graphIds.newCursor(), startNode, endNode)) {
-            while (cursor.next()) {
-                long[] array = cursor.array;
-                int offset = cursor.offset;
-                int limit = cursor.limit;
-                long internalId = cursor.base + offset;
-                for (int i = offset; i < limit; ++i, ++internalId) {
-                    boolean addedAsNewId = builder.setIfAbsent(array[i], internalId);
-                    if (!addedAsNewId) {
-                        throw new DuplicateNodeIdException(array[i]);
-                    }
-                }
-            }
-        }
+        return new IdMap(graphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
     }
 
     private IdMapBuilder() {
