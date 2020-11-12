@@ -123,13 +123,18 @@ public final class HugeInternalIdMappingBuilder implements InternalIdMappingBuil
 
         @Override
         public int insert(
-            long[] nodeIds, int length, PropertyAllocator propertyAllocator
+            long[] nodeIds,
+            int length,
+            PropertyAllocator propertyAllocator,
+            NodeImporter.PropertyReader reader,
+            long[] properties,
+            long[][] labelIds
         ) {
             int importedProperties = 0;
             int batchOffset = 0;
             while (nextBuffer()) {
                 System.arraycopy(nodeIds, batchOffset, this.buffer, this.offset, this.length);
-                importedProperties += propertyAllocator.allocateProperties(batchOffset, this.start, this.length);
+                importedProperties += propertyAllocator.allocateProperties(reader, nodeIds, properties, labelIds, batchOffset, this.length, this.start);
                 batchOffset += this.length;
             }
             return importedProperties;

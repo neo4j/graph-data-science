@@ -101,10 +101,15 @@ public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuil
 
         @Override
         public int insert(
-            long[] nodeIds, int length, PropertyAllocator propertyAllocator
+            long[] nodeIds,
+            int length,
+            PropertyAllocator propertyAllocator,
+            NodeImporter.PropertyReader reader,
+            long[] properties,
+            long[][] labelIds
         ) {
             builder.set(allocationIndex, nodeIds, 0, length);
-            return propertyAllocator.allocateProperties(0, allocationIndex, length);
+            return propertyAllocator.allocateProperties(reader, nodeIds, properties, labelIds, 0, length, allocationIndex);
         }
     }
 }

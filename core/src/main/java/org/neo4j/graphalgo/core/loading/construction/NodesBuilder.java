@@ -76,6 +76,7 @@ public class NodesBuilder {
             hugeInternalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
+            false,
             tracker
         );
 

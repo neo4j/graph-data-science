@@ -127,6 +127,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
                 idMapBuilder,
                 nodeLabelBitSetMapping,
                 labelTokenNodeLabelMapping,
+                nodePropertyImporter != null,
                 tracker
             ),
             nodePropertyImporter,

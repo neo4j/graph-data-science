@@ -76,6 +76,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             builder,
             new HashMap<>(),
             labelTokenNodeLabelMapping,
+            true, // TODO: why?
             loadingContext.tracker()
         );
     }

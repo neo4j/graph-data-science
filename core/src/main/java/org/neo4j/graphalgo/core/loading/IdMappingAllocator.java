@@ -23,12 +23,27 @@ public interface IdMappingAllocator {
 
     long startId();
 
-    int insert(long[] nodeIds, int length, PropertyAllocator propertyAllocator);
+    int insert(
+        long[] nodeIds,
+        int length,
+        PropertyAllocator propertyAllocator,
+        NodeImporter.PropertyReader reader,
+        long[] properties,
+        long[][] labelIds
+    );
 
     interface PropertyAllocator {
 
-        PropertyAllocator EMPTY = (batchOffset, start, length) -> 0;
+        PropertyAllocator EMPTY = (reader, batch, properties, labelIds, batchIndex, length, internalIndex) -> 0;
 
-        int allocateProperties(int batchOffset, long start, int length);
+        int allocateProperties(
+            NodeImporter.PropertyReader reader,
+            long[] batch,
+            long[] properties,
+            long[][] labelIds,
+            int batchIndex,
+            int length,
+            long internalIndex
+        );
     }
 }

@@ -41,22 +41,27 @@ public class NodeImporter {
         int readProperty(long nodeReference, long[] labelIds, long propertiesReference, long internalId);
     }
 
+    private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
     final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping;
     final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
     private final AllocationTracker tracker;
+    private final IdMappingAllocator.PropertyAllocator propertyAllocator;
 
-    private final InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder;
 
     public NodeImporter(
         InternalIdMappingBuilder<? extends IdMappingAllocator> idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMapping,
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping,
+        boolean loadsProperties,
         AllocationTracker tracker
     ) {
         this.idMapBuilder = idMapBuilder;
         this.nodeLabelBitSetMapping = nodeLabelBitSetMapping;
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
+        this.propertyAllocator = loadsProperties
+            ? NodeImporter::importProperties
+            : IdMappingAllocator.PropertyAllocator.EMPTY;
     }
 
     public long importNodes(
@@ -116,31 +121,15 @@ public class NodeImporter {
 
         int importedProperties = 0;
 
-        long[] batch = buffer.batch();
-        long[] properties = buffer.properties();
+        var batch = buffer.batch();
+        var properties = buffer.properties();
+        var labelIds = buffer.labelIds();
 
         if (buffer.hasLabelInformation()) {
-            setNodeLabelInformation(batchLength, adder.startId(), buffer.labelIds());
+            setNodeLabelInformation(batchLength, adder.startId(), labelIds);
         }
 
-        IdMappingAllocator.PropertyAllocator property = properties == null
-            ? IdMappingAllocator.PropertyAllocator.EMPTY
-            : ((batchOffset, start, length) -> {
-                int batchImportedProperties = 0;
-                for (int i = 0; i < length; i++) {
-                    long localIndex = start + i;
-                    int batchIndex = batchOffset + i;
-                    batchImportedProperties += reader.readProperty(
-                        batch[batchIndex],
-                        buffer.labelIds()[i],
-                        properties[batchIndex],
-                        localIndex
-                    );
-                }
-                return batchImportedProperties;
-            });
-
-        importedProperties += adder.insert(batch, batchLength, property);
+        importedProperties += adder.insert(batch, batchLength, propertyAllocator, reader, properties, labelIds);
         return RawValues.combineIntInt(batchLength, importedProperties);
     }
 
@@ -163,5 +152,28 @@ public class NodeImporter {
                 }
             }
         }
+    }
+
+    private static int importProperties(
+        NodeImporter.PropertyReader reader,
+        long[] batch,
+        long[] properties,
+        long[][] labelIds,
+        int batchIndex,
+        int length,
+        long internalIndex
+    ) {
+        int batchImportedProperties = 0;
+        for (int i = 0; i < length; i++) {
+            long localIndex = internalIndex + i;
+            int indexInBatch = batchIndex + i;
+            batchImportedProperties += reader.readProperty(
+                batch[indexInBatch],
+                labelIds[i],
+                properties[indexInBatch],
+                localIndex
+            );
+        }
+        return batchImportedProperties;
     }
 }
