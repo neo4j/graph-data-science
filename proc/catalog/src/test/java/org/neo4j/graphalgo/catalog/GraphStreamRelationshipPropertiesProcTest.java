@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
@@ -183,7 +182,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
-            .nodes((IdMap) graphStore.nodes())
+            .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .loadRelationshipProperty(true)
             .build();
@@ -287,7 +286,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
-            .nodes((IdMap) graphStore.nodes())
+            .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .loadRelationshipProperty(true)
             .build();

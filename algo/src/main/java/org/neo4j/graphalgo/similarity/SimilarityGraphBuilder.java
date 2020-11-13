@@ -21,11 +21,11 @@ package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -77,7 +77,7 @@ public class SimilarityGraphBuilder {
 
     private final Graph baseGraph;
 
-    private final IdMap baseIdMap;
+    private final NodeMapping baseIdMap;
 
     public SimilarityGraphBuilder(
         Graph baseGraph,
@@ -89,12 +89,7 @@ public class SimilarityGraphBuilder {
         this.executorService = executorService;
         this.tracker = tracker;
         this.baseGraph = baseGraph;
-
-        if (baseGraph.nodeMapping() instanceof IdMap) {
-            this.baseIdMap = (IdMap) baseGraph.nodeMapping();
-        } else {
-            throw new IllegalArgumentException("Base graph must contain an IdMap.");
-        }
+        this.baseIdMap = baseGraph.nodeMapping();
     }
 
     public Graph build(Stream<SimilarityResult> stream) {
