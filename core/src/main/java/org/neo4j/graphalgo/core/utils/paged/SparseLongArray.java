@@ -139,17 +139,30 @@ public final class SparseLongArray {
         var originalId = blockOffsets[startBlockIndex];
         for (int blockIndex = blockStart; blockIndex < blockEnd; blockIndex++) {
             var page = array[blockIndex];
-            var pos = 0;
             var idsInPage = Long.bitCount(page);
             if (originalId + idsInPage > mappedId) {
-                while (originalId <= mappedId) {
-                    if ((page & 1) == 1) {
-                        ++originalId;
+                // Perform binary search within the page
+                // to find the correct original id.
+                var pos = 0;
+                long mask = 0xFFFF_FFFFL;
+                int shift = 32;
+
+                while (shift > 0) {
+                    var idsInLowerPage = Long.bitCount(page & mask);
+
+                    if (originalId + idsInLowerPage > mappedId) {
+                        page = page & mask;
+                    } else {
+                        pos += shift;
+                        originalId += idsInLowerPage;
+                        page = page >>> shift;
                     }
-                    page >>>= 1;
-                    ++pos;
+
+                    shift >>= 1;
+                    mask >>= shift;
                 }
-                return (blockIndex << BLOCK_SHIFT) + (pos - 1);
+
+                return (blockIndex << BLOCK_SHIFT) + pos;
             }
             originalId += idsInPage;
         }
