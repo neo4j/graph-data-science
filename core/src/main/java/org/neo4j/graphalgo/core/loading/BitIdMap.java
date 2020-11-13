@@ -186,16 +186,12 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         }
 
         long nodeId = -1L;
-        long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
-        HugeLongArray newGraphIds = HugeLongArray.newArray(newNodeCount, tracker);
 
         var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(newNodeCount);
 
         while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
             sparseLongArrayBuilder.set(nodeId);
-            newGraphIds.set(cursor, nodeId);
-            cursor++;
         }
 
         var sparseLongArray = sparseLongArrayBuilder.build();
