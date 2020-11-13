@@ -45,6 +45,8 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
+    private static final double ENTRY_PROBABILITY = 1.0f / (2.0f * SPARSITY);
+
     private final Graph graph;
     private final int concurrency;
     private final float normalizationStrength;
@@ -135,12 +137,11 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     private void initPropertyVectors() {
         int propertyDimension = embeddingDimension - baseEmbeddingDimension;
         float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
-        double probability = 1.0f / (2.0f * SPARSITY);
         ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
         for (int i = 0; i < featureProperties.size(); i++) {
             this.propertyVectors[i] = new float[propertyDimension];
             for (int d = 0; d < propertyDimension; d++) {
-                this.propertyVectors[i][d] = computeRandomEntry(random.get(), probability, entryValue);
+                this.propertyVectors[i][d] = computeRandomEntry(random.get(), entryValue);
             }
         }
     }
@@ -222,12 +223,12 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
         }
     }
 
-    private static float computeRandomEntry(Random random, double probability, float entryValue) {
+    private static float computeRandomEntry(Random random, float entryValue) {
         double randomValue = random.nextDouble();
 
-        if (randomValue < probability) {
+        if (randomValue < ENTRY_PROBABILITY) {
             return entryValue;
-        } else if (randomValue < probability * 2.0f) {
+        } else if (randomValue < ENTRY_PROBABILITY * 2.0f) {
             return -entryValue;
         } else {
             return 0.0f;
@@ -276,7 +277,6 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private final class InitRandomVectorTask implements Runnable {
 
-        final double probability = 1.0f / (2.0f * SPARSITY);
         final float sqrtSparsity = (float) Math.sqrt(SPARSITY);
 
         private final Partition partition;
@@ -300,17 +300,17 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
                     : (float) Math.pow(degree, normalizationStrength);
 
                 float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
-                float[] randomVector = computeRandomVector(nodeId, random, probability, entryValue);
+                float[] randomVector = computeRandomVector(nodeId, random, entryValue);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);
             }
             progressLogger.logProgress(partition.nodeCount());
         }
 
-        private float[] computeRandomVector(long nodeId, Random random, double probability, float entryValue) {
+        private float[] computeRandomVector(long nodeId, Random random, float entryValue) {
             float[] randomVector = new float[embeddingDimension];
             for (int i = 0; i < embeddingDimension; i++) {
-                randomVector[i] = computeRandomEntry(random, probability, entryValue);
+                randomVector[i] = computeRandomEntry(random, entryValue);
             }
             for (int j = 0; j < featureProperties.size(); j++) {
                 String feature = featureProperties.get(j);
