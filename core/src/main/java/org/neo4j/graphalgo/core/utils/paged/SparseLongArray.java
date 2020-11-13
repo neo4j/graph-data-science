@@ -74,6 +74,10 @@ public final class SparseLongArray {
         return new SequentialBuilder(capacity);
     }
 
+    public static FromExistingBuilder fromExistingBuilder(long[] array) {
+        return new FromExistingBuilder(array);
+    }
+
     private SparseLongArray(
         long idCount,
         long[] array,
@@ -251,7 +255,6 @@ public final class SparseLongArray {
 
     public static class SequentialBuilder {
 
-        // TODO: could be shared singleton-ish thing
         private final AutoCloseableThreadLocal<ThreadLocalBuilder> localBuilders;
         private final SparseLongArrayCombiner combiner;
 
@@ -276,11 +279,10 @@ public final class SparseLongArray {
 
         public SparseLongArray build() {
             localBuilders.close();
-            return computeCounts(combiner.build());
+            return computeCounts(combiner.build().array);
         }
 
-        private SparseLongArray computeCounts(ThreadLocalBuilder sparseLongArray) {
-            long[] array = sparseLongArray.array;
+        protected SparseLongArray computeCounts(long[] array) {
             int size = array.length;
             int cappedSize = size - BLOCK_SIZE;
             // blockOffsets[0] is always 0, hence + 1
@@ -353,6 +355,21 @@ public final class SparseLongArray {
             ThreadLocalBuilder build() {
                 return result != null ? result : new ThreadLocalBuilder(capacity);
             }
+        }
+    }
+
+    public static class FromExistingBuilder extends SequentialBuilder {
+
+        private final long[] array;
+
+        FromExistingBuilder(long[] array) {
+            super(array.length);
+            this.array = array;
+        }
+
+        @Override
+        public SparseLongArray build() {
+            return computeCounts(array);
         }
     }
 

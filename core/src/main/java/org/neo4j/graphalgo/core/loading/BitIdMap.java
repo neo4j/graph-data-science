@@ -178,23 +178,14 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             return this;
         }
 
-        BitSet unionBitSet = new BitSet(nodeCount());
+        var unionBitSet = new BitSet(nodeCount());
         nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
 
         if (unionBitSet.cardinality() == nodeCount()) {
             return this;
         }
 
-        long nodeId = -1L;
-        long newNodeCount = unionBitSet.cardinality();
-
-        var sparseLongArrayBuilder = SparseLongArray.sequentialBuilder(newNodeCount);
-
-        while ((nodeId = unionBitSet.nextSetBit(nodeId + 1)) != -1) {
-            sparseLongArrayBuilder.set(nodeId);
-        }
-
-        var sparseLongArray = sparseLongArrayBuilder.build();
+        var sparseLongArray = SparseLongArray.fromExistingBuilder(unionBitSet.bits).build();
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
             .stream()
