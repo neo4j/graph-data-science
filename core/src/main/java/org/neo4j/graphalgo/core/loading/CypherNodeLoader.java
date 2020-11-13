@@ -51,7 +51,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private final GraphDimensions outerDimensions;
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    private final HugeInternalIdMappingBuilder builder;
+    private final InternalHugeIdMappingBuilder builder;
     private long maxNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
     private NodeImporter importer;
@@ -69,7 +69,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.outerDimensions = outerDimensions;
         this.maxNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
-        this.builder = HugeInternalIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+        this.builder = InternalHugeIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
 
     @Override

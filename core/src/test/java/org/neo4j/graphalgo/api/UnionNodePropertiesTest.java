@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.api;
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.loading.LokiIdMap;
+import org.neo4j.graphalgo.core.loading.BitIdMap;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -91,7 +91,7 @@ class UnionNodePropertiesTest {
         bitSets.put(label, bitSet);
 
         return new UnionNodeProperties(
-            new LokiIdMap(sparseLongArray, bitSets, AllocationTracker.empty()),
+            new BitIdMap(sparseLongArray, bitSets, AllocationTracker.empty()),
             propertiesMap
         );
     }

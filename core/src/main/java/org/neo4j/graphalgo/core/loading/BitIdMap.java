@@ -51,10 +51,10 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class LokiIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
+public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-        .builder(LokiIdMap.class)
+        .builder(BitIdMap.class)
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
@@ -85,7 +85,7 @@ public class LokiIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public LokiIdMap(
+    public BitIdMap(
         SparseLongArray sparseLongArray,
         Map<NodeLabel, BitSet> labelInformation,
         AllocationTracker tracker
@@ -171,7 +171,7 @@ public class LokiIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
-    public LokiIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public BitIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         validateNodeLabelFilter(nodeLabels, labelInformation);
 
         if (labelInformation.isEmpty()) {
@@ -225,7 +225,7 @@ public class LokiIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         }
     }
 
-    private static class FilteredIdMap extends LokiIdMap {
+    private static class FilteredIdMap extends BitIdMap {
 
         FilteredIdMap(
             SparseLongArray sparseLongArray,

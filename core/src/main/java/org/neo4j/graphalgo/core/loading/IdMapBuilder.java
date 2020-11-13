@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 
 public final class IdMapBuilder {
 
-    public static LokiIdMap build(
-        LokiInternalIdMappingBuilder idMapBuilder,
+    public static BitIdMap build(
+        InternalBitIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         AllocationTracker tracker
     ) {
@@ -48,7 +48,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new LokiIdMap(
+        return new BitIdMap(
             graphIds,
             convertedLabelInformation,
             tracker
@@ -56,7 +56,7 @@ public final class IdMapBuilder {
     }
 
     public static IdMap build(
-        HugeInternalIdMappingBuilder idMapBuilder,
+        InternalHugeIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
@@ -86,7 +86,7 @@ public final class IdMapBuilder {
     }
 
     static IdMap buildChecked(
-        HugeInternalIdMappingBuilder idMapBuilder,
+        InternalHugeIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,

@@ -26,19 +26,19 @@ import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuilder<LokiInternalIdMappingBuilder.BulkAdder> {
+public final class InternalBitIdMappingBuilder implements InternalIdMappingBuilder<InternalBitIdMappingBuilder.BulkAdder> {
 
     private final SparseLongArray.Builder builder;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static LokiInternalIdMappingBuilder of(long length, AllocationTracker tracker) {
+    public static InternalBitIdMappingBuilder of(long length, AllocationTracker tracker) {
         var builder = SparseLongArray.builder(length);
-        return new LokiInternalIdMappingBuilder(builder, length);
+        return new InternalBitIdMappingBuilder(builder, length);
     }
 
-    private LokiInternalIdMappingBuilder(SparseLongArray.Builder builder, final long length) {
+    private InternalBitIdMappingBuilder(SparseLongArray.Builder builder, final long length) {
         this.builder = builder;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -46,7 +46,7 @@ public final class LokiInternalIdMappingBuilder implements InternalIdMappingBuil
     }
 
     @Override
-    public @Nullable LokiInternalIdMappingBuilder.BulkAdder allocate(int batchLength) {
+    public @Nullable InternalBitIdMappingBuilder.BulkAdder allocate(int batchLength) {
         return this.allocate((long) batchLength);
     }
 

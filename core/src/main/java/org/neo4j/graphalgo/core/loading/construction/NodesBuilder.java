@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.HugeInternalIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
@@ -54,7 +54,7 @@ public class NodesBuilder {
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final HugeInternalIdMappingBuilder hugeInternalIdMappingBuilder;
+    private final InternalHugeIdMappingBuilder internalHugeIdMappingBuilder;
     private final NodeImporter nodeImporter;
 
     private final Lock lock;
@@ -76,9 +76,9 @@ public class NodesBuilder {
 
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
-        this.hugeInternalIdMappingBuilder = HugeInternalIdMappingBuilder.of(maxOriginalId + 1, tracker);
+        this.internalHugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(maxOriginalId + 1, tracker);
         this.nodeImporter = new NodeImporter(
-            hugeInternalIdMappingBuilder,
+            internalHugeIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
             false,
@@ -105,7 +105,7 @@ public class NodesBuilder {
         this.threadLocalBuilder.close();
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
-            hugeInternalIdMappingBuilder,
+            internalHugeIdMappingBuilder,
             nodeLabelBitSetMap,
             maxOriginalId,
             concurrency,

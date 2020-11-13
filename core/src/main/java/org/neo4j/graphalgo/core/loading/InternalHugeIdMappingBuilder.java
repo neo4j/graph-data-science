@@ -27,19 +27,19 @@ import org.neo4j.graphalgo.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class HugeInternalIdMappingBuilder implements InternalIdMappingBuilder<HugeInternalIdMappingBuilder.BulkAdder> {
+public final class InternalHugeIdMappingBuilder implements InternalIdMappingBuilder<InternalHugeIdMappingBuilder.BulkAdder> {
 
     private final HugeLongArray array;
     private final long capacity;
     private final AtomicLong allocationIndex;
     private final CloseableThreadLocal<BulkAdder> adders;
 
-    public static HugeInternalIdMappingBuilder of(long length, AllocationTracker tracker) {
+    public static InternalHugeIdMappingBuilder of(long length, AllocationTracker tracker) {
         HugeLongArray array = HugeLongArray.newArray(length, tracker);
-        return new HugeInternalIdMappingBuilder(array, length);
+        return new InternalHugeIdMappingBuilder(array, length);
     }
 
-    private HugeInternalIdMappingBuilder(HugeLongArray array, final long length) {
+    private InternalHugeIdMappingBuilder(HugeLongArray array, final long length) {
         this.array = array;
         this.capacity = length;
         this.allocationIndex = new AtomicLong();
@@ -47,7 +47,7 @@ public final class HugeInternalIdMappingBuilder implements InternalIdMappingBuil
     }
 
     @Override
-    public @Nullable HugeInternalIdMappingBuilder.BulkAdder allocate(int batchLength) {
+    public @Nullable InternalHugeIdMappingBuilder.BulkAdder allocate(int batchLength) {
         return this.allocate((long) batchLength);
     }
 
