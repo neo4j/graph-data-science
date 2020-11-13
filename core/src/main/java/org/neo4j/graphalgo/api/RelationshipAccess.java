@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.api;
 
+@Deprecated
 public interface RelationshipAccess {
 
+    @Deprecated
     long getTarget(long nodeId, long index);
 
 }
