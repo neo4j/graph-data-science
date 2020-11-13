@@ -1,15 +1,12 @@
 function tabTheSource($content) {
-    var SESSION_STORAGE_KEY = 'active_procedure_mode';
-    var MODES = {
+    // order of precedence for default active tab
+    const MODES = {
+        'train': 'Train mode',
         'stream': 'Stream mode',
         'mutate': 'Mutate mode',
         'stats': 'Stats mode',
-        'write': 'Write mode',
-        'train': 'Train mode'
+        'write': 'Write mode'
     };
-    updateSelectedModeFromQueryParams(MODES, SESSION_STORAGE_KEY);
-
-    var storedMode = getStoredActiveProcedureMode(SESSION_STORAGE_KEY);
 
     var $UL = $('<ul class="nav nav-tabs" role="tablist"/>');
     var $LI = $('<li role="presentation"/>');
@@ -33,15 +30,11 @@ function tabTheSource($content) {
         for (var j = 0; j < $elements.length; j++) {
             $elements[j].tab('show');
         }
-        if (storageAvailable('sessionStorage')) {
-            sessionStorage.setItem(SESSION_STORAGE_KEY, mode);
-        }
     };
 
     $('div.tabbed-example', $content).each(function () {
         var $exampleBlock = $(this);
-        var title = $exampleBlock.children('div.example-title', this).first().text();
-        var modes = [];
+        var supportedModes = [];
         var $modeBlocks = {};
         $(this).children('div.tabbed-example-contents').children('div.listingblock,div.informalexample[class*="include-with"]').each(function () {
             var $this = $(this);
@@ -56,14 +49,14 @@ function tabTheSource($content) {
                     }
                 }
             }
-            modes.push(mode);
+            supportedModes.push(mode);
             $modeBlocks[mode] = $(this);
         });
 
-        if (modes.length >= 1) {
+        if (supportedModes.length >= 1) {
             snippets.push({
                 '$exampleBlock': $exampleBlock,
-                'modes': modes,
+                'modes': supportedModes,
                 '$modeBlocks': $modeBlocks
             });
         }
@@ -72,15 +65,15 @@ function tabTheSource($content) {
     var idNum = 0;
     for (var ix = 0; ix < snippets.length; ix++) {
         var snippet = snippets[ix];
-        var modes = snippet.modes;
+        var supportedModes = snippet.modes;
         var $modeBlocks = snippet.$modeBlocks;
         var $exampleBlock = snippet.$exampleBlock;
         var idBase = 'tabbed-example-' + idNum++;
         var $wrapper = $WRAPPER.clone();
         var $ul = $UL.clone();
 
-        for (var i = 0; i < modes.length; i++) {
-            var mode = modes[i];
+        for (var i = 0; i < supportedModes.length; i++) {
+            var mode = supportedModes[i];
             var $content = $($modeBlocks[mode]);
             var id;
             if ($content.attr('id')) {
@@ -102,13 +95,10 @@ function tabTheSource($content) {
             }
             $wrapper.append($content);
 
-            // Do not check the storedMode when there is only one mode in the documentation.
-            if (storedMode && modes.length > 1) {
-                if (mode === storedMode) {
-                    $li.addClass('active');
-                    $content.addClass('active');
-                }
-            } else if (i === 0) {
+            // the first supported mode is active
+            // the order is not the order in the doc source, but the order of MODES above
+            // but of course it's nice if these are consistent
+            if (i === 0) {
                 $li.addClass('active');
                 $content.addClass('active');
             }
@@ -119,46 +109,4 @@ function tabTheSource($content) {
         $exampleBlock.children('div.example-title', this).first().after($ul);
         $exampleBlock.append($wrapper);
     }
-}
-
-function storageAvailable(type) {
-    try {
-        var storage = window[type];
-        var x = '__storage_test__';
-        storage.setItem(x, x);
-        storage.removeItem(x);
-        return true;
-    }
-    catch(e) {
-        return false;
-    }
-}
-
-function getStoredActiveProcedureMode(storageKey) {
-    return storageAvailable('sessionStorage') ? sessionStorage.getItem(storageKey) || false : false;
-}
-
-function updateSelectedModeFromQueryParams(availableModes, storageKey) {
-    var modeFromParams = getQueryParamsFromUrl()["mode"];
-
-    if (modeFromParams && storageAvailable("sessionStorage")) {
-        sessionStorage.setItem(storageKey, modeFromParams);
-    } else {
-        sessionStorage.setItem(storageKey, Object.keys(availableModes)[0]);
-    }
-}
-
-function getQueryParamsFromUrl() {
-    var vars = [];
-    var hash = [];
-    var hashes = window.location.href
-      .split("#")[0]
-      .slice(window.location.href.indexOf("?") + 1)
-      .split("&");
-    for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split("=");
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
 }
