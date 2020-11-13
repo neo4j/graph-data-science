@@ -67,7 +67,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class TestSupport {
 
     public enum FactoryType {
-        NATIVE, CYPHER
+        NATIVE,
+        NATIVE_BIT_ID_MAP,
+        CYPHER
     }
 
     private TestSupport() {}
@@ -78,7 +80,7 @@ public final class TestSupport {
     public @interface AllGraphStoreFactoryTypesTest {}
 
     public static Stream<FactoryType> allFactoryTypes() {
-        return Stream.of(FactoryType.NATIVE, FactoryType.CYPHER);
+        return Stream.of(FactoryType.NATIVE, FactoryType.NATIVE_BIT_ID_MAP, FactoryType.CYPHER);
     }
 
     public static Stream<Orientation> allDirectedProjections() {
