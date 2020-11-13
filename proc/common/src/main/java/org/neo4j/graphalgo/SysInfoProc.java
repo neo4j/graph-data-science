@@ -122,7 +122,8 @@ public class SysInfoProc {
             .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
             .add(value("featureKernelTracker", GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()))
             .add(value("featurePropertyValueIndex", GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()))
-            .add(value("featureParallelPropertyValueIndex", GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()));
+            .add(value("featureParallelPropertyValueIndex", GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()))
+            .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
     }
 
     private static void buildInfo(BuildInfoProperties properties, Stream.Builder<DebugValue> builder) {

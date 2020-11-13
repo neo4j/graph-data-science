@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Map;
 import java.util.Optional;
@@ -165,28 +166,40 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             dimensions,
             loadingContext.transaction()
         );
-        return new ScanningNodesImporter<>(
-            graphCreateConfig,
-            loadingContext,
-            dimensions,
-            progressLogger,
-            concurrency,
-            properties,
-            internalIdMappingBuilderFactory(),
-            nodeMappingBuilder()
-        ).call(loadingContext.log());
+
+        var scanningNodesImporter = GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()
+            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, bitIdMappingBuilderFactory(), bitIdMapBuilder())
+            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, hugeIdMappingBuilderFactory(), hugeIdMapBuilder());
+
+        return scanningNodesImporter.call(loadingContext.log());
     }
 
     @NotNull
-    private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> internalIdMappingBuilderFactory() {
+    private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> bitIdMappingBuilderFactory() {
         return nodeCount -> InternalBitIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
 
     @NotNull
-    private NodeMappingBuilder<InternalBitIdMappingBuilder> nodeMappingBuilder() {
+    private NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
         return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
             idMapBuilder,
             labelInformation,
+            tracker
+        );
+    }
+
+    @NotNull
+    private InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> hugeIdMappingBuilderFactory() {
+        return nodeCount -> InternalHugeIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+    }
+
+    @NotNull
+    private NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+            idMapBuilder,
+            labelInformation,
+            graphDimensions.highestNeoId(),
+            concurrency,
             tracker
         );
     }

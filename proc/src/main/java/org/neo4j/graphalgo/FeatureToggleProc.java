@@ -112,6 +112,19 @@ public final class FeatureToggleProc {
         GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set((int) maxArrayLengthShift);
     }
 
+    @Procedure("gds.features.useBitIdMap.reset")
+    @Description("Set the behavior of whether to use the bit id map. That value is returned.")
+    public Stream<FeatureState> resetUseBitIdMap() {
+        GdsFeatureToggles.USE_BIT_ID_MAP.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
+    }
+
+    @Procedure("gds.features.useBitIdMap")
+    @Description("Toggle whether the bit id map should be used during graph creation.")
+    public void useBitIdMap(@Name(value = "useBitIdMap") boolean useBitIdMap) {
+        GdsFeatureToggles.USE_BIT_ID_MAP.toggle(useBitIdMap);
+    }
+
     @Procedure("gds.features.maxArrayLengthShift.reset")
     @Description("Set the value of the max array size before paging to the default. That value is returned.")
     public Stream<FeatureValue> resetMaxArrayLengthShift() {
