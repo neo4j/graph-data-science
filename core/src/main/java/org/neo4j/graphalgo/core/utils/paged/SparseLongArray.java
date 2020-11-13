@@ -36,23 +36,29 @@ public final class SparseLongArray {
     public static final long NOT_FOUND = -1;
 
     public static final int BLOCK_SIZE = 64;
-    public static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
+    private static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
     private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
     private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 
-    // Number of mapped ids. This is set via the builder.
+    // Number of mapped ids.
     private final long idCount;
 
     // Each element (long) represents a page.
     // Each page represents 64 possible ids.
     private final long[] array;
 
-    // Each block represents BLOCK_SIZE pages. Each entry
-    // stores the number of ids mapped within all
-    // preceding blocks. This is set via the builder.
-    private final long[] allocationIndexes;
-    private final long[] sortedAllocationIndexes;
-    private final int[] allocationToBlockIndexes;
+
+    // Each block represents BLOCK_SIZE pages.
+    // Each value represents the id offset for all ids stored in the block.
+    // Id ranges within a block to not overlap with id ranges in other blocks.
+    // Block offsets are unordered as their insertion depends on the user of
+    // the SLA (e.g. node loading does not insert blocks in a sequential order).
+    private final long[] blockOffsets;
+    // Sorted representation of block offsets to speed up the lookup for the
+    // correct block using binary search.
+    private final long[] sortedBlockOffsets;
+    // Maps block indices from the sorted offsets to the unsorted offsets.
+    private final int[] blockMapping;
 
     public static int toValidBatchSize(int batchSize) {
         // We need to make sure that we scan aligned to the super block size, as we are not
@@ -71,15 +77,15 @@ public final class SparseLongArray {
     private SparseLongArray(
         long idCount,
         long[] array,
-        long[] allocationIndexes,
-        long[] sortedAllocationIndexes,
-        int[] allocationToBlockIndexes
+        long[] blockOffsets,
+        long[] sortedBlockOffsets,
+        int[] blockMapping
     ) {
         this.idCount = idCount;
         this.array = array;
-        this.allocationIndexes = allocationIndexes;
-        this.sortedAllocationIndexes = sortedAllocationIndexes;
-        this.allocationToBlockIndexes = allocationToBlockIndexes;
+        this.blockOffsets = blockOffsets;
+        this.sortedBlockOffsets = sortedBlockOffsets;
+        this.blockMapping = blockMapping;
     }
 
     public long idCount() {
@@ -97,8 +103,8 @@ public final class SparseLongArray {
         }
 
         var block = page >>> BLOCK_SHIFT;
-        // Get the count from all previous blocks
-        var mappedId = allocationIndexes[block];
+        // Get the id offset for that block
+        var mappedId = blockOffsets[block];
         // Count set bits up to original id
         var a = array;
         // Get count within current block
@@ -121,12 +127,12 @@ public final class SparseLongArray {
     }
 
     public long toOriginalNodeId(long mappedId) {
-        var startBlockIndex = ArrayUtil.binaryLookup(mappedId, sortedAllocationIndexes);
-        startBlockIndex = allocationToBlockIndexes[startBlockIndex];
+        var startBlockIndex = ArrayUtil.binaryLookup(mappedId, sortedBlockOffsets);
+        startBlockIndex = blockMapping[startBlockIndex];
         var array = this.array;
         var blockStart = startBlockIndex << BLOCK_SHIFT;
         var blockEnd = Math.min((startBlockIndex + 1) << BLOCK_SHIFT, array.length);
-        var originalId = allocationIndexes[startBlockIndex];
+        var originalId = blockOffsets[startBlockIndex];
         for (int blockIndex = blockStart; blockIndex < blockEnd; blockIndex++) {
             var page = array[blockIndex];
             var pos = 0;
@@ -155,26 +161,17 @@ public final class SparseLongArray {
 
     public static class Builder {
 
-        // TODO: could be shared singleton-ish thing
-//        private final AutoCloseableThreadLocal<ThreadLocalBuilder> localBuilders;
-//        private final SparseLongArrayCombiner combiner;
-
         private final long[] array;
-        private final long[] allocationIndexes;
-        // good luck figuring out how and why this works :)
-//        private long countsOfLastSeenBlock;
+        private final long[] blockOffsets;
 
         Builder(long capacity) {
-//            this.combiner = new SparseLongArrayCombiner(capacity);
-//            this.localBuilders = new AutoCloseableThreadLocal<>(
-//                () -> new ThreadLocalBuilder(capacity),
-//                Optional.of(combiner)
-//            );
-
             var size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
             this.array = new long[size];
-            this.allocationIndexes = new long[(size >>> BLOCK_SHIFT) + 1];
-            Arrays.fill(allocationIndexes, Long.MAX_VALUE);
+            this.blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
+            // The blocks are initialized with Long.MAX_VALUE to identify
+            // which blocks have been written and move unwritten ones to
+            // the end during sorting.
+            Arrays.fill(blockOffsets, Long.MAX_VALUE);
         }
 
         @TestOnly
@@ -187,26 +184,22 @@ public final class SparseLongArray {
             var prevBlock = -1;
             var prevCount = 0;
 
-            // Can we find something better than checking at every value?
+            // TODO: Can we find something better than checking at every value?
             for (int i = 0; i < length; i++) {
                 var originalId = originalIds[i + offset];
                 var block = (int) (originalId >>> 12); // BLOCK_SIZE * Long.SIZE
                 if (block != prevBlock) {
                     if (prevBlock != -1) {
-                        assert array.allocationIndexes[prevBlock] == Long.MAX_VALUE;
-                        array.allocationIndexes[prevBlock] = prevCount + allocationIndex;
-                        //                        allocationIndex += i;
+                        assert array.blockOffsets[prevBlock] == Long.MAX_VALUE;
+                        array.blockOffsets[prevBlock] = prevCount + allocationIndex;
                     }
                     prevBlock = block;
                     prevCount = i;
                 }
                 array.set(originalId);
             }
-//            if (length > 0) {
-            assert array.allocationIndexes[prevBlock] == Long.MAX_VALUE;
-            array.allocationIndexes[prevBlock] = prevCount + allocationIndex;
-            //            array.setCountsOfLastSeenBlock(length - prevCount);
-//            }
+            assert array.blockOffsets[prevBlock] == Long.MAX_VALUE;
+            array.blockOffsets[prevBlock] = prevCount + allocationIndex;
         }
 
         public SparseLongArray build() {
@@ -224,93 +217,35 @@ public final class SparseLongArray {
             long[] array = this.array;
             int size = array.length;
 
-            var allocationIndexes = this.allocationIndexes;
-            var sortedArrayIndexes = IndirectSort.mergesort(
+            var blockOffsets = this.blockOffsets;
+            var blockMapping = IndirectSort.mergesort(
                 0,
-                allocationIndexes.length,
-                new AscendingLongComparator(allocationIndexes)
+                blockOffsets.length,
+                new AscendingLongComparator(blockOffsets)
             );
-            var sortedAllocationIndexes = new long[allocationIndexes.length];
-            Arrays.setAll(sortedAllocationIndexes, i -> allocationIndexes[sortedArrayIndexes[i]]);
+            var sortedBlockOffsets = new long[blockOffsets.length];
+            Arrays.setAll(sortedBlockOffsets, i -> blockOffsets[blockMapping[i]]);
 
-            int lastSortedAllocationIndex = sortedAllocationIndexes.length - 1;
-            long count = 0;
-            while (lastSortedAllocationIndex > 0) {
-                var lastCount = sortedAllocationIndexes[lastSortedAllocationIndex];
+            int lastSortedBlockOffset = sortedBlockOffsets.length - 1;
+            long idCount = 0;
+            while (lastSortedBlockOffset > 0) {
+                var lastCount = sortedBlockOffsets[lastSortedBlockOffset];
                 if (lastCount != Long.MAX_VALUE) {
-                    count = lastCount;
+                    idCount = lastCount;
                     break;
                 }
-                --lastSortedAllocationIndex;
+                --lastSortedBlockOffset;
             }
 
-            var lastSortedBlock = sortedArrayIndexes[lastSortedAllocationIndex];
+            var lastSortedBlock = blockMapping[lastSortedBlockOffset];
             // Count the remaining ids in the last block.
             var lastBlockBegin = lastSortedBlock << BLOCK_SHIFT;
             var lastBlockEnd = Math.min(size, lastBlockBegin + BLOCK_SIZE);
             for (int page = lastBlockBegin; page < lastBlockEnd; page++) {
-                count += Long.bitCount(array[page]);
+                idCount += Long.bitCount(array[page]);
             }
 
-            return new SparseLongArray(count, array, allocationIndexes, sortedAllocationIndexes, sortedArrayIndexes);
-        }
-
-        private static class ThreadLocalBuilder implements AutoCloseable {
-
-            private final long[] array;
-            private final long[] allocationIndexes;
-            private long countsOfLastSeenBlock;
-
-            ThreadLocalBuilder(long capacity) {
-                var size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
-                this.array = new long[size];
-                this.allocationIndexes = new long[(size >>> BLOCK_SHIFT) + 1];
-            }
-
-            @Override
-            public void close() {
-            }
-
-            private void set(long originalId) {
-                var page = (int) (originalId >>> BLOCK_SHIFT);
-                var indexInPage = originalId & BLOCK_MASK;
-                var mask = 1L << indexInPage;
-                array[page] |= mask;
-            }
-
-            void setCountsFor(int block, long allocationIndex) {
-                allocationIndexes[block] = allocationIndex;
-            }
-
-            void setCountsOfLastSeenBlock(long count) {
-                countsOfLastSeenBlock = count;
-            }
-        }
-
-        static class SparseLongArrayCombiner implements Consumer<ThreadLocalBuilder> {
-
-            private final long capacity;
-            private ThreadLocalBuilder result;
-
-            SparseLongArrayCombiner(long capacity) {
-                this.capacity = capacity;
-            }
-
-            @Override
-            public void accept(ThreadLocalBuilder other) {
-                if (result == null) {
-                    result = other;
-                } else {
-                    int size = result.array.length;
-                    for (int page = 0; page < size; page++) {
-                        result.array[page] |= other.array[page];
-                    }
-                }
-            }
-
-            ThreadLocalBuilder build() {
-                return result != null ? result : new ThreadLocalBuilder(capacity);
-            }
+            return new SparseLongArray(idCount, array, blockOffsets, sortedBlockOffsets, blockMapping);
         }
     }
 
@@ -328,7 +263,6 @@ public final class SparseLongArray {
             );
         }
 
-        //        @TestOnly
         public void set(long originalId) {
             localBuilders.get().set(originalId);
         }
@@ -349,8 +283,8 @@ public final class SparseLongArray {
             long[] array = sparseLongArray.array;
             int size = array.length;
             int cappedSize = size - BLOCK_SIZE;
-            // blockCounts[0] is always 0, hence + 1
-            long[] blockCounts = new long[(size >>> BLOCK_SHIFT) + 1];
+            // blockOffsets[0] is always 0, hence + 1
+            long[] blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
 
             long count = 0;
             int block;
@@ -358,7 +292,7 @@ public final class SparseLongArray {
                 for (int page = block; page < block + BLOCK_SIZE; page++) {
                     count += Long.bitCount(array[page]);
                 }
-                blockCounts[(block >>> BLOCK_SHIFT) + 1] = count;
+                blockOffsets[(block >>> BLOCK_SHIFT) + 1] = count;
             }
 
             // Count the remaining ids in the tail.
@@ -367,10 +301,11 @@ public final class SparseLongArray {
                 count += Long.bitCount(array[page]);
             }
 
-            var sortedArrayIndexes = new int[blockCounts.length];
-            Arrays.setAll(sortedArrayIndexes, i -> i);
+            // No need to sort as the blocks are already sorted.
+            var blockMapping = new int[blockOffsets.length];
+            Arrays.setAll(blockMapping, i -> i);
 
-            return new SparseLongArray(count, array, blockCounts, blockCounts, sortedArrayIndexes);
+            return new SparseLongArray(count, array, blockOffsets, blockOffsets, blockMapping);
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {
