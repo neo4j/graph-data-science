@@ -105,7 +105,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         ImportSizing sizing,
         StoreScanner<NodeReference> scanner
     ) {
-        idMapBuilder = internalIdMappingBuilderFactory.of(dimensions.highestNeoId() + 1);
+        idMapBuilder = internalIdMappingBuilderFactory.of(dimensions);
 
         IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
 

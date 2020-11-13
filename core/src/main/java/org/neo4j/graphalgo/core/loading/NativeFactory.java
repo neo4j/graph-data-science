@@ -176,7 +176,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private InternalIdMappingBuilderFactory<InternalBitIdMappingBuilder, InternalBitIdMappingBuilder.BulkAdder> bitIdMappingBuilderFactory() {
-        return nodeCount -> InternalBitIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+        return dimensions -> InternalBitIdMappingBuilder.of(dimensions.highestNeoId() + 1, loadingContext.tracker());
     }
 
     @NotNull
@@ -190,7 +190,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
     @NotNull
     private InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> hugeIdMappingBuilderFactory() {
-        return nodeCount -> InternalHugeIdMappingBuilder.of(nodeCount, loadingContext.tracker());
+        return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.tracker());
     }
 
     @NotNull

@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.GraphDimensions;
+
 public interface InternalIdMappingBuilderFactory<BUILDER extends InternalIdMappingBuilder<ALLOCATOR>, ALLOCATOR extends IdMappingAllocator> {
 
-    BUILDER of(long size);
+    BUILDER of(GraphDimensions dimensions);
 }
