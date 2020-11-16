@@ -214,7 +214,7 @@ YIELD
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../common-configuration/common-write-relationships-configuration-named-graph.adoc[]
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
@@ -257,7 +257,7 @@ YIELD
   configuration: Map
 ----
 
-include::../common-configuration/common-write-relationships-configuration-anonymous-graph.adoc[]
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
 
 include::specific-configuration.adoc[]
 
