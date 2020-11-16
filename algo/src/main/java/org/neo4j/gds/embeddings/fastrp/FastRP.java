@@ -45,7 +45,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
     private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
-    private static final double ENTRY_PROBABILITY = 1.0f / (2.0f * SPARSITY);
+    private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
 
     private final Graph graph;
     private final int concurrency;
@@ -228,7 +228,7 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
 
         if (randomValue < ENTRY_PROBABILITY) {
             return entryValue;
-        } else if (randomValue < ENTRY_PROBABILITY * 2.0f) {
+        } else if (randomValue < ENTRY_PROBABILITY * 2.0) {
             return -entryValue;
         } else {
             return 0.0f;
