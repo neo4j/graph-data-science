@@ -5,5 +5,8 @@
 | nodeLabels             | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
 | relationshipTypes      | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | concurrency            | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+ifeval::["{entity}" == "relationship"]
+| mutateRelationshipType | String      | n/a                    | no       | The relationship type used for the new relationships written to Neo4j.
+endif::[]
 | mutateProperty         | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
 |===
