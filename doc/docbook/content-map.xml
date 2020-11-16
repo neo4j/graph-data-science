@@ -215,6 +215,9 @@
             <d:tocentry linkend="transaction-handling">
                 <?dbhtml filename="production-deployment/transaction-handling/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="fabric">
+                <?dbhtml filename="production-deployment/fabric/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="appendix-a">
