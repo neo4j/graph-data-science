@@ -175,10 +175,11 @@ public final class RandomGraphGenerator {
             degree = degreeProducer.applyAsLong(nodeId);
 
             for (int j = 0; j < degree; j++) {
-                if (allowSelfLoops.value()) {
-                    targetId = relationshipProducer.applyAsLong(nodeId);
-                } else {
-                    while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}
+                targetId = relationshipProducer.applyAsLong(nodeId);
+                if (!allowSelfLoops.value()) {
+                    while (targetId == nodeId) {
+                        targetId = relationshipProducer.applyAsLong(nodeId);
+                    }
                 }
                 assert (targetId < nodeCount);
                 property = relationshipPropertyProducer.getPropertyValue(random);
