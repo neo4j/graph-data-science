@@ -32,7 +32,9 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -74,6 +76,19 @@ class RandomGraphGeneratorTest {
 
         assertEquals(graph.nodeCount(), nbrNodes);
         assertEquals((double) nbrNodes * avgDeg, graph.relationshipCount(), 1_000D);
+
+        var previousAvgDegree = Double.POSITIVE_INFINITY;
+        var bucketSize = nbrNodes / 10;
+        for (var start = 0L; start < nbrNodes; start += bucketSize) {
+            var end = Math.min(start + bucketSize, nbrNodes);
+            var avgDegreeInBucket = LongStream
+                    .rangeClosed(start, end)
+                    .mapToInt(graph::degree)
+                    .average()
+                    .orElse(0.0);
+            assertThat(avgDegreeInBucket).isLessThanOrEqualTo(previousAvgDegree);
+            previousAvgDegree = avgDegreeInBucket;
+        }
     }
 
     @Test

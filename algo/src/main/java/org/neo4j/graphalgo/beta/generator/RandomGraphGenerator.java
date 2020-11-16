@@ -173,7 +173,7 @@ public final class RandomGraphGenerator {
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             degree = degreeProducer.applyAsLong(nodeId);
-            
+
             for (int j = 0; j < degree; j++) {
                 if (allowSelfLoops.value()) {
                     targetId = relationshipProducer.applyAsLong(nodeId);
@@ -182,7 +182,11 @@ public final class RandomGraphGenerator {
                 }
                 assert (targetId < nodeCount);
                 property = relationshipPropertyProducer.getPropertyValue(random);
-                relationshipsImporter.addFromInternal(nodeId, targetId, property);
+                if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
+                    relationshipsImporter.addFromInternal(targetId, nodeId, property);
+                } else {
+                    relationshipsImporter.addFromInternal(nodeId, targetId, property);
+                }
             }
         }
     }
