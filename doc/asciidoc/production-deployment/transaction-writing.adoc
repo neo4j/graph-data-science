@@ -110,8 +110,7 @@ try (var session = driver.session()) {
 
     // First run the remove statement
     session.writeTransaction(tx -> {
-        tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
-        return null;
+        return tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
     });
 
     // Create the in-memory graph
