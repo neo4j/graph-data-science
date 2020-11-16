@@ -1,0 +1,10 @@
+[[catalog-graph-exists]]
+= Check if a graph exists in the catalog
+
+We can check if a graph is stored in the catalog by looking up its name.
+
+.Check if a graph exists in the catalog:
+[source,cypher]
+----
+CALL gds.graph.exists('my-store-graph') YIELD exists;
+----

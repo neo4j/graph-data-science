@@ -1,0 +1,76 @@
+[[graph-catalog-ops]]
+= Graph Catalog
+
+[abstract]
+--
+This section details the graph catalog operations available to manage named graph projections within the Neo4j Graph Data Science library.
+--
+
+Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
+A graph projection can be seen as a view over the stored graph, containing only analytically relevant, potentially aggregated, topological and property information.
+Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
+
+The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
+Using its name, a created graph can be used many times in the analytical workflow.
+Named graphs can be created using either a <<native-projection, Native projection>> or a <<cypher-projection, Cypher projection>>.
+After usage, named graphs can be removed from the catalog to free up main memory.
+
+Graphs can also be created when running an algorithm without placing them in the catalog.
+We refer to such graphs as <<anonymous-graph, anonymous graphs>>.
+
+[NOTE]
+====
+The graph catalog exists as long as the Neo4j instance is running.
+When Neo4j is restarted, graphs stored in the catalog are lost and need to be re-created.
+====
+
+This chapter explains the available graph catalog operations.
+
+[[table-proc]]
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                                     | Description
+| <<catalog-graph-create, gds.graph.create>>                                               | Creates a graph in the catalog using a <<native-projection, Native projection>>.
+| <<catalog-graph-create, gds.graph.create.cypher>>                                        | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
+| <<catalog-graph-list, gds.graph.list>>                                                   | Prints information about graphs that are currently stored in the catalog.
+| <<catalog-graph-exists, gds.graph.exists>>                                               | Checks if a named graph is stored in the catalog.
+| <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>>                 | Removes node properties from a named graph.
+| <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>                         | Deletes relationships of a given relationship type from a named graph.
+| <<catalog-graph-drop, gds.graph.drop>>                                                   | Drops a named graph from the catalog.
+| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperty>>                   | Streams a single node property stored in a named graph.
+| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperties>>                 | Streams node properties stored in a named graph.
+| <<catalog-graph-stream-relationship-properties, gds.graph.streamRelationshipProperty>>   | Streams a single relationship property stored in a named graph.
+| <<catalog-graph-stream-relationship-properties, gds.graph.streamRelationshipProperties>> | Streams relationship properties stored in a named graph.
+| <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>                   | Writes node properties stored in a named graph to Neo4j.
+| <<catalog-graph-write-relationship, gds.graph.writeRelationship>>                        | Writes relationships stored in a named graph to Neo4j.
+| <<catalog-graph-export, gds.graph.export>>                                               | Exports a named graph into a new offline Neo4j database.
+|===
+
+[NOTE]
+====
+Creating, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
+Graphs created by a different Neo4j user are not accessible at any time.
+====
+
+
+include::graph-create.adoc[leveloffset=+1]
+
+include::graph-list.adoc[leveloffset=+1]
+
+include::graph-exists.adoc[leveloffset=+1]
+
+include::graph-remove-node-properties.adoc[leveloffset=+1]
+
+include::graph-delete-relationship-type.adoc[leveloffset=+1]
+
+include::graph-drop.adoc[leveloffset=+1]
+
+include::graph-stream-node-properties.adoc[leveloffset=+1]
+
+include::graph-stream-relationship-properties.adoc[leveloffset=+1]
+
+include::graph-write-node-properties.adoc[leveloffset=+1]
+
+include::graph-write-relationship.adoc[leveloffset=+1]
+
+include::graph-export.adoc[leveloffset=+1]
