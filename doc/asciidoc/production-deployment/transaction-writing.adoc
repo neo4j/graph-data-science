@@ -78,3 +78,54 @@ CALL gds.nodeSimilarity.write(
 :COMMIT
 ----
 
+
+==== Java API
+
+The same issue can be seen using the Java API, the examples are below.
+
+Incorrect use.
+
+[source, java]
+----
+try (var session = driver.session()) {
+	var params = Map.<String, Object>of("graphName", "genre-related-to-artist");
+	session.writeTransaction(tx -> {
+		tx.run(CYPHER_DROP_GDS_GRAPH_IF_EXISTS, params).consume();
+		tx.run(CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE, params).consume();
+		tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
+		tx.run(CYPHER_WRITE_SIMILAR_TO, params).consume();
+		return null;
+	});
+}
+----
+
+Here we are facing the same issue with running everything in the same transaction.
+This can be written correctly by splitting each statement in its own transaction.
+
+Correct handling of the statements.
+
+[source, java]
+----
+try (var session = driver.session()) {
+
+    // First run the remove statement
+    session.writeTransaction(tx -> {
+        tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
+        return null;
+    });
+
+    // Create the in-memory graph
+    var params = Map.<String, Object>of("graphName", "genre-related-to-artist");
+	session.writeTransaction(tx -> {
+	    tx.run(CYPHER_DROP_GDS_GRAPH_IF_EXISTS, params).consume();
+	    tx.run(CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE, params).consume();
+	    return null;
+    });
+
+	// Run the algorithm
+    session.writeTransaction(tx -> {
+        tx.run(CYPHER_WRITE_SIMILAR_TO, params).consume();
+        return null;
+    });
+}
+----
