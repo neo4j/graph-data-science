@@ -162,7 +162,7 @@ public final class SparseLongArray {
                     mask >>= shift;
                 }
 
-                return (blockIndex << BLOCK_SHIFT) + pos;
+                return (((long) blockIndex) << BLOCK_SHIFT) + pos;
             }
             originalId += idsInPage;
         }

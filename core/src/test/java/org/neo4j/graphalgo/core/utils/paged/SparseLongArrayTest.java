@@ -276,6 +276,16 @@ class SparseLongArrayTest {
         }
     }
 
+    @Test
+    void testValueLargerThanIntMax() {
+        var maxId = ((long) Integer.MAX_VALUE) + 1;
+        var builder = SparseLongArray.builder(maxId + 1);
+        builder.set(0, maxId);
+        var array = builder.build();
+        assertEquals(0, array.toMappedNodeId(maxId));
+        assertEquals(maxId, array.toOriginalNodeId(0));
+    }
+
     @ParameterizedTest
     @MethodSource("stridesAndChunkSizes")
     void testSetParallel(int stride, int blocksPerChunk) {
