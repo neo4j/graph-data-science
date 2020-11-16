@@ -182,6 +182,10 @@ public final class RandomGraphGenerator {
                 }
                 assert (targetId < nodeCount);
                 property = relationshipPropertyProducer.getPropertyValue(random);
+                // For POWER_LAW, we generate a normal distributed out-degree value
+                // and connect to nodes where the target is power-law-distributed.
+                // In order to have the out degree follow a power-law distribution,
+                // we have to swap the relationship.
                 if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
                     relationshipsImporter.addFromInternal(targetId, nodeId, property);
                 } else {
