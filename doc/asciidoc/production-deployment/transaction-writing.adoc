@@ -1,0 +1,80 @@
+=== Transaction writing examples
+
+==== Cypher Shell
+
+Example for incorrect use.
+
+[source, cypher]
+----
+:BEGIN
+
+// Create the in-memory graph
+CALL gds.graph.create.cypher(
+  'test',
+  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) as id',
+  'MATCH (a:Artist) <-[:RELEASED_BY]- (:Album) -[:HAS_GENRE]-> (g:Genre)
+   RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
+);
+
+// Delete the old stuff
+MATCH () -[r:SIMILAR_TO]-> () DELETE r;
+
+// Run the algorithm
+CALL gds.nodeSimilarity.write(
+  'test', {
+    writeRelationshipType: 'SIMILAR_TO',
+    writeProperty: 'score'
+  }
+);
+
+:COMMIT
+----
+
+The issue with the above statement is that all the queries run in the same transaction.
+
+Correct handling of the above statement would be to run each statement in its own transaction.
+Notice the reordering of the statements, this ensures that the in-memory graph will have the most recent changes after the removal of the relationships.
+
+First remove the unwanted relationships.
+
+[source, cypher]
+----
+:BEGIN
+
+MATCH () -[r:SIMILAR_TO]-> () DELETE r;
+
+:COMMIT
+----
+
+Create the in-memory graph.
+
+[source, cypher]
+----
+:BEGIN
+
+CALL gds.graph.create.cypher(
+  'test',
+  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) as id',
+  'MATCH (a:Artist) <-[:RELEASED_BY]- (:Album) -[:HAS_GENRE]-> (g:Genre)
+   RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
+);
+
+:COMMIT
+----
+
+Run the algorithm.
+
+[source, cypher]
+----
+:BEGIN
+
+CALL gds.nodeSimilarity.write(
+  'test', {
+    writeRelationshipType: 'SIMILAR_TO',
+    writeProperty: 'score'
+  }
+);
+
+:COMMIT
+----
+
