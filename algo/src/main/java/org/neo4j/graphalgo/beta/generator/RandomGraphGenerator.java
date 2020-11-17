@@ -173,16 +173,25 @@ public final class RandomGraphGenerator {
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             degree = degreeProducer.applyAsLong(nodeId);
-            
+
             for (int j = 0; j < degree; j++) {
-                if (allowSelfLoops.value()) {
-                    targetId = relationshipProducer.applyAsLong(nodeId);
-                } else {
-                    while ((targetId = relationshipProducer.applyAsLong(nodeId)) == nodeId) {}
+                targetId = relationshipProducer.applyAsLong(nodeId);
+                if (!allowSelfLoops.value()) {
+                    while (targetId == nodeId) {
+                        targetId = relationshipProducer.applyAsLong(nodeId);
+                    }
                 }
                 assert (targetId < nodeCount);
                 property = relationshipPropertyProducer.getPropertyValue(random);
-                relationshipsImporter.addFromInternal(nodeId, targetId, property);
+                // For POWER_LAW, we generate a normal distributed out-degree value
+                // and connect to nodes where the target is power-law-distributed.
+                // In order to have the out degree follow a power-law distribution,
+                // we have to swap the relationship.
+                if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
+                    relationshipsImporter.addFromInternal(targetId, nodeId, property);
+                } else {
+                    relationshipsImporter.addFromInternal(nodeId, targetId, property);
+                }
             }
         }
     }
