@@ -3,7 +3,7 @@
 [NOTE]
 ====
 The code in this section is for illustrative purposes.
-The goal is to illustrate correct usage of the GDS library write functionality with Cypher Shell and Java API.
+The goal is to demonstrate correct usage of the GDS library write functionality with Cypher Shell and Java API.
 ====
 
 == Cypher Shell
@@ -88,6 +88,32 @@ CALL gds.nodeSimilarity.write(
 == Java API
 
 The same issue can be seen using the Java API, the examples are below.
+
+.Constants used throughout the examples below:
+[source, java]
+----
+// Removes the in-memory graph (if exists) from the graph catalog
+static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
+    "CALL gds.graph.drop('test', false)";
+
+// Creates the in-memory graph
+static final String CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE =
+    "CALL gds.graph.create.cypher(" +
+    "    'test', " +
+    "    'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id', " +
+    "    'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre) " +
+    "       RETURN id(g) AS source, id(a) AS target, \"IS_ASSOCIATED_WITH\" AS type'" +
+    ")";
+
+// Runs NodeSimilarity in `write` mode over the in-memory graph
+static final String CYPHER_WRITE_SIMILAR_TO =
+    "CALL gds.nodeSimilarity.write(" +
+    "   'test', {" +
+    "       writeRelationshipType: 'SIMILAR_TO'," +
+    "       writeProperty: 'score'"+
+    "   }"
+    ");";
+----
 
 .Incorrect use:
 [source, java]
