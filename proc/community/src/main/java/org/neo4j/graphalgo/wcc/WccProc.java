@@ -35,7 +35,7 @@ final class WccProc {
     private WccProc() {}
 
     static <CONFIG extends WccBaseConfig> AlgorithmFactory<Wcc, CONFIG> algorithmFactory() {
-        return new WccFactory<>();
+        return new WccAlgorithmFactory<>();
     }
 
     static <PROC_RESULT, CONFIG extends WccBaseConfig> AbstractCommunityResultBuilder<PROC_RESULT> resultBuilder(
