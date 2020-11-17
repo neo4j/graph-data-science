@@ -36,7 +36,12 @@ public final class DistributionHelper {
 
     // https://stackoverflow.com/questions/17882907/python-scipy-stats-powerlaw-negative-exponent/46065079#46065079
     public static long powerLawSample(long min, long max, double gamma, Random random) {
-        double v = Math.pow(((Math.pow(max, -gamma + 1.0d) - Math.pow(min, -gamma + 1.0d)) * random.nextDouble() + Math.pow(min, -gamma + 1.0d)), 1.0d / (-gamma + 1.0d));
-        return Math.round(v);
+        double maxGamma = Math.pow(max, -gamma + 1.0d);
+        double minGamma = Math.pow(min, -gamma + 1.0d);
+        // (max^(-gamma + 1) - min^(-gamma + 1)) * y + min^(-gamma + 1)
+        double base = (maxGamma - minGamma) * random.nextDouble() + minGamma;
+        // 1 / (-gamma + 1)
+        double exponent = 1.0d / (-gamma + 1.0d);
+        return Math.round(Math.pow(base, exponent));
     }
 }
