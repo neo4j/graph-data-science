@@ -2,7 +2,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name               | Type    | Default | Optional | Description
-| nodeWeightProperty | String  | null    | no       | The name of a node property that contains node weights which will be used for similarity computation.
+| nodeWeightProperty | String  | n/a     | no       | The name of a node property that contains node weights which will be used for similarity computation.
 | topK               | Integer | 10      | yes      | The number of neighbors to find for each node. The K-nearest neighbors are returned. This value cannot be lower than 1.
 | sampleRate         | Float   | 0.5     | yes      | Sample rate to limit the number of comparisons per node. Value must be between 0 (exclusive) and 1 (inclusive).
 | deltaThreshold     | Float   | 0.001   | yes      | Value as a percentage to determine when to stop early. If fewer updates than the configured value happen, the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).
