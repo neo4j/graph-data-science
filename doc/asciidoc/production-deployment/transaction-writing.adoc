@@ -1,6 +1,12 @@
-=== Transaction writing examples
+= Transaction writing examples
 
-==== Cypher Shell
+[NOTE]
+====
+The code in this section is for illustrative purposes.
+The goal is to illustrate correct usage of the GDS library write functionality with Cypher Shell and Java API.
+====
+
+== Cypher Shell
 
 Example for incorrect use.
 
@@ -11,13 +17,13 @@ Example for incorrect use.
 // Create the in-memory graph
 CALL gds.graph.create.cypher(
   'test',
-  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) as id',
-  'MATCH (a:Artist) <-[:RELEASED_BY]- (:Album) -[:HAS_GENRE]-> (g:Genre)
+  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
+  'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
    RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
 );
 
 // Delete the old stuff
-MATCH () -[r:SIMILAR_TO]-> () DELETE r;
+MATCH ()-[r:SIMILAR_TO]->() DELETE r;
 
 // Run the algorithm
 CALL gds.nodeSimilarity.write(
@@ -32,7 +38,7 @@ CALL gds.nodeSimilarity.write(
 
 The issue with the above statement is that all the queries run in the same transaction.
 
-Correct handling of the above statement would be to run each statement in its own transaction.
+A correct handling of the above statement would be to run each statement in its own transaction, which is shown below.
 Notice the reordering of the statements, this ensures that the in-memory graph will have the most recent changes after the removal of the relationships.
 
 First remove the unwanted relationships.
@@ -41,7 +47,7 @@ First remove the unwanted relationships.
 ----
 :BEGIN
 
-MATCH () -[r:SIMILAR_TO]-> () DELETE r;
+MATCH ()-[r:SIMILAR_TO]->() DELETE r;
 
 :COMMIT
 ----
@@ -54,8 +60,8 @@ Create the in-memory graph.
 
 CALL gds.graph.create.cypher(
   'test',
-  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) as id',
-  'MATCH (a:Artist) <-[:RELEASED_BY]- (:Album) -[:HAS_GENRE]-> (g:Genre)
+  'MATCH (n) WHERE n:Artist OR n:Genre RETURN id(n) AS id',
+  'MATCH (a:Artist)<-[:RELEASED_BY]-(:Album)-[:HAS_GENRE]->(g:Genre)
    RETURN id(g) AS source, id(a) AS target, "IS_ASSOCIATED_WITH" AS type'
 );
 
@@ -79,12 +85,11 @@ CALL gds.nodeSimilarity.write(
 ----
 
 
-==== Java API
+== Java API
 
 The same issue can be seen using the Java API, the examples are below.
 
-Incorrect use.
-
+.Incorrect use:
 [source, java]
 ----
 try (var session = driver.session()) {
@@ -92,7 +97,7 @@ try (var session = driver.session()) {
 	session.writeTransaction(tx -> {
 		tx.run(CYPHER_DROP_GDS_GRAPH_IF_EXISTS, params).consume();
 		tx.run(CYPHER_CREATE_GDS_GRAPH_ARTIST_GENRE, params).consume();
-		tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
+		tx.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r").consume();
 		tx.run(CYPHER_WRITE_SIMILAR_TO, params).consume();
 		return null;
 	});
@@ -102,15 +107,14 @@ try (var session = driver.session()) {
 Here we are facing the same issue with running everything in the same transaction.
 This can be written correctly by splitting each statement in its own transaction.
 
-Correct handling of the statements.
-
+.Correct handling of the statements:
 [source, java]
 ----
 try (var session = driver.session()) {
 
     // First run the remove statement
     session.writeTransaction(tx -> {
-        return tx.run("MATCH () -[r:SIMILAR_TO]-> () DELETE r").consume();
+        return tx.run("MATCH ()-[r:SIMILAR_TO]->() DELETE r").consume();
     });
 
     // Create the in-memory graph

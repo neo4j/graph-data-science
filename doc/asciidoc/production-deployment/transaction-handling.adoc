@@ -71,7 +71,7 @@ The number of transactions used depends on the size of the results and the `writ
 These transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
-include::transaction-writing.adoc[levelOffset=+3]
+include::transaction-writing.adoc[leveloffset=+2]
 
 
 [[tx-termination]]
