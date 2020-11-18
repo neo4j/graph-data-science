@@ -42,7 +42,7 @@ public class Scalar extends Tensor<Scalar> {
         return new Scalar(value() + b.value());
     }
 
-    private double value() {
+    public double value() {
         return data[0];
     }
 }

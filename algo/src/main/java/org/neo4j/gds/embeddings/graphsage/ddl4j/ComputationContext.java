@@ -39,14 +39,14 @@ public class ComputationContext {
         this.gradients = new ConcurrentHashMap<>();
     }
 
-    public Tensor<?> forward(Variable<?> variable) {
+    public <T extends Tensor<T>> T forward(Variable<T> variable) {
         for (Variable<?> parent : variable.parents()) {
             if (!data.containsKey(parent)) {
                 Tensor<?> parentData = forward(parent);
                 data.put(parent, parentData);
             }
         }
-        return data.computeIfAbsent(variable, ignore -> variable.apply(this));
+        return (T) data.computeIfAbsent(variable, ignore -> variable.apply(this));
     }
 
     public Tensor<?> data(Variable<?> variable) {
