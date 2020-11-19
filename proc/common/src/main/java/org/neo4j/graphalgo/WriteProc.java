@@ -46,7 +46,7 @@ public abstract class WriteProc<
         throw new UnsupportedOperationException("Write procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return List.of(ImmutableNodeProperty.of(computationResult.config().writeProperty(), nodeProperties(computationResult)));
     }
 

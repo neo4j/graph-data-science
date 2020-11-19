@@ -63,7 +63,7 @@ public class NodePropertyExporter extends StatementApi {
     }
 
     @ValueClass
-    public interface NodeProperty<T> {
+    public interface NodeProperty {
         String propertyKey();
 
         NodeProperties properties();
@@ -72,16 +72,16 @@ public class NodePropertyExporter extends StatementApi {
             if (propertyToken == -1) {
                 throw new IllegalStateException("No write property token id is set.");
             }
-            return ResolvedNodeProperty.of((NodeProperty<Object>) this, propertyToken);
+            return ResolvedNodeProperty.of((NodeProperty) this, propertyToken);
         }
     }
 
     @SuppressWarnings("immutables:subtype")
     @ValueClass
-    public interface ResolvedNodeProperty extends NodeProperty<Object> {
+    public interface ResolvedNodeProperty extends NodeProperty {
         int propertyToken();
 
-        static ResolvedNodeProperty of(NodeProperty<Object> nodeProperty, int propertyToken) {
+        static ResolvedNodeProperty of(NodeProperty nodeProperty, int propertyToken) {
             return ImmutableResolvedNodeProperty.of(
                 nodeProperty.propertyKey(),
                 nodeProperty.properties(),
@@ -147,11 +147,11 @@ public class NodePropertyExporter extends StatementApi {
         write(ImmutableNodeProperty.of(property, properties));
     }
 
-    public <T> void write(NodeProperty<T> nodeProperty) {
+    public void write(NodeProperty nodeProperty) {
         write(Collections.singletonList(nodeProperty));
     }
 
-    public void write(Collection<NodeProperty<?>> nodeProperties) {
+    public void write(Collection<NodeProperty> nodeProperties) {
         List<ResolvedNodeProperty> resolvedNodeProperties = nodeProperties.stream()
             .map(desc -> desc.resolveWith(getOrCreatePropertyToken(desc.propertyKey())))
             .collect(Collectors.toList());
