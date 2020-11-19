@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 final class PregelBaseProc {
 
     static <ALGO extends Algorithm<ALGO, Pregel.PregelResult>, CONFIG extends PregelConfig>
-    List<NodePropertyExporter.NodeProperty<?>> nodeProperties(
+    List<NodePropertyExporter.NodeProperty> nodeProperties(
         AlgoBaseProc.ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult,
         String propertyPrefix
     ) {
