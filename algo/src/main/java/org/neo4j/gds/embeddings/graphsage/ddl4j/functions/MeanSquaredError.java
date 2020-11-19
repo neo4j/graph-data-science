@@ -46,12 +46,12 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
     public Scalar apply(ComputationContext ctx) {
         Tensor<?> predictedData = ctx.data(predictions);
         Tensor<?> targetData = ctx.data(targets);
-        double sos = 0;
+        double sumOfSquares = 0;
         for (int i = 0; i < predictedData.totalSize(); i++) {
-            sos += Math.pow((predictedData.dataAt(i) - targetData.dataAt(i)), 2);
+            sumOfSquares += Math.pow((predictedData.dataAt(i) - targetData.dataAt(i)), 2);
         }
 
-        return new Scalar(sos/predictedData.totalSize());
+        return new Scalar(sumOfSquares/predictedData.totalSize());
     }
 
     @Override
