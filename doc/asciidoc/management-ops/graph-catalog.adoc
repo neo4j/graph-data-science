@@ -404,6 +404,7 @@ This can be used to write algorithm results (for example from <<algorithms-node-
 
 The relationships to write are specified by a relationship type.
 This can either be an element identifier used in a relationship projection during graph construction or the `writeRelationshipType` used in algorithms that create relationships.
+Relationships are always written using a single thread.
 
 .Write relationships to Neo4j:
 [source,cypher]
