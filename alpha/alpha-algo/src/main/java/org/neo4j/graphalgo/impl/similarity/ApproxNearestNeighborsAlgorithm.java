@@ -573,7 +573,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             topology.put(ANN_OUT_GRAPH, outRelationships.topology());
             topology.put(ANN_IN_GRAPH, inRelationships.topology());
 
-            return new CSRGraphStore(
+            return CSRGraphStore.of(
                 databaseId,
                 nodeMapping,
                 Collections.emptyMap(),

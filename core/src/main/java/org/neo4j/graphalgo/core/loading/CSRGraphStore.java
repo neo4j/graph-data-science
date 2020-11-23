@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
@@ -91,27 +90,6 @@ public class CSRGraphStore implements GraphStore {
 
     private ZonedDateTime modificationTime;
 
-    public static CSRGraphStore of(
-        NamedDatabaseId databaseId,
-        NodeMapping nodes,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
-        int concurrency,
-        AllocationTracker tracker
-    ) {
-        return of(
-            databaseId,
-            nodes,
-            nodeProperties,
-            relationships,
-            relationshipProperties,
-            concurrency,
-            tracker,
-            CSRGraphStore::new
-        );
-    }
-
     public interface CSRGraphStoreConstructor<T> {
         T construct(
             NamedDatabaseId databaseId,
@@ -124,52 +102,37 @@ public class CSRGraphStore implements GraphStore {
         );
     }
 
+    public static CSRGraphStore of(
+        NamedDatabaseId databaseId,
+        NodeMapping nodes,
+        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
+        Map<RelationshipType, Relationships.Topology> relationships,
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        return new CSRGraphStore(
+            databaseId,
+            nodes,
+            nodePropertyStores,
+            relationships,
+            relationshipPropertyStores,
+            concurrency,
+            tracker
+        );
+    }
+
+
     public static <T extends CSRGraphStore> T of(
         NamedDatabaseId databaseId,
         NodeMapping nodes,
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties,
+        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
         Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, Map<PropertyMapping, Relationships.Properties>> relationshipProperties,
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
         AllocationTracker tracker,
         CSRGraphStoreConstructor<T> constructor
     ) {
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>(nodeProperties.size());
-        nodeProperties.forEach((nodeLabel, propertyMap) -> {
-            NodePropertyStore.Builder builder = NodePropertyStore.builder();
-            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putNodeProperty(
-                propertyMapping.propertyKey(),
-                NodeProperty.of(
-                    propertyMapping.propertyKey(),
-                    PropertyState.PERSISTENT,
-                    propertyValues,
-                    propertyMapping.defaultValue().isUserDefined()
-                        ? propertyMapping.defaultValue()
-                        : propertyValues.valueType().fallbackValue()
-                )
-            ));
-            nodePropertyStores.put(nodeLabel, builder.build());
-        });
-
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>();
-        relationshipProperties.forEach((relationshipType, propertyMap) -> {
-            RelationshipPropertyStore.Builder builder = RelationshipPropertyStore.builder();
-            propertyMap.forEach((propertyMapping, propertyValues) -> builder.putRelationshipProperty(
-                propertyMapping.propertyKey(),
-                RelationshipProperty.of(
-                    propertyMapping.propertyKey(),
-                    NumberType.FLOATING_POINT,
-                    PropertyState.PERSISTENT,
-                    propertyValues,
-                    propertyMapping.defaultValue().isUserDefined()
-                        ? propertyMapping.defaultValue()
-                        : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
-                    propertyMapping.aggregation()
-                )
-            ));
-            relationshipPropertyStores.put(relationshipType, builder.build());
-        });
-
         return constructor.construct(
             databaseId,
             nodes,
@@ -274,7 +237,7 @@ public class CSRGraphStore implements GraphStore {
         return relationshipProperties;
     }
 
-    public CSRGraphStore(
+    protected CSRGraphStore(
         NamedDatabaseId databaseId,
         NodeMapping nodes,
         Map<NodeLabel, NodePropertyStore> nodeProperties,

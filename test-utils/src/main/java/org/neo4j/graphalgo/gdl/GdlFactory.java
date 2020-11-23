@@ -156,7 +156,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         )
                     ).build()
             ));
-        CSRGraphStore graphStore = new CSRGraphStore(
+        CSRGraphStore graphStore = CSRGraphStore.of(
             databaseId,
             nodes.idMap(),
             nodes.properties(),

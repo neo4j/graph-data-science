@@ -88,7 +88,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             }
         });
 
-        return new CSRGraphStore(
+        return CSRGraphStore.of(
             loadingContext.api().databaseId(),
             idsAndProperties.idMap(),
             idsAndProperties.properties(),
@@ -131,7 +131,6 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                 )
             );
         });
-
 
         return propertyStoreBuilder.build();
     }
