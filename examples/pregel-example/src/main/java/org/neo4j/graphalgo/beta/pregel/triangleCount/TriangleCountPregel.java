@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Arrays;
 
@@ -62,13 +64,24 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
                 neighbours[idx] = message.longValue();
                 idx++;
             }
-            // to later allow sorted merge
-            Arrays.sort(neighbours);
+
+            if (!context.config().indexNeighbours()) {
+                // to later allow sorted merge
+                Arrays.sort(neighbours);
+            }
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {
             long[] neighbours = context.longArrayNodeValue(NEIGHBOURS);
+            // TODO: use a non-atomic HugeBitSet
+            HugeAtomicBitSet isNeighbourFromA = null;
+            if (context.config().indexNeighbours()) {
+                isNeighbourFromA = HugeAtomicBitSet.create(context.nodeCount(), AllocationTracker.empty());
+                for (long nodeB : neighbours) {
+                    isNeighbourFromA.set(nodeB);
+                }
+            }
+
             long nodeA = context.nodeId();
             long trianglesFromNodeA = 0;
-
             long lastNodeB = -1;
             for (long nodeB : neighbours) {
                 if (nodeB == lastNodeB) {
@@ -84,24 +97,37 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
                     long lastNodeC = -1;
 
                     // find common neighbors
-                    while (i < followingNeighbours.length && j < neighbours.length) {
-                        long nodeCfromB = followingNeighbours[i];
-                        long nodeCfromA = neighbours[j];
-                        if (nodeCfromB < nodeCfromA)
-                            i++;
-                        else if (nodeCfromA < nodeCfromB)
-                            j++;
-                        else {
-                            // only count each triangle once and avoid parallel rels
-                            if (nodeCfromA > nodeB && lastNodeC != nodeCfromA) {
+                    if (context.config().indexNeighbours()) {
+                        // check indexed neighbours of A
+                        for (long nodeCfromB : followingNeighbours) {
+                            if (lastNodeC != nodeCfromB && nodeCfromB > nodeB && isNeighbourFromA.get(nodeCfromB)) {
                                 trianglesFromNodeA++;
-                                lastNodeC = nodeCfromA;
+                                lastNodeC = nodeCfromB;
                                 context.sendTo(nodeB, 1);
-                                context.sendTo(nodeCfromA, 1);
+                                context.sendTo(nodeCfromB, 1);
                             }
+                        }
+                    } else {
+                        // sorted merge
+                        while (i < followingNeighbours.length && j < neighbours.length) {
+                            long nodeCfromB = followingNeighbours[i];
+                            long nodeCfromA = neighbours[j];
+                            if (nodeCfromB < nodeCfromA)
+                                i++;
+                            else if (nodeCfromA < nodeCfromB)
+                                j++;
+                            else {
+                                // only count each triangle once and avoid parallel rels
+                                if (nodeCfromA > nodeB && lastNodeC != nodeCfromA) {
+                                    trianglesFromNodeA++;
+                                    lastNodeC = nodeCfromA;
+                                    context.sendTo(nodeB, 1);
+                                    context.sendTo(nodeCfromA, 1);
+                                }
 
-                            i++;
-                            j++;
+                                i++;
+                                j++;
+                            }
                         }
                     }
                 }
