@@ -186,11 +186,16 @@ public abstract class BaseTest {
     }
 
     protected void runWithEnterpriseLicense(Runnable r) {
+        var isOnEnterprise = GdsEdition.instance().isOnEnterpriseEdition();
         try {
-            GdsEdition.instance().setToEnterpriseEdition();
+            if (!isOnEnterprise) {
+                GdsEdition.instance().setToEnterpriseEdition();
+            }
             r.run();
         } finally {
-            GdsEdition.instance().setToCommunityEdition();
+            if (!isOnEnterprise) {
+                GdsEdition.instance().setToCommunityEdition();
+            }
         }
     }
 
