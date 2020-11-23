@@ -90,8 +90,8 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         Map<NodeLabel, BitSet> labelInformation,
         AllocationTracker tracker
     ) {
-        this.labelInformation = labelInformation;
         this.sparseLongArray = sparseLongArray;
+        this.labelInformation = labelInformation;
         this.tracker = tracker;
     }
 

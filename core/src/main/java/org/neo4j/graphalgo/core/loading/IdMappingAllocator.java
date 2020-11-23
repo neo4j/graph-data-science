@@ -32,6 +32,7 @@ public interface IdMappingAllocator {
         long[][] labelIds
     );
 
+    @FunctionalInterface
     interface PropertyAllocator {
 
         PropertyAllocator EMPTY = (reader, batch, properties, labelIds, batchIndex, length, internalIndex) -> 0;

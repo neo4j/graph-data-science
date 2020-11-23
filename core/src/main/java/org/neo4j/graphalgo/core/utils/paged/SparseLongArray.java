@@ -97,8 +97,8 @@ public final class SparseLongArray {
     }
 
     public long toMappedNodeId(long originalId) {
-        var page = (int) (originalId >>> BLOCK_SHIFT);
-        var indexInPage = originalId & BLOCK_MASK;
+        var page = pageId(originalId);
+        var indexInPage = indexInPage(originalId);
 
         // Check if original id is contained
         long mask = 1L << indexInPage;
@@ -123,8 +123,8 @@ public final class SparseLongArray {
     }
 
     public boolean contains(long originalId) {
-        var page = (int) (originalId >>> BLOCK_SHIFT);
-        var indexInPage = originalId & BLOCK_MASK;
+        var page = pageId(originalId);
+        var indexInPage = indexInPage(originalId);
         // Check if original id is contained
         long mask = 1L << indexInPage;
         return (mask & array[page]) == mask;
@@ -169,6 +169,14 @@ public final class SparseLongArray {
         // Returning 0, since this is what the current
         // IdMap implementation returns in that case.
         return 0;
+    }
+
+    private static int pageId(long originalId) {
+        return (int) (originalId >>> BLOCK_SHIFT);
+    }
+
+    private static long indexInPage(long originalId) {
+        return originalId & BLOCK_MASK;
     }
 
     @TestOnly
@@ -224,8 +232,8 @@ public final class SparseLongArray {
         }
 
         private void set(long originalId) {
-            var page = (int) (originalId >>> BLOCK_SHIFT);
-            var indexInPage = originalId & BLOCK_MASK;
+            var page = pageId(originalId);
+            var indexInPage = indexInPage(originalId);
             var mask = 1L << indexInPage;
             array[page] |= mask;
         }
@@ -337,7 +345,7 @@ public final class SparseLongArray {
             }
 
             private void set(long originalId) {
-                var page = (int) (originalId >>> BLOCK_SHIFT);
+                var page = pageId(originalId);
                 var indexInPage = originalId & BLOCK_MASK;
                 var mask = 1L << indexInPage;
                 array[page] |= mask;
