@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -115,14 +116,28 @@ public final class FeatureToggleProc {
     @Procedure("gds.features.useBitIdMap.reset")
     @Description("Set the behavior of whether to use the bit id map. That value is returned.")
     public Stream<FeatureState> resetUseBitIdMap() {
-        GdsFeatureToggles.USE_BIT_ID_MAP.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            GdsFeatureToggles.USE_BIT_ID_MAP.reset();
+            return Stream.of(new FeatureState(GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()));
+        } else {
+            throw new IllegalArgumentException(
+                "The BitIdMap feature is only available, when you have licensed " +
+                "the Enterprise Edition of the Neo4j Graph Data Science Library."
+            );
+        }
     }
 
     @Procedure("gds.features.useBitIdMap")
     @Description("Toggle whether the bit id map should be used during graph creation.")
     public void useBitIdMap(@Name(value = "useBitIdMap") boolean useBitIdMap) {
-        GdsFeatureToggles.USE_BIT_ID_MAP.toggle(useBitIdMap);
+        if (GdsEdition.instance().isOnEnterpriseEdition()) {
+            GdsFeatureToggles.USE_BIT_ID_MAP.toggle(useBitIdMap);
+        } else {
+            throw new IllegalArgumentException(
+                "The BitIdMap feature is only available, when you have licensed " +
+                "the Enterprise Edition of the Neo4j Graph Data Science Library."
+            );
+        }
     }
 
     @Procedure("gds.features.maxArrayLengthShift.reset")
