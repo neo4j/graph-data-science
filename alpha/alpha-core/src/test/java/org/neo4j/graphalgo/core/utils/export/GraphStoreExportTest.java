@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.loading.GraphStore;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 
 import java.io.File;
+import java.util.Collections;
 
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -71,7 +72,7 @@ class GraphStoreExportTest {
     void exportTopology() {
         StoreLoaderBuilder loaderBuilder = new StoreLoaderBuilder()
             .loadAnyLabel()
-            .loadAnyRelationshipType();
+            .relationshipTypes(Collections.singletonList("REL"));
 
         GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
@@ -99,7 +100,7 @@ class GraphStoreExportTest {
             .loadAnyLabel()
             .addNodeProperty(PropertyMapping.of("prop1", 0))
             .addNodeProperty(PropertyMapping.of("prop2", 42))
-            .loadAnyRelationshipType();
+            .relationshipTypes(Collections.singletonList("REL"));
 
         GraphStore inputGraphStore = loaderBuilder.api(db).build().graphStore(NativeFactory.class);
 
