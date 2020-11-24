@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.collections.api.block.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,15 +41,15 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -244,15 +245,23 @@ class CypherFactoryTest extends BaseTest {
         assertEquals(4, graphStore.nodeCount());
         assertEquals(2, getGraph.apply(Collections.singletonList("A")).nodeCount());
         assertEquals(2, getGraph.apply(Collections.singletonList("B")).nodeCount());
-        assertEquals(3, getGraph.apply(Arrays.asList("A", "B")).nodeCount());
+        var abGraph = getGraph.apply(List.of("A", "B"));
+        assertEquals(3, abGraph.nodeCount());
 
-        Collection<Long> neighbours = new ArrayList<>();
-        getGraph.apply(Arrays.asList("A", "B")).forEachRelationship(0, (source, target) -> {
-            neighbours.add(target);
+        var expectation = List.of(
+            Pair.of(Set.of(NodeLabel.of("A")), Set.of(NodeLabel.of("B"))),
+            Pair.of(Set.of(NodeLabel.of("A")), Set.of(NodeLabel.of("A"), NodeLabel.of("B")))
+        );
+
+        var actual = new ArrayList<Pair<Set<NodeLabel>, Set<NodeLabel>>>();
+        abGraph.forEachNode(nodeId -> {
+            abGraph.forEachRelationship(nodeId, (source, target) -> {
+                actual.add(Pair.of(abGraph.nodeLabels(source), abGraph.nodeLabels(target)));
+                return true;
+            });
             return true;
         });
-
-        assertEquals(Arrays.asList(1L, 2L), neighbours);
+        assertThat(actual).containsExactlyElementsOf(expectation);
     }
 
     @Test
