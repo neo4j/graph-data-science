@@ -32,24 +32,42 @@ import java.util.List;
 import static java.lang.Math.log;
 
 /**
-    Cross-entropy loss, or log loss, measures the performance of a classification model whose output is a probability value between 0 and 1.
-    Cross-entropy loss increases as the predicted probability diverges from the actual label.
-
-    The formula used by this variable is:
-    −(𝑦log(𝑝)+(1−𝑦)log(1−𝑝))
+   This variable represents the composition of the logistic regression model's prediction function
+   and cross-entropy loss. This therefore represents a function from weights, features and targets
+   to a scalar loss value. Compared to using CrossEntropyLoss variable, composed with predictions from
+   the model, this variable does not register the predictions as a parent in the computation graph.
+   Rather, the gradient method directly computes the loss gradient for the weights and circumvents
+   the loss gradient for the predictions variable.
+   Another advantage of using LogisticLoss is that the expression for the gradient for the weights is
+   much simpler than the gradient obtained by back-propagating through the predictions variable.
+   In a compact form this gradient expression is just '(predictions - targets) * features'.
  */
-public class CrossEntropyLoss extends AbstractVariable<Scalar> {
-    private final Variable<Matrix> predictions;
-    private final Variable<Matrix> targets;
+public class LogisticLoss extends AbstractVariable<Scalar> {
+    // 1 x d
+    private Variable<Matrix> weights;
+    // n x 1
+    private Variable<Matrix> predictions;
+    // n x d
+    private Variable<Matrix> features;
+    // n x 1
+    private Variable<Matrix> targets;
 
-    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Matrix> targets) {
-        super(List.of(predictions, targets), Dimensions.scalar());
+    LogisticLoss(
+        Variable<Matrix> weights,
+        Variable<Matrix> predictions,
+        Variable<Matrix> features,
+        Variable<Matrix> targets
+    ) {
+        super(List.of(weights, features, targets), Dimensions.scalar());
+        this.weights = weights;
         this.predictions = predictions;
+        this.features = features;
         this.targets = targets;
     }
 
     @Override
     public Scalar apply(ComputationContext ctx) {
+        ctx.forward(predictions);
         Matrix predTensor = ctx.data(predictions);
         Matrix targetTensor = ctx.data(targets);
 
@@ -72,18 +90,25 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        if (parent == predictions) {
+        if (parent == weights) {
+
+            ctx.forward(predictions);
             Matrix predTensor = ctx.data(predictions);
             Matrix targetTensor = ctx.data(targets);
-            Matrix gradient = predTensor.zeros();
-            double multiplier = -1.0/gradient.rows();
-            for (int row = 0; row < gradient.rows(); row++) {
-                double v1 = targetTensor.dataAt(row) / predTensor.dataAt(row);
-                double v2 = -(1.0 - targetTensor.dataAt(row)) / (1.0 - predTensor.dataAt(row));
-                gradient.setDataAt(row, multiplier * (v1 + v2));
+            Matrix weightsTensor = ctx.data(weights);
+            Matrix featuresTensor = ctx.data(features);
+            Matrix gradient = weightsTensor.zeros();
+            int cols = weightsTensor.cols();
+            int nodes = predTensor.rows();
+            for (int node = 0; node < nodes; node++) {
+                double errorPerNode = (predTensor.dataAt(node) - targetTensor.dataAt(node)) / nodes;
+                for (int dim = 0; dim < cols; dim++) {
+                    gradient.addDataAt(dim, errorPerNode * featuresTensor.dataAt(node * cols + dim));
+                }
             }
             return gradient;
         } else {
+            // assume other variables do not require gradient
             return ctx.data(parent).zeros();
         }
     }
