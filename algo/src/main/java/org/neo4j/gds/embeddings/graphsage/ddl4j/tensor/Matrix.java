@@ -65,11 +65,11 @@ public class Matrix extends Tensor<Matrix> {
         return sum;
     }
 
-    private int rows() {
+    public int rows() {
         return dimensions[ROWS_INDEX];
     }
 
-    private int cols() {
+    public int cols() {
         return dimensions[COLUMNS_INDEX];
     }
 }

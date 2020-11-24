@@ -49,12 +49,12 @@ public class ComputationContext {
         return (T) data.computeIfAbsent(variable, ignore -> variable.apply(this));
     }
 
-    public Tensor<?> data(Variable<?> variable) {
-        return data.get(variable);
+    public <T extends Tensor<T>> T data(Variable<T> variable) {
+        return (T) data.get(variable);
     }
 
-    public Tensor<?> gradient(Variable<?> variable) {
-        return gradients.get(variable);
+    public <T extends Tensor<T>> T gradient(Variable<T> variable) {
+        return (T) gradients.get(variable);
     }
 
     public void backward(Variable<?> function) {
