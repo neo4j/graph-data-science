@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel.triangleCount;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
@@ -26,8 +27,6 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Arrays;
 
@@ -71,10 +70,9 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
             }
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {
             long[] neighbours = context.longArrayNodeValue(NEIGHBOURS);
-            // TODO: use a non-atomic HugeBitSet
-            HugeAtomicBitSet isNeighbourFromA = null;
+            BitSet isNeighbourFromA = null;
             if (context.config().indexNeighbours()) {
-                isNeighbourFromA = HugeAtomicBitSet.create(context.nodeCount(), AllocationTracker.empty());
+                isNeighbourFromA = new BitSet(context.nodeCount());
                 for (long nodeB : neighbours) {
                     isNeighbourFromA.set(nodeB);
                 }
