@@ -22,15 +22,12 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.IntArrayDeque;
-import com.carrotsearch.hppc.IntDoubleMap;
-import com.carrotsearch.hppc.IntDoubleScatterMap;
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntScatterMap;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
-import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
+import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -42,12 +39,10 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     public static final double NO_PATH_FOUND = -1.0;
     public static final int UNUSED = 42;
 
-    private Graph graph;
+    private final Graph graph;
 
-    // node to cost map
-    private IntDoubleMap costs;
     // next node priority queue
-    private IntPriorityQueue queue;
+    private HugeLongPriorityQueue queue;
     // auxiliary path map
     private IntIntMap path;
     // path map (stores the resulting shortest path)
@@ -65,11 +60,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.config = config;
-        this.costs = new IntDoubleScatterMap();
-        this.queue = SharedIntPriorityQueue.min(
-            IntPriorityQueue.DEFAULT_CAPACITY,
-            costs,
-            Double.MAX_VALUE);
+        this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
         this.path = new IntIntScatterMap();
         this.visited = new BitSet();
         this.finalPath = new IntArrayDeque();
@@ -86,22 +77,21 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
 
         int node = Math.toIntExact(graph.toMappedNodeId(startNode));
         int goal = Math.toIntExact(graph.toMappedNodeId(goalNode));
-        costs.put(node, 0.0);
+
         queue.add(node, 0.0);
         run(goal);
         if (!path.containsKey(goal)) {
             return this;
         }
-        totalCost = costs.get(goal);
+        totalCost = queue.cost(goal);
         int last = goal;
         while (last != PATH_END) {
             finalPath.addFirst(last);
-            finalPathCosts.addFirst(costs.get(last));
+            finalPathCosts.addFirst(queue.cost(last));
             last = path.getOrDefault(last, PATH_END);
         }
         // destroy costs and path to remove the data for nodes that are not part of the graph
         // since clear never downsizes the buffer array
-        costs.release();
         path.release();
         return this;
     }
@@ -145,13 +135,13 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
 
     private void run(int goal) {
         while (!queue.isEmpty() && running()) {
-            int node = queue.pop();
+            long node = queue.pop();
             if (node == goal) {
                 return;
             }
 
             visited.set(node);
-            double costs = this.costs.getOrDefault(node, Double.MAX_VALUE);
+            double costs = queue.cost(node);
             graph.forEachRelationship(
                 node,
                 1.0D,
@@ -164,19 +154,22 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     }
 
     private void updateCosts(int source, int target, double newCosts) {
+        // target has been visited, we already have a shortest path
+        if (visited.get(target)) {
+            return;
+        }
 
-        if (costs.containsKey(target)) {
-            if (newCosts < costs.getOrDefault(target, Double.MAX_VALUE)) {
-                costs.put(target, newCosts);
+        // we see target again
+        if (queue.containsElement(target)) {
+            // and found a shorter path to target
+            if (newCosts < queue.cost(target)) {
                 path.put(target, source);
-                queue.update(target);
+                queue.updateCost(target, newCosts);
             }
-        } else  {
-            if (newCosts < costs.getOrDefault(target, Double.MAX_VALUE)) {
-                costs.put(target, newCosts);
-                path.put(target, source);
-                queue.add(target, newCosts);
-            }
+        } else {
+            // we see target for the first time
+            path.put(target, source);
+            queue.add(target, newCosts);
         }
     }
 
@@ -187,7 +180,6 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
 
     @Override
     public void release() {
-        costs = null;
         queue = null;
         path = null;
         visited = null;
@@ -196,7 +188,6 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     private void reset() {
         visited.clear();
         queue.clear();
-        costs.clear();
         path.clear();
         finalPath.clear();
         totalCost = NO_PATH_FOUND;

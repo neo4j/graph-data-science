@@ -209,7 +209,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Updates the heap because the cost of an element has changed, possibly from the outside.
      * Cost is linear with the size of the queue.
      */
-    public final void update(long element) {
+    void update(long element) {
         long pos = findElementPosition(element);
         if (pos != 0) {
             if (!upHeap(pos) && pos < size) {
