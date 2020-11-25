@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -86,11 +87,11 @@ final class DijkstraTest {
                 .sourceNode(nodeIds[0])
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config);
+            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
             shortestPathDijkstra.compute();
             long[] path = Arrays
                 .stream(shortestPathDijkstra.getFinalPath().toArray())
-                .mapToLong(graph::toOriginalNodeId)
+                .map(graph::toOriginalNodeId)
                 .toArray();
 
             assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
@@ -109,7 +110,7 @@ final class DijkstraTest {
             long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
 
             DijkstraStreamConfig config = defaultConfigBuilder().sourceNode(head).targetNode(tail).build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config);
+            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
             shortestPathDijkstra.compute();
             Stream<Dijkstra.Result> resultStream = shortestPathDijkstra.resultStream();
 
@@ -168,11 +169,11 @@ final class DijkstraTest {
                 .sourceNode(nodeIds[0])
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config);
+            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
             shortestPathDijkstra.compute();
             long[] path = Arrays
                 .stream(shortestPathDijkstra.getFinalPath().toArray())
-                .mapToLong(graph::toOriginalNodeId)
+                .map(graph::toOriginalNodeId)
                 .toArray();
 
             assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);

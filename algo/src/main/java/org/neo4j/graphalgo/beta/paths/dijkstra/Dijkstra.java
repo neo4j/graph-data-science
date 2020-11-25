@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
-import com.carrotsearch.hppc.IntArrayDeque;
-import com.carrotsearch.hppc.IntIntMap;
-import com.carrotsearch.hppc.IntIntScatterMap;
+import com.carrotsearch.hppc.LongArrayDeque;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.stream.Stream;
@@ -35,35 +35,32 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
-    private static final int PATH_END = -1;
+    private static final long PATH_END = -1;
     public static final double NO_PATH_FOUND = -1.0;
-    public static final int UNUSED = 42;
 
     private final Graph graph;
 
     // next node priority queue
     private HugeLongPriorityQueue queue;
     // auxiliary path map
-    private IntIntMap path;
+    private HugeLongLongMap path;
     // path map (stores the resulting shortest path)
-    private IntArrayDeque finalPath;
+    private LongArrayDeque finalPath;
     private DoubleArrayDeque finalPathCosts;
     // visited set
     private BitSet visited;
-    private final int nodeCount;
     private final DijkstraBaseConfig config;
     // overall cost of the path
     private double totalCost;
     private ProgressLogger progressLogger;
 
-    public Dijkstra(Graph graph, DijkstraBaseConfig config) {
+    public Dijkstra(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
         this.graph = graph;
-        this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.config = config;
         this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
-        this.path = new IntIntScatterMap();
+        this.path = new HugeLongLongMap(tracker);
         this.visited = new BitSet();
-        this.finalPath = new IntArrayDeque();
+        this.finalPath = new LongArrayDeque();
         this.finalPathCosts = new DoubleArrayDeque();
         this.progressLogger = getProgressLogger();
     }
@@ -84,7 +81,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
             return this;
         }
         totalCost = queue.cost(goal);
-        int last = goal;
+        long last = goal;
         while (last != PATH_END) {
             finalPath.addFirst(last);
             finalPathCosts.addFirst(queue.cost(last));
@@ -107,7 +104,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
             .map(cursor -> new Result(graph.toOriginalNodeId(cursor.value), costs[cursor.index]));
     }
 
-    public IntArrayDeque getFinalPath() {
+    public LongArrayDeque getFinalPath() {
         return finalPath;
     }
 
@@ -149,7 +146,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
                     updateCosts(source, target, weight + costs);
                     return true;
                 }));
-            progressLogger.logProgress((double) node / (nodeCount - 1));
+            progressLogger.logProgress((double) node / (graph.nodeCount() - 1));
         }
     }
 
