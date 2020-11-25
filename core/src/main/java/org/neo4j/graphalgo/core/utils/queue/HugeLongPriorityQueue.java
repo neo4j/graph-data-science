@@ -184,7 +184,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Updates the heap because the cost of an element has changed, possibly from the outside.
      * Cost is linear with the size of the queue.
      */
-    public final void update(int element) {
+    public final void update(long element) {
         long pos = findElementPosition(element);
         if (pos != 0) {
             if (!upHeap(pos) && pos < size) {
@@ -193,7 +193,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         }
     }
 
-    public final void set(int element, double cost) {
+    public final void set(long element, double cost) {
         if (addCost(element, cost)) {
             update(element);
         } else {
@@ -201,7 +201,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         }
     }
 
-    private long findElementPosition(int element) {
+    private long findElementPosition(long element) {
         final long limit = size + 1;
         final HugeLongArray data = heap;
         HugeCursor<long[]> cursor = data.initCursor(data.newCursor(), 1, limit);
@@ -293,7 +293,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
-    public static HugeLongPriorityQueue min(int capacity) {
+    public static HugeLongPriorityQueue min(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
@@ -302,7 +302,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
-    public static HugeLongPriorityQueue max(int capacity) {
+    public static HugeLongPriorityQueue max(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
