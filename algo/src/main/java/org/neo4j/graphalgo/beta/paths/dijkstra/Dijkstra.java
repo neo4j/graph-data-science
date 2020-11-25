@@ -36,7 +36,6 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
 public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     private static final long PATH_END = -1;
-    public static final double NO_PATH_FOUND = -1.0;
 
     private final Graph graph;
 
@@ -52,6 +51,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     private final DijkstraBaseConfig config;
     // overall cost of the path
     private double totalCost;
+
     private ProgressLogger progressLogger;
 
     public Dijkstra(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
@@ -66,29 +66,25 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
     }
 
     public Dijkstra compute() {
-        return compute(config.sourceNode(), config.targetNode());
-    }
+        var source = graph.toMappedNodeId(config.sourceNode());
+        var target = graph.toMappedNodeId(config.targetNode());
 
-    public Dijkstra compute(long startNode, long goalNode) {
-        reset();
+        queue.add(source, 0.0);
 
-        int node = Math.toIntExact(graph.toMappedNodeId(startNode));
-        int goal = Math.toIntExact(graph.toMappedNodeId(goalNode));
+        run(target);
 
-        queue.add(node, 0.0);
-        run(goal);
-        if (!path.containsKey(goal)) {
+        if (!path.containsKey(target)) {
             return this;
         }
-        totalCost = queue.cost(goal);
-        long last = goal;
+
+        totalCost = queue.cost(target);
+
+        long last = target;
         while (last != PATH_END) {
             finalPath.addFirst(last);
             finalPathCosts.addFirst(queue.cost(last));
             last = path.getOrDefault(last, PATH_END);
         }
-        // destroy costs and path to remove the data for nodes that are not part of the graph
-        // since clear never downsizes the buffer array
         path.release();
         return this;
     }
@@ -121,16 +117,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
         return totalCost;
     }
 
-    /**
-     * return the number of nodes the path consists of
-     *
-     * @return number of nodes in the path
-     */
-    public int getPathLength() {
-        return finalPath.size();
-    }
-
-    private void run(int goal) {
+    private void run(long goal) {
         while (!queue.isEmpty() && running()) {
             long node = queue.pop();
             if (node == goal) {
@@ -177,17 +164,11 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
 
     @Override
     public void release() {
+        path.release();
+        queue.release();
         queue = null;
         path = null;
         visited = null;
-    }
-
-    private void reset() {
-        visited.clear();
-        queue.clear();
-        path.clear();
-        finalPath.clear();
-        totalCost = NO_PATH_FOUND;
     }
 
     /**
