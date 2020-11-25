@@ -73,6 +73,18 @@ final class HugeLongLongMapTest {
     }
 
     @Test
+    void put() {
+        HugeLongLongMap map = new HugeLongLongMap(AllocationTracker.empty());
+        assertEquals(42L, map.getOrDefault(1, 42L));
+        map.put(1L, 1L);
+        assertEquals(1L, map.getOrDefault(1, 42L));
+        map.put(1L, 2L);
+        assertEquals(2L, map.getOrDefault(1, 42L));
+        map.put(1L, 3L);
+        assertEquals(3L, map.getOrDefault(1, 42L));
+    }
+
+    @Test
     void acceptsInitialSize() {
         HugeLongLongMap map = new HugeLongLongMap(0L, AllocationTracker.empty());
         map.addTo(1L, 1L);
@@ -147,6 +159,15 @@ final class HugeLongLongMapTest {
         }
         map.release();
         assertEquals(0L, tracker.trackedBytes());
+    }
+
+    @Test
+    void containsKey() {
+        AllocationTracker tracker = AllocationTracker.create();
+        HugeLongLongMap map = new HugeLongLongMap(tracker);
+        assertFalse(map.containsKey(1));
+        map.addTo(1, 42);
+        assertTrue(map.containsKey(1));
     }
 
     @Test
