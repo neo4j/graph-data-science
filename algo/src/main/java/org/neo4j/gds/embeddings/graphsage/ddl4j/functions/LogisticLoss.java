@@ -52,7 +52,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     // n x 1
     private Variable<Matrix> targets;
 
-    LogisticLoss(
+    public LogisticLoss(
         Variable<Matrix> weights,
         Variable<Matrix> predictions,
         Variable<Matrix> features,
