@@ -80,7 +80,7 @@ final class DijkstraTest {
                 .build();
 
             var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
-            var path = dijkstraResult.paths().get(0);
+            var path = dijkstraResult.paths().findFirst().get();
             assertEquals(expected.weight, path.totalCost, 0.1);
 
             var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
@@ -134,7 +134,7 @@ final class DijkstraTest {
                 .build();
 
             var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
-            var path = dijkstraResult.paths().get(0);
+            var path = dijkstraResult.paths().findFirst().get();
             assertEquals(expected.weight, path.totalCost, 0.1);
 
             var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();

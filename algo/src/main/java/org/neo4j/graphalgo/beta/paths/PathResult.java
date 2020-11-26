@@ -26,6 +26,9 @@ import java.util.List;
 
 @Value.Style(depluralize = true)
 public final class PathResult {
+
+    public static final PathResult EMPTY = new PathResult();
+
     public int index;
 
     public long sourceNode;
@@ -37,6 +40,8 @@ public final class PathResult {
     public List<Long> nodeIds;
 
     public List<Double> costs;
+
+    private PathResult() {}
 
     private PathResult(
         int index,

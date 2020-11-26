@@ -31,7 +31,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.LinkedList;
-import java.util.List;
+import java.util.function.LongPredicate;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 
@@ -65,55 +66,59 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
         queue.add(sourceNode, 0.0);
 
-        run(targetNode);
-
-        if (!path.containsKey(targetNode)) {
-            return DijkstraResult.EMPTY;
-        }
-
-        var pathResultBuilder = new PathResultBuilder();
-
-        pathResultBuilder
+        var pathResultBuilder = new PathResultBuilder()
             .index(0)
-            .sourceNode(sourceNode)
-            .targetNode(targetNode)
-            .totalCost(queue.cost(targetNode));
+            .sourceNode(sourceNode);
 
-        var finalPath = new LinkedList<Long>();
-        var finalPathCosts = new LinkedList<Double>();
-
-        long lastNode = targetNode;
-        while (lastNode != PATH_END) {
-            finalPath.addFirst(lastNode);
-            finalPathCosts.addFirst(queue.cost(lastNode));
-            lastNode = path.getOrDefault(lastNode, PATH_END);
-        }
+        var paths = Stream.generate(() -> next(node -> node == targetNode, pathResultBuilder));
 
         return ImmutableDijkstraResult
             .builder()
-            .addPath(pathResultBuilder.nodeIds(finalPath).costs(finalPathCosts).build())
+            .paths(paths)
             .build();
     }
 
-    private void run(long goal) {
+    private PathResult next(LongPredicate stopPredicate, PathResultBuilder pathResultBuilder) {
         while (!queue.isEmpty() && running()) {
-            long node = queue.pop();
-            if (node == goal) {
-                return;
-            }
-
+            var node = queue.pop();
+            var cost = queue.cost(node);
             visited.set(node);
-            double costs = queue.cost(node);
+
             graph.forEachRelationship(
                 node,
                 1.0D,
                 longToIntConsumer((source, target, weight) -> {
-                    updateCosts(source, target, weight + costs);
+                    updateCosts(source, target, weight + cost);
                     return true;
                 })
             );
+
+            if (stopPredicate.test(node)) {
+                pathResultBuilder.targetNode(node).totalCost(cost);
+                return createPathResult(node, pathResultBuilder);
+            }
+
             progressLogger.logProgress((double) node / (graph.nodeCount() - 1));
         }
+        return PathResult.EMPTY;
+    }
+
+    private PathResult createPathResult(long target, PathResultBuilder pathResultBuilder) {
+        var path = new LinkedList<Long>();
+        var costs = new LinkedList<Double>();
+
+        var lastNode = target;
+
+        while (lastNode != PATH_END) {
+            path.addFirst(lastNode);
+            costs.addFirst(queue.cost(lastNode));
+            lastNode = this.path.getOrDefault(lastNode, PATH_END);
+        }
+
+        return pathResultBuilder
+            .nodeIds(path)
+            .costs(costs)
+            .build();
     }
 
     private void updateCosts(int source, int target, double newCosts) {
@@ -153,7 +158,6 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
 @ValueClass
 interface DijkstraResult {
-    DijkstraResult EMPTY = ImmutableDijkstraResult.of(List.of());
 
-    List<PathResult> paths();
+    Stream<PathResult> paths();
 }
