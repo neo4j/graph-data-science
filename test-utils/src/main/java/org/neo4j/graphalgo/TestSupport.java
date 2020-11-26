@@ -210,7 +210,7 @@ public final class TestSupport {
         long expectedMinBytes,
         long expectedMaxBytes
     ) {
-       assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, expectedMinBytes, expectedMaxBytes);
+       assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expectedMinBytes, expectedMaxBytes);
     }
 
     public static void assertMemoryEstimation(
