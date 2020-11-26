@@ -25,9 +25,6 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.qala.datagen.RandomShortApi.integer;
@@ -40,81 +37,83 @@ class HugeLongPriorityQueueTest {
 
     @Test
     void testIsEmpty() {
-        final int capacity = integer(10, 20);
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(capacity);
+        var capacity = integer(10, 20);
+        var queue = HugeLongPriorityQueue.min(capacity);
         assertEquals(queue.size(), 0);
     }
 
     @Test
     void testClear() {
-        final int maxSize = integer(3, 10);
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(maxSize);
-        final int iterations = integer(3, maxSize);
-        for (int i = 0; i < iterations; i++) {
-            queue.add(i, integer(1, 5));
+        var maxSize = integer(3, 10);
+        var queue = HugeLongPriorityQueue.min(maxSize);
+        var count = integer(3, maxSize);
+        for (long element = 0; element < count; element++) {
+            queue.add(element, integer(1, 5));
         }
-        assertEquals(queue.size(), iterations);
+        assertEquals(queue.size(), count);
         queue.clear();
         assertEquals(queue.size(), 0);
     }
 
     @Test
     void testAdd() {
-        int size = 50;
-        final int iterations = integer(5, size);
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(size);
-        int min = -1;
-        double minWeight = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < iterations; i++) {
-            final double weight = exclusiveDouble(0D, 100D);
-            if (weight < minWeight) {
-                minWeight = weight;
-                min = i;
+        var size = 50;
+        var count = integer(5, size);
+        var queue = HugeLongPriorityQueue.min(size);
+        var minElement = -1L;
+        var minCost = Double.POSITIVE_INFINITY;
+
+        for (long key = 0; key < count; key++) {
+            double weight = exclusiveDouble(0D, 100D);
+            if (weight < minCost) {
+                minCost = weight;
+                minElement = key;
             }
-            queue.add(i, weight);
-            assertEquals(queue.top(), min);
+            queue.add(key, weight);
+            assertEquals(queue.top(), minElement);
         }
     }
 
     @Test
     void testAddAndPop() {
-        int size = 50;
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(size);
-        final List<Pair<Long, Double>> elements = new ArrayList<>();
+        var size = 50;
+        var queue = HugeLongPriorityQueue.min(size);
+        var elements = new ArrayList<Pair<Long, Double>>();
+        var count = integer(5, size);
+        var minElement = -1L;
+        var minCost = Double.POSITIVE_INFINITY;
 
-        final int iterations = integer(5, size);
-        long min = -1;
-        double minWeight = Double.POSITIVE_INFINITY;
-        for (long i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(0D, 100D);
-            if (weight < minWeight) {
-                minWeight = weight;
-                min = i;
+        for (long element = 1; element <= count; element++) {
+            var weight = exclusiveDouble(0D, 100D);
+            if (weight < minCost) {
+                minCost = weight;
+                minElement = element;
             }
-            queue.add(i, weight);
-            assertEquals(queue.top(), min);
-            elements.add(Tuples.pair(i, weight));
+            queue.add(element, weight);
+            assertEquals(queue.top(), minElement);
+            elements.add(Tuples.pair(element, weight));
         }
 
         // PQ isn't stable for duplicate elements, so we have to
         // test those with non strict ordering requirements
-        final Map<Double, Set<Long>> byWeight = elements
+        var byCost = elements
             .stream()
             .collect(Collectors.groupingBy(
                 Pair::getTwo,
-                Collectors.mapping(Pair::getOne, Collectors.toSet())));
-        final List<Double> weightGroups = byWeight
+                Collectors.mapping(Pair::getOne, Collectors.toSet())
+            ));
+        var costGroups = byCost
             .keySet()
             .stream()
             .sorted()
             .collect(Collectors.toList());
 
-        for (Double weight : weightGroups) {
-            final Set<Long> allowedIds = byWeight.get(weight);
-            while (!allowedIds.isEmpty()) {
-                final long item = queue.pop();
-                assertThat(allowedIds, hasItem(item));
-                allowedIds.remove(item);
+        for (var cost : costGroups) {
+            var allowedElements = byCost.get(cost);
+            while (!allowedElements.isEmpty()) {
+                long item = queue.pop();
+                assertThat(allowedElements, hasItem(item));
+                allowedElements.remove(item);
             }
         }
 
@@ -123,75 +122,73 @@ class HugeLongPriorityQueueTest {
 
     @Test
     void testUpdateDecreasing() {
-        int size = 50;
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(size);
+        var size = 50;
+        var queue = HugeLongPriorityQueue.min(size);
 
-        final int iterations = integer(5, size);
-        double minWeight = Double.POSITIVE_INFINITY;
-        for (int i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(50D, 100D);
-            if (weight < minWeight) {
-                minWeight = weight;
+        var count = integer(5, size);
+        var minCost = Double.POSITIVE_INFINITY;
+        for (long element = 1; element <= count; element++) {
+            double weight = exclusiveDouble(50D, 100D);
+            if (weight < minCost) {
+                minCost = weight;
             }
-            queue.add(i, weight);
+            queue.add(element, weight);
         }
 
-        for (int i = iterations; i >= 1; i--) {
-            minWeight = Math.nextDown(minWeight);
-            queue.addCost(i, minWeight);
-            queue.update(i);
-            assertEquals(i, queue.top());
+        for (long element = count; element >= 1; element--) {
+            minCost = Math.nextDown(minCost);
+            queue.addCost(element, minCost);
+            queue.update(element);
+            assertEquals(element, queue.top());
         }
     }
 
     @Test
     void testUpdateIncreasing() {
-        int size = 50;
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(size);
-        final int iterations = integer(5, size);
-        for (int i = 1; i <= iterations; i++) {
-            queue.add(i, exclusiveDouble(50D, 100D));
+        var size = 50;
+        var queue = HugeLongPriorityQueue.min(size);
+        int count = integer(5, size);
+        double maxCost = Double.NEGATIVE_INFINITY;
+
+        for (long element = 1; element <= count; element++) {
+            var weight = exclusiveDouble(50D, 100D);
+            if (weight > maxCost) {
+                maxCost = weight;
+            }
+            queue.add(element, weight);
         }
 
-        final long top = queue.top();
-        for (int i = iterations + 1; i < iterations + 10; i++) {
-            queue.addCost(i, 1D);
-            queue.update(i);
+        var top = queue.top();
+        for (var element = count; element >= 1; element--) {
+            if (element == top) {
+                continue;
+            }
+            maxCost = Math.nextUp(maxCost);
+            queue.addCost(element, maxCost);
+            queue.update(element);
             assertEquals(top, queue.top());
         }
     }
 
     @Test
     void testUpdateNotExisting() {
-        int size = 50;
-        final HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(size);
+        var size = 50;
+        var queue = HugeLongPriorityQueue.min(size);
+        var count = integer(5, size);
 
-        final int iterations = integer(5, size);
-        double maxWeight = Double.NEGATIVE_INFINITY;
-        for (int i = 1; i <= iterations; i++) {
-            final double weight = exclusiveDouble(50D, 100D);
-            if (weight > maxWeight) {
-                maxWeight = weight;
-            }
-            queue.add(i, weight);
+        for (long element = 1; element <= count; element++) {
+            queue.add(element, exclusiveDouble(50D, 100D));
         }
 
-        long top = queue.top();
-        for (int i = iterations; i >= 1; i--) {
-            if (i == top) {
-                continue;
-            }
-            maxWeight = Math.nextUp(maxWeight);
-            queue.addCost(i, maxWeight);
-            queue.update(i);
+        var top = queue.top();
+        for (long element = count + 1; element < count + 10; element++) {
+            queue.addCost(element, 1D);
+            queue.update(element);
             assertEquals(top, queue.top());
         }
     }
 
-    private double exclusiveDouble(
-        final double exclusiveMin,
-        final double exclusiveMax) {
+    private double exclusiveDouble(double exclusiveMin, double exclusiveMax) {
         return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }
-
 }
