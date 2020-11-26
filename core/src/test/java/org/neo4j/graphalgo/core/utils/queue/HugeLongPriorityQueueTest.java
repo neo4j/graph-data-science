@@ -137,8 +137,7 @@ class HugeLongPriorityQueueTest {
 
         for (long element = count; element >= 1; element--) {
             minCost = Math.nextDown(minCost);
-            queue.addCost(element, minCost);
-            queue.update(element);
+            queue.set(element, minCost);
             assertEquals(element, queue.top());
         }
     }
@@ -164,8 +163,7 @@ class HugeLongPriorityQueueTest {
                 continue;
             }
             maxCost = Math.nextUp(maxCost);
-            queue.addCost(element, maxCost);
-            queue.update(element);
+            queue.set(element, maxCost);
             assertEquals(top, queue.top());
         }
     }
@@ -182,8 +180,7 @@ class HugeLongPriorityQueueTest {
 
         var top = queue.top();
         for (long element = count + 1; element < count + 10; element++) {
-            queue.addCost(element, 1D);
-            queue.update(element);
+            queue.set(element, 1D);
             assertEquals(top, queue.top());
         }
     }

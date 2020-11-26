@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -48,6 +47,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
  */
 public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
+
     public static MemoryEstimation memoryEstimation(long capacity) {
         return MemoryEstimations.builder(HugeLongPriorityQueue.class)
             .fixed("heap", sizeOfLongArray(capacity))
@@ -56,84 +56,78 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
             .build();
     }
 
+    private final long capacity;
+    private final double defaultCost;
+
+    private BitSet costKeys;
+    protected HugeDoubleArray costValues;
     private HugeLongArray heap;
-    protected HugeDoubleArray costs;
-    protected BitSet keys;
 
     private long size = 0;
 
     /**
-     * Creates a new queue with the given capacity.
+     * Creates a new priority queue with the given capacity.
+     * The size is fixed, the queue cannot shrink or grow.
      */
-    HugeLongPriorityQueue(final long initialCapacity) {
-        final long heapSize;
-        if (0 == initialCapacity) {
+    HugeLongPriorityQueue(long capacity, double defaultCost) {
+        this.defaultCost = defaultCost;
+        long heapSize;
+        if (0 == capacity) {
             // We allocate 1 extra to avoid if statement in top()
             heapSize = 2;
         } else {
             // NOTE: we add +1 because all access to heap is
             // 1-based not 0-based.  heap[0] is unused.
-            heapSize = initialCapacity + 1;
+            heapSize = capacity + 1;
         }
+        this.capacity = capacity;
+        this.costKeys = new BitSet(capacity);
         this.heap = HugeLongArray.newArray(heapSize, AllocationTracker.empty());
-        this.costs = HugeDoubleArray.newArray(initialCapacity, AllocationTracker.empty());
-        this.keys = new BitSet(initialCapacity);
+        this.costValues = HugeDoubleArray.newArray(capacity, AllocationTracker.empty());
     }
 
     /**
-     * Defines the ordering of the queue.
-     * Returns true iff {@code a} is strictly less than {@code b}.
-     * <p>
-     * The default behavior assumes a min queue, where the smallest value is on top.
-     * To implement a max queue, return {@code b < a}.
-     * The resulting order is not stable.
+     * Adds an element associated with a cost to the queue in log(size) time.
      */
-    protected abstract boolean lessThan(long a, long b);
-
-    protected boolean addCost(long element, double cost) {
-        double oldCost = costs.get(element);
-        boolean elementExists = keys.get(element);
-        costs.set(element, cost);
-        keys.set(element);
-        return oldCost != cost || !elementExists;
-    }
-
-    protected void removeCost(final long element) {
-        keys.clear(element);
-    }
-
-    protected double cost(long element) {
-        if (keys.get(element)) {
-            return costs.get(element);
-        }
-        return 0D;
-    }
-
-    /**
-     * Adds an long associated with the given weight to a queue in log(size) time.
-     * <p>
-     * NOTE: The default implementation does nothing with the cost parameter.
-     * It is up to the implementation how the cost parameter is used.
-     */
-    public final void add(long element, double cost) {
+    public void add(long element, double cost) {
+        assert element < capacity;
         addCost(element, cost);
         size++;
-        ensureCapacityForInsert();
-        heap.set(size, element);
-        upHeap(size);
-    }
-
-    private void add(long element) {
-        size++;
-        ensureCapacityForInsert();
         heap.set(size, element);
         upHeap(size);
     }
 
     /**
-     * @return the least element of the queue in constant time.
+     * Adds an element associated with a cost to the queue in log(size) time.
+     * If the element was already in the queue, it's cost are updated and the
+     * heap is reordered in log(size) time.
      */
-    public final long top() {
+    public void set(long element, double cost) {
+        assert element < capacity;
+        if (addCost(element, cost)) {
+            update(element);
+        } else {
+            size++;
+            heap.set(size, element);
+            upHeap(size);
+        }
+    }
+
+    /**
+     * Returns the cost associated with the given element or
+     * the default cost, if the element is not in the heap.
+     */
+    public double cost(long element) {
+        if (costKeys.get(element)) {
+            return costValues.get(element);
+        }
+        return defaultCost;
+    }
+
+    /**
+     * Returns the element with the minimum cost from the queue in constant time.
+     */
+    public long top() {
         // We don't need to check size here: if maxSize is 0,
         // then heap is length 2 array with both entries null.
         // If size is 0 then heap[1] is already null.
@@ -141,11 +135,9 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * Removes and returns the least element of the queue in log(size) time.
-     *
-     * @return the least element of the queue in log(size) time while removing it.
+     * Removes and returns the element with the minimum cost from the queue in log(size) time.
      */
-    public final long pop() {
+    public long pop() {
         if (size > 0) {
             long result = heap.get(1);    // save first value
             heap.set(1, heap.get(size));    // move last to first
@@ -161,14 +153,47 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     /**
      * @return the number of elements currently stored in the queue.
      */
-    public final long size() {
+    public long size() {
         return size;
+    }
+
+    /**
+     * Removes all entries from the queue, releases all buffers.
+     * The queue can no longer be used afterwards.
+     */
+    public void release() {
+        size = 0;
+        heap = null;
+        costKeys = null;
+        costValues.release();
+    }
+
+    /**
+     * Defines the ordering of the queue.
+     * Returns true iff {@code a} is strictly less than {@code b}.
+     * <p>
+     * The default behavior assumes a min queue, where the value with smallest cost is on top.
+     * To implement a max queue, return {@code b < a}.
+     * The resulting order is not stable.
+     */
+    protected abstract boolean lessThan(long a, long b);
+
+    private boolean addCost(long element, double cost) {
+        double oldCost = costValues.get(element);
+        boolean elementExists = costKeys.get(element);
+        costKeys.set(element);
+        costValues.set(element, cost);
+        return oldCost != cost || !elementExists;
+    }
+
+    private void removeCost(long element) {
+        costKeys.clear(element);
     }
 
     /**
      * @return true iff there are currently no elements stored in the queue.
      */
-    public final boolean isEmpty() {
+    public boolean isEmpty() {
         return size == 0;
     }
 
@@ -177,7 +202,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      */
     public void clear() {
         size = 0;
-        keys.clear();
+        costKeys.clear();
     }
 
     /**
@@ -193,17 +218,9 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         }
     }
 
-    public final void set(long element, double cost) {
-        if (addCost(element, cost)) {
-            update(element);
-        } else {
-            add(element);
-        }
-    }
-
     private long findElementPosition(long element) {
-        final long limit = size + 1;
-        final HugeLongArray data = heap;
+        long limit = size + 1;
+        HugeLongArray data = heap;
         HugeCursor<long[]> cursor = data.initCursor(data.newCursor(), 1, limit);
         while (cursor.next()) {
             long[] internalArray = cursor.array;
@@ -222,54 +239,46 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         return 0;
     }
 
-    /**
-     * Removes all entries from the queue, releases all buffers.
-     * The queue can no longer be used afterwards.
-     */
-    public void release() {
-        size = 0;
-        heap = null;
-        keys = null;
-        costs.release();
-    }
-
     private boolean upHeap(long origPos) {
         long i = origPos;
-        long node = heap.get(i);          // save bottom node
+        // save bottom node
+        long node = heap.get(i);
+        // find parent of current node
         long j = i >>> 1;
         while (j > 0 && lessThan(node, heap.get(j))) {
-            heap.set(i, heap.get(j));       // shift parents down
+            // shift parents down
+            heap.set(i, heap.get(j));
             i = j;
+            // find new parent of swapped node
             j = j >>> 1;
         }
-        heap.set(i, node);              // install saved node
+        // install saved node
+        heap.set(i, node);
         return i != origPos;
     }
 
     private void downHeap(long i) {
-        long node = heap.get(i);          // save top node
-        long j = i << 1;              // find smaller child
+        // save top node
+        long node = heap.get(i);
+        // find smallest child of top node
+        long j = i << 1;
         long k = j + 1;
         if (k <= size && lessThan(heap.get(k), heap.get(j))) {
             j = k;
         }
         while (j <= size && lessThan(heap.get(j), node)) {
-            heap.set(i, heap.get(j));       // shift up child
+            // shift up child
+            heap.set(i, heap.get(j));
             i = j;
+            // find smallest child of swapped node
             j = i << 1;
             k = j + 1;
             if (k <= size && lessThan(heap.get(k), heap.get(j))) {
                 j = k;
             }
         }
-        heap.set(i, node);              // install saved node
-    }
-
-    private void ensureCapacityForInsert() {
-        if (size >= heap.size()) {
-            long oversize = HugeArrays.oversize(size + 1, Integer.BYTES);
-            heap = heap.copyOf(oversize, AllocationTracker.empty());
-        }
+        // install saved node
+        heap.set(i, node);
     }
 
     @Override
@@ -294,19 +303,27 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     public static HugeLongPriorityQueue min(long capacity) {
-        return new HugeLongPriorityQueue(capacity) {
+        return min(capacity, Double.MAX_VALUE);
+    }
+
+    public static HugeLongPriorityQueue min(long capacity, double defaultCost) {
+        return new HugeLongPriorityQueue(capacity, defaultCost) {
             @Override
             protected boolean lessThan(long a, long b) {
-                return costs.get(a) < costs.get(b);
+                return costValues.get(a) < costValues.get(b);
             }
         };
     }
 
     public static HugeLongPriorityQueue max(long capacity) {
-        return new HugeLongPriorityQueue(capacity) {
+        return max(capacity, Double.MIN_VALUE);
+    }
+
+    public static HugeLongPriorityQueue max(long capacity, double defaultCost) {
+        return new HugeLongPriorityQueue(capacity, defaultCost) {
             @Override
             protected boolean lessThan(long a, long b) {
-                return costs.get(a) > costs.get(b);
+                return costValues.get(a) > costValues.get(b);
             }
         };
     }
