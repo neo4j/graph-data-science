@@ -23,9 +23,6 @@ import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
@@ -113,18 +110,6 @@ public abstract class BaseComputeStep implements ComputeStep {
         this.progressLogger = progressLogger;
         this.endNode = startNode + (long) partitionSize;
         state = S_INIT;
-    }
-
-    static MemoryEstimation estimateMemory(
-        final int partitionSize,
-        final Class<?> computeStep
-    ) {
-        return MemoryEstimations.builder(computeStep)
-            .perThread("nextScores[] wrapper", MemoryUsage::sizeOfObjectArray)
-            .perThread("inner nextScores[][]", sizeOfFloatArray(partitionSize))
-            .fixed("pageRank[]", sizeOfDoubleArray(partitionSize))
-            .fixed("deltas[]", sizeOfDoubleArray(partitionSize))
-            .build();
     }
 
     public void setStarts(long[] starts, int[] lengths) {

@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -34,12 +35,10 @@ import org.neo4j.graphalgo.result.CentralityResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -101,7 +100,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     public static final Double DEFAULT_TOLERANCE = 0.0000001D;
 
     private final ExecutorService executor;
-    private final int batchSize;
     private final int concurrency;
     private final AllocationTracker tracker;
     private final IdMapping idMapping;
@@ -129,13 +127,11 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         LongStream sourceNodeIds,
         PageRankBaseConfig algoConfig,
         ExecutorService executor,
-        int batchSize,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         assert algoConfig.maxIterations() >= 1;
         this.executor = executor;
-        this.batchSize = batchSize;
         this.concurrency = algoConfig.concurrency();
         this.tracker = tracker;
         this.idMapping = graph;
@@ -189,7 +185,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
             return;
         }
 
-        List<Partition> partitions = PartitionUtils.degreePartition(graph, adjustBatchSize(batchSize));
+        var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), concurrency);
+        List<Partition> partitions = PartitionUtils.degreePartition(graph, degreeBatchSize);
 
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
             ? this.executor
@@ -204,19 +201,6 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         );
     }
 
-    private int adjustBatchSize(int batchSize) {
-        if (batchSize == 0) {
-            return Partition.MAX_NODE_COUNT;
-        }
-
-        // multiply batchsize by average degree, so that the resulting
-        // partitions are sized closer to the provided batchSize
-        long averageDegree = Math.max(1, ceilDiv(graph.relationshipCount(), graph.nodeCount()));
-        long degreeBatchSize = averageDegree * batchSize;
-
-        return (int) Math.min(degreeBatchSize, Partition.MAX_NODE_COUNT);
-    }
-
     private ComputeSteps createComputeSteps(
         long nodeCount,
         double dampingFactor,
@@ -224,35 +208,17 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         List<Partition> partitions,
         ExecutorService pool
     ) {
-        final int expectedParallelism = Math.min(
-            concurrency,
-            partitions.size()
-        );
 
-        List<ComputeStep> computeSteps = new ArrayList<>(expectedParallelism);
-        LongArrayList starts = new LongArrayList(expectedParallelism);
-        IntArrayList lengths = new IntArrayList(expectedParallelism);
-        int partitionsPerThread = ParallelUtil.threadCount(
-            concurrency + 1,
-            partitions.size()
-        );
-        Iterator<Partition> parts = partitions.iterator();
+        List<ComputeStep> computeSteps = new ArrayList<>(partitions.size());
+        LongArrayList starts = new LongArrayList(partitions.size());
+        IntArrayList lengths = new IntArrayList(partitions.size());
 
         DegreeComputer degreeComputer = pageRankVariant.degreeComputer(graph);
         DegreeCache degreeCache = degreeComputer.degree(pool, concurrency, tracker);
 
-        while (parts.hasNext()) {
-            Partition partition = parts.next();
+        for (Partition partition : partitions) {
             int partitionSize = (int) partition.nodeCount();
             long start = partition.startNode();
-            int i = 1;
-            while (parts.hasNext()
-                   && i < partitionsPerThread
-                   && partition.fits(partitionSize)) {
-                partition = parts.next();
-                partitionSize += partition.nodeCount();
-                ++i;
-            }
 
             starts.add(start);
             lengths.add(partitionSize);
