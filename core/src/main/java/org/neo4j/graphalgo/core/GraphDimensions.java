@@ -121,7 +121,16 @@ public interface GraphDimensions {
             : nodeLabels.size();
     }
 
+
     static GraphDimensions of(long nodeCount) {
-        return ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
+        return of(nodeCount, 0);
+    }
+
+    static GraphDimensions of(long nodeCount, long relationshipCount) {
+        return ImmutableGraphDimensions.builder()
+            .nodeCount(nodeCount)
+            .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relationshipCount))
+            .maxRelCount(relationshipCount)
+            .build();
     }
 }
