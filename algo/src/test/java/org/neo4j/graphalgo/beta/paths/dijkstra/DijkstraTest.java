@@ -28,11 +28,6 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.RelationshipType;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,47 +70,21 @@ final class DijkstraTest {
         private IdFunction idFunction;
 
         @Test
-        void test1() {
-            ShortestPath expected = expected(
-                graph,
-                idFunction,
-                "a", "c", "e", "d", "f"
-            );
-            long[] nodeIds = expected.nodeIds;
+        void test() {
+            var expected = expected(graph, idFunction, "a", "c", "e", "d", "f");
+            var nodeIds = expected.nodeIds;
 
-            DijkstraStreamConfig config = defaultConfigBuilder()
+            var config = defaultConfigBuilder()
                 .sourceNode(nodeIds[0])
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
-            shortestPathDijkstra.compute();
-            long[] path = Arrays
-                .stream(shortestPathDijkstra.getFinalPath().toArray())
-                .map(graph::toOriginalNodeId)
-                .toArray();
 
-            assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
-            assertArrayEquals(nodeIds, path);
-        }
+            var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
+            var path = dijkstraResult.paths().get(0);
+            assertEquals(expected.weight, path.totalCost, 0.1);
 
-        @Test
-        void testResultStream() {
-            Label label = Label.label("Label1");
-            RelationshipType type = RelationshipType.withName("TYPE1");
-            ShortestPath expected = expected(
-                graph,
-                idFunction,
-                "a", "c", "e", "d", "f"
-            );
-            long head = expected.nodeIds[0], tail = expected.nodeIds[expected.nodeIds.length - 1];
-
-            DijkstraStreamConfig config = defaultConfigBuilder().sourceNode(head).targetNode(tail).build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
-            shortestPathDijkstra.compute();
-            Stream<Dijkstra.Result> resultStream = shortestPathDijkstra.resultStream();
-
-            assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
-            assertEquals(expected.nodeIds.length, resultStream.count());
+            var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
+            assertArrayEquals(nodeIds, ids);
         }
     }
 
@@ -155,37 +124,25 @@ final class DijkstraTest {
         private IdFunction idFunction;
 
         @Test
-        void test2() {
-            // graph 2
-            ShortestPath expected = expected(
-                graph,
-                idFunction,
-                "n1", "n3", "n6", "n7"
-            );
+        void test() {
+            var expected = expected(graph, idFunction, "n1", "n3", "n6", "n7");
+            var nodeIds = expected.nodeIds;
 
-            long[] nodeIds = expected.nodeIds;
-
-            DijkstraStreamConfig config = defaultConfigBuilder()
+            var config = defaultConfigBuilder()
                 .sourceNode(nodeIds[0])
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
-            Dijkstra shortestPathDijkstra = new Dijkstra(graph, config, AllocationTracker.empty());
-            shortestPathDijkstra.compute();
-            long[] path = Arrays
-                .stream(shortestPathDijkstra.getFinalPath().toArray())
-                .map(graph::toOriginalNodeId)
-                .toArray();
 
-            assertEquals(expected.weight, shortestPathDijkstra.getTotalCost(), 0.1);
-            assertArrayEquals(nodeIds, path);
+            var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
+            var path = dijkstraResult.paths().get(0);
+            assertEquals(expected.weight, path.totalCost, 0.1);
+
+            var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
+            assertArrayEquals(nodeIds, ids);
         }
     }
 
-    private ShortestPath expected(
-        RelationshipProperties graph,
-        IdFunction idFunction,
-        String... nodeIds
-    ) {
+    private ShortestPath expected(RelationshipProperties graph, IdFunction idFunction, String... nodeIds) {
 
         var nodes = new long[nodeIds.length];
         var weight = 0.0;
