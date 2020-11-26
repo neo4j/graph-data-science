@@ -34,8 +34,6 @@ import java.util.LinkedList;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
-
 public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
 
@@ -87,10 +85,10 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.forEachRelationship(
                 node,
                 1.0D,
-                longToIntConsumer((source, target, weight) -> {
+                (source, target, weight) -> {
                     updateCosts(source, target, weight + cost);
                     return true;
-                })
+                }
             );
 
             if (stopPredicate.test(node)) {
@@ -121,7 +119,7 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .build();
     }
 
-    private void updateCosts(int source, int target, double newCosts) {
+    private void updateCosts(long source, long target, double newCosts) {
         // target has been visited, we already have a shortest path
         if (visited.get(target)) {
             return;
