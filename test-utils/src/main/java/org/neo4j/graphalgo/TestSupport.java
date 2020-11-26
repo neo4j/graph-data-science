@@ -210,9 +210,20 @@ public final class TestSupport {
         long expectedMinBytes,
         long expectedMaxBytes
     ) {
+       assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, expectedMinBytes, expectedMaxBytes);
+    }
+
+    public static void assertMemoryEstimation(
+        Supplier<MemoryEstimation> actualMemoryEstimation,
+        long nodeCount,
+        long relationshipCount,
+        int concurrency,
+        long expectedMinBytes,
+        long expectedMaxBytes
+    ) {
         assertMemoryEstimation(
             actualMemoryEstimation,
-            GraphDimensions.of(nodeCount),
+            GraphDimensions.of(nodeCount, relationshipCount),
             concurrency,
             expectedMinBytes,
             expectedMaxBytes
