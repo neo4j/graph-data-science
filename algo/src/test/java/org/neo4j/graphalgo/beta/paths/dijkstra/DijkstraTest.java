@@ -23,11 +23,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
+import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +73,7 @@ final class DijkstraTest {
         private IdFunction idFunction;
 
         @Test
-        void test() {
+        void testSourceTarget() {
             var expected = expected(graph, idFunction, "a", "c", "e", "d", "f");
             var nodeIds = expected.nodeIds;
 
@@ -79,12 +82,31 @@ final class DijkstraTest {
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
 
-            var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
+            var dijkstraResult = Dijkstra.sourceTarget(graph, config, AllocationTracker.empty()).compute();
             var path = dijkstraResult.paths().findFirst().get();
             assertEquals(expected.weight, path.totalCost, 0.1);
 
             var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
             assertArrayEquals(nodeIds, ids);
+        }
+
+        @Test
+        void testSingleSource() {
+            var expected = expected(graph, idFunction, "a", "c", "e", "d", "f");
+            var nodeIds = expected.nodeIds;
+
+            var config = defaultConfigBuilder()
+                .sourceNode(nodeIds[0])
+                .targetNode(nodeIds[nodeIds.length - 1])
+                .build();
+
+            var dijkstraResult = Dijkstra.singleSource(graph, config, AllocationTracker.empty()).compute();
+            var path = dijkstraResult
+                .paths()
+                .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
+                .collect(Collectors.toList());
+
+            path.forEach(System.out::println);
         }
     }
 
@@ -133,7 +155,7 @@ final class DijkstraTest {
                 .targetNode(nodeIds[nodeIds.length - 1])
                 .build();
 
-            var dijkstraResult = new Dijkstra(graph, config, AllocationTracker.empty()).compute();
+            var dijkstraResult = Dijkstra.sourceTarget(graph, config, AllocationTracker.empty()).compute();
             var path = dijkstraResult.paths().findFirst().get();
             assertEquals(expected.weight, path.totalCost, 0.1);
 

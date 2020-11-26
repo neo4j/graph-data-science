@@ -70,4 +70,16 @@ public final class PathResult {
     ) {
         return new PathResult(index, sourceNode, targetNode, totalCost, nodeIds, costs);
     }
+
+    @Override
+    public String toString() {
+        return "PathResult{" +
+               "index=" + index +
+               ", sourceNode=" + sourceNode +
+               ", targetNode=" + targetNode +
+               ", totalCost=" + totalCost +
+               ", nodeIds=" + nodeIds +
+               ", costs=" + costs +
+               '}';
+    }
 }

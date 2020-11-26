@@ -34,11 +34,12 @@ import java.util.LinkedList;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
+public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
 
     private final Graph graph;
     private final DijkstraBaseConfig config;
+    private final LongPredicate stopPredicate;
 
     // priority queue
     private HugeLongPriorityQueue queue;
@@ -49,9 +50,25 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     private final ProgressLogger progressLogger;
 
-    public Dijkstra(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
+    /**
+     * Configure Dijkstra to compute at most one source-target shortest path.
+     */
+    public static Dijkstra sourceTarget(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
+        long targetNode = config.targetNode();
+        return new Dijkstra(graph, config, node -> node == targetNode, tracker);
+    }
+
+    /**
+     * Configure Dijkstra to compute all single-source shortest path.
+     */
+    public static Dijkstra singleSource(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
+        return new Dijkstra(graph, config, node -> true, tracker);
+    }
+
+    private Dijkstra(Graph graph, DijkstraBaseConfig config, LongPredicate stopPredicate, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
+        this.stopPredicate = stopPredicate;
         this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
         this.path = new HugeLongLongMap(tracker);
         this.visited = new BitSet();
@@ -68,7 +85,7 @@ public class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .index(0)
             .sourceNode(sourceNode);
 
-        var paths = Stream.generate(() -> next(node -> node == targetNode, pathResultBuilder));
+        var paths = Stream.generate(() -> next(stopPredicate, pathResultBuilder));
 
         return ImmutableDijkstraResult
             .builder()
