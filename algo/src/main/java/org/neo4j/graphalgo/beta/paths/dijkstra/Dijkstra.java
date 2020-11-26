@@ -148,7 +148,7 @@ public class Dijkstra extends Algorithm<Dijkstra, Dijkstra> {
             // and found a shorter path to target
             if (newCosts < queue.cost(target)) {
                 path.put(target, source);
-                queue.updateCost(target, newCosts);
+                queue.set(target, newCosts);
             }
         } else {
             // we see target for the first time

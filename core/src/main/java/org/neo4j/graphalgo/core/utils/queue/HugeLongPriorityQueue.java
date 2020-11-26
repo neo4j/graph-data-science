@@ -57,7 +57,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     private final long capacity;
-    private final double defaultCost;
 
     private BitSet costKeys;
     protected HugeDoubleArray costValues;
@@ -69,8 +68,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Creates a new priority queue with the given capacity.
      * The size is fixed, the queue cannot shrink or grow.
      */
-    HugeLongPriorityQueue(long capacity, double defaultCost) {
-        this.defaultCost = defaultCost;
+    HugeLongPriorityQueue(long capacity) {
         long heapSize;
         if (0 == capacity) {
             // We allocate 1 extra to avoid if statement in top()
@@ -114,14 +112,19 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * Returns the cost associated with the given element or
-     * the default cost, if the element is not in the heap.
+     * Returns the cost associated with the given element.
+     * If the element has been popped from the queue, its
+     * latest cost value is being returned.
      */
     public double cost(long element) {
-        if (costKeys.get(element)) {
-            return costValues.get(element);
-        }
-        return defaultCost;
+        return costValues.get(element);
+    }
+
+    /**
+     * Returns true, iff the element is contained in the queue.
+     */
+    public boolean containsElement(long element) {
+        return costKeys.get(element);
     }
 
     /**
@@ -151,7 +154,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * @return the number of elements currently stored in the queue.
+     * Returns the number of elements currently stored in the queue.
      */
     public long size() {
         return size;
@@ -186,10 +189,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         return oldCost != cost || !elementExists;
     }
 
-    private void removeCost(long element) {
-        costKeys.clear(element);
-    }
-
     /**
      * @return true iff there are currently no elements stored in the queue.
      */
@@ -203,19 +202,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public void clear() {
         size = 0;
         costKeys.clear();
-    }
-
-    /**
-     * Updates the heap because the cost of an element has changed, possibly from the outside.
-     * Cost is linear with the size of the queue.
-     */
-    void update(long element) {
-        long pos = findElementPosition(element);
-        if (pos != 0) {
-            if (!upHeap(pos) && pos < size) {
-                downHeap(pos);
-            }
-        }
     }
 
     private long findElementPosition(long element) {
@@ -281,6 +267,19 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         heap.set(i, node);
     }
 
+    private void update(long element) {
+        long pos = findElementPosition(element);
+        if (pos != 0) {
+            if (!upHeap(pos) && pos < size) {
+                downHeap(pos);
+            }
+        }
+    }
+
+    private void removeCost(long element) {
+        costKeys.clear(element);
+    }
+
     @Override
     public PrimitiveLongIterator iterator() {
         return new PrimitiveLongIterator() {
@@ -303,11 +302,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     public static HugeLongPriorityQueue min(long capacity) {
-        return min(capacity, Double.MAX_VALUE);
-    }
-
-    public static HugeLongPriorityQueue min(long capacity, double defaultCost) {
-        return new HugeLongPriorityQueue(capacity, defaultCost) {
+        return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costValues.get(a) < costValues.get(b);
@@ -316,11 +311,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     public static HugeLongPriorityQueue max(long capacity) {
-        return max(capacity, Double.MIN_VALUE);
-    }
-
-    public static HugeLongPriorityQueue max(long capacity, double defaultCost) {
-        return new HugeLongPriorityQueue(capacity, defaultCost) {
+        return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costValues.get(a) > costValues.get(b);
