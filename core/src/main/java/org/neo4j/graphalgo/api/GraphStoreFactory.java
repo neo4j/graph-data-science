@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 import java.util.Map;
@@ -34,7 +33,7 @@ import java.util.Map;
 /**
  * The Abstract Factory defines the construction of the graph
  */
-public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphCreateConfig> implements Assessable {
+public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends GraphCreateConfig> {
 
     public interface Supplier {
         GraphStoreFactory<? extends GraphStore, ? extends GraphCreateConfig> get(GraphLoaderContext loaderContext);
