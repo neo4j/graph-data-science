@@ -76,14 +76,14 @@ class HugeLongPriorityQueueTest {
 
     @Test
     void testAddAndPop() {
-        var size = 50;
-        var queue = HugeLongPriorityQueue.min(size);
+        var capacity = 50;
+        var queue = HugeLongPriorityQueue.min(capacity);
         var elements = new ArrayList<Pair<Long, Double>>();
-        var count = integer(5, size);
+        var count = integer(5, capacity);
         var minElement = -1L;
         var minCost = Double.POSITIVE_INFINITY;
 
-        for (long element = 1; element <= count; element++) {
+        for (long element = 0; element < count; element++) {
             var weight = exclusiveDouble(0D, 100D);
             if (weight < minCost) {
                 minCost = weight;
@@ -122,12 +122,12 @@ class HugeLongPriorityQueueTest {
 
     @Test
     void testUpdateDecreasing() {
-        var size = 50;
-        var queue = HugeLongPriorityQueue.min(size);
+        var capacity = 50;
+        var queue = HugeLongPriorityQueue.min(capacity);
 
-        var count = integer(5, size);
+        var count = integer(5, capacity);
         var minCost = Double.POSITIVE_INFINITY;
-        for (long element = 1; element <= count; element++) {
+        for (long element = 0; element < count; element++) {
             double weight = exclusiveDouble(50D, 100D);
             if (weight < minCost) {
                 minCost = weight;
@@ -135,7 +135,7 @@ class HugeLongPriorityQueueTest {
             queue.add(element, weight);
         }
 
-        for (long element = count; element >= 1; element--) {
+        for (long element = count - 1; element >= 0; element--) {
             minCost = Math.nextDown(minCost);
             queue.set(element, minCost);
             assertEquals(element, queue.top());
@@ -144,12 +144,12 @@ class HugeLongPriorityQueueTest {
 
     @Test
     void testUpdateIncreasing() {
-        var size = 50;
-        var queue = HugeLongPriorityQueue.min(size);
-        int count = integer(5, size);
+        var capacity = 50;
+        var queue = HugeLongPriorityQueue.min(capacity);
+        int count = integer(5, capacity);
         double maxCost = Double.NEGATIVE_INFINITY;
 
-        for (long element = 1; element <= count; element++) {
+        for (long element = 0; element < count; element++) {
             var weight = exclusiveDouble(50D, 100D);
             if (weight > maxCost) {
                 maxCost = weight;
@@ -158,29 +158,12 @@ class HugeLongPriorityQueueTest {
         }
 
         var top = queue.top();
-        for (var element = count; element >= 1; element--) {
+        for (var element = count - 1; element >= 0; element--) {
             if (element == top) {
                 continue;
             }
             maxCost = Math.nextUp(maxCost);
             queue.set(element, maxCost);
-            assertEquals(top, queue.top());
-        }
-    }
-
-    @Test
-    void testUpdateNotExisting() {
-        var size = 50;
-        var queue = HugeLongPriorityQueue.min(size);
-        var count = integer(5, size);
-
-        for (long element = 1; element <= count; element++) {
-            queue.add(element, exclusiveDouble(50D, 100D));
-        }
-
-        var top = queue.top();
-        for (long element = count + 1; element < count + 10; element++) {
-            queue.set(element, 1D);
             assertEquals(top, queue.top());
         }
     }
