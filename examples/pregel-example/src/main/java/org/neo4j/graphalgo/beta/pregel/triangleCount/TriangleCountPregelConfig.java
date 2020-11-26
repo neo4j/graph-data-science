@@ -38,11 +38,6 @@ public interface TriangleCountPregelConfig extends PregelConfig {
         return 4;
     }
 
-    @Value.Default
-    default boolean indexNeighbours() {
-        return true;
-    }
-
     static TriangleCountPregelConfig of(
         String username,
         Optional<String> graphName,

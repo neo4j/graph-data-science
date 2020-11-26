@@ -28,10 +28,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.Arrays;
-
 /**
- *
  * ! Assuming an unweighted graph
  */
 @PregelProcedure(name = "example.pregel.triangleCount", modes = {GDSMode.STREAM})
@@ -63,19 +60,11 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
                 neighbours[idx] = message.longValue();
                 idx++;
             }
-
-            if (!context.config().indexNeighbours()) {
-                // to later allow sorted merge
-                Arrays.sort(neighbours);
-            }
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {
             long[] neighbours = context.longArrayNodeValue(NEIGHBOURS);
-            BitSet isNeighbourFromA = null;
-            if (context.config().indexNeighbours()) {
-                isNeighbourFromA = new BitSet(context.nodeCount());
-                for (long nodeB : neighbours) {
-                    isNeighbourFromA.set(nodeB);
-                }
+            var isNeighbourFromA = new BitSet(context.nodeCount());
+            for (long nodeB : neighbours) {
+                isNeighbourFromA.set(nodeB);
             }
 
             long nodeA = context.nodeId();
@@ -85,47 +74,20 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
                 if (nodeB == lastNodeB) {
                     continue;
                 }
-
                 lastNodeB = nodeB;
 
                 if (nodeB > nodeA) {
                     long[] followingNeighbours = context.longArrayNodeValue(NEIGHBOURS, nodeB);
-                    int i = 0, j = 0;
-
                     long lastNodeC = -1;
 
                     // find common neighbors
-                    if (context.config().indexNeighbours()) {
-                        // check indexed neighbours of A
-                        for (long nodeCfromB : followingNeighbours) {
-                            if (lastNodeC != nodeCfromB && nodeCfromB > nodeB && isNeighbourFromA.get(nodeCfromB)) {
-                                trianglesFromNodeA++;
-                                lastNodeC = nodeCfromB;
-                                context.sendTo(nodeB, 1);
-                                context.sendTo(nodeCfromB, 1);
-                            }
-                        }
-                    } else {
-                        // sorted merge
-                        while (i < followingNeighbours.length && j < neighbours.length) {
-                            long nodeCfromB = followingNeighbours[i];
-                            long nodeCfromA = neighbours[j];
-                            if (nodeCfromB < nodeCfromA)
-                                i++;
-                            else if (nodeCfromA < nodeCfromB)
-                                j++;
-                            else {
-                                // only count each triangle once and avoid parallel rels
-                                if (nodeCfromA > nodeB && lastNodeC != nodeCfromA) {
-                                    trianglesFromNodeA++;
-                                    lastNodeC = nodeCfromA;
-                                    context.sendTo(nodeB, 1);
-                                    context.sendTo(nodeCfromA, 1);
-                                }
-
-                                i++;
-                                j++;
-                            }
+                    // check indexed neighbours of A
+                    for (long nodeC : followingNeighbours) {
+                        if (lastNodeC != nodeC && nodeC > nodeB && isNeighbourFromA.get(nodeC)) {
+                            trianglesFromNodeA++;
+                            lastNodeC = nodeC;
+                            context.sendTo(nodeB, 1);
+                            context.sendTo(nodeC, 1);
                         }
                     }
                 }
