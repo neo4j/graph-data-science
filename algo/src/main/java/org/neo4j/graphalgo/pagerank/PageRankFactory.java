@@ -23,11 +23,14 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.logging.Log;
+
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public class PageRankFactory<CONFIG extends PageRankBaseConfig> implements AlgorithmFactory<PageRank, CONFIG> {
 
@@ -58,14 +61,25 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> implements Algor
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return MemoryEstimations.builder(PageRank.class)
-            .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> MemoryEstimations
-                .builder(PageRank.ComputeSteps.class)
-                .perThread("scores[] wrapper", MemoryUsage::sizeOfObjectArray)
-                .perThread("starts[]", MemoryUsage::sizeOfLongArray)
-                .perThread("lengths[]", MemoryUsage::sizeOfLongArray)
-                .perThread("list of computeSteps", MemoryUsage::sizeOfObjectArray)
-                .perThread("ComputeStep", algorithmType(config).memoryEstimation())
-                .build()))
+            .add(MemoryEstimations.setup("computeSteps", (dimensions, concurrency) -> {
+                var nodeCount = dimensions.nodeCount();
+                var relationshipCount = dimensions.maxRelCount();
+                var averageDegree = Math.max(1, dimensions.averageDegree());
+
+                var degreePartitionSize = ceilDiv(relationshipCount, concurrency);
+                var unboundedNodesPerPartition = degreePartitionSize / averageDegree;
+                var nodesPerPartition = Math.min(unboundedNodesPerPartition, Partition.MAX_NODE_COUNT);
+                var partitionCount = ceilDiv(nodeCount, nodesPerPartition);
+
+                return MemoryEstimations
+                    .builder(PageRank.ComputeSteps.class)
+                    .fixed("scores[] wrapper", MemoryUsage.sizeOfObjectArray(partitionCount))
+                    .fixed("starts[]", MemoryUsage.sizeOfLongArray(partitionCount))
+                    .fixed("lengths[]", MemoryUsage.sizeOfLongArray(partitionCount))
+                    .fixed("list of computeSteps", MemoryUsage.sizeOfObjectArray(partitionCount))
+                    .add("ComputeStep", algorithmType(config).memoryEstimation(partitionCount, nodesPerPartition))
+                    .build();
+            }))
             .build();
     }
 
