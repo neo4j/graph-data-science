@@ -285,6 +285,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final long nodeCount;
         private final long relationshipCount;
         private final boolean isAsync;
+        private final boolean isMultiGraph;
         private final PregelComputation<CONFIG> computation;
         private final PregelContext.InitContext<CONFIG> initContext;
         private final PregelContext.ComputeContext<CONFIG> computeContext;
@@ -318,6 +319,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.voteBits = voteBits;
             this.nodeBatch = nodeBatch;
             this.degrees = graph;
+            this.isMultiGraph = graph.isMultiGraph();
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
@@ -366,6 +368,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return iteration;
         }
 
+        boolean isMultiGraph() {
+            return isMultiGraph;
+        }
+
         long nodeCount() {
             return nodeCount;
         }
@@ -387,6 +393,15 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 sendTo(targetNodeId, message);
                 return true;
             });
+        }
+
+        LongStream getNeighbors(long sourceNodeId) {
+            LongStream.Builder builder = LongStream.builder();
+            relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+                builder.accept(targetNodeId);
+                return true;
+            });
+            return builder.build();
         }
 
         void sendTo(long targetNodeId, double message) {

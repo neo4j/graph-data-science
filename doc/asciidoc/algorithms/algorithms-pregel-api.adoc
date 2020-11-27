@@ -149,6 +149,8 @@ public final class ComputeContext {
     public long nodeCount();
     // Number of relationships in the input graph.
     public long relationshipCount();
+    // Indicates whether the input graph is a multi-graph.
+    public boolean isMultiGraph();
     // Number of relationships of the current node.
     public int degree();
     // Double value for the given node schema key.
@@ -169,6 +171,8 @@ public final class ComputeContext {
     public void sendToNeighbors(double message);
     // Sends the given message to the target node.
     public void sendTo(long targetNodeId, double message);
+    // Stream of outgoing neighbors ids of the current node.
+    public LongStream getNeighbours();
 }
 ----
 

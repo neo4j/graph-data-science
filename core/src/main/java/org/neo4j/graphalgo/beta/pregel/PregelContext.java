@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodePropertyContainer;
 
 import java.util.Set;
+import java.util.stream.LongStream;
 
 public abstract class PregelContext<CONFIG extends PregelConfig> {
 
@@ -71,6 +72,13 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
      */
     public CONFIG config() {
         return config;
+    }
+
+    /**
+     * Whether the graph can contain multiple relationships.
+     */
+    public boolean isMultiGraph() {
+        return computeStep.isMultiGraph();
     }
 
     /**
@@ -133,6 +141,14 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
     public int degree() {
         return computeStep.degree(nodeId);
     }
+
+    /**
+     * Returns the outgoing neighbour-ids of the currently processed node.
+     */
+    public LongStream getNeighbours() { return computeStep.getNeighbors(nodeId); }
+
+    public LongStream getNeighbours(long nodeId) { return computeStep.getNeighbors(nodeId); }
+
 
     /**
      * A context that is used during the initialization phase, which is before the
