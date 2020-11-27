@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -28,6 +29,10 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends AbstractAlgorithmFactory<Wcc, CONFIG> {
+
+    public WccAlgorithmFactory() {
+        super();
+    }
 
     @Override
     protected long taskVolume(Graph graph, CONFIG configuration) {
@@ -61,5 +66,10 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return Wcc.memoryEstimation(config.isIncremental());
+    }
+
+    @TestOnly
+    WccAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
+        super(factory);
     }
 };
