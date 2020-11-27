@@ -46,6 +46,7 @@ task versionsJson {
     def bucketUrl = "https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science"
     def versionsJsonUrl = new URL("https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/versions.json")
     outputs.file(outFile)
+    outputs.upToDateWhen { false }
     doLast {
         def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
         def indexedVersionsJson = versionsJson.collectEntries {
