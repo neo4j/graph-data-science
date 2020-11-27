@@ -27,7 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
-class CrossEntropyMultiClassLossTest implements FiniteDifferenceTest {
+class MultiClassCrossEntropyLossTest implements FiniteDifferenceTest {
 
     private ComputationContext ctx;
 
@@ -48,7 +48,7 @@ class CrossEntropyMultiClassLossTest implements FiniteDifferenceTest {
             3, 3
         );
 
-        var loss = new CrossEntropyMultiClassLoss(predictions, targets);
+        var loss = new MultiClassCrossEntropyLoss(predictions, targets);
 
         double lossValue = ctx.forward(loss).value();
 
@@ -75,7 +75,7 @@ class CrossEntropyMultiClassLossTest implements FiniteDifferenceTest {
             )
         );
 
-        var loss = new CrossEntropyMultiClassLoss(predictions, targets);
+        var loss = new MultiClassCrossEntropyLoss(predictions, targets);
 
         finiteDifferenceShouldApproximateGradient(predictions, loss);
     }
