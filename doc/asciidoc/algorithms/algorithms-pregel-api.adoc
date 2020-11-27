@@ -171,7 +171,7 @@ public final class ComputeContext {
     public void sendToNeighbors(double message);
     // Sends the given message to the target node.
     public void sendTo(long targetNodeId, double message);
-    // Stream of outgoing neighbors ids of the current node.
+    // Stream of neighbor ids of the current node.
     public LongStream getNeighbours();
 }
 ----

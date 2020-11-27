@@ -75,7 +75,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
     }
 
     /**
-     * Whether the graph can contain multiple relationships.
+     * Indicates whether the input graph is a multi-graph.
      */
     public boolean isMultiGraph() {
         return computeStep.isMultiGraph();
