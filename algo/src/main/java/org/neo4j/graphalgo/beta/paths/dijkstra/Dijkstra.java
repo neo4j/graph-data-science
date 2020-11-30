@@ -28,6 +28,9 @@ import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.PathResultBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
@@ -45,11 +48,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private final LongPredicate stopPredicate;
 
     // priority queue
-    private HugeLongPriorityQueue queue;
+    private final HugeLongPriorityQueue queue;
     // predecessor map
-    private HugeLongLongMap path;
+    private final HugeLongLongMap path;
     // visited set
-    private BitSet visited;
+    private final BitSet visited;
     // path id increasing in order of exploration
     private long pathIndex;
 
@@ -76,6 +79,14 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         AllocationTracker tracker
     ) {
         return new Dijkstra(graph, config, node -> true, progressLogger, tracker);
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(Dijkstra.class)
+            .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .add("reverse path", HugeLongLongMap.memoryEstimation())
+            .perNode("visited set", MemoryUsage::sizeOfBitset)
+            .build();
     }
 
     private Dijkstra(

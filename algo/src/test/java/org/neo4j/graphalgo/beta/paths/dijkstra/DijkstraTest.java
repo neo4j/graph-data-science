@@ -21,8 +21,12 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.beta.paths.PathResult;
@@ -38,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,10 +50,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @GdlExtension
 final class DijkstraTest {
 
+    @GdlGraph
+    private static final String DUMMY = "()";
+
     static ImmutableDijkstraStreamConfig.Builder defaultConfigBuilder() {
         return ImmutableDijkstraStreamConfig.builder()
             .path(true)
             .concurrency(1);
+    }
+
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1_000, 32_728L),
+            Arguments.of(1_000_000, 32_250_472L),
+            Arguments.of(1_000_000_000, 32_254_883_384L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedMemoryEstimation")
+    void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
+        TestSupport.assertMemoryEstimation(
+            Dijkstra::memoryEstimation,
+            nodeCount,
+            1,
+            expectedBytes,
+            expectedBytes
+        );
     }
 
     @Nested

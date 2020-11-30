@@ -25,13 +25,10 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfBitset;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * A PriorityQueue specialized for longs that maintains a partial ordering of
@@ -48,11 +45,11 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
 
-    public static MemoryEstimation memoryEstimation(long capacity) {
+    public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(HugeLongPriorityQueue.class)
-            .fixed("heap", sizeOfLongArray(capacity))
-            .fixed("costs", sizeOfDoubleArray(capacity))
-            .fixed("keys", sizeOfBitset(capacity))
+            .perNode("heap", HugeLongArray::memoryEstimation)
+            .perNode("costs", HugeDoubleArray::memoryEstimation)
+            .perNode("keys", MemoryUsage::sizeOfBitset)
             .build();
     }
 
