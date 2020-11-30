@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.logging.Log;
 
 public class DijkstraFactory<T extends DijkstraBaseConfig> implements AlgorithmFactory<Dijkstra, T> {
@@ -48,6 +47,6 @@ public class DijkstraFactory<T extends DijkstraBaseConfig> implements AlgorithmF
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
-        return MemoryEstimations.empty();
+        return Dijkstra.memoryEstimation();
     }
 }
