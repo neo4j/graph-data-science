@@ -19,87 +19,29 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
-import org.immutables.builder.Builder;
-import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-@Value.Style(depluralize = true)
-public final class PathResult {
+@ValueClass
+public interface PathResult {
 
-    public static final PathResult EMPTY = new PathResult();
+    PathResult EMPTY = ImmutablePathResult.builder()
+        .index(-1)
+        .sourceNode(-1)
+        .targetNode(-1)
+        .totalCost(0)
+        .build();
 
-    public long index;
+    long index();
 
-    public long sourceNode;
+    long sourceNode();
 
-    public long targetNode;
+    long targetNode();
 
-    public double totalCost;
+    double totalCost();
 
-    public List<Long> nodeIds;
+    List<Long> nodeIds();
 
-    public List<Double> costs;
-
-    private PathResult() {}
-
-    private PathResult(
-        long index,
-        long sourceNode,
-        long targetNode,
-        double totalCost,
-        List<Long> nodeIds,
-        List<Double> costs
-    ) {
-        this.index = index;
-        this.sourceNode = sourceNode;
-        this.targetNode = targetNode;
-        this.totalCost = totalCost;
-        this.nodeIds = new ArrayList<>(nodeIds);
-        this.costs = costs;
-    }
-
-    @Builder.Factory
-    static PathResult pathResult(
-        long index,
-        long sourceNode,
-        long targetNode,
-        double totalCost,
-        List<Long> nodeIds,
-        List<Double> costs
-    ) {
-        return new PathResult(index, sourceNode, targetNode, totalCost, nodeIds, costs);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        PathResult that = (PathResult) o;
-        return index == that.index &&
-               sourceNode == that.sourceNode &&
-               targetNode == that.targetNode &&
-               Double.compare(that.totalCost, totalCost) == 0 &&
-               Objects.equals(nodeIds, that.nodeIds) &&
-               Objects.equals(costs, that.costs);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(index, sourceNode, targetNode, totalCost, nodeIds, costs);
-    }
-
-    @Override
-    public String toString() {
-        return "PathResult{" +
-               "index=" + index +
-               ", sourceNode=" + sourceNode +
-               ", targetNode=" + targetNode +
-               ", totalCost=" + totalCost +
-               ", nodeIds=" + nodeIds +
-               ", costs=" + costs +
-               '}';
-    }
+    List<Double> costs();
 }

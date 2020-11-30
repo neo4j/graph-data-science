@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
+import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
-import org.neo4j.graphalgo.beta.paths.PathResultBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -307,7 +307,7 @@ final class DijkstraTest {
     }
 
     private PathResult expected(RelationshipProperties graph, IdFunction idFunction, long index, String... nodes) {
-        var builder = new PathResultBuilder()
+        var builder = ImmutablePathResult.builder()
             .index(index)
             .sourceNode(idFunction.of(nodes[0]))
             .targetNode(idFunction.of(nodes[nodes.length - 1]));

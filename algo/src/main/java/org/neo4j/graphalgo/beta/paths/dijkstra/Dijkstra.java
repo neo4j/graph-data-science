@@ -24,8 +24,8 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
-import org.neo4j.graphalgo.beta.paths.PathResultBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -113,7 +113,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
         queue.add(sourceNode, 0.0);
 
-        var pathResultBuilder = new PathResultBuilder()
+        var pathResultBuilder = ImmutablePathResult.builder()
             .sourceNode(sourceNode);
 
         var paths = Stream.generate(() -> next(stopPredicate, pathResultBuilder));
@@ -124,7 +124,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .build();
     }
 
-    private PathResult next(LongPredicate stopPredicate, PathResultBuilder pathResultBuilder) {
+    private PathResult next(LongPredicate stopPredicate, ImmutablePathResult.Builder pathResultBuilder) {
         while (!queue.isEmpty() && running()) {
             var node = queue.pop();
             var cost = queue.cost(node);
@@ -170,7 +170,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         }
     }
 
-    private PathResult pathResult(long target, double cost, PathResultBuilder pathResultBuilder) {
+    private PathResult pathResult(long target, double cost, ImmutablePathResult.Builder pathResultBuilder) {
         var pathNodeIds = new LinkedList<Long>();
         var costs = new LinkedList<Double>();
 

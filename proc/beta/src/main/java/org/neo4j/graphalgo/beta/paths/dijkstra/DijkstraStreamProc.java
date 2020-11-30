@@ -23,13 +23,13 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.beta.paths.PathResult;
+import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -37,11 +37,11 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, PathResult, DijkstraStreamConfig> {
+public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, StreamResult, DijkstraStreamConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
-    public Stream<PathResult> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -49,7 +49,7 @@ public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, Pat
     }
 
     @Override
-    protected Stream<PathResult> stream(ComputationResult<Dijkstra, DijkstraResult, DijkstraStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<Dijkstra, DijkstraResult, DijkstraStreamConfig> computationResult) {
         return runWithExceptionLogging("Result streaming failed", () -> {
             var graph = computationResult.graph();
 
@@ -57,21 +57,16 @@ public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, Pat
                 graph.release();
                 return Stream.empty();
             }
-            return computationResult.result().paths()
+            return computationResult
+                .result()
+                .paths()
                 .takeWhile(path -> path != PathResult.EMPTY)
-                .peek(pathResult -> {
-                    pathResult.sourceNode = graph.toOriginalNodeId(pathResult.sourceNode);
-                    pathResult.targetNode = graph.toOriginalNodeId(pathResult.targetNode);
-                    List<Long> nodeIds = pathResult.nodeIds;
-                    for (int i = 0; i < nodeIds.size(); i++) {
-                        nodeIds.set(i, graph.toOriginalNodeId(nodeIds.get(i)));
-                    }
-                });
+                .map(path -> StreamResult.of(graph, path));
         });
     }
 
     @Override
-    protected PathResult streamResult(
+    protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
         throw new UnsupportedOperationException("Dijkstra handles result building individually.");
@@ -91,5 +86,4 @@ public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, Pat
     protected AlgorithmFactory<Dijkstra, DijkstraStreamConfig> algorithmFactory() {
         return new DijkstraFactory<>();
     }
-
 }
