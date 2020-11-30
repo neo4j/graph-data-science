@@ -187,11 +187,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     @Override
     public void release() {
-        path.release();
-        queue.release();
-        queue = null;
-        path = null;
-        visited = null;
+        // We do not release, since the result
+        // is lazily computed when the consumer
+        // iterates over the stream.
     }
 }
 
