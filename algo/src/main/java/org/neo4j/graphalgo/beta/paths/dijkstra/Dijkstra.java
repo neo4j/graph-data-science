@@ -47,6 +47,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private HugeLongLongMap path;
     // visited set
     private BitSet visited;
+    // path id increasing in order of exploration
+    private long pathIndex;
 
     private final ProgressLogger progressLogger;
 
@@ -72,17 +74,16 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
         this.path = new HugeLongLongMap(tracker);
         this.visited = new BitSet();
+        this.pathIndex = 0L;
         this.progressLogger = getProgressLogger();
     }
 
     public DijkstraResult compute() {
         var sourceNode = graph.toMappedNodeId(config.sourceNode());
-        var targetNode = graph.toMappedNodeId(config.targetNode());
 
         queue.add(sourceNode, 0.0);
 
         var pathResultBuilder = new PathResultBuilder()
-            .index(0)
             .sourceNode(sourceNode);
 
         var paths = Stream.generate(() -> next(stopPredicate, pathResultBuilder));
@@ -109,31 +110,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             );
 
             if (stopPredicate.test(node)) {
-                pathResultBuilder.targetNode(node).totalCost(cost);
-                return createPathResult(node, pathResultBuilder);
+                return pathResult(node, cost, pathResultBuilder);
             }
 
             progressLogger.logProgress((double) node / (graph.nodeCount() - 1));
         }
         return PathResult.EMPTY;
-    }
-
-    private PathResult createPathResult(long target, PathResultBuilder pathResultBuilder) {
-        var path = new LinkedList<Long>();
-        var costs = new LinkedList<Double>();
-
-        var lastNode = target;
-
-        while (lastNode != PATH_END) {
-            path.addFirst(lastNode);
-            costs.addFirst(queue.cost(lastNode));
-            lastNode = this.path.getOrDefault(lastNode, PATH_END);
-        }
-
-        return pathResultBuilder
-            .nodeIds(path)
-            .costs(costs)
-            .build();
     }
 
     private void updateCosts(long source, long target, double newCosts) {
@@ -154,6 +136,27 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             path.put(target, source);
             queue.add(target, newCosts);
         }
+    }
+
+    private PathResult pathResult(long target, double cost, PathResultBuilder pathResultBuilder) {
+        var path = new LinkedList<Long>();
+        var costs = new LinkedList<Double>();
+
+        var lastNode = target;
+
+        while (lastNode != PATH_END) {
+            path.addFirst(lastNode);
+            costs.addFirst(queue.cost(lastNode));
+            lastNode = this.path.getOrDefault(lastNode, PATH_END);
+        }
+
+        return pathResultBuilder
+            .index(pathIndex++)
+            .targetNode(target)
+            .totalCost(cost)
+            .nodeIds(path)
+            .costs(costs)
+            .build();
     }
 
     @Override

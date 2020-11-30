@@ -24,15 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.beta.paths.PathResult;
+import org.neo4j.graphalgo.beta.paths.PathResultBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
@@ -45,26 +47,26 @@ final class DijkstraTest {
     }
 
     @Nested
-    class ShortestPathWithDirectedWeights {
+    class Graph1 {
 
         // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Label1)" +
-            ", (b:Label1)" +
-            ", (c:Label1)" +
-            ", (d:Label1)" +
-            ", (e:Label1)" +
-            ", (f:Label1)" +
+            "  (a:Label)" +
+            ", (b:Label)" +
+            ", (c:Label)" +
+            ", (d:Label)" +
+            ", (e:Label)" +
+            ", (f:Label)" +
 
-            ", (a)-[:TYPE1 {cost: 4}]->(b)" +
-            ", (a)-[:TYPE1 {cost: 2}]->(c)" +
-            ", (b)-[:TYPE1 {cost: 5}]->(c)" +
-            ", (b)-[:TYPE1 {cost: 10}]->(d)" +
-            ", (c)-[:TYPE1 {cost: 3}]->(e)" +
-            ", (d)-[:TYPE1 {cost: 11}]->(f)" +
-            ", (e)-[:TYPE1 {cost: 4}]->(d)";
+            ", (a)-[:TYPE {cost: 4}]->(b)" +
+            ", (a)-[:TYPE {cost: 2}]->(c)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (b)-[:TYPE {cost: 10}]->(d)" +
+            ", (c)-[:TYPE {cost: 3}]->(e)" +
+            ", (d)-[:TYPE {cost: 11}]->(f)" +
+            ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
         private Graph graph;
@@ -73,71 +75,97 @@ final class DijkstraTest {
         private IdFunction idFunction;
 
         @Test
-        void testSourceTarget() {
-            var expected = expected(graph, idFunction, "a", "c", "e", "d", "f");
-            var nodeIds = expected.nodeIds;
-
+        void nonExisting() {
             var config = defaultConfigBuilder()
-                .sourceNode(nodeIds[0])
-                .targetNode(nodeIds[nodeIds.length - 1])
+                .sourceNode(idFunction.of("f"))
+                .targetNode(idFunction.of("a"))
                 .build();
 
-            var dijkstraResult = Dijkstra.sourceTarget(graph, config, AllocationTracker.empty()).compute();
-            var path = dijkstraResult.paths().findFirst().get();
-            assertEquals(expected.weight, path.totalCost, 0.1);
+            var path = Dijkstra
+                .sourceTarget(graph, config, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
 
-            var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
-            assertArrayEquals(nodeIds, ids);
+            assertEquals(PathResult.EMPTY, path);
         }
 
         @Test
-        void testSingleSource() {
-            var expected = expected(graph, idFunction, "a", "c", "e", "d", "f");
-            var nodeIds = expected.nodeIds;
+        void sourceTarget() {
+            var expected = expected(graph, idFunction, 0, "a", "c", "e", "d", "f");
 
             var config = defaultConfigBuilder()
-                .sourceNode(nodeIds[0])
-                .targetNode(nodeIds[nodeIds.length - 1])
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
                 .build();
 
-            var dijkstraResult = Dijkstra.singleSource(graph, config, AllocationTracker.empty()).compute();
-            var path = dijkstraResult
+            var path = Dijkstra
+                .sourceTarget(graph, config, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
+        }
+
+        @Test
+        void singleSource() {
+            var expected = Set.of(
+                expected(graph, idFunction, 0, "a"),
+                expected(graph, idFunction, 1, "a", "c"),
+                expected(graph, idFunction, 2, "a", "b"),
+                expected(graph, idFunction, 3, "a", "c", "e"),
+                expected(graph, idFunction, 4, "a", "c", "e", "d"),
+                expected(graph, idFunction, 5, "a", "c", "e", "d", "f")
+            );
+
+            var sourceNode = idFunction.of("a");
+            var ignored = -1L;
+
+            var config = defaultConfigBuilder()
+                .sourceNode(sourceNode)
+                .targetNode(ignored)
+                .build();
+
+            var paths = Dijkstra.singleSource(graph, config, AllocationTracker.empty())
+                .compute()
                 .paths()
                 .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
-            path.forEach(System.out::println);
+            assertEquals(expected, paths);
         }
     }
 
     @Nested
-    class MoreComplexGraph {
+    class Graph2 {
 
-        // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf
-        // without the additional 14 edge
+        // https://www.cise.ufl.edu/~sahni/cop3530/slides/lec326.pdf without relationship id 14
         @GdlGraph
         private static final String DB_CYPHER2 =
             "CREATE" +
-            "  (n1:Label2)" +
-            ", (n2:Label2)" +
-            ", (n3:Label2)" +
-            ", (n4:Label2)" +
-            ", (n5:Label2)" +
-            ", (n6:Label2)" +
-            ", (n7:Label2)" +
+            "  (n1:Label)" +
+            ", (n2:Label)" +
+            ", (n3:Label)" +
+            ", (n4:Label)" +
+            ", (n5:Label)" +
+            ", (n6:Label)" +
+            ", (n7:Label)" +
 
-            ", (n1)-[:TYPE2 {cost: 6}]->(n2)" +
-            ", (n1)-[:TYPE2 {cost: 2}]->(n3)" +
-            ", (n1)-[:TYPE2 {cost: 16}]->(n4)" +
-            ", (n2)-[:TYPE2 {cost: 4}]->(n5)" +
-            ", (n2)-[:TYPE2 {cost: 5}]->(n4)" +
-            ", (n3)-[:TYPE2 {cost: 7}]->(n2)" +
-            ", (n3)-[:TYPE2 {cost: 3}]->(n5)" +
-            ", (n3)-[:TYPE2 {cost: 8}]->(n6)" +
-            ", (n4)-[:TYPE2 {cost: 7}]->(n3)" +
-            ", (n5)-[:TYPE2 {cost: 4}]->(n4)" +
-            ", (n5)-[:TYPE2 {cost: 10}]->(n7)" +
-            ", (n6)-[:TYPE2 {cost: 1}]->(n7)";
+            ", (n1)-[:TYPE {cost: 6}]->(n2)" +
+            ", (n1)-[:TYPE {cost: 2}]->(n3)" +
+            ", (n1)-[:TYPE {cost: 16}]->(n4)" +
+            ", (n2)-[:TYPE {cost: 4}]->(n5)" +
+            ", (n2)-[:TYPE {cost: 5}]->(n4)" +
+            ", (n3)-[:TYPE {cost: 7}]->(n2)" +
+            ", (n3)-[:TYPE {cost: 3}]->(n5)" +
+            ", (n3)-[:TYPE {cost: 8}]->(n6)" +
+            ", (n4)-[:TYPE {cost: 7}]->(n3)" +
+            ", (n5)-[:TYPE {cost: 4}]->(n4)" +
+            ", (n5)-[:TYPE {cost: 10}]->(n7)" +
+            ", (n6)-[:TYPE {cost: 1}]->(n7)";
 
         @Inject
         private Graph graph;
@@ -146,48 +174,80 @@ final class DijkstraTest {
         private IdFunction idFunction;
 
         @Test
-        void test() {
-            var expected = expected(graph, idFunction, "n1", "n3", "n6", "n7");
-            var nodeIds = expected.nodeIds;
+        void sourceTarget() {
+            var expected = expected(graph, idFunction, 0, "n1", "n3", "n6", "n7");
 
             var config = defaultConfigBuilder()
-                .sourceNode(nodeIds[0])
-                .targetNode(nodeIds[nodeIds.length - 1])
+                .sourceNode(idFunction.of("n1"))
+                .targetNode(idFunction.of("n7"))
                 .build();
 
-            var dijkstraResult = Dijkstra.sourceTarget(graph, config, AllocationTracker.empty()).compute();
-            var path = dijkstraResult.paths().findFirst().get();
-            assertEquals(expected.weight, path.totalCost, 0.1);
+            var path = Dijkstra
+                .sourceTarget(graph, config, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
 
-            var ids = path.nodeIds.stream().mapToLong(graph::toOriginalNodeId).toArray();
-            assertArrayEquals(nodeIds, ids);
+            assertEquals(expected, path);
+        }
+
+        @Test
+        void singleSource() {
+            var expected = Set.of(
+                expected(graph, idFunction, 0, "n1"),
+                expected(graph, idFunction, 1, "n1", "n3"),
+                expected(graph, idFunction, 2, "n1", "n3", "n5"),
+                expected(graph, idFunction, 3, "n1", "n2"),
+                expected(graph, idFunction, 4, "n1", "n3", "n5", "n4"),
+                expected(graph, idFunction, 5, "n1", "n3", "n6"),
+                expected(graph, idFunction, 6, "n1", "n3", "n6", "n7")
+            );
+
+            var sourceNode = idFunction.of("n1");
+            var ignored = -1L;
+
+            var config = defaultConfigBuilder()
+                .sourceNode(sourceNode)
+                .targetNode(ignored)
+                .build();
+
+            var paths = Dijkstra.singleSource(graph, config, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
+                .collect(Collectors.toSet());
+
+            assertEquals(expected, paths);
         }
     }
 
-    private ShortestPath expected(RelationshipProperties graph, IdFunction idFunction, String... nodeIds) {
+    private PathResult expected(RelationshipProperties graph, IdFunction idFunction, long index, String... nodes) {
+        var builder = new PathResultBuilder()
+            .index(index)
+            .sourceNode(idFunction.of(nodes[0]))
+            .targetNode(idFunction.of(nodes[nodes.length - 1]));
 
-        var nodes = new long[nodeIds.length];
-        var weight = 0.0;
-        for (int i = 0; i < nodeIds.length; i++) {
-            var currentNode = idFunction.of(nodeIds[i]);
-            var j = i + 1;
-            if (j < nodeIds.length) {
-                var nextNode = idFunction.of(nodeIds[j]);
-                weight += graph.relationshipProperty(currentNode, nextNode);
+        var nodeIds = new ArrayList<Long>(nodes.length);
+        var costs = new ArrayList<Double>(nodes.length);
+
+        var cost = 0.0;
+        var prevNode = -1L;
+
+        for (int i = 0; i < nodes.length; i++) {
+            var currentNode = idFunction.of(nodes[i]);
+            if (i > 0) {
+                cost += graph.relationshipProperty(prevNode, currentNode);
             }
-            nodes[i] = currentNode;
+            prevNode = currentNode;
+            nodeIds.add(currentNode);
+            costs.add(cost);
         }
 
-        return new ShortestPath(nodes, weight);
-    }
-
-    private static final class ShortestPath {
-        private final long[] nodeIds;
-        private final double weight;
-
-        private ShortestPath(long[] nodeIds, double weight) {
-            this.nodeIds = nodeIds;
-            this.weight = weight;
-        }
+        return builder
+            .totalCost(costs.get(costs.size() - 1))
+            .costs(costs)
+            .nodeIds(nodeIds)
+            .build();
     }
 }

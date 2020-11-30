@@ -23,13 +23,14 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 
 import java.util.List;
+import java.util.Objects;
 
 @Value.Style(depluralize = true)
 public final class PathResult {
 
     public static final PathResult EMPTY = new PathResult();
 
-    public int index;
+    public long index;
 
     public long sourceNode;
 
@@ -44,7 +45,7 @@ public final class PathResult {
     private PathResult() {}
 
     private PathResult(
-        int index,
+        long index,
         long sourceNode,
         long targetNode,
         double totalCost,
@@ -61,7 +62,7 @@ public final class PathResult {
 
     @Builder.Factory
     static PathResult pathResult(
-        int index,
+        long index,
         long sourceNode,
         long targetNode,
         double totalCost,
@@ -69,6 +70,24 @@ public final class PathResult {
         List<Double> costs
     ) {
         return new PathResult(index, sourceNode, targetNode, totalCost, nodeIds, costs);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PathResult that = (PathResult) o;
+        return index == that.index &&
+               sourceNode == that.sourceNode &&
+               targetNode == that.targetNode &&
+               Double.compare(that.totalCost, totalCost) == 0 &&
+               Objects.equals(nodeIds, that.nodeIds) &&
+               Objects.equals(costs, that.costs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(index, sourceNode, targetNode, totalCost, nodeIds, costs);
     }
 
     @Override
