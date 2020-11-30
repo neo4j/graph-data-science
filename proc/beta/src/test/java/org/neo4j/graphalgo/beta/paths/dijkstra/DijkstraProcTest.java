@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
+import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -38,7 +39,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
-//    MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
+    MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
     RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {

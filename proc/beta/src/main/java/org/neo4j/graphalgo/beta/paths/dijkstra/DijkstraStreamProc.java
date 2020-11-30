@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,6 +47,15 @@ public class DijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, Str
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return stream(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(name = "gds.beta.shortestPath.dijkstra.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> streamEstimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
