@@ -19,10 +19,15 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DijkstraStreamProcTest extends DijkstraProcTest<DijkstraStreamConfig> {
 
@@ -34,5 +39,37 @@ class DijkstraStreamProcTest extends DijkstraProcTest<DijkstraStreamConfig> {
     @Override
     public DijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
         return DijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
+
+    @Test
+    void returnCorrectResult() {
+        DijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+        String createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipProperty("cost")
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher.call().explicitCreation("graph")
+            .algo("gds.beta.shortestPath.dijkstra")
+            .streamMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter("relationshipWeightProperty", "cost")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(0, row.getNumber("index").longValue());
+
+            assertEquals(nodeIdByProperty(0), row.getNumber("sourceNode").longValue());
+            assertEquals(nodeIdByProperty(6), row.getNumber("targetNode").longValue());
+
+            assertEquals(20.0D, row.getNumber("totalCost").doubleValue());
+
+            assertEquals(List.of(0L, 2L, 4L, 3L, 5L), row.get("nodeIds"));
+            assertEquals(List.of(0.0D, 2.0D, 5.0D, 9.0D, 20.0D), row.get("costs"));
+        });
     }
 }

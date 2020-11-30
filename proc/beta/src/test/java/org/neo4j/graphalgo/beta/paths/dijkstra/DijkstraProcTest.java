@@ -34,6 +34,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
@@ -45,12 +46,12 @@ abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseP
     @Override
     public String createQuery() {
         return "CREATE" +
-               "  (a:Label { prop: 0 })" +
-               ", (b:Label)" +
-               ", (c:Label)" +
-               ", (d:Label)" +
-               ", (e:Label)" +
-               ", (f:Label { prop: 1 })" +
+               "  (a:Label { id: 1 })" +
+               ", (b:Label { id: 2 })" +
+               ", (c:Label { id: 3 })" +
+               ", (d:Label { id: 4 })" +
+               ", (e:Label { id: 5 })" +
+               ", (f:Label { id: 6 })" +
                ", (a)-[:TYPE {cost: 4}]->(b)" +
                ", (a)-[:TYPE {cost: 2}]->(c)" +
                ", (b)-[:TYPE {cost: 5}]->(c)" +
@@ -81,25 +82,25 @@ abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseP
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        var sourceId = new MutableLong(0L);
-        var targetId = new MutableLong(0L);
-
-        runQueryWithRowConsumer(
-            "MATCH (n) WHERE n.prop = 0 RETURN id(n) AS source",
-            resultRow -> sourceId.setValue(resultRow.getNumber("source"))
-        );
-        runQueryWithRowConsumer(
-            "MATCH (n) WHERE n.prop = 0 RETURN id(n) AS target",
-            resultRow -> targetId.setValue(resultRow.getNumber("target"))
-        );
+        long sourceId = nodeIdByProperty(1);
+        long targetId = nodeIdByProperty(6);
 
         if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId.longValue());
+            mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
         }
         if (!mapWrapper.containsKey(TARGET_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(TARGET_NODE_KEY, targetId.longValue());
+            mapWrapper = mapWrapper.withNumber(TARGET_NODE_KEY, targetId);
         }
         return mapWrapper;
+    }
+
+    long nodeIdByProperty(long propertyValue) {
+        var nodeId = new MutableLong(0L);
+        runQueryWithRowConsumer(
+            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
+            resultRow -> nodeId.setValue(resultRow.getNumber("id"))
+        );
+        return nodeId.longValue();
     }
 
     @Override

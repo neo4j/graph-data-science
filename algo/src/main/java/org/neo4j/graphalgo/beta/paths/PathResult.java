@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.paths;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,7 +57,7 @@ public final class PathResult {
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.totalCost = totalCost;
-        this.nodeIds = nodeIds;
+        this.nodeIds = new ArrayList<>(nodeIds);
         this.costs = costs;
     }
 
