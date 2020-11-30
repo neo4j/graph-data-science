@@ -19,15 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
-import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
-
-import java.util.Optional;
-
-public interface DijkstraBaseConfig extends ShortestPathBaseConfig {
-
-    /**
-     * Iff true, the stream result contains a Cypher path representation.
-     */
-    Optional<Boolean> path();
-
+public class DijkstraProc {
+    static final String DIJKSTRA_DESCRIPTION = "TODO";
 }

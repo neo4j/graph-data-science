@@ -26,6 +26,9 @@ import java.util.Optional;
 
 public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
+    String SOURCE_NODE_KEY = "sourceNode";
+    String TARGET_NODE_KEY = "targetNode";
+
     long sourceNode();
 
     long targetNode();

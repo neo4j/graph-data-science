@@ -222,8 +222,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default void testRunOnLoadedGraph(TestSupport.FactoryType factoryType) {
         String loadedGraphName = "loadedGraph";
         GraphCreateConfig graphCreateConfig = factoryType == CYPHER
-            ? withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections())
-            : withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery());
+            ? withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery())
+            : withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();

@@ -19,15 +19,20 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
-import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-public interface DijkstraBaseConfig extends ShortestPathBaseConfig {
+class DijkstraStreamProcTest extends DijkstraProcTest<DijkstraStreamConfig> {
 
-    /**
-     * Iff true, the stream result contains a Cypher path representation.
-     */
-    Optional<Boolean> path();
+    @Override
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, DijkstraStreamConfig>> getProcedureClazz() {
+        return DijkstraStreamProc.class;
+    }
 
+    @Override
+    public DijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return DijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
 }
