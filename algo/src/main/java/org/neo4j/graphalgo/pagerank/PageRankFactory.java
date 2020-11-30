@@ -69,7 +69,9 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> implements Algor
                 var degreePartitionSize = ceilDiv(relationshipCount, concurrency);
                 var unboundedNodesPerPartition = degreePartitionSize / averageDegree;
                 var nodesPerPartition = Math.min(unboundedNodesPerPartition, Partition.MAX_NODE_COUNT);
-                var partitionCount = ceilDiv(nodeCount, nodesPerPartition);
+                var partitionCount = nodesPerPartition > 0
+                    ? ceilDiv(nodeCount, nodesPerPartition)
+                    : 0;
 
                 return MemoryEstimations
                     .builder(PageRank.ComputeSteps.class)
