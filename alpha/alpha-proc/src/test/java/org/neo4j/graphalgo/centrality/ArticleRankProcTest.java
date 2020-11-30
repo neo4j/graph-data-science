@@ -86,11 +86,11 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "| page      | score               |" + NL +
             "+---------------------------------+" + NL +
-            "| \"Paper 0\" | 0.3462769146633946  |" + NL +
-            "| \"Paper 1\" | 0.31950147982279303 |" + NL +
-            "| \"Paper 4\" | 0.21375000253319743 |" + NL +
-            "| \"Paper 2\" | 0.21092906260164457 |" + NL +
-            "| \"Paper 3\" | 0.18028125041164458 |" + NL +
+            "| \"Paper 0\" | 0.7561931175296194  |" + NL +
+            "| \"Paper 1\" | 0.5640594220254571  |" + NL +
+            "| \"Paper 2\" | 0.306357501167804   |" + NL +
+            "| \"Paper 4\" | 0.27750000506639483 |" + NL +
+            "| \"Paper 3\" | 0.22862500101327898 |" + NL +
             "| \"Paper 5\" | 0.15000000000000002 |" + NL +
             "| \"Paper 6\" | 0.15000000000000002 |" + NL +
             "+---------------------------------+" + NL +
@@ -121,11 +121,11 @@ class ArticleRankProcTest extends BaseProcTest {
             "+---------------------------------+" + NL +
             "| page      | score               |" + NL +
             "+---------------------------------+" + NL +
-            "| \"Paper 0\" | 0.3462769146633946  |" + NL +
-            "| \"Paper 1\" | 0.31950147982279303 |" + NL +
-            "| \"Paper 4\" | 0.21375000253319743 |" + NL +
-            "| \"Paper 2\" | 0.21092906260164457 |" + NL +
-            "| \"Paper 3\" | 0.18028125041164458 |" + NL +
+            "| \"Paper 0\" | 0.7561931175296194  |" + NL +
+            "| \"Paper 1\" | 0.5640594220254571  |" + NL +
+            "| \"Paper 2\" | 0.306357501167804   |" + NL +
+            "| \"Paper 4\" | 0.27750000506639483 |" + NL +
+            "| \"Paper 3\" | 0.22862500101327898 |" + NL +
             "| \"Paper 5\" | 0.15000000000000002 |" + NL +
             "| \"Paper 6\" | 0.15000000000000002 |" + NL +
             "+---------------------------------+" + NL +
@@ -137,7 +137,7 @@ class ArticleRankProcTest extends BaseProcTest {
             assertNotEquals(-1L, row.getNumber("writeMillis").longValue());
             Map<String, Object> centralityDistribution = (Map<String, Object>) row.get("centralityDistribution");
             assertNotNull(centralityDistribution);
-            assertEquals(0.346, (Double) centralityDistribution.get("max"), 1e-2);
+            assertEquals(0.756, (Double) centralityDistribution.get("max"), 1e-2);
         });
 
         String actual = runQuery(resultQuery, Result::resultAsString);

@@ -68,6 +68,11 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
     }
 
     @Override
+    double degreeFactor() {
+        return averageDegree;
+    }
+
+    @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
         if (srcRankDelta != 0F) {
             int idx = binaryLookup(targetNodeId, starts);

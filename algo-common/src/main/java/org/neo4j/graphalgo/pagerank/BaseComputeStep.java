@@ -198,7 +198,7 @@ public abstract class BaseComputeStep implements ComputeStep {
                 sum += scores[i];
                 scores[i] = 0F;
             }
-            double delta = dampingFactor * sum;
+            double delta = dampingFactor * degreeFactor() * sum;
             if (delta > tolerance) {
                 shouldBreak = false;
             }
@@ -207,6 +207,10 @@ public abstract class BaseComputeStep implements ComputeStep {
         }
 
         return shouldBreak;
+    }
+
+    double degreeFactor() {
+        return 1;
     }
 
     public float[][] nextScores() {
