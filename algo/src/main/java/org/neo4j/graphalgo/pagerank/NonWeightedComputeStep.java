@@ -52,6 +52,7 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
         );
     }
 
+    @Override
     void singleIteration() {
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
@@ -59,7 +60,7 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
                 int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     srcRankDelta = (float) (delta / degree);
-                    this.relationshipIterator.forEachRelationship(nodeId, this);
+                    relationshipIterator.forEachRelationship(nodeId, this);
                 }
             }
             progressLogger.logProgress(graph.degree(nodeId));
