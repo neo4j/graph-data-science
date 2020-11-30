@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -53,8 +55,14 @@ final class DijkstraTest {
     @GdlGraph
     private static final String DUMMY = "()";
 
-    static ImmutableDijkstraStreamConfig.Builder defaultConfigBuilder() {
-        return ImmutableDijkstraStreamConfig.builder()
+    static ImmutableShortestPathDijkstraStreamConfig.Builder defaultSourceTargetConfigBuilder() {
+        return ImmutableShortestPathDijkstraStreamConfig.builder()
+            .path(true)
+            .concurrency(1);
+    }
+
+    static ImmutableAllShortestPathsDijkstraStreamConfig.Builder defaultSingleSourceConfigBuilder() {
+        return ImmutableAllShortestPathsDijkstraStreamConfig.builder()
             .path(true)
             .concurrency(1);
     }
@@ -109,7 +117,7 @@ final class DijkstraTest {
 
         @Test
         void nonExisting() {
-            var config = defaultConfigBuilder()
+            var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("f"))
                 .targetNode(idFunction.of("a"))
                 .build();
@@ -128,7 +136,7 @@ final class DijkstraTest {
         void sourceTarget() {
             var expected = expected(graph, idFunction, 0, "a", "c", "e", "d", "f");
 
-            var config = defaultConfigBuilder()
+            var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("a"))
                 .targetNode(idFunction.of("f"))
                 .build();
@@ -155,11 +163,9 @@ final class DijkstraTest {
             );
 
             var sourceNode = idFunction.of("a");
-            var ignored = -1L;
 
-            var config = defaultConfigBuilder()
+            var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
-                .targetNode(ignored)
                 .build();
 
             var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
@@ -197,12 +203,12 @@ final class DijkstraTest {
         void shouldLogProgress() {
             var testLogger = new TestProgressLogger(graph.relationshipCount(), "Dijkstra", 1);
 
-            var config = defaultConfigBuilder()
+            var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("a"))
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            var ignore = Dijkstra
+            var ignored = Dijkstra
                 .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
                 .compute()
                 .pathSet();
@@ -263,7 +269,7 @@ final class DijkstraTest {
         void sourceTarget() {
             var expected = expected(graph, idFunction, 0, "n1", "n3", "n6", "n7");
 
-            var config = defaultConfigBuilder()
+            var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("n1"))
                 .targetNode(idFunction.of("n7"))
                 .build();
@@ -291,11 +297,9 @@ final class DijkstraTest {
             );
 
             var sourceNode = idFunction.of("n1");
-            var ignored = -1L;
 
-            var config = defaultConfigBuilder()
+            var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
-                .targetNode(ignored)
                 .build();
 
             var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())

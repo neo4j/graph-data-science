@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import com.carrotsearch.hppc.BitSet;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraBaseConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -35,18 +35,16 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
 
     private final Graph graph;
-    private final DijkstraBaseConfig config;
     private final LongPredicate stopPredicate;
 
+    private final long sourceNode;
     // priority queue
     private final HugeLongPriorityQueue queue;
     // predecessor map
@@ -61,12 +59,18 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
      */
     public static Dijkstra sourceTarget(
         Graph graph,
-        DijkstraBaseConfig config,
+        ShortestPathDijkstraBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         long targetNode = graph.toMappedNodeId(config.targetNode());
-        return new Dijkstra(graph, config, node -> node == targetNode, progressLogger, tracker);
+        return new Dijkstra(
+            graph,
+            graph.toOriginalNodeId(config.sourceNode()),
+            node -> node == targetNode,
+            progressLogger,
+            tracker
+        );
     }
 
     /**
@@ -74,11 +78,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
      */
     public static Dijkstra singleSource(
         Graph graph,
-        DijkstraBaseConfig config,
+        AllShortestPathsDijkstraBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        return new Dijkstra(graph, config, node -> true, progressLogger, tracker);
+        return new Dijkstra(graph, graph.toOriginalNodeId(config.sourceNode()), node -> true, progressLogger, tracker);
     }
 
     public static MemoryEstimation memoryEstimation() {
@@ -91,13 +95,13 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     private Dijkstra(
         Graph graph,
-        DijkstraBaseConfig config,
+        long sourceNode,
         LongPredicate stopPredicate,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
-        this.config = config;
+        this.sourceNode = sourceNode;
         this.stopPredicate = stopPredicate;
         this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
         this.path = new HugeLongLongMap(tracker);
@@ -108,8 +112,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     public DijkstraResult compute() {
         progressLogger.logStart();
-
-        var sourceNode = graph.toMappedNodeId(config.sourceNode());
 
         queue.add(sourceNode, 0.0);
 
@@ -201,16 +203,5 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         // We do not release, since the result
         // is lazily computed when the consumer
         // iterates over the stream.
-    }
-}
-
-@ValueClass
-interface DijkstraResult {
-
-    Stream<PathResult> paths();
-
-    @TestOnly
-    default Set<PathResult> pathSet() {
-        return paths().takeWhile(p -> p != PathResult.EMPTY).collect(Collectors.toSet());
     }
 }

@@ -17,33 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.dijkstra;
+package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
+import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-class DijkstraStreamProcTest extends DijkstraProcTest<DijkstraStreamConfig> {
+class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, DijkstraStreamConfig>> getProcedureClazz() {
-        return DijkstraStreamProc.class;
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
+        return ShortestPathDijkstraStreamProc.class;
     }
 
     @Override
-    public DijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return DijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return ShortestPathDijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test
     void returnCorrectResult() {
-        DijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+        ShortestPathDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()
             .withAnyRelationshipType()
@@ -60,16 +62,21 @@ class DijkstraStreamProcTest extends DijkstraProcTest<DijkstraStreamConfig> {
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        runQueryWithRowConsumer(query, row -> {
-            assertEquals(0, row.getNumber("index").longValue());
+        var idA = nodeIdByProperty(1);
+        var idC = nodeIdByProperty(3);
+        var idD = nodeIdByProperty(4);
+        var idE = nodeIdByProperty(5);
+        var idF = nodeIdByProperty(6);
 
-            assertEquals(nodeIdByProperty(0), row.getNumber("sourceNode").longValue());
-            assertEquals(nodeIdByProperty(6), row.getNumber("targetNode").longValue());
+        var expected = Map.of(
+            "index", 0L,
+            "sourceNode", nodeIdByProperty(1),
+            "targetNode", nodeIdByProperty(6),
+            "totalCost", 20.0D,
+            "costs", List.of(0.0, 2.0, 5.0, 9.0, 20.0),
+            "nodeIds", List.of(idA, idC, idE, idD, idF)
+        );
 
-            assertEquals(20.0D, row.getNumber("totalCost").doubleValue());
-
-            assertEquals(List.of(0L, 2L, 4L, 3L, 5L), row.get("nodeIds"));
-            assertEquals(List.of(0.0D, 2.0D, 5.0D, 9.0D, 20.0D), row.get("costs"));
-        });
+        assertCypherResult(query, List.of(expected));
     }
 }

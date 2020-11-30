@@ -17,14 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths;
+package org.neo4j.graphalgo.beta.paths.dijkstra;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.paths.PathResult;
 
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+@ValueClass
+public interface DijkstraResult {
 
-    Optional<Integer> maxDepth();
+    Stream<PathResult> paths();
+
+    @TestOnly
+    default Set<PathResult> pathSet() {
+        return paths().takeWhile(p -> p != PathResult.EMPTY).collect(Collectors.toSet());
+    }
 }

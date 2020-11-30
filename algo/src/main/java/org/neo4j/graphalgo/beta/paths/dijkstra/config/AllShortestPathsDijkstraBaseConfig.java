@@ -17,14 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths;
+package org.neo4j.graphalgo.beta.paths.dijkstra.config;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+public interface AllShortestPathsDijkstraBaseConfig extends DijkstraBaseConfig {
 
-import java.util.Optional;
-
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    Optional<Integer> maxDepth();
 }

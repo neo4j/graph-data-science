@@ -19,34 +19,59 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraBaseConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraBaseConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public class DijkstraFactory<T extends DijkstraBaseConfig> implements AlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends ShortestPathBaseConfig> implements AlgorithmFactory<Dijkstra, T> {
 
     @Override
-    public Dijkstra build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
-        var progressLogger = new BatchingProgressLogger(
+    public MemoryEstimation memoryEstimation(T configuration) {
+        return Dijkstra.memoryEstimation();
+    }
+
+    @NotNull
+    public static BatchingProgressLogger progressLogger(Graph graph, Log log) {
+        return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "Dijkstra",
             1
         );
-
-        return Dijkstra.sourceTarget(
-            graph,
-            configuration,
-            progressLogger,
-            tracker
-        );
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation(T configuration) {
-        return Dijkstra.memoryEstimation();
+    public static <T extends ShortestPathDijkstraBaseConfig> DijkstraFactory<T> sourceTarget() {
+        return new DijkstraFactory<T>() {
+            @Override
+            public Dijkstra build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+                return Dijkstra.sourceTarget(
+                    graph,
+                    configuration,
+                    progressLogger(graph, log),
+                    tracker
+                );
+            }
+        };
+    }
+
+    public static <T extends AllShortestPathsDijkstraBaseConfig> DijkstraFactory<T> singleSource() {
+        return new DijkstraFactory<T>() {
+            @Override
+            public Dijkstra build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+                return Dijkstra.singleSource(
+                    graph,
+                    configuration,
+                    progressLogger(graph, log),
+                    tracker
+                );
+            }
+        };
     }
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.dijkstra;
+package org.neo4j.graphalgo.beta.paths.singlesource;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
@@ -27,17 +27,19 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
+import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraBaseConfig;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
-import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseProcTest implements
+abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsDijkstraBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
@@ -84,13 +86,9 @@ abstract class DijkstraProcTest<CONFIG extends DijkstraBaseConfig> extends BaseP
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         long sourceId = nodeIdByProperty(1);
-        long targetId = nodeIdByProperty(6);
 
         if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
             mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
-        }
-        if (!mapWrapper.containsKey(TARGET_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(TARGET_NODE_KEY, targetId);
         }
         return mapWrapper;
     }

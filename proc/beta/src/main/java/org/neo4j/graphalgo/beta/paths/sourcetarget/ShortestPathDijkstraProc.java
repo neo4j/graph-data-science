@@ -17,14 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths;
+package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+final class ShortestPathDijkstraProc {
+    static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between a pair of nodes.";
 
-import java.util.Optional;
-
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    Optional<Integer> maxDepth();
+    private ShortestPathDijkstraProc() {}
 }

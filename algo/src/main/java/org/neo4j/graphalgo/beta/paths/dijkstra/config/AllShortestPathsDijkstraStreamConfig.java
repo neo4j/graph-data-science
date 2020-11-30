@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.dijkstra;
+package org.neo4j.graphalgo.beta.paths.dijkstra.config;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -29,15 +29,20 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface DijkstraStreamConfig extends DijkstraBaseConfig {
+public interface AllShortestPathsDijkstraStreamConfig extends AllShortestPathsDijkstraBaseConfig {
 
-    static DijkstraStreamConfig of(
+    /**
+     * Iff true, the stream result contains a Cypher path representation.
+     */
+    Optional<Boolean> path();
+
+    static AllShortestPathsDijkstraStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new DijkstraStreamConfigImpl(
+        return new AllShortestPathsDijkstraStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
