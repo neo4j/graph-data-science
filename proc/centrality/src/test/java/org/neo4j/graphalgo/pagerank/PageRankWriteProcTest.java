@@ -122,7 +122,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
             .yields("ranIterations");
 
         runQueryWithRowConsumer(query,
-            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
+            row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
         );
 
         query = builder
