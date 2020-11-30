@@ -45,7 +45,7 @@ public abstract class MutatePropertyProc<
         throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
-    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperties(computationResult)));
     }
 

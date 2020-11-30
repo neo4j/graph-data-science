@@ -101,7 +101,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
                 .withLog(log)
                 .build();
 
-            Collection<NodePropertyExporter.NodeProperty<?>> writeNodeProperties =
+            Collection<NodePropertyExporter.NodeProperty> writeNodeProperties =
                 config.nodeProperties().stream()
                     .map(nodePropertyKey ->
                         ImmutableNodeProperty.of(
