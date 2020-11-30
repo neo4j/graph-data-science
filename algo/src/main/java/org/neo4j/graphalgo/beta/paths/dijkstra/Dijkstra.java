@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import com.carrotsearch.hppc.BitSet;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -31,7 +32,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
@@ -50,24 +53,38 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     // path id increasing in order of exploration
     private long pathIndex;
 
-    private final ProgressLogger progressLogger;
-
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
      */
-    public static Dijkstra sourceTarget(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
+    public static Dijkstra sourceTarget(
+        Graph graph,
+        DijkstraBaseConfig config,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
+    ) {
         long targetNode = config.targetNode();
-        return new Dijkstra(graph, config, node -> node == targetNode, tracker);
+        return new Dijkstra(graph, config, node -> node == targetNode, progressLogger, tracker);
     }
 
     /**
      * Configure Dijkstra to compute all single-source shortest path.
      */
-    public static Dijkstra singleSource(Graph graph, DijkstraBaseConfig config, AllocationTracker tracker) {
-        return new Dijkstra(graph, config, node -> true, tracker);
+    public static Dijkstra singleSource(
+        Graph graph,
+        DijkstraBaseConfig config,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
+    ) {
+        return new Dijkstra(graph, config, node -> true, progressLogger, tracker);
     }
 
-    private Dijkstra(Graph graph, DijkstraBaseConfig config, LongPredicate stopPredicate, AllocationTracker tracker) {
+    private Dijkstra(
+        Graph graph,
+        DijkstraBaseConfig config,
+        LongPredicate stopPredicate,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
+    ) {
         this.graph = graph;
         this.config = config;
         this.stopPredicate = stopPredicate;
@@ -75,10 +92,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.path = new HugeLongLongMap(tracker);
         this.visited = new BitSet();
         this.pathIndex = 0L;
-        this.progressLogger = getProgressLogger();
+        this.progressLogger = progressLogger;
     }
 
     public DijkstraResult compute() {
+        progressLogger.logStart();
+
         var sourceNode = graph.toMappedNodeId(config.sourceNode());
 
         queue.add(sourceNode, 0.0);
@@ -100,6 +119,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             var cost = queue.cost(node);
             visited.set(node);
 
+            // For disconnected graphs, this will not reach 100%.
+            progressLogger.logProgress(graph.degree(node));
+
             graph.forEachRelationship(
                 node,
                 1.0D,
@@ -112,9 +134,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             if (stopPredicate.test(node)) {
                 return pathResult(node, cost, pathResultBuilder);
             }
-
-            progressLogger.logProgress((double) node / (graph.nodeCount() - 1));
         }
+        progressLogger.logFinish();
         return PathResult.EMPTY;
     }
 
@@ -178,4 +199,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 interface DijkstraResult {
 
     Stream<PathResult> paths();
+
+    @TestOnly
+    default Set<PathResult> pathSet() {
+        return paths().takeWhile(p -> p != PathResult.EMPTY).collect(Collectors.toSet());
+    }
 }

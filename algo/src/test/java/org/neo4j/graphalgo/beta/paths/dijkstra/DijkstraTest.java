@@ -21,10 +21,13 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.PathResultBuilder;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -32,10 +35,12 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 final class DijkstraTest {
@@ -82,7 +87,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, AllocationTracker.empty())
+                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -101,7 +106,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, AllocationTracker.empty())
+                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -129,13 +134,38 @@ final class DijkstraTest {
                 .targetNode(ignored)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
-                .paths()
-                .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
-                .collect(Collectors.toSet());
+                .pathSet();
 
             assertEquals(expected, paths);
+        }
+
+        @Test
+        void shouldLogProgress() {
+            var testLogger = new TestProgressLogger(graph.relationshipCount(), "Dijkstra", 1);
+
+            var config = defaultConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .build();
+
+            var ignore = Dijkstra
+                .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            List<AtomicLong> progresses = testLogger.getProgresses();
+            assertEquals(1, progresses.size());
+            assertEquals(graph.relationshipCount(), progresses.get(0).get());
+
+            assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 28%"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 42%"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 71%"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 85%"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 100%"));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
         }
     }
 
@@ -183,7 +213,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, AllocationTracker.empty())
+                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -212,11 +242,9 @@ final class DijkstraTest {
                 .targetNode(ignored)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
-                .paths()
-                .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
-                .collect(Collectors.toSet());
+                .pathSet();
 
             assertEquals(expected, paths);
         }
