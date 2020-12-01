@@ -184,10 +184,6 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         BitSet unionBitSet = new BitSet(nodeCount());
         nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
 
-        if (unionBitSet.cardinality() == nodeCount()) {
-            return this;
-        }
-
         long nodeId = -1L;
         long cursor = 0L;
         long newNodeCount = unionBitSet.cardinality();
