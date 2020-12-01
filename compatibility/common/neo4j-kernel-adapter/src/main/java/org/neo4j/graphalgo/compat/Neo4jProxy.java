@@ -44,6 +44,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -108,6 +109,10 @@ public final class Neo4jProxy {
         AccessMode.Static restricting
     ) {
         return IMPL.newRestrictedAccessMode(original, restricting);
+    }
+
+    public static AuthSubject usernameAuthSubject(String username, AuthSubject authSubject) {
+        return IMPL.usernameAuthSubject(username, authSubject);
     }
 
     public static <RECORD extends AbstractBaseRecord> void read(

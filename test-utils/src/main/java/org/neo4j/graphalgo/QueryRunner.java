@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -148,46 +148,7 @@ public final class QueryRunner {
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();
-        SecurityContext securityContext = new SecurityContext(new CustomUserNameAuthSubject(username, subject), READ);
+        SecurityContext securityContext = new SecurityContext(Neo4jProxy.usernameAuthSubject(username, subject), READ);
         return topLevelTransaction.overrideWith(securityContext);
     }
-
-    private static class CustomUserNameAuthSubject implements AuthSubject {
-
-        private final String username;
-
-        private final AuthSubject authSubject;
-
-        CustomUserNameAuthSubject(String username, AuthSubject authSubject) {
-            this.username = username;
-            this.authSubject = authSubject;
-        }
-
-        @Override
-        public void logout() {
-            authSubject.logout();
-        }
-
-        @Override
-        public AuthenticationResult getAuthenticationResult() {
-            return authSubject.getAuthenticationResult();
-        }
-
-        @Override
-        public void setPasswordChangeNoLongerRequired() {
-            authSubject.setPasswordChangeNoLongerRequired();
-        }
-
-        @Override
-        public boolean hasUsername(String username) {
-            return this.username.equals(username);
-        }
-
-        @Override
-        public String username() {
-            return username;
-        }
-
-    }
-
 }

@@ -52,6 +52,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -118,6 +119,11 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
         AccessMode.Static restricting
     ) {
         return new RestrictedAccessMode(original, restricting);
+    }
+
+    @Override
+    public AuthSubject usernameAuthSubject(String username, AuthSubject authSubject) {
+        return new CompatUsernameAuthSubject43(username, authSubject);
     }
 
     @Override
