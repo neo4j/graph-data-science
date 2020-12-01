@@ -42,14 +42,36 @@ class UnionNodePropertiesTest {
     @Test
     void shouldReturnDoubleCorrectly() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(42.0D));
-
         assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
+    }
+
+    @Test
+    void shouldReturnLongCorrectly() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L));
+        assertThat(unionNodeProperties.longValue(0)).isEqualTo(42L);
+    }
+
+    @Test
+    void shouldReturnFloatArrayCorrectly() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new float[]{4.2F}));
+        assertThat(unionNodeProperties.floatArrayValue(0)).isEqualTo(new float[]{4.2f});
+    }
+
+    @Test
+    void shouldReturnDoubleArrayCorrectly() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new double[]{4.2}));
+        assertThat(unionNodeProperties.doubleArrayValue(0)).isEqualTo(new double[]{4.2});
+    }
+
+    @Test
+    void shouldReturnLongArrayCorrectly() {
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new long[]{42L}));
+        assertThat(unionNodeProperties.longArrayValue(0)).isEqualTo(new long[]{42L});
     }
 
     @Test
     void shouldConvertLongToDouble() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L));
-
         assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
     }
 
