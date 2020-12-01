@@ -181,10 +181,6 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         var unionBitSet = new BitSet(nodeCount());
         nodeLabels.forEach(label -> unionBitSet.union(labelInformation.get(label)));
 
-        if (unionBitSet.cardinality() == nodeCount()) {
-            return this;
-        }
-
         var sparseLongArray = SparseLongArray.fromExistingBuilder(unionBitSet.bits).build();
 
         Map<NodeLabel, BitSet> newLabelInformation = nodeLabels
