@@ -210,6 +210,12 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.modularityOptimization.stream.estimate`
 | `gds.beta.modularityOptimization.write`
 | `gds.beta.modularityOptimization.write.estimate`
+.2+<.^| Shortest Path Dijkstra
+| `gds.beta.shortestPath.dijkstra.stream`
+| `gds.beta.shortestPath.dijkstra.stream.estimate`
+.2+<.^| All Shortest Paths Dijkstra
+| `gds.beta.allShortestPaths.dijkstra.stream`
+| `gds.beta.allShortestPaths.dijkstra.stream.estimate`
 |===
 
 [[alpha-tier]]

@@ -41,6 +41,8 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -100,6 +102,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
+        "gds.beta.allShortestPaths.dijkstra.stream",
+        "gds.beta.allShortestPaths.dijkstra.stream.estimate",
+
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",
         "gds.beta.graphSage.stream",
@@ -144,6 +149,9 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.beta.shortestPath.dijkstra.stream",
+        "gds.beta.shortestPath.dijkstra.stream.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
@@ -266,6 +274,7 @@ class ListProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
+            AllShortestPathsDijkstraStreamProc.class,
             BetweennessCentralityStreamProc.class,
             BetweennessCentralityWriteProc.class,
             BetweennessCentralityMutateProc.class,
@@ -321,6 +330,7 @@ class ListProcTest extends BaseProcTest {
             PageRankStreamProc.class,
             PageRankMutateProc.class,
             PageRankStatsProc.class,
+            ShortestPathDijkstraStreamProc.class,
             TriangleCountStatsProc.class,
             TriangleCountWriteProc.class,
             TriangleCountStreamProc.class,

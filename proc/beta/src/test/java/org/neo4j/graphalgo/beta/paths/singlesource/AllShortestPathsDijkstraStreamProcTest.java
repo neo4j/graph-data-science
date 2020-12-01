@@ -35,7 +35,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig>> getProcedureClazz() {
-        return AllShortestPathDijkstraStreamProc.class;
+        return AllShortestPathsDijkstraStreamProc.class;
     }
 
     @Override

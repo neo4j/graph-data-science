@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathDijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, StreamResult, AllShortestPathsDijkstraStreamConfig> {
+public class AllShortestPathsDijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, StreamResult, AllShortestPathsDijkstraStreamConfig> {
 
     @Procedure(name = "gds.beta.allShortestPaths.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
