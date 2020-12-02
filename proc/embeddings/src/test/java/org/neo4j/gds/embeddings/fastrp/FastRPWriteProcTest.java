@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
-    implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP.FloatEmbeddings> {
+    implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP.FastRPResult> {
 
     @Override
     GdsCypher.ExecutionModes mode() {
@@ -45,7 +45,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPWriteConfig>> getProcedureClazz() {
         return FastRPWriteProc.class;
     }
 

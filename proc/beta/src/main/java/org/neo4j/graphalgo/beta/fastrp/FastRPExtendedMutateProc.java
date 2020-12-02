@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.fastrp.FastRPExtendedCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPExtendedMutateProc extends MutatePropertyProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedMutateProc.MutateResult, FastRPExtendedMutateConfig> {
+public class FastRPExtendedMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPResult, FastRPExtendedMutateProc.MutateResult, FastRPExtendedMutateConfig> {
 
     @Procedure(value = "gds.beta.fastRPExtended.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -46,7 +46,7 @@ public class FastRPExtendedMutateProc extends MutatePropertyProc<FastRP, FastRP.
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedMutateConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FastRPResult, FastRPExtendedMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -63,12 +63,12 @@ public class FastRPExtendedMutateProc extends MutatePropertyProc<FastRP, FastRP.
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPExtendedMutateConfig> computationResult) {
         return FastRPExtendedCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP.FastRPResult, FastRPExtendedMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 

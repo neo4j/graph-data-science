@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.fastrp.FastRPExtendedCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPExtendedStreamProc extends StreamProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStreamProc.StreamResult, FastRPExtendedStreamConfig> {
+public class FastRPExtendedStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, FastRPExtendedStreamProc.StreamResult, FastRPExtendedStreamConfig> {
 
     @Procedure(value = "gds.beta.fastRPExtended.stream", mode = READ)
     @Description(FastRPExtendedCompanion.DESCRIPTION)
@@ -47,7 +47,7 @@ public class FastRPExtendedStreamProc extends StreamProc<FastRP, FastRP.FloatEmb
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStreamConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FastRPResult, FastRPExtendedStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,7 +64,7 @@ public class FastRPExtendedStreamProc extends StreamProc<FastRP, FastRP.FloatEmb
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPExtendedStreamConfig> computationResult) {
         return FastRPExtendedCompanion.getNodeProperties(computationResult);
     }
 

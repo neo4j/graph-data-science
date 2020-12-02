@@ -38,8 +38,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<FastRP, CONFIG, FastRP>,
-    MemoryEstimateTest<FastRP, CONFIG, FastRP> {
+    AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
+    MemoryEstimateTest<FastRP, CONFIG, FastRP.FastRPResult> {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -74,7 +74,7 @@ public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseCo
 
     @Override
     public void assertResultEquals(
-        FastRP result1, FastRP result2
+        FastRP.FastRPResult result1, FastRP.FastRPResult result2
     ) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);
