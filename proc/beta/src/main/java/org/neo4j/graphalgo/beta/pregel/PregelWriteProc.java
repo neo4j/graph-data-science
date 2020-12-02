@@ -31,7 +31,7 @@ public abstract class PregelWriteProc<
     extends WriteProc<ALGO, Pregel.PregelResult, PregelWriteResult, CONFIG> {
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty<?>> nodePropertyList(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().writeProperty());
     }
 }
