@@ -32,7 +32,7 @@ import java.util.Optional;
 class FastRPExtendedStatsProcTest extends FastRPExtendedProcTest<FastRPExtendedStatsConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStatsConfig>> getProcedureClazz() {
         return FastRPExtendedStatsProc.class;
     }
 

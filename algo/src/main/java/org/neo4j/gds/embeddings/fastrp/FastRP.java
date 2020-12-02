@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class FastRP extends Algorithm<FastRP, FastRP.FloatEmbeddings> {
+public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
@@ -101,13 +101,13 @@ public class FastRP extends Algorithm<FastRP, FastRP.FloatEmbeddings> {
     }
 
     @Override
-    public FloatEmbeddings compute() {
+    public FastRPResult compute() {
         progressLogger.logMessage(":: Start");
         initPropertyVectors();
         initRandomVectors();
         propagateEmbeddings();
         progressLogger.logMessage(":: Finished");
-        return new FloatEmbeddings(embeddings);
+        return new FastRPResult(embeddings);
     }
 
     @TestOnly
@@ -171,10 +171,12 @@ public class FastRP extends Algorithm<FastRP, FastRP.FloatEmbeddings> {
             List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
                 .stream()
                 .map(partition -> new PropagateEmbeddingsTask(
-                    partition,
-                    localCurrent,
-                    localPrevious,
-                    iterationWeight))
+                        partition,
+                        localCurrent,
+                        localPrevious,
+                        iterationWeight
+                    )
+                )
                 .collect(Collectors.toList());
             ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
@@ -371,10 +373,10 @@ public class FastRP extends Algorithm<FastRP, FastRP.FloatEmbeddings> {
         }
     }
 
-    public static class FloatEmbeddings {
+    public static class FastRPResult {
         private final HugeObjectArray<float[]> embeddings;
 
-        public FloatEmbeddings(HugeObjectArray<float[]> embeddings) {
+        public FastRPResult(HugeObjectArray<float[]> embeddings) {
             this.embeddings = embeddings;
         }
 

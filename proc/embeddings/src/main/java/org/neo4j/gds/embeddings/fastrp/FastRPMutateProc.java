@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FloatEmbeddings, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
+public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPResult, FastRPMutateProc.MutateResult, FastRPMutateConfig> {
 
     @Procedure(value = "gds.fastRP.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
@@ -45,7 +45,7 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FloatEmb
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPMutateConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FastRPResult, FastRPMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -62,12 +62,12 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FloatEmb
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPMutateConfig> computationResult) {
         return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<FastRP, FastRP.FastRPResult, FastRPMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 

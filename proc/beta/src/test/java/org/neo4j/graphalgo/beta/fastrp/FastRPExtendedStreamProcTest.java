@@ -33,7 +33,7 @@ import java.util.Optional;
 class FastRPExtendedStreamProcTest extends FastRPExtendedProcTest<FastRPExtendedStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FastRPResult, FastRPExtendedStreamConfig>> getProcedureClazz() {
         return FastRPExtendedStreamProc.class;
     }
 

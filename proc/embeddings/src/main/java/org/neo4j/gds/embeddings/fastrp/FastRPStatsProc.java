@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FloatEmbeddings, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
+public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, FastRPStatsProc.StatsResult, FastRPStatsConfig> {
 
     @Procedure(value = "gds.fastRP.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
@@ -44,7 +44,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FloatEmbeddings, F
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPStatsConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FastRPResult, FastRPStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -61,7 +61,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FloatEmbeddings, F
 
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP.FastRPResult, FastRPStatsConfig> computeResult) {
         return new StatsResult.Builder();
     }
 
