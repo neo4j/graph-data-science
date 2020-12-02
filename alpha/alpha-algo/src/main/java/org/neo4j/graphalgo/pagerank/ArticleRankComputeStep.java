@@ -21,14 +21,13 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.binaryLookup;
 
 final class ArticleRankComputeStep extends BaseComputeStep implements RelationshipConsumer {
-    private double averageDegree;
+    private final double averageDegree;
     private float srcRankDelta;
 
     ArticleRankComputeStep(
@@ -53,23 +52,27 @@ final class ArticleRankComputeStep extends BaseComputeStep implements Relationsh
         this.averageDegree = degreeCache.average();
     }
 
+    @Override
     void singleIteration() {
-        long startNode = this.startNode;
-        long endNode = this.endNode;
-        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0) {
                 int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     srcRankDelta = (float) (delta / (degree + averageDegree));
-                    rels.forEachRelationship(nodeId, this);
+                    this.relationshipIterator.forEachRelationship(nodeId, this);
                 }
             }
             progressLogger.logProgress(graph.degree(nodeId));
         }
     }
 
+    @Override
+    double degreeFactor() {
+        return averageDegree;
+    }
+
+    @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
         if (srcRankDelta != 0F) {
             int idx = binaryLookup(targetNodeId, starts);

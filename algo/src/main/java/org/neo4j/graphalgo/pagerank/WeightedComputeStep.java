@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -56,17 +55,15 @@ public class WeightedComputeStep extends BaseComputeStep implements Relationship
         this.aggregatedDegrees = degreeCache.aggregatedDegrees();
     }
 
+    @Override
     void singleIteration() {
-        long startNode = this.startNode;
-        long endNode = this.endNode;
-        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
                 int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     sumOfWeights = aggregatedDegrees.get(nodeId);
-                    rels.forEachRelationship(nodeId, DEFAULT_WEIGHT, this);
+                    relationshipIterator.forEachRelationship(nodeId, DEFAULT_WEIGHT, this);
                 }
             }
             progressLogger.logProgress(graph.degree(nodeId));

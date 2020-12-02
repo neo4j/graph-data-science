@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -32,22 +31,23 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
     private final double initialValue;
 
     EigenvectorCentralityComputeStep(
-            double dampingFactor,
-            long[] sourceNodeIds,
-            Graph graph,
-            AllocationTracker tracker,
-            int partitionSize,
-            long startNode,
-            long nodeCount,
-            ProgressLogger progressLogger
+        double dampingFactor,
+        long[] sourceNodeIds,
+        Graph graph,
+        AllocationTracker tracker,
+        int partitionSize,
+        long startNode,
+        long nodeCount,
+        ProgressLogger progressLogger
     ) {
-        super(dampingFactor,
-                sourceNodeIds,
-                graph,
-                tracker,
-                partitionSize,
-                startNode,
-                progressLogger
+        super(
+            dampingFactor,
+            sourceNodeIds,
+            graph,
+            tracker,
+            partitionSize,
+            startNode,
+            progressLogger
         );
         this.initialValue = 1.0 / nodeCount;
     }
@@ -57,17 +57,15 @@ final class EigenvectorCentralityComputeStep extends BaseComputeStep implements 
         return initialValue;
     }
 
+    @Override
     void singleIteration() {
-        long startNode = this.startNode;
-        long endNode = this.endNode;
-        RelationshipIterator rels = this.relationshipIterator;
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
             if (delta > 0.0) {
                 int degree = degrees.degree(nodeId);
                 if (degree > 0) {
                     srcRankDelta = (float) delta;
-                    rels.forEachRelationship(nodeId, this);
+                    relationshipIterator.forEachRelationship(nodeId, this);
                 }
             }
             progressLogger.logProgress(graph.degree(nodeId));

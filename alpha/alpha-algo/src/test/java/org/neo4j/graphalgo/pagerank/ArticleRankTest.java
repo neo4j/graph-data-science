@@ -82,16 +82,16 @@ final class ArticleRankTest {
     void test() {
         Map<Long, Double> expected = new HashMap<>();
 
-            expected.put(idFunction.of("a"), 0.2071625);
-            expected.put(idFunction.of("b"), 0.4706795);
-            expected.put(idFunction.of("c"), 0.3605195);
-            expected.put(idFunction.of("d"), 0.195118);
-            expected.put(idFunction.of("e"), 0.2071625);
-            expected.put(idFunction.of("f"), 0.195118);
-            expected.put(idFunction.of("g"), 0.15);
-            expected.put(idFunction.of("h"), 0.15);
-            expected.put(idFunction.of("i"), 0.15);
-            expected.put(idFunction.of("j"), 0.15);
+        expected.put(idFunction.of("a"), 0.19991328);
+        expected.put(idFunction.of("b"), 0.41704274);
+        expected.put(idFunction.of("c"), 0.31791456);
+        expected.put(idFunction.of("d"), 0.18921376);
+        expected.put(idFunction.of("e"), 0.19991328);
+        expected.put(idFunction.of("f"), 0.18921376);
+        expected.put(idFunction.of("g"), 0.15);
+        expected.put(idFunction.of("h"), 0.15);
+        expected.put(idFunction.of("i"), 0.15);
+        expected.put(idFunction.of("j"), 0.15);
 
         CentralityResult rankResult = LabsPageRankAlgorithmType.ARTICLE_RANK
             .create(
@@ -108,7 +108,7 @@ final class ArticleRankTest {
             assertEquals(
                 expected.get(nodeId),
                 rankResult.score(i),
-                1e-2,
+                1e-6,
                 "Node#" + nodeId
             );
         });
