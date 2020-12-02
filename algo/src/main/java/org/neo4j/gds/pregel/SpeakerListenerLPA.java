@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.pregel;
 
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongIntScatterMap;
+import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.immutables.value.Value;
-import org.neo4j.collection.pool.LinkedQueuePool;
-import org.neo4j.collection.pool.Pool;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -32,8 +33,6 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 @PregelProcedure(
@@ -43,10 +42,16 @@ import java.util.Random;
 public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.SpeakerListenerLPAConfig> {
 
     public static final String LABELS_PROPERTY = "labels";
-    private Pool<Map<Long, Integer>> mapPool;
-    private final Random random;
 
-    public SpeakerListenerLPA() {random = new Random();}
+    private final ThreadLocal<Random> random;
+
+    public SpeakerListenerLPA() {
+        this(System.currentTimeMillis());
+    }
+
+    public SpeakerListenerLPA(long seed) {
+        random = ThreadLocal.withInitial(() -> new Random(seed));
+    }
 
     @Override
     public PregelSchema schema() {
@@ -58,7 +63,6 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     @Override
     public void init(PregelContext.InitContext<SpeakerListenerLPA.SpeakerListenerLPAConfig> context) {
         context.setNodeValue(LABELS_PROPERTY, new long[context.config().maxIterations()]);
-        this.mapPool = new LinkedQueuePool<>(context.config().concurrency(), HashMap::new);
     }
 
     @Override
@@ -80,50 +84,65 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     private void listen(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, Pregel.Messages messages, long[] labels) {
-        var labelVotes = mapPool.acquire();
-        for (Double message : messages) {
-            labelVotes.compute(message.longValue(), (key, frequency) -> 1 + (frequency == null ? 0 : frequency));
-        }
+        var messageSize = messages.size();
 
-        Map.Entry<Long, Integer> winningVote = Map.entry(0L, Integer.MIN_VALUE);
-        for (Map.Entry<Long, Integer> labelVote : labelVotes.entrySet()) {
-            if (labelVote.getValue() > winningVote.getValue()) {
-                winningVote = labelVote;
+        if (messageSize == 0) {
+            return;
+        } if (messageSize == 1) {
+            var iterator = messages.iterator();
+            iterator.hasNext();
+            labels[context.superstep()] = iterator.next().longValue();
+        } else {
+            var labelVotes = new LongIntScatterMap();
+            for (Double message : messages) {
+                labelVotes.addTo(message.longValue(), 1);
             }
+
+            long winningLabel = 0;
+            int maxFrequency = Integer.MIN_VALUE;
+            for (LongIntCursor labelVote : labelVotes) {
+                if (labelVote.value > maxFrequency || (labelVote.value == maxFrequency && winningLabel > labelVote.key)) {
+                    winningLabel = labelVote.key;
+                    maxFrequency = labelVote.value;
+                }
+            }
+
+            labels[context.superstep()] = winningLabel;
         }
-
-        labels[context.superstep()] = winningVote.getKey();
-
-        labelVotes.clear();
-        mapPool.release(labelVotes);
     }
 
     private void speak(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
-        var randomLabelPosition = random.nextInt(context.superstep() + 1);
+        var randomLabelPosition = random.get().nextInt(context.superstep() + 1);
         var labelToSend = labels[randomLabelPosition];
         context.sendToNeighbors(labelToSend);
     }
 
+    // TODO: Instead of just returning every community the current node is part of, keep the frequency of each community as a, sort of, weight
     private void prune(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
-        var labelVotes = mapPool.acquire();
+        var labelVotes = new LongIntScatterMap();
         for (long label : labels) {
-            labelVotes.compute(label, (key, frequency) -> 1 + (frequency == null ? 0 : frequency));
+            labelVotes.addTo(label, 1);
         }
 
-        var filteredLabels = labelVotes
-            .entrySet().stream()
-            .filter(entry -> {
-                var relativeFrequency = entry.getValue().doubleValue() / labels.length;
-                return relativeFrequency > context.config().r();
-            }).mapToLong(Map.Entry::getKey).toArray();
+        var labelsToKeep = new LongArrayList(labels.length);
 
-        context.setNodeValue(LABELS_PROPERTY, filteredLabels);
+        for (LongIntCursor labelVote : labelVotes) {
+            var relativeFrequency = ((double) labelVote.value) / labels.length;
+            if (relativeFrequency > context.config().r()) {
+                labelsToKeep.add(labelVote.key);
+            }
+        }
+
+        context.setNodeValue(
+            LABELS_PROPERTY,
+            labelsToKeep.size() == labels.length ? labelsToKeep.buffer : labelsToKeep.toArray()
+        );
     }
 
 
     @ValueClass
     @Configuration
-    interface SpeakerListenerLPAConfig extends PregelConfig {
+    public interface SpeakerListenerLPAConfig extends PregelConfig {
 
         @Value.Derived
         @Configuration.Ignore
