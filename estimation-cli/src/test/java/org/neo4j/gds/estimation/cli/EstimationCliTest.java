@@ -38,6 +38,8 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -122,6 +124,8 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.beta.allShortestPaths.dijkstra.stream.estimate",
+
         "gds.beta.fastRPExtended.mutate.estimate",
         "gds.beta.fastRPExtended.stats.estimate",
         "gds.beta.fastRPExtended.stream.estimate",
@@ -140,6 +144,8 @@ final class EstimationCliTest {
         "gds.beta.modularityOptimization.mutate.estimate",
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.beta.shortestPath.dijkstra.stream.estimate",
 
         "gds.betweenness.mutate.estimate",
         "gds.betweenness.stats.estimate",
@@ -376,6 +382,8 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
+            runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
+
             runEstimation(new FastRPExtendedMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
             runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
             runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
@@ -418,6 +426,8 @@ final class EstimationCliTest {
             runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new ModularityOptimizationStreamProc()::estimate),
             runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
 
             runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
