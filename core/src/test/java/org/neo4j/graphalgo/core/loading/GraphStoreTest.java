@@ -133,36 +133,6 @@ class GraphStoreTest extends BaseTest {
     }
 
     @Test
-    void testFilterNodesWithAllProjectionIncluded() {
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
-            .graphName("myGraph")
-            .putNodeProjectionsWithIdentifier("A", NodeProjection.of("A", PropertyMappings.of()))
-            .putNodeProjectionsWithIdentifier("All", NodeProjection.all())
-            .build();
-
-        GraphStore graphStore = graphLoader.graphStore();
-
-        Graph filteredAGraph = graphStore.getGraph(
-            Collections.singletonList(LABEL_A),
-            graphStore.relationshipTypes(),
-            Optional.empty()
-        );
-
-        assertGraphEquals(fromGdl("(a:A)"), filteredAGraph);
-
-        Graph filteredAllGraph = graphStore.getGraph(
-            Collections.singletonList(NodeLabel.of("All")),
-            graphStore.relationshipTypes(),
-            Optional.empty()
-        );
-
-        Graph nonFilteredGraph = graphStore.getUnion();
-
-        assertGraphEquals(filteredAllGraph, nonFilteredGraph);
-    }
-
-    @Test
     void testModificationDate() throws InterruptedException {
         GraphStore graphStore = new StoreLoaderBuilder()
             .api(db)
