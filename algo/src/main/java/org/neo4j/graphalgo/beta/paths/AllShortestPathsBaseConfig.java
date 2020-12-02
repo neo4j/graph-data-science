@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.dijkstra.config;
+package org.neo4j.graphalgo.beta.paths;
 
-import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-public interface DijkstraBaseConfig  extends ShortestPathBaseConfig {
-
-    String SOURCE_NODE_KEY = "sourceNode";
+public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     long sourceNode();
 }

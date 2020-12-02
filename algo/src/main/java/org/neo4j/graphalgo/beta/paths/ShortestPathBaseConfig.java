@@ -22,9 +22,13 @@ package org.neo4j.graphalgo.beta.paths;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-import java.util.Optional;
-
 public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-    Optional<Integer> maxDepth();
+    String SOURCE_NODE_KEY = "sourceNode";
+    String TARGET_NODE_KEY = "targetNode";
+
+    long sourceNode();
+
+    long targetNode();
+
 }

@@ -22,15 +22,16 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
 import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraBaseConfig;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraBaseConfig;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public abstract class DijkstraFactory<T extends ShortestPathBaseConfig> implements AlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> implements AlgorithmFactory<Dijkstra, T> {
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
@@ -47,7 +48,7 @@ public abstract class DijkstraFactory<T extends ShortestPathBaseConfig> implemen
         );
     }
 
-    public static <T extends ShortestPathDijkstraBaseConfig> DijkstraFactory<T> sourceTarget() {
+    public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
         return new DijkstraFactory<T>() {
             @Override
             public Dijkstra build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
@@ -61,7 +62,7 @@ public abstract class DijkstraFactory<T extends ShortestPathBaseConfig> implemen
         };
     }
 
-    public static <T extends AllShortestPathsDijkstraBaseConfig> DijkstraFactory<T> singleSource() {
+    public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
         return new DijkstraFactory<T>() {
             @Override
             public Dijkstra build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
