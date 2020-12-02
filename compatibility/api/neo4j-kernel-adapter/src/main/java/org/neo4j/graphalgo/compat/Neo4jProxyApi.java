@@ -44,6 +44,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -85,6 +86,8 @@ public interface Neo4jProxyApi {
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
     AccessMode newRestrictedAccessMode(AccessMode original, AccessMode.Static restricting);
+
+    AuthSubject usernameAuthSubject(String username, AuthSubject authSubject);
 
     <RECORD extends AbstractBaseRecord> void read(
         RecordFormat<RECORD> recordFormat,
