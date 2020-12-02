@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
@@ -122,19 +123,19 @@ final class PageRankTest {
 
     @Test
     void correctPartitionBoundariesForAllNodes() {
-        // explicitly list all source nodes to prevent the 'we got everything' optimization
-        PageRankAlgorithmType.NON_WEIGHTED
-            .create(
-                naturalGraph,
-                LongStream.range(0L, naturalGraph.nodeCount()),
-                defaultConfigBuilder().concurrency(1).build(),
-                null,
-                1,
-                ProgressLogger.NULL_LOGGER,
-                AllocationTracker.empty()
-            )
-            .compute();
-        // should not throw
+        assertThatCode(() -> {
+            // explicitly list all source nodes to prevent the 'we got everything' optimization
+            PageRankAlgorithmType.NON_WEIGHTED
+                .create(
+                    naturalGraph,
+                    LongStream.range(0L, naturalGraph.nodeCount()),
+                    defaultConfigBuilder().concurrency(1).build(),
+                    null,
+                    ProgressLogger.NULL_LOGGER,
+                    AllocationTracker.empty()
+                )
+                .compute();
+        }).doesNotThrowAnyException();
     }
 
     static Stream<Arguments> expectedMemoryEstimation() {
@@ -150,12 +151,29 @@ final class PageRankTest {
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
         var config = defaultConfigBuilder().build();
         var nodeCount = 100_000;
+        var relationshipCount = nodeCount * 10;
         assertMemoryEstimation(
             () -> new PageRankFactory<>().memoryEstimation(config),
             nodeCount,
+            relationshipCount,
             concurrency,
             expectedMinBytes,
             expectedMaxBytes
+        );
+    }
+
+    @Test
+    void shouldComputeMemoryEstimationFor10BElements() {
+        var config = defaultConfigBuilder().build();
+        var nodeCount = 10_000_000_000L;
+        var relationshipCount = 10_000_000_000L;
+        assertMemoryEstimation(
+            () -> new PageRankFactory<>().memoryEstimation(config),
+            nodeCount,
+            relationshipCount,
+            4,
+            601295416504L,
+            601295416504L
         );
     }
 

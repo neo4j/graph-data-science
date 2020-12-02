@@ -196,16 +196,16 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
 
         Map<Long, Double> expectedResult = new HashMap<>();
         runInTransaction(db, tx -> {
-            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "John").getId(), 0.3260027844575233);
-            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Jill").getId(), 0.23342811424518006);
-            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Mary").getId(), 0.3834281142451801);
-            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Todd").getId(), 0.10794770773500204);
+            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "John").getId(), 0.3260027892072685);
+            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Jill").getId(), 0.23342811760958285);
+            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Mary").getId(), 0.3834281176095828);
+            expectedResult.put(tx.findNode(PERSON_LABEL, "name", "Todd").getId(), 0.10794771040673369);
 
-            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.3105931498808786);
-            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "iPhone5").getId(), 0.3105931498808786);
-            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.2026776185026392);
-            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.029719049402046945);
-            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Hobbit").getId(), 0.029719049402046945);
+            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.3105931632395368);
+            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "iPhone5").getId(), 0.3105931632395368);
+            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.20267762236180714);
+            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.029719049995765086);
+            expectedResult.put(tx.findNode(PRODUCT_LABEL, "name", "Hobbit").getId(), 0.029719049995765086);
         });
 
         assertThat(actual).containsExactlyInAnyOrderEntriesOf(expectedResult);

@@ -20,24 +20,24 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.Assessable;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfFloatArray;
 
-public interface PageRankAlgorithm extends Assessable {
+public interface PageRankAlgorithm {
 
     /**
      * Forces sequential use. If you want parallelism, prefer
      *
-     * {@link #create(Graph, LongStream, PageRankBaseConfig, ExecutorService, int, ProgressLogger, AllocationTracker)} }
+     * {@link #create(org.neo4j.graphalgo.api.Graph, java.util.stream.LongStream, PageRankBaseConfig, java.util.concurrent.ExecutorService, org.neo4j.graphalgo.core.utils.ProgressLogger, org.neo4j.graphalgo.core.utils.mem.AllocationTracker)} }
      */
     default PageRank create(
         Graph graph,
@@ -46,7 +46,7 @@ public interface PageRankAlgorithm extends Assessable {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        return create(graph, sourceNodeIds, algoConfig, null, ParallelUtil.DEFAULT_BATCH_SIZE, progressLogger, tracker);
+        return create(graph, sourceNodeIds, algoConfig, null, progressLogger, tracker);
     }
 
     default PageRank create(
@@ -54,26 +54,6 @@ public interface PageRankAlgorithm extends Assessable {
         LongStream sourceNodeIds,
         PageRankBaseConfig algoConfig,
         ExecutorService executor,
-        ProgressLogger progressLogger,
-        AllocationTracker tracker
-    ) {
-        return create(
-            graph,
-            sourceNodeIds,
-            algoConfig,
-            executor,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            progressLogger,
-            tracker
-        );
-    }
-
-    default PageRank create(
-        Graph graph,
-        LongStream sourceNodeIds,
-        PageRankBaseConfig algoConfig,
-        ExecutorService executor,
-        int batchSize,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -83,7 +63,6 @@ public interface PageRankAlgorithm extends Assessable {
             sourceNodeIds,
             algoConfig,
             executor,
-            batchSize,
             progressLogger,
             tracker
         );
@@ -93,12 +72,13 @@ public interface PageRankAlgorithm extends Assessable {
 
     Class<? extends BaseComputeStep> computeStepClass();
 
-    @Override
-    default MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.setup("ComputeStep", (dimensions, concurrency) -> {
-            long nodeCount = dimensions.nodeCount();
-            long nodesPerThread = ceilDiv(nodeCount, concurrency);
-            return BaseComputeStep.estimateMemory((int) nodesPerThread, computeStepClass());
-        });
+    default MemoryEstimation memoryEstimation(long partitionCount, long nodesPerPartition) {
+        return MemoryEstimations.builder(computeStepClass())
+            .fixed("nextScores[] wrapper", MemoryUsage.sizeOfObjectArray(partitionCount))
+            .fixed("inner nextScores[][]", sizeOfFloatArray(nodesPerPartition) * partitionCount)
+            .fixed("pageRank[]", sizeOfDoubleArray(nodesPerPartition))
+            .fixed("deltas[]", sizeOfDoubleArray(nodesPerPartition))
+            .build()
+            .times(partitionCount);
     }
 }
