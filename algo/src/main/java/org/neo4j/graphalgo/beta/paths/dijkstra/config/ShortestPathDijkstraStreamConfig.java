@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra.config;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
@@ -35,7 +36,10 @@ public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig
     /**
      * Iff true, the stream result contains a Cypher path representation.
      */
-    Optional<Boolean> path();
+    @Value.Default
+    default boolean path() {
+        return false;
+    }
 
     static ShortestPathDijkstraStreamConfig of(
         String username,

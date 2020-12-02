@@ -66,16 +66,19 @@ public class AllShortestPathsDijkstraStreamProc extends StreamProc<Dijkstra, Dij
     protected Stream<StreamResult> stream(ComputationResult<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig> computationResult) {
         return runWithExceptionLogging("Result streaming failed", () -> {
             var graph = computationResult.graph();
+            var config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 graph.release();
                 return Stream.empty();
             }
+
+            var resultBuilder = new StreamResult.Builder(graph, transaction);
             return computationResult
                 .result()
                 .paths()
                 .takeWhile(path -> path != PathResult.EMPTY)
-                .map(path -> StreamResult.of(graph, path));
+                .map(path -> resultBuilder.build(path, config.path()));
         });
     }
 

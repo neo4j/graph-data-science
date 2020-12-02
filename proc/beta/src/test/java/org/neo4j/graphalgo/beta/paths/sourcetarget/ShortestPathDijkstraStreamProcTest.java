@@ -22,14 +22,22 @@ package org.neo4j.graphalgo.beta.paths.sourcetarget;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.paths.PathFactory;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
 
@@ -44,7 +52,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     }
 
     @Test
-    void returnCorrectResult() {
+    void returnCorrectResult() throws TransactionFailureException {
         ShortestPathDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()
@@ -60,6 +68,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())
             .addParameter("relationshipWeightProperty", "cost")
+            .addParameter("path", true)
             .yields();
 
         var idA = nodeIdByProperty(1);
@@ -68,13 +77,27 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
         var idE = nodeIdByProperty(5);
         var idF = nodeIdByProperty(6);
 
+        List<Long> expectedNodeIds = List.of(idA, idC, idE, idD, idF);
+        List<Double> expectedCosts = List.of(0.0, 2.0, 5.0, 9.0, 20.0);
+
+        KernelTransaction ktx = GraphDatabaseApiProxy.newKernelTransaction(db).ktx();
+        var expectedPath = PathFactory.create(
+            ktx,
+            -1,
+            expectedNodeIds,
+            expectedCosts,
+            RelationshipType.withName(formatWithLocale("PATH_0")), COST_PROPERTY_NAME
+        );
+        ktx.close();
+
         var expected = Map.of(
             "index", 0L,
             "sourceNode", nodeIdByProperty(1),
             "targetNode", nodeIdByProperty(6),
             "totalCost", 20.0D,
-            "costs", List.of(0.0, 2.0, 5.0, 9.0, 20.0),
-            "nodeIds", List.of(idA, idC, idE, idD, idF)
+            "costs", expectedCosts,
+            "nodeIds", expectedNodeIds,
+            "path", expectedPath
         );
 
         assertCypherResult(query, List.of(expected));

@@ -19,12 +19,21 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.beta.paths.PathFactory.create;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class StreamResult {
+
+    public static final String COST_PROPERTY_NAME = "cost";
 
     public long index;
 
@@ -38,13 +47,16 @@ public final class StreamResult {
 
     public List<Double> costs;
 
+    public Path path;
+
     private StreamResult(
         long index,
         long sourceNode,
         long targetNode,
         double totalCost,
         List<Long> nodeIds,
-        List<Double> costs
+        List<Double> costs,
+        @Nullable Path path
     ) {
         this.index = index;
         this.sourceNode = sourceNode;
@@ -52,16 +64,48 @@ public final class StreamResult {
         this.totalCost = totalCost;
         this.nodeIds = nodeIds;
         this.costs = costs;
+        this.path = path;
     }
 
-    public static StreamResult of(IdMapping idMapping, PathResult pathResult) {
-        return new StreamResult(
-            pathResult.index(),
-            idMapping.toOriginalNodeId(pathResult.sourceNode()),
-            idMapping.toOriginalNodeId(pathResult.targetNode()),
-            pathResult.totalCost(),
-            pathResult.nodeIds().stream().map(idMapping::toOriginalNodeId).collect(Collectors.toList()),
-            pathResult.costs()
-        );
+    public static class Builder {
+        private long relationshipIdOffset;
+        private final IdMapping idMapping;
+        private final KernelTransaction transaction;
+
+        public Builder(IdMapping idMapping, KernelTransaction transaction) {
+            this.relationshipIdOffset = -1L;
+            this.idMapping = idMapping;
+            this.transaction = transaction;
+        }
+
+        public StreamResult build(PathResult pathResult, boolean createCypherPath) {
+            var nodeIds = pathResult.nodeIds();
+            var costs = pathResult.costs();
+            var pathIndex = pathResult.index();
+
+            var relationshipType = RelationshipType.withName(formatWithLocale("PATH_%d", pathIndex));
+
+            Path path = null;
+            if (createCypherPath) {
+                path = create(
+                    transaction,
+                    relationshipIdOffset,
+                    nodeIds,
+                    costs,
+                    relationshipType,
+                    COST_PROPERTY_NAME
+                );
+                relationshipIdOffset -= path.length();
+            }
+            return new StreamResult(
+                pathIndex,
+                idMapping.toOriginalNodeId(pathResult.sourceNode()),
+                idMapping.toOriginalNodeId(pathResult.targetNode()),
+                pathResult.totalCost(),
+                nodeIds.stream().map(idMapping::toOriginalNodeId).collect(Collectors.toList()),
+                costs,
+                path
+            );
+        }
     }
 }
