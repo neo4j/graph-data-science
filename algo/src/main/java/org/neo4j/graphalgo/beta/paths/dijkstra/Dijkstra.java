@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraBaseConfig;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraBaseConfig;
+import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -59,14 +59,15 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
      */
     public static Dijkstra sourceTarget(
         Graph graph,
-        ShortestPathDijkstraBaseConfig config,
+        ShortestPathBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
+        long sourceNode = graph.toMappedNodeId(config.sourceNode());
         long targetNode = graph.toMappedNodeId(config.targetNode());
         return new Dijkstra(
             graph,
-            graph.toOriginalNodeId(config.sourceNode()),
+            sourceNode,
             node -> node == targetNode,
             progressLogger,
             tracker
@@ -78,11 +79,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
      */
     public static Dijkstra singleSource(
         Graph graph,
-        AllShortestPathsDijkstraBaseConfig config,
+        AllShortestPathsBaseConfig config,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        return new Dijkstra(graph, graph.toOriginalNodeId(config.sourceNode()), node -> true, progressLogger, tracker);
+        long sourceNode = graph.toMappedNodeId(config.sourceNode());
+        return new Dijkstra(graph, sourceNode, node -> true, progressLogger, tracker);
     }
 
     public static MemoryEstimation memoryEstimation() {
