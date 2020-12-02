@@ -84,11 +84,9 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     private void listen(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, Pregel.Messages messages, long[] labels) {
-        var messageSize = messages.size();
-
-        if (messageSize == 0) {
+        if (messages.isEmpty()) {
             return;
-        } if (messageSize == 1) {
+        } if (messages.hasExactlyOneElement()) {
             var iterator = messages.iterator();
             iterator.hasNext();
             labels[context.superstep()] = iterator.next().longValue();
