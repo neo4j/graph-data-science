@@ -88,7 +88,8 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
             return;
         } if (messages.hasExactlyOneElement()) {
             var iterator = messages.iterator();
-            iterator.hasNext();
+            var hasNext = iterator.hasNext();
+            assert hasNext : "exactly one message must be hasNext";
             labels[context.superstep()] = iterator.next().longValue();
         } else {
             var labelVotes = new LongIntScatterMap();
