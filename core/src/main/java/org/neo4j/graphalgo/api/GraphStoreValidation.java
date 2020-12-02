@@ -83,10 +83,10 @@ public final class GraphStoreValidation {
             }
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Node properties %s not found in graph with node properties: %s in all node labels: %s",
-                    missingProperties,
-                    graphStore.nodePropertyKeys(filterLabels),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
+                    "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
                 ));
             }
         }
@@ -105,7 +105,7 @@ public final class GraphStoreValidation {
                     weightProperty,
                     StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
                     StringJoining.join(labelsWithMissingProperty),
-                    graphStore.nodePropertyKeys(filterLabels)
+                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
                 ));
             }
         }

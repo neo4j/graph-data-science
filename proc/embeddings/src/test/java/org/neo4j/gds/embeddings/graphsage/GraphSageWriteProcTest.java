@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
     @MethodSource("missingNodeProperties")
-    void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, String nodeProperties, String graphProperties, String label) {
+    void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
         train(42, "mean", ActivationFunction.SIGMOID);
 
         String query = GdsCypher.call().implicitCreation(config)
@@ -83,7 +84,12 @@ class GraphSageWriteProcTest extends GraphSageBaseProcTest {
             .addParameter("writeProperty", modelName)
             .yields();
 
-        String expectedFail = formatWithLocale("Node properties [%s] not found in graph with node properties: [%s] in all node labels: ['%s']", nodeProperties, graphProperties, label);
+        String expectedFail = formatWithLocale(
+            "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
+            StringJoining.join(nodeProperties),
+            StringJoining.join(label),
+            StringJoining.join(graphProperties)
+        );
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         assertEquals(expectedFail, throwable.getMessage());
