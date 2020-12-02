@@ -29,21 +29,31 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.pregel.SpeakerListenerLPA.LABELS_PROPERTY;
 
 @GdlExtension
 class SpeakerListenerLPATest {
 
     @GdlGraph
     private static final String GDL =
-        "(a), (b), (c), (d), (e) " +
-
-        "(a)-->(b), " +
-        "(a)-->(b), " +
-        "(a)-->(c), " +
-        "(b)-->(a), " +
-        "(c)-->(d), " +
-        "(c)-->(c), ";
+        "(a), (b), (c), (d), (e), (f), (g), (h), (i)" +
+        ", (a)-->(b)" +
+        ", (a)-->(c)" +
+        ", (b)-->(e)" +
+        ", (b)-->(d)" +
+        ", (b)-->(c)" +
+        ", (e)-->(f)" +
+        ", (f)-->(g)" +
+        ", (f)-->(h)" +
+        ", (f)-->(i)" +
+        ", (h)-->(i)" +
+        ", (g)-->(i)";
 
     @Inject
     private TestGraph graph;
@@ -52,25 +62,49 @@ class SpeakerListenerLPATest {
     private IdFunction idFunction;
 
     @Test
-    void unweighted() {
-        var config = ImmutableSpeakerListenerLPAConfig.builder().maxIterations(5).build();
+    void testWithoutPruning() {
+        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).r(0.00).maxIterations(10).build();
 
         var pregelJob = Pregel.create(
             graph,
             config,
-            new SpeakerListenerLPA(),
+            new SpeakerListenerLPA(42),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
 
-        var labels = pregelJob.run().nodeValues().longArrayProperties("labels");
+        var resultCommunities = pregelJob.run().nodeValues().longArrayProperties(LABELS_PROPERTY);
 
-        System.out.println("labels = " + labels);
-        System.out.println("(\"a\")) = " + Arrays.toString(labels.get(idFunction.of("a"))));
-        System.out.println("(\"b\")) = " + Arrays.toString(labels.get(idFunction.of("b"))));
-        System.out.println("(\"c\")) = " + Arrays.toString(labels.get(idFunction.of("c"))));
-        System.out.println("(\"d\")) = " + Arrays.toString(labels.get(idFunction.of("d"))));
-        System.out.println("(\"e\")) = " + Arrays.toString(labels.get(idFunction.of("e"))));
+        Map<Long, Set<Long>> communities = new HashMap<>();
+
+        graph.forEachNode(nodeId -> {
+            for (long communityId : resultCommunities.get(nodeId)) {
+               communities.compute(communityId, (ignore, members) -> {
+                   if (members == null) {
+                       members = new HashSet<>();
+                   }
+
+                   members.add(nodeId);
+                   return members;
+               });
+            }
+
+            return true;
+        });
+
+        var expected = Map.of(
+            0L, Set.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L),
+            1L, Set.of(1L, 3L, 4L, 5L, 6L, 7L, 8L),
+            2L, Set.of(2L),
+            3L, Set.of(3L),
+            4L, Set.of(4L, 5L, 6L, 7L, 8L),
+            5L, Set.of(5L, 6L, 7L),
+            6L, Set.of(6L),
+            7L, Set.of(7L),
+            8L, Set.of(8L)
+        );
+
+        assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
 }
