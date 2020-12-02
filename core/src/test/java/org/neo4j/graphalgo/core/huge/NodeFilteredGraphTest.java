@@ -55,7 +55,6 @@ class NodeFilteredGraphTest extends BaseTest {
             .graphStore();
     }
 
-
     @Test
     void filteredIdMapThatIncludesAllNodes() {
         Graph unfilteredGraph = graphStore.getGraph(RelationshipType.ALL_RELATIONSHIPS);
