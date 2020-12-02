@@ -65,7 +65,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        long targetNode = config.targetNode();
+        long targetNode = graph.toMappedNodeId(config.targetNode());
         return new Dijkstra(graph, config, node -> node == targetNode, progressLogger, tracker);
     }
 
