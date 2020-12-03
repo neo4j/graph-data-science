@@ -108,4 +108,43 @@ class SpeakerListenerLPATest {
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
+    @Test
+    void prunesAwayAfterManyIterations() {
+        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).maxIterations(30).build();
+
+        var pregelJob = Pregel.create(
+            graph,
+            config,
+            new SpeakerListenerLPA(42),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        var resultCommunities = pregelJob.run().nodeValues().longArrayProperties(LABELS_PROPERTY);
+
+        Map<Long, Set<Long>> communities = new HashMap<>();
+
+        graph.forEachNode(nodeId -> {
+            for (long communityId : resultCommunities.get(nodeId)) {
+                communities.compute(communityId, (ignore, members) -> {
+                    if (members == null) {
+                        members = new HashSet<>();
+                    }
+
+                    members.add(nodeId);
+                    return members;
+                });
+            }
+
+            return true;
+        });
+
+        var expected = Map.of(
+            0L, Set.of(0L),
+            1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+        );
+
+        assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
+    }
+
 }
