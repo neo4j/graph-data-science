@@ -42,7 +42,7 @@ class SpeakerListenerLPATest {
 
     @GdlGraph
     private static final String GDL =
-        "(a), (b), (c), (d), (e), (f), (g), (h), (i)" +
+        "(x), (a), (b), (c), (d), (e), (f), (g), (h), (i)" +
         ", (a)-->(b)" +
         ", (a)-->(c)" +
         ", (b)-->(e)" +
@@ -93,15 +93,16 @@ class SpeakerListenerLPATest {
         });
 
         var expected = Map.of(
-            0L, Set.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L),
-            1L, Set.of(1L, 3L, 4L, 5L, 6L, 7L, 8L),
-            2L, Set.of(2L),
+            0L, Set.of(0L),
+            1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L),
+            2L, Set.of(2L, 4L, 5L, 6L, 7L, 8L),
             3L, Set.of(3L),
-            4L, Set.of(4L, 5L, 6L, 7L, 8L),
-            5L, Set.of(5L, 6L, 7L),
-            6L, Set.of(6L),
+            4L, Set.of(4L),
+            5L, Set.of(5L, 6L, 7L, 8L, 9L),
+            6L, Set.of(6L, 7L, 8L, 9L),
             7L, Set.of(7L),
-            8L, Set.of(8L)
+            8L, Set.of(8L),
+            9L, Set.of(9L)
         );
 
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);

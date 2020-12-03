@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
+import java.util.Arrays;
 import java.util.Random;
 
 @PregelProcedure(
@@ -62,7 +63,10 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     @Override
     public void init(PregelContext.InitContext<SpeakerListenerLPA.SpeakerListenerLPAConfig> context) {
-        context.setNodeValue(LABELS_PROPERTY, new long[context.config().maxIterations()]);
+        var initialLabels = new long[context.config().maxIterations()];
+        // when nodes do not have incoming rels, it should vote for itself always
+        Arrays.fill(initialLabels, context.nodeId());
+        context.setNodeValue(LABELS_PROPERTY, initialLabels);
     }
 
     @Override
