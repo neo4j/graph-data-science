@@ -170,6 +170,30 @@ final class DijkstraTest {
         }
 
         @Test
+        void singleSourceFromDisconnectedNode() {
+            var expected = Set.of(
+                expected(graph, idFunction, 0, "c"),
+                expected(graph, idFunction, 1, "c", "e"),
+                expected(graph, idFunction, 2, "c", "e", "d"),
+                expected(graph, idFunction, 3, "c", "e", "d", "f")
+            );
+
+            var sourceNode = idFunction.of("c");
+            var ignored = -1L;
+
+            var config = defaultConfigBuilder()
+                .sourceNode(sourceNode)
+                .targetNode(ignored)
+                .build();
+
+            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            assertEquals(expected, paths);
+        }
+
+        @Test
         void shouldLogProgress() {
             var testLogger = new TestProgressLogger(graph.relationshipCount(), "Dijkstra", 1);
 
@@ -194,6 +218,10 @@ final class DijkstraTest {
             assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 85%"));
             assertTrue(testLogger.containsMessage(TestLog.INFO, "Dijkstra 100%"));
             assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+
+            // no duplicate entries in progress logger
+            var logMessages = testLogger.getMessages(TestLog.INFO);
+            assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
         }
     }
 

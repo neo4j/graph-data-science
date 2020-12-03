@@ -56,10 +56,11 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     private final long capacity;
 
     private BitSet costKeys;
-    protected HugeDoubleArray costValues;
     private HugeLongArray heap;
 
     private long size = 0;
+
+    HugeDoubleArray costValues;
 
     /**
      * Creates a new priority queue with the given capacity.
@@ -112,6 +113,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Returns the cost associated with the given element.
      * If the element has been popped from the queue, its
      * latest cost value is being returned.
+     *
+     * @return The double cost value for the element. 0.0D if the element is not found.
      */
     public double cost(long element) {
         return costValues.get(element);
@@ -298,6 +301,10 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
+    /**
+     * Returns a non growing min priority queue,
+     * i.e. the element with the lowest priority is always on top.
+     */
     public static HugeLongPriorityQueue min(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
@@ -307,6 +314,10 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
+    /**
+     * Returns a non growing max priority queue,
+     * i.e. the element with the highest priority is always on top.
+     */
     public static HugeLongPriorityQueue max(long capacity) {
         return new HugeLongPriorityQueue(capacity) {
             @Override

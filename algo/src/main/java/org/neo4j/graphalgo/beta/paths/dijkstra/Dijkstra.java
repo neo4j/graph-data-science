@@ -137,7 +137,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 node,
                 1.0D,
                 (source, target, weight) -> {
-                    updateCosts(source, target, weight + cost);
+                    updateCost(source, target, weight + cost);
                     return true;
                 }
             );
@@ -150,7 +150,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return PathResult.EMPTY;
     }
 
-    private void updateCosts(long source, long target, double newCosts) {
+    private void updateCost(long source, long target, double newCost) {
         // target has been visited, we already have a shortest path
         if (visited.get(target)) {
             return;
@@ -159,25 +159,25 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         // we see target again
         if (queue.containsElement(target)) {
             // and found a shorter path to target
-            if (newCosts < queue.cost(target)) {
+            if (newCost < queue.cost(target)) {
                 path.put(target, source);
-                queue.set(target, newCosts);
+                queue.set(target, newCost);
             }
         } else {
             // we see target for the first time
             path.put(target, source);
-            queue.add(target, newCosts);
+            queue.add(target, newCost);
         }
     }
 
     private PathResult pathResult(long target, double cost, PathResultBuilder pathResultBuilder) {
-        var path = new LinkedList<Long>();
+        var pathNodeIds = new LinkedList<Long>();
         var costs = new LinkedList<Double>();
 
         var lastNode = target;
 
         while (lastNode != PATH_END) {
-            path.addFirst(lastNode);
+            pathNodeIds.addFirst(lastNode);
             costs.addFirst(queue.cost(lastNode));
             lastNode = this.path.getOrDefault(lastNode, PATH_END);
         }
@@ -186,7 +186,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .index(pathIndex++)
             .targetNode(target)
             .totalCost(cost)
-            .nodeIds(path)
+            .nodeIds(pathNodeIds)
             .costs(costs)
             .build();
     }
