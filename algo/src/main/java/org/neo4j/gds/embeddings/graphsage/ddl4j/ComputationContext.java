@@ -40,13 +40,16 @@ public class ComputationContext {
     }
 
     public <T extends Tensor<T>> T forward(Variable<T> variable) {
-        for (Variable<?> parent : variable.parents()) {
-            if (!data.containsKey(parent)) {
-                Tensor<?> parentData = forward(parent);
-                data.put(parent, parentData);
-            }
+        var cachedData = (T) data.get(variable);
+        if (cachedData != null) {
+            return cachedData;
         }
-        return (T) data.computeIfAbsent(variable, ignore -> variable.apply(this));
+        for (Variable<?> parent : variable.parents()) {
+            forward(parent);
+        }
+        T variableResult = variable.apply(this);
+        data.put(variable, variableResult);
+        return variableResult;
     }
 
     public <T extends Tensor<T>> T data(Variable<T> variable) {
