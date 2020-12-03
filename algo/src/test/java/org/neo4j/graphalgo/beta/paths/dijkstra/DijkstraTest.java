@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -69,9 +71,9 @@ final class DijkstraTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 32_728L),
-            Arguments.of(1_000_000, 32_250_472L),
-            Arguments.of(1_000_000_000, 32_254_883_384L)
+            Arguments.of(1_000, 32_736L),
+            Arguments.of(1_000_000, 32_250_480L),
+            Arguments.of(1_000_000_000, 32_254_883_392L)
         );
     }
 
@@ -88,6 +90,7 @@ final class DijkstraTest {
     }
 
     @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
     class Graph1 {
 
         // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
@@ -149,6 +152,41 @@ final class DijkstraTest {
                 .get();
 
             assertEquals(expected, path);
+        }
+
+        @ParameterizedTest
+        @MethodSource("predicatesAndPaths")
+        void sourceTargetWithRelationshipFilter(LongLongPredicate graphFilter, List<String> expectedPath) {
+            var expected = expected(graph, idFunction, 0, expectedPath.toArray(String[]::new));
+
+            var sourceNode = idFunction.of(expectedPath.get(0));
+            var targetNode = idFunction.of(expectedPath.get(expectedPath.size() - 1));
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(sourceNode)
+                .targetNode(targetNode)
+                .build();
+
+            var dijkstra = Dijkstra
+                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .withRelationshipFilter(graphFilter);
+            var paths = dijkstra
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, paths);
+        }
+
+        Stream<Arguments> predicatesAndPaths() {
+            return Stream.of(
+                Arguments.of((LongLongPredicate)(source, target) -> source != idFunction.of("c"), List.of("a", "b", "d", "f")),
+                Arguments.of(
+                    (LongLongPredicate)(source, target) -> !((source == idFunction.of("a") && target == idFunction.of("c")) ||
+                                                           (source == idFunction.of("b") && target == idFunction.of("d"))),
+                    List.of("a", "b", "c", "e", "d", "f"))
+            );
         }
 
         @Test

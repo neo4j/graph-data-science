@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
@@ -35,7 +37,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.LinkedList;
-import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
@@ -53,6 +54,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private final BitSet visited;
     // path id increasing in order of exploration
     private long pathIndex;
+    // returns true if the given relationship should be traversed
+    private LongLongPredicate relationshipFilter = (sourceId, targetId) -> true;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -112,6 +115,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.progressLogger = progressLogger;
     }
 
+    public Dijkstra withRelationshipFilter(LongLongPredicate relationshipFilter) {
+        this.relationshipFilter = relationshipFilter;
+        return this;
+    }
+
     public DijkstraResult compute() {
         progressLogger.logStart();
 
@@ -141,12 +149,14 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 node,
                 1.0D,
                 (source, target, weight) -> {
-                    updateCost(source, target, weight + cost);
+                    if (relationshipFilter.apply(source, target)) {
+                        updateCost(source, target, weight + cost);
+                    }
                     return true;
                 }
             );
 
-            if (stopPredicate.test(node)) {
+            if (stopPredicate.apply(node)) {
                 return pathResult(node, cost, pathResultBuilder);
             }
         }
