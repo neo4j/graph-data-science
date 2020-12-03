@@ -19,30 +19,40 @@
  */
 package org.neo4j.graphalgo.wcc;
 
-import org.neo4j.graphalgo.AlgorithmFactory;
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.logging.Log;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
-public class WccFactory<CONFIG extends WccBaseConfig> implements AlgorithmFactory<Wcc, CONFIG> {
+public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends AbstractAlgorithmFactory<Wcc, CONFIG> {
+
+    public WccAlgorithmFactory() {
+        super();
+    }
 
     @Override
-    public Wcc build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        var progressLogger = new BatchingProgressLogger(
-            log,
-            graph.relationshipCount(),
-            "WCC",
-            configuration.concurrency()
-        );
+    protected long taskVolume(Graph graph, CONFIG configuration) {
+        return graph.relationshipCount();
+    }
 
+    @Override
+    protected String taskName() {
+        return "WCC";
+    }
+
+    @Override
+    protected Wcc build(
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressLogger progressLogger
+    ) {
         if (configuration.relationshipWeightProperty() != null && configuration.threshold() == 0) {
-            log.warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
+            progressLogger
+                .getLog()
+                .warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
-
         return new Wcc(
             graph,
             Pools.DEFAULT,
@@ -56,5 +66,10 @@ public class WccFactory<CONFIG extends WccBaseConfig> implements AlgorithmFactor
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return Wcc.memoryEstimation(config.isIncremental());
+    }
+
+    @TestOnly
+    WccAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
+        super(factory);
     }
 };

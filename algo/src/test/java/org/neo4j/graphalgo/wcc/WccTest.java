@@ -24,26 +24,26 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class WccTest {
 
@@ -106,23 +106,33 @@ class WccTest {
     void shouldLogProgress() {
         var graph = createTestGraph(Orientation.NATURAL);
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Wcc", 2);
-
-        new Wcc(
+        var wcc = new WccAlgorithmFactory<>(TestProgressLogger.FACTORY).build(
             graph,
-            Pools.DEFAULT,
-            communitySize() / 4,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
-            testLogger,
-            AllocationTracker.empty()
-        ).compute();
+            AllocationTracker.empty(),
+            NullLog.getInstance()
+        );
+        wcc.compute();
 
-        List<AtomicLong> progresses = testLogger.getProgresses();
-        assertEquals(1, progresses.size());
-        assertEquals(graph.relationshipCount(), progresses.get(0).get());
+        var messagesInOrder = ((TestProgressLogger) wcc.getProgressLogger()).getMessages(INFO);
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+        assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .doesNotHaveDuplicates()
+            .hasSize(103)
+            .containsSequence(
+                "WCC :: Start",
+                "WCC 0%",
+                "WCC 1%",
+                "WCC 2%"
+            )
+            .containsSequence(
+                "WCC 98%",
+                "WCC 99%",
+                "WCC 100%",
+                "WCC :: Finished"
+            );
     }
 
     @Test
