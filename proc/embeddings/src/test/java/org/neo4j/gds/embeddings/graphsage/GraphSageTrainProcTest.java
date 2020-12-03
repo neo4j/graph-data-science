@@ -262,7 +262,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        String expectedFail = "The feature properties ['missing_1', 'missing_2'] are not present for all requested labels. Requested labels: ['King']. Properties available on all requested labels: [death_year, age, birth_year]";
+        String expectedFail = "The feature properties ['missing_1', 'missing_2'] are not present for all requested labels. Requested labels: ['King']. Properties available on all requested labels: ['age', 'birth_year', 'death_year']";
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         assertEquals(expectedFail, throwable.getMessage());
