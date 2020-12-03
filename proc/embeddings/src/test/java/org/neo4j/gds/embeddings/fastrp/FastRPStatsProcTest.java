@@ -40,7 +40,7 @@ class FastRPStatsProcTest extends FastRPProcTest<FastRPStatsConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPStatsConfig>> getProcedureClazz() {
         return FastRPStatsProc.class;
     }
 

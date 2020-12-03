@@ -38,7 +38,7 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
+public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FloatEmbeddings, FastRPWriteProc.WriteResult, FastRPWriteConfig> {
 
     @Procedure(value = "gds.fastRP.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -46,7 +46,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.W
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     )  {
-        ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -78,12 +78,12 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP, FastRPWriteProc.W
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPWriteConfig> computationResult) {
         return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPWriteConfig> computeResult) {
         return new WriteResult.Builder();
     }
 
