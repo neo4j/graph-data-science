@@ -112,13 +112,6 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         return new FastRPResult(embeddings);
     }
 
-    @TestOnly
-    HugeObjectArray<float[]> currentEmbedding(int iteration) {
-        return iteration % 2 == 0
-            ? this.embeddingA
-            : this.embeddingB;
-    }
-
     @Override
     public FastRP me() {
         return this;
@@ -183,6 +176,18 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));
         }
+    }
+
+    @TestOnly
+    HugeObjectArray<float[]> currentEmbedding(int iteration) {
+        return iteration % 2 == 0
+            ? this.embeddingA
+            : this.embeddingB;
+    }
+
+    @TestOnly
+    HugeObjectArray<float[]> embeddings() {
+        return embeddings;
     }
 
     private void addArrayValues(float[] lhs, float[] rhs) {

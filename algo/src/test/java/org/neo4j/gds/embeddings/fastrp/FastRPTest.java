@@ -245,8 +245,7 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
-        FastRP computeResult = fastRP.compute();
-        HugeObjectArray<float[]> embeddings = computeResult.embeddings();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
         for (int i = 0; i < embeddings.size(); i++) {
             float[] embedding = embeddings.get(i);
             for (double embeddingValue : embedding) {
