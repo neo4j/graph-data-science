@@ -42,11 +42,15 @@ public class FilteredNodeProperties implements NodeProperties {
         return properties.doubleValue(translateId(nodeId));
     }
 
-        @Override
+    @Override
     public long longValue(long nodeId) {
         return properties.longValue(translateId(nodeId));
     }
 
+    @Override
+    public float[] floatArrayValue(long nodeId) {
+        return properties.floatArrayValue(translateId(nodeId));
+    }
 
     @Override
     public double[] doubleArrayValue(long nodeId) {

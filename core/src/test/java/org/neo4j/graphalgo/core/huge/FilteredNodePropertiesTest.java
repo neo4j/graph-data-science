@@ -35,8 +35,8 @@ class FilteredNodePropertiesTest {
 
     @GdlGraph
     private static final String GDL =
-        " (a:A { doubleArray: [1.0], longArray: [1L] })" +
-        " (b:A { doubleArray: [1.0, 2.22, 1.337], longArray: [1L, 222L, 1337L] })";
+        " (a:A { doubleArray: [1.0], longArray: [1L], floatArray: [1.0F] })" +
+        " (b:A { doubleArray: [1.0, 2.22, 1.337], longArray: [1L, 222L, 1337L], floatArray: [1.0F, 2.22F, 1.337F] })";
 
     @Inject
     private CSRGraph graph;
@@ -46,13 +46,9 @@ class FilteredNodePropertiesTest {
 
     @Test
     void testDoubleArray() {
-
         var filteredNodeProperties = new FilteredNodeProperties(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(
-                graph,
-                (IdMap) graph.nodeMapping()
-            )
+            new NodeFilteredGraph(graph, (IdMap) graph.nodeMapping())
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -64,16 +60,23 @@ class FilteredNodePropertiesTest {
 
     @Test
     void testLongArray() {
-
         var filteredNodeProperties = new FilteredNodeProperties(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(
-                graph,
-                (IdMap) graph.nodeMapping()
-            )
+            new NodeFilteredGraph(graph, (IdMap) graph.nodeMapping())
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("b"))).containsExactly(1L, 222L, 1337L);
+    }
+
+    @Test
+    void testFloatArray() {
+        var filteredNodeProperties = new FilteredNodeProperties(
+            graph.nodeProperties("floatArray"),
+            new NodeFilteredGraph(graph, (IdMap) graph.nodeMapping())
+        );
+
+        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);
+        assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("b"))).containsExactly(1.0F, 2.22F, 1.337F);
     }
 }

@@ -32,6 +32,7 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE_ARRAY;
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.FLOAT_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG_ARRAY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -72,6 +73,9 @@ public class UnionNodeProperties implements NodeProperties {
             case LONG_ARRAY:
                 this.valueProducer = (nodeId -> Values.longArray(longArrayValue(nodeId)));
                 break;
+            case FLOAT_ARRAY:
+                this.valueProducer = (nodeId -> Values.floatArray(floatArrayValue(nodeId)));
+                break;
             case DOUBLE_ARRAY:
                 this.valueProducer = (nodeId -> Values.doubleArray(doubleArrayValue(nodeId)));
                 break;
@@ -109,6 +113,19 @@ public class UnionNodeProperties implements NodeProperties {
         } else {
             throw new UnsupportedOperationException(formatWithLocale(
                 "Cannot cast properties of type %s to double array",
+                valueType
+            ));
+        }
+    }
+
+    @Override
+    public float[] floatArrayValue(long nodeId) {
+        if (valueType == FLOAT_ARRAY) {
+            var nodeProperties = getPropertiesForNodeId(nodeId);
+            return nodeProperties == null ? null : nodeProperties.floatArrayValue(nodeId);
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot cast properties of type %s to float array",
                 valueType
             ));
         }
