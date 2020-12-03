@@ -58,9 +58,9 @@ public class ComputationContext {
     }
 
     public void backward(Variable<?> function) {
-        if (function.dimensions().length != 1 || data(function).totalSize() != 1) {
-            throw new IllegalArgumentException("Backward requires a variable with rank 1 and single dimension of size 1.");
-        }
+        assert (function.dimensions().length == 1 && data(function).totalSize() == 1) : "Root variable must be scalar.";
+        assert function.requireGradient() : "Root variable must have requireGradient==true";
+
         gradients.clear();
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
         PassthroughVariable<?> dummy = new PassthroughVariable<>(function);
