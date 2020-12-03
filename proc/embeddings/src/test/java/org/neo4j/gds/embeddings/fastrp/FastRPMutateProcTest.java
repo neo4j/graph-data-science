@@ -49,7 +49,7 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPMutateConfig>> getProcedureClazz() {
         return FastRPMutateProc.class;
     }
 

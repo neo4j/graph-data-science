@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Optional;
 
 class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedWriteConfig>
-    implements WritePropertyConfigTest<FastRP, FastRPExtendedWriteConfig, FastRP> {
+    implements WritePropertyConfigTest<FastRP, FastRPExtendedWriteConfig, FastRP.FloatEmbeddings> {
 
     @Override
-    public Class<? extends AlgoBaseProc<FastRP, FastRP, FastRPExtendedWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedWriteConfig>> getProcedureClazz() {
         return FastRPExtendedWriteProc.class;
     }
 

@@ -30,7 +30,7 @@ final class FastRPExtendedCompanion {
 
     private FastRPExtendedCompanion() {}
 
-    static <CONFIG extends FastRPExtendedBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP, CONFIG> computationResult) {
+    static <CONFIG extends FastRPExtendedBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP.FloatEmbeddings, CONFIG> computationResult) {
         return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
     }
 }

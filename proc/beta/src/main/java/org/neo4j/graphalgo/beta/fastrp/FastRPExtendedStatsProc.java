@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.fastrp.FastRPExtendedCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPExtendedStatsProc extends StatsProc<FastRP, FastRP, FastRPExtendedStatsProc.StatsResult, FastRPExtendedStatsConfig> {
+public class FastRPExtendedStatsProc extends StatsProc<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStatsProc.StatsResult, FastRPExtendedStatsConfig> {
 
     @Procedure(value = "gds.beta.fastRPExtended.stats", mode = READ)
     @Description(DESCRIPTION)
@@ -45,7 +45,7 @@ public class FastRPExtendedStatsProc extends StatsProc<FastRP, FastRP, FastRPExt
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<FastRP, FastRP, FastRPExtendedStatsConfig> computationResult = compute(
+        ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -62,7 +62,7 @@ public class FastRPExtendedStatsProc extends StatsProc<FastRP, FastRP, FastRPExt
 
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP, FastRPExtendedStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<FastRP, FastRP.FloatEmbeddings, FastRPExtendedStatsConfig> computeResult) {
         return new StatsResult.Builder();
     }
 

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class FastRP extends Algorithm<FastRP, FastRP> {
+public class FastRP extends Algorithm<FastRP, FastRP.FloatEmbeddings> {
 
     private static final int MIN_BATCH_SIZE = 1;
     private static final int SPARSITY = 3;
@@ -101,17 +101,13 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
     }
 
     @Override
-    public FastRP compute() {
+    public FloatEmbeddings compute() {
         progressLogger.logMessage(":: Start");
         initPropertyVectors();
         initRandomVectors();
         propagateEmbeddings();
         progressLogger.logMessage(":: Finished");
-        return me();
-    }
-
-    public HugeObjectArray<float[]> embeddings() {
-        return this.embeddings;
+        return new FloatEmbeddings(embeddings);
     }
 
     @TestOnly
@@ -372,6 +368,18 @@ public class FastRP extends Algorithm<FastRP, FastRP> {
                 degrees += degree;
             }
             progressLogger.logProgress(degrees);
+        }
+    }
+
+    public static class FloatEmbeddings {
+        private final HugeObjectArray<float[]> embeddings;
+
+        public FloatEmbeddings(HugeObjectArray<float[]> embeddings) {
+            this.embeddings = embeddings;
+        }
+
+        public HugeObjectArray<float[]> embeddings() {
+            return embeddings;
         }
     }
 }
