@@ -83,15 +83,12 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         }
     }
 
-    private void listen(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, Pregel.Messages messages, long[] labels) {
-        if (messages.isEmpty()) {
-            return;
-        } if (messages.hasExactlyOneElement()) {
-            var iterator = messages.iterator();
-            var hasNext = iterator.hasNext();
-            assert hasNext : "exactly one message must be hasNext";
-            labels[context.superstep()] = iterator.next().longValue();
-        } else {
+    private void listen(
+        PregelContext.ComputeContext<SpeakerListenerLPAConfig> context,
+        Pregel.Messages messages,
+        long[] labels
+    ) {
+        if (!messages.isEmpty()) {
             var labelVotes = new LongIntScatterMap();
             for (Double message : messages) {
                 labelVotes.addTo(message.longValue(), 1);
@@ -116,7 +113,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         context.sendToNeighbors(labelToSend);
     }
 
-    // TODO: Instead of just returning every community the current node is part of, keep the frequency of each community as a, sort of, weight
+    // IDEA: Instead of just returning every community the current node is part of, keep the frequency of each community as a, sort of, weight
     private void prune(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
         var labelVotes = new LongIntScatterMap();
         for (long label : labels) {

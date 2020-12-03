@@ -605,10 +605,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         public boolean isEmpty() {
             return iterator.isEmpty();
         }
-
-        public boolean hasExactlyOneElement() {
-            return iterator.hasExactlyOneElement();
-        }
     }
 
     abstract static class MessageIterator implements Iterator<Double> {
@@ -628,8 +624,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         public abstract boolean isEmpty();
 
-        public abstract boolean hasExactlyOneElement();
-
         static class Sync extends MessageIterator {
             @Override
             public boolean hasNext() {
@@ -641,14 +635,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
             @Override
             public boolean isEmpty() {
-                return queue == null || queue.size() < 2;
-
-            }
-
-            @Override
-            public boolean hasExactlyOneElement() {
-                return queue != null && queue.size() == 2;
-
+                return queue == null || queue.isEmpty() || Double.isNaN(queue.peek());
             }
         }
 
@@ -665,11 +652,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
             @Override
             public boolean isEmpty() {
                 return queue == null || queue.isEmpty();
-            }
-
-            @Override
-            public boolean hasExactlyOneElement() {
-                return queue != null && queue.size() == 1;
             }
         }
     }
