@@ -29,8 +29,8 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.atIndex;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class ArrayLayoutTest {
@@ -40,7 +40,7 @@ class ArrayLayoutTest {
     void testConstruct(long[] input, long[] expected) {
         var result = ArrayLayout.construct_eytzinger(input);
         assertThat(result)
-//            .contains(-1, 0)
+            .contains(-1L, atIndex(0))
             .containsSubsequence(expected);
     }
 
@@ -86,14 +86,14 @@ class ArrayLayoutTest {
         var input = new long[]{1, 2, 3, 4, 5, 6, 7, 8};
         var layout = ArrayLayout.construct_eytzinger(input);
         System.out.println("layout = " + Arrays.toString(layout));
-        assertEquals(7, ArrayLayout.search_eytzinger(layout, 1));
-        assertEquals(3, ArrayLayout.search_eytzinger(layout, 2));
-        assertEquals(1, ArrayLayout.search_eytzinger(layout, 3));
-        assertEquals(4, ArrayLayout.search_eytzinger(layout, 4));
-        assertEquals(0, ArrayLayout.search_eytzinger(layout, 5));
-        assertEquals(5, ArrayLayout.search_eytzinger(layout, 6));
-        assertEquals(2, ArrayLayout.search_eytzinger(layout, 7));
-        assertEquals(6, ArrayLayout.search_eytzinger(layout, 8));
+        assertThat(ArrayLayout.search_eytzinger(layout, 1)).isEqualTo(7 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 2)).isEqualTo(3 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 3)).isEqualTo(1 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 4)).isEqualTo(4 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 5)).isEqualTo(0 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 6)).isEqualTo(5 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 7)).isEqualTo(2 + 1);
+        assertThat(ArrayLayout.search_eytzinger(layout, 8)).isEqualTo(6 + 1);
     }
 
     @Test
@@ -111,7 +111,7 @@ class ArrayLayoutTest {
 //        for (int i = 42; i < 43; i++) {
 //        for (int i = 23; i < 24; i++) {
             var search_eytzinger = ArrayLayout.search_eytzinger(layout, i);
-            var eytzinger_value = search_eytzinger >= 0 ? layout[search_eytzinger] : -1;
+            var eytzinger_value = layout[search_eytzinger];
 
             var binarySearch = Arrays.binarySearch(values, i);
             // binarySearch returns (-idx - 1) when not found, and the index is that of the next element that
