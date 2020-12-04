@@ -80,12 +80,46 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
         return keys.sizeOf() + values.sizeOf();
     }
 
+    public void put(long key, long value) {
+        put0(1L + key, value);
+    }
+
     public void addTo(long key, long value) {
         addTo0(1L + key, value);
     }
 
     public long getOrDefault(long key, long defaultValue) {
         return getOrDefault0(1L + key, defaultValue);
+    }
+
+    public boolean containsKey(long key) {
+        return containsKey0(1L + key);
+    }
+
+    private boolean containsKey0(long key) {
+        final long hash = BitMixer.mixPhi(key);
+        return findSlot(key, hash & mask) >= 0L;
+    }
+
+    private void put0(long key, long value) {
+        assert assigned < mask + 1L;
+        final long hash = BitMixer.mixPhi(key);
+        long slot = findSlot(key, hash & mask);
+        assert slot != -1L;
+        if (slot >= 0L) {
+            values.set(slot, value);
+            return;
+        }
+
+        slot = ~(1L + slot);
+        if (assigned == resizeAt) {
+            allocateThenInsertThenRehash(slot, key, value);
+        } else {
+            values.set(slot, value);
+            keys.set(slot, key);
+        }
+
+        assigned++;
     }
 
     private void addTo0(long key, long value) {

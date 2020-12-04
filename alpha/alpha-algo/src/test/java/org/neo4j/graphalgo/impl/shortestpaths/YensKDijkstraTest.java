@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  *    (c)   (f)
  */
 @GdlExtension
-class DijkstraTest {
+class YensKDijkstraTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =

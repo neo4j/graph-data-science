@@ -25,13 +25,10 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfBitset;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 /**
  * A PriorityQueue specialized for longs that maintains a partial ordering of
@@ -48,29 +45,28 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
 
-    public static MemoryEstimation memoryEstimation(long capacity) {
+    public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(HugeLongPriorityQueue.class)
-            .fixed("heap", sizeOfLongArray(capacity))
-            .fixed("costs", sizeOfDoubleArray(capacity))
-            .fixed("keys", sizeOfBitset(capacity))
+            .perNode("heap", HugeLongArray::memoryEstimation)
+            .perNode("costs", HugeDoubleArray::memoryEstimation)
+            .perNode("keys", MemoryUsage::sizeOfBitset)
             .build();
     }
 
     private final long capacity;
-    private final double defaultCost;
 
     private BitSet costKeys;
-    protected HugeDoubleArray costValues;
     private HugeLongArray heap;
 
     private long size = 0;
+
+    HugeDoubleArray costValues;
 
     /**
      * Creates a new priority queue with the given capacity.
      * The size is fixed, the queue cannot shrink or grow.
      */
-    HugeLongPriorityQueue(long capacity, double defaultCost) {
-        this.defaultCost = defaultCost;
+    HugeLongPriorityQueue(long capacity) {
         long heapSize;
         if (0 == capacity) {
             // We allocate 1 extra to avoid if statement in top()
@@ -114,14 +110,21 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * Returns the cost associated with the given element or
-     * the default cost, if the element is not in the heap.
+     * Returns the cost associated with the given element.
+     * If the element has been popped from the queue, its
+     * latest cost value is being returned.
+     *
+     * @return The double cost value for the element. 0.0D if the element is not found.
      */
     public double cost(long element) {
-        if (costKeys.get(element)) {
-            return costValues.get(element);
-        }
-        return defaultCost;
+        return costValues.get(element);
+    }
+
+    /**
+     * Returns true, iff the element is contained in the queue.
+     */
+    public boolean containsElement(long element) {
+        return costKeys.get(element);
     }
 
     /**
@@ -151,7 +154,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     /**
-     * @return the number of elements currently stored in the queue.
+     * Returns the number of elements currently stored in the queue.
      */
     public long size() {
         return size;
@@ -186,10 +189,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         return oldCost != cost || !elementExists;
     }
 
-    private void removeCost(long element) {
-        costKeys.clear(element);
-    }
-
     /**
      * @return true iff there are currently no elements stored in the queue.
      */
@@ -203,19 +202,6 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     public void clear() {
         size = 0;
         costKeys.clear();
-    }
-
-    /**
-     * Updates the heap because the cost of an element has changed, possibly from the outside.
-     * Cost is linear with the size of the queue.
-     */
-    public final void update(long element) {
-        long pos = findElementPosition(element);
-        if (pos != 0) {
-            if (!upHeap(pos) && pos < size) {
-                downHeap(pos);
-            }
-        }
     }
 
     private long findElementPosition(long element) {
@@ -281,6 +267,19 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         heap.set(i, node);
     }
 
+    private void update(long element) {
+        long pos = findElementPosition(element);
+        if (pos != 0) {
+            if (!upHeap(pos) && pos < size) {
+                downHeap(pos);
+            }
+        }
+    }
+
+    private void removeCost(long element) {
+        costKeys.clear(element);
+    }
+
     @Override
     public PrimitiveLongIterator iterator() {
         return new PrimitiveLongIterator() {
@@ -302,12 +301,12 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
+    /**
+     * Returns a non growing min priority queue,
+     * i.e. the element with the lowest priority is always on top.
+     */
     public static HugeLongPriorityQueue min(long capacity) {
-        return min(capacity, Double.MAX_VALUE);
-    }
-
-    public static HugeLongPriorityQueue min(long capacity, double defaultCost) {
-        return new HugeLongPriorityQueue(capacity, defaultCost) {
+        return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costValues.get(a) < costValues.get(b);
@@ -315,12 +314,12 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
+    /**
+     * Returns a non growing max priority queue,
+     * i.e. the element with the highest priority is always on top.
+     */
     public static HugeLongPriorityQueue max(long capacity) {
-        return max(capacity, Double.MIN_VALUE);
-    }
-
-    public static HugeLongPriorityQueue max(long capacity, double defaultCost) {
-        return new HugeLongPriorityQueue(capacity, defaultCost) {
+        return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return costValues.get(a) > costValues.get(b);
