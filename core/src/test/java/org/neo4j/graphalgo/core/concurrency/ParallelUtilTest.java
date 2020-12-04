@@ -90,6 +90,7 @@ final class ParallelUtilTest {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
+            assertThat(thread.getName(), containsString("gds-forkjoin"));
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
             assertEquals(concurrency, threadPool.getParallelism());
             assertNotSame(threadPool, commonPool);
