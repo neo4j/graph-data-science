@@ -69,9 +69,7 @@ public class VirtualRelationship implements Relationship {
 
     @Override
     public Node[] getNodes() {
-        return new Node[] {
-                startNode, endNode
-        } ;
+        return new Node[]{startNode, endNode};
     }
 
     @Override
@@ -96,8 +94,7 @@ public class VirtualRelationship implements Relationship {
 
     @Override
     public Object getProperty(String s, Object o) {
-        Object res = props.get(s);
-        return res == null ? o : res;
+        return props.getOrDefault(s, o);
     }
 
     @Override
@@ -139,9 +136,11 @@ public class VirtualRelationship implements Relationship {
     }
 
     @Override
-    public String toString()
-    {
-        return "VirtualRelationship{" + "startNode=" + startNode.getLabels() + ", endNode=" + endNode.getLabels() + ", " +
-                "type=" + type + '}';
+    public String toString() {
+        return "VirtualRelationship{" +
+               "startNode=" + startNode.getLabels() +
+               ", endNode=" + endNode.getLabels() +
+               ", type=" + type +
+               '}';
     }
 }

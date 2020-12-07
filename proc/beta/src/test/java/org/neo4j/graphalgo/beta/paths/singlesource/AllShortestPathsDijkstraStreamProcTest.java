@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraSt
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
 
 import java.util.List;
 import java.util.Map;
