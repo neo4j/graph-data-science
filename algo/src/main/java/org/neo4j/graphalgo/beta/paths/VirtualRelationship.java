@@ -50,8 +50,6 @@ public class VirtualRelationship implements Relationship {
 
     @Override
     public void delete() {
-//        if (getStartNode() instanceof VirtualNode) ((VirtualNode) getStartNode()).delete(this);
-//        if (getEndNode() instanceof VirtualNode) ((VirtualNode) getEndNode()).delete(this);
     }
 
     @Override
