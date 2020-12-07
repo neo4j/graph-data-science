@@ -19,19 +19,33 @@
  */
 package org.neo4j.graphalgo.beta.paths.yens;
 
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongObjectScatterMap;
+import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
+import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
+import org.neo4j.graphalgo.beta.paths.dijkstra.ImmutableDijkstraResult;
 import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
-    private final Graph graph;
+    private static final LongHashSet EMPTY_SET = new LongHashSet(0);
+
     private final Dijkstra dijkstra;
-    private final AllocationTracker tracker;
+    private final int k;
+
+    private final LongScatterSet nodeBlackList;
+    private final LongObjectScatterMap<LongHashSet> relationshipBlackList;
 
     /**
      * Configure Yens to compute at most one source-target shortest path.
@@ -46,39 +60,209 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         var dijkstra = Dijkstra.sourceTarget(graph, config, progressLogger, tracker);
 
         return new Yens(
-            graph,
             dijkstra,
             config.k(),
-            progressLogger,
-            tracker
+            progressLogger
         );
     }
 
-    private Yens(
-        Graph graph,
-        Dijkstra dijkstra,
-        int k,
-        ProgressLogger progressLogger,
-        AllocationTracker tracker
-    ) {
-        this.graph = graph;
+    private Yens(Dijkstra dijkstra, int k, ProgressLogger progressLogger) {
+        this.k = k;
+        // Track nodes and relationships that are skipped in a single iteration.
+        // The content of these data structures is reset after each of k iterations.
+        this.nodeBlackList = new LongScatterSet();
+        this.relationshipBlackList = new LongObjectScatterMap<>();
+        // set filter in Dijkstra to respect our blacklists
         this.dijkstra = dijkstra;
+        dijkstra.withRelationshipFilter((source, target) ->
+            !nodeBlackList.contains(target) &&
+            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(target))
+        );
+
         this.progressLogger = progressLogger;
-        this.tracker = tracker;
     }
 
     @Override
     public DijkstraResult compute() {
-        return null;
+        var kShortestPaths = new ArrayList<MutablePathResult>();
+        // compute top 1 shortest path
+        var shortestPath = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);
+        kShortestPaths.add(MutablePathResult.of(shortestPath));
+
+        var candidates = new ArrayList<MutablePathResult>();
+
+        for (int i = 1; i < k; i++) {
+            var prevPath = kShortestPaths.get(i - 1);
+
+            for (int n = 0; n < prevPath.nodeCount() - 2; n++) {
+                var spurNode = prevPath.node(n);
+                var rootPath = prevPath.subPath(n);
+
+                for (var path : kShortestPaths) {
+                    // Filter relationships that are part of the previous
+                    // shortest paths which share the same root path.
+                    if (rootPath.matches(path, n)) {
+                        var node2 = path.node(n + 1);
+
+                        var neighbors = relationshipBlackList.get(spurNode);
+
+                        if (neighbors == null) {
+                            neighbors = new LongHashSet();
+                            relationshipBlackList.put(spurNode, neighbors);
+                        }
+                        neighbors.add(node2);
+                    }
+                }
+
+                // Filter nodes from root path to avoid cyclic path searches.
+                for (int j = 0; j < n; j++) {
+                    nodeBlackList.add(rootPath.node(j));
+                }
+
+                // Calculate the spur path from the spur node to the sink.
+                dijkstra.clear();
+                dijkstra.withSourceNode(spurNode);
+                var spurPath = dijkstra.compute().paths().findFirst().orElse(PathResult.EMPTY);
+                // No new candidate from this spur node, continue with next node.
+                if (spurPath == PathResult.EMPTY) {
+                    continue;
+                }
+
+                // Entire path is made up of the root path and spur path.
+                rootPath.append(MutablePathResult.of(spurPath));
+                // Add the potential k-shortest path to the heap.
+                if (!candidates.contains(rootPath)) {
+                    candidates.add(rootPath);
+                }
+
+                // Clear filters for next spur node
+                nodeBlackList.clear();
+                relationshipBlackList.clear();
+            }
+
+            if (candidates.isEmpty()) {
+                break;
+            }
+
+            candidates.sort(Comparator.comparingDouble(MutablePathResult::totalCost));
+            kShortestPaths.add(candidates.remove(0).withIndex(i));
+        }
+
+        return ImmutableDijkstraResult
+            .builder()
+            .paths(kShortestPaths.stream().map(MutablePathResult::toPathResult))
+            .build();
     }
 
     @Override
     public Yens me() {
-        return null;
+        return this;
     }
 
     @Override
     public void release() {
 
+    }
+
+    static class MutablePathResult {
+
+        private long index;
+
+        private final long sourceNode;
+
+        private final long targetNode;
+
+        private final List<Long> nodeIds;
+
+        private final List<Double> costs;
+
+        MutablePathResult(
+            long index,
+            long sourceNode,
+            long targetNode,
+            List<Long> nodeIds,
+            List<Double> costs
+        ) {
+            this.index = index;
+            this.sourceNode = sourceNode;
+            this.targetNode = targetNode;
+            this.nodeIds = nodeIds;
+            this.costs = costs;
+        }
+
+        static MutablePathResult of(PathResult pathResult) {
+            return new MutablePathResult(
+                pathResult.index(),
+                pathResult.sourceNode(),
+                pathResult.targetNode(),
+                new ArrayList<>(pathResult.nodeIds()),
+                new ArrayList<>(pathResult.costs())
+            );
+        }
+
+        PathResult toPathResult() {
+            return ImmutablePathResult.of(index, sourceNode, targetNode, costs.get(costs.size() - 1), nodeIds, costs);
+        }
+
+        MutablePathResult withIndex(int index) {
+            this.index = index;
+            return this;
+        }
+
+        int nodeCount() {
+            return nodeIds.size();
+        }
+
+        long node(int index) {
+            return nodeIds.get(index);
+        }
+
+        double totalCost() {
+            return costs.get(costs.size() - 1);
+        }
+
+        MutablePathResult subPath(int index) {
+            return new MutablePathResult(
+                index,
+                sourceNode,
+                targetNode,
+                new ArrayList<>(nodeIds.subList(0, index + 1)),
+                new ArrayList<>(costs.subList(0, index + 1))
+            );
+        }
+
+        boolean matches(MutablePathResult path, int index) {
+            for (int i = 0; i < index; i++) {
+                if (!nodeIds.get(i).equals(path.nodeIds.get(i))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        void append(MutablePathResult path) {
+            var length = nodeIds.size();
+            this.nodeIds.addAll(path.nodeIds.subList(1, path.nodeIds.size()));
+            this.costs.addAll(path.costs.subList(1, path.costs.size()));
+
+            // add cost from previous path to each cost in the appended path
+            var baseCost = this.costs.get(length - 1);
+            for (int i = length; i < costs.size(); i++) {
+                costs.set(i, costs.get(i) + baseCost);
+            }
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            return nodeIds.equals(((MutablePathResult) o).nodeIds);
+        }
+
+        @Override
+        public int hashCode() {
+            return nodeIds.hashCode();
+        }
     }
 }

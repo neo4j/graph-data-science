@@ -45,7 +45,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private final Graph graph;
     private final LongPredicate stopPredicate;
 
-    private final long sourceNode;
+    private long sourceNode;
     // priority queue
     private final HugeLongPriorityQueue queue;
     // predecessor map
@@ -115,9 +115,21 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.progressLogger = progressLogger;
     }
 
+    public Dijkstra withSourceNode(long sourceNode) {
+        this.sourceNode = sourceNode;
+        return this;
+    }
+
     public Dijkstra withRelationshipFilter(LongLongPredicate relationshipFilter) {
         this.relationshipFilter = relationshipFilter;
         return this;
+    }
+
+    // Resets the internal state of the algorithm.
+    public void clear() {
+        queue.clear();
+        visited.clear();
+        path.clear();
     }
 
     public DijkstraResult compute() {
