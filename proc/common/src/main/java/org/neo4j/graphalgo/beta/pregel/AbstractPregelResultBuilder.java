@@ -21,17 +21,17 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-public abstract class AbstractPregelResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
+public abstract class AbstractPregelResultBuilder<RESULT> extends AbstractResultBuilder<RESULT> {
 
     protected long ranIterations;
     protected boolean didConverge;
 
-    public AbstractPregelResultBuilder<WRITE_RESULT> withRanIterations(long ranIterations) {
+    public AbstractPregelResultBuilder<RESULT> withRanIterations(long ranIterations) {
         this.ranIterations = ranIterations;
         return this;
     }
 
-    public AbstractPregelResultBuilder<WRITE_RESULT> didConverge(boolean didConverge) {
+    public AbstractPregelResultBuilder<RESULT> didConverge(boolean didConverge) {
         this.didConverge = didConverge;
         return this;
     }
