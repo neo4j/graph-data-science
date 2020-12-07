@@ -30,8 +30,6 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipProperties;
-import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
@@ -42,7 +40,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,6 +47,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.expected;
 
 @GdlExtension
 final class DijkstraTest {
@@ -344,34 +342,5 @@ final class DijkstraTest {
 
             assertEquals(expected, paths);
         }
-    }
-
-    private PathResult expected(RelationshipProperties graph, IdFunction idFunction, long index, String... nodes) {
-        var builder = ImmutablePathResult.builder()
-            .index(index)
-            .sourceNode(idFunction.of(nodes[0]))
-            .targetNode(idFunction.of(nodes[nodes.length - 1]));
-
-        var nodeIds = new ArrayList<Long>(nodes.length);
-        var costs = new ArrayList<Double>(nodes.length);
-
-        var cost = 0.0;
-        var prevNode = -1L;
-
-        for (int i = 0; i < nodes.length; i++) {
-            var currentNode = idFunction.of(nodes[i]);
-            if (i > 0) {
-                cost += graph.relationshipProperty(prevNode, currentNode);
-            }
-            prevNode = currentNode;
-            nodeIds.add(currentNode);
-            costs.add(cost);
-        }
-
-        return builder
-            .totalCost(costs.get(costs.size() - 1))
-            .costs(costs)
-            .nodeIds(nodeIds)
-            .build();
     }
 }
