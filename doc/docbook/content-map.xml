@@ -101,6 +101,9 @@
                 <d:tocentry linkend="algorithms-strongly-connected-components">
                     <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-sllpa">
+                    <?dbhtml filename="algorithms/sllpa/index.html"?>
+                </d:tocentry>
             </d:tocentry>
 
             <d:tocentry linkend="algorithms-similarity">

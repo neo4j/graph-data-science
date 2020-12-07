@@ -20,6 +20,7 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 ** <<algorithms-modularity-optimization, Modularity Optimization>>
 * Alpha
 ** <<algorithms-strongly-connected-components, Strongly Connected Components>>
+** <<algorithms-sllpa, Speaker-Listener Label Propagation>>
 
 include::louvain/louvain.adoc[leveloffset=+1]
 
@@ -36,3 +37,5 @@ include::beta/k1coloring.adoc[leveloffset=+1]
 include::beta/modularity-optimization.adoc[leveloffset=+1]
 
 include::alpha/alpha-strongly-connected-components.adoc[leveloffset=+1]
+
+include::alpha/sllpa/sllpa.adoc[leveloffset=+1]

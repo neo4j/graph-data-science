@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.doc;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Row;
+import org.assertj.core.util.Arrays;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.graphdb.Result;
+import org.neo4j.values.storable.Values;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -194,9 +196,14 @@ abstract class DocTestBase extends BaseProcTest {
     private String valueToString(Object value) {
         // TODO: Do we want to use the Values API here? We would get single-quote strings instead of double quotes.
         // return Values.of(value).prettyPrint();
-        return value instanceof String
-            ? "\"" + value.toString() + "\""
-            : value != null ? value.toString() : "null";
+        if (value == null) {
+            return "null";
+        } else if (value instanceof String) {
+            return "\"" + value.toString() + "\"";
+        } else if (Arrays.isArray(value)) {
+            return Values.of(value).prettyPrint();
+        } else {
+            return value.toString();
+        }
     }
-
 }
