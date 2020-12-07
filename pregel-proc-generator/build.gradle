@@ -11,7 +11,7 @@ dependencies {
     compileOnly         group: 'com.google.auto.service',  name: 'auto-service',       version: ver.'auto-service'
 
     implementation             project(':annotations')
-    implementation             project(':proc-beta')
+    implementation             project(':proc-common')
 
     implementation             group: 'org.neo4j',                name: 'neo4j-logging',        version: ver.'neo4j'
     implementation             group: 'org.neo4j',                name: 'neo4j-procedure-api',  version: ver.'neo4j'

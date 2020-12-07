@@ -9,7 +9,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    api project(':proc-beta')
+    api project(':proc-common')
 
     implementation(
             project(':neo4j-adapter')
