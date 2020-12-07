@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public final class PregelStatsResult {
-    public final long createMillis;
-    public final long computeMillis;
+import org.neo4j.graphalgo.results.StandardStatsResult;
+
+import java.util.Map;
+
+public final class PregelStatsResult extends StandardStatsResult {
+
     public final long ranIterations;
     public final boolean didConverge;
 
@@ -29,10 +32,10 @@ public final class PregelStatsResult {
         long createMillis,
         long computeMillis,
         long ranIterations,
-        boolean didConverge
+        boolean didConverge,
+        Map<String, Object> configuration
     ) {
-        this.createMillis = createMillis;
-        this.computeMillis = computeMillis;
+        super(createMillis, computeMillis, 0L, configuration);
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
     }
@@ -41,7 +44,7 @@ public final class PregelStatsResult {
 
         @Override
         public PregelStatsResult build() {
-            return new PregelStatsResult(createMillis, computeMillis, ranIterations, didConverge);
+            return new PregelStatsResult(createMillis, computeMillis, ranIterations, didConverge, config.toMap());
         }
     }
 }
