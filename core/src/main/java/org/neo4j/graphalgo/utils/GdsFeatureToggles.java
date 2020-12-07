@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.utils;
 
 import org.apache.commons.text.CaseUtils;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.util.FeatureToggles;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
