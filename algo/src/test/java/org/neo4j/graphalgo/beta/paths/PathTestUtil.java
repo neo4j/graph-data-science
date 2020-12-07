@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.beta.paths;
 import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.extension.IdFunction;
 
-import java.util.ArrayList;
-
 public final class PathTestUtil {
 
     public static PathResult expected(
@@ -37,8 +35,8 @@ public final class PathTestUtil {
             .sourceNode(idFunction.of(nodes[0]))
             .targetNode(idFunction.of(nodes[nodes.length - 1]));
 
-        var nodeIds = new ArrayList<Long>(nodes.length);
-        var costs = new ArrayList<Double>(nodes.length);
+        var nodeIds = new long[nodes.length];
+        var costs = new double[nodes.length];
 
         var cost = 0.0;
         var prevNode = -1L;
@@ -49,12 +47,12 @@ public final class PathTestUtil {
                 cost += graph.relationshipProperty(prevNode, currentNode);
             }
             prevNode = currentNode;
-            nodeIds.add(currentNode);
-            costs.add(cost);
+            nodeIds[i] = currentNode;
+            costs[i] = cost;
         }
 
         return builder
-            .totalCost(costs.get(costs.size() - 1))
+            .totalCost(costs[costs.length - 1])
             .costs(costs)
             .nodeIds(nodeIds)
             .build();

@@ -24,8 +24,6 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-import java.util.List;
-
 public final class PathFactory {
 
     public static final long DEFAULT_RELATIONSHIP_OFFSET = -1L;
@@ -35,17 +33,17 @@ public final class PathFactory {
     public static Path create(
         Transaction tx,
         long relationshipIdOffset,
-        List<Long> nodeIds,
-        List<Double> costs,
+        long[] nodeIds,
+        double[] costs,
         RelationshipType relationshipType,
         String costPropertyName
     ) {
-        var firstNodeId = nodeIds.get(0);
+        var firstNodeId = nodeIds[0];
         var pathBuilder = new PathImpl.Builder(tx.getNodeById(firstNodeId));
 
-        for (int i = 0; i < nodeIds.size() - 1; i++) {
-            long sourceNodeId = nodeIds.get(i);
-            long targetNodeId = nodeIds.get(i + 1);
+        for (int i = 0; i < nodeIds.length - 1; i++) {
+            long sourceNodeId = nodeIds[i];
+            long targetNodeId = nodeIds[i + 1];
 
             var relationship = new VirtualRelationship(
                 relationshipIdOffset--,
@@ -53,7 +51,7 @@ public final class PathFactory {
                 tx.getNodeById(targetNodeId),
                 relationshipType
             );
-            var costDifference = costs.get(i + 1) - costs.get(i);
+            var costDifference = costs[i + 1] - costs[i];
             relationship.setProperty(costPropertyName, costDifference);
             pathBuilder = pathBuilder.push(relationship);
         }

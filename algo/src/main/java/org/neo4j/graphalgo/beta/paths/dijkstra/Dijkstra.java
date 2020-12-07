@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.DoubleArrayDeque;
+import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.graphalgo.Algorithm;
@@ -36,7 +38,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
-import java.util.LinkedList;
 import java.util.stream.Stream;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
@@ -197,8 +198,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     private PathResult pathResult(long target, double cost, ImmutablePathResult.Builder pathResultBuilder) {
-        var pathNodeIds = new LinkedList<Long>();
-        var costs = new LinkedList<Double>();
+        // TODO: use LongArrayList and then ArrayUtils.reverse
+        var pathNodeIds = new LongArrayDeque();
+        var costs = new DoubleArrayDeque();
 
         var lastNode = target;
 
@@ -212,8 +214,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .index(pathIndex++)
             .targetNode(target)
             .totalCost(cost)
-            .nodeIds(pathNodeIds)
-            .costs(costs)
+            .nodeIds(pathNodeIds.toArray())
+            .costs(costs.toArray())
             .build();
     }
 

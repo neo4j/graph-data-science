@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.LongObjectScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
@@ -35,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.PriorityQueue;
 
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
@@ -161,108 +159,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     @Override
     public void release() {
-
+        dijkstra.release();
     }
 
-    static class MutablePathResult {
-
-        private long index;
-
-        private final long sourceNode;
-
-        private final long targetNode;
-
-        private final List<Long> nodeIds;
-
-        private final List<Double> costs;
-
-        MutablePathResult(
-            long index,
-            long sourceNode,
-            long targetNode,
-            List<Long> nodeIds,
-            List<Double> costs
-        ) {
-            this.index = index;
-            this.sourceNode = sourceNode;
-            this.targetNode = targetNode;
-            this.nodeIds = nodeIds;
-            this.costs = costs;
-        }
-
-        static MutablePathResult of(PathResult pathResult) {
-            return new MutablePathResult(
-                pathResult.index(),
-                pathResult.sourceNode(),
-                pathResult.targetNode(),
-                new ArrayList<>(pathResult.nodeIds()),
-                new ArrayList<>(pathResult.costs())
-            );
-        }
-
-        PathResult toPathResult() {
-            return ImmutablePathResult.of(index, sourceNode, targetNode, costs.get(costs.size() - 1), nodeIds, costs);
-        }
-
-        MutablePathResult withIndex(int index) {
-            this.index = index;
-            return this;
-        }
-
-        int nodeCount() {
-            return nodeIds.size();
-        }
-
-        long node(int index) {
-            return nodeIds.get(index);
-        }
-
-        double totalCost() {
-            return costs.get(costs.size() - 1);
-        }
-
-        MutablePathResult subPath(int index) {
-            return new MutablePathResult(
-                index,
-                sourceNode,
-                targetNode,
-                new ArrayList<>(nodeIds.subList(0, index + 1)),
-                new ArrayList<>(costs.subList(0, index + 1))
-            );
-        }
-
-        boolean matches(MutablePathResult path, int index) {
-            for (int i = 0; i < index; i++) {
-                if (!nodeIds.get(i).equals(path.nodeIds.get(i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        void append(MutablePathResult path) {
-            var length = nodeIds.size();
-            this.nodeIds.addAll(path.nodeIds.subList(1, path.nodeIds.size()));
-            this.costs.addAll(path.costs.subList(1, path.costs.size()));
-
-            // add cost from previous path to each cost in the appended path
-            var baseCost = this.costs.get(length - 1);
-            for (int i = length; i < costs.size(); i++) {
-                costs.set(i, costs.get(i) + baseCost);
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            return nodeIds.equals(((MutablePathResult) o).nodeIds);
-        }
-
-        @Override
-        public int hashCode() {
-            return nodeIds.hashCode();
-        }
-    }
 }

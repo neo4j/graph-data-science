@@ -30,9 +30,11 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -75,8 +77,8 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
         var idE = nodeIdByProperty(5);
         var idF = nodeIdByProperty(6);
 
-        List<Long> expectedNodeIds = List.of(idA, idC, idE, idD, idF);
-        List<Double> expectedCosts = List.of(0.0, 2.0, 5.0, 9.0, 20.0);
+        var expectedNodeIds = new long[]{idA, idC, idE, idD, idF};
+        var expectedCosts = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             var expectedPath = PathFactory.create(
@@ -91,8 +93,8 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
                 "sourceNode", nodeIdByProperty(1),
                 "targetNode", nodeIdByProperty(6),
                 "totalCost", 20.0D,
-                "costs", expectedCosts,
-                "nodeIds", expectedNodeIds,
+                "costs", Arrays.stream(expectedCosts).boxed().collect(Collectors.toList()),
+                "nodeIds", Arrays.stream(expectedNodeIds).boxed().collect(Collectors.toList()),
                 "path", expectedPath
             );
 

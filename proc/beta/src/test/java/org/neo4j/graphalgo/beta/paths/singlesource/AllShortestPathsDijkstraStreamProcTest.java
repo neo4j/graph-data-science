@@ -30,9 +30,11 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 
@@ -74,19 +76,19 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
         var idE = nodeIdByProperty(5);
         var idF = nodeIdByProperty(6);
 
-        var costs0 = List.of(0.0);
-        var costs1 = List.of(0.0, 2.0 );
-        var costs2 = List.of(0.0, 4.0);
-        var costs3 = List.of(0.0, 2.0, 5.0);
-        var costs4 = List.of(0.0, 2.0, 5.0, 9.0);
-        var costs5 = List.of(0.0, 2.0, 5.0, 9.0, 20.0);
+        var costs0 = new double[]{0.0};
+        var costs1 = new double[]{0.0, 2.0};
+        var costs2 = new double[]{0.0, 4.0};
+        var costs3 = new double[]{0.0, 2.0, 5.0};
+        var costs4 = new double[]{0.0, 2.0, 5.0, 9.0};
+        var costs5 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
 
-        var ids0 = List.of(idA);
-        var ids1 = List.of(idA, idC);
-        var ids2 = List.of(idA, idB);
-        var ids3 = List.of(idA, idC, idE);
-        var ids4 = List.of(idA, idC, idE, idD);
-        var ids5 = List.of(idA, idC, idE, idD, idF);
+        var ids0 = new long[]{idA};
+        var ids1 = new long[]{idA, idC};
+        var ids2 = new long[]{idA, idB};
+        var ids3 = new long[]{idA, idC, idE};
+        var ids4 = new long[]{idA, idC, idE, idD};
+        var ids5 = new long[]{idA, idC, idE, idD, idF};
 
         //@formatter:off
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
@@ -97,16 +99,24 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
             var path4 = PathFactory.create(tx, -5, ids4, costs4, RelationshipType.withName("PATH_4"), COST_PROPERTY_NAME);
             var path5 = PathFactory.create(tx, -8, ids5, costs5, RelationshipType.withName("PATH_5"), COST_PROPERTY_NAME);
             var expected = List.of(
-                Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", costs0, "nodeIds", ids0, "path", path0),
-                Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", costs1, "nodeIds", ids1, "path", path1),
-                Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", costs2, "nodeIds", ids2, "path", path2),
-                Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", costs3, "nodeIds", ids3, "path", path3),
-                Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", costs4, "nodeIds", ids4, "path", path4),
-                Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", costs5, "nodeIds", ids5, "path", path5)
+                Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", path0),
+                Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", path1),
+                Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", asList(costs2), "nodeIds", asList(ids2), "path", path2),
+                Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", asList(costs3), "nodeIds", asList(ids3), "path", path3),
+                Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", asList(costs4), "nodeIds", asList(ids4), "path", path4),
+                Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", asList(costs5), "nodeIds", asList(ids5), "path", path5)
             );
             assertCypherResult(query, expected);
         });
         //@formatter:on
 
+    }
+
+    private static List<Double> asList(double[] array) {
+        return Arrays.stream(array).boxed().collect(Collectors.toList());
+    }
+
+    private static List<Long> asList(long[] array) {
+        return Arrays.stream(array).boxed().collect(Collectors.toList());
     }
 }

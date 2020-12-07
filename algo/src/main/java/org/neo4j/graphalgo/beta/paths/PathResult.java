@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.beta.paths;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.List;
-
 @ValueClass
 public interface PathResult {
 
@@ -30,6 +28,8 @@ public interface PathResult {
         .index(-1)
         .sourceNode(-1)
         .targetNode(-1)
+        .nodeIds(-1)
+        .costs(0)
         .totalCost(0)
         .build();
 
@@ -41,7 +41,7 @@ public interface PathResult {
 
     double totalCost();
 
-    List<Long> nodeIds();
+    long[] nodeIds();
 
-    List<Double> costs();
+    double[] costs();
 }

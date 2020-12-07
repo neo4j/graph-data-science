@@ -25,8 +25,8 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.beta.paths.PathFactory.create;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -97,13 +97,24 @@ public final class StreamResult {
                 );
                 relationshipIdOffset -= path.length();
             }
+
+            // 😿
+            var nodeIdsList = new ArrayList<Long>(nodeIds.length);
+            for (long nodeId : nodeIds) {
+                nodeIdsList.add(nodeId);
+            }
+            var costsList = new ArrayList<Double>(costs.length);
+            for (double cost : costs) {
+                costsList.add(cost);
+            }
+
             return new StreamResult(
                 pathIndex,
                 idMapping.toOriginalNodeId(pathResult.sourceNode()),
                 idMapping.toOriginalNodeId(pathResult.targetNode()),
                 pathResult.totalCost(),
-                nodeIds.stream().map(idMapping::toOriginalNodeId).collect(Collectors.toList()),
-                costs,
+                nodeIdsList,
+                costsList,
                 path
             );
         }

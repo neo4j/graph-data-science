@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.beta.paths.PathFactory.DEFAULT_RELATIONSHIP_OFFSET;
 
@@ -44,8 +42,8 @@ class PathFactoryTest extends BaseProcTest {
 
         @Test
         void emptyPath() {
-            var nodeIds = List.of(0L);
-            var costs = List.of(0.0D);
+            var nodeIds = new long[]{0L};
+            var costs = new double[]{0.0D};
 
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
@@ -78,8 +76,8 @@ class PathFactoryTest extends BaseProcTest {
 
         @Test
         void pathWithCosts() {
-            var nodeIds = List.of(0L, 1L, 2L);
-            var costs = List.of(0.0D, 1.0D, 4.0D);
+            var nodeIds = new long[]{0L, 1L, 2L};
+            var costs = new double[]{0.0D, 1.0D, 4.0D};
 
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
@@ -95,7 +93,7 @@ class PathFactoryTest extends BaseProcTest {
 
                 path.relationships().forEach(relationship -> {
                     var actualCost = (double) relationship.getProperty("prop");
-                    var expectedCost = costs.get((int) relationship.getEndNodeId()) - costs.get((int) relationship.getStartNodeId());
+                    var expectedCost = costs[(int) relationship.getEndNodeId()] - costs[(int) relationship.getStartNodeId()];
 
                     assertEquals(expectedCost, actualCost, 1E-4);
                 });

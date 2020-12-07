@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.expected;
 
 @GdlExtension
-public class YensTest {
+class YensTest {
 
     static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathYensStreamConfig.builder()
