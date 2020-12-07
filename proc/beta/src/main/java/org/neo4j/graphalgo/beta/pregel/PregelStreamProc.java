@@ -63,7 +63,7 @@ public abstract class PregelStreamProc<
                         }
                     }
                 ));
-            return new PregelStreamResult(nodeId, values);
+            return new PregelStreamResult(computationResult.graph().toOriginalNodeId(nodeId), values);
         });
 
     }

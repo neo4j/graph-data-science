@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -48,47 +49,45 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PregelProcTest extends BaseProcTest {
 
-    private static final String DB_CYPHER = "CREATE (a)";
-
     @BeforeEach
     void setup() throws Exception {
-        runQuery(DB_CYPHER);
+        runQuery("CREATE (:OffsetId), (:RealNode)");
         registerProcedures(GraphCreateProc.class, StreamProc.class, WriteProc.class, MutateProc.class);
     }
 
     @Test
     void stream() {
         var query = GdsCypher.call()
-            .loadEverything()
+            .withNodeLabel("RealNode")
+            .withAnyRelationshipType()
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
             .yields("nodeId", "values");
 
-        runQueryWithRowConsumer(query, row -> {
-            var values = (Map<String, Object>) row.get("values");
-            assertEquals(42L, values.get(CompositeTestAlgorithm.LONG_KEY));
-            assertEquals(42.0D, values.get(CompositeTestAlgorithm.DOUBLE_KEY));
-            assertArrayEquals(new long[]{1, 3, 3, 7}, (long[]) values.get(CompositeTestAlgorithm.LONG_ARRAY_KEY));
-            assertArrayEquals(new double[]{1, 9, 8, 4}, (double[]) values.get(CompositeTestAlgorithm.DOUBLE_ARRAY_KEY));
-            assertFalse(values.containsKey(CompositeTestAlgorithm.PRIVATE_LONG_KEY));
-        });
+        assertCypherResult(query, List.of(Map.of(
+            "nodeId", 1L,
+            "values", ConditionFactory.containsExactlyInAnyOrderEntriesOf(Map.of(
+                CompositeTestAlgorithm.LONG_KEY, 42L,
+                CompositeTestAlgorithm.DOUBLE_KEY, 42D,
+                CompositeTestAlgorithm.LONG_ARRAY_KEY, new long[]{1, 3, 3, 7},
+                CompositeTestAlgorithm.DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4}
+            ))
+        )));
     }
 
     @Test
     void write() {
         var writePrefix = "test_";
         var query = GdsCypher.call()
-            .loadEverything()
+            .withNodeLabel("RealNode")
+            .withAnyRelationshipType()
             .algo("example", "pregel", "test")
             .writeMode()
             .addParameter("maxIterations", 20)
@@ -98,7 +97,7 @@ public class PregelProcTest extends BaseProcTest {
         runQuery(query);
 
         var validationQuery = formatWithLocale(
-            "MATCH (n) RETURN n.%6$s%s AS long, n.%6$s%s AS double, n.%6$s%s AS long_array, n.%6$s%s AS double_array, exists(n.%6$s%s) AS exists",
+            "MATCH (n:RealNode) RETURN n.%6$s%s AS long, n.%6$s%s AS double, n.%6$s%s AS long_array, n.%6$s%s AS double_array, exists(n.%6$s%s) AS exists",
             CompositeTestAlgorithm.LONG_KEY,
             CompositeTestAlgorithm.DOUBLE_KEY,
             CompositeTestAlgorithm.LONG_ARRAY_KEY,
@@ -124,7 +123,8 @@ public class PregelProcTest extends BaseProcTest {
         var mutatePrefix = "test_";
 
         var loadQuery = GdsCypher.call()
-            .loadEverything()
+            .withNodeLabel("RealNode")
+            .withAnyRelationshipType()
             .graphCreate(graphName)
             .yields();
 
@@ -144,7 +144,7 @@ public class PregelProcTest extends BaseProcTest {
 
         assertGraphEquals(
             fromGdl(
-                "(a { test_long: 42L, test_double: 42.0D, test_long_array: [1L, 3L, 3L, 7L], test_double_array: [1.0, 9.0, 8.0, 4.0] })"),
+                "(:RealNode { test_long: 42L, test_double: 42.0D, test_long_array: [1L, 3L, 3L, 7L], test_double_array: [1.0, 9.0, 8.0, 4.0] })"),
             graph
         );
     }
