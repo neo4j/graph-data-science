@@ -38,12 +38,12 @@ import java.util.Arrays;
 import java.util.Random;
 
 @PregelProcedure(
-    name = "gds.pregel.sllpa",
+    name = "gds.alpha.sllpa",
     description = "TODO"
 )
 public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.SpeakerListenerLPAConfig> {
 
-    public static final String LABELS_PROPERTY = "labels";
+    public static final String LABELS_PROPERTY = "communityIds";
 
     private final ThreadLocal<Random> random;
 
@@ -131,7 +131,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
         for (LongIntCursor labelVote : labelVotes) {
             var relativeFrequency = ((double) labelVote.value) / labels.length;
-            if (relativeFrequency > context.config().r()) {
+            if (relativeFrequency > context.config().minInfluence()) {
                 labelsToKeep.add(labelVote.key);
             }
         }
@@ -155,7 +155,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         }
 
         @Value.Default
-        default double r() {
+        default double minInfluence() {
             return 0.2;
         }
 

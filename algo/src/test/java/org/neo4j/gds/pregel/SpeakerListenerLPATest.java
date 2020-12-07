@@ -63,7 +63,7 @@ class SpeakerListenerLPATest {
 
     @Test
     void testWithoutPruning() {
-        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).r(0.00).maxIterations(10).build();
+        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).minInfluence(0.00).maxIterations(10).build();
 
         var pregelJob = Pregel.create(
             graph,
