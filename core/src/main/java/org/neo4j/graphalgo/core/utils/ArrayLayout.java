@@ -29,8 +29,8 @@ public final class ArrayLayout {
      *
      * @param input the sorted input data
      */
-    public static long[] construct_eytzinger(long[] input) {
-        return construct_eytzinger(input, 0, input.length);
+    public static long[] constructEytzinger(long[] input) {
+        return constructEytzinger(input, 0, input.length);
     }
 
     /**
@@ -40,8 +40,8 @@ public final class ArrayLayout {
      * @param input the sorted input data
      * @param length how many elements to use from the input
      */
-    public static long[] construct_eytzinger(long[] input, int length) {
-        return construct_eytzinger(input, 0, length);
+    public static long[] constructEytzinger(long[] input, int length) {
+        return constructEytzinger(input, 0, length);
     }
 
     /**
@@ -52,25 +52,21 @@ public final class ArrayLayout {
      * @param offset where to start at in the input
      * @param length how many elements to use from the input
      */
-    public static long[] construct_eytzinger(long[] input, int offset, int length) {
+    public static long[] constructEytzinger(long[] input, int offset, int length) {
         Objects.checkFromIndexSize(offset, length, input.length);
         // position 0 is the result of a left-biased miss (needle is smaller than the smallest entry).
         // the actual values are stored 1-based
         var dest = new long[length + 1];
         dest[0] = -1;
         eytzinger(length, input, dest, offset, 1);
-//        var dest = new long[length];
-//        eytzinger(length, input, dest, offset, 0);
         return dest;
     }
 
     private static int eytzinger(int length, long[] source, long[] dest, int sourceIndex, int destIndex) {
         if (destIndex <= length) {
             sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex);
-//            sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex + 1);
             dest[destIndex] = source[sourceIndex++];
             sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex + 1);
-//            sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex + 2);
         }
         return sourceIndex;
     }
@@ -78,7 +74,7 @@ public final class ArrayLayout {
     /**
      * Searches for the needle in the haystack, returning an index pointing at the needle.
      *
-     * The array must be one constructed from {@link #construct_eytzinger(long[])} or related.
+     * The array must be one constructed from {@link #constructEytzinger(long[])} or related.
      * Any other order of the array (e.g. sorted for binary search) will produce undefined results.
      *
      * Unlike {@link java.util.Arrays#binarySearch(long[], long)}, this method returns the index of the value
@@ -91,34 +87,21 @@ public final class ArrayLayout {
      * In contrast, this method returns the lower bound.
      * Starting from 0 upto, and including, the returned index, all values are either less than or equal to the needle.
      *
-     * @param haystack the input array sorted and constructed by {@link #construct_eytzinger(long[])}
+     * @param haystack the input array sorted and constructed by {@link #constructEytzinger(long[])}
      * @param needle the needle to search for
      * @return the lower bound for the needle. Either the index of the needle if it was in the array
      *         or the index preceding the place where the needle would be. Note that, unlike the sibling method
      *         {@link java.util.Arrays#binarySearch(long[], long)}, the index returned *cannot* be used to change
      *         the contents of the search array.
      */
-    public static int search_eytzinger(long[] haystack, long needle) {
+    public static int searchEytzinger(long[] haystack, long needle) {
         int index = 1;
         int length = haystack.length - 1;
         while (index <= length) {
             index = needle < haystack[index] ? index << 1 : (index << 1) + 1;
-//            index = (index << 1) + (needle < haystack[index] ? 0 : 1);
         }
         return index >>> (1 + Integer.numberOfTrailingZeros(index));
     }
-
-//    public static int search_eytzinger(long[] haystack, long needle) {
-//        int index = 0;
-//        int length = haystack.length;
-//        while (index < length) {
-//            index = needle < haystack[index] ? ((index << 1) + 1) : ((index << 1) + 2);
-//        }
-//        var ctz = Integer.numberOfTrailingZeros(index + 1);
-//        var ffs = ctz + 1;
-//        var idx = (index + 1) >>> ffs;
-//        return idx - 1;
-//    }
 
     private ArrayLayout() {}
 }

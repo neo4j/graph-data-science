@@ -38,7 +38,7 @@ class ArrayLayoutTest {
     @ParameterizedTest
     @MethodSource("layouts")
     void testConstruct(long[] input, long[] expected) {
-        var result = ArrayLayout.construct_eytzinger(input);
+        var result = ArrayLayout.constructEytzinger(input);
         assertThat(result)
             .contains(-1L, atIndex(0))
             .containsSubsequence(expected);
@@ -84,16 +84,15 @@ class ArrayLayoutTest {
     @Test
     void testSearch() {
         var input = new long[]{1, 2, 3, 4, 5, 6, 7, 8};
-        var layout = ArrayLayout.construct_eytzinger(input);
-        System.out.println("layout = " + Arrays.toString(layout));
-        assertThat(ArrayLayout.search_eytzinger(layout, 1)).isEqualTo(7 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 2)).isEqualTo(3 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 3)).isEqualTo(1 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 4)).isEqualTo(4 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 5)).isEqualTo(0 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 6)).isEqualTo(5 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 7)).isEqualTo(2 + 1);
-        assertThat(ArrayLayout.search_eytzinger(layout, 8)).isEqualTo(6 + 1);
+        var layout = ArrayLayout.constructEytzinger(input);
+        assertThat(ArrayLayout.searchEytzinger(layout, 1)).isEqualTo(7 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 2)).isEqualTo(3 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 3)).isEqualTo(1 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 4)).isEqualTo(4 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 5)).isEqualTo(0 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 6)).isEqualTo(5 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 7)).isEqualTo(2 + 1);
+        assertThat(ArrayLayout.searchEytzinger(layout, 8)).isEqualTo(6 + 1);
     }
 
     @Test
@@ -104,23 +103,24 @@ class ArrayLayoutTest {
             .limit(16)
             .skip(1)
             .toArray();
-        System.out.println("values = " + Arrays.toString(values));
-        var layout = ArrayLayout.construct_eytzinger(values);
-        System.out.println("layout = " + Arrays.toString(layout));
+        var layout = ArrayLayout.constructEytzinger(values);
         for (int i = 0; i < 1000; i++) {
-//        for (int i = 42; i < 43; i++) {
-//        for (int i = 23; i < 24; i++) {
-            var search_eytzinger = ArrayLayout.search_eytzinger(layout, i);
-            var eytzinger_value = layout[search_eytzinger];
+            var searchEytzinger = ArrayLayout.searchEytzinger(layout, i);
+            var eytzingerValue = layout[searchEytzinger];
 
             var binarySearch = Arrays.binarySearch(values, i);
             // binarySearch returns (-idx - 1) when not found, and the index is that of the next element that
             // is larger, whereas we return the one that is smaller, so we do -2 to get to the correct index
             binarySearch = binarySearch >= 0 ? binarySearch : -binarySearch - 2;
-            var bs_value = binarySearch >= 0 ? values[binarySearch] : -1;
-            assertThat(eytzinger_value)
-                .as("Needle = %d Eytzinger result = %d, Binary Search result = %d", i, eytzinger_value, bs_value)
-                .isEqualTo(bs_value);
+            var binarySearchValue = binarySearch >= 0 ? values[binarySearch] : -1;
+            assertThat(eytzingerValue)
+                .as(
+                    "Needle = %d Eytzinger result = %d, Binary Search result = %d",
+                    i,
+                    eytzingerValue,
+                    binarySearchValue
+                )
+                .isEqualTo(binarySearchValue);
         }
     }
 }
