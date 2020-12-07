@@ -33,8 +33,11 @@ import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Random;
 
 @PregelProcedure(
@@ -149,6 +152,25 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     @Configuration
     public interface SpeakerListenerLPAConfig extends PregelConfig {
 
+        @Value.Default
+        default double minInfluence() {
+            return 0.2;
+        }
+
+        static SpeakerListenerLPAConfig of(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitConfig,
+            CypherMapWrapper userConfig
+        ) {
+            return new SpeakerListenerLPAConfigImpl(
+                graphName,
+                maybeImplicitConfig,
+                username,
+                userConfig
+            );
+        }
+
         @Value.Derived
         @Configuration.Ignore
         @Override
@@ -156,10 +178,6 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
             return true;
         }
 
-        @Value.Default
-        default double minInfluence() {
-            return 0.2;
-        }
 
         @Value.Derived
         @Configuration.Ignore
