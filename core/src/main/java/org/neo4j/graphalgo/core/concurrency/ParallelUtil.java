@@ -59,6 +59,7 @@ import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
+import static org.neo4j.graphalgo.core.concurrency.Pools.THREAD_NAME_PREFIX;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -1078,6 +1079,18 @@ public final class ParallelUtil {
     }
 
     private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
-        return new ForkJoinPool(concurrency);
+        return new ForkJoinPool(concurrency, forkJoinPoolWorkerThreadFactory, null, false);
+    }
+
+    private static final ForkJoinPool.ForkJoinWorkerThreadFactory forkJoinPoolWorkerThreadFactory;
+
+    private static final String FORK_JOIN_INFIX = "-forkjoin-";
+
+    static {
+        forkJoinPoolWorkerThreadFactory = pool -> {
+            var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+            worker.setName(THREAD_NAME_PREFIX + FORK_JOIN_INFIX + worker.getPoolIndex());
+            return worker;
+        };
     }
 }

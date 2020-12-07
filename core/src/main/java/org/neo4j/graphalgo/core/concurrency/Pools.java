@@ -40,7 +40,7 @@ public final class Pools {
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
 
-    private static final String THREAD_NAME_PREFIX = "gds";
+    static final String THREAD_NAME_PREFIX = "gds";
 
     private Pools() {
         throw new UnsupportedOperationException();
