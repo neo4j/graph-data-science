@@ -99,7 +99,6 @@ public final class GraphStoreValidation {
                     .map(NodeLabel::name)
                     .collect(Collectors.toList());
 
-
                 throw new IllegalArgumentException(formatWithLocale(
                     "Node weight property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
                     weightProperty,
