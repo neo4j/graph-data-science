@@ -73,7 +73,7 @@ public class AllShortestPathsDijkstraStreamProc extends StreamProc<Dijkstra, Dij
                 return Stream.empty();
             }
 
-            var resultBuilder = new StreamResult.Builder(graph, transaction);
+            var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
             return computationResult
                 .result()
                 .paths()

@@ -29,8 +29,6 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStream
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     }
 
     @Test
-    void returnCorrectResult() throws TransactionFailureException {
+    void returnCorrectResult() {
         ShortestPathDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()
@@ -80,26 +78,25 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
         List<Long> expectedNodeIds = List.of(idA, idC, idE, idD, idF);
         List<Double> expectedCosts = List.of(0.0, 2.0, 5.0, 9.0, 20.0);
 
-        KernelTransaction ktx = GraphDatabaseApiProxy.newKernelTransaction(db).ktx();
-        var expectedPath = PathFactory.create(
-            ktx,
-            -1,
-            expectedNodeIds,
-            expectedCosts,
-            RelationshipType.withName(formatWithLocale("PATH_0")), COST_PROPERTY_NAME
-        );
-        ktx.close();
+        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            var expectedPath = PathFactory.create(
+                tx,
+                -1,
+                expectedNodeIds,
+                expectedCosts,
+                RelationshipType.withName(formatWithLocale("PATH_0")), COST_PROPERTY_NAME
+            );
+            var expected = Map.of(
+                "index", 0L,
+                "sourceNode", nodeIdByProperty(1),
+                "targetNode", nodeIdByProperty(6),
+                "totalCost", 20.0D,
+                "costs", expectedCosts,
+                "nodeIds", expectedNodeIds,
+                "path", expectedPath
+            );
 
-        var expected = Map.of(
-            "index", 0L,
-            "sourceNode", nodeIdByProperty(1),
-            "targetNode", nodeIdByProperty(6),
-            "totalCost", 20.0D,
-            "costs", expectedCosts,
-            "nodeIds", expectedNodeIds,
-            "path", expectedPath
-        );
-
-        assertCypherResult(query, List.of(expected));
+            assertCypherResult(query, List.of(expected));
+        });
     }
 }

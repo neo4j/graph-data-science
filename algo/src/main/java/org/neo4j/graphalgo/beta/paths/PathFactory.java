@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.paths;
 import org.neo4j.graphalgo.impl.util.PathImpl;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 
@@ -33,14 +33,13 @@ public final class PathFactory {
     private PathFactory() {}
 
     public static Path create(
-        KernelTransaction kernelTx,
+        Transaction tx,
         long relationshipIdOffset,
         List<Long> nodeIds,
         List<Double> costs,
         RelationshipType relationshipType,
         String costPropertyName
     ) {
-        var tx = kernelTx.internalTransaction();
         var firstNodeId = nodeIds.get(0);
         var pathBuilder = new PathImpl.Builder(tx.getNodeById(firstNodeId));
 

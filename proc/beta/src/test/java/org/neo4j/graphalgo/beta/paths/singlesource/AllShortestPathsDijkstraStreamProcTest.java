@@ -50,7 +50,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
     }
 
     @Test
-    void returnCorrectResult() throws TransactionFailureException {
+    void returnCorrectResult() {
         AllShortestPathsDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()
@@ -90,25 +90,24 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
         var ids5 = List.of(idA, idC, idE, idD, idF);
 
         //@formatter:off
-        var ktx = GraphDatabaseApiProxy.newKernelTransaction(db).ktx();
-        var path0 = PathFactory.create(ktx, -1, ids0, costs0, RelationshipType.withName("PATH_0"), COST_PROPERTY_NAME);
-        var path1 = PathFactory.create(ktx, -1, ids1, costs1, RelationshipType.withName("PATH_1"), COST_PROPERTY_NAME);
-        var path2 = PathFactory.create(ktx, -2, ids2, costs2, RelationshipType.withName("PATH_2"), COST_PROPERTY_NAME);
-        var path3 = PathFactory.create(ktx, -3, ids3, costs3, RelationshipType.withName("PATH_3"), COST_PROPERTY_NAME);
-        var path4 = PathFactory.create(ktx, -5, ids4, costs4, RelationshipType.withName("PATH_4"), COST_PROPERTY_NAME);
-        var path5 = PathFactory.create(ktx, -8, ids5, costs5, RelationshipType.withName("PATH_5"), COST_PROPERTY_NAME);
-        ktx.close();
-
-        var expected = List.of(
-            Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", costs0, "nodeIds", ids0, "path", path0),
-            Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", costs1, "nodeIds", ids1, "path", path1),
-            Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", costs2, "nodeIds", ids2, "path", path2),
-            Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", costs3, "nodeIds", ids3, "path", path3),
-            Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", costs4, "nodeIds", ids4, "path", path4),
-            Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", costs5, "nodeIds", ids5, "path", path5)
-        );
+        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            var path0 = PathFactory.create(tx, -1, ids0, costs0, RelationshipType.withName("PATH_0"), COST_PROPERTY_NAME);
+            var path1 = PathFactory.create(tx, -1, ids1, costs1, RelationshipType.withName("PATH_1"), COST_PROPERTY_NAME);
+            var path2 = PathFactory.create(tx, -2, ids2, costs2, RelationshipType.withName("PATH_2"), COST_PROPERTY_NAME);
+            var path3 = PathFactory.create(tx, -3, ids3, costs3, RelationshipType.withName("PATH_3"), COST_PROPERTY_NAME);
+            var path4 = PathFactory.create(tx, -5, ids4, costs4, RelationshipType.withName("PATH_4"), COST_PROPERTY_NAME);
+            var path5 = PathFactory.create(tx, -8, ids5, costs5, RelationshipType.withName("PATH_5"), COST_PROPERTY_NAME);
+            var expected = List.of(
+                Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", costs0, "nodeIds", ids0, "path", path0),
+                Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", costs1, "nodeIds", ids1, "path", path1),
+                Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", costs2, "nodeIds", ids2, "path", path2),
+                Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", costs3, "nodeIds", ids3, "path", path3),
+                Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", costs4, "nodeIds", ids4, "path", path4),
+                Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", costs5, "nodeIds", ids5, "path", path5)
+            );
+            assertCypherResult(query, expected);
+        });
         //@formatter:on
 
-        assertCypherResult(query, expected);
     }
 }

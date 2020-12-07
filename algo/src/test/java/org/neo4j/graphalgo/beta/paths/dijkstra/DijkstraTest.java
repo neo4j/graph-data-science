@@ -185,11 +185,9 @@ final class DijkstraTest {
             );
 
             var sourceNode = idFunction.of("c");
-            var ignored = -1L;
 
-            var config = defaultConfigBuilder()
+            var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
-                .targetNode(ignored)
                 .build();
 
             var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())

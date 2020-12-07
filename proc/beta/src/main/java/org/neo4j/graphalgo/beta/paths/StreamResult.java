@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,9 +70,9 @@ public final class StreamResult {
     public static class Builder {
         private long relationshipIdOffset;
         private final IdMapping idMapping;
-        private final KernelTransaction transaction;
+        private final Transaction transaction;
 
-        public Builder(IdMapping idMapping, KernelTransaction transaction) {
+        public Builder(IdMapping idMapping, Transaction transaction) {
             this.relationshipIdOffset = -1L;
             this.idMapping = idMapping;
             this.transaction = transaction;
