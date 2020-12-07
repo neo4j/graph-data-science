@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
@@ -89,7 +90,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         var shortestPath = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);
         kShortestPaths.add(MutablePathResult.of(shortestPath));
 
-        var candidates = new ArrayList<MutablePathResult>();
+        var candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
 
         for (int i = 1; i < k; i++) {
             var prevPath = kShortestPaths.get(i - 1);
@@ -144,8 +145,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 break;
             }
 
-            candidates.sort(Comparator.comparingDouble(MutablePathResult::totalCost));
-            kShortestPaths.add(candidates.remove(0).withIndex(i));
+            kShortestPaths.add(candidates.poll().withIndex(i));
         }
 
         return ImmutableDijkstraResult
