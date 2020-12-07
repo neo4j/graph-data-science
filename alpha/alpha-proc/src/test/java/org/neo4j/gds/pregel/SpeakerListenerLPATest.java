@@ -95,7 +95,7 @@ class SpeakerListenerLPATest {
         var expected = Map.of(
             0L, Set.of(0L),
             1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L),
-            2L, Set.of(2L, 4L, 5L, 6L, 7L, 8L),
+            2L, Set.of(2L, 4L, 5L, 6L, 7L, 8L, 9L),
             3L, Set.of(3L),
             4L, Set.of(4L),
             5L, Set.of(5L, 6L, 7L, 8L, 9L),
@@ -141,7 +141,8 @@ class SpeakerListenerLPATest {
 
         var expected = Map.of(
             0L, Set.of(0L),
-            1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L)
+            1L, Set.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L),
+            2L, Set.of(8L, 9L)
         );
 
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);

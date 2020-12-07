@@ -115,9 +115,11 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     private void speak(ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
-        var randomLabelPosition = random.get().nextInt(context.superstep() + 1);
-        var labelToSend = labels[randomLabelPosition];
-        context.sendToNeighbors(labelToSend);
+        context.getNeighbours().forEach(neighbor -> {
+            var randomLabelPosition = random.get().nextInt(context.superstep() + 1);
+            var labelToSend = labels[randomLabelPosition];
+            context.sendTo(neighbor, labelToSend);
+        });
     }
 
     // IDEA: Instead of just returning every community the current node is part of, keep the frequency of each community as a, sort of, weight
