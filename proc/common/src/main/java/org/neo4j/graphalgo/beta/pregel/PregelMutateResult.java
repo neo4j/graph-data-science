@@ -19,41 +19,43 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-public final class PregelWriteResult {
+import org.neo4j.graphalgo.results.StandardMutateResult;
+
+import java.util.Map;
+
+public final class PregelMutateResult extends StandardMutateResult {
+
     public final long nodePropertiesWritten;
-    public final long createMillis;
-    public final long computeMillis;
-    public final long writeMillis;
     public final long ranIterations;
     public final boolean didConverge;
 
-    private PregelWriteResult(
+    private PregelMutateResult(
         long nodePropertiesWritten,
         long createMillis,
         long computeMillis,
-        long writeMillis,
+        long mutateMillis,
         long ranIterations,
-        boolean didConverge
+        boolean didConverge,
+        Map<String, Object> configuration
     ) {
+        super(createMillis, computeMillis, 0L, mutateMillis, configuration);
         this.nodePropertiesWritten = nodePropertiesWritten;
-        this.createMillis = createMillis;
-        this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
     }
 
-    public static class Builder extends AbstractPregelResultBuilder<PregelWriteResult> {
+    public static class Builder extends AbstractPregelResultBuilder<PregelMutateResult> {
 
         @Override
-        public PregelWriteResult build() {
-            return new PregelWriteResult(
+        public PregelMutateResult build() {
+            return new PregelMutateResult(
                 nodePropertiesWritten,
                 createMillis,
                 computeMillis,
-                writeMillis,
+                mutateMillis,
                 ranIterations,
-                didConverge
+                didConverge,
+                config.toMap()
             );
         }
     }
