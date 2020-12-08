@@ -95,7 +95,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
             for (int n = 0; n < prevPath.nodeCount() - 2; n++) {
                 var spurNode = prevPath.node(n);
-                var rootPath = prevPath.subPath(n);
+                var rootPath = prevPath.subPath(n + 1);
 
                 for (var path : kShortestPaths) {
                     // Filter relationships that are part of the previous

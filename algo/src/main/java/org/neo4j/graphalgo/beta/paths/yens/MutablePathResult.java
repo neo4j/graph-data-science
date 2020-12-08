@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.paths.yens;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
 
@@ -86,8 +87,8 @@ final class MutablePathResult {
             index,
             sourceNode,
             targetNode,
-            Arrays.copyOf(nodeIds, index + 1),
-            Arrays.copyOf(costs, index + 1)
+            Arrays.copyOf(nodeIds, index),
+            Arrays.copyOf(costs, index)
         );
     }
 
@@ -101,6 +102,9 @@ final class MutablePathResult {
     }
 
     void append(MutablePathResult path) {
+        // spur node is end of first and beginning of second path
+        assert nodeIds[nodeIds.length - 1] == path.nodeIds[0];
+
         var oldLength = nodeIds.length;
 
         var newNodeIds = new long[oldLength + path.nodeIds.length - 1];
@@ -134,5 +138,10 @@ final class MutablePathResult {
     @Override
     public int hashCode() {
         return Arrays.hashCode(nodeIds);
+    }
+
+    @TestOnly
+    long index() {
+        return index;
     }
 }
