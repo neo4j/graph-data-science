@@ -601,6 +601,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
         public Iterator<Double> iterator() {
             return iterator;
         }
+
+        public boolean isEmpty() {
+            return iterator.isEmpty();
+        }
     }
 
     abstract static class MessageIterator implements Iterator<Double> {
@@ -618,6 +622,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.queue = queue;
         }
 
+        public abstract boolean isEmpty();
+
         static class Sync extends MessageIterator {
             @Override
             public boolean hasNext() {
@@ -625,6 +631,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
                     return false;
                 }
                 return !Double.isNaN(next = queue.poll());
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return queue == null || queue.isEmpty() || Double.isNaN(queue.peek());
             }
         }
 
@@ -635,6 +646,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
                     return false;
                 }
                 return (next = queue.poll()) != null;
+            }
+
+
+            @Override
+            public boolean isEmpty() {
+                return queue == null || queue.isEmpty();
             }
         }
     }
