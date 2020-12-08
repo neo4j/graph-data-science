@@ -216,6 +216,9 @@ The following table lists all beta procedures in the GDS library:
 .2+<.^| All Shortest Paths Dijkstra
 | `gds.beta.allShortestPaths.dijkstra.stream`
 | `gds.beta.allShortestPaths.dijkstra.stream.estimate`
+.2+<.^| Shortest Paths Yens
+| `gds.beta.shortestPath.yens.stream`
+| `gds.beta.shortestPath.yens.stream.estimate`
 |===
 
 [[alpha-tier]]

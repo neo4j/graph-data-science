@@ -43,6 +43,7 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -152,6 +153,9 @@ class ListProcTest extends BaseProcTest {
 
         "gds.beta.shortestPath.dijkstra.stream",
         "gds.beta.shortestPath.dijkstra.stream.estimate",
+
+        "gds.beta.shortestPath.yens.stream",
+        "gds.beta.shortestPath.yens.stream.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
@@ -331,6 +335,7 @@ class ListProcTest extends BaseProcTest {
             PageRankMutateProc.class,
             PageRankStatsProc.class,
             ShortestPathDijkstraStreamProc.class,
+            ShortestPathYensStreamProc.class,
             TriangleCountStatsProc.class,
             TriangleCountWriteProc.class,
             TriangleCountStreamProc.class,

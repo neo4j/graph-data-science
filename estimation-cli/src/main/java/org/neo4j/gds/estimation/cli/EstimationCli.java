@@ -226,9 +226,12 @@ public class EstimationCli implements Runnable {
             if (procedureName.equals("gds.nodeSimilarity.mutate.estimate") || procedureName.equals("gds.beta.knn.mutate.estimate")) {
                 actualConfig.put("mutateRelationshipType", "ESTIMATE_FAKE_MUTATE_RELATIONSHIP_PROPERTY");
             }
-            if (procedureName.equals("gds.beta.shortestPath.dijkstra.stream.estimate")) {
+            if (procedureName.startsWith("gds.beta.shortestPath.")) {
                 actualConfig.put("sourceNode", 0L);
                 actualConfig.put("targetNode", 1L);
+            }
+            if (procedureName.endsWith("gds.beta.shortestPath.yens.stream.estimate")) {
+                actualConfig.put("k", 3);
             }
             if (procedureName.equals("gds.beta.allShortestPaths.dijkstra.stream.estimate")) {
                 actualConfig.put("sourceNode", 0L);

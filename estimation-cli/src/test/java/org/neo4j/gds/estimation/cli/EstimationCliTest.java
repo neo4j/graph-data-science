@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -146,6 +147,7 @@ final class EstimationCliTest {
         "gds.beta.modularityOptimization.write.estimate",
 
         "gds.beta.shortestPath.dijkstra.stream.estimate",
+        "gds.beta.shortestPath.yens.stream.estimate",
 
         "gds.betweenness.mutate.estimate",
         "gds.betweenness.stats.estimate",
@@ -428,6 +430,7 @@ final class EstimationCliTest {
             runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
+            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
 
             runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
