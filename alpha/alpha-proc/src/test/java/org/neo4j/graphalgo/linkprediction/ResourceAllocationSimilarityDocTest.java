@@ -24,10 +24,22 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ResourceAllocationSimilarityDocTest extends BaseProcTest {
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "false"));
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "false"));
+    }
 
     static final String DB_CYPHER = "CREATE " +
                                     " (zhen:Person {name: 'Zhen'})," +
