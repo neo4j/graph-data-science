@@ -65,6 +65,11 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
     }
 
     @Override
+    void closeCursorReference(NodeReference nodeReference) {
+        ((NodeLabelIndexReference) nodeReference).close();
+    }
+
+    @Override
     boolean needsPatchingForLabelScanAlignment() {
         var neo4jVersion = Neo4jVersion.findNeo4jVersion();
         // Bug was fixed in 4.2 (#6156)

@@ -52,4 +52,9 @@ final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeRefere
     NodeReference cursorReference(KernelTransaction transaction, NodeCursor cursor) {
         return new NodeCursorReference(cursor);
     }
+
+    @Override
+    void closeCursorReference(NodeReference nodeReference) {
+        // no need to close anything, nothing new is allocated in `cursorReference`
+    }
 }

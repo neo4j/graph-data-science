@@ -101,9 +101,10 @@ abstract class AbstractCursorBasedScanner<
         @Override
         public void close() {
             if (cursor != null) {
+                closeCursorReference(cursorReference);
+                cursorReference = null;
                 cursor.close();
                 cursor = null;
-                cursorReference = null;
 
                 final StoreScanner.ScanCursor<Reference> localCursor = cursors.get();
                 // sanity check, should always be called from the same thread
@@ -186,6 +187,12 @@ abstract class AbstractCursorBasedScanner<
     abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
 
     abstract Reference cursorReference(KernelTransaction transaction, EntityCursor cursor);
+
+    /**
+     * Close Neo4j cursors that have been allocated in {@link #cursorReference(org.neo4j.kernel.api.KernelTransaction, org.neo4j.internal.kernel.api.Cursor)}.
+     * Cursors that were allocated in {@link #entityCursor(org.neo4j.kernel.api.KernelTransaction)} are closed automatically.
+     */
+    abstract void closeCursorReference(Reference reference);
 
     boolean needsPatchingForLabelScanAlignment() {
         return false;

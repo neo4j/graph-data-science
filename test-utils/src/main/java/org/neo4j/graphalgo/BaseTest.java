@@ -53,6 +53,13 @@ public abstract class BaseTest {
         builder.noOpSystemGraphInitializer();
         builder.addExtension(new EnterpriseLicensingExtension());
         builder.addExtension(new AllocationTrackerExtensionFactory());
+        // A change in 4.3.0-drop02.0 is enabling the feature to track cursor.close() events by default
+        // for test databases. We would like to additionally enable the feature to trace cursors,
+        // so that when we leak cursors, we can get a stacktrace of who was creating them.
+        // This is a no-op in any version before 4.3.0-drop02.0, where this behavior is governed by feature toggles
+        // but those are not enabled by default, test scope or otherwise.
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "true"));
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "true"));
     }
 
     protected long clearDb() {

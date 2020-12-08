@@ -69,4 +69,8 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
             return Read.NO_ID;
         }
     }
+
+    void close() {
+        nodeCursor.close();
+    }
 }
