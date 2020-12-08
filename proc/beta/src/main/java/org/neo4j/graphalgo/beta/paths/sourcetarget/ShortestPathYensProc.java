@@ -17,16 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.yens.config;
+package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
+public final class ShortestPathYensProc {
+    static final String YENS_DESCRIPTION = "The Yens shortest path algorithm computes the k shortest (weighted) paths between a pair of nodes.";
 
-public interface ShortestPathYensBaseConfig extends ShortestPathBaseConfig {
-
-    String K_KEY = "k";
-
-    // Number of shortest paths to compute
-    @Configuration.IntegerRange(min = 1)
-    int k();
+    private ShortestPathYensProc() {}
 }

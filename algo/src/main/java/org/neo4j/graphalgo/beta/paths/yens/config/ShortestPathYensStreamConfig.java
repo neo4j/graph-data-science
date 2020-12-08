@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.beta.paths.yens.config;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -42,13 +40,13 @@ public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig
         return false;
     }
 
-    static ShortestPathDijkstraStreamConfig of(
+    static ShortestPathYensStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ShortestPathDijkstraStreamConfigImpl(
+        return new ShortestPathYensStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
