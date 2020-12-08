@@ -283,6 +283,15 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.similarity.pearson.stats`
 | `gds.alpha.similarity.pearson.stream`
 | `gds.alpha.similarity.pearson.write`
+.8+<.^|<<algorithms-sllpa, Speaker-Listener Label Propagation>>
+| `gds.alpha.sllpa.mutate`
+| `gds.alpha.sllpa.mutate.estimate`
+| `gds.alpha.sllpa.stats`
+| `gds.alpha.sllpa.stats.estimate`
+| `gds.alpha.sllpa.stream`
+| `gds.alpha.sllpa.stream.estimate`
+| `gds.alpha.sllpa.write`
+| `gds.alpha.sllpa.write.estimate`
 .5+<.^|<<alpha-algorithms-minimum-weight-spanning-tree, Spanning Tree>>
 | `gds.alpha.spanningTree.write`
 | `gds.alpha.spanningTree.kmax.write`
