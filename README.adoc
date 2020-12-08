@@ -17,7 +17,7 @@ For further instructions, see our https://neo4j.com/docs/graph-data-science/curr
 |Neo4j 3.5.9 - 3.5.19
 
 |GDS 1.1.x
-|Neo4j 3.5.20 - 3.5.24
+|Neo4j 3.5.20 - 3.5.25
 
 |GDS 1.2.x
 |Neo4j 4.0.0 – 4.0.4
