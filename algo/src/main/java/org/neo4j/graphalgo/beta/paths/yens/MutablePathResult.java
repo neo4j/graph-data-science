@@ -25,6 +25,10 @@ import org.neo4j.graphalgo.beta.paths.PathResult;
 
 import java.util.Arrays;
 
+/**
+ * Helper data structure for Yen's algorithm that allows us
+ * to manipulate {@link org.neo4j.graphalgo.beta.paths.PathResult}s.
+ */
 final class MutablePathResult {
 
     private long index;
@@ -65,6 +69,9 @@ final class MutablePathResult {
         return ImmutablePathResult.of(index, sourceNode, targetNode, nodeIds, costs);
     }
 
+    /**
+     * Changes the index field to the given value and returns the mutated instance.
+     */
     MutablePathResult withIndex(int index) {
         this.index = index;
         return this;
@@ -82,6 +89,9 @@ final class MutablePathResult {
         return costs[costs.length - 1];
     }
 
+    /**
+     * Returns the path from the start to the given index (exclusive).
+     */
     MutablePathResult subPath(int index) {
         return new MutablePathResult(
             index,
@@ -92,6 +102,10 @@ final class MutablePathResult {
         );
     }
 
+    /**
+     * Returns true, iff this path matches the given path up until the given index (exclusive).
+     * Two paths match, if they have the same node ids, but not necessarily the same costs.
+     */
     boolean matches(MutablePathResult path, int index) {
         for (int i = 0; i < index; i++) {
             if (nodeIds[i] != path.nodeIds[i]) {
@@ -101,6 +115,14 @@ final class MutablePathResult {
         return true;
     }
 
+    /**
+     * Appends the given path to this path.
+     *
+     * The last node in this path, must match the first node in the given path.
+     * This node will only appear once in the resulting path.
+     * The cost value associated with the last value in this path, is added to
+     * the costs for each node in the second path.
+     */
     void append(MutablePathResult path) {
         // spur node is end of first and beginning of second path
         assert nodeIds[nodeIds.length - 1] == path.nodeIds[0];
