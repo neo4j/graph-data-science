@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
@@ -30,7 +31,6 @@ public interface PathResult {
         .targetNode(-1)
         .nodeIds(-1)
         .costs(0)
-        .totalCost(0)
         .build();
 
     long index();
@@ -39,7 +39,10 @@ public interface PathResult {
 
     long targetNode();
 
-    double totalCost();
+    @Value.Derived
+    default double totalCost() {
+        return costs()[costs().length - 1];
+    }
 
     long[] nodeIds();
 

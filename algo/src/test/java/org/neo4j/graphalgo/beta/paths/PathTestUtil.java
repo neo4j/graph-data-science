@@ -52,7 +52,6 @@ public final class PathTestUtil {
         }
 
         return builder
-            .totalCost(costs[costs.length - 1])
             .costs(costs)
             .nodeIds(nodeIds)
             .build();

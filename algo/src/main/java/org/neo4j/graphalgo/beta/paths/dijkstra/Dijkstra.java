@@ -170,7 +170,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             );
 
             if (stopPredicate.apply(node)) {
-                return pathResult(node, cost, pathResultBuilder);
+                return pathResult(node, pathResultBuilder);
             }
         }
         progressLogger.logFinish();
@@ -197,7 +197,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         }
     }
 
-    private PathResult pathResult(long target, double cost, ImmutablePathResult.Builder pathResultBuilder) {
+    private PathResult pathResult(long target, ImmutablePathResult.Builder pathResultBuilder) {
         // TODO: use LongArrayList and then ArrayUtils.reverse
         var pathNodeIds = new LongArrayDeque();
         var costs = new DoubleArrayDeque();
@@ -213,7 +213,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return pathResultBuilder
             .index(pathIndex++)
             .targetNode(target)
-            .totalCost(cost)
             .nodeIds(pathNodeIds.toArray())
             .costs(costs.toArray())
             .build();
