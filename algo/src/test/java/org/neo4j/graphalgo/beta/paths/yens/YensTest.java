@@ -20,8 +20,12 @@
 package org.neo4j.graphalgo.beta.paths.yens;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -32,6 +36,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,6 +50,26 @@ class YensTest {
         return ImmutableShortestPathYensStreamConfig.builder()
             .path(true)
             .concurrency(1);
+    }
+
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1_000, 33_048L),
+            Arguments.of(1_000_000, 32_250_792L),
+            Arguments.of(1_000_000_000, 32_254_883_704L)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("expectedMemoryEstimation")
+    void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
+        TestSupport.assertMemoryEstimation(
+            Yens::memoryEstimation,
+            nodeCount,
+            1,
+            expectedBytes,
+            expectedBytes
+        );
     }
 
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif

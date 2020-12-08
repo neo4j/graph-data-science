@@ -31,6 +31,9 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.ImmutableDijkstraResult;
 import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -61,6 +64,20 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         // Init dijkstra algorithm for computing shortest paths
         var dijkstra = Dijkstra.sourceTarget(graph, config, progressLogger, tracker);
         return new Yens(graph, dijkstra, config, progressLogger);
+    }
+
+    // The blacklists contain nodes and relationships that are
+    // "forbidden" to be traversed by Dijkstra. The size of that
+    // blacklist is not known upfront and depends on the length
+    // of the found paths.
+    private static final long AVERAGE_BLACKLIST_SIZE = 10L;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(Yens.class)
+            .add("Dijkstra", Dijkstra.memoryEstimation())
+            .fixed("nodeBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE))
+            .fixed("relationshipBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE * 2))
+            .build();
     }
 
     private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressLogger progressLogger) {
