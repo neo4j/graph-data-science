@@ -46,6 +46,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     private final ThreadLocal<Random> random;
 
+    @SuppressWarnings("unused") // Needed for the @PregelProcedure annotation
     public SpeakerListenerLPA() {
         this(System.currentTimeMillis());
     }
@@ -94,16 +95,17 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     ) {
         if (!messages.isEmpty()) {
             var labelVotes = new LongIntScatterMap();
-            for (Double message : messages) {
-                labelVotes.addTo(message.longValue(), 1);
-            }
-
             long winningLabel = 0;
             int maxFrequency = Integer.MIN_VALUE;
-            for (LongIntCursor labelVote : labelVotes) {
-                if (labelVote.value > maxFrequency || (labelVote.value == maxFrequency && winningLabel > labelVote.key)) {
-                    winningLabel = labelVote.key;
-                    maxFrequency = labelVote.value;
+            for (Double message : messages) {
+                var currentLabel = message.longValue();
+                var updatedFrequency = labelVotes.addTo(currentLabel, 1);
+
+                if (updatedFrequency > maxFrequency) {
+                    winningLabel = currentLabel;
+                    maxFrequency = updatedFrequency;
+                } else if (updatedFrequency == maxFrequency && currentLabel < winningLabel) {
+                    winningLabel = currentLabel;
                 }
             }
 
