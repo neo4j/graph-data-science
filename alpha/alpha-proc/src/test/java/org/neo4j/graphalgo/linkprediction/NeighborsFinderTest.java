@@ -24,7 +24,10 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,6 +40,14 @@ class NeighborsFinderTest extends AlgoTestBase {
     private static final RelationshipType FRIEND = RelationshipType.withName("FRIEND");
     private static final RelationshipType COLLEAGUE = RelationshipType.withName("COLLEAGUE");
     private static final RelationshipType FOLLOWS = RelationshipType.withName("FOLLOWS");
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "false"));
+        builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "false"));
+    }
 
     @Test
     void excludeDirectRelationships() {
