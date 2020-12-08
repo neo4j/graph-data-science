@@ -74,4 +74,9 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanne
             Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer())
         );
     }
+
+    @Override
+    void closeCursorReference(NodeReference nodeReference) {
+        ((MultipleNodeLabelIndexReference) nodeReference).close();
+    }
 }

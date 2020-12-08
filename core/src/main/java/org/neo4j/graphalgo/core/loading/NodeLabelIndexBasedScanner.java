@@ -62,4 +62,9 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
             labelId
         );
     }
+
+    @Override
+    void closeCursorReference(NodeReference nodeReference) {
+        ((NodeLabelIndexReference) nodeReference).close();
+    }
 }
