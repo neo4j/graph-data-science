@@ -36,12 +36,15 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     private static final LongHashSet EMPTY_SET = new LongHashSet(0);
 
+    private final Graph graph;
+    private final ShortestPathYensBaseConfig config;
     private final Dijkstra dijkstra;
-    private final int k;
 
     private final LongScatterSet nodeBlackList;
     private final LongObjectScatterMap<LongHashSet> relationshipBlackList;
@@ -57,16 +60,12 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     ) {
         // Init dijkstra algorithm for computing shortest paths
         var dijkstra = Dijkstra.sourceTarget(graph, config, progressLogger, tracker);
-
-        return new Yens(
-            dijkstra,
-            config.k(),
-            progressLogger
-        );
+        return new Yens(graph, dijkstra, config, progressLogger);
     }
 
-    private Yens(Dijkstra dijkstra, int k, ProgressLogger progressLogger) {
-        this.k = k;
+    private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressLogger progressLogger) {
+        this.graph = graph;
+        this.config = config;
         // Track nodes and relationships that are skipped in a single iteration.
         // The content of these data structures is reset after each of k iterations.
         this.nodeBlackList = new LongScatterSet();
@@ -83,14 +82,18 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     @Override
     public DijkstraResult compute() {
+        progressLogger.logStart();
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
-        var shortestPath = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);
+        logStart(1);
+        var shortestPath = computeDijkstra(config.sourceNode());
+        logFinish(1);
         kShortestPaths.add(MutablePathResult.of(shortestPath));
 
         var candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
 
-        for (int i = 1; i < k; i++) {
+        for (int i = 1; i < config.k(); i++) {
+            logStart(i + 1);
             var prevPath = kShortestPaths.get(i - 1);
 
             for (int n = 0; n < prevPath.nodeCount() - 2; n++) {
@@ -121,7 +124,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 // Calculate the spur path from the spur node to the sink.
                 dijkstra.clear();
                 dijkstra.withSourceNode(spurNode);
-                var spurPath = dijkstra.compute().paths().findFirst().orElse(PathResult.EMPTY);
+                var spurPath = computeDijkstra(graph.toOriginalNodeId(spurNode));
                 // No new candidate from this spur node, continue with next node.
                 if (spurPath == PathResult.EMPTY) {
                     continue;
@@ -144,7 +147,10 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             }
 
             kShortestPaths.add(candidates.poll().withIndex(i));
+            logFinish(i + 1);
         }
+
+        progressLogger.logFinish();
 
         return ImmutableDijkstraResult
             .builder()
@@ -160,6 +166,25 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     @Override
     public void release() {
         dijkstra.release();
+        nodeBlackList.release();
+        relationshipBlackList.release();
+    }
+
+    private void logStart(int iteration) {
+        progressLogger.logMessage(formatWithLocale("Start searching path %d of %d", iteration, config.k()));
+    }
+
+    private void logFinish(int iteration) {
+        progressLogger.logMessage(formatWithLocale("Finish searching path %d of %d", iteration, config.k()));
+    }
+
+    private PathResult computeDijkstra(long sourceNode) {
+        progressLogger.logMessage(formatWithLocale("Start Dijkstra for spur node %d", sourceNode));
+        progressLogger.setTask("Dijkstra");
+        progressLogger.reset(graph.relationshipCount());
+        var pathResult = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);
+        progressLogger.setTask("Yens");
+        return pathResult;
     }
 
 }

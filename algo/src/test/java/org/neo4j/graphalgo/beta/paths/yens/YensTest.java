@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.beta.paths.yens;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -32,7 +34,9 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.expected;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class YensTest {
@@ -89,5 +93,38 @@ class YensTest {
             .pathSet();
 
         assertEquals(expected, paths);
+    }
+
+    @Test
+    void shouldLogProgress() {
+        int k = 3;
+        var testLogger = new TestProgressLogger(graph.relationshipCount(), "Yens", 1);
+
+        var config = defaultSourceTargetConfigBuilder()
+            .sourceNode(idFunction.of("c"))
+            .targetNode(idFunction.of("h"))
+            .k(k)
+            .build();
+
+        var ignored = Yens
+            .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+            .compute()
+            .pathSet();
+
+        assertEquals(6, testLogger.getProgresses().size());
+
+        // once
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
+        // for each k
+        for (int i = 1; i <= k; i++) {
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Start searching path %d of %d", i, k)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Finish searching path %d of %d", i, k)));
+
+        }
+        // multiple times within each k
+        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Start Dijkstra for spur node")));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Start")));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
 }
