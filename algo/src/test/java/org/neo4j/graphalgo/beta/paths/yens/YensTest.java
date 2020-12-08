@@ -35,7 +35,8 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,18 +99,43 @@ class YensTest {
     @Inject
     private IdFunction idFunction;
 
-    @Test
-    void fixedK() {
-        var expected = Set.of(
-            expected(graph, idFunction, 0, "c", "e", "f", "h"),
-            expected(graph, idFunction, 1, "c", "e", "g", "h"),
-            expected(graph, idFunction, 2, "c", "d", "f", "h")
+    static Stream<Arguments> input() {
+        return Stream.of(
+            Arguments.of(1, new String[][]{
+                {"c", "e", "f", "h"}
+            }),
+            Arguments.of(2, new String[][]{
+                {"c", "e", "f", "h"},
+                {"c", "e", "g", "h"}
+            }),
+            Arguments.of(3, new String[][]{
+                {"c", "e", "f", "h"},
+                {"c", "e", "g", "h"},
+                {"c", "d", "f", "h"}
+            }),
+            Arguments.of(4, new String[][]{
+                {"c", "e", "f", "h"},
+                {"c", "e", "g", "h"},
+                {"c", "d", "f", "h"},
+                {"c", "e", "d", "f", "h"}
+            })
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("input")
+    void compute(int k, String[][] expectedNodes) {
+        var sourceNode = expectedNodes[0][0];
+        var targetNode = expectedNodes[0][expectedNodes[0].length - 1];
+
+        var expected = IntStream.range(0, expectedNodes.length)
+            .mapToObj(i -> expected(graph, idFunction, i, expectedNodes[i]))
+            .collect(Collectors.toSet());
 
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of("c"))
-            .targetNode(idFunction.of("h"))
-            .k(3)
+            .sourceNode(idFunction.of(sourceNode))
+            .targetNode(idFunction.of(targetNode))
+            .k(k)
             .build();
 
         var paths = Yens
