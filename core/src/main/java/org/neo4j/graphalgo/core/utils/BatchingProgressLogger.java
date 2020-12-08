@@ -34,7 +34,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     private final int concurrency;
     private long taskVolume;
     private long batchSize;
-    private final String task;
+    private String task;
     private final LongAdder progressCounter;
     private final ThreadLocal<MutableLong> callCounter;
 
@@ -63,6 +63,16 @@ public class BatchingProgressLogger implements ProgressLogger {
         this.callCounter = ThreadLocal.withInitial(MutableLong::new);
         this.concurrency = concurrency;
         this.globalPercentage = -1;
+    }
+
+    @Override
+    public String getTask() {
+        return task;
+    }
+
+    @Override
+    public void setTask(String task) {
+        this.task = task;
     }
 
     @Override

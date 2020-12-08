@@ -29,7 +29,7 @@ public class ProgressLoggerAdapter implements ProgressLogger {
 
     private final Log log;
 
-    private final String task;
+    private String task;
 
     private int logIntervalMillis = 10_000; // 10s log interval by default
 
@@ -70,6 +70,16 @@ public class ProgressLoggerAdapter implements ProgressLogger {
     @Override
     public Log getLog() {
         return this.log;
+    }
+
+    @Override
+    public String getTask() {
+        return task;
+    }
+
+    @Override
+    public void setTask(String task) {
+        this.task = task;
     }
 
     @Override

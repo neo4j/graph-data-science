@@ -30,6 +30,10 @@ public interface ProgressLogger {
 
     Supplier<String> NO_MESSAGE = () -> null;
 
+    String getTask();
+
+    void setTask(String task);
+
     default void logProgress() {
         logProgress(NO_MESSAGE);
     };
@@ -89,6 +93,16 @@ public interface ProgressLogger {
 
     enum NullProgressLogger implements ProgressLogger {
         INSTANCE;
+
+        @Override
+        public String getTask() {
+            return NullProgressLogger.class.getSimpleName();
+        }
+
+        @Override
+        public void setTask(String task) {
+
+        }
 
         @Override
         public void logProgress(Supplier<String> msgFactory) {

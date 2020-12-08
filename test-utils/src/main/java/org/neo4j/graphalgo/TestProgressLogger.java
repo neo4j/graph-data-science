@@ -48,6 +48,16 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     }
 
     @Override
+    public String getTask() {
+        return batchingLogger.getTask();
+    }
+
+    @Override
+    public void setTask(String task) {
+        batchingLogger.setTask(task);
+    }
+
+    @Override
     public void logProgress(Supplier<String> msgFactory) {
         progresses.get(progresses.size() - 1).incrementAndGet();
         batchingLogger.logProgress(msgFactory);
