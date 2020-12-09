@@ -19,13 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.StreamResult;
-import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.yens.Yens;
 import org.neo4j.graphalgo.beta.paths.yens.YensFactory;
 import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensStreamConfig;
@@ -43,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathYensStreamProc extends StreamProc<Yens, DijkstraResult, StreamResult, ShortestPathYensStreamConfig> {
+public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, ShortestPathYensStreamConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.yens.stream", mode = READ)
     @Description(YENS_DESCRIPTION)
@@ -61,33 +56,6 @@ public class ShortestPathYensStreamProc extends StreamProc<Yens, DijkstraResult,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Override
-    protected Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<Yens, DijkstraResult, ShortestPathYensStreamConfig> computationResult) {
-        return runWithExceptionLogging("Result streaming failed", () -> {
-            var graph = computationResult.graph();
-            var config = computationResult.config();
-
-            if (computationResult.isGraphEmpty()) {
-                graph.release();
-                return Stream.empty();
-            }
-
-            var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
-            return computationResult
-                .result()
-                .paths()
-                .takeWhile(path -> path != PathResult.EMPTY)
-                .map(path -> resultBuilder.build(path, config.path()));
-        });
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        throw new UnsupportedOperationException("Yens handles result building individually.");
     }
 
     @Override

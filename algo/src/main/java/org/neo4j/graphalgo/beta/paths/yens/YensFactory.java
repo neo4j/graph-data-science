@@ -47,9 +47,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     }
 
     @Override
-    public Yens build(
-        Graph graph, ShortestPathYensBaseConfig configuration, AllocationTracker tracker, Log log
-    ) {
+    public Yens build(Graph graph, ShortestPathYensBaseConfig configuration, AllocationTracker tracker, Log log) {
         return Yens.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
     }
 }

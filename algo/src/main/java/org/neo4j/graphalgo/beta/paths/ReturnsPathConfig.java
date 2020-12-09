@@ -17,10 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.sourcetarget;
+package org.neo4j.graphalgo.beta.paths;
 
-final class ShortestPathYensProc {
-    static final String YENS_DESCRIPTION = "The Yen's shortest path algorithm computes the k shortest (weighted) paths between a pair of nodes.";
+import org.immutables.value.Value;
 
-    private ShortestPathYensProc() {}
+public interface ReturnsPathConfig {
+
+    /**
+     * Iff true, the stream result contains a Cypher path representation.
+     */
+    @Value.Default
+    default boolean path() {
+        return false;
+    }
 }

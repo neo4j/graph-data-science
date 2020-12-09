@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra.config;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.paths.ReturnsPathConfig;
 import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -31,15 +31,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig {
-
-    /**
-     * Iff true, the stream result contains a Cypher path representation.
-     */
-    @Value.Default
-    default boolean path() {
-        return false;
-    }
+public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig, ReturnsPathConfig {
 
     static ShortestPathDijkstraStreamConfig of(
         String username,

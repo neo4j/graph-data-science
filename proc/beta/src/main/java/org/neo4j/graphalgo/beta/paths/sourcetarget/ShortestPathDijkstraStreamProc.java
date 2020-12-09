@@ -20,13 +20,9 @@
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraFactory;
-import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -42,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathDijkstraStreamProc extends StreamProc<Dijkstra, DijkstraResult, StreamResult, ShortestPathDijkstraStreamConfig> {
+public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, ShortestPathDijkstraStreamConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
@@ -60,33 +56,6 @@ public class ShortestPathDijkstraStreamProc extends StreamProc<Dijkstra, Dijkstr
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Override
-    protected Stream<StreamResult> stream(ComputationResult<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig> computationResult) {
-        return runWithExceptionLogging("Result streaming failed", () -> {
-            var graph = computationResult.graph();
-            var config = computationResult.config();
-
-            if (computationResult.isGraphEmpty()) {
-                graph.release();
-                return Stream.empty();
-            }
-
-            var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
-            return computationResult
-                .result()
-                .paths()
-                .takeWhile(path -> path != PathResult.EMPTY)
-                .map(path -> resultBuilder.build(path, config.path()));
-        });
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        throw new UnsupportedOperationException("Dijkstra handles result building individually.");
     }
 
     @Override
