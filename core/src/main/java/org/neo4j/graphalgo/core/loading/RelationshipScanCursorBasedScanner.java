@@ -54,4 +54,9 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
     RelationshipReference cursorReference(KernelTransaction transaction, RelationshipScanCursor cursor) {
         return new RelationshipScanCursorReference(cursor);
     }
+
+    @Override
+    void closeCursorReference(RelationshipReference relationshipReference) {
+        // no need to close anything, nothing new is allocated in `cursorReference`
+    }
 }

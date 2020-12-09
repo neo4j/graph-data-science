@@ -67,4 +67,8 @@ public class NodeLabelIndexReference implements NodeReference {
             return Read.NO_ID;
         }
     }
+
+    void close() {
+        nodeCursor.close();
+    }
 }
