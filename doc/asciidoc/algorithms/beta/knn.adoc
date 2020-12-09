@@ -369,9 +369,9 @@ include::../shared/examples-stream-intro.adoc[]
 CALL gds.beta.knn.stream('myGraph', {
     topK: 1,
     nodeWeightProperty: 'age',
-    // The following parameters are not strictly required
-    // but will make the result more stable
+    // The following parameters are set to produce a deterministic result
     randomSeed: 42,
+    concurrency: 1,
     sampleRate: 1.0,
     deltaThreshold: 0.0
 })
