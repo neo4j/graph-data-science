@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -194,6 +195,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             }
 
             runComputeSteps(computeSteps, iterations, prevMessageBits);
+            runMasterComputeStep(iterations);
 
             // No messages have been sent and all nodes voted to halt
             if (messageBits.isEmpty() && voteBits.allSet()) {
@@ -262,6 +264,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
 
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
+    }
+
+    private void runMasterComputeStep(final int iteration) {
+        var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
+        computation.masterCompute(context);
     }
 
     @SuppressWarnings({"unchecked"})

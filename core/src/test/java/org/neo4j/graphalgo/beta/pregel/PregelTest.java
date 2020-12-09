@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -133,6 +134,20 @@ class PregelTest {
         assertEquals(88.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("eve")));
         assertArrayEquals(new long[]{50L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("eve")));
         assertArrayEquals(new double[]{88.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve")));
+    }
+
+    @Test
+    void sendsMessages() {
+        var pregelJob = Pregel.create(
+            graph,
+            ImmutablePregelConfig.builder().maxIterations(4).build(),
+            new TestMasterCompute(),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        var nodeValues = pregelJob.run().nodeValues();
+        assertArrayEquals(new long[]{4L, 4L, 4L}, nodeValues.longProperties(KEY).toArray());
     }
 
     static Stream<Arguments> estimations() {
@@ -329,6 +344,31 @@ class PregelTest {
                 context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleArray[0] * 2L});
             }
             context.sendToNeighbors(42.0);
+        }
+    }
+
+    private static class TestMasterCompute implements PregelComputation<PregelConfig> {
+        @Override
+        public PregelSchema schema() {
+            return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
+        }
+
+        @Override
+        public void init(InitContext<PregelConfig> context) {
+            context.setNodeValue(KEY, 0);
+        }
+
+        @Override
+        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+
+        }
+
+        @Override
+        public void masterCompute(MasterComputeContext<PregelConfig> context) {
+            context.forEachNode(nodeId -> {
+                context.setNodeValue(nodeId, KEY, context.longNodeValue(nodeId, KEY) + 1);
+                return true;
+            });
         }
     }
 }

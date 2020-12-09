@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 
 /**
  * Main interface to express user-defined logic using the
@@ -77,6 +78,12 @@ public interface PregelComputation<C extends PregelConfig> {
      * identifier is known.
      */
     void compute(ComputeContext<C> context, Pregel.Messages messages);
+
+    /**
+     * The masterCompute method is called exactly once after every superstep.
+     * It is called by a single thread.
+     */
+    default void masterCompute(MasterComputeContext<C> context) { }
 
     /**
      * If the input graph is weighted, i.e. relationships have a
