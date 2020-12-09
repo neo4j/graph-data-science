@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -326,7 +327,7 @@ public class PregelProcTest extends BaseProcTest {
                 }
 
                 @Override
-                public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+                public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
                     context.setNodeValue(LONG_KEY, 42L);
                     context.setNodeValue(DOUBLE_KEY, 42.0D);
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});

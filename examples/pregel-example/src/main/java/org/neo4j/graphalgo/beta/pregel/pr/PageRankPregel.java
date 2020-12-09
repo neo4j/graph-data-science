@@ -26,10 +26,11 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -49,7 +50,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     }
 
     @Override
-    public void init(PregelContext.InitContext<PageRankPregelConfig> context) {
+    public void init(InitContext<PageRankPregelConfig> context) {
         var initialValue = context.config().seedProperty() != null
             ? context.nodeProperties(context.config().seedProperty()).doubleValue(context.nodeId())
             : 1.0 / context.nodeCount();
@@ -59,7 +60,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PageRankPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<PageRankPregelConfig> context, Pregel.Messages messages) {
         double newRank = context.doubleNodeValue(PAGE_RANK);
 
         // compute new rank based on neighbor ranks

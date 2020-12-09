@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+
 /**
  * Main interface to express user-defined logic using the
  * Pregel framework. An algorithm is expressed using a
@@ -59,7 +62,7 @@ public interface PregelComputation<C extends PregelConfig> {
      * The context parameter provides access to node properties of
      * the in-memory graph and the algorithm configuration.
      */
-    default void init(PregelContext.InitContext<C> context) {}
+    default void init(InitContext<C> context) {}
 
     /**
      * The compute method is called individually for each node
@@ -73,7 +76,7 @@ public interface PregelComputation<C extends PregelConfig> {
      * Messages can be sent to neighbor nodes or any node if the
      * identifier is known.
      */
-    void compute(PregelContext.ComputeContext<C> context, Pregel.Messages messages);
+    void compute(ComputeContext<C> context, Pregel.Messages messages);
 
     /**
      * If the input graph is weighted, i.e. relationships have a

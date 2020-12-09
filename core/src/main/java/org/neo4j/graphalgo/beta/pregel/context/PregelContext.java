@@ -17,30 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel.cc;
+package org.neo4j.graphalgo.beta.pregel.context;
 
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
-import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
-import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 
-@PregelProcedure(
-    name = "gds.pregel.test",
-    description = "Test computation description",
-    modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS}
-)
-public class Computation implements PregelComputation<PregelConfig> {
+public abstract class PregelContext<CONFIG extends PregelConfig> {
 
-    @Override
-    public PregelSchema schema() {
-        return null;
+    protected final CONFIG config;
+
+    protected PregelContext(CONFIG config) {
+        this.config = config;
     }
 
-    @Override
-    public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
-
+    /**
+     * Allows access to the user-defined Pregel configuration.
+     */
+    public CONFIG config() {
+        return config;
     }
+
+    /**
+     * Indicates whether the input graph is a multi-graph.
+     */
+    public abstract boolean isMultiGraph();
+
+    /**
+     * Number of nodes in the input graph.
+     */
+    public abstract long nodeCount();
+
+    /**
+     * Number of relationships in the input graph.
+     */
+    public abstract long relationshipCount();
 }

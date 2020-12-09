@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.beta.pregel.bfs;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 
 /**
  * Setting the value for each node to the level/iteration the node is discovered via BFS.
@@ -42,7 +42,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             if (context.nodeId() == context.config().startNode()) {
                 context.setNodeValue(LEVEL, 0);

@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -231,7 +233,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.setNodeValue(KEY, 0.0);
                 context.sendToNeighbors(1.0);
@@ -264,7 +266,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
             if (context.nodeId() == 0) {
                 var sum = StreamSupport.stream(messages.spliterator(), false).mapToDouble(d -> d).sum();
                 context.setNodeValue(KEY, sum);
@@ -300,7 +302,7 @@ class PregelTest {
         }
 
         @Override
-        public void init(PregelContext.InitContext<CompositeTestComputationConfig> context) {
+        public void init(InitContext<CompositeTestComputationConfig> context) {
             long nodeId = context.nodeId();
             long longValue = context.nodeProperties(context.config().longProperty()).longValue(nodeId);
             double doubleValue = context.nodeProperties(context.config().doubleProperty()).doubleValue(nodeId);
@@ -313,7 +315,7 @@ class PregelTest {
 
         @Override
         public void compute(
-            PregelContext.ComputeContext<CompositeTestComputationConfig> context,
+            ComputeContext<CompositeTestComputationConfig> context,
             Pregel.Messages messages
         ) {
             if (!context.isInitialSuperstep()) {

@@ -23,10 +23,11 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 
 import java.util.Arrays;
 
@@ -44,12 +45,12 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void init(PregelContext.InitContext<PregelConfig> context) {
+    public void init(InitContext<PregelConfig> context) {
         context.setNodeValue(LABEL_KEY, context.nodeId());
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             context.sendToNeighbors(context.nodeId());
         } else {

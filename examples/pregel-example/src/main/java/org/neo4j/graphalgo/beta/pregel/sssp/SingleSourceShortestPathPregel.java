@@ -25,10 +25,11 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -47,7 +48,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void init(PregelContext.InitContext<SingleSourceShortestPathPregelConfig> context) {
+    public void init(InitContext<SingleSourceShortestPathPregelConfig> context) {
         if (context.nodeId() == context.config().startNode()) {
             context.setNodeValue(DISTANCE, 0);
         } else {
@@ -56,7 +57,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             if (context.nodeId() == context.config().startNode()) {
                 context.sendToNeighbors(1);

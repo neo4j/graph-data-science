@@ -22,9 +22,10 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.MUTATE;
 import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STATS;
@@ -46,7 +47,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void init(PregelContext.InitContext<ConnectedComponentsConfig> context) {
+    public void init(InitContext<ConnectedComponentsConfig> context) {
         var initialValue = context.config().seedProperty() != null
             ? context.nodeProperties(context.config().seedProperty()).longValue(context.nodeId())
             : context.nodeId();
@@ -54,7 +55,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<ConnectedComponentsConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<ConnectedComponentsConfig> context, Pregel.Messages messages) {
         long oldComponentId = context.longNodeValue(COMPONENT);
         long newComponentId = oldComponentId;
 

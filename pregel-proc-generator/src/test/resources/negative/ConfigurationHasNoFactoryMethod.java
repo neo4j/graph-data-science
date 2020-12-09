@@ -17,11 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
@@ -39,7 +37,7 @@ public class ConfigurationHasNoFactoryMethod implements PregelComputation<Config
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    public void compute(ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 

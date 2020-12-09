@@ -29,9 +29,10 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -63,7 +64,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     @Override
-    public void init(PregelContext.InitContext<SpeakerListenerLPA.SpeakerListenerLPAConfig> context) {
+    public void init(InitContext<SpeakerListenerLPAConfig> context) {
         var initialLabels = new long[context.config().maxIterations()];
         // when nodes do not have incoming rels, it should vote for itself always
         Arrays.fill(initialLabels, context.nodeId());
@@ -72,7 +73,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     @Override
     public void compute(
-        PregelContext.ComputeContext<SpeakerListenerLPA.SpeakerListenerLPAConfig> context, Pregel.Messages messages
+        ComputeContext<SpeakerListenerLPAConfig> context, Pregel.Messages messages
     ) {
         var labels = context.longArrayNodeValue(LABELS_PROPERTY);
 
@@ -89,7 +90,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     private void listen(
-        PregelContext.ComputeContext<SpeakerListenerLPAConfig> context,
+        ComputeContext<SpeakerListenerLPAConfig> context,
         Pregel.Messages messages,
         long[] labels
     ) {
@@ -113,14 +114,14 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         }
     }
 
-    private void speak(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
+    private void speak(ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
         var randomLabelPosition = random.get().nextInt(context.superstep() + 1);
         var labelToSend = labels[randomLabelPosition];
         context.sendToNeighbors(labelToSend);
     }
 
     // IDEA: Instead of just returning every community the current node is part of, keep the frequency of each community as a, sort of, weight
-    private void prune(PregelContext.ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
+    private void prune(ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
         var labelVotes = new LongIntScatterMap();
         for (long label : labels) {
             labelVotes.addTo(label, 1);

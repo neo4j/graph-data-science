@@ -23,10 +23,10 @@ import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.LongStream;
@@ -47,7 +47,7 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<TriangleCountPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<TriangleCountPregelConfig> context, Pregel.Messages messages) {
         if (context.isInitialSuperstep()) {
             context.setNodeValue(TRIANGLE_COUNT, 0);
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {

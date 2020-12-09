@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -287,8 +289,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final boolean isAsync;
         private final boolean isMultiGraph;
         private final PregelComputation<CONFIG> computation;
-        private final PregelContext.InitContext<CONFIG> initContext;
-        private final PregelContext.ComputeContext<CONFIG> computeContext;
+        private final InitContext<CONFIG> initContext;
+        private final ComputeContext<CONFIG> computeContext;
         private final Partition nodeBatch;
         private final Degrees degrees;
         private final CompositeNodeValue nodeValues;
@@ -323,8 +325,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             this.nodeValues = nodeValues;
             this.messageQueues = messageQueues;
             this.relationshipIterator = relationshipIterator.concurrentCopy();
-            this.computeContext = PregelContext.computeContext(this, config);
-            this.initContext = PregelContext.initContext(this, config, graph);
+            this.computeContext = new ComputeContext<>(this, config);
+            this.initContext = new InitContext<>(this, config, graph);
         }
 
         void init(
@@ -368,34 +370,34 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return iteration;
         }
 
-        boolean isMultiGraph() {
+        public boolean isMultiGraph() {
             return isMultiGraph;
         }
 
-        long nodeCount() {
+        public long nodeCount() {
             return nodeCount;
         }
 
-        long relationshipCount() {
+        public long relationshipCount() {
             return relationshipCount;
         }
 
-        int degree(long nodeId) {
+        public int degree(long nodeId) {
             return degrees.degree(nodeId);
         }
 
-        void voteToHalt(long nodeId) {
+        public void voteToHalt(long nodeId) {
             voteBits.set(nodeId);
         }
 
-        void sendToNeighbors(long sourceNodeId, double message) {
+        public void sendToNeighbors(long sourceNodeId, double message) {
             relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
                 sendTo(targetNodeId, message);
                 return true;
             });
         }
 
-        LongStream getNeighbors(long sourceNodeId) {
+        public LongStream getNeighbors(long sourceNodeId) {
             LongStream.Builder builder = LongStream.builder();
             relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
                 builder.accept(targetNodeId);
@@ -404,12 +406,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return builder.build();
         }
 
-        void sendTo(long targetNodeId, double message) {
+        public void sendTo(long targetNodeId, double message) {
             messageQueues.get(targetNodeId).add(message);
             messageBits.set(targetNodeId);
         }
 
-        void sendToNeighborsWeighted(long sourceNodeId, double message) {
+        public void sendToNeighborsWeighted(long sourceNodeId, double message) {
             relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
                 messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
                 messageBits.set(target);
@@ -421,35 +423,35 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
 
-        double doubleNodeValue(String key, long nodeId) {
+        public double doubleNodeValue(String key, long nodeId) {
             return nodeValues.doubleValue(key, nodeId);
         }
 
-        long longNodeValue(String key, long nodeId) {
+        public long longNodeValue(String key, long nodeId) {
             return nodeValues.longValue(key, nodeId);
         }
 
-        long[] longArrayNodeValue(String key, long nodeId) {
+        public long[] longArrayNodeValue(String key, long nodeId) {
             return nodeValues.longArrayValue(key, nodeId);
         }
 
-         double[] doubleArrayNodeValue(String key, long nodeId) {
+         public double[] doubleArrayNodeValue(String key, long nodeId) {
             return nodeValues.doubleArrayValue(key, nodeId);
         }
 
-        void setNodeValue(String key, long nodeId, double value) {
+        public void setNodeValue(String key, long nodeId, double value) {
             nodeValues.set(key, nodeId, value);
         }
 
-        void setNodeValue(String key, long nodeId, long value) {
+        public void setNodeValue(String key, long nodeId, long value) {
             nodeValues.set(key, nodeId, value);
         }
 
-        void setNodeValue(String key, long nodeId, long[] value) {
+        public void setNodeValue(String key, long nodeId, long[] value) {
             nodeValues.set(key, nodeId, value);
         }
 
-        void setNodeValue(String key, long nodeId, double[] value) {
+        public void setNodeValue(String key, long nodeId, double[] value) {
             nodeValues.set(key, nodeId, value);
         }
     }
@@ -548,19 +550,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
             return arrayProperties.get(nodeId);
         }
 
-        void set(String key, long nodeId, double value) {
+        public void set(String key, long nodeId, double value) {
             doubleProperties(key).set(nodeId, value);
         }
 
-        void set(String key, long nodeId, long value) {
+        public void set(String key, long nodeId, long value) {
             longProperties(key).set(nodeId, value);
         }
 
-        void set(String key, long nodeId, long[] value) {
+        public void set(String key, long nodeId, long[] value) {
             longArrayProperties(key).set(nodeId, value);
         }
 
-        void set(String key, long nodeId, double[] value) {
+        public void set(String key, long nodeId, double[] value) {
             doubleArrayProperties(key).set(nodeId, value);
         }
 
