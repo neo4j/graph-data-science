@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
@@ -36,10 +35,10 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig.K_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Yens, CONFIG, DijkstraResult>,
@@ -89,8 +88,8 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = nodeIdByProperty(1);
-        long targetId = nodeIdByProperty(6);
+        long sourceId = nodeIdByProperty(db, 1);
+        long targetId = nodeIdByProperty(db, 6);
 
         if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
             mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
@@ -102,15 +101,6 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             mapWrapper = mapWrapper.withNumber(K_KEY, 3);
         }
         return mapWrapper;
-    }
-
-    long nodeIdByProperty(long propertyValue) {
-        var nodeId = new MutableLong(0L);
-        runQueryWithRowConsumer(
-            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
-            resultRow -> nodeId.setValue(resultRow.getNumber("id"))
-        );
-        return nodeId.longValue();
     }
 
     @Override

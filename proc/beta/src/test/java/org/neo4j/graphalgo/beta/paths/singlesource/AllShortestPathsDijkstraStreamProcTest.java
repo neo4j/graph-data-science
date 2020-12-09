@@ -30,12 +30,12 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static org.assertj.core.util.Arrays.asList;
+import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 
 class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraStreamConfig> {
@@ -69,12 +69,12 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
             .addParameter("path", true)
             .yields();
 
-        var idA = nodeIdByProperty(1);
-        var idB = nodeIdByProperty(2);
-        var idC = nodeIdByProperty(3);
-        var idD = nodeIdByProperty(4);
-        var idE = nodeIdByProperty(5);
-        var idF = nodeIdByProperty(6);
+        var idA = nodeIdByProperty(db, 1);
+        var idB = nodeIdByProperty(db, 2);
+        var idC = nodeIdByProperty(db, 3);
+        var idD = nodeIdByProperty(db, 4);
+        var idE = nodeIdByProperty(db, 5);
+        var idF = nodeIdByProperty(db, 6);
 
         var costs0 = new double[]{0.0};
         var costs1 = new double[]{0.0, 2.0};
@@ -110,13 +110,5 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
         });
         //@formatter:on
 
-    }
-
-    private static List<Double> asList(double[] array) {
-        return Arrays.stream(array).boxed().collect(Collectors.toList());
-    }
-
-    private static List<Long> asList(long[] array) {
-        return Arrays.stream(array).boxed().collect(Collectors.toList());
     }
 }

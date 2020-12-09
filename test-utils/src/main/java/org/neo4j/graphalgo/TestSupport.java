@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +37,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -321,5 +323,15 @@ public final class TestSupport {
                 break;
         }
         return formatWithLocale(cypherAggregation, property);
+    }
+
+    public static long nodeIdByProperty(GraphDatabaseService db, long propertyValue) {
+        var nodeId = new MutableLong(0L);
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
+            resultRow -> nodeId.setValue(resultRow.getNumber("id"))
+        );
+        return nodeId.longValue();
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.paths.singlesource;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
@@ -36,8 +35,8 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
@@ -85,21 +84,12 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = nodeIdByProperty(1);
+        long sourceId = nodeIdByProperty(db, 1);
 
         if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
             mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
         }
         return mapWrapper;
-    }
-
-    long nodeIdByProperty(long propertyValue) {
-        var nodeId = new MutableLong(0L);
-        runQueryWithRowConsumer(
-            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
-            resultRow -> nodeId.setValue(resultRow.getNumber("id"))
-        );
-        return nodeId.longValue();
     }
 
     @Override

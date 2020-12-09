@@ -30,12 +30,12 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import static org.assertj.core.util.Arrays.asList;
+import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 
 class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPathYensStreamConfig> {
@@ -71,12 +71,12 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
             .addParameter("path", true)
             .yields();
 
-        var idC = nodeIdByProperty(1);
-        var idD = nodeIdByProperty(2);
-        var idE = nodeIdByProperty(3);
-        var idF = nodeIdByProperty(4);
-        var idG = nodeIdByProperty(5);
-        var idH = nodeIdByProperty(6);
+        var idC = nodeIdByProperty(db, 1);
+        var idD = nodeIdByProperty(db, 2);
+        var idE = nodeIdByProperty(db, 3);
+        var idF = nodeIdByProperty(db, 4);
+        var idG = nodeIdByProperty(db, 5);
+        var idH = nodeIdByProperty(db, 6);
 
         var ids0 = new long[]{idC, idE, idF, idH};
         var ids1 = new long[]{idC, idE, idG, idH};
@@ -98,13 +98,5 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
 
             assertCypherResult(query, expected);
         });
-    }
-
-    private static List<Double> asList(double[] array) {
-        return Arrays.stream(array).boxed().collect(Collectors.toList());
-    }
-
-    private static List<Long> asList(long[] array) {
-        return Arrays.stream(array).boxed().collect(Collectors.toList());
     }
 }
