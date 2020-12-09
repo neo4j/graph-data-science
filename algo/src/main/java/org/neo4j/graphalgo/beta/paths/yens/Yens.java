@@ -159,6 +159,11 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 dijkstra.clear();
                 dijkstra.withSourceNode(spurNode);
                 var spurPath = computeDijkstra(graph.toOriginalNodeId(spurNode));
+
+                // Clear filters for next spur node
+                nodeBlackList.clear();
+                relationshipBlackList.clear();
+
                 // No new candidate from this spur node, continue with next node.
                 if (spurPath == PathResult.EMPTY) {
                     continue;
@@ -170,10 +175,6 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 if (!candidates.contains(rootPath)) {
                     candidates.add(rootPath);
                 }
-
-                // Clear filters for next spur node
-                nodeBlackList.clear();
-                relationshipBlackList.clear();
             }
 
             if (candidates.isEmpty()) {
