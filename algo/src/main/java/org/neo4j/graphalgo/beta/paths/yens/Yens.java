@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.paths.yens;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongObjectScatterMap;
 import com.carrotsearch.hppc.LongScatterSet;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.PathResult;
@@ -129,14 +130,14 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             logStart(i + 1);
             var prevPath = kShortestPaths.get(i - 1);
 
-            for (int n = 0; n < prevPath.nodeCount() - 2; n++) {
+            for (int n = 0; n < prevPath.nodeCount() - 1; n++) {
                 var spurNode = prevPath.node(n);
                 var rootPath = prevPath.subPath(n + 1);
 
                 for (var path : kShortestPaths) {
                     // Filter relationships that are part of the previous
                     // shortest paths which share the same root path.
-                    if (rootPath.matches(path, n)) {
+                    if (rootPath.matches(path, n + 1)) {
                         var relationshipId = path.relationship(n);
 
                         var neighbors = relationshipBlackList.get(spurNode);
