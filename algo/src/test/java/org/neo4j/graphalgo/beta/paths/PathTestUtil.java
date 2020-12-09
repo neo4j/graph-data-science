@@ -19,25 +19,24 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
-import org.neo4j.graphalgo.api.RelationshipProperties;
 import org.neo4j.graphalgo.extension.IdFunction;
 
 public final class PathTestUtil {
 
     public static PathResult expected(
-        RelationshipProperties graph,
         IdFunction idFunction,
         long index,
+        double[] costs,
         String... nodes
     ) {
-        return expected(graph, idFunction, index, new long[0], nodes);
+        return expected(idFunction, index, new long[0], costs, nodes);
     }
 
     public static PathResult expected(
-        RelationshipProperties graph,
         IdFunction idFunction,
         long index,
         long[] relationshipIds,
+        double[] costs,
         String... nodes
     ) {
         var builder = ImmutablePathResult.builder()
@@ -46,19 +45,9 @@ public final class PathTestUtil {
             .targetNode(idFunction.of(nodes[nodes.length - 1]));
 
         var nodeIds = new long[nodes.length];
-        var costs = new double[nodes.length];
-
-        var cost = 0.0;
-        var prevNode = -1L;
 
         for (int i = 0; i < nodes.length; i++) {
-            var currentNode = idFunction.of(nodes[i]);
-            if (i > 0) {
-                cost += graph.relationshipProperty(prevNode, currentNode);
-            }
-            prevNode = currentNode;
-            nodeIds[i] = currentNode;
-            costs[i] = cost;
+            nodeIds[i] = idFunction.of(nodes[i]);
         }
 
         return builder

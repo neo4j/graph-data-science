@@ -124,7 +124,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
         kShortestPaths.add(MutablePathResult.of(shortestPath));
 
-        PriorityQueue<MutablePathResult> candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
+        PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
         for (int i = 1; i < config.k(); i++) {
             logStart(i + 1);
@@ -190,6 +190,18 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             .builder()
             .paths(kShortestPaths.stream().map(MutablePathResult::toPathResult))
             .build();
+    }
+
+    @NotNull
+    private PriorityQueue<MutablePathResult> initCandidatesQueue() {
+        return new PriorityQueue<>((path1, path2) -> {
+            // To provide more deterministic results we sort candidates by total cost and path length
+            int costComparison = Comparator.comparingDouble(MutablePathResult::totalCost).compare(path1, path2);
+            if (costComparison == 0) {
+                return Comparator.comparingInt(MutablePathResult::nodeCount).compare(path1, path2);
+            }
+            return costComparison;
+        });
     }
 
     @Override

@@ -184,6 +184,18 @@ final class MutablePathResult {
         return h;
     }
 
+    @Override
+    public String toString() {
+        return "MutablePathResult{" +
+               "index=" + index +
+               ", sourceNode=" + sourceNode +
+               ", targetNode=" + targetNode +
+               ", nodeIds=" + Arrays.toString(nodeIds) +
+               ", relationshipIds=" + Arrays.toString(relationshipIds) +
+               ", costs=" + Arrays.toString(costs) +
+               '}';
+    }
+
     @TestOnly
     long index() {
         return index;

@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.paths.yens;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -105,6 +107,8 @@ class YensTest {
                 {"c", "e", "f", "h"}
             }, new long[][] {
                 {1, 1, 1}
+            }, new double[][] {
+                {0.0, 2.0, 4.0, 5.0}
             }),
             Arguments.of(2, new String[][]{
                 {"c", "e", "f", "h"},
@@ -112,6 +116,9 @@ class YensTest {
             }, new long[][] {
                 {1, 1, 1},
                 {1, 2, 0}
+            }, new double[][] {
+                {0.0, 2.0, 4.0, 5.0},
+                {0.0, 2.0, 5.0, 7.0}
             }),
             Arguments.of(3, new String[][]{
                 {"c", "e", "f", "h"},
@@ -121,6 +128,10 @@ class YensTest {
                 {1, 1, 1},
                 {1, 2, 0},
                 {0, 0, 1}
+            }, new double[][] {
+                {0.0, 2.0, 4.0, 5.0},
+                {0.0, 2.0, 5.0, 7.0},
+                {0.0, 3.0, 7.0, 8.0}
             }),
             Arguments.of(4, new String[][]{
                 {"c", "e", "f", "h"},
@@ -132,32 +143,19 @@ class YensTest {
                 {1, 2, 0},
                 {0, 0, 1},
                 {1, 0, 0, 1}
+            }, new double[][] {
+                {0.0, 2.0, 4.0, 5.0},
+                {0.0, 2.0, 5.0, 7.0},
+                {0.0, 3.0, 7.0, 8.0},
+                {0.0, 2.0, 3.0, 7.0, 8.0}
             })
         );
     }
 
     @ParameterizedTest
     @MethodSource("input")
-    void compute(int k, String[][] expectedNodes, long[][] relationshipIds) {
-        var sourceNode = expectedNodes[0][0];
-        var targetNode = expectedNodes[0][expectedNodes[0].length - 1];
-
-        var expected = IntStream.range(0, expectedNodes.length)
-            .mapToObj(i -> expected(graph, idFunction, i, relationshipIds[i], expectedNodes[i]))
-            .collect(Collectors.toSet());
-
-        var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of(sourceNode))
-            .targetNode(idFunction.of(targetNode))
-            .k(k)
-            .build();
-
-        var paths = Yens
-            .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-            .compute()
-            .pathSet();
-
-        assertEquals(expected, paths);
+    void compute(int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
+        assertResult(graph, idFunction, k, expectedNodes, expectedRelationships, expectedCosts);
     }
 
     @Test
@@ -176,7 +174,7 @@ class YensTest {
             .compute()
             .pathSet();
 
-        assertEquals(6, testLogger.getProgresses().size());
+        assertEquals(8, testLogger.getProgresses().size());
 
         // once
         assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Start"));
@@ -191,5 +189,100 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Start Dijkstra for spur node")));
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Start")));
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
+    }
+
+    static void assertResult(Graph graph, IdFunction idFunction, int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
+        assertEquals(
+            expectedNodes.length,
+            expectedRelationships.length,
+            "Number of expected paths does not equals number of expected relationship arrays"
+        );
+
+        var sourceNode = expectedNodes[0][0];
+        var targetNode = expectedNodes[0][expectedNodes[0].length - 1];
+
+        var expected = IntStream.range(0, expectedNodes.length)
+            .mapToObj(i -> expected(idFunction, i, expectedRelationships[i], expectedCosts[i], expectedNodes[i]))
+            .collect(Collectors.toSet());
+
+        var config = defaultSourceTargetConfigBuilder()
+            .sourceNode(idFunction.of(sourceNode))
+            .targetNode(idFunction.of(targetNode))
+            .k(k)
+            .build();
+
+        var paths = Yens
+            .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .compute()
+            .pathSet();
+
+        assertEquals(expected, paths);
+    }
+
+    @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
+    class MultiGraph {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a { id: 0 })" +
+            ", (b { id: 1 })" +
+            ", (c { id: 2 })" +
+            ", (d { id: 3 })" +
+            ", (a)-[:REL { cost: 1.0 }]->(b)" +
+            ", (a)-[:REL { cost: 2.0 }]->(b)" +
+            ", (b)-[:REL { cost: 3.0 }]->(c)" +
+            ", (b)-[:REL { cost: 4.0 }]->(c)" +
+            ", (c)-[:REL { cost: 42.0 }]->(d)" +
+            ", (c)-[:REL { cost: 42.0 }]->(d)";
+
+        @Inject
+        private Graph graph;
+
+        @Inject
+        private IdFunction idFunction;
+
+        Stream<Arguments> input() {
+            return Stream.of(
+                Arguments.of(1, new String[][]{
+                    {"a", "b"}
+                }, new long[][] {
+                    {0}
+                }, new double[][] {
+                    {0.0, 1.0}
+                }),
+                Arguments.of(2, new String[][]{
+                    {"a", "b"},
+                    {"a", "b"}
+                }, new long[][] {
+                    {0},
+                    {1}
+                }, new double[][] {
+                    {0.0, 1.0},
+                    {0.0, 2.0},
+                }),
+                Arguments.of(3, new String[][]{
+                    {"a", "b", "c"},
+                    {"a", "b", "c"},
+                    {"a", "b", "c"}
+                }, new long[][] {
+                    {0, 0},
+                    {1, 0},
+                    {0, 1}
+                }, new double[][] {
+                    {0.0, 1.0, 4.0},
+                    {0.0, 2.0, 5.0},
+                    {0.0, 1.0, 5.0},
+                })
+            );
+        }
+
+        @ParameterizedTest
+        @MethodSource("input")
+        void compute(int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
+            assertResult(graph, idFunction, k, expectedNodes, expectedRelationships, expectedCosts);
+        }
+
     }
 }

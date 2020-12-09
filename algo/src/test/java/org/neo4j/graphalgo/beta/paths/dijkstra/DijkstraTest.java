@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.paths.dijkstra;
 
-import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -139,7 +138,7 @@ final class DijkstraTest {
 
         @Test
         void sourceTarget() {
-            var expected = expected(graph, idFunction, 0, "a", "c", "e", "d", "f");
+            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
 
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("a"))
@@ -158,8 +157,8 @@ final class DijkstraTest {
 
         @ParameterizedTest
         @MethodSource("predicatesAndPaths")
-        void sourceTargetWithRelationshipFilter(Dijkstra.RelationshipFilter relationshipFilter, List<String> expectedPath) {
-            var expected = expected(graph, idFunction, 0, expectedPath.toArray(String[]::new));
+        void sourceTargetWithRelationshipFilter(Dijkstra.RelationshipFilter relationshipFilter, double[] expectedCosts, List<String> expectedPath) {
+            var expected = expected(idFunction, 0, expectedCosts, expectedPath.toArray(String[]::new));
 
             var sourceNode = idFunction.of(expectedPath.get(0));
             var targetNode = idFunction.of(expectedPath.get(expectedPath.size() - 1));
@@ -185,7 +184,7 @@ final class DijkstraTest {
         void sourceTargetWithRelationshipIds() {
             var expected = ImmutablePathResult
                 .builder()
-                .from(expected(graph, idFunction, 0, "a", "c", "e", "d", "f"))
+                .from(expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f"))
                 .relationshipIds(1, 0, 0, 0)
                 .build();
 
@@ -207,23 +206,27 @@ final class DijkstraTest {
 
         Stream<Arguments> predicatesAndPaths() {
             return Stream.of(
-                Arguments.of((LongLongPredicate)(source, target) -> source != idFunction.of("c"), List.of("a", "b", "d", "f")),
+                Arguments.of((Dijkstra.RelationshipFilter) (source, target, relationshipId) ->
+                    source != idFunction.of("c"), new double[]{0.0, 4.0, 14.0, 25.0}, List.of("a", "b", "d", "f")),
                 Arguments.of(
-                    (LongLongPredicate)(source, target) -> !((source == idFunction.of("a") && target == idFunction.of("c")) ||
-                                                           (source == idFunction.of("b") && target == idFunction.of("d"))),
-                    List.of("a", "b", "c", "e", "d", "f"))
+                    (Dijkstra.RelationshipFilter) (source, target, relationshipId) ->
+                        !((source == idFunction.of("a") && target == idFunction.of("c")) ||
+                          (source == idFunction.of("b") && target == idFunction.of("d"))),
+                    new double[]{0.0, 4.0, 9.0, 12.0, 16.0, 27.0},
+                    List.of("a", "b", "c", "e", "d", "f")
+                )
             );
         }
 
         @Test
         void singleSource() {
             var expected = Set.of(
-                expected(graph, idFunction, 0, "a"),
-                expected(graph, idFunction, 1, "a", "c"),
-                expected(graph, idFunction, 2, "a", "b"),
-                expected(graph, idFunction, 3, "a", "c", "e"),
-                expected(graph, idFunction, 4, "a", "c", "e", "d"),
-                expected(graph, idFunction, 5, "a", "c", "e", "d", "f")
+                expected(idFunction, 0, new double[]{0.0}, "a"),
+                expected(idFunction, 1, new double[]{0.0, 2.0}, "a", "c"),
+                expected(idFunction, 2, new double[]{0.0, 4.0}, "a", "b"),
+                expected(idFunction, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
+                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "a", "c", "e", "d"),
+                expected(idFunction, 5, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f")
             );
 
             var sourceNode = idFunction.of("a");
@@ -242,10 +245,10 @@ final class DijkstraTest {
         @Test
         void singleSourceFromDisconnectedNode() {
             var expected = Set.of(
-                expected(graph, idFunction, 0, "c"),
-                expected(graph, idFunction, 1, "c", "e"),
-                expected(graph, idFunction, 2, "c", "e", "d"),
-                expected(graph, idFunction, 3, "c", "e", "d", "f")
+                expected(idFunction, 0, new double[]{0.0}, "c"),
+                expected(idFunction, 1, new double[]{0.0, 3.0}, "c", "e"),
+                expected(idFunction, 2, new double[]{0.0, 3.0, 7.0}, "c", "e", "d"),
+                expected(idFunction, 3, new double[]{0.0, 3.0, 7.0, 18.0}, "c", "e", "d", "f")
             );
 
             var sourceNode = idFunction.of("c");
@@ -329,7 +332,7 @@ final class DijkstraTest {
 
         @Test
         void sourceTarget() {
-            var expected = expected(graph, idFunction, 0, "n1", "n3", "n6", "n7");
+            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7");
 
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("n1"))
@@ -349,13 +352,13 @@ final class DijkstraTest {
         @Test
         void singleSource() {
             var expected = Set.of(
-                expected(graph, idFunction, 0, "n1"),
-                expected(graph, idFunction, 1, "n1", "n3"),
-                expected(graph, idFunction, 2, "n1", "n3", "n5"),
-                expected(graph, idFunction, 3, "n1", "n2"),
-                expected(graph, idFunction, 4, "n1", "n3", "n5", "n4"),
-                expected(graph, idFunction, 5, "n1", "n3", "n6"),
-                expected(graph, idFunction, 6, "n1", "n3", "n6", "n7")
+                expected(idFunction, 0, new double[]{0.0}, "n1"),
+                expected(idFunction, 1, new double[]{0.0, 2.0}, "n1", "n3"),
+                expected(idFunction, 2, new double[]{0.0, 2.0, 5.0}, "n1", "n3", "n5"),
+                expected(idFunction, 3, new double[]{0.0, 6.0}, "n1", "n2"),
+                expected(idFunction, 4, new double[]{0.0, 2.0, 5.0, 9.0}, "n1", "n3", "n5", "n4"),
+                expected(idFunction, 5, new double[]{0.0, 2.0, 10.0}, "n1", "n3", "n6"),
+                expected(idFunction, 6, new double[]{0.0, 2.0, 10.0, 11.0}, "n1", "n3", "n6", "n7")
             );
 
             var sourceNode = idFunction.of("n1");
