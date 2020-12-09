@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.ImmutableDijkstraResult;
+import org.neo4j.graphalgo.beta.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -62,9 +63,17 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
+        // If the input graph is a multi-graph, we need to track
+        // parallel relationships. This is necessary since shortest
+        // paths can visit the same nodes via different relationships.
+        var newConfig = ImmutableShortestPathYensBaseConfig
+            .builder()
+            .from(config)
+            .trackRelationships(graph.isMultiGraph())
+            .build();
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, progressLogger, tracker);
-        return new Yens(graph, dijkstra, config, progressLogger);
+        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, progressLogger, tracker);
+        return new Yens(graph, dijkstra, newConfig, progressLogger);
     }
 
     // The blacklists contain nodes and relationships that are

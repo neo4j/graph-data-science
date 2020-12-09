@@ -68,6 +68,7 @@ final class MutablePathResult {
         this.nodeIds = nodeIds;
         this.relationshipIds = relationshipIds;
         this.costs = costs;
+        assert nodeIds.length - 1 == relationshipIds.length;
     }
 
     PathResult toPathResult() {

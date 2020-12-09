@@ -103,10 +103,15 @@ class YensTest {
         return Stream.of(
             Arguments.of(1, new String[][]{
                 {"c", "e", "f", "h"}
+            }, new long[][] {
+                {1, 1, 1}
             }),
             Arguments.of(2, new String[][]{
                 {"c", "e", "f", "h"},
                 {"c", "e", "g", "h"}
+            }, new long[][] {
+                {1, 1, 1},
+                {1, 2, 0}
             }),
             Arguments.of(3, new String[][]{
                 {"c", "e", "f", "h"},
@@ -122,18 +127,23 @@ class YensTest {
                 {"c", "e", "g", "h"},
                 {"c", "d", "f", "h"},
                 {"c", "e", "d", "f", "h"}
+            }, new long[][] {
+                {1, 1, 1},
+                {1, 2, 0},
+                {0, 0, 1},
+                {1, 0, 0, 1}
             })
         );
     }
 
     @ParameterizedTest
     @MethodSource("input")
-    void compute(int k, String[][] expectedNodes) {
+    void compute(int k, String[][] expectedNodes, long[][] relationshipIds) {
         var sourceNode = expectedNodes[0][0];
         var targetNode = expectedNodes[0][expectedNodes[0].length - 1];
 
         var expected = IntStream.range(0, expectedNodes.length)
-            .mapToObj(i -> expected(graph, idFunction, i, expectedNodes[i]))
+            .mapToObj(i -> expected(graph, idFunction, i, relationshipIds[i], expectedNodes[i]))
             .collect(Collectors.toSet());
 
         var config = defaultSourceTargetConfigBuilder()

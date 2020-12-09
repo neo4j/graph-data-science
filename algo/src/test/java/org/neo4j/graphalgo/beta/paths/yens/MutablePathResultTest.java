@@ -38,6 +38,7 @@ class MutablePathResultTest {
     private static final MutablePathResult TEST_PATH = MutablePathResult.of(ImmutablePathResult
         .builder()
         .nodeIds(0, 4, 2, 3)
+        .relationshipIds(0, 1, 2)
         .costs(1, 3, 4, 7)
         .sourceNode(0)
         .targetNode(3)
@@ -135,6 +136,7 @@ class MutablePathResultTest {
         var testPath = MutablePathResult.of(ImmutablePathResult
             .builder()
             .nodeIds(0, 1, 2, 3)
+            .relationshipIds(0, 1, 2)
             .costs(1, 3, 4, 7)
             .sourceNode(0)
             .targetNode(3)
@@ -177,9 +179,9 @@ class MutablePathResultTest {
     @Test
     void appendWithOffset() {
         //@formatter:off
-        var p1 = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(0, 1, 2).costs(0, 1, 42).sourceNode(0).targetNode(2).index(0).build());
-        var p2 = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(2, 3, 4).costs(0, 13, 37).sourceNode(0).targetNode(2).index(1).build());
-        var expected = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(0, 1, 2, 3, 4).costs(0, 1, 42, 55, 79).sourceNode(0).targetNode(2).index(2).build());
+        var p1 = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(0, 1, 2).relationshipIds(0, 1).costs(0, 1, 42).sourceNode(0).targetNode(2).index(0).build());
+        var p2 = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(2, 3, 4).relationshipIds(2, 3).costs(0, 13, 37).sourceNode(0).targetNode(2).index(1).build());
+        var expected = MutablePathResult.of(ImmutablePathResult.builder().nodeIds(0, 1, 2, 3, 4).relationshipIds(0, 1, 2, 3).costs(0, 1, 42, 55, 79).sourceNode(0).targetNode(2).index(2).build());
         //@formatter:on
 
         p1.append(p2);

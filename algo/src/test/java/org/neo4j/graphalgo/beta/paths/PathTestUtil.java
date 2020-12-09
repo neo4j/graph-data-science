@@ -30,6 +30,16 @@ public final class PathTestUtil {
         long index,
         String... nodes
     ) {
+        return expected(graph, idFunction, index, new long[0], nodes);
+    }
+
+    public static PathResult expected(
+        RelationshipProperties graph,
+        IdFunction idFunction,
+        long index,
+        long[] relationshipIds,
+        String... nodes
+    ) {
         var builder = ImmutablePathResult.builder()
             .index(index)
             .sourceNode(idFunction.of(nodes[0]))
@@ -54,6 +64,7 @@ public final class PathTestUtil {
         return builder
             .costs(costs)
             .nodeIds(nodeIds)
+            .relationshipIds(relationshipIds)
             .build();
     }
 
