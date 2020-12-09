@@ -66,7 +66,7 @@ final class MutablePathResult {
     }
 
     PathResult toPathResult() {
-        return ImmutablePathResult.of(index, sourceNode, targetNode, nodeIds, costs);
+        return ImmutablePathResult.of(index, sourceNode, targetNode, nodeIds, new long[0], costs);
     }
 
     /**

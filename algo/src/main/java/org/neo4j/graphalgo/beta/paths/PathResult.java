@@ -46,5 +46,10 @@ public interface PathResult {
 
     long[] nodeIds();
 
+    @Value.Default
+    default long[] relationshipIds() {
+        return new long[0];
+    }
+
     double[] costs();
 }

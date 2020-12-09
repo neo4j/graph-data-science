@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
@@ -50,7 +51,13 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     // priority queue
     private final HugeLongPriorityQueue queue;
     // predecessor map
-    private final HugeLongLongMap path;
+    private final HugeLongLongMap predecessors;
+    // True, iff the algo should track relationship ids.
+    // A relationship id is the index of a relationship
+    // in the adjacency list of a single node.
+    private final boolean trackRelationships;
+    // relationship ids (null, if trackRelationships is false)
+    private final HugeLongLongMap relationships;
     // visited set
     private final BitSet visited;
     // path id increasing in order of exploration
@@ -73,6 +80,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph,
             sourceNode,
             node -> node == targetNode,
+            config.trackRelationships(),
             progressLogger,
             tracker
         );
@@ -87,8 +95,13 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        long sourceNode = graph.toMappedNodeId(config.sourceNode());
-        return new Dijkstra(graph, sourceNode, node -> true, progressLogger, tracker);
+        return new Dijkstra(graph,
+            graph.toMappedNodeId(config.sourceNode()),
+            node -> true,
+            config.trackRelationships(),
+            progressLogger,
+            tracker
+        );
     }
 
     public static MemoryEstimation memoryEstimation() {
@@ -103,14 +116,17 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         Graph graph,
         long sourceNode,
         LongPredicate stopPredicate,
+        boolean trackRelationships,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.sourceNode = sourceNode;
         this.stopPredicate = stopPredicate;
+        this.trackRelationships = trackRelationships;
         this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
-        this.path = new HugeLongLongMap(tracker);
+        this.predecessors = new HugeLongLongMap(tracker);
+        this.relationships = trackRelationships ? new HugeLongLongMap(tracker) : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
         this.progressLogger = progressLogger;
@@ -130,7 +146,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     public void clear() {
         queue.clear();
         visited.clear();
-        path.clear();
+        predecessors.clear();
+        if (trackRelationships) {
+            relationships.clear();
+        }
     }
 
     public DijkstraResult compute() {
@@ -150,6 +169,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     private PathResult next(LongPredicate stopPredicate, ImmutablePathResult.Builder pathResultBuilder) {
+        var relationshipId = new MutableInt();
+
         while (!queue.isEmpty() && running()) {
             var node = queue.pop();
             var cost = queue.cost(node);
@@ -158,13 +179,15 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             // For disconnected graphs, this will not reach 100%.
             progressLogger.logProgress(graph.degree(node));
 
+            relationshipId.setValue(0);
             graph.forEachRelationship(
                 node,
                 1.0D,
                 (source, target, weight) -> {
                     if (relationshipFilter.apply(source, target)) {
-                        updateCost(source, target, weight + cost);
+                        updateCost(source, target, relationshipId.intValue(), weight + cost);
                     }
+                    relationshipId.increment();
                     return true;
                 }
             );
@@ -177,43 +200,53 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return PathResult.EMPTY;
     }
 
-    private void updateCost(long source, long target, double newCost) {
+    private void updateCost(long source, long target, long relationshipId, double newCost) {
         // target has been visited, we already have a shortest path
         if (visited.get(target)) {
             return;
         }
 
-        // we see target again
-        if (queue.containsElement(target)) {
-            // and found a shorter path to target
-            if (newCost < queue.cost(target)) {
-                path.put(target, source);
-                queue.set(target, newCost);
-            }
-        } else {
+        if (!queue.containsElement(target)) {
             // we see target for the first time
-            path.put(target, source);
             queue.add(target, newCost);
+            predecessors.put(target, source);
+            if (trackRelationships) {
+                relationships.put(target, relationshipId);
+            }
+        } else if (newCost < queue.cost(target)) {
+            // we see target again and found a shorter path to target
+            queue.set(target, newCost);
+            predecessors.put(target, source);
+            if (trackRelationships) {
+                relationships.put(target, relationshipId);
+            }
         }
     }
 
     private PathResult pathResult(long target, ImmutablePathResult.Builder pathResultBuilder) {
         // TODO: use LongArrayList and then ArrayUtils.reverse
         var pathNodeIds = new LongArrayDeque();
+        var relationshipIds = new LongArrayDeque();
         var costs = new DoubleArrayDeque();
 
         var lastNode = target;
+        var prevNode = lastNode;
 
         while (lastNode != PATH_END) {
             pathNodeIds.addFirst(lastNode);
             costs.addFirst(queue.cost(lastNode));
-            lastNode = this.path.getOrDefault(lastNode, PATH_END);
+            prevNode = lastNode;
+            lastNode = this.predecessors.getOrDefault(lastNode, PATH_END);
+            if (trackRelationships && lastNode != PATH_END) {
+                relationshipIds.addFirst(relationships.getOrDefault(prevNode, PATH_END));
+            }
         }
 
         return pathResultBuilder
             .index(pathIndex++)
             .targetNode(target)
             .nodeIds(pathNodeIds.toArray())
+            .relationshipIds(relationshipIds.toArray())
             .costs(costs.toArray())
             .build();
     }

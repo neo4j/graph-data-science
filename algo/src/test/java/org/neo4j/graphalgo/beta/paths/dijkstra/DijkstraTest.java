@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
@@ -175,6 +176,30 @@ final class DijkstraTest {
                 .get();
 
             assertEquals(expected, paths);
+        }
+
+        @Test
+        void sourceTargetWithRelationshipIds() {
+            var expected = ImmutablePathResult
+                .builder()
+                .from(expected(graph, idFunction, 0, "a", "c", "e", "d", "f"))
+                .relationshipIds(1, 0, 0, 0)
+                .build();
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .trackRelationships(true)
+                .build();
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
         }
 
         Stream<Arguments> predicatesAndPaths() {

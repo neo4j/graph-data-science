@@ -19,10 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+public interface TrackRelationshipsConfig {
 
-    long sourceNode();
+    @Value.Default
+    @Configuration.Ignore
+    default boolean trackRelationships() {
+        return false;
+    }
 }
