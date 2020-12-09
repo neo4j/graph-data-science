@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.List;
@@ -120,7 +121,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             }
         );
         assertThat(e.getMessage(), containsString("foo"));
-        assertThat(e.getMessage(), containsString("[a]"));
+        assertThat(e.getMessage(), containsString("['a']"));
     }
 
     @Test
@@ -144,8 +145,14 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 .stream()
                 .flatMap(Set::stream)
                 .collect(Collectors.joining(", "));
-            String error = formatWithLocale("Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
-                           "with node properties: [%s] in all node labels: ['__ALL__']", nodePropertyKeys);
+
+            String error = formatWithLocale(
+                "Node weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
+                StringJoining.join(List.of(NodeLabel.ALL_NODES.name)),
+                StringJoining.join(List.of(NodeLabel.ALL_NODES.name)),
+                StringJoining.join(graphStore.nodePropertyKeys(NodeLabel.ALL_NODES))
+            );
+
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -190,7 +197,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of("nodeLabels", List.of("Node")));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
             configMap.put("nodeWeightProperty", "foo");
-            String error = "Node weight property `foo` not found in graph with node properties: [] in all node labels: ['Node']";
+            String error = "Node weight property `foo` is not present for all requested labels. Requested labels: ['Node']. Labels without the property key: ['Node']. Properties available on all requested labels: ['']";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap

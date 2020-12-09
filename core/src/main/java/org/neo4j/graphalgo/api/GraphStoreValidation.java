@@ -83,21 +83,28 @@ public final class GraphStoreValidation {
             }
             if (!missingProperties.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Node properties %s not found in graph with node properties: %s in all node labels: %s",
-                    missingProperties,
-                    graphStore.nodePropertyKeys(filterLabels),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
+                    "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
                 ));
             }
         }
         if (config instanceof NodeWeightConfig) {
             String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
             if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
+                var labelsWithMissingProperty = filterLabels
+                    .stream()
+                    .filter(label -> !graphStore.nodePropertyKeys(label).contains(weightProperty))
+                    .map(NodeLabel::name)
+                    .collect(Collectors.toList());
+
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Node weight property `%s` not found in graph with node properties: %s in all node labels: %s",
+                    "Node weight property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
                     weightProperty,
-                    graphStore.nodePropertyKeys(filterLabels),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name))
+                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(labelsWithMissingProperty),
+                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
                 ));
             }
         }

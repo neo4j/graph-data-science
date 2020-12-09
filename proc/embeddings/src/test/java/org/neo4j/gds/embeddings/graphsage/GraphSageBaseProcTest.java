@@ -174,9 +174,9 @@ class GraphSageBaseProcTest extends BaseProcTest {
                         .build())
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),
-                "birth_year, death_year",
-                "age",
-                "King"
+                List.of("birth_year", "death_year"),
+                List.of("age"),
+                List.of("King")
             ),
             Arguments.of(
                 ImmutableGraphCreateFromStoreConfig.builder()
@@ -196,9 +196,9 @@ class GraphSageBaseProcTest extends BaseProcTest {
                         .build())
                     .relationshipProjections(RelationshipProjections.fromString("REL")
                     ).build(),
-                "death_year",
-                "age, birth_year",
-                "King"
+                List.of("death_year"),
+                List.of("age", "birth_year"),
+                List.of("King")
             ),
             Arguments.of(
                 ImmutableGraphCreateFromStoreConfig.of(
@@ -207,9 +207,9 @@ class GraphSageBaseProcTest extends BaseProcTest {
                     NodeProjections.fromString(PROJECT_ALL),
                     RelationshipProjections.fromString(PROJECT_ALL)
                 ),
-                "age, birth_year, death_year",
-                "",
-                "__ALL__"
+                List.of("age", "birth_year", "death_year"),
+                List.of(""),
+                List.of("__ALL__")
             )
         );
     }
