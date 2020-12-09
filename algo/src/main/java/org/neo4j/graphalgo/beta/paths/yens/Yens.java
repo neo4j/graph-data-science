@@ -114,7 +114,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
         kShortestPaths.add(MutablePathResult.of(shortestPath));
 
-        var candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
+        PriorityQueue<MutablePathResult> candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
 
         for (int i = 1; i < config.k(); i++) {
             logStart(i + 1);
@@ -195,15 +195,15 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     }
 
     private void logStart(int iteration) {
-        progressLogger.logMessage(formatWithLocale("Start searching path %d of %d", iteration, config.k()));
+        progressLogger.logMessage(formatWithLocale(":: Start searching path %d of %d", iteration, config.k()));
     }
 
     private void logFinish(int iteration) {
-        progressLogger.logMessage(formatWithLocale("Finish searching path %d of %d", iteration, config.k()));
+        progressLogger.logMessage(formatWithLocale(":: Finished searching path %d of %d", iteration, config.k()));
     }
 
     private PathResult computeDijkstra(long sourceNode) {
-        progressLogger.logMessage(formatWithLocale("Start Dijkstra for spur node %d", sourceNode));
+        progressLogger.logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
         progressLogger.setTask("Dijkstra");
         progressLogger.reset(graph.relationshipCount());
         var pathResult = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);

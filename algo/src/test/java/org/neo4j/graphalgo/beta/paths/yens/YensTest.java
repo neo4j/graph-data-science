@@ -169,12 +169,12 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
         // for each k
         for (int i = 1; i <= k; i++) {
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Start searching path %d of %d", i, k)));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Finish searching path %d of %d", i, k)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Start searching path %d of %d", i, k)));
+            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Finished searching path %d of %d", i, k)));
 
         }
         // multiple times within each k
-        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens Start Dijkstra for spur node")));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Start Dijkstra for spur node")));
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Start")));
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
