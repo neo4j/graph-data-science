@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -105,6 +106,12 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         logStart(1);
         var shortestPath = computeDijkstra(config.sourceNode());
         logFinish(1);
+
+        // no shortest path has been found
+        if (shortestPath == PathResult.EMPTY) {
+            return ImmutableDijkstraResult.of(Stream.of(shortestPath));
+        }
+
         kShortestPaths.add(MutablePathResult.of(shortestPath));
 
         var candidates = new PriorityQueue<>(Comparator.comparingDouble(MutablePathResult::totalCost));
