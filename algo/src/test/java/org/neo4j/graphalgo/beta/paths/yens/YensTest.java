@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.paths.yens;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -29,6 +31,8 @@ import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
+import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -36,14 +40,18 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.s1ck.gdl.GDLHandler;
+import org.s1ck.gdl.model.Edge;
+import org.s1ck.gdl.model.Vertex;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.beta.paths.PathTestUtil.expected;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -101,127 +109,57 @@ class YensTest {
     @Inject
     private IdFunction idFunction;
 
-    static Stream<Arguments> input() {
+    static Stream<Arguments> pathInput() {
         return Stream.of(
-            Arguments.of(1, new String[][]{
-                {"c", "e", "f", "h"}
-            }, new long[][] {
-                {1, 1, 1}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})"
             }),
-            Arguments.of(2, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"}
-            }, new long[][] {
-                {1, 1, 1},
-                {1, 2, 0}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})"
             }),
-            Arguments.of(3, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"},
-                {"c", "d", "f", "h"}
-            }, new long[][] {
-                {1, 1, 1},
-                {1, 2, 0},
-                {0, 0, 1}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0},
-                {0.0, 3.0, 7.0, 8.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
             }),
-            Arguments.of(4, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"},
-                {"c", "d", "f", "h"},
-                {"c", "e", "d", "f", "h"}
-            }, new long[][] {
-                {1, 1, 1},
-                {1, 2, 0},
-                {0, 0, 1},
-                {1, 0, 0, 1}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0},
-                {0.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 3.0, 7.0, 8.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
             }),
-            Arguments.of(5, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"},
-                {"c", "d", "f", "h"},
-                {"c", "e", "d", "f", "h"},
-                {"c", "e", "f", "g", "h"}
-            }, new long[][] {
-                {1, 1, 1},
-                {1, 2, 0},
-                {0, 0, 1},
-                {1, 0, 0, 1},
-                {1, 1, 0, 0}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0},
-                {0.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 4.0, 6.0, 8.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})"
             }),
-            Arguments.of(6, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"},
-                {"c", "d", "f", "h"},
-                {"c", "e", "d", "f", "h"},
-                {"c", "e", "f", "g", "h"},
-                {"c", "d", "f", "g", "h"}
-            }, new long[][]{
-                {1, 1, 1},
-                {1, 2, 0},
-                {0, 0, 1},
-                {1, 0, 0, 1},
-                {1, 1, 0, 0},
-                {0, 0, 0, 0}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0},
-                {0.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 4.0, 6.0, 8.0},
-                {0.0, 3.0, 7.0, 9.0, 11.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
             }),
-            Arguments.of(7, new String[][]{
-                {"c", "e", "f", "h"},
-                {"c", "e", "g", "h"},
-                {"c", "d", "f", "h"},
-                {"c", "e", "d", "f", "h"},
-                {"c", "e", "f", "g", "h"},
-                {"c", "d", "f", "g", "h"},
-                {"c", "e", "d", "f", "g", "h"}
-            }, new long[][] {
-                {1, 1, 1},
-                {1, 2, 0},
-                {0, 0, 1},
-                {1, 0, 0, 1},
-                {1, 1, 0, 0},
-                {0, 0, 0, 0},
-                {1, 0, 0, 0, 0}
-            }, new double[][] {
-                {0.0, 2.0, 4.0, 5.0},
-                {0.0, 2.0, 5.0, 7.0},
-                {0.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 3.0, 7.0, 8.0},
-                {0.0, 2.0, 4.0, 6.0, 8.0},
-                {0.0, 3.0, 7.0, 9.0, 11.0},
-                {0.0, 2.0, 3.0, 7.0, 9.0, 11.0}
+            Arguments.of("c", "h", new String[]{
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
+                "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})",
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
             })
         );
     }
 
     @ParameterizedTest
-    @MethodSource("input")
-    void compute(int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
-        assertResult(graph, idFunction, k, expectedNodes, expectedRelationships, expectedCosts);
+    @MethodSource("pathInput")
+    void compute(String source, String target, String[] expectedPaths) {
+        assertResult(graph, idFunction, source, target, expectedPaths);
     }
 
     @Test
@@ -247,8 +185,14 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
         // for each k
         for (int i = 1; i <= k; i++) {
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Start searching path %d of %d", i, k)));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Finished searching path %d of %d", i, k)));
+            assertTrue(testLogger.containsMessage(
+                TestLog.INFO,
+                formatWithLocale("Yens :: Start searching path %d of %d", i, k)
+            ));
+            assertTrue(testLogger.containsMessage(
+                TestLog.INFO,
+                formatWithLocale("Yens :: Finished searching path %d of %d", i, k)
+            ));
 
         }
         // multiple times within each k
@@ -257,32 +201,91 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
 
-    static void assertResult(Graph graph, IdFunction idFunction, int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
-        assertEquals(
-            expectedNodes.length,
-            expectedRelationships.length,
-            "Number of expected paths does not equals number of expected relationship arrays"
+    private static void assertResult(
+        Graph graph,
+        IdFunction idFunction,
+        String source,
+        String target,
+        String[] expectedPaths
+    ) {
+        var expectedPathResults = expectedPathResults(
+            idFunction,
+            source,
+            target,
+            expectedPaths
         );
 
-        var sourceNode = expectedNodes[0][0];
-        var targetNode = expectedNodes[0][expectedNodes[0].length - 1];
-
-        var expected = IntStream.range(0, expectedNodes.length)
-            .mapToObj(i -> expected(idFunction, i, expectedRelationships[i], expectedCosts[i], expectedNodes[i]))
-            .collect(Collectors.toSet());
-
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of(sourceNode))
-            .targetNode(idFunction.of(targetNode))
-            .k(k)
+            .sourceNode(idFunction.of(source))
+            .targetNode(idFunction.of(target))
+            .k(expectedPathResults.size())
             .build();
 
-        var paths = Yens
+        var actualPathResults = Yens
             .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute()
             .pathSet();
 
-        assertEquals(expected, paths);
+        assertEquals(expectedPathResults, actualPathResults);
+    }
+
+    @NotNull
+    private static Set<PathResult> expectedPathResults(
+        IdFunction idFunction,
+        String source,
+        String target,
+        String[] expectedPaths
+    ) {
+        var index = new MutableInt(0);
+        return Arrays.stream(expectedPaths)
+            .map(expectedPath -> new GDLHandler.Builder()
+                .setNextVertexId(variable -> variable
+                    .map(idFunction::of)
+                    .orElseThrow(() -> new IllegalArgumentException("Path must not contain anonymous nodes.")))
+                .buildFromString(expectedPath)
+            )
+            .map(gdl -> {
+                var sourceNode = gdl.getVertexCache().get(source);
+                var targetNode = gdl.getVertexCache().get(target);
+
+                int nodeCount = gdl.getVertices().size();
+
+                var nodeIds = new long[nodeCount];
+                var relationshipIds = new long[nodeCount - 1];
+                var costs = new double[nodeCount];
+
+                var nextNode = sourceNode;
+                var j = 0;
+                while (nextNode != targetNode) {
+                    var edge = getEdgeBySourceId(gdl.getEdges(), nextNode.getId());
+                    nodeIds[j] = nextNode.getId();
+                    relationshipIds[j] = (int) edge.getProperties().get("id");
+                    costs[j] = (float) nextNode.getProperties().get("cost");
+                    nextNode = getVertexById(gdl.getVertices(), edge.getTargetVertexId());
+                    j += 1;
+                }
+
+                nodeIds[j] = nextNode.getId();
+                costs[j] = (float) nextNode.getProperties().get("cost");
+
+                return ImmutablePathResult.builder()
+                    .index(index.getAndIncrement())
+                    .sourceNode(sourceNode.getId())
+                    .targetNode(targetNode.getId())
+                    .nodeIds(nodeIds)
+                    .relationshipIds(relationshipIds)
+                    .costs(costs)
+                    .build();
+            })
+            .collect(Collectors.toSet());
+    }
+
+    private static Vertex getVertexById(Collection<Vertex> vertices, long id) {
+        return vertices.stream().filter(v -> v.getId() == id).findFirst().orElseThrow();
+    }
+
+    private static Edge getEdgeBySourceId(Collection<Edge> elements, long id) {
+        return elements.stream().filter(e -> e.getSourceVertexId() == id).findFirst().orElseThrow();
     }
 
     @Nested
@@ -309,55 +312,31 @@ class YensTest {
         @Inject
         private IdFunction idFunction;
 
-        Stream<Arguments> input() {
+        Stream<Arguments> pathInput() {
             return Stream.of(
-                Arguments.of(1, new String[][]{
-                    {"a", "b"}
-                }, new long[][] {
-                    {0}
-                }, new double[][] {
-                    {0.0, 1.0}
+                Arguments.of("a", "b", new String[]{
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})"
                 }),
-                Arguments.of(2, new String[][]{
-                    {"a", "b"},
-                    {"a", "b"}
-                }, new long[][] {
-                    {0},
-                    {1}
-                }, new double[][] {
-                    {0.0, 1.0},
-                    {0.0, 2.0},
+                Arguments.of("a", "b", new String[]{
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})",
+                    "(a {cost: 0.0})-[{id: 1}]->(b {cost: 2.0})"
                 }),
-                Arguments.of(3, new String[][]{
-                    {"a", "b", "c"},
-                    {"a", "b", "c"},
-                    {"a", "b", "c"}
-                }, new long[][] {
-                    {0, 0},
-                    {1, 0},
-                    {0, 1}
-                }, new double[][] {
-                    {0.0, 1.0, 4.0},
-                    {0.0, 2.0, 5.0},
-                    {0.0, 1.0, 5.0},
+                Arguments.of("a", "c", new String[]{
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})",
+                    "(a {cost: 0.0})-[{id: 1}]->(b {cost: 2.0})-[{id: 0}]->(c {cost: 5.0})",
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 1}]->(c {cost: 5.0})"
                 }),
-                Arguments.of(2, new String[][]{
-                    {"a", "b", "c", "d"},
-                    {"a", "b", "c", "d"}
-                }, new long[][] {
-                    {0, 0, 0},
-                    {0, 0, 1},
-                }, new double[][] {
-                    {0.0, 1.0, 4.0, 46.0},
-                    {0.0, 1.0, 4.0, 46.0}
+                Arguments.of("a", "d", new String[]{
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})-[{id: 0}]->(d {cost: 46.0})",
+                    "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})-[{id: 1}]->(d {cost: 46.0})"
                 })
             );
         }
 
         @ParameterizedTest
-        @MethodSource("input")
-        void compute(int k, String[][] expectedNodes, long[][] expectedRelationships, double[][] expectedCosts) {
-            assertResult(graph, idFunction, k, expectedNodes, expectedRelationships, expectedCosts);
+        @MethodSource("pathInput")
+        void compute(String source, String target, String[] expectedPaths) {
+            assertResult(graph, idFunction, source, target, expectedPaths);
         }
 
     }
