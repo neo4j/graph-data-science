@@ -70,17 +70,20 @@ final class DijkstraTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 32_736L),
-            Arguments.of(1_000_000, 32_250_480L),
-            Arguments.of(1_000_000_000, 32_254_883_392L)
+            Arguments.of(1_000, false, 32_744L),
+            Arguments.of(1_000_000, false, 32_250_488L),
+            Arguments.of(1_000_000_000, false, 32_254_883_400L),
+            Arguments.of(1_000, true, 48_960L),
+            Arguments.of(1_000_000, true, 48_250_704L),
+            Arguments.of(1_000_000_000, true, 48_257_325_072L)
         );
     }
 
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
+    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            Dijkstra::memoryEstimation,
+            () -> Dijkstra.memoryEstimation(trackRelationships),
             nodeCount,
             1,
             expectedBytes,

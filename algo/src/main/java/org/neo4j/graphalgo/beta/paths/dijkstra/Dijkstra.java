@@ -105,9 +105,17 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(Dijkstra.class)
+        return memoryEstimation(false);
+    }
+
+    public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
+        var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
-            .add("reverse path", HugeLongLongMap.memoryEstimation())
+            .add("reverse path", HugeLongLongMap.memoryEstimation());
+        if (trackRelationships) {
+            builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
+        }
+        return builder
             .perNode("visited set", MemoryUsage::sizeOfBitset)
             .build();
     }
