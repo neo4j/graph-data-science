@@ -158,7 +158,7 @@ final class DijkstraTest {
 
         @ParameterizedTest
         @MethodSource("predicatesAndPaths")
-        void sourceTargetWithRelationshipFilter(LongLongPredicate graphFilter, List<String> expectedPath) {
+        void sourceTargetWithRelationshipFilter(Dijkstra.RelationshipFilter relationshipFilter, List<String> expectedPath) {
             var expected = expected(graph, idFunction, 0, expectedPath.toArray(String[]::new));
 
             var sourceNode = idFunction.of(expectedPath.get(0));
@@ -171,7 +171,7 @@ final class DijkstraTest {
 
             var dijkstra = Dijkstra
                 .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-                .withRelationshipFilter(graphFilter);
+                .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
                 .paths()

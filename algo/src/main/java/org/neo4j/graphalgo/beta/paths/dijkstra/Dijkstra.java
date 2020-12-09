@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
-import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
@@ -63,7 +62,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     // path id increasing in order of exploration
     private long pathIndex;
     // returns true if the given relationship should be traversed
-    private LongLongPredicate relationshipFilter = (sourceId, targetId) -> true;
+    private RelationshipFilter relationshipFilter = (sourceId, targetId, id) -> true;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -145,7 +144,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return this;
     }
 
-    public Dijkstra withRelationshipFilter(LongLongPredicate relationshipFilter) {
+    public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
         this.relationshipFilter = relationshipFilter;
         return this;
     }
@@ -192,7 +191,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 node,
                 1.0D,
                 (source, target, weight) -> {
-                    if (relationshipFilter.apply(source, target)) {
+                    if (relationshipFilter.apply(source, target, relationshipId.longValue())) {
                         updateCost(source, target, relationshipId.intValue(), weight + cost);
                     }
                     relationshipId.increment();
@@ -269,5 +268,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         // We do not release, since the result
         // is lazily computed when the consumer
         // iterates over the stream.
+    }
+
+    @FunctionalInterface
+    public interface RelationshipFilter {
+        boolean apply(long source, long target, long relationshipId);
     }
 }

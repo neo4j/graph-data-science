@@ -112,6 +112,10 @@ class YensTest {
                 {"c", "e", "f", "h"},
                 {"c", "e", "g", "h"},
                 {"c", "d", "f", "h"}
+            }, new long[][] {
+                {1, 1, 1},
+                {1, 2, 0},
+                {0, 0, 1}
             }),
             Arguments.of(4, new String[][]{
                 {"c", "e", "f", "h"},

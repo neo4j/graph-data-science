@@ -90,9 +90,9 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         this.relationshipBlackList = new LongObjectScatterMap<>();
         // set filter in Dijkstra to respect our blacklists
         this.dijkstra = dijkstra;
-        dijkstra.withRelationshipFilter((source, target) ->
+        dijkstra.withRelationshipFilter((source, target, relationshipId) ->
             !nodeBlackList.contains(target) &&
-            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(target))
+            !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(relationshipId))
         );
 
         this.progressLogger = progressLogger;
@@ -128,7 +128,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                     // Filter relationships that are part of the previous
                     // shortest paths which share the same root path.
                     if (rootPath.matches(path, n)) {
-                        var node2 = path.node(n + 1);
+                        var relationshipId = path.relationship(n);
 
                         var neighbors = relationshipBlackList.get(spurNode);
 
@@ -136,7 +136,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                             neighbors = new LongHashSet();
                             relationshipBlackList.put(spurNode, neighbors);
                         }
-                        neighbors.add(node2);
+                        neighbors.add(relationshipId);
                     }
                 }
 
