@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
 
+import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -51,6 +52,7 @@ class MutablePathResultTest {
             .costs(IntStream.range(0, nodeIds.length).asDoubleStream().toArray())
             .sourceNode(nodeIds[0])
             .targetNode(nodeIds[nodeIds.length - 1])
+            .relationshipIds(Arrays.copyOf(nodeIds, nodeIds.length - 1))
             .index(0)
             .build()
         );

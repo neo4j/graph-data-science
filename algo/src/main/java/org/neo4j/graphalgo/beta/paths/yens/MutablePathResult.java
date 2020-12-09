@@ -39,6 +39,8 @@ final class MutablePathResult {
 
     private long[] nodeIds;
 
+    private long[] relationshipIds;
+
     private double[] costs;
 
     static MutablePathResult of(PathResult pathResult) {
@@ -47,6 +49,7 @@ final class MutablePathResult {
             pathResult.sourceNode(),
             pathResult.targetNode(),
             pathResult.nodeIds(),
+            pathResult.relationshipIds(),
             pathResult.costs()
         );
     }
@@ -56,17 +59,19 @@ final class MutablePathResult {
         long sourceNode,
         long targetNode,
         long[] nodeIds,
+        long[] relationshipIds,
         double[] costs
     ) {
         this.index = index;
         this.sourceNode = sourceNode;
         this.targetNode = targetNode;
         this.nodeIds = nodeIds;
+        this.relationshipIds = relationshipIds;
         this.costs = costs;
     }
 
     PathResult toPathResult() {
-        return ImmutablePathResult.of(index, sourceNode, targetNode, nodeIds, new long[0], costs);
+        return ImmutablePathResult.of(index, sourceNode, targetNode, nodeIds, relationshipIds, costs);
     }
 
     /**
@@ -85,6 +90,10 @@ final class MutablePathResult {
         return nodeIds[index];
     }
 
+    long relationship(int index) {
+        return relationshipIds[index];
+    }
+
     double totalCost() {
         return costs[costs.length - 1];
     }
@@ -98,6 +107,7 @@ final class MutablePathResult {
             sourceNode,
             targetNode,
             Arrays.copyOf(nodeIds, index),
+            Arrays.copyOf(relationshipIds, index - 1),
             Arrays.copyOf(costs, index)
         );
     }
@@ -132,9 +142,15 @@ final class MutablePathResult {
         var newNodeIds = new long[oldLength + path.nodeIds.length - 1];
         var newCosts = new double[oldLength + path.nodeIds.length - 1];
 
+        var oldRelationshipIdsLength = relationshipIds.length;
+        var newRelationshipIds = new long[oldRelationshipIdsLength + path.relationshipIds.length];
+
         // copy node ids
         System.arraycopy(this.nodeIds, 0, newNodeIds, 0, oldLength);
         System.arraycopy(path.nodeIds, 1, newNodeIds, oldLength, path.nodeIds.length - 1);
+        // copy relationship ids
+        System.arraycopy(this.relationshipIds, 0, newRelationshipIds, 0, oldRelationshipIdsLength);
+        System.arraycopy(path.relationshipIds, 0, newRelationshipIds, oldRelationshipIdsLength, path.relationshipIds.length);
         // copy costs
         System.arraycopy(this.costs, 0, newCosts, 0, oldLength);
         System.arraycopy(path.costs, 1, newCosts, oldLength, path.costs.length - 1);
@@ -146,6 +162,7 @@ final class MutablePathResult {
         }
 
         this.nodeIds = newNodeIds;
+        this.relationshipIds = newRelationshipIds;
         this.costs = newCosts;
     }
 
@@ -154,12 +171,16 @@ final class MutablePathResult {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        return Arrays.equals(nodeIds, ((MutablePathResult) o).nodeIds);
+        var other = (MutablePathResult) o;
+        return Arrays.equals(nodeIds, other.nodeIds) && Arrays.equals(relationshipIds, other.relationshipIds);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(nodeIds);
+        int h = 5381;
+        h += (h << 5) + Arrays.hashCode(nodeIds);
+        h += (h << 5) + Arrays.hashCode(relationshipIds);
+        return h;
     }
 
     @TestOnly
