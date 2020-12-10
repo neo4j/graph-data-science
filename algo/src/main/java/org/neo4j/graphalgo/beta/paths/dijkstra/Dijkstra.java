@@ -230,10 +230,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         }
     }
 
+    private static final long[] EMPTY_ARRAY = new long[0];
+
     private PathResult pathResult(long target, ImmutablePathResult.Builder pathResultBuilder) {
         // TODO: use LongArrayList and then ArrayUtils.reverse
         var pathNodeIds = new LongArrayDeque();
-        var relationshipIds = new LongArrayDeque();
+        var relationshipIds = trackRelationships ? new LongArrayDeque() : null;
         var costs = new DoubleArrayDeque();
 
         var lastNode = target;
@@ -253,7 +255,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .index(pathIndex++)
             .targetNode(target)
             .nodeIds(pathNodeIds.toArray())
-            .relationshipIds(relationshipIds.toArray())
+            .relationshipIds(trackRelationships ? relationshipIds.toArray() : EMPTY_ARRAY)
             .costs(costs.toArray())
             .build();
     }

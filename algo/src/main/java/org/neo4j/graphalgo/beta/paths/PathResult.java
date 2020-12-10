@@ -30,6 +30,7 @@ public interface PathResult {
         .sourceNode(-1)
         .targetNode(-1)
         .nodeIds(-1)
+        .relationshipIds(-1)
         .costs(0)
         .build();
 
@@ -46,10 +47,7 @@ public interface PathResult {
 
     long[] nodeIds();
 
-    @Value.Default
-    default long[] relationshipIds() {
-        return new long[0];
-    }
+    long[] relationshipIds();
 
     double[] costs();
 }
