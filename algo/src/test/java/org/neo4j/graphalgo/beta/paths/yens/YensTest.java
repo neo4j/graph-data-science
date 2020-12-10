@@ -44,8 +44,8 @@ import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Vertex;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,42 +109,47 @@ class YensTest {
     @Inject
     private IdFunction idFunction;
 
-    static Stream<Arguments> pathInput() {
+    // Each input represents k paths that are expected to be returned by Yen's algorithm.
+    // The first node in each path is the start node for the path search, the last node in
+    // each path is the target node for each path search. The node property represents the
+    // expected cost in the resulting path, the relationship property is the index of the
+    // relationship that has been traversed.
+    static Stream<List<String>> pathInput() {
         return Stream.of(
-            Arguments.of("c", "h", new String[]{
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
-            }),
-            Arguments.of("c", "h", new String[]{
+            ),
+            List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
@@ -152,14 +157,14 @@ class YensTest {
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
                 "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
-            })
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("pathInput")
-    void compute(String source, String target, String[] expectedPaths) {
-        assertResult(graph, idFunction, source, target, expectedPaths);
+    void compute(Collection<String> expectedPaths) {
+        assertResult(graph, idFunction, expectedPaths);
     }
 
     @Test
@@ -201,23 +206,23 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
 
-    private static void assertResult(
-        Graph graph,
-        IdFunction idFunction,
-        String source,
-        String target,
-        String[] expectedPaths
-    ) {
-        var expectedPathResults = expectedPathResults(
-            idFunction,
-            source,
-            target,
-            expectedPaths
-        );
+    private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {
+        var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
+
+        var firstResult = expectedPathResults
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("At least one expected path must be provided"));
+
+        if (!expectedPathResults
+            .stream()
+            .allMatch(p -> p.sourceNode() == firstResult.sourceNode() && p.targetNode() == firstResult.targetNode())) {
+            throw new IllegalArgumentException("All expected paths must have the same source and target nodes.");
+        }
 
         var config = defaultSourceTargetConfigBuilder()
-            .sourceNode(idFunction.of(source))
-            .targetNode(idFunction.of(target))
+            .sourceNode(firstResult.sourceNode())
+            .targetNode(firstResult.targetNode())
             .k(expectedPathResults.size())
             .build();
 
@@ -230,14 +235,9 @@ class YensTest {
     }
 
     @NotNull
-    private static Set<PathResult> expectedPathResults(
-        IdFunction idFunction,
-        String source,
-        String target,
-        String[] expectedPaths
-    ) {
+    private static Set<PathResult> expectedPathResults(IdFunction idFunction, Collection<String> expectedPaths) {
         var index = new MutableInt(0);
-        return Arrays.stream(expectedPaths)
+        return expectedPaths.stream()
             .map(expectedPath -> new GDLHandler.Builder()
                 .setNextVertexId(variable -> variable
                     .map(idFunction::of)
@@ -245,8 +245,15 @@ class YensTest {
                 .buildFromString(expectedPath)
             )
             .map(gdl -> {
-                var sourceNode = gdl.getVertexCache().get(source);
-                var targetNode = gdl.getVertexCache().get(target);
+                var sourceNode = gdl.getVertices().stream()
+                    .filter(v -> gdl.getEdges().stream().allMatch(e -> e.getTargetVertexId() != v.getId()))
+                    .findFirst()
+                    .orElseThrow();
+
+                var targetNode = gdl.getVertices().stream()
+                    .filter(v -> gdl.getEdges().stream().allMatch(e -> e.getSourceVertexId() != v.getId()))
+                    .findFirst()
+                    .orElseThrow();
 
                 int nodeCount = gdl.getVertices().size();
 
@@ -312,32 +319,31 @@ class YensTest {
         @Inject
         private IdFunction idFunction;
 
-        Stream<Arguments> pathInput() {
+        Stream<List<String>> pathInput() {
             return Stream.of(
-                Arguments.of("a", "b", new String[]{
+                List.of(
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})"
-                }),
-                Arguments.of("a", "b", new String[]{
+                ),
+                List.of(
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})",
                     "(a {cost: 0.0})-[{id: 1}]->(b {cost: 2.0})"
-                }),
-                Arguments.of("a", "c", new String[]{
+                ),
+                List.of(
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})",
                     "(a {cost: 0.0})-[{id: 1}]->(b {cost: 2.0})-[{id: 0}]->(c {cost: 5.0})",
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 1}]->(c {cost: 5.0})"
-                }),
-                Arguments.of("a", "d", new String[]{
+                ),
+                List.of(
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})-[{id: 0}]->(d {cost: 46.0})",
                     "(a {cost: 0.0})-[{id: 0}]->(b {cost: 1.0})-[{id: 0}]->(c {cost: 4.0})-[{id: 1}]->(d {cost: 46.0})"
-                })
+                )
             );
         }
 
         @ParameterizedTest
         @MethodSource("pathInput")
-        void compute(String source, String target, String[] expectedPaths) {
-            assertResult(graph, idFunction, source, target, expectedPaths);
+        void compute(Collection<String> expectedPaths) {
+            assertResult(graph, idFunction, expectedPaths);
         }
-
     }
 }
