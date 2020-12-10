@@ -62,7 +62,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     // path id increasing in order of exploration
     private long pathIndex;
     // returns true if the given relationship should be traversed
-    private RelationshipFilter relationshipFilter = (sourceId, targetId, id) -> true;
+    private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -191,7 +191,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 node,
                 1.0D,
                 (source, target, weight) -> {
-                    if (relationshipFilter.apply(source, target, relationshipId.longValue())) {
+                    if (relationshipFilter.test(source, target, relationshipId.longValue())) {
                         updateCost(source, target, relationshipId.intValue(), weight + cost);
                     }
                     relationshipId.increment();
@@ -274,6 +274,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     @FunctionalInterface
     public interface RelationshipFilter {
-        boolean apply(long source, long target, long relationshipId);
+        boolean test(long source, long target, long relationshipId);
     }
 }

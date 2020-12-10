@@ -195,14 +195,9 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     @NotNull
     private PriorityQueue<MutablePathResult> initCandidatesQueue() {
-        return new PriorityQueue<>((path1, path2) -> {
-            // To provide more deterministic results we sort candidates by total cost and path length
-            int costComparison = Comparator.comparingDouble(MutablePathResult::totalCost).compare(path1, path2);
-            if (costComparison == 0) {
-                return Comparator.comparingInt(MutablePathResult::nodeCount).compare(path1, path2);
-            }
-            return costComparison;
-        });
+        return new PriorityQueue<>(Comparator
+            .comparingDouble(MutablePathResult::totalCost)
+            .thenComparingInt(MutablePathResult::nodeCount));
     }
 
     @Override
