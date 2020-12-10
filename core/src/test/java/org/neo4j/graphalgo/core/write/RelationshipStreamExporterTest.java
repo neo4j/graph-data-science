@@ -33,6 +33,8 @@ import org.neo4j.values.storable.Values;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -140,6 +142,33 @@ class RelationshipStreamExporterTest extends BaseTest {
             )
         );
         //@formatter:on
+    }
+
+    @Test
+    void exportExceedsBufferSize() {
+        int nodeCount = 4;
+        var bufferSize = 10;
+        // enforce writing non-full buffer
+        var relationshipCount = 105;
+
+        var rand = new Random();
+
+        var relationshipStream = IntStream
+            .range(0, relationshipCount)
+            .mapToObj(ignored -> relationship(rand.nextInt(nodeCount), rand.nextInt(nodeCount)));
+
+        var exporter = RelationshipStreamExporter
+            .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
+            .withBatchSize(bufferSize)
+            .build();
+
+        var relationshipsWritten = exporter.write("FOOBAR");
+
+        assertEquals(relationshipCount, relationshipsWritten);
+        assertCypherResult(
+            "MATCH ()-[r]->() RETURN count(r) AS count",
+            List.of(Map.of("count", (long) relationshipCount))
+        );
     }
 
     RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {

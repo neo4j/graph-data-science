@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.SecureTransaction;
@@ -40,6 +41,7 @@ public final class RelationshipStreamExporter extends StatementApi {
 
     private final LongUnaryOperator toOriginalId;
     private final Stream<Relationship> relationships;
+    private final int batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
 
@@ -49,7 +51,10 @@ public final class RelationshipStreamExporter extends StatementApi {
 
         long targetNode();
 
-        Value[] values();
+        @org.immutables.value.Value.Default
+        default Value @Nullable [] values() {
+            return null;
+        }
     }
 
     public static RelationshipStreamExporter.Builder builder(
@@ -69,6 +74,7 @@ public final class RelationshipStreamExporter extends StatementApi {
     public static final class Builder extends ExporterBuilder<RelationshipStreamExporter> {
 
         private final Stream<Relationship> relationships;
+        private int batchSize;
 
         Builder(
             SecureTransaction tx,
@@ -78,11 +84,24 @@ public final class RelationshipStreamExporter extends StatementApi {
         ) {
             super(tx, idMapping, terminationFlag);
             this.relationships = relationships;
+            this.batchSize = (int) MIN_BATCH_SIZE;
         }
 
         @Override
         public RelationshipStreamExporter build() {
-            return new RelationshipStreamExporter(tx, toOriginalId, relationships, terminationFlag, progressLogger);
+            return new RelationshipStreamExporter(
+                tx,
+                toOriginalId,
+                relationships,
+                batchSize,
+                terminationFlag,
+                progressLogger
+            );
+        }
+
+        public Builder withBatchSize(int batchSize) {
+            this.batchSize = batchSize;
+            return this;
         }
 
         @Override
@@ -103,12 +122,14 @@ public final class RelationshipStreamExporter extends StatementApi {
         SecureTransaction tx,
         LongUnaryOperator toOriginalId,
         Stream<Relationship> relationships,
+        int batchSize,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
         super(tx);
         this.toOriginalId = toOriginalId;
         this.relationships = relationships;
+        this.batchSize = batchSize;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
     }
@@ -119,7 +140,6 @@ public final class RelationshipStreamExporter extends StatementApi {
 
         progressLogger.logStart();
 
-        var batchSize = (int) MIN_BATCH_SIZE;
         var written = new MutableLong(0);
 
         var buffer = new Buffer(batchSize);
@@ -142,29 +162,31 @@ public final class RelationshipStreamExporter extends StatementApi {
     }
 
     private int write(Buffer buffer, int relationshipToken, int[] propertyTokens) {
+        var bufferSize = buffer.size;
+        var tokenCount = propertyTokens.length;
+        var relationships = buffer.array;
+
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             var ops = stmt.dataWrite();
 
-            Relationship relationship;
-
-            for (int i = 0; i < buffer.size; i++) {
-                relationship = buffer.array[i];
+            for (int i = 0; i < bufferSize; i++) {
                 // create relationship
                 long relationshipId = ops.relationshipCreate(
-                    toOriginalId.applyAsLong(relationship.sourceNode()),
+                    toOriginalId.applyAsLong(relationships[i].sourceNode()),
                     relationshipToken,
-                    toOriginalId.applyAsLong(relationship.targetNode())
+                    toOriginalId.applyAsLong(relationships[i].targetNode())
                 );
 
                 // write properties
-                for (int j = 0; j < propertyTokens.length; j++) {
-                    ops.relationshipSetProperty(relationshipId, propertyTokens[j], relationship.values()[j]);
+                var values = relationships[i].values();
+                for (int j = 0; j < tokenCount; j++) {
+                    ops.relationshipSetProperty(relationshipId, propertyTokens[j], values[j]);
                 }
             }
         });
 
-        return buffer.size;
+        return bufferSize;
     }
 
     static class Buffer {
