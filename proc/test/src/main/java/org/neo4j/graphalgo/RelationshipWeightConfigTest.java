@@ -355,7 +355,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
             Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.of(graphName));
 
             Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(a:Label)-[{w1: 0.0}]->(b:Label), (a:Label)-[{w1: 0.0}]->(c:Label), (b:Label)-[{w1: 0.0}]->(c:Label)"), graph);
+            assertGraphEquals(fromGdl("(a:Label)-[{w1: 0.0}]->(b:Label), (a)-[{w1: 0.0}]->(c:Label), (b)-[{w1: 0.0}]->(c)"), graph);
         });
     }
 

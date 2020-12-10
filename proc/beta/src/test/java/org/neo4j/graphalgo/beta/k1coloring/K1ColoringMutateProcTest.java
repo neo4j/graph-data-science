@@ -61,7 +61,7 @@ public class K1ColoringMutateProcTest extends K1ColoringProcBaseTest<K1ColoringM
             ", (y { color: 0 }) " +
             ", (z { color: 0 }) " +
             ", (w { color: 1 })-->(y) " +
-            ", (w { color: 1 })-->(z) ";
+            ", (w)-->(z) ";
     }
 
     @Override
