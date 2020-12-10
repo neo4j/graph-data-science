@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.core.utils.progress;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.scheduler.CancelListener;
+import org.neo4j.scheduler.Group;
+import org.neo4j.scheduler.JobScheduler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +38,36 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.core.utils.RenamesCurrentThread.renameThread;
 
-public final class ProgressEventConsumer implements Runnable {
+public final class ProgressEventConsumer implements Runnable, CancelListener {
 
+    private final Monitor monitor;
     private final JobRunner jobRunner;
-    private volatile @Nullable JobPromise job;
-
     private final Queue<LogEvent> queue;
+
+    private volatile @Nullable JobPromise job;
     private final Map<String, Map<String, List<LogEvent>>> events;
 
-    public ProgressEventConsumer(JobRunner jobRunner, Queue<LogEvent> queue) {
+    public ProgressEventConsumer(
+        JobRunner jobRunner,
+        Queue<LogEvent> queue
+    ) {
+        this(Monitor.EMPTY, jobRunner, queue);
+    }
+
+    public ProgressEventConsumer(
+        Monitor monitor,
+        JobScheduler jobScheduler,
+        Queue<LogEvent> queue
+    ) {
+        this(monitor, new JobSchedulingRunner(jobScheduler, Group.TASK_SCHEDULER), queue);
+    }
+
+    public ProgressEventConsumer(
+        Monitor monitor,
+        JobRunner jobRunner,
+        Queue<LogEvent> queue
+    ) {
+        this.monitor = monitor;
         this.jobRunner = jobRunner;
         this.queue = queue;
         events = new ConcurrentHashMap<>();
@@ -77,6 +101,7 @@ public final class ProgressEventConsumer implements Runnable {
     }
 
     public void start() {
+        monitor.started();
         if (job != null) {
             throw new IllegalArgumentException("Already running");
         }
@@ -84,6 +109,7 @@ public final class ProgressEventConsumer implements Runnable {
     }
 
     public void stop() {
+        monitor.stopped();
         // pull into field to avoid racing against another stop.
         // We might cancel multiple times, but we're not running into a sneaky NPE
         var job = this.job;
@@ -97,5 +123,28 @@ public final class ProgressEventConsumer implements Runnable {
     @TestOnly
     boolean isRunning() {
         return job != null;
+    }
+
+    @Override
+    public void cancelled() {
+        System.out.println("progress event monitor job cancelled");
+    }
+
+    public interface Monitor {
+        void started();
+
+        void stopped();
+
+        class Adapter implements Monitor {
+            @Override
+            public void started() {
+            }
+
+            @Override
+            public void stopped() {
+            }
+        }
+
+        Monitor EMPTY = new Monitor.Adapter();
     }
 }
