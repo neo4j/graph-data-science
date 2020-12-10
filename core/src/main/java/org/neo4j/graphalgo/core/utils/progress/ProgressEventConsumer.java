@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.core.utils.RenamesCurrentThread;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.ArrayList;
@@ -29,23 +29,24 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
 import static java.util.Collections.emptyMap;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
+import static org.neo4j.graphalgo.core.utils.RenamesCurrentThread.renameThread;
 
 public final class ProgressEventConsumer implements Runnable {
 
+    private final JobRunner jobRunner;
+    private volatile @Nullable JobPromise job;
+
     private final Queue<LogEvent> queue;
     private final Map<String, Map<String, List<LogEvent>>> events;
-    private volatile boolean running;
-    private volatile @Nullable Thread runningThread;
 
-    public ProgressEventConsumer(Queue<LogEvent> queue) {
+    public ProgressEventConsumer(JobRunner jobRunner, Queue<LogEvent> queue) {
+        this.jobRunner = jobRunner;
         this.queue = queue;
         events = new ConcurrentHashMap<>();
-        running = false;
     }
 
     public List<LogEvent> query(String username) {
@@ -60,45 +61,41 @@ public final class ProgressEventConsumer implements Runnable {
 
     @Override
     public void run() {
-        try (RenamesCurrentThread.Revert ignored = RenamesCurrentThread.renameThread("progress-event-consumer")) {
-            while (running) {
-                pollNext();
+        try (var ignored = renameThread("progress-event-consumer")) {
+            LogEvent event;
+            while ((event = queue.poll()) != null && !Thread.interrupted()) {
+                process(event);
             }
         }
     }
 
-    /* test-private */ void pollNext() {
-        var event = queue.poll();
-        while (event == null) {
-            if (!running) {
-                return;
-            }
-            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
-            event = queue.poll();
-        }
-
+    private void process(LogEvent event) {
         events
             .computeIfAbsent(AuthSubject.ANONYMOUS.username(), __ -> new ConcurrentHashMap<>())
             .computeIfAbsent(event.id(), __ -> new ArrayList<>())
             .add(event);
     }
 
-    void start() {
-        if (running) {
-            return;
+    public void start() {
+        if (job != null) {
+            throw new IllegalArgumentException("Already running");
         }
-
-        running = true;
-        runningThread = new Thread(this);
-        runningThread.start();
+        job = jobRunner.scheduleAtInterval(this, 0, 100, TimeUnit.MILLISECONDS);
     }
 
-    void stop() throws InterruptedException {
-        if (!running || runningThread == null) {
-            return;
+    public void stop() {
+        // pull into field to avoid racing against another stop.
+        // We might cancel multiple times, but we're not running into a sneaky NPE
+        var job = this.job;
+        if (job == null) {
+            throw new IllegalArgumentException("Not running");
         }
-        running = false;
-        runningThread.join();
-        runningThread = null;
+        job.cancel();
+        this.job = null;
+    }
+
+    @TestOnly
+    boolean isRunning() {
+        return job != null;
     }
 }
