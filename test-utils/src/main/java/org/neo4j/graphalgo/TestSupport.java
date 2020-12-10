@@ -326,10 +326,14 @@ public final class TestSupport {
     }
 
     public static long nodeIdByProperty(GraphDatabaseService db, long propertyValue) {
+        return nodeIdByProperty(db, "id", propertyValue);
+    }
+
+    public static long nodeIdByProperty(GraphDatabaseService db, String propertyKey, long propertyValue) {
         var nodeId = new MutableLong(0L);
         QueryRunner.runQueryWithRowConsumer(
             db,
-            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
+            formatWithLocale("MATCH (n) WHERE n.%s = %d RETURN id(n) AS id", propertyKey, propertyValue),
             resultRow -> nodeId.setValue(resultRow.getNumber("id"))
         );
         return nodeId.longValue();

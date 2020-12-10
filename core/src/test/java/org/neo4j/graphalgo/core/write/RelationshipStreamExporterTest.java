@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -53,22 +54,6 @@ class RelationshipStreamExporterTest extends BaseTest {
     void setup() {
         runQuery(DB_CYPHER);
         graph = new StoreLoaderBuilder().api(db).build().graphStore().getUnion();
-    }
-
-    long nodeId(String propertyKey, int propertyValue) {
-        return (long) runQuery(formatWithLocale(
-            "MATCH (n) WHERE n.%s = %d RETURN id(n) AS id",
-            propertyKey,
-            propertyValue
-        ), result -> result.next().get("id"));
-    }
-
-    RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {
-        return ImmutableRelationship.of(
-            graph.toMappedNodeId(nodeId("id", sourceProperty)),
-            graph.toMappedNodeId(nodeId("id", targetProperty)),
-            values
-        );
     }
 
     @Test
@@ -155,5 +140,13 @@ class RelationshipStreamExporterTest extends BaseTest {
             )
         );
         //@formatter:on
+    }
+
+    RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {
+        return ImmutableRelationship.of(
+            graph.toMappedNodeId(TestSupport.nodeIdByProperty(db, sourceProperty)),
+            graph.toMappedNodeId(TestSupport.nodeIdByProperty(db, targetProperty)),
+            values
+        );
     }
 }
