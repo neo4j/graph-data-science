@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.core.utils.RenamesCurrentThread;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -44,7 +44,7 @@ public final class ProgressEventConsumer implements Runnable {
 
     public ProgressEventConsumer(Queue<LogEvent> queue) {
         this.queue = queue;
-        events = new HashMap<>();
+        events = new ConcurrentHashMap<>();
         running = false;
     }
 
@@ -78,7 +78,7 @@ public final class ProgressEventConsumer implements Runnable {
         }
 
         events
-            .computeIfAbsent(AuthSubject.ANONYMOUS.username(), __ -> new HashMap<>())
+            .computeIfAbsent(AuthSubject.ANONYMOUS.username(), __ -> new ConcurrentHashMap<>())
             .computeIfAbsent(event.id(), __ -> new ArrayList<>())
             .add(event);
     }

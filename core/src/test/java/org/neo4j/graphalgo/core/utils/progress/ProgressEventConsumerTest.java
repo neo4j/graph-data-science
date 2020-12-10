@@ -23,9 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.BooleanSupplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ProgressEventConsumerTest {
 
@@ -70,19 +72,43 @@ class ProgressEventConsumerTest {
 
         consumer.start();
 
-        Thread.sleep(1000);
+        // wait for the spawned thread to poll things
+        waitForAnotherThread(
+            () -> !consumer.query(username).isEmpty(),
+            1000,
+            TimeUnit.MILLISECONDS
+        );
         assertThat(consumer.query(username)).containsExactly(event);
 
         var event2 = ImmutableLogEvent.of("baz", "qux", 1337.0);
-        // wait for the queue to be empty, i.e. the element has been polled
         queue.add(event2);
 
-        Thread.sleep(1000);
-
-        // same dance
-        queue.put(event2);
+        // wait for the spawned thread to poll things
+        waitForAnotherThread(
+            () -> consumer.query(username).size() > 1,
+            1000,
+            TimeUnit.MILLISECONDS
+        );
         assertThat(consumer.query(username)).containsExactly(event, event2);
 
         consumer.stop();
+    }
+
+    private void waitForAnotherThread(
+        BooleanSupplier checkThatThreadHasAdvanced,
+        long timeout,
+        TimeUnit timeoutUnit
+    ) {
+        var start = System.nanoTime();
+        var timeoutNanos = timeoutUnit.toNanos(timeout);
+        var deadline = start + timeoutNanos;
+        var waitTime = Math.max(1000, timeoutNanos / 100);
+
+        while (!checkThatThreadHasAdvanced.getAsBoolean()) {
+            if (System.nanoTime() > deadline) {
+                throw new AssertionError("Timeout while waiting on another thread to advance");
+            }
+            LockSupport.parkNanos(waitTime);
+        }
     }
 }
