@@ -31,6 +31,7 @@ import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -71,14 +72,14 @@ class RelationshipStreamExporterTest extends BaseTest {
     }
 
     @Test
-    void exportStream() {
+    void exportScalar() {
         var exportRelationships = List.of(
-            relationship(0, 1, Values.longValue(42L)),
-            relationship(0, 2, Values.longValue(43L)),
-            relationship(1, 0, Values.longValue(44L)),
-            relationship(2, 2, Values.longValue(45L)),
-            relationship(2, 3, Values.longValue(46L)),
-            relationship(2, 3, Values.longValue(47L))
+            relationship(0, 1, Values.longValue(42L), Values.doubleValue(1332)),
+            relationship(0, 2, Values.longValue(43L), Values.doubleValue(1333)),
+            relationship(1, 0, Values.longValue(44L), Values.doubleValue(1334)),
+            relationship(2, 2, Values.longValue(45L), Values.doubleValue(1335)),
+            relationship(2, 3, Values.longValue(46L), Values.doubleValue(1336)),
+            relationship(2, 3, Values.longValue(47L), Values.doubleValue(1337))
         );
 
         var exporter = RelationshipStreamExporter
@@ -86,27 +87,73 @@ class RelationshipStreamExporterTest extends BaseTest {
             .build();
 
         var relationshipType = "FOOBAR";
-        var relationshipProperty = "x";
-        var relationshipsWritten = exporter.write(relationshipType, relationshipProperty);
+        var longKey = "x";
+        var doubleKey = "y";
+        var relationshipsWritten = exporter.write(relationshipType, longKey, doubleKey);
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
         var exportedGraph = new StoreLoaderBuilder().api(db)
             .addRelationshipType(relationshipType)
-            .addRelationshipProperty(relationshipProperty, relationshipProperty, DefaultValue.of(0), Aggregation.NONE)
+            .addRelationshipProperty(longKey, longKey, DefaultValue.forLong(), Aggregation.NONE)
+            .addRelationshipProperty(doubleKey, doubleKey, DefaultValue.forDouble(), Aggregation.NONE)
             .build()
             .graphStore()
             .getUnion();
 
         assertGraphEquals(
             fromGdl("(a), (b), (c), (d), " +
-                    "(a)-[:FOOBAR {x: 42}]->(b)" +
-                    "(a)-[:FOOBAR {x: 43}]->(c)" +
-                    "(b)-[:FOOBAR {x: 44}]->(a)" +
-                    "(c)-[:FOOBAR {x: 45}]->(c)" +
-                    "(c)-[:FOOBAR {x: 46}]->(d)" +
-                    "(c)-[:FOOBAR {x: 47}]->(d)"),
+                    "(a)-[:FOOBAR { w: 42 }]->(b)" +
+                    "(a)-[:FOOBAR { w: 43 }]->(c)" +
+                    "(b)-[:FOOBAR { w: 44 }]->(a)" +
+                    "(c)-[:FOOBAR { w: 45 }]->(c)" +
+                    "(c)-[:FOOBAR { w: 46 }]->(d)" +
+                    "(c)-[:FOOBAR { w: 47 }]->(d)" +
+                    "(a)-[:FOOBAR { w: 1332.0 }]->(b)" +
+                    "(a)-[:FOOBAR { w: 1333.0 }]->(c)" +
+                    "(b)-[:FOOBAR { w: 1334.0 }]->(a)" +
+                    "(c)-[:FOOBAR { w: 1335.0 }]->(c)" +
+                    "(c)-[:FOOBAR { w: 1336.0 }]->(d)" +
+                    "(c)-[:FOOBAR { w: 1337.0 }]->(d)"
+            ),
             exportedGraph
         );
+    }
+
+    @Test
+    void exportArray() {
+        var exportRelationships = List.of(
+            relationship(0, 1, Values.longArray(new long[]{1, 3, 3, 2}), Values.doubleArray(new double[]{4, 2})),
+            relationship(0, 2, Values.longArray(new long[]{1, 3, 3, 3}), Values.doubleArray(new double[]{4, 3})),
+            relationship(1, 0, Values.longArray(new long[]{1, 3, 3, 4}), Values.doubleArray(new double[]{4, 4})),
+            relationship(2, 2, Values.longArray(new long[]{1, 3, 3, 5}), Values.doubleArray(new double[]{4, 5})),
+            relationship(2, 3, Values.longArray(new long[]{1, 3, 3, 6}), Values.doubleArray(new double[]{4, 6})),
+            relationship(2, 3, Values.longArray(new long[]{1, 3, 3, 7}), Values.doubleArray(new double[]{4, 7}))
+        );
+
+        var exporter = RelationshipStreamExporter
+            .builder(db, graph, exportRelationships.stream(), TerminationFlag.RUNNING_TRUE)
+            .build();
+
+        var relationshipType = "FOOBAR";
+        var longArrayKey = "x";
+        var doubleArrayKey = "y";
+        var relationshipsWritten = exporter.write(relationshipType, longArrayKey, doubleArrayKey);
+
+        assertEquals(exportRelationships.size(), relationshipsWritten);
+
+        //@formatter:off
+        var query = "MATCH (a { id: %d })-[r]->(b { id: %d }) RETURN r.x AS x, r.y AS y";
+        assertCypherResult(formatWithLocale(query, 0, 1), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
+        assertCypherResult(formatWithLocale(query, 0, 2), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
+        assertCypherResult(formatWithLocale(query, 1, 0), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
+        assertCypherResult(formatWithLocale(query, 2, 2), List.of(Map.of("x", new long[]{1, 3, 3, 5}, "y", new double[]{4, 5})));
+        assertCypherResult(formatWithLocale(query, 2, 3),
+            List.of(
+                Map.of("x", new long[]{1, 3, 3, 6}, "y", new double[]{4, 6}),
+                Map.of("x", new long[]{1, 3, 3, 7}, "y", new double[]{4, 7})
+            )
+        );
+        //@formatter:on
     }
 }
