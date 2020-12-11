@@ -36,7 +36,7 @@ class Neo4jSupportExtensionTest extends BaseTest {
     GraphDatabaseAPI neoInjectedDb;
 
     @Neo4jGraph
-    private static final String DB_CYPHER = "CREATE" +
+    static final String DB_CYPHER = "CREATE" +
                                             "  (a { id: 0 })" +
                                             ", (b { id: 1 })";
 

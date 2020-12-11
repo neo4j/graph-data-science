@@ -38,7 +38,6 @@ import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -48,6 +47,8 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
+import static org.neo4j.graphalgo.extension.ExtensionUtil.getStringValueOfField;
+import static org.neo4j.graphalgo.extension.ExtensionUtil.setField;
 
 public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallback {
 
@@ -97,36 +98,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
     }
 
     private static Stream<GdlGraphSetup> gdlGraphsForField(Field field) {
-        if (field.getType() != String.class) {
-            throw new ExtensionConfigurationException(String.format(
-                Locale.ENGLISH,
-                "Field %s.%s must be of type %s.",
-                field.getDeclaringClass().getTypeName(),
-                field.getName(),
-                String.class.getTypeName()
-            ));
-        }
-
-        // read field value
-        if (!Modifier.isStatic(field.getModifiers())) {
-            throw new ExtensionConfigurationException(String.format(
-                Locale.ENGLISH,
-                "Field %s.%s must be static.",
-                field.getDeclaringClass().getTypeName(),
-                field.getName()
-            ));
-        }
-
-        if (Modifier.isPrivate(field.getModifiers())) {
-            field.setAccessible(true);
-        }
-
-        String gdl;
-        try {
-            gdl = field.get(null).toString();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        String gdl = getStringValueOfField(field);
 
         var annotations = field.isAnnotationPresent(GdlGraph.class)
             ? Stream.of(field.getAnnotation(GdlGraph.class))
@@ -185,15 +157,6 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             testClass = testClass.getSuperclass();
         }
         while (testClass != null);
-    }
-
-    private static void setField(Object testInstance, Field field, Object db) {
-        field.setAccessible(true);
-        try {
-            field.set(testInstance, db);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @ValueClass
