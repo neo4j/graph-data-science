@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.core.NodeEntity;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -75,7 +76,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             .orElseThrow(() -> null);
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
-        Map<String, Long> idMapping = neo4jGraphSetup(db, requiredTestClass);
+        Map<String, Node> idMapping = neo4jGraphSetup(db, requiredTestClass);
         injectFields(context, db, idMapping);
     }
 
@@ -83,7 +84,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
     }
 
-    private Map<String, Long> neo4jGraphSetup(GraphDatabaseService db, Class<?> testCLass) {
+    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Class<?> testCLass) {
         return stream(testCLass.getDeclaredFields())
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
@@ -93,23 +94,22 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             .orElseGet(Map::of);
     }
 
-    private static Map<String, Long> extractVariableIds(Result result) {
+    private static Map<String, Node> extractVariableIds(Result result) {
         if (!result.hasNext()) {
             throw new IllegalArgumentException("Result of create query was empty");
         }
         List<String> columns = result.columns();
         Map<String, Object> row = result.next();
 
-        Map<String, Long> idMapping = new HashMap<>();
+        Map<String, Node> nodeMapping = new HashMap<>();
         columns.forEach(column -> {
             Object value = row.get(column);
             if (value instanceof NodeEntity) {
-                long nodeId = ((NodeEntity) value).getId();
-                idMapping.put(column, nodeId);
+                nodeMapping.put(column, (NodeEntity) value);
             }
         });
 
-        return idMapping;
+        return nodeMapping;
     }
 
     private static String neo4jGraphSetupForField(Field field) {
@@ -147,9 +147,11 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return setupQuery;
     }
 
-    private void injectFields(ExtensionContext context, GraphDatabaseAPI db, Map<String, Long> idMapping) {
-        IdFunction idFunction = idMapping::get;
+    private void injectFields(ExtensionContext context, GraphDatabaseAPI db, Map<String, Node> nodeMapping) {
+        NodeFunction nodeFunction = nodeMapping::get;
+        IdFunction idFunction = variable -> nodeFunction.of(variable).getId();
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
+            injectInstance(testInstance, nodeFunction, NodeFunction.class);
             injectInstance(testInstance, idFunction, IdFunction.class);
             injectInstance(testInstance, db, GraphDatabaseAPI.class);
         });

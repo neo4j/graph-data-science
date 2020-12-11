@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.extension;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -28,23 +29,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Neo4jGraphExtension
-class Neo4jSupportExtensionTest {
-
-    @Inject
-    GraphDatabaseAPI db;
+class Neo4jSupportExtensionTest extends BaseTest {
 
     @org.neo4j.test.extension.Inject
     GraphDatabaseAPI neoInjectedDb;
 
     @Neo4jGraph
-    private static final String DB_CYPHER = "" +
-                                            "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
                                             "  (a { id: 0 })" +
                                             ", (b { id: 1 })";
-
-    @Inject
-    IdFunction idFunction;
 
     @Test
     void shouldLoadGraphAndIdFunctionThroughExtension() {
@@ -63,6 +56,25 @@ class Neo4jSupportExtensionTest {
             "MATCH (n) WHERE n.id = 1 RETURN id(n) AS id",
             Map.of(),
             (tx, row) -> assertEquals(idB, row.getNumber("id"))
+        );
+    }
+
+    @Test
+    void shouldInjectNodeFunction() {
+        var nodeA = nodeFunction.of("a");
+        var nodeB = nodeFunction.of("b");
+
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            "MATCH (n) WHERE n.id = 0 RETURN n",
+            Map.of(),
+            (tx, row) -> assertEquals(nodeA, row.getNode("n"))
+        );
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            "MATCH (n) WHERE n.id = 1 RETURN n",
+            Map.of(),
+            (tx, row) -> assertEquals(nodeB, row.getNode("n"))
         );
     }
 

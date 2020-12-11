@@ -51,6 +51,12 @@ public abstract class BaseTest {
     @Inject
     public GraphDatabaseAPI db;
 
+    @Inject
+    public NodeFunction nodeFunction;
+
+    @Inject
+    public IdFunction idFunction;
+
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder.impermanent();
