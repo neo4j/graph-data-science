@@ -25,10 +25,11 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -46,13 +47,13 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     }
 
     @Override
-    public void init(PregelContext.InitContext<ExamplePregelComputation.ExampleConfig> context) {
+    public void init(InitContext<ExampleConfig> context) {
         // Set node identifier as initial node value
         context.setNodeValue(KEY, context.nodeId());
     }
 
     @Override
-    public void compute(PregelContext.ComputeContext<ExamplePregelComputation.ExampleConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<ExampleConfig> context, Pregel.Messages messages) {
         // Silence is golden
         context.voteToHalt();
     }
