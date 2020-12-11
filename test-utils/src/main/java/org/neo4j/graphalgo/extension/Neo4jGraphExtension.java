@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.extension;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.test.extension.ImpermanentDbmsExtension;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -31,7 +30,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ImpermanentDbmsExtension(configurationCallback = "configuration")
 @ExtendWith(Neo4jSupportExtension.class)
 public @interface Neo4jGraphExtension {
 }

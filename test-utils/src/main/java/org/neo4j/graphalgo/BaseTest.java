@@ -24,6 +24,10 @@ import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTrackerExtensionFactory;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
+import org.neo4j.graphalgo.extension.NodeFunction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -31,7 +35,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.test.extension.ImpermanentDbmsExtension;
-import org.neo4j.test.extension.Inject;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,6 +45,7 @@ import java.util.function.Function;
 import static java.util.Collections.emptyMap;
 
 @ImpermanentDbmsExtension(configurationCallback = "configuration")
+@Neo4jGraphExtension
 public abstract class BaseTest {
 
     @Inject
