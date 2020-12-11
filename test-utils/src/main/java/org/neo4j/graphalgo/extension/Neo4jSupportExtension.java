@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.extension;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -30,6 +31,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.core.NodeEntity;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,14 +72,27 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
     }
 
-    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Class<?> testCLass) {
-        return stream(testCLass.getDeclaredFields())
+    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Class<?> testClass) {
+        Collection<Class<?>> classHierarchy = getClassHierarchy(testClass);
+        return classHierarchy.stream().flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
             .map(ExtensionUtil::getStringValueOfField)
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
             .orElseGet(Map::of);
+    }
+
+    @NotNull
+    private Collection<Class<?>> getClassHierarchy(Class<?> testClass) {
+        Collection<Class<?>> classHierarchy = new ArrayList<>();
+        classHierarchy.add(testClass);
+        var superClass = testClass.getSuperclass();
+        while (superClass != null) {
+            classHierarchy.add(superClass);
+            superClass = superClass.getSuperclass();
+        }
+        return classHierarchy;
     }
 
     private static Map<String, Node> extractVariableIds(Result result) {

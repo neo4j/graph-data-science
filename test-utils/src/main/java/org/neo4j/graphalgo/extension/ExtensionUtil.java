@@ -59,9 +59,7 @@ public final class ExtensionUtil {
             ));
         }
 
-        if (Modifier.isPrivate(field.getModifiers())) {
-            field.setAccessible(true);
-        }
+        field.setAccessible(true);
 
         String value;
         try {
