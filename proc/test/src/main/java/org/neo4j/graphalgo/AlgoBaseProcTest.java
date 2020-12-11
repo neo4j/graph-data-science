@@ -101,8 +101,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
-    String createQuery();
-
     GraphDatabaseAPI graphDb();
 
     default NamedDatabaseId namedDatabaseId() {
@@ -373,7 +371,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
         createRandomNodes();
         emptyDb();
-        runQuery(graphDb(), createQuery());
 
         RESULT reloadedResult = loadGraphAndRunCompute("reloadedGraph");
 

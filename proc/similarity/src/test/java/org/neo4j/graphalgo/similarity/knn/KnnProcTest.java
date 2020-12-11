@@ -45,6 +45,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -66,15 +67,12 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     static final String GRAPH_NAME = "myGraph";
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a { id: 1, knn: 1.0 } )" +
-               ", (b { id: 2, knn: 2.0 } )" +
-               ", (c { id: 3, knn: 5.0 } )" +
-               ", (a)-[:IGNORE]->(b)";
-    }
-
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+                                       "  (a { id: 1, knn: 1.0 } )" +
+                                       ", (b { id: 2, knn: 2.0 } )" +
+                                       ", (c { id: 3, knn: 5.0 } )" +
+                                       ", (a)-[:IGNORE]->(b)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -84,7 +82,6 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class
         );
-        runQuery(createQuery());
 
         String graphCreateQuery = GdsCypher.call()
             .withAnyLabel()

@@ -24,31 +24,29 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<Vector>> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Node1)" +
-               ", (b:Node1)" +
-               ", (c:Node2)" +
-               ", (d:Isolated)" +
-               ", (e:Isolated)" +
-               ", (a)-[:REL]->(b)" +
-               ", (b)-[:REL]->(a)" +
-               ", (a)-[:REL]->(c)" +
-               ", (c)-[:REL]->(a)" +
-               ", (b)-[:REL]->(c)" +
-               ", (c)-[:REL]->(b)";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+           "  (a:Node1)" +
+           ", (b:Node1)" +
+           ", (c:Node2)" +
+           ", (d:Isolated)" +
+           ", (e:Isolated)" +
+           ", (a)-[:REL]->(b)" +
+           ", (b)-[:REL]->(a)" +
+           ", (a)-[:REL]->(c)" +
+           ", (c)-[:REL]->(a)" +
+           ", (b)-[:REL]->(c)" +
+           ", (c)-[:REL]->(b)";
 
     @BeforeEach
     void setUp() throws Exception {
-        runQuery(createQuery());
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class

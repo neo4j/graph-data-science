@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -72,24 +73,22 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     private static final String nodeQuery = "MATCH (n) RETURN id(n) AS id, n.weight AS weight, n.seed AS seed";
     private static final String relQuery = "MATCH (s)-[:X]->(t) RETURN id(s) AS source, id(t) AS target";
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:A {id: 0, seed: 42}) " +
-               ", (b:B {id: 1, seed: 42}) " +
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+                                       "  (a:A {id: 0, seed: 42}) " +
+                                       ", (b:B {id: 1, seed: 42}) " +
 
-               ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-               ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-               ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-               ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-               ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+                                       ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+                                       ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+                                       ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+                                       ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+                                       ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-               ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-               ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-               ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-               ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-               ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
-    }
+                                       ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+                                       ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+                                       ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+                                       ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+                                       ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -103,7 +102,6 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-        runQuery(createQuery());
         // Create explicit graphs with both projection variants
         runQuery(graphCreateQuery(Orientation.NATURAL, TEST_GRAPH_NAME));
         runQuery(formatWithLocale(

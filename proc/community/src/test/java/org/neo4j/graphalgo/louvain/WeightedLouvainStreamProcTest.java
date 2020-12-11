@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
@@ -69,24 +70,22 @@ class WeightedLouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig>
         "Michael", 4L
     );
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (nAlice:User {name: 'Alice', seed: 42})" +
-               ", (nBridget:User {name: 'Bridget', seed: 42})" +
-               ", (nCharles:User {name: 'Charles', seed: 42})" +
-               ", (nDoug:User {name: 'Doug'})" +
-               ", (nMark:User {name: 'Mark'})" +
-               ", (nMichael:User {name: 'Michael'})" +
-               ", (nAlice)-[:LINK {weight: 1}]->(nBridget)" +
-               ", (nAlice)-[:LINK {weight: 1}]->(nCharles)" +
-               ", (nCharles)-[:LINK {weight: 1}]->(nBridget)" +
-               ", (nAlice)-[:LINK {weight: 5}]->(nDoug)" +
-               ", (nAlice)-[:LINK  {weight: null}]->(nMark)" +
-               ", (nMark)-[:LINK {weight: 1}]->(nDoug)" +
-               ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
-               ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+                                       "  (nAlice:User {name: 'Alice', seed: 42})" +
+                                       ", (nBridget:User {name: 'Bridget', seed: 42})" +
+                                       ", (nCharles:User {name: 'Charles', seed: 42})" +
+                                       ", (nDoug:User {name: 'Doug'})" +
+                                       ", (nMark:User {name: 'Mark'})" +
+                                       ", (nMichael:User {name: 'Michael'})" +
+                                       ", (nAlice)-[:LINK {weight: 1}]->(nBridget)" +
+                                       ", (nAlice)-[:LINK {weight: 1}]->(nCharles)" +
+                                       ", (nCharles)-[:LINK {weight: 1}]->(nBridget)" +
+                                       ", (nAlice)-[:LINK {weight: 5}]->(nDoug)" +
+                                       ", (nAlice)-[:LINK  {weight: null}]->(nMark)" +
+                                       ", (nMark)-[:LINK {weight: 1}]->(nDoug)" +
+                                       ", (nMark)-[:LINK {weight: 1}]->(nMichael)" +
+                                       ", (nMichael)-[:LINK {weight: 1}]->(nMark)";
 
     @Override
     List<String> graphCreateQueries() {

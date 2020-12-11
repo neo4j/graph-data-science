@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -61,6 +62,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         return db;
     }
 
+    @Neo4jGraph
     static final @Language("Cypher") String DB_CYPHER =
         "CREATE" +
         " (nA:Label {nodeId: 0, seedId: 42})" +
@@ -84,11 +86,6 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         // {H, I}
         ",(nH)-[:TYPE]->(nI)";
 
-    @Override
-    public String createQuery() {
-        return DB_CYPHER;
-    }
-
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
@@ -96,7 +93,6 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-        runQuery(createQuery());
     }
 
     @AfterEach

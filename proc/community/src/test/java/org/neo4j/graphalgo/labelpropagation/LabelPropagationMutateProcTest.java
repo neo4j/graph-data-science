@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -165,48 +167,6 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     }
 
     @Test
-    void testGraphMutationFiltered() {
-        long deletedNodes = clearDb();
-        runQuery("CREATE (x:Ignore {id: -1, communityId: null}) " + createQuery());
-
-        String graphName = "loadGraph";
-
-        String loadQuery = GdsCypher
-            .call()
-            .withNodeLabels("Ignore", "A", "B")
-            .withAnyRelationshipType()
-            .graphCreate(graphName)
-            .yields();
-
-        runQuery(loadQuery);
-
-        String query = GdsCypher
-            .call()
-            .explicitCreation(graphName)
-            .algo("labelPropagation")
-            .mutateMode()
-            .addParameter("nodeLabels", Arrays.asList("A", "B"))
-            .addParameter("mutateProperty", mutateProperty())
-            .yields();
-
-        runQuery(query);
-
-        List<Long> expectedValueList = new ArrayList<>(RESULT.size() + 1);
-        expectedValueList.add(Long.MIN_VALUE);
-        RESULT.forEach(component -> expectedValueList.add(component + deletedNodes + 1));
-
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
-        mutatedGraph.forEachNode(nodeId -> {
-            assertEquals(
-                    expectedValueList.get(Math.toIntExact(nodeId)),
-                    mutatedGraph.nodeProperties("communityId").longValue(nodeId)
-                );
-                return true;
-            }
-        );
-    }
-
-    @Test
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
@@ -220,5 +180,53 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             .yields("communityCount");
 
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+    }
+
+    @Nested
+    class FilteredGraph {
+
+        @Neo4jGraph
+        private static final String DB_CYPHER_WITH_OFFSET = "CREATE (x:Ignore {id: -1, communityId: null}) " + DB_CYPHER;
+
+        @Test
+        void testGraphMutationFiltered() {
+            long deletedNodes = clearDb();
+
+            String graphName = "loadGraph";
+
+            String loadQuery = GdsCypher
+                .call()
+                .withNodeLabels("Ignore", "A", "B")
+                .withAnyRelationshipType()
+                .graphCreate(graphName)
+                .yields();
+
+            runQuery(loadQuery);
+
+            String query = GdsCypher
+                .call()
+                .explicitCreation(graphName)
+                .algo("labelPropagation")
+                .mutateMode()
+                .addParameter("nodeLabels", Arrays.asList("A", "B"))
+                .addParameter("mutateProperty", mutateProperty())
+                .yields();
+
+            runQuery(query);
+
+            List<Long> expectedValueList = new ArrayList<>(RESULT.size() + 1);
+            expectedValueList.add(Long.MIN_VALUE);
+            RESULT.forEach(component -> expectedValueList.add(component + deletedNodes + 1));
+
+            Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
+            mutatedGraph.forEachNode(nodeId -> {
+                    assertEquals(
+                        expectedValueList.get(Math.toIntExact(nodeId)),
+                        mutatedGraph.nodeProperties("communityId").longValue(nodeId)
+                    );
+                    return true;
+                }
+            );
+        }
     }
 }

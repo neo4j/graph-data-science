@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.impl.walking.CollapsePath;
 import org.neo4j.graphalgo.impl.walking.CollapsePathConfig;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -47,16 +48,14 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     AlgoBaseProcTest<CollapsePath, CollapsePathConfig, Relationships>,
     MutateRelationshipsTest<CollapsePath, CollapsePathConfig, Relationships> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Person)" +
-               ", (b:Person)" +
-               ", (c:Person)" +
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+           "  (a:Person)" +
+           ", (b:Person)" +
+           ", (c:Person)" +
 
-               ", (a)-[:KNOWS]->(b)" +
-               ", (b)-[:KNOWS]->(c)";
-    }
+           ", (a)-[:KNOWS]->(b)" +
+           ", (b)-[:KNOWS]->(c)";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -70,8 +69,6 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-
-        runQuery(createQuery());
     }
 
     @Override

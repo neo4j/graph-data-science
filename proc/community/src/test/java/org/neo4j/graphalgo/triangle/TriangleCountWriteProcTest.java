@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -39,18 +40,16 @@ class TriangleCountWriteProcTest
     extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
     implements WritePropertyConfigTest<IntersectingTriangleCount, TriangleCountWriteConfig, IntersectingTriangleCount.TriangleCountResult> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE " +
-               "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
-               "(b)-[:T]->(c:A { name: 'c' }), " +
-               "(c)-[:T]->(a), " +
-               "(a)-[:T]->(d:A { name: 'd' }), " +
-               "(b)-[:T]->(d), " +
-               "(c)-[:T]->(d), " +
-               "(a)-[:T]->(e:A { name: 'e' }), " +
-               "(b)-[:T]->(e) ";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+           "(a:A { name: 'a' })-[:T]->(b:A { name: 'b' }), " +
+           "(b)-[:T]->(c:A { name: 'c' }), " +
+           "(c)-[:T]->(a), " +
+           "(a)-[:T]->(d:A { name: 'd' }), " +
+           "(b)-[:T]->(d), " +
+           "(c)-[:T]->(d), " +
+           "(a)-[:T]->(e:A { name: 'e' }), " +
+           "(b)-[:T]->(e) ";
 
     @Test
     void testWrite() {

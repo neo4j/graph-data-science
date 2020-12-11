@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collections;
@@ -41,6 +42,7 @@ public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseCo
     AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
     MemoryEstimateTest<FastRP, CONFIG, FastRP.FastRPResult> {
 
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {name: 'a', f1: 0.4, f2: 1.3})" +
@@ -54,14 +56,8 @@ public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseCo
         ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
         ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
-    @Override
-    public String createQuery() {
-        return DB_CYPHER;
-    }
-
     @BeforeEach
     void setUp() throws Exception {
-        runQuery(createQuery());
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class

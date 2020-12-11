@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.catalog.GraphWriteRelationshipProc;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -67,24 +68,22 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     HeapControlTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,
     RelationshipWeightConfigTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Person {id: 0,  name: 'Alice'})" +
-               ", (b:Person {id: 1,  name: 'Bob'})" +
-               ", (c:Person {id: 2,  name: 'Charlie'})" +
-               ", (d:Person {id: 3,  name: 'Dave'})" +
-               ", (i1:Item  {id: 10, name: 'p1'})" +
-               ", (i2:Item  {id: 11, name: 'p2'})" +
-               ", (i3:Item  {id: 12, name: 'p3'})" +
-               ", (i4:Item  {id: 13, name: 'p4'})" +
-               ", (a)-[:LIKES]->(i1)" +
-               ", (a)-[:LIKES]->(i2)" +
-               ", (a)-[:LIKES]->(i3)" +
-               ", (b)-[:LIKES]->(i1)" +
-               ", (b)-[:LIKES]->(i2)" +
-               ", (c)-[:LIKES]->(i3)";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+           "  (a:Person {id: 0,  name: 'Alice'})" +
+           ", (b:Person {id: 1,  name: 'Bob'})" +
+           ", (c:Person {id: 2,  name: 'Charlie'})" +
+           ", (d:Person {id: 3,  name: 'Dave'})" +
+           ", (i1:Item  {id: 10, name: 'p1'})" +
+           ", (i2:Item  {id: 11, name: 'p2'})" +
+           ", (i3:Item  {id: 12, name: 'p3'})" +
+           ", (i4:Item  {id: 13, name: 'p4'})" +
+           ", (a)-[:LIKES]->(i1)" +
+           ", (a)-[:LIKES]->(i2)" +
+           ", (a)-[:LIKES]->(i3)" +
+           ", (b)-[:LIKES]->(i1)" +
+           ", (b)-[:LIKES]->(i2)" +
+           ", (c)-[:LIKES]->(i3)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -94,7 +93,6 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
             GraphWriteNodePropertiesProc.class,
             GraphWriteRelationshipProc.class
         );
-        runQuery(createQuery());
 
         TestSupport.allDirectedProjections().forEach(orientation -> {
             String name = "myGraph" + orientation.name();

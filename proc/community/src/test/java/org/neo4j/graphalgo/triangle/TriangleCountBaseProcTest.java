@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -52,13 +53,11 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     MemoryEstimateTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
     HeapControlTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE " +
-               "(a:A)-[:T]->(b:A), " +
-               "(b)-[:T]->(c:A), " +
-               "(c)-[:T]->(a)";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+           "(a:A)-[:T]->(b:A), " +
+           "(b)-[:T]->(c:A), " +
+           "(c)-[:T]->(a)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -68,7 +67,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             getProcedureClazz()
         );
 
-        runQuery(createQuery());
         runQuery("CALL gds.graph.create('g', 'A', {T: { orientation: 'UNDIRECTED'}})");
     }
 

@@ -27,8 +27,11 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 abstract class ModularityOptimizationProcTest extends BaseProcTest {
+
+    @Neo4jGraph
     static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
@@ -58,10 +61,7 @@ abstract class ModularityOptimizationProcTest extends BaseProcTest {
             GraphCreateProc.class,
             GraphWriteNodePropertiesProc.class
         );
-        runQuery(DB_CYPHER);
     }
-
-
 
     @AfterEach
     void tearDown() {

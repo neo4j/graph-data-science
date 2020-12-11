@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,23 +51,21 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
     static double[] costs0, costs1, costs2, costs3, costs4, costs5;
     static long[] ids0, ids1, ids2, ids3, ids4, ids5;
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Label { id: 1 })" +
-               ", (b:Label { id: 2 })" +
-               ", (c:Label { id: 3 })" +
-               ", (d:Label { id: 4 })" +
-               ", (e:Label { id: 5 })" +
-               ", (f:Label { id: 6 })" +
-               ", (a)-[:TYPE {cost: 4}]->(b)" +
-               ", (a)-[:TYPE {cost: 2}]->(c)" +
-               ", (b)-[:TYPE {cost: 5}]->(c)" +
-               ", (b)-[:TYPE {cost: 10}]->(d)" +
-               ", (c)-[:TYPE {cost: 3}]->(e)" +
-               ", (d)-[:TYPE {cost: 11}]->(f)" +
-               ", (e)-[:TYPE {cost: 4}]->(d)";
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE" +
+           "  (a:Label { id: 1 })" +
+           ", (b:Label { id: 2 })" +
+           ", (c:Label { id: 3 })" +
+           ", (d:Label { id: 4 })" +
+           ", (e:Label { id: 5 })" +
+           ", (f:Label { id: 6 })" +
+           ", (a)-[:TYPE {cost: 4}]->(b)" +
+           ", (a)-[:TYPE {cost: 2}]->(c)" +
+           ", (b)-[:TYPE {cost: 5}]->(c)" +
+           ", (b)-[:TYPE {cost: 10}]->(d)" +
+           ", (c)-[:TYPE {cost: 3}]->(e)" +
+           ", (d)-[:TYPE {cost: 11}]->(f)" +
+           ", (e)-[:TYPE {cost: 4}]->(d)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -74,7 +73,6 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
             getProcedureClazz(),
             GraphCreateProc.class
         );
-        runQuery(createQuery());
 
         idA = nodeIdByProperty(db, 1);
         idB = nodeIdByProperty(db, 2);

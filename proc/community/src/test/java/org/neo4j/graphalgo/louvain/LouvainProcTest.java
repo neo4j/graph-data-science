@@ -42,6 +42,7 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -71,51 +72,49 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
 
     static final String LOUVAIN_GRAPH = "myGraph";
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Node {seed: 1})" +        // 0
-               ", (b:Node {seed: 1})" +        // 1
-               ", (c:Node {seed: 1})" +        // 2
-               ", (d:Node {seed: 1})" +        // 3
-               ", (e:Node {seed: 1})" +        // 4
-               ", (f:Node {seed: 1})" +        // 5
-               ", (g:Node {seed: 2})" +        // 6
-               ", (h:Node {seed: 2})" +        // 7
-               ", (i:Node {seed: 2})" +        // 8
-               ", (j:Node {seed: 42})" +       // 9
-               ", (k:Node {seed: 42})" +       // 10
-               ", (l:Node {seed: 42})" +       // 11
-               ", (m:Node {seed: 42})" +       // 12
-               ", (n:Node {seed: 42})" +       // 13
-               ", (x:Node {seed: 1})" +        // 14
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE" +
+                                       "  (a:Node {seed: 1})" +        // 0
+                                       ", (b:Node {seed: 1})" +        // 1
+                                       ", (c:Node {seed: 1})" +        // 2
+                                       ", (d:Node {seed: 1})" +        // 3
+                                       ", (e:Node {seed: 1})" +        // 4
+                                       ", (f:Node {seed: 1})" +        // 5
+                                       ", (g:Node {seed: 2})" +        // 6
+                                       ", (h:Node {seed: 2})" +        // 7
+                                       ", (i:Node {seed: 2})" +        // 8
+                                       ", (j:Node {seed: 42})" +       // 9
+                                       ", (k:Node {seed: 42})" +       // 10
+                                       ", (l:Node {seed: 42})" +       // 11
+                                       ", (m:Node {seed: 42})" +       // 12
+                                       ", (n:Node {seed: 42})" +       // 13
+                                       ", (x:Node {seed: 1})" +        // 14
 
-               ", (a)-[:TYPE {weight: 1.0}]->(b)" +
-               ", (a)-[:TYPE {weight: 1.0}]->(d)" +
-               ", (a)-[:TYPE {weight: 1.0}]->(f)" +
-               ", (b)-[:TYPE {weight: 1.0}]->(d)" +
-               ", (b)-[:TYPE {weight: 1.0}]->(x)" +
-               ", (b)-[:TYPE {weight: 1.0}]->(g)" +
-               ", (b)-[:TYPE {weight: 1.0}]->(e)" +
-               ", (c)-[:TYPE {weight: 1.0}]->(x)" +
-               ", (c)-[:TYPE {weight: 1.0}]->(f)" +
-               ", (d)-[:TYPE {weight: 1.0}]->(k)" +
-               ", (e)-[:TYPE {weight: 1.0}]->(x)" +
-               ", (e)-[:TYPE {weight: 0.01}]->(f)" +
-               ", (e)-[:TYPE {weight: 1.0}]->(h)" +
-               ", (f)-[:TYPE {weight: 1.0}]->(g)" +
-               ", (g)-[:TYPE {weight: 1.0}]->(h)" +
-               ", (h)-[:TYPE {weight: 1.0}]->(i)" +
-               ", (h)-[:TYPE {weight: 1.0}]->(j)" +
-               ", (i)-[:TYPE {weight: 1.0}]->(k)" +
-               ", (j)-[:TYPE {weight: 1.0}]->(k)" +
-               ", (j)-[:TYPE {weight: 1.0}]->(m)" +
-               ", (j)-[:TYPE {weight: 1.0}]->(n)" +
-               ", (k)-[:TYPE {weight: 1.0}]->(m)" +
-               ", (k)-[:TYPE {weight: 1.0}]->(l)" +
-               ", (l)-[:TYPE {weight: 1.0}]->(n)" +
-               ", (m)-[:TYPE {weight: 1.0}]->(n)";
-    }
+                                       ", (a)-[:TYPE {weight: 1.0}]->(b)" +
+                                       ", (a)-[:TYPE {weight: 1.0}]->(d)" +
+                                       ", (a)-[:TYPE {weight: 1.0}]->(f)" +
+                                       ", (b)-[:TYPE {weight: 1.0}]->(d)" +
+                                       ", (b)-[:TYPE {weight: 1.0}]->(x)" +
+                                       ", (b)-[:TYPE {weight: 1.0}]->(g)" +
+                                       ", (b)-[:TYPE {weight: 1.0}]->(e)" +
+                                       ", (c)-[:TYPE {weight: 1.0}]->(x)" +
+                                       ", (c)-[:TYPE {weight: 1.0}]->(f)" +
+                                       ", (d)-[:TYPE {weight: 1.0}]->(k)" +
+                                       ", (e)-[:TYPE {weight: 1.0}]->(x)" +
+                                       ", (e)-[:TYPE {weight: 0.01}]->(f)" +
+                                       ", (e)-[:TYPE {weight: 1.0}]->(h)" +
+                                       ", (f)-[:TYPE {weight: 1.0}]->(g)" +
+                                       ", (g)-[:TYPE {weight: 1.0}]->(h)" +
+                                       ", (h)-[:TYPE {weight: 1.0}]->(i)" +
+                                       ", (h)-[:TYPE {weight: 1.0}]->(j)" +
+                                       ", (i)-[:TYPE {weight: 1.0}]->(k)" +
+                                       ", (j)-[:TYPE {weight: 1.0}]->(k)" +
+                                       ", (j)-[:TYPE {weight: 1.0}]->(m)" +
+                                       ", (j)-[:TYPE {weight: 1.0}]->(n)" +
+                                       ", (k)-[:TYPE {weight: 1.0}]->(m)" +
+                                       ", (k)-[:TYPE {weight: 1.0}]->(l)" +
+                                       ", (l)-[:TYPE {weight: 1.0}]->(n)" +
+                                       ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -131,7 +130,6 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
         );
         registerFunctions(AsNodeFunc.class);
 
-        runQuery(createQuery());
         graphCreateQueries().forEach(this::runQuery);
     }
 

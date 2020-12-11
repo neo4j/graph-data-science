@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.reflect.InvocationTargetException;
@@ -55,18 +56,16 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE " +
-               "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
-               "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
-               "(c)-[:T]->(a), " +
-               "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
-               "(b)-[:T]->(d), " +
-               "(c)-[:T]->(d), " +
-               "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
-               "(b)-[:T]->(e) ";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE " +
+           "(a:A { name: 'a', seed: 2 })-[:T]->(b:A { name: 'b', seed: 2 }), " +
+           "(b)-[:T]->(c:A { name: 'c', seed: 1 }), " +
+           "(c)-[:T]->(a), " +
+           "(a)-[:T]->(d:A { name: 'd', seed: 2 }), " +
+           "(b)-[:T]->(d), " +
+           "(c)-[:T]->(d), " +
+           "(a)-[:T]->(e:A { name: 'e', seed: 2 }), " +
+           "(b)-[:T]->(e) ";
 
     final Map<String, Double> expectedResult = Map.of(
         "a", 2.0 / 3,
@@ -100,7 +99,6 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             getProcedureClazz()
         );
 
-        runQuery(createQuery());
         runQuery("CALL gds.graph.create('g', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
     }
 

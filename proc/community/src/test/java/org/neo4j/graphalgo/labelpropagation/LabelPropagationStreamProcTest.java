@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.labelpropagation;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,43 +69,6 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
     }
 
     @Test
-    void testStreamWithFilteredNodes() {
-        long deletedNodes = clearDb();
-        runQuery("CREATE (c:Ignore {id:12, seed: 0}) " + createQuery() + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)");
-
-        String graphCreateQuery = GdsCypher
-            .call()
-            .withNodeLabels("A", "B", "Ignore")
-            .withNodeProperty("id", DefaultValue.of(-1))
-            .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
-            .withNodeProperty("weight", DefaultValue.of(Double.NaN))
-            .withAnyRelationshipType()
-            .graphCreate("nodeFilteredGraph")
-            .yields("nodeCount", "relationshipCount");
-
-        runQueryWithRowConsumer(graphCreateQuery, row -> {
-            assertEquals(13L, row.getNumber("nodeCount"));
-            assertEquals(12L, row.getNumber("relationshipCount"));
-        });
-
-        String query = GdsCypher.call()
-            .explicitCreation("nodeFilteredGraph")
-            .algo("gds.labelPropagation")
-            .streamMode()
-            .addParameter("nodeLabels", Arrays.asList("A", "B"))
-            .yields();
-
-        List<Long> actualCommunities = new ArrayList<>();
-        runQueryWithRowConsumer(query, row -> {
-            int id = row.getNumber("nodeId").intValue() - (int) deletedNodes;
-            long community = row.getNumber("communityId").longValue();
-            actualCommunities.add(id - 1, community - 1 - deletedNodes);
-        });
-
-        assertEquals(RESULT, actualCommunities);
-    }
-
-    @Test
     void testEstimate() {
         String query = GdsCypher
             .call()
@@ -119,6 +84,49 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
             "bytesMin", 1656L,
             "bytesMax", 2168L
         )));
+    }
+
+    @Nested
+    class FilteredGraph {
+
+        @Neo4jGraph
+        static final String DB_CYPHER_WITH_OFFSET = "CREATE (c:Ignore {id:12, seed: 0}) " + DB_CYPHER + " CREATE (a)-[:X]->(c), (c)-[:X]->(b)";
+
+        @Test
+        void testStreamWithFilteredNodes() {
+            long deletedNodes = clearDb();
+
+            String graphCreateQuery = GdsCypher
+                .call()
+                .withNodeLabels("A", "B", "Ignore")
+                .withNodeProperty("id", DefaultValue.of(-1))
+                .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
+                .withNodeProperty("weight", DefaultValue.of(Double.NaN))
+                .withAnyRelationshipType()
+                .graphCreate("nodeFilteredGraph")
+                .yields("nodeCount", "relationshipCount");
+
+            runQueryWithRowConsumer(graphCreateQuery, row -> {
+                assertEquals(13L, row.getNumber("nodeCount"));
+                assertEquals(12L, row.getNumber("relationshipCount"));
+            });
+
+            String query = GdsCypher.call()
+                .explicitCreation("nodeFilteredGraph")
+                .algo("gds.labelPropagation")
+                .streamMode()
+                .addParameter("nodeLabels", Arrays.asList("A", "B"))
+                .yields();
+
+            List<Long> actualCommunities = new ArrayList<>();
+            runQueryWithRowConsumer(query, row -> {
+                int id = row.getNumber("nodeId").intValue() - (int) deletedNodes;
+                long community = row.getNumber("communityId").longValue();
+                actualCommunities.add(id - 1, community - 1 - deletedNodes);
+            });
+
+            assertEquals(RESULT, actualCommunities);
+        }
     }
 
     @Override

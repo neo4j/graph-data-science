@@ -70,11 +70,6 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         runQuery(graphCreateQuery());
     }
 
-    @Override
-    public String createQuery() {
-        return DB_CYPHER;
-    }
-
     @Test
     void testMutate() {
         String query = explicitAlgoBuildStage()

@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.OrientationCombinationTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
@@ -45,21 +46,19 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
 
-    static Map<Long, Double> EXPECTED = new HashMap<>();
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE" +
+                                       "  (a:Node {name: 'a'})" +
+                                       ", (b:Node {name: 'b'})" +
+                                       ", (c:Node {name: 'c'})" +
+                                       ", (d:Node {name: 'd'})" +
+                                       ", (e:Node {name: 'e'})" +
+                                       ", (a)-[:REL]->(b)" +
+                                       ", (b)-[:REL]->(c)" +
+                                       ", (c)-[:REL]->(d)" +
+                                       ", (d)-[:REL]->(e)";
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (a:Node {name: 'a'})" +
-               ", (b:Node {name: 'b'})" +
-               ", (c:Node {name: 'c'})" +
-               ", (d:Node {name: 'd'})" +
-               ", (e:Node {name: 'e'})" +
-               ", (a)-[:REL]->(b)" +
-               ", (b)-[:REL]->(c)" +
-               ", (c)-[:REL]->(d)" +
-               ", (d)-[:REL]->(e)";
-    }
+    static Map<Long, Double> EXPECTED = new HashMap<>();
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -73,8 +72,6 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             GraphWriteNodePropertiesProc.class,
             GraphCreateProc.class
         );
-
-        runQuery(createQuery());
 
         runInTransaction(db, tx -> {
             var label = Label.label("Node");

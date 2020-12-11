@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,25 +52,23 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     long[] ids0, ids1, ids2;
     double[] costs0, costs1, costs2;
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (c {id: 1})" +
-               ", (d {id: 2})" +
-               ", (e {id: 3})" +
-               ", (f {id: 4})" +
-               ", (g {id: 5})" +
-               ", (h {id: 6})" +
-               ", (c)-[:TYPE {cost: 3.0}]->(d)" +
-               ", (c)-[:TYPE {cost: 2.0}]->(e)" +
-               ", (d)-[:TYPE {cost: 4.0}]->(f)" +
-               ", (e)-[:TYPE {cost: 1.0}]->(d)" +
-               ", (e)-[:TYPE {cost: 2.0}]->(f)" +
-               ", (e)-[:TYPE {cost: 3.0}]->(g)" +
-               ", (f)-[:TYPE {cost: 2.0}]->(g)" +
-               ", (f)-[:TYPE {cost: 1.0}]->(h)" +
-               ", (g)-[:TYPE {cost: 2.0}]->(h)";
-    }
+    @Neo4jGraph
+    public static final String DB_CYPHER = "CREATE" +
+           "  (c {id: 1})" +
+           ", (d {id: 2})" +
+           ", (e {id: 3})" +
+           ", (f {id: 4})" +
+           ", (g {id: 5})" +
+           ", (h {id: 6})" +
+           ", (c)-[:TYPE {cost: 3.0}]->(d)" +
+           ", (c)-[:TYPE {cost: 2.0}]->(e)" +
+           ", (d)-[:TYPE {cost: 4.0}]->(f)" +
+           ", (e)-[:TYPE {cost: 1.0}]->(d)" +
+           ", (e)-[:TYPE {cost: 2.0}]->(f)" +
+           ", (e)-[:TYPE {cost: 3.0}]->(g)" +
+           ", (f)-[:TYPE {cost: 2.0}]->(g)" +
+           ", (f)-[:TYPE {cost: 1.0}]->(h)" +
+           ", (g)-[:TYPE {cost: 2.0}]->(h)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -77,7 +76,6 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             getProcedureClazz(),
             GraphCreateProc.class
         );
-        runQuery(createQuery());
 
         idC = nodeIdByProperty(db, 1);
         idD = nodeIdByProperty(db, 2);

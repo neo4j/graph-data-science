@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,18 +44,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
 
-    @Override
-    public String createQuery() {
-        return "CREATE " +
-               "  (a:Label1 {name: 'a'})" +
-               ", (b:Label1 {name: 'b'})" +
-               ", (a)-[:TYPE1]->(b)";
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE " +
+           "  (a:Label1 {name: 'a'})" +
+           ", (b:Label1 {name: 'b'})" +
+           ", (a)-[:TYPE1]->(b)";
 
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(GraphCreateProc.class, PageRankStatsProc.class);
-        runQuery(createQuery());
         runQuery("CALL gds.graph.create('graphLabel1', '*', '*')");
     }
 
