@@ -33,4 +33,3 @@ import java.lang.annotation.Target;
 @ExtendWith(Neo4jSupportExtension.class)
 public @interface Neo4jGraphExtension {
 }
-

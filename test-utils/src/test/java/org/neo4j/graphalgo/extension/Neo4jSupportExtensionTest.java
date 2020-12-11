@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 
 class Neo4jSupportExtensionTest extends BaseTest {
 
@@ -45,18 +46,8 @@ class Neo4jSupportExtensionTest extends BaseTest {
         assertEquals(db, neoInjectedDb);
         long idA = idFunction.of("a");
         long idB = idFunction.of("b");
-        QueryRunner.runQueryWithRowConsumer(
-            db,
-            "MATCH (n) WHERE n.id = 0 RETURN id(n) AS id",
-            Map.of(),
-            (tx, row) -> assertEquals(idA, row.getNumber("id"))
-        );
-        QueryRunner.runQueryWithRowConsumer(
-            db,
-            "MATCH (n) WHERE n.id = 1 RETURN id(n) AS id",
-            Map.of(),
-            (tx, row) -> assertEquals(idB, row.getNumber("id"))
-        );
+        assertEquals(nodeIdByProperty(db, 0), idA);
+        assertEquals(nodeIdByProperty(db, 1), idB);
     }
 
     @Test
