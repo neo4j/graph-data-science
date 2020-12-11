@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.extension;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -35,6 +34,9 @@ class Neo4jSupportExtensionTest {
     @Inject
     GraphDatabaseAPI db;
 
+    @org.neo4j.test.extension.Inject
+    GraphDatabaseAPI neoInjectedDb;
+
     @Neo4jGraph
     private static final String DB_CYPHER = "" +
                                             "CREATE" +
@@ -45,16 +47,23 @@ class Neo4jSupportExtensionTest {
     IdFunction idFunction;
 
     @Test
-    void shouldLoadGraph() {
+    void shouldLoadGraphAndIdFunctionThroughExtension() {
         assertNotNull(db);
+        assertEquals(db, neoInjectedDb);
         long idA = idFunction.of("a");
         long idB = idFunction.of("b");
-        QueryRunner.runQueryWithRowConsumer(db, "MATCH (n) WHERE n.id = 0 RETURN id(n) AS id", Map.of(), (tx, row) -> assertEqualIds(idA, row));
-        QueryRunner.runQueryWithRowConsumer(db, "MATCH (n) WHERE n.id = 1 RETURN id(n) AS id", Map.of(), (tx, row) -> assertEqualIds(idB, row));
-    }
-
-    private void assertEqualIds(long expected, Result.ResultRow row) {
-        assertEquals(expected, row.getNumber("id"));
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            "MATCH (n) WHERE n.id = 0 RETURN id(n) AS id",
+            Map.of(),
+            (tx, row) -> assertEquals(idA, row.getNumber("id"))
+        );
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            "MATCH (n) WHERE n.id = 1 RETURN id(n) AS id",
+            Map.of(),
+            (tx, row) -> assertEquals(idB, row.getNumber("id"))
+        );
     }
 
 }
