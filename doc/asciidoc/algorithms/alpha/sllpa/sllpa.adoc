@@ -263,7 +263,7 @@ include::../../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.sllpa.stream('myGraph', {maxIterations: 100, minInfluence: 0.1})
+CALL gds.alpha.sllpa.stream('myGraph', {maxIterations: 100, minAssociationStrength: 0.1})
 YIELD nodeId, values
 RETURN gds.util.asNode(nodeId).name AS Name, values.communityIds AS communityIds
   ORDER BY Name ASC

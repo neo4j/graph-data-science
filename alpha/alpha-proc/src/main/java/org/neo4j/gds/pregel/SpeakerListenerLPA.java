@@ -136,7 +136,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
         for (LongIntCursor labelVote : labelVotes) {
             var relativeFrequency = ((double) labelVote.value) / labels.length;
-            if (relativeFrequency > context.config().minInfluence()) {
+            if (relativeFrequency > context.config().minAssociationStrength()) {
                 labelsToKeep.add(labelVote.key);
             }
         }
@@ -153,7 +153,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     public interface SpeakerListenerLPAConfig extends PregelConfig {
 
         @Value.Default
-        default double minInfluence() {
+        default double minAssociationStrength() {
             return 0.2;
         }
 
