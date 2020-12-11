@@ -266,7 +266,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
 
-    private void runMasterComputeStep(final int iteration) {
+    private void runMasterComputeStep(int iteration) {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
         computation.masterCompute(context);
     }

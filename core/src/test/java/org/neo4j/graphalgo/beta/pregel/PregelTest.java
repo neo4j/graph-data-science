@@ -137,7 +137,7 @@ class PregelTest {
     }
 
     @Test
-    void sendsMessages() {
+    void testMasterComputeStep() {
         var pregelJob = Pregel.create(
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).build(),
