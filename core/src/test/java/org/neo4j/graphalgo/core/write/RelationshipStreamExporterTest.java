@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -169,6 +171,43 @@ class RelationshipStreamExporterTest extends BaseTest {
             "MATCH ()-[r]->() RETURN count(r) AS count",
             List.of(Map.of("count", (long) relationshipCount))
         );
+    }
+
+    @Test
+    void logProgress() {
+        int nodeCount = 4;
+        var bufferSize = 25;
+        // enforce writing non-full buffer
+        var relationshipCount = 105;
+
+        var rand = new Random();
+
+        var log = new TestLog();
+
+        var relationshipStream = IntStream
+            .range(0, relationshipCount)
+            .mapToObj(ignored -> relationship(rand.nextInt(nodeCount), rand.nextInt(nodeCount)));
+
+        var exporter = RelationshipStreamExporter
+            .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
+            .withBatchSize(bufferSize)
+            .withLog(log)
+            .build();
+
+        var relationshipsWritten = exporter.write("FOOBAR");
+
+        assertEquals(relationshipCount, relationshipsWritten);
+
+        assertThat(log.getMessages("info"))
+            .containsExactlyInAnyOrder(
+                "[main] WriteRelationshipStream :: Start",
+                "[main] WriteRelationshipStream Wrote 25 relationships",
+                "[main] WriteRelationshipStream Wrote 50 relationships",
+                "[main] WriteRelationshipStream Wrote 75 relationships",
+                "[main] WriteRelationshipStream Wrote 100 relationships",
+                "[main] WriteRelationshipStream Wrote 105 relationships",
+                "[main] WriteRelationshipStream :: Finished"
+            );
     }
 
     RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {
