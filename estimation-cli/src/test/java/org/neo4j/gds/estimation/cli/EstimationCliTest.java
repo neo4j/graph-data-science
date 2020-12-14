@@ -39,13 +39,17 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraWriteProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraWriteProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensWriteProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -126,6 +130,7 @@ final class EstimationCliTest {
 
     private static final List<String> PROCEDURES = List.of(
         "gds.beta.allShortestPaths.dijkstra.stream.estimate",
+        "gds.beta.allShortestPaths.dijkstra.write.estimate",
 
         "gds.beta.fastRPExtended.mutate.estimate",
         "gds.beta.fastRPExtended.stats.estimate",
@@ -147,7 +152,9 @@ final class EstimationCliTest {
         "gds.beta.modularityOptimization.write.estimate",
 
         "gds.beta.shortestPath.dijkstra.stream.estimate",
+        "gds.beta.shortestPath.dijkstra.write.estimate",
         "gds.beta.shortestPath.yens.stream.estimate",
+        "gds.beta.shortestPath.yens.write.estimate",
 
         "gds.betweenness.mutate.estimate",
         "gds.betweenness.stats.estimate",
@@ -385,11 +392,31 @@ final class EstimationCliTest {
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
             runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
+            runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
 
-            runEstimation(new FastRPExtendedMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(
+                new FastRPExtendedMutateProc()::estimate,
+                "mutateProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
             runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
             runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(new FastRPExtendedWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(
+                new FastRPExtendedWriteProc()::estimate,
+                "writeProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
 
             runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new K1ColoringStatsProc()::estimate),
@@ -430,7 +457,18 @@ final class EstimationCliTest {
             runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
+            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
             runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
+            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
 
             runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
