@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraFactory;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathStreamProc;
+import org.neo4j.graphalgo.beta.paths.ShortestPathStreamProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;

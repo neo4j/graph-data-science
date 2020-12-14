@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.beta.paths.ShortestPathStreamProc;
 import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraFactory;
