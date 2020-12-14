@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.utils.StatementApi;
@@ -31,6 +31,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.values.storable.Value;
 
 import java.util.Arrays;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -39,6 +43,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipStreamExporter extends StatementApi {
 
+    public static final int QUEUE_CAPACITY = 2;
     private final LongUnaryOperator toOriginalId;
     private final Stream<Relationship> relationships;
     private final int batchSize;
@@ -140,53 +145,133 @@ public final class RelationshipStreamExporter extends StatementApi {
 
         progressLogger.logStart();
 
-        var written = new MutableLong(0);
+        var writeQueue = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+        var bufferPool = new LinkedBlockingQueue<Buffer>(QUEUE_CAPACITY);
+        for (int i = 0; i < QUEUE_CAPACITY; i++) {
+            bufferPool.add(new Buffer(batchSize));
+        }
 
-        var buffer = new Buffer(batchSize);
+        var writer = new Writer(
+            tx,
+            toOriginalId,
+            writeQueue,
+            bufferPool,
+            relationshipToken,
+            propertyTokens,
+            terminationFlag,
+            progressLogger
+        );
+        var consumer = Pools.DEFAULT.submit(writer);
+
+        var bufferRef = new AtomicReference<>(bufferPool.poll());
 
         relationships.forEach(relationship -> {
+            var buffer = bufferRef.get();
             buffer.add(relationship);
             if (buffer.isFull()) {
-                written.add(write(buffer, relationshipToken, propertyTokens));
-                buffer.reset();
-                progressLogger.logMessage(formatWithLocale("Wrote %d relationships", written.longValue()));
-            }
-        });
-
-        // write final relationships
-        written.add(write(buffer, relationshipToken, propertyTokens));
-        progressLogger.logMessage(formatWithLocale("Wrote %d relationships", written.longValue()));
-        progressLogger.logFinish();
-
-        return written.longValue();
-    }
-
-    private int write(Buffer buffer, int relationshipToken, int[] propertyTokens) {
-        var bufferSize = buffer.size;
-        var tokenCount = propertyTokens.length;
-        var relationships = buffer.array;
-
-        acceptInTransaction(stmt -> {
-            terminationFlag.assertRunning();
-            var ops = stmt.dataWrite();
-
-            for (int i = 0; i < bufferSize; i++) {
-                // create relationship
-                long relationshipId = ops.relationshipCreate(
-                    toOriginalId.applyAsLong(relationships[i].sourceNode()),
-                    relationshipToken,
-                    toOriginalId.applyAsLong(relationships[i].targetNode())
-                );
-
-                // write properties
-                var values = relationships[i].values();
-                for (int j = 0; j < tokenCount; j++) {
-                    ops.relationshipSetProperty(relationshipId, propertyTokens[j], values[j]);
+                try {
+                    writeQueue.put(buffer);
+                    bufferRef.set(bufferPool.take());
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
 
-        return bufferSize;
+        try {
+            writeQueue.put(bufferRef.get());
+            // Add an empty buffer to signal end of writing
+            writeQueue.put(new Buffer(0));
+            consumer.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        progressLogger.logFinish();
+
+        return writer.written;
+    }
+
+    static class Writer extends StatementApi implements Runnable {
+
+        private final TerminationFlag terminationFlag;
+        private final ProgressLogger progressLogger;
+
+        private final LongUnaryOperator toOriginalId;
+        private final BlockingQueue<Buffer> writeQueue;
+        private final BlockingQueue<Buffer> bufferPool;
+
+        private final int relationshipToken;
+        private final int[] propertyTokens;
+        private long written;
+
+        Writer(
+            SecureTransaction tx,
+            LongUnaryOperator toOriginalId,
+            BlockingQueue<Buffer> writeQueue,
+            BlockingQueue<Buffer> bufferPool,
+            int relationshipToken,
+            int[] propertyTokens,
+            TerminationFlag terminationFlag,
+            ProgressLogger progressLogger
+        ) {
+            super(tx);
+            this.toOriginalId = toOriginalId;
+            this.writeQueue = writeQueue;
+            this.bufferPool = bufferPool;
+            this.relationshipToken = relationshipToken;
+            this.propertyTokens = propertyTokens;
+            this.terminationFlag = terminationFlag;
+            this.progressLogger = progressLogger;
+        }
+
+        @Override
+        public void run() {
+            Buffer buffer;
+            while (true) {
+                try {
+                    buffer = writeQueue.take();
+                    if (buffer.size == 0) {
+                        return;
+                    }
+                    written += write(buffer, relationshipToken, propertyTokens);
+
+                    progressLogger.logMessage(formatWithLocale("Wrote %d relationships", written));
+
+                    buffer.reset();
+                    bufferPool.put(buffer);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        private int write(Buffer buffer, int relationshipToken, int[] propertyTokens) {
+            var bufferSize = buffer.size;
+            var tokenCount = propertyTokens.length;
+            var relationships = buffer.array;
+
+            acceptInTransaction(stmt -> {
+                terminationFlag.assertRunning();
+                var ops = stmt.dataWrite();
+
+                for (int i = 0; i < bufferSize; i++) {
+                    // create relationship
+                    long relationshipId = ops.relationshipCreate(
+                        toOriginalId.applyAsLong(relationships[i].sourceNode()),
+                        relationshipToken,
+                        toOriginalId.applyAsLong(relationships[i].targetNode())
+                    );
+
+                    // write properties
+                    var values = relationships[i].values();
+                    for (int j = 0; j < tokenCount; j++) {
+                        ops.relationshipSetProperty(relationshipId, propertyTokens[j], values[j]);
+                    }
+                }
+            });
+
+            return bufferSize;
+        }
     }
 
     static class Buffer {
