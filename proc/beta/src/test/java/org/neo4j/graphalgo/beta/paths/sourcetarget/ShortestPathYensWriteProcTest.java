@@ -33,15 +33,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
 import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
-
-    private static final String WRITE_RELATIONSHIP_TYPE = "PATH";
 
     @Override
     public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig>> getProcedureClazz() {
@@ -65,7 +61,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
     }
 
     @Test
-    void testWriteYields() {
+    void testWrite() {
         var relationshipWeightProperty = "cost";
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
@@ -100,18 +96,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
             }
         );
 
-        var validationQuery = formatWithLocale(
-            "MATCH ({ id: %d })-[r:%s]->() " +
-            "RETURN r.%s AS totalCost, r.%s AS nodeIds, r.%s AS costs " +
-            "ORDER BY totalCost ASC",
-            1,
-            WRITE_RELATIONSHIP_TYPE,
-            TOTAL_COST_KEY,
-            NODE_IDS_KEY,
-            COSTS_KEY
-        );
-
-        assertCypherResult(validationQuery, List.of(
+        assertCypherResult(validationQuery(idC), List.of(
             Map.of("totalCost", 5.0D, "nodeIds", ids0, "costs", costs0),
             Map.of("totalCost", 7.0D, "nodeIds", ids1, "costs", costs1),
             Map.of("totalCost", 8.0D, "nodeIds", ids2, "costs", costs2)

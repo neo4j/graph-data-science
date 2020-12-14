@@ -46,6 +46,10 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {
 
+    long idA, idC, idD, idE, idF;
+    long[] ids0;
+    double[] costs0;
+
     @Override
     public String createQuery() {
         return "CREATE" +
@@ -71,6 +75,15 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
             GraphCreateProc.class
         );
         runQuery(createQuery());
+
+        idA = nodeIdByProperty(db, 1);
+        idC = nodeIdByProperty(db, 3);
+        idD = nodeIdByProperty(db, 4);
+        idE = nodeIdByProperty(db, 5);
+        idF = nodeIdByProperty(db, 6);
+
+        ids0 = new long[]{idA, idC, idE, idD, idF};
+        costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
     }
 
     @AfterEach

@@ -33,16 +33,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
 import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
-
-    private static final String WRITE_RELATIONSHIP_TYPE = "PATH";
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig>> getProcedureClazz() {
@@ -66,7 +61,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     }
 
     @Test
-    void testWriteYields() {
+    void testWrite() {
         var relationshipWeightProperty = "cost";
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
@@ -100,27 +95,6 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
             }
         );
 
-        var validationQuery = formatWithLocale(
-            "MATCH ({ id: %d })-[r:%s]->({ id: %d }) RETURN r.%s AS totalCost, r.%s AS nodeIds, r.%s AS costs",
-            1,
-            WRITE_RELATIONSHIP_TYPE,
-            6,
-            TOTAL_COST_KEY,
-            NODE_IDS_KEY,
-            COSTS_KEY
-        );
-
-        var idA = nodeIdByProperty(db, 1);
-        var idC = nodeIdByProperty(db, 3);
-        var idD = nodeIdByProperty(db, 4);
-        var idE = nodeIdByProperty(db, 5);
-        var idF = nodeIdByProperty(db, 6);
-
-        assertCypherResult(validationQuery, List.of(Map.of(
-            "totalCost", 20.0D,
-            "nodeIds", new long[]{idA, idC, idE, idD, idF},
-            "costs", new double[]{0.0, 2.0, 5.0, 9.0, 20.0}
-            ))
-        );
+        assertCypherResult(validationQuery(idA), List.of(Map.of("totalCost", 20.0D, "nodeIds", ids0, "costs", costs0)));
     }
 }

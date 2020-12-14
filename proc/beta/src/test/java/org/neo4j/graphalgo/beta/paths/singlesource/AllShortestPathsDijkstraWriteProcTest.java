@@ -33,15 +33,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
+import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
 import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraWriteConfig> {
-
-    private static final String WRITE_RELATIONSHIP_TYPE = "PATH";
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>> getProcedureClazz() {
@@ -98,18 +94,7 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
             }
         );
 
-        var validationQuery = formatWithLocale(
-            "MATCH ({ id: %d })-[r:%s]->() " +
-            "RETURN r.%s AS totalCost, r.%s AS nodeIds, r.%s AS costs " +
-            "ORDER BY totalCost ASC",
-            1,
-            WRITE_RELATIONSHIP_TYPE,
-            TOTAL_COST_KEY,
-            NODE_IDS_KEY,
-            COSTS_KEY
-        );
-
-        assertCypherResult(validationQuery, List.of(
+        assertCypherResult(validationQuery(idA), List.of(
             Map.of("totalCost", 0.0D, "nodeIds", ids0, "costs", costs0),
             Map.of("totalCost", 2.0D, "nodeIds", ids1, "costs", costs1),
             Map.of("totalCost", 4.0D, "nodeIds", ids2, "costs", costs2),
