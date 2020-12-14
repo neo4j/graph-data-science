@@ -167,7 +167,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         var pathResultBuilder = ImmutablePathResult.builder()
             .sourceNode(sourceNode);
 
-        var paths = Stream.generate(() -> next(stopPredicate, pathResultBuilder));
+        var paths = Stream
+            .generate(() -> next(stopPredicate, pathResultBuilder))
+            .takeWhile(pathResult -> pathResult != PathResult.EMPTY);
 
         return ImmutableDijkstraResult
             .builder()

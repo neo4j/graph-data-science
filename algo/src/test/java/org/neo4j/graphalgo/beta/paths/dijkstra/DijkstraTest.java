@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
-import org.neo4j.graphalgo.beta.paths.PathResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -126,14 +125,12 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("a"))
                 .build();
 
-            var path = Dijkstra
+            var paths = Dijkstra
                 .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
-                .paths()
-                .findFirst()
-                .get();
+                .pathSet();
 
-            assertEquals(PathResult.EMPTY, path);
+            assertTrue(paths.isEmpty());
         }
 
         @Test

@@ -34,6 +34,6 @@ public interface DijkstraResult {
 
     @TestOnly
     default Set<PathResult> pathSet() {
-        return paths().takeWhile(p -> p != PathResult.EMPTY).collect(Collectors.toSet());
+        return paths().collect(Collectors.toSet());
     }
 }

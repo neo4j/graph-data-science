@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
 
@@ -118,11 +119,11 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         logFinish(1);
 
         // no shortest path has been found
-        if (shortestPath == PathResult.EMPTY) {
-            return ImmutableDijkstraResult.of(Stream.of(shortestPath));
+        if (shortestPath.isEmpty()) {
+            return ImmutableDijkstraResult.of(Stream.empty());
         }
 
-        kShortestPaths.add(MutablePathResult.of(shortestPath));
+        kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
 
         PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
@@ -165,12 +166,12 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 relationshipBlackList.clear();
 
                 // No new candidate from this spur node, continue with next node.
-                if (spurPath == PathResult.EMPTY) {
+                if (spurPath.isEmpty()) {
                     continue;
                 }
 
                 // Entire path is made up of the root path and spur path.
-                rootPath.append(MutablePathResult.of(spurPath));
+                rootPath.append(MutablePathResult.of(spurPath.get()));
                 // Add the potential k-shortest path to the heap.
                 if (!candidates.contains(rootPath)) {
                     candidates.add(rootPath);
@@ -220,11 +221,11 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         progressLogger.logMessage(formatWithLocale(":: Finished searching path %d of %d", iteration, config.k()));
     }
 
-    private PathResult computeDijkstra(long sourceNode) {
+    private Optional<PathResult> computeDijkstra(long sourceNode) {
         progressLogger.logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
         progressLogger.setTask("Dijkstra");
         progressLogger.reset(graph.relationshipCount());
-        var pathResult = dijkstra.compute().pathSet().stream().findFirst().orElse(PathResult.EMPTY);
+        var pathResult = dijkstra.compute().paths().findFirst();
         progressLogger.setTask("Yens");
         return pathResult;
     }

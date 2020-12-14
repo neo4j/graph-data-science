@@ -59,7 +59,6 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
 
             var relationshipStream = result
                 .paths()
-                .takeWhile(pathResult -> pathResult != PathResult.EMPTY)
                 .map(pathResult -> ImmutableRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),

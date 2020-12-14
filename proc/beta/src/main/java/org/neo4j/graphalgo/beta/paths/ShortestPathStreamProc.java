@@ -23,9 +23,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.beta.paths.PathResult;
-import org.neo4j.graphalgo.beta.paths.ReturnsPathConfig;
-import org.neo4j.graphalgo.beta.paths.StreamResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
@@ -55,7 +52,6 @@ public abstract class ShortestPathStreamProc<
             return computationResult
                 .result()
                 .paths()
-                .takeWhile(path -> path != PathResult.EMPTY)
                 .map(path -> resultBuilder.build(path, config.path()));
         });
     }
