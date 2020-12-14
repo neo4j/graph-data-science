@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface WriteRelationshipConfig extends WriteConfig {
 
+    String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String writeRelationshipType();
 }
