@@ -43,7 +43,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipStreamExporter extends StatementApi {
 
-    public static final int QUEUE_CAPACITY = 2;
+    private static final int QUEUE_CAPACITY = 2;
+
     private final LongUnaryOperator toOriginalId;
     private final Stream<Relationship> relationships;
     private final int batchSize;
@@ -88,6 +89,9 @@ public final class RelationshipStreamExporter extends StatementApi {
             TerminationFlag terminationFlag
         ) {
             super(tx, idMapping, terminationFlag);
+            if (relationships.isParallel()) {
+                throw new IllegalArgumentException("Parallel relationship exporter supports only sequential streams. Use Stream#sequential().");
+            }
             this.relationships = relationships;
             this.batchSize = (int) MIN_BATCH_SIZE;
         }
