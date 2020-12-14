@@ -198,16 +198,16 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(relationshipCount, relationshipsWritten);
 
-        assertThat(log.getMessages("info"))
-            .containsExactlyInAnyOrder(
-                "[main] WriteRelationshipStream :: Start",
-                "[main] WriteRelationshipStream Wrote 25 relationships",
-                "[main] WriteRelationshipStream Wrote 50 relationships",
-                "[main] WriteRelationshipStream Wrote 75 relationships",
-                "[main] WriteRelationshipStream Wrote 100 relationships",
-                "[main] WriteRelationshipStream Wrote 105 relationships",
-                "[main] WriteRelationshipStream :: Finished"
-            );
+        var messages = log.getMessages("info");
+        assertEquals(7, messages.size());
+
+        assertThat(messages.get(0)).contains("WriteRelationshipStream :: Start");
+        assertThat(messages.get(1)).contains("WriteRelationshipStream Wrote 25 relationships");
+        assertThat(messages.get(2)).contains("WriteRelationshipStream Wrote 50 relationships");
+        assertThat(messages.get(3)).contains("WriteRelationshipStream Wrote 75 relationships");
+        assertThat(messages.get(4)).contains("WriteRelationshipStream Wrote 100 relationships");
+        assertThat(messages.get(5)).contains("WriteRelationshipStream Wrote 105 relationships");
+        assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
     }
 
     RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {
