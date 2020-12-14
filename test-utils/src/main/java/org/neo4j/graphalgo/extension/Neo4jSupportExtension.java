@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.extension;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -31,12 +30,11 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.core.NodeEntity;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -61,7 +59,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
     public void beforeEach(ExtensionContext context) throws Exception {
         GraphDatabaseAPI db = (GraphDatabaseAPI) getDbms(context)
             .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
-            .orElseThrow(() -> null);
+            .orElseThrow(() -> new IllegalStateException("No database was found."));
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
         Map<String, Node> idMapping = neo4jGraphSetup(db, requiredTestClass);
@@ -73,26 +71,14 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
     }
 
     private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Class<?> testClass) {
-        Collection<Class<?>> classHierarchy = getClassHierarchy(testClass);
-        return classHierarchy.stream().flatMap(clazz -> stream(clazz.getDeclaredFields()))
+        return Stream.<Class<?>>iterate(testClass, c -> c.getSuperclass() != null, Class::getSuperclass)
+            .flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
             .map(ExtensionUtil::getStringValueOfField)
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
             .orElseGet(Map::of);
-    }
-
-    @NotNull
-    private Collection<Class<?>> getClassHierarchy(Class<?> testClass) {
-        Collection<Class<?>> classHierarchy = new ArrayList<>();
-        classHierarchy.add(testClass);
-        var superClass = testClass.getSuperclass();
-        while (superClass != null) {
-            classHierarchy.add(superClass);
-            superClass = superClass.getSuperclass();
-        }
-        return classHierarchy;
     }
 
     private static Map<String, Node> extractVariableIds(Result result) {
