@@ -34,8 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.pregel.HitsPregel.AUTH_PROPERTY;
-import static org.neo4j.gds.pregel.HitsPregel.HUB_PROPERTY;
+import static org.neo4j.gds.pregel.Hits.AUTH_PROPERTY;
+import static org.neo4j.gds.pregel.Hits.HUB_PROPERTY;
 
 @GdlExtension
 class HitsTest {
@@ -70,12 +70,12 @@ class HitsTest {
 
     @Test
     void testHits() {
-        var config = ImmutableHitsConfig.builder().isAsynchronous(false).concurrency(1).k(30).build();
+        var config = ImmutableHitsConfig.builder().concurrency(1).hitsIterations(30).build();
 
         var pregelJob = Pregel.create(
             graph,
             config,
-            new HitsPregel(),
+            new Hits(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -109,6 +109,7 @@ class HitsTest {
         assertThat(actualAuthScores).containsExactlyEntriesOf(expectedAuthScores);
     }
 
+    // Basically implements the pseudo code from Wikipedia
     private class PseudoCodeHits {
         final double[] auths;
         final double[] hubs;

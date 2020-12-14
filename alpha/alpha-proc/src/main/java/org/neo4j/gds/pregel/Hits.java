@@ -31,15 +31,18 @@ import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.stream.StreamSupport;
 
 @PregelProcedure(
     name = "gds.alpha.hits",
-    description = "TODO"
+    description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
 )
-public class HitsPregel implements PregelComputation<HitsPregel.HitsConfig> {
+public class Hits implements PregelComputation<Hits.HitsConfig> {
 
     static final String HUB_PROPERTY = "hub";
     static final String AUTH_PROPERTY = "auth";
@@ -94,7 +97,7 @@ public class HitsPregel implements PregelComputation<HitsPregel.HitsConfig> {
         } else if (state == HitsState.NORMALIZE_AUTHS) {
             // normalise auth
             var normalizedValue = normalize(context, AUTH_PROPERTY);
-            // send normalised auths to incomming neighbors
+            // send normalised auths to incoming neighbors
             for (long neighbor : context.longArrayNodeValue(NEIGHBOR_IDS)) {
                 context.sendTo(neighbor, normalizedValue);
             }
@@ -143,12 +146,13 @@ public class HitsPregel implements PregelComputation<HitsPregel.HitsConfig> {
     @Configuration
     public interface HitsConfig extends PregelConfig {
         @Value
-        int k();
+        int hitsIterations();
 
         @Override
         @Value.Derived
+        @Configuration.Ignore
         default int maxIterations() {
-            return k() * 4 + 1;
+            return hitsIterations() * 4 + 1;
         }
 
         @Override
@@ -156,6 +160,20 @@ public class HitsPregel implements PregelComputation<HitsPregel.HitsConfig> {
         @Value.Derived
         default boolean isAsynchronous() {
             return false;
+        }
+
+        static HitsConfig of(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitConfig,
+            CypherMapWrapper userConfig
+        ) {
+            return new HitsConfigImpl(
+                graphName,
+                maybeImplicitConfig,
+                username,
+                userConfig
+            );
         }
     }
 
