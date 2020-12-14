@@ -41,7 +41,7 @@ import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraPr
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<ShortestPathDijkstraWriteConfig> {
+public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Dijkstra, ShortestPathDijkstraWriteConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)

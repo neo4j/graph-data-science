@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.graphalgo.beta.paths.sourcetarget;
+
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
+import org.neo4j.graphalgo.beta.paths.yens.Yens;
+import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.COSTS_KEY;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
+import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPathYensWriteConfig> {
+
+    private static final String WRITE_RELATIONSHIP_TYPE = "PATH";
+
+    @Override
+    public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensWriteConfig>> getProcedureClazz() {
+        return ShortestPathYensWriteProc.class;
+    }
+
+    @Override
+    public ShortestPathYensWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+        return ShortestPathYensWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
+
+    @Override
+    public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
+        mapWrapper = super.createMinimalConfig(mapWrapper);
+
+        if (!mapWrapper.containsKey(WRITE_RELATIONSHIP_TYPE_KEY)) {
+            mapWrapper = mapWrapper.withString(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
+        }
+
+        return mapWrapper;
+    }
+
+    @Test
+    void testWriteYields() {
+        var relationshipWeightProperty = "cost";
+
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+
+        var createQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipProperty(relationshipWeightProperty)
+            .graphCreate("graph")
+            .yields();
+        runQuery(createQuery);
+
+        var query = GdsCypher.call().explicitCreation("graph")
+            .algo("gds.beta.shortestPath.yens")
+            .writeMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter("k", config.k())
+            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .yields();
+
+        runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertUserInput(row, "writeRelationshipType", WRITE_RELATIONSHIP_TYPE);
+                assertUserInput(row, "relationshipWeightProperty", relationshipWeightProperty);
+                assertEquals(3L, row.getNumber("relationshipsWritten"));
+                assertNotEquals(-1L, row.getNumber("createMillis"));
+                assertNotEquals(-1L, row.getNumber("computeMillis"));
+                assertNotEquals(-1L, row.getNumber("writeMillis"));
+            }
+        );
+
+        var validationQuery = formatWithLocale(
+            "MATCH ({ id: %d })-[r:%s]->() " +
+            "RETURN r.%s AS totalCost, r.%s AS nodeIds, r.%s AS costs " +
+            "ORDER BY totalCost ASC",
+            1,
+            WRITE_RELATIONSHIP_TYPE,
+            TOTAL_COST_KEY,
+            NODE_IDS_KEY,
+            COSTS_KEY
+        );
+
+        assertCypherResult(validationQuery, List.of(
+            Map.of("totalCost", 5.0D, "nodeIds", ids0, "costs", costs0),
+            Map.of("totalCost", 7.0D, "nodeIds", ids1, "costs", costs1),
+            Map.of("totalCost", 8.0D, "nodeIds", ids2, "costs", costs2)
+        ));
+    }
+}

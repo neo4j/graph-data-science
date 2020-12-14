@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.paths;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
+import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
@@ -36,10 +36,10 @@ import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstr
 import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public abstract class ShortestPathWriteProc<CONFIG extends AlgoBaseConfig & WriteRelationshipConfig>
-    extends AlgoBaseProc<Dijkstra, DijkstraResult, CONFIG> {
+public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig>
+    extends AlgoBaseProc<ALGO, DijkstraResult, CONFIG> {
 
-    protected Stream<WriteResult> write(ComputationResult<Dijkstra, DijkstraResult, CONFIG> computationResult) {
+    protected Stream<WriteResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Write relationships failed", () -> {
             var config = computationResult.config();
 

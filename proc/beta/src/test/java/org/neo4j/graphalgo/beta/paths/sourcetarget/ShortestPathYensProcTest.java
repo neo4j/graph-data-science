@@ -47,6 +47,10 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     RelationshipWeightConfigTest<Yens, CONFIG, DijkstraResult>
 {
 
+    long idC, idH, idD, idE, idF, idG;
+    long[] ids0, ids1, ids2;
+    double[] costs0, costs1, costs2;
+
     @Override
     public String createQuery() {
         return "CREATE" +
@@ -74,6 +78,21 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             GraphCreateProc.class
         );
         runQuery(createQuery());
+
+        idC = nodeIdByProperty(db, 1);
+        idD = nodeIdByProperty(db, 2);
+        idE = nodeIdByProperty(db, 3);
+        idF = nodeIdByProperty(db, 4);
+        idG = nodeIdByProperty(db, 5);
+        idH = nodeIdByProperty(db, 6);
+
+        ids0 = new long[]{idC, idE, idF, idH};
+        ids1 = new long[]{idC, idE, idG, idH};
+        ids2 = new long[]{idC, idD, idF, idH};
+
+        costs0 = new double[]{0.0, 2.0, 4.0, 5.0};
+        costs1 = new double[]{0.0, 2.0, 5.0, 7.0};
+        costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
     }
 
     @AfterEach

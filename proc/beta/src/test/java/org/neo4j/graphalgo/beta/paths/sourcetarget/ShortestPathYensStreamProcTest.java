@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 
 class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPathYensStreamConfig> {
@@ -70,21 +69,6 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("path", true)
             .yields();
-
-        var idC = nodeIdByProperty(db, 1);
-        var idD = nodeIdByProperty(db, 2);
-        var idE = nodeIdByProperty(db, 3);
-        var idF = nodeIdByProperty(db, 4);
-        var idG = nodeIdByProperty(db, 5);
-        var idH = nodeIdByProperty(db, 6);
-
-        var ids0 = new long[]{idC, idE, idF, idH};
-        var ids1 = new long[]{idC, idE, idG, idH};
-        var ids2 = new long[]{idC, idD, idF, idH};
-
-        var costs0 = new double[]{0.0, 2.0, 4.0, 5.0};
-        var costs1 = new double[]{0.0, 2.0, 5.0, 7.0};
-        var costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             var path0 = PathFactory.create(tx, -1, ids0, costs0, RelationshipType.withName("PATH_0"), COST_PROPERTY_NAME);
