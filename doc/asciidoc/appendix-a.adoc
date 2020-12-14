@@ -272,6 +272,15 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
 | `gds.alpha.eigenvector.stream`
 | `gds.alpha.eigenvector.write`
+.8+<.^|<<algorithms-hits, HITS>>
+| `gds.alpha.hits.mutate`
+| `gds.alpha.hits.mutate.estimate`
+| `gds.alpha.hits.stats`
+| `gds.alpha.hits.stats.estimate`
+| `gds.alpha.hits.stream`
+| `gds.alpha.hits.stream.estimate`
+| `gds.alpha.hits.write`
+| `gds.alpha.hits.write.estimate`
 .1+<.^|<<alpha-algorithms-random-walk, Random Walk>>
 | `gds.alpha.randomWalk.stream`
 .2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>

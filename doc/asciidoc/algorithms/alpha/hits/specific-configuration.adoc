@@ -1,0 +1,6 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                      | Type    | Default | Optional | Description
+| hitsIterations            | Integer | n/a     | no       | The number of hits iterations to run. The number of pregel iterations will be equal to `hitsIterations * 4 + 1`
+|===

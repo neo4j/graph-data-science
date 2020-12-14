@@ -73,6 +73,9 @@
                 <d:tocentry linkend="algorithms-eigenvector">
                     <?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-hits">
+                    <?dbhtml filename="algorithms/hits/index.html"?>
+                </d:tocentry>
 
             </d:tocentry>
             <d:tocentry linkend="algorithms-community">
