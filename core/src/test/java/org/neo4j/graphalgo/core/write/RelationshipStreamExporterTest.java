@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -171,6 +172,17 @@ class RelationshipStreamExporterTest extends BaseTest {
             "MATCH ()-[r]->() RETURN count(r) AS count",
             List.of(Map.of("count", (long) relationshipCount))
         );
+    }
+
+    @Test
+    void exportEmptyStream() {
+        var exporter = RelationshipStreamExporter
+            .builder(db, graph, Stream.empty(), TerminationFlag.RUNNING_TRUE)
+            .build();
+
+        var relationshipsWritten = exporter.write("FOOBAR");
+
+        assertEquals(0, relationshipsWritten);
     }
 
     @Test
