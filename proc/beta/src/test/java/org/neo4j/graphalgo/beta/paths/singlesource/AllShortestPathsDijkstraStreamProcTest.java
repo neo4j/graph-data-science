@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.util.Arrays.asList;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 
 class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraStreamConfig> {
@@ -68,27 +67,6 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("path", true)
             .yields();
-
-        var idA = nodeIdByProperty(db, 1);
-        var idB = nodeIdByProperty(db, 2);
-        var idC = nodeIdByProperty(db, 3);
-        var idD = nodeIdByProperty(db, 4);
-        var idE = nodeIdByProperty(db, 5);
-        var idF = nodeIdByProperty(db, 6);
-
-        var costs0 = new double[]{0.0};
-        var costs1 = new double[]{0.0, 2.0};
-        var costs2 = new double[]{0.0, 4.0};
-        var costs3 = new double[]{0.0, 2.0, 5.0};
-        var costs4 = new double[]{0.0, 2.0, 5.0, 9.0};
-        var costs5 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
-
-        var ids0 = new long[]{idA};
-        var ids1 = new long[]{idA, idC};
-        var ids2 = new long[]{idA, idB};
-        var ids3 = new long[]{idA, idC, idE};
-        var ids4 = new long[]{idA, idC, idE, idD};
-        var ids5 = new long[]{idA, idC, idE, idD, idF};
 
         //@formatter:off
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {

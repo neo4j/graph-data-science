@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.sourcetarget;
+package org.neo4j.graphalgo.beta.paths.singlesource;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.beta.paths.ShortestPathWriteProc;
 import org.neo4j.graphalgo.beta.paths.WriteResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraFactory;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -36,14 +36,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.of;
-import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<ShortestPathDijkstraWriteConfig> {
+public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<AllShortestPathsDijkstraWriteConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.write", mode = WRITE)
+    @Procedure(name = "gds.beta.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -52,7 +51,7 @@ public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Shortes
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.write.estimate", mode = READ)
+    @Procedure(name = "gds.beta.allShortestPaths.dijkstra.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -62,17 +61,18 @@ public class ShortestPathDijkstraWriteProc extends ShortestPathWriteProc<Shortes
     }
 
     @Override
-    protected ShortestPathDijkstraWriteConfig newConfig(
+    protected AllShortestPathsDijkstraWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return of(username, graphName, maybeImplicitCreate, config);
+        return AllShortestPathsDijkstraWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Dijkstra, ShortestPathDijkstraWriteConfig> algorithmFactory() {
-        return DijkstraFactory.sourceTarget();
+    protected AlgorithmFactory<Dijkstra, AllShortestPathsDijkstraWriteConfig> algorithmFactory() {
+        return DijkstraFactory.singleSource();
     }
 }
+

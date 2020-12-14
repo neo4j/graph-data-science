@@ -44,6 +44,10 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
     RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {
+    // Track expected results
+    long idA, idB, idC, idD, idE, idF;
+    static double[] costs0, costs1, costs2, costs3, costs4, costs5;
+    static long[] ids0, ids1, ids2, ids3, ids4, ids5;
 
     @Override
     public String createQuery() {
@@ -70,6 +74,27 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
             GraphCreateProc.class
         );
         runQuery(createQuery());
+
+        idA = nodeIdByProperty(db, 1);
+        idB = nodeIdByProperty(db, 2);
+        idC = nodeIdByProperty(db, 3);
+        idD = nodeIdByProperty(db, 4);
+        idE = nodeIdByProperty(db, 5);
+        idF = nodeIdByProperty(db, 6);
+
+        costs0 = new double[]{0.0};
+        costs1 = new double[]{0.0, 2.0};
+        costs2 = new double[]{0.0, 4.0};
+        costs3 = new double[]{0.0, 2.0, 5.0};
+        costs4 = new double[]{0.0, 2.0, 5.0, 9.0};
+        costs5 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
+
+        ids0 = new long[]{idA};
+        ids1 = new long[]{idA, idC};
+        ids2 = new long[]{idA, idB};
+        ids3 = new long[]{idA, idC, idE};
+        ids4 = new long[]{idA, idC, idE, idD};
+        ids5 = new long[]{idA, idC, idE, idD, idF};
     }
 
     @AfterEach
