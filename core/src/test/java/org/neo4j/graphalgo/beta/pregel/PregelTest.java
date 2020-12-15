@@ -248,7 +248,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.setNodeValue(KEY, 0.0);
                 context.sendToNeighbors(1.0);
@@ -281,7 +281,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
             if (context.nodeId() == 0) {
                 var sum = StreamSupport.stream(messages.spliterator(), false).mapToDouble(d -> d).sum();
                 context.setNodeValue(KEY, sum);
@@ -331,7 +331,7 @@ class PregelTest {
         @Override
         public void compute(
             ComputeContext<CompositeTestComputationConfig> context,
-            Pregel.Messages messages
+            Messages messages
         ) {
             if (!context.isInitialSuperstep()) {
                 context.setNodeValue(LONG_KEY, context.longNodeValue(LONG_KEY) * 2);
@@ -359,7 +359,7 @@ class PregelTest {
         }
 
         @Override
-        public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
 
         }
 

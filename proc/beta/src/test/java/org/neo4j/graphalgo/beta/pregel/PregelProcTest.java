@@ -327,7 +327,7 @@ public class PregelProcTest extends BaseProcTest {
                 }
 
                 @Override
-                public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+                public void compute(ComputeContext<PregelConfig> context, Messages messages) {
                     context.setNodeValue(LONG_KEY, 42L);
                     context.setNodeValue(DOUBLE_KEY, 42.0D);
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel.cc;
 
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
@@ -42,7 +42,7 @@ public class BaseClassHasNoEmptyConstructor implements PregelComputation<PregelC
     }
 
     @Override
-    public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<PregelConfig> context, Messages messages) {
 
     }
 }

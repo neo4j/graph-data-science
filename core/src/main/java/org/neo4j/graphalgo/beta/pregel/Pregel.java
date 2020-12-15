@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
 import org.jctools.queues.MpscLinkedQueue;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -46,7 +45,6 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -349,8 +347,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         @Override
         public void run() {
             var messageIterator = isAsync
-                ? new MessageIterator.Async()
-                : new MessageIterator.Sync();
+                ? new Messages.MessageIterator.Async()
+                : new Messages.MessageIterator.Sync();
             var messages = new Messages(messageIterator);
 
             long batchStart = nodeBatch.startNode();
@@ -597,73 +595,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
     }
 
-    public static class Messages implements Iterable<Double> {
 
-        private final MessageIterator iterator;
-
-        Messages(MessageIterator iterator) {
-            this.iterator = iterator;
-        }
-
-        @NotNull
-        @Override
-        public Iterator<Double> iterator() {
-            return iterator;
-        }
-
-        public boolean isEmpty() {
-            return iterator.isEmpty();
-        }
-    }
-
-    abstract static class MessageIterator implements Iterator<Double> {
-
-        Queue<Double> queue;
-
-        @Nullable Double next;
-
-        @Override
-        public @Nullable Double next() {
-            return next;
-        }
-
-        void init(@Nullable Queue<Double> queue) {
-            this.queue = queue;
-        }
-
-        public abstract boolean isEmpty();
-
-        static class Sync extends MessageIterator {
-            @Override
-            public boolean hasNext() {
-                if (queue == null) {
-                    return false;
-                }
-                return !Double.isNaN(next = queue.poll());
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return queue == null || queue.isEmpty() || Double.isNaN(queue.peek());
-            }
-        }
-
-        static class Async extends MessageIterator {
-            @Override
-            public boolean hasNext() {
-                if (queue == null) {
-                    return false;
-                }
-                return (next = queue.poll()) != null;
-            }
-
-
-            @Override
-            public boolean isEmpty() {
-                return queue == null || queue.isEmpty();
-            }
-        }
-    }
 
     @ValueClass
     public interface PregelResult {

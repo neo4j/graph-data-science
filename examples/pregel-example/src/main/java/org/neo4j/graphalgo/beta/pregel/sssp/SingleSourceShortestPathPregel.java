@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.sssp;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -57,7 +57,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     }
 
     @Override
-    public void compute(ComputeContext<SingleSourceShortestPathPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<SingleSourceShortestPathPregelConfig> context, Messages messages) {
         if (context.isInitialSuperstep()) {
             if (context.nodeId() == context.config().startNode()) {
                 context.sendToNeighbors(1);

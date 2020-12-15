@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel.cc;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
@@ -55,7 +55,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     }
 
     @Override
-    public void compute(ComputeContext<ConnectedComponentsConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<ConnectedComponentsConfig> context, Messages messages) {
         long oldComponentId = context.longNodeValue(COMPONENT);
         long newComponentId = oldComponentId;
 
