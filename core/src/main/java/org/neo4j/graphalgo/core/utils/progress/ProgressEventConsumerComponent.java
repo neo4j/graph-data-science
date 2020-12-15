@@ -75,6 +75,6 @@ public final class ProgressEventConsumerComponent extends LifecycleAdapter imple
         if (progressEventConsumer == null) {
             throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
         }
-        return new ProgressEventTracker(messageQueue);
+        return new ProgressEventQueueTracker(messageQueue);
     }
 }

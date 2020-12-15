@@ -19,22 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-public interface ProgressEventTracker {
-    // MP
-    void addLogEvent(
-        String id,
-        String message
-    );
+import java.util.List;
 
-    // MP
-    void addLogEvent(
-        String id,
-        String message,
-        double progress
-    );
+public enum EmptyProgressEventStore implements ProgressEventStore {
+    INSTANCE;
 
-    // MP
-    void addLogEvent(
-        LogEvent event
-    );
+    @Override
+    public List<LogEvent> query(String username) {
+        return List.of();
+    }
 }

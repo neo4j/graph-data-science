@@ -19,22 +19,23 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-public interface ProgressEventTracker {
-    // MP
-    void addLogEvent(
-        String id,
-        String message
-    );
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Description;
+import org.neo4j.configuration.DocumentedDefaultValue;
+import org.neo4j.configuration.SettingsDeclaration;
+import org.neo4j.graphdb.config.Setting;
 
-    // MP
-    void addLogEvent(
-        String id,
-        String message,
-        double progress
-    );
+import static org.neo4j.configuration.SettingImpl.newBuilder;
+import static org.neo4j.configuration.SettingValueParsers.BOOL;
 
-    // MP
-    void addLogEvent(
-        LogEvent event
-    );
+@ServiceProvider
+public final class ProgressFeatureSettings implements SettingsDeclaration {
+
+    @Description("Enable progress logging tracking.")
+    @DocumentedDefaultValue("false")
+    public static final Setting<Boolean> progress_tracking_enabled = newBuilder(
+        "gds.progress_tracking_enabled",
+        BOOL,
+        false
+    ).build();
 }

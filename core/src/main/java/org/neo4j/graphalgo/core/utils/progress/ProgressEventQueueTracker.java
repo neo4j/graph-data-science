@@ -19,22 +19,47 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-public interface ProgressEventTracker {
-    // MP
-    void addLogEvent(
-        String id,
-        String message
-    );
+import java.util.OptionalDouble;
+import java.util.Queue;
+
+public final class ProgressEventQueueTracker implements ProgressEventTracker {
+
+    // Queue<LogEvent> - MPSC
+    // singleton, (not static, wish list)
+
+    private final Queue<LogEvent> queue;
+
+    ProgressEventQueueTracker(Queue<LogEvent> queue) {
+        this.queue = queue;
+    }
 
     // MP
-    void addLogEvent(
+    @Override
+    public void addLogEvent(
+        String id,
+        String message
+    ) {
+        var logEvent = ImmutableLogEvent.of(id, message, OptionalDouble.empty());
+        this.queue.offer(logEvent);
+    }
+
+    // MP
+    @Override
+    public void addLogEvent(
         String id,
         String message,
         double progress
-    );
+    ) {
+
+    }
 
     // MP
-    void addLogEvent(
+    @Override
+    public void addLogEvent(
         LogEvent event
-    );
+    ) {
+
+    }
+
+
 }

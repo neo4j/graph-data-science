@@ -37,7 +37,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.core.utils.RenamesCurrentThread.renameThread;
 
-public final class ProgressEventConsumer implements Runnable {
+public final class ProgressEventConsumer implements Runnable, ProgressEventStore {
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
@@ -72,6 +72,7 @@ public final class ProgressEventConsumer implements Runnable {
         events = new ConcurrentHashMap<>();
     }
 
+    @Override
     public List<LogEvent> query(String username) {
         return events
             .getOrDefault(username, emptyMap())

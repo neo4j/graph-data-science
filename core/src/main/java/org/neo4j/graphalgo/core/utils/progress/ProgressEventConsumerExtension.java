@@ -19,41 +19,64 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Config;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.monitoring.Monitors;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.util.Optional;
+
 @ServiceProvider
 public final class ProgressEventConsumerExtension extends ExtensionFactory<ProgressEventConsumerExtension.Dependencies> {
+    private final @Nullable JobScheduler scheduler;
+
     public ProgressEventConsumerExtension() {
+        this(null);
+    }
+
+    public ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
+        this.scheduler = scheduler;
     }
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, ProgressEventConsumerExtension.Dependencies dependencies) {
-        var progressEventConsumerComponent = new ProgressEventConsumerComponent(
-            dependencies.logService().getInternalLog(ProgressEventConsumerComponent.class),
-            dependencies.jobScheduler(),
-            dependencies.globalMonitors()
-        );
-
         var registry = dependencies.globalProceduresRegistry();
-        registry.registerComponent(ProgressEventTracker.class, progressEventConsumerComponent, true);
-        registry.registerComponent(
-            ProgressEventConsumer.class,
-            ctx -> progressEventConsumerComponent.progressEventConsumer(),
-            true
-        );
-        return progressEventConsumerComponent;
+        var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
+        if (enabled) {
+            var scheduler = Optional.ofNullable(this.scheduler).orElseGet(dependencies::jobScheduler);
+            var progressEventConsumerComponent = new ProgressEventConsumerComponent(
+                dependencies.logService().getInternalLog(ProgressEventConsumerComponent.class),
+                scheduler,
+                dependencies.globalMonitors()
+            );
+            registry.registerComponent(ProgressEventTracker.class, progressEventConsumerComponent, true);
+            registry.registerComponent(
+                ProgressEventStore.class,
+                ctx -> progressEventConsumerComponent.progressEventConsumer(),
+                true
+            );
+            return progressEventConsumerComponent;
+        } else {
+            registry.registerComponent(ProgressEventTracker.class, ctx -> EmptyProgressEventTracker.INSTANCE, true);
+            registry.registerComponent(ProgressEventStore.class, ctx -> EmptyProgressEventStore.INSTANCE, true);
+            return LifecycleAdapter.onStart(() -> {
+                dependencies.logService().getUserLog(ProgressEventTracker.class).info("disabled");
+            });
+        }
     }
 
     interface Dependencies {
+        Config config();
+
         LogService logService();
 
         JobScheduler jobScheduler();
