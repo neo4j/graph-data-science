@@ -40,7 +40,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.core.utils.RenamesCurrentThread.renameThread;
 
-public final class ProgressEventConsumer implements Runnable, ProgressEventStore {
+final class ProgressEventConsumer implements Runnable, ProgressEventStore {
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
@@ -104,7 +104,7 @@ public final class ProgressEventConsumer implements Runnable, ProgressEventStore
             .add(event);
     }
 
-    public void start() {
+    void start() {
         monitor.started();
         if (job != null) {
             throw new IllegalArgumentException("Already running");
@@ -112,7 +112,7 @@ public final class ProgressEventConsumer implements Runnable, ProgressEventStore
         job = jobRunner.scheduleAtInterval(this, 0, 100, TimeUnit.MILLISECONDS);
     }
 
-    public void stop() {
+    void stop() {
         monitor.stopped();
         // pull into field to avoid racing against another stop.
         // We might cancel multiple times, but we're not running into a sneaky NPE
@@ -129,7 +129,7 @@ public final class ProgressEventConsumer implements Runnable, ProgressEventStore
         return job != null;
     }
 
-    public interface Monitor {
+    interface Monitor {
         void started();
 
         void stopped();

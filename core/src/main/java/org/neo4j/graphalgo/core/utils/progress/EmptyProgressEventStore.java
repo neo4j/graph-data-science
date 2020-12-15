@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.progress;
 
 import java.util.List;
 
-public enum EmptyProgressEventStore implements ProgressEventStore {
+enum EmptyProgressEventStore implements ProgressEventStore {
     INSTANCE;
 
     @Override

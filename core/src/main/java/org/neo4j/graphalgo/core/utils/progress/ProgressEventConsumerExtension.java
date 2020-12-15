@@ -38,11 +38,12 @@ import java.util.Optional;
 public final class ProgressEventConsumerExtension extends ExtensionFactory<ProgressEventConsumerExtension.Dependencies> {
     private final @Nullable JobScheduler scheduler;
 
+    @SuppressWarnings("unused - entry point for service loader")
     public ProgressEventConsumerExtension() {
         this(null);
     }
 
-    public ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
+    /* test-private */ ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
         this.scheduler = scheduler;
     }

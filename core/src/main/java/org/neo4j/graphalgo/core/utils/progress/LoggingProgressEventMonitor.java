@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.core.utils.progress;
 
 import org.neo4j.logging.Log;
 
-public final class LoggingProgressEventMonitor implements ProgressEventConsumer.Monitor {
+final class LoggingProgressEventMonitor implements ProgressEventConsumer.Monitor {
     private final Log log;
 
-    public LoggingProgressEventMonitor(Log log) {
+    LoggingProgressEventMonitor(Log log) {
         this.log = log;
     }
 

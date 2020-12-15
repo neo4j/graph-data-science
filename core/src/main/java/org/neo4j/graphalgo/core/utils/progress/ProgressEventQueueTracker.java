@@ -22,10 +22,7 @@ package org.neo4j.graphalgo.core.utils.progress;
 import java.util.OptionalDouble;
 import java.util.Queue;
 
-public final class ProgressEventQueueTracker implements ProgressEventTracker {
-
-    // Queue<LogEvent> - MPSC
-    // singleton, (not static, wish list)
+final class ProgressEventQueueTracker implements ProgressEventTracker {
 
     private final Queue<LogEvent> queue;
 

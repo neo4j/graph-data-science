@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import java.util.OptionalDouble;
 
 @ValueClass
-interface LogEvent {
+public interface LogEvent {
     String id();
 
     String message();

@@ -31,7 +31,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Queue;
 
-public final class ProgressEventConsumerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
+final class ProgressEventConsumerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
     private final JobScheduler jobScheduler;
     private final Monitors globalMonitors;
     private final ProgressEventConsumer.Monitor monitor;
@@ -39,7 +39,7 @@ public final class ProgressEventConsumerComponent extends LifecycleAdapter imple
     private final Queue<LogEvent> messageQueue;
     private volatile ProgressEventConsumer progressEventConsumer;
 
-    public ProgressEventConsumerComponent(
+    ProgressEventConsumerComponent(
         Log log,
         JobScheduler jobScheduler,
         Monitors globalMonitors
