@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -238,12 +239,20 @@ public class EstimationCli implements Runnable {
                 actualConfig.put(WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(WRITE_PROPERTY_KEY);
             }
+            if (procedureName.startsWith("gds.beta.shortestPath.") && procedureName.endsWith("mutate.estimate")) {
+                actualConfig.put(MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
+                actualConfig.remove(MUTATE_PROPERTY_KEY);
+            }
             if (procedureName.startsWith("gds.beta.allShortestPaths.")) {
                 actualConfig.put("sourceNode", 0L);
             }
             if (procedureName.startsWith("gds.beta.allShortestPaths.") && procedureName.endsWith("write.estimate")) {
                 actualConfig.put(WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(WRITE_PROPERTY_KEY);
+            }
+            if (procedureName.startsWith("gds.beta.allShortestPaths.") && procedureName.endsWith("mutate.estimate")) {
+                actualConfig.put(MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
+                actualConfig.remove(MUTATE_PROPERTY_KEY);
             }
             return actualConfig;
         }
