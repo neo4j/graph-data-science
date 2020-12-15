@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RelationshipStreamExporterTest extends BaseTest {
 
@@ -132,12 +131,12 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
         //@formatter:off
-        var query = "MATCH (a { id: %d })-[r]->(b { id: %d }) RETURN r.x AS x, r.y AS y";
-        assertCypherResult(formatWithLocale(query, 0, 1), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
-        assertCypherResult(formatWithLocale(query, 0, 2), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
-        assertCypherResult(formatWithLocale(query, 1, 0), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
-        assertCypherResult(formatWithLocale(query, 2, 2), List.of(Map.of("x", new long[]{1, 3, 3, 5}, "y", new double[]{4, 5})));
-        assertCypherResult(formatWithLocale(query, 2, 3),
+        var query = "MATCH (a {id: $idA})-[r]->(b {id: $idB}) RETURN r.x AS x, r.y AS y";
+        assertCypherResult(query, Map.of("idA", 0, "idB", 1), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
+        assertCypherResult(query, Map.of("idA", 0, "idB", 2), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
+        assertCypherResult(query, Map.of("idA", 1, "idB", 0), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
+        assertCypherResult(query, Map.of("idA", 2, "idB", 2), List.of(Map.of("x", new long[]{1, 3, 3, 5}, "y", new double[]{4, 5})));
+        assertCypherResult(query, Map.of("idA", 2, "idB", 3),
             List.of(
                 Map.of("x", new long[]{1, 3, 3, 6}, "y", new double[]{4, 6}),
                 Map.of("x", new long[]{1, 3, 3, 7}, "y", new double[]{4, 7})
@@ -149,7 +148,7 @@ class RelationshipStreamExporterTest extends BaseTest {
     @Test
     void exportExceedsBufferSize() {
         int nodeCount = 4;
-        var bufferSize = 10;
+        var batchSize = 10;
         // enforce writing non-full buffer
         var relationshipCount = 105;
 
@@ -161,7 +160,7 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         var exporter = RelationshipStreamExporter
             .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
-            .withBatchSize(bufferSize)
+            .withBatchSize(batchSize)
             .build();
 
         var relationshipsWritten = exporter.write("FOOBAR");
@@ -176,7 +175,7 @@ class RelationshipStreamExporterTest extends BaseTest {
     @Test
     void logProgress() {
         int nodeCount = 4;
-        var bufferSize = 25;
+        var batchSize = 25;
         // enforce writing non-full buffer
         var relationshipCount = 105;
 
@@ -190,7 +189,7 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         var exporter = RelationshipStreamExporter
             .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
-            .withBatchSize(bufferSize)
+            .withBatchSize(batchSize)
             .withLog(log)
             .build();
 
