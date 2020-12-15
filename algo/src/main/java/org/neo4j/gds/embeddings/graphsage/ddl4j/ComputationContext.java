@@ -81,8 +81,7 @@ public class ComputationContext {
             Tensor<?> gradient = child.gradient(variable, this);
             updateGradient(variable, gradient);
 
-            upstreamCounters.get(variable).decrementAndGet();
-            if (upstreamCounters.get(variable).get() == 0) {
+            if (upstreamCounters.get(variable).decrementAndGet() == 0) {
                 for (Variable<?> parent : variable.parents()) {
                     if (parent.requireGradient()) {
                         executionQueue.offer(new BackPropTask(parent, variable));
