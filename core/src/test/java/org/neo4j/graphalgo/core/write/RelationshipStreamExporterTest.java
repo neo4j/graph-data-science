@@ -133,7 +133,7 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
         //@formatter:off
-        var query = "MATCH (a {id: $idA})-[r]->(b {id: $idB}) RETURN r.x AS x, r.y AS y";
+        var query = "MATCH (a {id: $idA})-[r:FOOBAR]->(b {id: $idB}) RETURN r.x AS x, r.y AS y";
         assertCypherResult(query, Map.of("idA", 0, "idB", 1), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
         assertCypherResult(query, Map.of("idA", 0, "idB", 2), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
         assertCypherResult(query, Map.of("idA", 1, "idB", 0), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
@@ -214,11 +214,11 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertEquals(7, messages.size());
 
         assertThat(messages.get(0)).contains("WriteRelationshipStream :: Start");
-        assertThat(messages.get(1)).contains("WriteRelationshipStream Wrote 25 relationships");
-        assertThat(messages.get(2)).contains("WriteRelationshipStream Wrote 50 relationships");
-        assertThat(messages.get(3)).contains("WriteRelationshipStream Wrote 75 relationships");
-        assertThat(messages.get(4)).contains("WriteRelationshipStream Wrote 100 relationships");
-        assertThat(messages.get(5)).contains("WriteRelationshipStream Wrote 105 relationships");
+        assertThat(messages.get(1)).contains("WriteRelationshipStream has written 25 relationships");
+        assertThat(messages.get(2)).contains("WriteRelationshipStream has written 50 relationships");
+        assertThat(messages.get(3)).contains("WriteRelationshipStream has written 75 relationships");
+        assertThat(messages.get(4)).contains("WriteRelationshipStream has written 100 relationships");
+        assertThat(messages.get(5)).contains("WriteRelationshipStream has written 105 relationships");
         assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
     }
 

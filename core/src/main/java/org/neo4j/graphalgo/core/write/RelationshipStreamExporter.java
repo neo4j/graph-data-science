@@ -239,7 +239,7 @@ public final class RelationshipStreamExporter extends StatementApi {
                     }
                     written += write(buffer, relationshipToken, propertyTokens);
 
-                    progressLogger.logMessage(formatWithLocale("Wrote %d relationships", written));
+                    progressLogger.logMessage(formatWithLocale("has written %d relationships", written));
 
                     buffer.reset();
                     bufferPool.put(buffer);
@@ -252,7 +252,7 @@ public final class RelationshipStreamExporter extends StatementApi {
         private int write(Buffer buffer, int relationshipToken, int[] propertyTokens) {
             var bufferSize = buffer.size;
             var tokenCount = propertyTokens.length;
-            var relationships = buffer.array;
+            var relationships = buffer.relationships;
 
             acceptInTransaction(stmt -> {
                 terminationFlag.assertRunning();
@@ -280,16 +280,16 @@ public final class RelationshipStreamExporter extends StatementApi {
 
     static class Buffer {
         private final long capacity;
-        private final Relationship[] array;
+        private final Relationship[] relationships;
         private int size;
 
         Buffer(int capacity) {
-            this.array = new Relationship[(int) capacity];
+            this.relationships = new Relationship[capacity];
             this.capacity = capacity;
         }
 
         void add(Relationship relationship) {
-            array[size] = relationship;
+            relationships[size] = relationship;
             size += 1;
         }
 
