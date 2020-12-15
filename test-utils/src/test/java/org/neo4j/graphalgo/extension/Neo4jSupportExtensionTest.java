@@ -32,6 +32,9 @@ import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 
 class Neo4jSupportExtensionTest extends BaseTest {
 
+    // The full identifier is used here to show that this
+    // import is explicitly from Neo4j as opposed to our
+    // own Inject interface, in order to compare both results.
     @org.neo4j.test.extension.Inject
     GraphDatabaseAPI neoInjectedDb;
 
