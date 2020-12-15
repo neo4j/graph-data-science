@@ -22,10 +22,12 @@ package org.neo4j.graphalgo.beta.paths.singlesource;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -33,35 +35,36 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
-import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
-class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraWriteConfig> {
+class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraMutateConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraWriteConfig>> getProcedureClazz() {
-        return AllShortestPathsDijkstraWriteProc.class;
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig>> getProcedureClazz() {
+        return AllShortestPathsDijkstraMutateProc.class;
     }
 
     @Override
-    public AllShortestPathsDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return AllShortestPathsDijkstraWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    public AllShortestPathsDijkstraMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return AllShortestPathsDijkstraMutateConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         mapWrapper = super.createMinimalConfig(mapWrapper);
 
-        if (!mapWrapper.containsKey(WRITE_RELATIONSHIP_TYPE_KEY)) {
-            mapWrapper = mapWrapper.withString(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
+        if (!mapWrapper.containsKey(MUTATE_RELATIONSHIP_TYPE_KEY)) {
+            mapWrapper = mapWrapper.withString(MUTATE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
         }
 
         return mapWrapper;
     }
 
     @Test
-    void testWrite() {
+    void testMutate() {
+        var graphName = "graph";
         var relationshipWeightProperty = "cost";
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
@@ -70,16 +73,16 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
             .withAnyLabel()
             .withAnyRelationshipType()
             .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("graph")
+            .graphCreate(graphName)
             .yields();
         runQuery(createQuery);
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.beta.allShortestPaths.dijkstra")
-            .writeMode()
+            .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("relationshipWeightProperty", relationshipWeightProperty)
-            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .addParameter("mutateRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
@@ -87,17 +90,29 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
-            "writeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
 
-        assertCypherResult(validationQuery(idA), List.of(
-            Map.of("totalCost", 0.0D, "nodeIds", ids0, "costs", costs0),
-            Map.of("totalCost", 2.0D, "nodeIds", ids1, "costs", costs1),
-            Map.of("totalCost", 4.0D, "nodeIds", ids2, "costs", costs2),
-            Map.of("totalCost", 5.0D, "nodeIds", ids3, "costs", costs3),
-            Map.of("totalCost", 9.0D, "nodeIds", ids4, "costs", costs4),
-            Map.of("totalCost", 20.0D, "nodeIds", ids5, "costs", costs5)
-        ));
+        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), graphName).graphStore().getUnion();
+        var expected = TestSupport.fromGdl(
+            "CREATE" +
+            "  (a)-[{w: 4.0D}]->(b)" +
+            ", (a)-[{w: 2.0D}]->(c)" +
+            ", (b)-[{w: 5.0D}]->(c)" +
+            ", (b)-[{w: 10.0D}]->(d)" +
+            ", (c)-[{w: 3.0D}]->(e)" +
+            ", (d)-[{w: 11.0D}]->(f)" +
+            ", (e)-[{w: 4.0D}]->(d)" +
+            // new relationship as a result from mutate
+            ", (a)-[{w: 0.0D}]->(a)" +
+            ", (a)-[{w: 2.0D}]->(c)" +
+            ", (a)-[{w: 4.0D}]->(b)" +
+            ", (a)-[{w: 5.0D}]->(e)" +
+            ", (a)-[{w: 9.0D}]->(d)" +
+            ", (a)-[{w: 20.0D}]->(f)"
+        );
+
+        assertGraphEquals(expected, actual);
     }
 }
