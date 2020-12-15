@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.progress;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.scheduler.CancelListener;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
@@ -38,7 +37,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.graphalgo.core.utils.RenamesCurrentThread.renameThread;
 
-public final class ProgressEventConsumer implements Runnable, CancelListener {
+public final class ProgressEventConsumer implements Runnable {
 
     private final Monitor monitor;
     private final JobRunner jobRunner;
@@ -59,7 +58,7 @@ public final class ProgressEventConsumer implements Runnable, CancelListener {
         JobScheduler jobScheduler,
         Queue<LogEvent> queue
     ) {
-        this(monitor, new JobSchedulingRunner(jobScheduler, Group.TASK_SCHEDULER), queue);
+        this(monitor, new JobSchedulingRunner(jobScheduler, Group.DATA_COLLECTOR), queue);
     }
 
     public ProgressEventConsumer(
@@ -123,11 +122,6 @@ public final class ProgressEventConsumer implements Runnable, CancelListener {
     @TestOnly
     boolean isRunning() {
         return job != null;
-    }
-
-    @Override
-    public void cancelled() {
-        System.out.println("progress event monitor job cancelled");
     }
 
     public interface Monitor {

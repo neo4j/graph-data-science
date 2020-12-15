@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -36,11 +37,20 @@ public final class ProgressEventConsumerExtension extends ExtensionFactory<Progr
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, ProgressEventConsumerExtension.Dependencies dependencies) {
-        return new ProgressEventConsumerComponent(
+        var progressEventConsumerComponent = new ProgressEventConsumerComponent(
             dependencies.logService().getInternalLog(ProgressEventConsumerComponent.class),
             dependencies.jobScheduler(),
             dependencies.globalMonitors()
         );
+
+        var registry = dependencies.globalProceduresRegistry();
+        registry.registerComponent(ProgressEventTracker.class, progressEventConsumerComponent, true);
+        registry.registerComponent(
+            ProgressEventConsumer.class,
+            ctx -> progressEventConsumerComponent.progressEventConsumer(),
+            true
+        );
+        return progressEventConsumerComponent;
     }
 
     interface Dependencies {
@@ -49,5 +59,7 @@ public final class ProgressEventConsumerExtension extends ExtensionFactory<Progr
         JobScheduler jobScheduler();
 
         Monitors globalMonitors();
+
+        GlobalProcedures globalProceduresRegistry();
     }
 }

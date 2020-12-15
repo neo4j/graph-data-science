@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.jctools.queues.MpscLinkedQueue;
+import org.neo4j.function.ThrowingFunction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.Log;
 import org.neo4j.monitoring.Monitors;
@@ -27,7 +31,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Queue;
 
-public final class ProgressEventConsumerComponent extends LifecycleAdapter {
+public final class ProgressEventConsumerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
     private final JobScheduler jobScheduler;
     private final Monitors globalMonitors;
     private final ProgressEventConsumer.Monitor monitor;
@@ -35,7 +39,11 @@ public final class ProgressEventConsumerComponent extends LifecycleAdapter {
     private final Queue<LogEvent> messageQueue;
     private volatile ProgressEventConsumer progressEventConsumer;
 
-    public ProgressEventConsumerComponent(Log log, JobScheduler jobScheduler, Monitors globalMonitors) {
+    public ProgressEventConsumerComponent(
+        Log log,
+        JobScheduler jobScheduler,
+        Monitors globalMonitors
+    ) {
         this.jobScheduler = jobScheduler;
         this.globalMonitors = globalMonitors;
         this.monitor = globalMonitors.newMonitor(ProgressEventConsumer.Monitor.class);
@@ -55,5 +63,18 @@ public final class ProgressEventConsumerComponent extends LifecycleAdapter {
         progressEventConsumer.stop();
         progressEventConsumer = null;
         globalMonitors.removeMonitorListener(loggingMonitor);
+    }
+
+    ProgressEventConsumer progressEventConsumer() {
+        return progressEventConsumer;
+    }
+
+    @Override
+    public ProgressEventTracker apply(Context context) throws ProcedureException {
+        var progressEventConsumer = this.progressEventConsumer;
+        if (progressEventConsumer == null) {
+            throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
+        }
+        return new ProgressEventTracker(messageQueue);
     }
 }

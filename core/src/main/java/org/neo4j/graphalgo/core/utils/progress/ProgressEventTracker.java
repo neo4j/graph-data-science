@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-import org.jctools.queues.MpscLinkedQueue;
-
 import java.util.OptionalDouble;
 import java.util.Queue;
 
@@ -31,8 +29,8 @@ public final class ProgressEventTracker {
 
     private final Queue<LogEvent> queue;
 
-    public ProgressEventTracker() {
-        this.queue = new MpscLinkedQueue<>();
+    ProgressEventTracker(Queue<LogEvent> queue) {
+        this.queue = queue;
     }
 
     // MP
