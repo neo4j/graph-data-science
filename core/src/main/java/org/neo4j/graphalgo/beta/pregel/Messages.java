@@ -43,19 +43,17 @@ public class Messages implements Iterable<Double> {
         return iterator.isEmpty();
     }
 
-    abstract static class MessageIterator implements Iterator<Double> {
+    public abstract static class MessageIterator implements Iterator<Double> {
 
         Queue<Double> queue;
 
-        @Nullable Double next;
-
-        @Override
-        public @Nullable Double next() {
-            return next;
-        }
-
         void init(@Nullable Queue<Double> queue) {
             this.queue = queue;
+        }
+
+        @Override
+        public Double next() {
+            return queue.poll();
         }
 
         public abstract boolean isEmpty();
@@ -66,7 +64,7 @@ public class Messages implements Iterable<Double> {
                 if (queue == null) {
                     return false;
                 }
-                return !Double.isNaN(next = queue.poll());
+                return !Double.isNaN(queue.peek());
             }
 
             @Override
@@ -81,7 +79,7 @@ public class Messages implements Iterable<Double> {
                 if (queue == null) {
                     return false;
                 }
-                return (next = queue.poll()) != null;
+                return (queue.peek()) != null;
             }
 
 
