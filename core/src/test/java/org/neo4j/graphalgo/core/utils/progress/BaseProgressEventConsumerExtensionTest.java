@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.BaseTest;
@@ -36,65 +35,34 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
 
-class ProgressEventConsumerExtensionTest {
+abstract class BaseProgressEventConsumerExtensionTest extends BaseTest {
+    private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
 
-    abstract static class ExtensionTest extends BaseTest {
-        private final FakeClockJobScheduler scheduler = new FakeClockJobScheduler();
+    abstract boolean featureEnabled();
 
-        abstract boolean featureEnabled();
-
-        @Override
-        @ExtensionCallback
-        protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-            super.configuration(builder);
-            builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
-            builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
-            // make sure that we 1) have our extension under test and 2) have it only once
-            builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
-            builder.addExtension(new ProgressEventConsumerExtension(scheduler));
-        }
-
-        abstract void assertResult(List<String> result);
-
-        @Test
-        void test() throws Exception {
-            GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ProgressProc.class);
-            runQuery("CALL gds.test.algo");
-            scheduler.forward(100, TimeUnit.MILLISECONDS);
-            assertResult(runQuery(
-                "CALL gds.test.log() YIELD field RETURN field",
-                r -> r.<String>columnAs("field").stream().collect(toList())
-            ));
-        }
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfig(GraphDatabaseSettings.store_internal_log_level, Level.DEBUG);
+        builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, featureEnabled());
+        // make sure that we 1) have our extension under test and 2) have it only once
+        builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
+        builder.addExtension(new ProgressEventConsumerExtension(scheduler));
     }
 
-    @Nested
-    class FeatureOff extends ExtensionTest {
+    abstract void assertResult(List<String> result);
 
-        @Override
-        boolean featureEnabled() {
-            return false;
-        }
-
-        @Override
-        void assertResult(List<String> result) {
-            assertThat(result).isEmpty();
-        }
-    }
-
-    @Nested
-    class FeatureOn extends ExtensionTest {
-        @Override
-        boolean featureEnabled() {
-            return true;
-        }
-
-        @Override
-        void assertResult(List<String> result) {
-            assertThat(result).containsExactly("hello from any algo proc");
-        }
+    @Test
+    void test() throws Exception {
+        GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ProgressProc.class);
+        runQuery("CALL gds.test.algo");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        assertResult(runQuery(
+            "CALL gds.test.log() YIELD field RETURN field",
+            r -> r.<String>columnAs("field").stream().collect(toList())
+        ));
     }
 
     public static class AlgoProc {
