@@ -20,14 +20,14 @@
 package org.neo4j.graphalgo.similarity.nodesim;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteRelationshipsProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.graphalgo.results.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
+import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
+import org.neo4j.graphalgo.similarity.WriteRelationshipsProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

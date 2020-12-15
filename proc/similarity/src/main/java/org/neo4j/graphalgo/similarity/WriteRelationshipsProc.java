@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo;
+package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.results.similarity.SimilarityWriteResult;
-import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.SimilarityProc.shouldComputeHistogram;
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
+import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 
 public abstract class WriteRelationshipsProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,

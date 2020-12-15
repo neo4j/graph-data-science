@@ -17,49 +17,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.results.similarity;
-
-import org.neo4j.graphalgo.SimilarityProc;
+package org.neo4j.graphalgo.similarity;
 
 import java.util.Map;
 
-public final class SimilarityStatsResult {
+public class SimilarityMutateResult {
+    public final long createMillis;
+    public final long computeMillis;
+    public final long mutateMillis;
+    public final long postProcessingMillis;
 
-    public long createMillis;
-    public long computeMillis;
-    public long postProcessingMillis;
+    public final long nodesCompared;
+    public final long relationshipsWritten;
 
-    public long nodesCompared;
-    public long similarityPairs;
-    public Map<String, Object> similarityDistribution;
-    public Map<String, Object> configuration;
+    public final Map<String, Object> similarityDistribution;
+    public final Map<String, Object> configuration;
 
-    public SimilarityStatsResult(
+    public SimilarityMutateResult(
         long createMillis,
         long computeMillis,
+        long mutateMillis,
         long postProcessingMillis,
         long nodesCompared,
-        long similarityPairs,
-        Map<String, Object> communityDistribution,
+        long relationshipsWritten,
+        Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
-
     ) {
         this.createMillis = createMillis;
         this.computeMillis = computeMillis;
+        this.mutateMillis = mutateMillis;
         this.postProcessingMillis = postProcessingMillis;
         this.nodesCompared = nodesCompared;
-        this.similarityPairs = similarityPairs;
-        this.similarityDistribution = communityDistribution;
+        this.relationshipsWritten = relationshipsWritten;
+        this.similarityDistribution = similarityDistribution;
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityStatsResult> {
+    public static class Builder extends SimilarityProc.SimilarityResultBuilder<SimilarityMutateResult> {
 
         @Override
-        public SimilarityStatsResult build() {
-            return new SimilarityStatsResult(
+        public SimilarityMutateResult build() {
+            return new SimilarityMutateResult(
                 createMillis,
                 computeMillis,
+                mutateMillis,
                 postProcessingMillis,
                 nodesCompared,
                 relationshipsWritten,
