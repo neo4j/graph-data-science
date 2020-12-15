@@ -86,6 +86,7 @@ import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.LocalMemoryTracker;
 import org.neo4j.memory.MemoryPools;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
@@ -414,6 +415,11 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     @Override
     public Setting<Long> memoryTransactionMaxSize() {
         return GraphDatabaseSettings.memory_transaction_max_size;
+    }
+
+    @Override
+    public JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
+        return new JobRunner43(scheduler, group);
     }
 
     private static final class InputFromCompatInput implements Input {

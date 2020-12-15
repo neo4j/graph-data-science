@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;
@@ -38,7 +39,7 @@ class ProgressEventConsumerTest {
         var expectedEvents = new ArrayList<LogEvent>();
 
         var fakeClockScheduler = new FakeClockJobScheduler();
-        var runner = new JobSchedulingRunner(fakeClockScheduler, Group.TESTING);
+        var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
         var queue = new ArrayBlockingQueue<LogEvent>(1);
         var consumer = new ProgressEventConsumer(runner, queue);
 
@@ -74,7 +75,11 @@ class ProgressEventConsumerTest {
 
     @Test
     void testConsumerStartStop() {
-        var consumer = new ProgressEventConsumer(NO_RUNNER, new ArrayBlockingQueue<>(1));
+        var consumer = new ProgressEventConsumer(
+            // empty runner that does nothing
+            (runnable, initialDelay, rate, timeUnit) -> () -> {},
+            new ArrayBlockingQueue<>(1)
+        );
 
         assertThat(consumer.isRunning()).isFalse();
 
@@ -84,16 +89,4 @@ class ProgressEventConsumerTest {
         consumer.stop();
         assertThat(consumer.isRunning()).isFalse();
     }
-
-    private static final JobPromise EMPTY_PROMISE = new JobPromise() {
-        @Override
-        public void cancel() {
-        }
-
-        @Override
-        public void await(long timeout, TimeUnit unit) {
-        }
-    };
-
-    private static final JobRunner NO_RUNNER = (runnable, initialDelay, rate, timeUnit) -> EMPTY_PROMISE;
 }

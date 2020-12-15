@@ -21,6 +21,9 @@ package org.neo4j.graphalgo.core.utils.progress;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.compat.JobPromise;
+import org.neo4j.graphalgo.compat.JobRunner;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
@@ -46,22 +49,23 @@ public final class ProgressEventConsumer implements Runnable, ProgressEventStore
     private volatile @Nullable JobPromise job;
     private final Map<String, Map<String, List<LogEvent>>> events;
 
-    public ProgressEventConsumer(
+    ProgressEventConsumer(
+        Monitor monitor,
+        JobScheduler jobScheduler,
+        Queue<LogEvent> queue
+    ) {
+        this(monitor, Neo4jProxy.runnerFromScheduler(jobScheduler, Group.DATA_COLLECTOR), queue);
+    }
+
+    @TestOnly
+    ProgressEventConsumer(
         JobRunner jobRunner,
         Queue<LogEvent> queue
     ) {
         this(Monitor.EMPTY, jobRunner, queue);
     }
 
-    public ProgressEventConsumer(
-        Monitor monitor,
-        JobScheduler jobScheduler,
-        Queue<LogEvent> queue
-    ) {
-        this(monitor, new JobSchedulingRunner(jobScheduler, Group.DATA_COLLECTOR), queue);
-    }
-
-    public ProgressEventConsumer(
+    private ProgressEventConsumer(
         Monitor monitor,
         JobRunner jobRunner,
         Queue<LogEvent> queue

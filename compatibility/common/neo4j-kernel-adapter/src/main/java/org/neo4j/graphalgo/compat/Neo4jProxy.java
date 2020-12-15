@@ -67,6 +67,7 @@ import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.io.File;
@@ -343,6 +344,10 @@ public final class Neo4jProxy {
 
     public static Setting<Long> memoryTransactionMaxSize() {
         return IMPL.memoryTransactionMaxSize();
+    }
+
+    public static JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
+        return IMPL.runnerFromScheduler(scheduler, group);
     }
 
     private Neo4jProxy() {

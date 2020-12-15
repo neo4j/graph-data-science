@@ -74,6 +74,7 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.StoreLogService;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.storable.Value;
 
@@ -398,6 +399,11 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public Setting<Long> memoryTransactionMaxSize() {
         return newBuilder("fake_setting", BYTES, 0L).build();
+    }
+
+    @Override
+    public JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
+        return new JobRunner40(scheduler, group);
     }
 
     private static final class InputFromCompatInput implements Input {

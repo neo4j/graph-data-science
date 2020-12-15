@@ -17,29 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.progress;
+package org.neo4j.graphalgo.compat;
 
+import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobHandle;
+import org.neo4j.scheduler.JobScheduler;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-public final class JobPromiseFromHandle implements JobPromise {
+final class JobRunner40 implements JobRunner {
+    private final JobScheduler scheduler;
+    private final Group group;
 
-    private final JobHandle<?> handle;
-
-    public JobPromiseFromHandle(JobHandle<?> handle) {
-        this.handle = handle;
+    JobRunner40(JobScheduler scheduler, Group group) {
+        this.group = group;
+        this.scheduler = scheduler;
     }
 
     @Override
-    public void cancel() {
-        this.handle.cancel();
-    }
-
-    @Override
-    public void await(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        this.handle.waitTermination(timeout, unit);
+    public JobPromise scheduleAtInterval(
+        Runnable runnable,
+        long initialDelay,
+        long rate,
+        TimeUnit timeUnit
+    ) {
+        JobHandle jobHandle = this.scheduler.scheduleRecurring(group, runnable, initialDelay, rate, timeUnit);
+        return jobHandle::cancel;
     }
 }

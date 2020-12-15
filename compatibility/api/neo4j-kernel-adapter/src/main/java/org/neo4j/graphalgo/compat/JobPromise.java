@@ -17,15 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.progress;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+package org.neo4j.graphalgo.compat;
 
 public interface JobPromise {
 
     void cancel();
-
-    void await(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException;
 }
