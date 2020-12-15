@@ -180,12 +180,13 @@ public final class ComputeContext {
 [[algorithms-pregel-api-master-compute]]
 === Master Computation
 
-Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example to reset or evaluate a global datastructure.
-This can be achieved by overwriting the `org.neo4j.graphalgo.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
-This function will be called by a single thread after each compute thread has finished its work of the current superstep.
+Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example, to reset or evaluate a global datastructure.
+This can be achieved by overriding the `org.neo4j.graphalgo.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
+This function will be called at the end of each superstep after all compute threads have finished.
+The master compute function will be called by a single thread.
 
 The `masterCompute` function has access to the `org.neo4j.graphalgo.beta.pregel.PregelContext.MasterComputeContext`.
-This context is similar to the `ComputeContext` but is not tied to a specific node and does not allow the sending of messages.
+That context is similar to the `ComputeContext` but is not tied to a specific node and does not allow sending messages.
 Furthermore, the `MasterComputeContext` allows to run a function for every node in the graph and has access to the computation state of all nodes.
 
 .The MasterComputeContext
@@ -369,4 +370,3 @@ The https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-exam
 The algorithm implementations demonstrate the usage of the Pregel API.
 Along with each example, we provide test classes that can be used as a guideline on how to write tests for custom algorithms.
 To play around, we recommend copying one of the algorithms into the `pregel-bootstrap` project, build it and setup the plugin in Neo4j.
-
