@@ -64,6 +64,11 @@ public class KnnWriteProc extends WriteRelationshipsProc<Knn, Knn.Result, KnnWri
     }
 
     @Override
+    public String procedureName() {
+        return "KNN";
+    }
+
+    @Override
     protected KnnWriteConfig newConfig(
         String username,
         Optional<String> graphName,

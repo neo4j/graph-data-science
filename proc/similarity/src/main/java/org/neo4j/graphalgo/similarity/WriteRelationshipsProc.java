@@ -40,6 +40,8 @@ public abstract class WriteRelationshipsProc<
     ALGO_RESULT,
     CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {
 
+    public abstract String procedureName();
+
     @Override
     protected Stream<SimilarityWriteResult> write(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         return runWithExceptionLogging("Graph write failed", () -> {
@@ -72,7 +74,7 @@ public abstract class WriteRelationshipsProc<
                 String writeProperty = config.writeProperty();
 
                 runWithExceptionLogging(
-                    "NodeSimilarity write-back failed",
+                    procedureName() + " write-back failed",
                     () -> {
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                             RelationshipExporter exporter = RelationshipExporter

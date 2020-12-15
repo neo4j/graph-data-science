@@ -61,6 +61,11 @@ public class NodeSimilarityWriteProc extends WriteRelationshipsProc<NodeSimilari
     }
 
     @Override
+    public String procedureName() {
+        return "NodeSimilarity";
+    }
+
+    @Override
     protected NodeSimilarityWriteConfig newConfig(
         String username,
         Optional<String> graphName,
