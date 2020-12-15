@@ -49,7 +49,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                 .withConfig(config);
 
             if (computationResult.isGraphEmpty()) {
-                return Stream.of(new WriteResult(computationResult.createMillis(), 0L, 0L, 0L, config.toMap()));
+                return Stream.of(new WriteResult(computationResult.createMillis(), 0L, 0L, 0L, 0L, config.toMap()));
             }
 
             var algorithm = computationResult.algorithm();
