@@ -32,7 +32,7 @@ public final class PathTestUtil {
         return formatWithLocale(
             "MATCH (a)-[r:%s]->() " +
             "WHERE id(a) = %d " +
-            "RETURN r.%s AS totalCost, r.%s AS nodeIds, r.%s AS costs " +
+            "RETURN r.%3$s AS %3$s, r.%4$s AS %4$s, r.%5$s AS %5$s " +
             "ORDER BY totalCost ASC",
             WRITE_RELATIONSHIP_TYPE,
             sourceId,

@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
 import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
@@ -84,17 +84,14 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .yields();
 
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertUserInput(row, "writeRelationshipType", WRITE_RELATIONSHIP_TYPE);
-                assertUserInput(row, "relationshipWeightProperty", relationshipWeightProperty);
-                assertEquals(3L, row.getNumber("relationshipsWritten"));
-                assertNotEquals(-1L, row.getNumber("createMillis"));
-                assertNotEquals(-1L, row.getNumber("computeMillis"));
-                assertNotEquals(-1L, row.getNumber("writeMillis"));
-            }
-        );
+        assertCypherResult(query, List.of(Map.of(
+            "relationshipsWritten", 3L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
+            "writeMillis", greaterThan(-1L),
+            "configuration", isA(Map.class)
+        )));
 
         assertCypherResult(validationQuery(idC), List.of(
             Map.of("totalCost", 5.0D, "nodeIds", ids0, "costs", costs0),
