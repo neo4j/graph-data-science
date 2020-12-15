@@ -20,35 +20,34 @@
 package org.neo4j.graphalgo.beta.paths;
 
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.StandardWriteResult;
+import org.neo4j.graphalgo.results.StandardMutateResult;
 
 import java.util.Map;
 
-public final class WriteResult extends StandardWriteResult {
-
+public final class MutateResult extends StandardMutateResult {
     public final long relationshipsWritten;
 
-    WriteResult(
+    private MutateResult(
         long createMillis,
         long computeMillis,
+        long mutateMillis,
         long postProcessingMillis,
-        long writeMillis,
         long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(createMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
+        super(createMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<MutateResult> {
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public MutateResult build() {
+            return new MutateResult(
                 createMillis,
                 computeMillis,
                 0L,
-                writeMillis,
+                mutateMillis,
                 relationshipsWritten,
                 config.toMap()
             );

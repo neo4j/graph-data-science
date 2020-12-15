@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.annotation.Configuration;
 
 public interface MutateRelationshipConfig extends MutateConfig {
 
+    String MUTATE_RELATIONSHIP_TYPE_KEY = "mutateRelationshipType";
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String mutateRelationshipType();
 }
