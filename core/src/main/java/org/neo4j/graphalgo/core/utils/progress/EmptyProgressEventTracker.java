@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-enum EmptyProgressEventTracker implements ProgressEventTracker {
+public enum EmptyProgressEventTracker implements ProgressEventTracker {
     INSTANCE;
 
     @Override

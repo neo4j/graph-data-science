@@ -23,10 +23,14 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.graphdb.Result;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
@@ -61,7 +65,7 @@ public class ListProgressProcTest extends BaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ListProgressProc.class);
+        GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ListProgressProc.class, ProgressLoggingAlgoProc.class, GraphGenerateProc.class);
     }
 
     @Test
@@ -147,17 +151,68 @@ public class ListProgressProcTest extends BaseTest {
         @Procedure("gds.test.algo")
         public Stream<Bar> foo(
             @Name(value = "param") String param,
-            @Name(value = "source", defaultValue = "test") String id
+            @Name(value = "source", defaultValue = "test") String source
         ) {
-            progress.addLogEvent(id, "hello " + param);
+            progress.addLogEvent(source, "hello " + param);
             return Stream.empty();
-        }
-
-        public static class Bar {
-            public final String field;
-
-            public Bar(String field) {this.field = field;}
         }
     }
 
+    @Test
+    void progressLoggerShouldEmitProgressEvents() {
+        runQuery("CALL gds.test.logging_algo('foo', 'pagerank')");
+        runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        List<Map<String, Object>> expected = List.of(
+            Map.of("source", "pagerank", "message", "hello apa"),
+            Map.of("source", "wcc", "message", "hello bepa")
+        );
+        var result = runQuery(
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            r -> r.stream().collect(Collectors.toList())
+        );
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    @Test
+    void progressLoggerShouldEmitProgressEvents_for_realsies() {
+        runQuery("CALL gds.beta.generate('foo', 100, 5)");
+//        runQuery("CALL gds.fastRP({nodeProjection: '*', relationshipProjection: '*'})");
+//        runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
+//        scheduler.forward(100, TimeUnit.MILLISECONDS);
+//
+//        List<Map<String, Object>> expected = List.of(
+//            Map.of("source", "pagerank", "message", "hello apa"),
+//            Map.of("source", "wcc", "message", "hello bepa")
+//        );
+//        var result = runQuery(
+//            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+//            r -> r.stream().collect(Collectors.toList())
+//        );
+//
+//        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+    }
+
+    public static class ProgressLoggingAlgoProc extends BaseProc {
+        @Context
+        public ProgressEventTracker progress;
+
+        @Procedure("gds.test.logging_algo")
+        public Stream<Bar> bar(
+            @Name(value = "param") String param,
+            @Name(value = "source", defaultValue = "test") String source
+        ) {
+            var progressLogger = new BatchingProgressLogger(log, 0, source, 2, progress);
+            progressLogger.logProgress(() -> "hello " + param);
+            return Stream.empty();
+        }
+    }
+
+    public static class Bar {
+        public final String field;
+
+        public Bar(String field) {this.field = field;}
+    }
 }
