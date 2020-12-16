@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo;
 
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -28,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -54,26 +57,108 @@ public class ListProgressProcTest extends BaseTest {
         builder.addExtension(new ProgressEventConsumerExtension(scheduler));
     }
 
-    @Test
-    void test() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ListProgressProc.class);
-        runQuery("CALL gds.test.algo()");
+    }
+
+    @Test
+    void testOne() {
+        runQuery("CALL gds.test.algo('1')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
             "CALL gds.listProgress() YIELD id, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
-        assertThat(result).containsExactly("hello from any algo proc");
+        assertThat(result).containsExactly("hello 1");
     }
 
-    public static class AlgoProc {
+    @Test
+    void testLast() {
+        runQuery("CALL gds.test.algo('1')");
+        runQuery("CALL gds.test.algo('2')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        var result = runQuery(
+            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            r -> r.<String>columnAs("message").stream().collect(toList())
+        );
+        assertThat(result).containsExactly("hello 2");
+    }
+
+    @Test
+    @Disabled("Only the last entry is kept, is that what we want?")
+    void testMany() {
+        runQuery("CALL gds.test.algo('1')");
+        runQuery("CALL gds.test.algo('2')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        var result = runQuery(
+            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            r -> r.<String>columnAs("message").stream().collect(toList())
+        );
+        assertThat(result).containsExactly("hello 1", "hello 2");
+    }
+
+    @Test
+    void testPerUser() {
+        runQuery("Alice", "CALL gds.test.algo('Alice')");
+        runQuery("Bob", "CALL gds.test.algo('Bob')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        var aliceResult = runQuery(
+            "Alice",
+            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            r -> r.<String>columnAs("message").stream().collect(toList())
+        );
+        assertThat(aliceResult).containsExactly("hello Alice");
+        var bobResult = runQuery(
+            "Bob",
+            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            r -> r.<String>columnAs("message").stream().collect(toList())
+        );
+        assertThat(bobResult).containsExactly("hello Bob");
+    }
+
+    @Test
+    @Disabled
+    void testUserSelectedId() {
+        runQuery("CALL gds.test.algo('1', 'some-id')");
+        runQuery("CALL gds.test.algo('2', 'some-other-id')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        var result = runQuery(
+            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            r -> r.<String>columnAs("message").stream().collect(toList())
+        );
+        assertThat(result).containsExactly("hello 1", "hello 2");
+    }
+
+    @Test
+    @Disabled
+    void testResultContainsId() {
+        assertThat(true).isFalse();
+    }
+
+    @Test
+    @Disabled
+    void testProgressEventsAreCleanedUp() {
+        assertThat(true).isFalse();
+    }
+
+    public static class AlgoProc extends BaseProc {
         @Context
         public ProgressEventTracker progress;
 
         @Procedure("gds.test.algo")
-        public Stream<String> foo() {
-            progress.addLogEvent("foo", "hello from any algo proc");
+        public Stream<Bar> foo(
+            @Name(value = "param") String param,
+            @Name(value = "id", defaultValue = "test") String id
+        ) {
+            progress.addLogEvent(id, "hello " + param);
             return Stream.empty();
+        }
+
+        public static class Bar {
+            public final String field;
+
+            public Bar(String field) {this.field = field;}
         }
     }
 

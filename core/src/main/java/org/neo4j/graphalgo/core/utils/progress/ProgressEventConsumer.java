@@ -24,7 +24,6 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.compat.JobPromise;
 import org.neo4j.graphalgo.compat.JobRunner;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
@@ -99,7 +98,7 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
 
     private void process(LogEvent event) {
         events
-            .computeIfAbsent(AuthSubject.ANONYMOUS.username(), __ -> new ConcurrentHashMap<>())
+            .computeIfAbsent(event.username(), __ -> new ConcurrentHashMap<>())
             .computeIfAbsent(event.id(), __ -> new ArrayList<>())
             .add(event);
     }

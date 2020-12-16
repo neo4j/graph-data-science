@@ -33,22 +33,13 @@ public class ListProgressProc extends BaseProc {
 
     @Procedure("gds.listProgress")
     public Stream<ProgressResult> listProgress() {
-//        return progress.query(username()).stream().map(ProgressResult::new);
-        return progress.query(username()).stream().map(e -> {
-            System.out.printf("id=%s, messge=%s%n", e.id(), e.message());
-            return new ProgressResult(e.id(), e.message());
-        });
+        return progress.query(username()).stream().map(ProgressResult::new);
     }
 
     public static class ProgressResult {
 
         public String id;
         public String message;
-
-        ProgressResult(String id, String message) {
-            this.id = id;
-            this.message = message;
-        }
 
         ProgressResult(LogEvent logEvent) {
             this.id = logEvent.id();

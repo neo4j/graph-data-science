@@ -75,6 +75,7 @@ final class ProgressEventConsumerComponent extends LifecycleAdapter implements T
         if (progressEventConsumer == null) {
             throw new ProcedureException(Status.Database.Unknown, "The " + getClass().getSimpleName() + " is stopped");
         }
-        return new ProgressEventQueueTracker(messageQueue);
+        var username = context.securityContext().subject().username();
+        return new ProgressEventQueueTracker(messageQueue, username);
     }
 }

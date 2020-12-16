@@ -106,6 +106,23 @@ public final class QueryRunner {
         });
     }
 
+    public static <T> T runQuery(
+        GraphDatabaseService db,
+        String username,
+        String query,
+        Map<String, Object> params,
+        Function<Result, T> resultFunction
+    ) {
+        return applyInTransaction(db, tx -> {
+            try (
+                KernelTransaction.Revertable ignored = withUsername(tx, username);
+                Result result = runQueryWithoutClosingTheResult(tx, query, params)
+            ) {
+                return resultFunction.apply(result);
+            }
+        });
+    }
+
     public static void runQuery(GraphDatabaseService db, String username, String query, Map<String, Object> params) {
         runInTransaction(db, tx -> {
             try (KernelTransaction.Revertable ignored = withUsername(tx, username);

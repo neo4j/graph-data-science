@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -40,12 +41,17 @@ public final class ProgressEventConsumerExtension extends ExtensionFactory<Progr
 
     @SuppressWarnings("unused - entry point for service loader")
     public ProgressEventConsumerExtension() {
-        this(null);
+        this(Optional.empty());
     }
 
-    /* test-private */ public ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
+    @TestOnly
+    public ProgressEventConsumerExtension(JobScheduler scheduler) {
+        this(Optional.of(scheduler));
+    }
+
+    private ProgressEventConsumerExtension(Optional<JobScheduler> maybeScheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
-        this.scheduler = scheduler;
+        this.scheduler = maybeScheduler.orElse(null);
     }
 
     @Override

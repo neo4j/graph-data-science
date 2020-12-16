@@ -25,6 +25,9 @@ import java.util.OptionalDouble;
 
 @ValueClass
 public interface LogEvent {
+
+    String username();
+
     String id();
 
     String message();

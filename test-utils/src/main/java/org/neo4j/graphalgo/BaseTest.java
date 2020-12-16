@@ -135,12 +135,27 @@ public abstract class BaseTest {
         QueryRunner.runQueryWithRowConsumer(db, username, query, emptyMap(), discardTx(check));
     }
 
+    protected <T> T runQuery(
+        String username,
+        @Language("Cypher") String query,
+        Function<Result, T> resultFunction
+    ) {
+        return QueryRunner.runQuery(db, username, query, emptyMap(), resultFunction);
+    }
+
     protected void runQuery(
         String username,
         @Language("Cypher") String query,
         Map<String, Object> params
     ) {
         QueryRunner.runQuery(db, username, query, params);
+    }
+
+    protected void runQuery(
+        String username,
+        @Language("Cypher") String query
+    ) {
+        runQuery(username, query, Map.of());
     }
 
     protected void runQuery(

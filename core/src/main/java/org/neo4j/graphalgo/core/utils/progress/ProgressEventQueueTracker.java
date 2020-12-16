@@ -25,9 +25,11 @@ import java.util.Queue;
 final class ProgressEventQueueTracker implements ProgressEventTracker {
 
     private final Queue<LogEvent> queue;
+    private final String username;
 
-    ProgressEventQueueTracker(Queue<LogEvent> queue) {
+    ProgressEventQueueTracker(Queue<LogEvent> queue, String username) {
         this.queue = queue;
+        this.username = username;
     }
 
     // MP
@@ -36,7 +38,7 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
         String id,
         String message
     ) {
-        var logEvent = ImmutableLogEvent.of(id, message, OptionalDouble.empty());
+        var logEvent = ImmutableLogEvent.of(username, id, message, OptionalDouble.empty());
         this.queue.offer(logEvent);
     }
 
