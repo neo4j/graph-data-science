@@ -33,4 +33,8 @@ public enum EmptyProgressEventTracker implements ProgressEventTracker {
     @Override
     public void addLogEvent(LogEvent event) {
     }
+
+    @Override
+    public void clear(String id, String message) {
+    }
 }

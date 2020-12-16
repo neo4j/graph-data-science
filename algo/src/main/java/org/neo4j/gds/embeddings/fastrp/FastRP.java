@@ -104,11 +104,11 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     @Override
     public FastRPResult compute() {
-        progressLogger.logMessage(":: Start");
+        progressLogger.logStart();
         initPropertyVectors();
         initRandomVectors();
         propagateEmbeddings();
-        progressLogger.logMessage(":: Finished");
+        progressLogger.logFinish();
         return new FastRPResult(embeddings);
     }
 

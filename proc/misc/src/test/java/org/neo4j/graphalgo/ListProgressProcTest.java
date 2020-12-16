@@ -80,7 +80,7 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.algo('1')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 1");
@@ -92,7 +92,7 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.algo('2')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 2");
@@ -105,13 +105,13 @@ public class ListProgressProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(aliceResult).containsExactly("hello Alice");
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(bobResult).containsExactly("hello Bob");
@@ -198,6 +198,22 @@ public class ListProgressProcTest extends BaseTest {
             .element(0, InstanceOfAssertFactories.map(String.class, String.class))
             .hasEntrySatisfying("message", v -> assertThat(v).contains("100%"))
             .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("FastRP"));
+    }
+
+    @Test
+    void progressLoggerShouldClearProgressEventsOnLogFinish() {
+        runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
+        runQuery("CALL gds.fastRP.stream('foo', {embeddingDimension: 42})");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        List<Map<String, Object>> expected = List.of();
+
+        List<Map<String, Object>> result = runQuery(
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            r -> r.stream().collect(Collectors.toList())
+        );
+
+        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
     }
 
     public static class ProgressLoggingAlgoProc extends BaseProc {

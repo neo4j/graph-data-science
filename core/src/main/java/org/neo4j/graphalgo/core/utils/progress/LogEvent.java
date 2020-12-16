@@ -33,4 +33,6 @@ public interface LogEvent {
     String message();
 
     OptionalDouble progress();
+
+    boolean finished();
 }

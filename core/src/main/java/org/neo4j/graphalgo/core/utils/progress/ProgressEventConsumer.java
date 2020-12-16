@@ -97,10 +97,16 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     }
 
     private void process(LogEvent event) {
-        events
-            .computeIfAbsent(event.username(), __ -> new ConcurrentHashMap<>())
-            .computeIfAbsent(event.id(), __ -> new ArrayList<>())
-            .add(event);
+        if (event.finished()) {
+            if (events.containsKey(event.username())) {
+                events.get(event.username()).remove(event.id());
+            }
+        } else {
+            events
+                .computeIfAbsent(event.username(), __ -> new ConcurrentHashMap<>())
+                .computeIfAbsent(event.id(), __ -> new ArrayList<>())
+                .add(event);
+        }
     }
 
     void start() {

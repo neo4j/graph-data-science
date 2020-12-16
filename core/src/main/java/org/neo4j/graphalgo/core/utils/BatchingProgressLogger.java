@@ -62,6 +62,10 @@ public class BatchingProgressLogger implements ProgressLogger {
         this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency, progressTracker);
     }
 
+    public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
+        this(log, taskVolume, batchSize, task, concurrency, EmptyProgressEventTracker.INSTANCE);
+    }
+
     public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency, ProgressEventTracker progressTracker) {
         this.log = log;
         this.taskVolume = taskVolume;
@@ -109,6 +113,12 @@ public class BatchingProgressLogger implements ProgressLogger {
         } else {
             progressCounter.add(progress);
         }
+    }
+
+    @Override
+    public void logFinish(String message) {
+        logMessage((message + " :: Finished").trim());
+        progressTracker.clear(task, (message + " :: Finished").trim());
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {
