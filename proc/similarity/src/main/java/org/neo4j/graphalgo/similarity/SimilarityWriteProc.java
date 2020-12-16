@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.graphalgo.similarity.SimilarityProc.shouldComputeHistogram;
 
-public abstract class WriteRelationshipsProc<
+public abstract class SimilarityWriteProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
     CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> extends WriteProc<ALGO, ALGO_RESULT, SimilarityWriteResult, CONFIG> {

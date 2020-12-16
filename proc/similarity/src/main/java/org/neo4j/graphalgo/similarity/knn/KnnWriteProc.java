@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
 import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
-import org.neo4j.graphalgo.similarity.WriteRelationshipsProc;
+import org.neo4j.graphalgo.similarity.SimilarityWriteProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,7 +43,7 @@ import static org.neo4j.graphalgo.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KnnWriteProc extends WriteRelationshipsProc<Knn, Knn.Result, KnnWriteConfig> {
+public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteConfig> {
 
     @Procedure(name = "gds.beta.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
-import org.neo4j.graphalgo.similarity.WriteRelationshipsProc;
+import org.neo4j.graphalgo.similarity.SimilarityWriteProc;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProc.NODE_SIM
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class NodeSimilarityWriteProc extends WriteRelationshipsProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> {
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
