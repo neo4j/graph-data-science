@@ -47,8 +47,8 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
 {
 
     long idA, idC, idD, idE, idF;
-    long[] ids0;
-    double[] costs0;
+    static long[] ids0;
+    static double[] costs0;
 
     @Override
     public String createQuery() {

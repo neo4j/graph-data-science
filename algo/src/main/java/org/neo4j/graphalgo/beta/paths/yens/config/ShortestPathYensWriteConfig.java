@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.paths.yens.config;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.paths.WritePathOptionsConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -30,7 +31,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathYensWriteConfig extends ShortestPathYensBaseConfig, WriteRelationshipConfig {
+public interface ShortestPathYensWriteConfig extends ShortestPathYensBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static ShortestPathYensWriteConfig of(
         String username,

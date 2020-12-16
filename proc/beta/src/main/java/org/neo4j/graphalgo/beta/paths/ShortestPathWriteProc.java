@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstr
 import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig>
+public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
     extends AlgoBaseProc<ALGO, DijkstraResult, CONFIG> {
 
     protected Stream<WriteResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
@@ -57,16 +57,15 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
 
             var writeRelationshipType = config.writeRelationshipType();
 
+            boolean writeNodeIds = config.writeNodeIds();
+            boolean writeCosts = config.writeCosts();
+
             var relationshipStream = result
                 .paths()
                 .map(pathResult -> ImmutableRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
-                    new Value[]{
-                        Values.doubleValue(pathResult.totalCost()),
-                        Values.longArray(pathResult.nodeIds()),
-                        Values.doubleArray(pathResult.costs())
-                    }
+                    createValues(pathResult, writeNodeIds, writeCosts)
                 ));
 
             var exporter = RelationshipStreamExporter
@@ -77,13 +76,49 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                 resultBuilder.withRelationshipsWritten(exporter.write(
                     writeRelationshipType,
-                    TOTAL_COST_KEY,
-                    NODE_IDS_KEY,
-                    COSTS_KEY
+                    createKeys(writeNodeIds, writeCosts)
                 ));
             }
 
             return Stream.of(resultBuilder.build());
         });
+    }
+
+    private String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
+        if (writeNodeIds && writeCosts) {
+            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY, COSTS_KEY};
+        }
+        if (writeNodeIds) {
+            return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY};
+        }
+        if (writeCosts) {
+            return new String[]{TOTAL_COST_KEY, COSTS_KEY};
+        }
+        return new String[]{TOTAL_COST_KEY};
+    }
+
+    private Value[] createValues(PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
+        if (writeNodeIds && writeCosts) {
+            return new Value[]{
+                Values.doubleValue(pathResult.totalCost()),
+                Values.longArray(pathResult.nodeIds()),
+                Values.doubleArray(pathResult.costs())
+            };
+        }
+        if (writeNodeIds) {
+            return new Value[]{
+                Values.doubleValue(pathResult.totalCost()),
+                Values.longArray(pathResult.nodeIds()),
+            };
+        }
+        if (writeCosts) {
+            return new Value[]{
+                Values.doubleValue(pathResult.totalCost()),
+                Values.doubleArray(pathResult.costs())
+            };
+        }
+        return new Value[]{
+            Values.doubleValue(pathResult.totalCost()),
+        };
     }
 }
