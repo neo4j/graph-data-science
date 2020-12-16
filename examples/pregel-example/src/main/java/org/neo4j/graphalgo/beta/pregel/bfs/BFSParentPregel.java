@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel.bfs;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
@@ -43,7 +43,7 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
     }
 
     @Override
-    public void compute(ComputeContext<BFSPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<BFSPregelConfig> context, Messages messages) {
         long nodeId = context.nodeId();
 
         if (context.isInitialSuperstep()) {

@@ -26,7 +26,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -75,9 +75,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     @Override
-    public void compute(
-        ComputeContext<SpeakerListenerLPAConfig> context, Pregel.Messages messages
-    ) {
+    public void compute(ComputeContext<SpeakerListenerLPAConfig> context, Messages messages) {
         var labels = context.longArrayNodeValue(LABELS_PROPERTY);
 
         if (context.isInitialSuperstep()) {
@@ -94,7 +92,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     private void listen(
         ComputeContext<SpeakerListenerLPAConfig> context,
-        Pregel.Messages messages,
+        Messages messages,
         long[] labels
     ) {
         if (!messages.isEmpty()) {

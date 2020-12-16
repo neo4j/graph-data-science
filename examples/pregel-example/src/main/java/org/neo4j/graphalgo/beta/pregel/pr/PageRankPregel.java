@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -60,7 +60,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     }
 
     @Override
-    public void compute(ComputeContext<PageRankPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<PageRankPregelConfig> context, Messages messages) {
         double newRank = context.doubleNodeValue(PAGE_RANK);
 
         // compute new rank based on neighbor ranks

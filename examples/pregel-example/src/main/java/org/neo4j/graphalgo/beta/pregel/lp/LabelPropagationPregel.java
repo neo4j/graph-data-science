@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel.lp;
 
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -50,7 +50,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     }
 
     @Override
-    public void compute(ComputeContext<PregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<PregelConfig> context, Messages messages) {
         if (context.isInitialSuperstep()) {
             context.sendToNeighbors(context.nodeId());
         } else {

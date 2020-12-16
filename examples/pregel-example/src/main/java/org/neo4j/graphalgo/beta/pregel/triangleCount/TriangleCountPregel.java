@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.triangleCount;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
@@ -47,7 +47,7 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
     }
 
     @Override
-    public void compute(ComputeContext<TriangleCountPregelConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<TriangleCountPregelConfig> context, Messages messages) {
         if (context.isInitialSuperstep()) {
             context.setNodeValue(TRIANGLE_COUNT, 0);
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {

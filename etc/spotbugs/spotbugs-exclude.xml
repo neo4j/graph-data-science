@@ -354,4 +354,8 @@
         <Bug pattern="UWF_NULL_FIELD"/>
     </Match>
 
+    <Match>
+        <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
+    </Match>
+
 </FindBugsFilter>

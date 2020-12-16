@@ -77,7 +77,7 @@ public interface PregelComputation<C extends PregelConfig> {
      * Messages can be sent to neighbor nodes or any node if the
      * identifier is known.
      */
-    void compute(ComputeContext<C> context, Pregel.Messages messages);
+    void compute(ComputeContext<C> context, Messages messages);
 
     /**
      * The masterCompute method is called exactly once after every superstep.
