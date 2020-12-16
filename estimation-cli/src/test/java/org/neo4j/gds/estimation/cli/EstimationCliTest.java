@@ -38,9 +38,13 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraMutateProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraWriteProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarMutateProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarWriteProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraMutateProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
 import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraWriteProc;
@@ -156,6 +160,9 @@ final class EstimationCliTest {
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write.estimate",
 
+        "gds.beta.shortestPath.astar.mutate.estimate",
+        "gds.beta.shortestPath.astar.stream.estimate",
+        "gds.beta.shortestPath.astar.write.estimate",
         "gds.beta.shortestPath.dijkstra.mutate.estimate",
         "gds.beta.shortestPath.dijkstra.stream.estimate",
         "gds.beta.shortestPath.dijkstra.write.estimate",
@@ -466,6 +473,27 @@ final class EstimationCliTest {
             runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new ModularityOptimizationStreamProc()::estimate),
             runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
+            ),
+            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
 
             runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
             runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,

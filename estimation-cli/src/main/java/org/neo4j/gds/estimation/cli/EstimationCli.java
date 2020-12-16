@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
@@ -234,6 +235,10 @@ public class EstimationCli implements Runnable {
             }
             if (procedureName.startsWith("gds.beta.shortestPath.yens.")) {
                 actualConfig.put("k", 3);
+            }
+            if (procedureName.startsWith("gds.beta.shortestPath.astar.")) {
+                actualConfig.put(ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT");
+                actualConfig.put(ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON");
             }
             if (procedureName.startsWith("gds.beta.shortestPath.") && procedureName.endsWith("write.estimate")) {
                 actualConfig.put(WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");

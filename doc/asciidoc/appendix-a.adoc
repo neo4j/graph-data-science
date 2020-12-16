@@ -231,6 +231,13 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.shortestPath.yens.write.estimate`
 | `gds.beta.shortestPath.yens.mutate`
 | `gds.beta.shortestPath.yens.mutate.estimate`
+.6+<.^| Shortest Path AStar
+| `gds.beta.shortestPath.astar.stream`
+| `gds.beta.shortestPath.astar.stream.estimate`
+| `gds.beta.shortestPath.astar.write`
+| `gds.beta.shortestPath.astar.write.estimate`
+| `gds.beta.shortestPath.astar.mutate`
+| `gds.beta.shortestPath.astar.mutate.estimate`
 |===
 
 [[alpha-tier]]
