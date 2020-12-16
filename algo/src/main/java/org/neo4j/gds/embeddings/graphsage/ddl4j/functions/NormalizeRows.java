@@ -25,6 +25,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 public class NormalizeRows extends SingleParentVariable<Matrix> {
 
+    private static final double EPSILON = 1e-10;
+
     private final int rows;
     private final int cols;
 
@@ -50,7 +52,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
             double l2 = Math.sqrt(sum);
             for (int col = 0; col < cols; col++) {
                 int elementIndex = row * cols + col;
-                result[elementIndex] = parentData[elementIndex] / l2;
+                result[elementIndex] = parentData[elementIndex] / (l2 + EPSILON);
             }
         }
         return new Matrix(result, this.rows, this.cols);

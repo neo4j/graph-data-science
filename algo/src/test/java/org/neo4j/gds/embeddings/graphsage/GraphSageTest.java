@@ -22,9 +22,14 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -39,16 +44,33 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.logging.NullLog;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
+@GdlExtension
 class GraphSageTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "protein")
+    private static final String PROTEIN_GRAPH = "CREATE " +
+                                                    "(a:P {f1: 0.0, f2: 0.0, f3: 0.0})" +
+                                                    ", (b:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
+                                                    ", (c:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
+                                                    ", (c)-[:T]->(c)";
+
+    @Inject
+    private Graph proteinGraph;
 
     private static final int NODE_COUNT = 20;
     private static final int FEATURES_COUNT = 1;
@@ -83,6 +105,46 @@ class GraphSageTest {
         configBuilder = ImmutableGraphSageTrainConfig.builder()
             .degreeAsProperty(true)
             .embeddingDimension(EMBEDDING_DIMENSION);
+    }
+
+    @ParameterizedTest
+    @EnumSource
+    void shouldNotMakeNanEmbeddings(Aggregator.AggregatorType aggregator) {
+        var trainConfig = configBuilder
+            .modelName(MODEL_NAME)
+            .aggregator(aggregator)
+            .activationFunction(ActivationFunction.RELU)
+            .sampleSizes(List.of(75L,25L))
+            .degreeAsProperty(false)
+            .featureProperties(List.of("f1", "f2", "f3"))
+            .concurrency(4)
+            .build();
+
+        features = initializeFeatures(proteinGraph, trainConfig, AllocationTracker.empty());
+
+        SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
+            proteinGraph,
+            trainConfig,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        Model<ModelData, GraphSageTrainConfig> model = trainAlgo.compute();
+        ModelCatalog.set(model);
+
+        var streamConfig = ImmutableGraphSageStreamConfig
+            .builder()
+            .modelName(MODEL_NAME)
+            .concurrency(4)
+            .build();
+
+        var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
+        var graphSage = algorithmFactory.build(proteinGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        GraphSage.GraphSageResult compute = graphSage.compute();
+        for (int i = 0; i < proteinGraph.nodeCount() - 1; i++) {
+            Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> {
+                assertThat(embeddingValue).isNotNaN();
+            });
+        }
     }
 
     @Test
