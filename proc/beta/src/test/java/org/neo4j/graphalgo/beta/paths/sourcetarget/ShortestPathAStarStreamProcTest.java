@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.beta.paths.PathFactory;
-import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
+import org.neo4j.graphalgo.beta.paths.astar.AStar;
+import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
@@ -36,38 +36,43 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
+import static org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
+import static org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
+class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<ShortestPathAStarStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
-        return ShortestPathDijkstraStreamProc.class;
+    public Class<? extends AlgoBaseProc<AStar, DijkstraResult, ShortestPathAStarStreamConfig>> getProcedureClazz() {
+        return ShortestPathAStarStreamProc.class;
     }
 
     @Override
-    public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    public ShortestPathAStarStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return ShortestPathAStarStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test
     void testStream() {
-        ShortestPathDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()
+            .withNodeProperty(LATITUDE_PROPERTY)
+            .withNodeProperty(LONGITUDE_PROPERTY)
             .withAnyRelationshipType()
-            .withRelationshipProperty("cost")
+            .withRelationshipProperty(COST_PROPERTY)
             .graphCreate("graph")
             .yields();
         runQuery(createQuery);
 
         String query = GdsCypher.call().explicitCreation("graph")
-            .algo("gds.beta.shortestPath.dijkstra")
+            .algo("gds.beta.shortestPath.astar")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())
+            .addParameter(LATITUDE_PROPERTY_KEY, config.latitudeProperty())
+            .addParameter(LONGITUDE_PROPERTY_KEY, config.longitudeProperty())
             .addParameter("relationshipWeightProperty", "cost")
             .addParameter("path", true)
             .yields();
@@ -82,9 +87,9 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             );
             var expected = Map.of(
                 "index", 0L,
-                "sourceNode", nodeIdByProperty(db, 1),
-                "targetNode", nodeIdByProperty(db, 6),
-                "totalCost", 20.0D,
+                "sourceNode", idA,
+                "targetNode", idX,
+                "totalCost", 2979.0D,
                 "costs", Arrays.stream(costs0).boxed().collect(Collectors.toList()),
                 "nodeIds", Arrays.stream(ids0).boxed().collect(Collectors.toList()),
                 "path", expectedPath

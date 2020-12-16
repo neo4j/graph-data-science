@@ -43,8 +43,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>
-{
+    RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult> {
 
     long idA, idC, idD, idE, idF;
     static long[] ids0;
@@ -98,16 +97,9 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = nodeIdByProperty(db, 1);
-        long targetId = nodeIdByProperty(db, 6);
-
-        if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
-        }
-        if (!mapWrapper.containsKey(TARGET_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(TARGET_NODE_KEY, targetId);
-        }
-        return mapWrapper;
+        return mapWrapper
+            .withNumber(SOURCE_NODE_KEY, nodeIdByProperty(db, 1))
+            .withNumber(TARGET_NODE_KEY, nodeIdByProperty(db, 6));
     }
 
     @Override

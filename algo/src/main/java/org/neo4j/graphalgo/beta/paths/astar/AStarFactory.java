@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public abstract class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
+public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
 
     @Override
-    public MemoryEstimation memoryEstimation(ShortestPathAStarBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
         return AStar.memoryEstimation();
     }
 
@@ -46,7 +46,7 @@ public abstract class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> i
     }
 
     @Override
-    public AStar build(Graph graph, ShortestPathAStarBaseConfig configuration, AllocationTracker tracker, Log log) {
+    public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
         return AStar.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
     }
 }

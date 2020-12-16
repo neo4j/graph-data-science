@@ -50,7 +50,7 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
     }
 
     @Test
-    void returnCorrectResult() {
+    void testStream() {
         ShortestPathYensStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
         String createQuery = GdsCypher.call()
             .withAnyLabel()

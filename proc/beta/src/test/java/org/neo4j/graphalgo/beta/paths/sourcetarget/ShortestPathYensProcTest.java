@@ -44,8 +44,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     AlgoBaseProcTest<Yens, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Yens, CONFIG, DijkstraResult>,
     HeapControlTest<Yens, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<Yens, CONFIG, DijkstraResult>
-{
+    RelationshipWeightConfigTest<Yens, CONFIG, DijkstraResult> {
 
     long idC, idH, idD, idE, idF, idG;
     long[] ids0, ids1, ids2;
@@ -107,19 +106,10 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = nodeIdByProperty(db, 1);
-        long targetId = nodeIdByProperty(db, 6);
-
-        if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
-        }
-        if (!mapWrapper.containsKey(TARGET_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(TARGET_NODE_KEY, targetId);
-        }
-        if (!mapWrapper.containsKey(K_KEY)) {
-            mapWrapper = mapWrapper.withNumber(K_KEY, 3);
-        }
-        return mapWrapper;
+        return mapWrapper
+            .withNumber(SOURCE_NODE_KEY, nodeIdByProperty(db, 1))
+            .withNumber(TARGET_NODE_KEY, nodeIdByProperty(db, 6))
+            .withNumber(K_KEY, 3);
     }
 
     @Override
