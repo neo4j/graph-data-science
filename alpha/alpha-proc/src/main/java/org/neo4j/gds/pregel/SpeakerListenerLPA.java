@@ -75,9 +75,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     @Override
-    public void compute(
-        ComputeContext<SpeakerListenerLPAConfig> context, Messages messages
-    ) {
+    public void compute(ComputeContext<SpeakerListenerLPAConfig> context, Messages messages) {
         var labels = context.longArrayNodeValue(LABELS_PROPERTY);
 
         if (context.isInitialSuperstep()) {

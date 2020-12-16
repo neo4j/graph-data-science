@@ -596,8 +596,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
     }
 
-
-
     @ValueClass
     public interface PregelResult {
 
