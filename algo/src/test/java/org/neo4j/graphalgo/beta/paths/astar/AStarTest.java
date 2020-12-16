@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.paths.astar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
@@ -190,4 +191,23 @@ class AStarTest {
         assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
     }
 
+    // Validated against https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance
+    @ParameterizedTest
+    @CsvSource(value = {
+        "42,1337,1337,42,7264.92",
+        "42.42,19.84,13.37,20.77,1744.84"
+    })
+    void haversineTest(
+        double sourceLatitude,
+        double sourceLongitude,
+        double targetLatitude,
+        double targetLongitude,
+        double expectedDistance
+    ) {
+        assertEquals(
+            expectedDistance,
+            AStar.HaversineHeuristic.distance(sourceLatitude, sourceLongitude, targetLatitude, targetLongitude),
+            1E-2
+        );
+    }
 }
