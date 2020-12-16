@@ -12,6 +12,7 @@ This topic includes:
 * <<algorithms-pregel-api-java, Pregel Java API>>
 ** <<algorithms-pregel-api-java-computation, Computation>>
 ** <<algorithms-pregel-api-java-context, Init context and computation context>>
+** <<algorithms-pregel-api-master-compute, Master Computation >>
 ** <<algorithms-pregel-api-java-config, Configuration>>
 * <<algorithms-pregel-api-procedure, Run Pregel via Cypher>>
 ** <<algorithms-pregel-api-procedure-generation, Procedure generation>>
@@ -176,6 +177,54 @@ public final class ComputeContext {
 }
 ----
 
+[[algorithms-pregel-api-master-compute]]
+=== Master Computation
+
+Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example, to reset or evaluate a global datastructure.
+This can be achieved by overriding the `org.neo4j.graphalgo.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
+This function will be called at the end of each superstep after all compute threads have finished.
+The master compute function will be called by a single thread.
+
+The `masterCompute` function has access to the `org.neo4j.graphalgo.beta.pregel.PregelContext.MasterComputeContext`.
+That context is similar to the `ComputeContext` but is not tied to a specific node and does not allow sending messages.
+Furthermore, the `MasterComputeContext` allows to run a function for every node in the graph and has access to the computation state of all nodes.
+
+.The MasterComputeContext
+[source, java]
+----
+public final class MasterComputeContext {
+    // User-defined Pregel configuration
+    public PregelConfig config();
+    // Number of nodes in the input graph.
+    public long nodeCount();
+    // Number of relationships in the input graph.
+    public long relationshipCount();
+    // Indicates whether the input graph is a multi-graph.
+    public boolean isMultiGraph();
+    // Run the given consumer for every node in the graph.
+    public void forEachNode(LongPredicate consumer);
+    // Double value for the given node schema key.
+    public double doubleNodeValue(long nodeId, String key);
+    // Double value for the given node schema key.
+    public long longNodeValue(long nodeId, String key);
+    // Double array value for the given node schema key.
+    public double[] doubleArrayNodeValue(long nodeId, String key);
+    // Long array value for the given node schema key.
+    public long[] longArrayNodeValue(long nodeId, String key);
+    // Sets a double node value for the given schema key.
+    public void setNodeValue(long nodeId, String key, double value);
+    // Sets a long node value for the given schema key.
+    public void setNodeValue(long nodeId, String key, long value);
+    // Sets a double array node value for the given schema key.
+    public void setNodeValue(long nodeId, String key, double[] value);
+    // Sets a long array node value for the given schema key.
+    public void setNodeValue(long nodeId, String key, long[] value);
+    // Indicates whether this is superstep 0.
+    public boolean isInitialSuperstep();
+    // 0-based superstep identifier.
+    public int superstep();
+}
+----
 
 [[algorithms-pregel-api-java-config]]
 === Configuration
@@ -321,4 +370,3 @@ The https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-exam
 The algorithm implementations demonstrate the usage of the Pregel API.
 Along with each example, we provide test classes that can be used as a guideline on how to write tests for custom algorithms.
 To play around, we recommend copying one of the algorithms into the `pregel-bootstrap` project, build it and setup the plugin in Neo4j.
-

@@ -66,6 +66,13 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
     }
 
     /**
+     * Indicates if the current superstep is the first superstep.
+     */
+    public boolean isInitialSuperstep() {
+        return superstep() == 0;
+    }
+
+    /**
      * Accepts a consumer function that is called for every node in the graph.
      * The consumer receives one node id at the time.
      * If the consumer returns true, the next node is passed in. Otherwise the iteration stops.
