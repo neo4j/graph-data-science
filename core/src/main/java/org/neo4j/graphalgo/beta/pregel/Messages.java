@@ -58,27 +58,33 @@ public class Messages implements Iterable<Double> {
 
         public abstract boolean isEmpty();
 
-        public void removeSyncBarrier() {};
-
         static class Sync extends MessageIterator {
+            private boolean reachedEnd = false;
+
+            @Override
+            void init(@Nullable Queue<Double> queue) {
+                super.init(queue);
+                reachedEnd = false;
+            }
+
             @Override
             public boolean hasNext() {
-                if (queue == null) {
+                if (queue == null || reachedEnd) {
                     return false;
                 }
-                return !Double.isNaN(queue.peek());
+
+                if (Double.isNaN(queue.peek())) {
+                    queue.poll();
+                    reachedEnd = true;
+                    return false;
+                }
+
+                return true;
             }
 
             @Override
             public boolean isEmpty() {
-                return queue == null || queue.isEmpty() || Double.isNaN(queue.peek());
-            }
-
-            @Override
-            public void removeSyncBarrier() {
-                if (queue != null && !queue.isEmpty()) {
-                    queue.poll();
-                }
+                return queue == null || queue.isEmpty() || reachedEnd || Double.isNaN(queue.peek());
             }
         }
 

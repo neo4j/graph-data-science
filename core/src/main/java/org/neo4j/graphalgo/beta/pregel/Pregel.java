@@ -367,7 +367,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
                     messageIterator.init(receiveMessages(nodeId));
                     computation.compute(computeContext, messages);
-                    messageIterator.removeSyncBarrier();
                 }
             }
         }
