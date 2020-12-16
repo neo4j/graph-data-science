@@ -144,6 +144,8 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.knn.write",
         "gds.beta.knn.write.estimate",
 
+        "gds.beta.listProgress",
+
         "gds.beta.modularityOptimization.mutate",
         "gds.beta.modularityOptimization.mutate.estimate",
         "gds.beta.modularityOptimization.stream",
@@ -319,6 +321,7 @@ class ListProcTest extends BaseProcTest {
             LabelPropagationStatsProc.class,
             LabelPropagationMutateProc.class,
             ListProc.class,
+            ListProgressProc.class,
             LouvainWriteProc.class,
             LouvainStreamProc.class,
             LouvainStatsProc.class,

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -63,83 +62,45 @@ public class ListProgressProcTest extends BaseTest {
     }
 
     @Test
-    void testOne() {
+    void canListProgressEvent() {
         runQuery("CALL gds.test.algo('1')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 1");
     }
 
     @Test
-    void testLast() {
+    void listOnlyLastProgressEvent() {
         runQuery("CALL gds.test.algo('1')");
         runQuery("CALL gds.test.algo('2')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 2");
     }
 
     @Test
-    @Disabled("Only the last entry is kept, is that what we want?")
-    void testMany() {
-        runQuery("CALL gds.test.algo('1')");
-        runQuery("CALL gds.test.algo('2')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-        var result = runQuery(
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
-        );
-        assertThat(result).containsExactly("hello 1", "hello 2");
-    }
-
-    @Test
-    void testPerUser() {
+    void progressIsListedFilteredByUser() {
         runQuery("Alice", "CALL gds.test.algo('Alice')");
         runQuery("Bob", "CALL gds.test.algo('Bob')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(aliceResult).containsExactly("hello Alice");
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(bobResult).containsExactly("hello Bob");
-    }
-
-    @Test
-    @Disabled
-    void testUserSelectedId() {
-        runQuery("CALL gds.test.algo('1', 'some-id')");
-        runQuery("CALL gds.test.algo('2', 'some-other-id')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-        var result = runQuery(
-            "CALL gds.listProgress() YIELD id, message RETURN id, message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
-        );
-        assertThat(result).containsExactly("hello 1", "hello 2");
-    }
-
-    @Test
-    @Disabled
-    void testResultContainsId() {
-        assertThat(true).isFalse();
-    }
-
-    @Test
-    @Disabled
-    void testProgressEventsAreCleanedUp() {
-        assertThat(true).isFalse();
     }
 
     public static class AlgoProc extends BaseProc {

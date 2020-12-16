@@ -31,7 +31,7 @@ public class ListProgressProc extends BaseProc {
     @Context
     public ProgressEventStore progress;
 
-    @Procedure("gds.listProgress")
+    @Procedure("gds.beta.listProgress")
     public Stream<ProgressResult> listProgress() {
         return progress.query(username()).stream().map(ProgressResult::new);
     }
