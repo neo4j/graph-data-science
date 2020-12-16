@@ -477,3 +477,11 @@ CALL gds.beta.graphSage.write(
 | 7         | 7
 |===
 --
+
+[[algorithms-embeddings-graph-sage-caveats]]
+== Caveats
+
+If you are embedding a graph that has isolated nodes, the aggregation step in GraphSage can only draw information from the node itself.
+If furthermore all the properties of that node are `0.0`, and the activation function is relu, this leads to an all-zero vector for that node.
+However, since GraphSage normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
+In conclusion, bear in mind that some nodes may have all-zero embeddings if that can have an impact for downstream tasks like nearest-neighbour type algorithms.
