@@ -9,6 +9,7 @@ dependencies {
 
     api project(':proc-common')
     api project(':proc-catalog')
+    api project(':proc-embeddings')
 
     implementation(
             project(':neo4j-adapter')

@@ -20,17 +20,17 @@
 package org.neo4j.graphalgo;
 
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
-import org.neo4j.graphdb.Result;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
@@ -65,7 +65,14 @@ public class ListProgressProcTest extends BaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        GraphDatabaseApiProxy.registerProcedures(db, AlgoProc.class, ListProgressProc.class, ProgressLoggingAlgoProc.class, GraphGenerateProc.class);
+        GraphDatabaseApiProxy.registerProcedures(
+            db,
+            AlgoProc.class,
+            ListProgressProc.class,
+            ProgressLoggingAlgoProc.class,
+            GraphGenerateProc.class,
+            FastRPStreamProc.class
+        );
     }
 
     @Test
@@ -178,21 +185,19 @@ public class ListProgressProcTest extends BaseTest {
 
     @Test
     void progressLoggerShouldEmitProgressEvents_for_realsies() {
-        runQuery("CALL gds.beta.generate('foo', 100, 5)");
-//        runQuery("CALL gds.fastRP({nodeProjection: '*', relationshipProjection: '*'})");
-//        runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
-//        scheduler.forward(100, TimeUnit.MILLISECONDS);
-//
-//        List<Map<String, Object>> expected = List.of(
-//            Map.of("source", "pagerank", "message", "hello apa"),
-//            Map.of("source", "wcc", "message", "hello bepa")
-//        );
-//        var result = runQuery(
-//            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
-//            r -> r.stream().collect(Collectors.toList())
-//        );
-//
-//        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+        runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
+        runQuery("CALL gds.fastRP.stream('foo', {embeddingDimension: 42})");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        List<Map<String, Object>> result = runQuery(
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            r -> r.stream().collect(Collectors.toList())
+        );
+
+        assertThat(result).hasSize(1)
+            .element(0, InstanceOfAssertFactories.map(String.class, String.class))
+            .hasEntrySatisfying("message", v -> assertThat(v).contains("100%"))
+            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("FastRP"));
     }
 
     public static class ProgressLoggingAlgoProc extends BaseProc {
