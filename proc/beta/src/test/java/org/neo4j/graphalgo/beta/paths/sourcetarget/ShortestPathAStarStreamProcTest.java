@@ -56,15 +56,6 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
     @Test
     void testStream() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-        String createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withNodeProperty(LATITUDE_PROPERTY)
-            .withNodeProperty(LONGITUDE_PROPERTY)
-            .withAnyRelationshipType()
-            .withRelationshipProperty(COST_PROPERTY)
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
 
         String query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.astar")
