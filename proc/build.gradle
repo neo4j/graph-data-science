@@ -15,6 +15,7 @@ dependencies {
     api project(':proc-community')
     api project(':proc-beta')
     api project(':proc-catalog')
+    api project(':proc-misc')
 
     implementation(
         project(':neo4j-adapter')
