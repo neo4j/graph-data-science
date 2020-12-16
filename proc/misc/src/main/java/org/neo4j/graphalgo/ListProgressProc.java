@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.graphalgo;
+
+import org.neo4j.graphalgo.core.utils.progress.LogEvent;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
+import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Procedure;
+
+import java.util.stream.Stream;
+
+public class ListProgressProc extends BaseProc {
+
+    @Context
+    public ProgressEventStore progress;
+
+    @Procedure("gds.listProgress")
+    public Stream<ProgressResult> listProgress() {
+//        return progress.query(username()).stream().map(ProgressResult::new);
+        return progress.query(username()).stream().map(e -> {
+            System.out.printf("id=%s, messge=%s%n", e.id(), e.message());
+            return new ProgressResult(e.id(), e.message());
+        });
+    }
+
+    public static class ProgressResult {
+
+        public String id;
+        public String message;
+
+        ProgressResult(String id, String message) {
+            this.id = id;
+            this.message = message;
+        }
+
+        ProgressResult(LogEvent logEvent) {
+            this.id = logEvent.id();
+            this.message = logEvent.message();
+        }
+    }
+
+}

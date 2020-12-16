@@ -43,7 +43,7 @@ public final class ProgressEventConsumerExtension extends ExtensionFactory<Progr
         this(null);
     }
 
-    /* test-private */ ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
+    /* test-private */ public ProgressEventConsumerExtension(@Nullable JobScheduler scheduler) {
         super(ExtensionType.DATABASE, "gds.progress.logger");
         this.scheduler = scheduler;
     }
