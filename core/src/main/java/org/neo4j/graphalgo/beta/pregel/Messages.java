@@ -58,6 +58,8 @@ public class Messages implements Iterable<Double> {
 
         public abstract boolean isEmpty();
 
+        public void removeSyncBarrier() {};
+
         static class Sync extends MessageIterator {
             @Override
             public boolean hasNext() {
@@ -70,6 +72,13 @@ public class Messages implements Iterable<Double> {
             @Override
             public boolean isEmpty() {
                 return queue == null || queue.isEmpty() || Double.isNaN(queue.peek());
+            }
+
+            @Override
+            public void removeSyncBarrier() {
+                if (queue != null && !queue.isEmpty()) {
+                    queue.poll();
+                }
             }
         }
 
