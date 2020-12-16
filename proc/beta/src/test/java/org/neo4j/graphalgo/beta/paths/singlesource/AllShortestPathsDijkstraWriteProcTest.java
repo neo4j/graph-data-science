@@ -61,7 +61,7 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
     }
 
     @Test
-    void testWriteYields() {
+    void testWrite() {
         var relationshipWeightProperty = "cost";
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));

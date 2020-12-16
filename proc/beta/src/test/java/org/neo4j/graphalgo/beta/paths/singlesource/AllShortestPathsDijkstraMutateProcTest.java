@@ -17,15 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.sourcetarget;
+package org.neo4j.graphalgo.beta.paths.singlesource;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
-import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.graphalgo.beta.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
@@ -33,37 +35,37 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
-import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
-import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
-class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
+class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraMutateConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig>> getProcedureClazz() {
-        return ShortestPathDijkstraWriteProc.class;
+    public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, AllShortestPathsDijkstraMutateConfig>> getProcedureClazz() {
+        return AllShortestPathsDijkstraMutateProc.class;
     }
 
     @Override
-    public ShortestPathDijkstraWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return ShortestPathDijkstraWriteConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    public AllShortestPathsDijkstraMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return AllShortestPathsDijkstraMutateConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         mapWrapper = super.createMinimalConfig(mapWrapper);
 
-        if (!mapWrapper.containsKey(WRITE_RELATIONSHIP_TYPE_KEY)) {
-            mapWrapper = mapWrapper.withString(WRITE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
+        if (!mapWrapper.containsKey(MUTATE_RELATIONSHIP_TYPE_KEY)) {
+            mapWrapper = mapWrapper.withString(MUTATE_RELATIONSHIP_TYPE_KEY, WRITE_RELATIONSHIP_TYPE);
         }
 
         return mapWrapper;
     }
 
     @Test
-    void testWrite() {
-        var relationshipWeightProperty = "cost";
+    void testMutate() {
         var graphName = "graph";
+        var relationshipWeightProperty = "cost";
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
@@ -76,23 +78,41 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
         runQuery(createQuery);
 
         var query = GdsCypher.call().explicitCreation(graphName)
-            .algo("gds.beta.shortestPath.dijkstra")
-            .writeMode()
+            .algo("gds.beta.allShortestPaths.dijkstra")
+            .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
             .addParameter("relationshipWeightProperty", relationshipWeightProperty)
-            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .addParameter("mutateRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
-            "relationshipsWritten", 1L,
+            "relationshipsWritten", 6L,
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
-            "writeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
 
-        assertCypherResult(validationQuery(idA), List.of(Map.of("totalCost", 20.0D, "nodeIds", ids0, "costs", costs0)));
+        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), graphName).graphStore().getUnion();
+        var expected = TestSupport.fromGdl(
+            "CREATE" +
+            "  (a)-[{w: 4.0D}]->(b)" +
+            ", (a)-[{w: 2.0D}]->(c)" +
+            ", (b)-[{w: 5.0D}]->(c)" +
+            ", (b)-[{w: 10.0D}]->(d)" +
+            ", (c)-[{w: 3.0D}]->(e)" +
+            ", (d)-[{w: 11.0D}]->(f)" +
+            ", (e)-[{w: 4.0D}]->(d)" +
+            // new relationship as a result from mutate
+            ", (a)-[{w: 0.0D}]->(a)" +
+            ", (a)-[{w: 2.0D}]->(c)" +
+            ", (a)-[{w: 4.0D}]->(b)" +
+            ", (a)-[{w: 5.0D}]->(e)" +
+            ", (a)-[{w: 9.0D}]->(d)" +
+            ", (a)-[{w: 20.0D}]->(f)"
+        );
+
+        assertGraphEquals(expected, actual);
     }
 }

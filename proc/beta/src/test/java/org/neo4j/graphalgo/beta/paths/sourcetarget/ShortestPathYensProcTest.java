@@ -60,15 +60,15 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
                ", (f {id: 4})" +
                ", (g {id: 5})" +
                ", (h {id: 6})" +
-               ", (c)-[:REL {cost: 3.0}]->(d)" +
-               ", (c)-[:REL {cost: 2.0}]->(e)" +
-               ", (d)-[:REL {cost: 4.0}]->(f)" +
-               ", (e)-[:REL {cost: 1.0}]->(d)" +
-               ", (e)-[:REL {cost: 2.0}]->(f)" +
-               ", (e)-[:REL {cost: 3.0}]->(g)" +
-               ", (f)-[:REL {cost: 2.0}]->(g)" +
-               ", (f)-[:REL {cost: 1.0}]->(h)" +
-               ", (g)-[:REL {cost: 2.0}]->(h)";
+               ", (c)-[:TYPE {cost: 3.0}]->(d)" +
+               ", (c)-[:TYPE {cost: 2.0}]->(e)" +
+               ", (d)-[:TYPE {cost: 4.0}]->(f)" +
+               ", (e)-[:TYPE {cost: 1.0}]->(d)" +
+               ", (e)-[:TYPE {cost: 2.0}]->(f)" +
+               ", (e)-[:TYPE {cost: 3.0}]->(g)" +
+               ", (f)-[:TYPE {cost: 2.0}]->(g)" +
+               ", (f)-[:TYPE {cost: 1.0}]->(h)" +
+               ", (g)-[:TYPE {cost: 2.0}]->(h)";
     }
 
     @BeforeEach

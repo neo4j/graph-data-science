@@ -210,21 +210,27 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.modularityOptimization.stream.estimate`
 | `gds.beta.modularityOptimization.write`
 | `gds.beta.modularityOptimization.write.estimate`
-.4+<.^| Shortest Path Dijkstra
+.6+<.^| Shortest Path Dijkstra
 | `gds.beta.shortestPath.dijkstra.stream`
 | `gds.beta.shortestPath.dijkstra.stream.estimate`
 | `gds.beta.shortestPath.dijkstra.write`
 | `gds.beta.shortestPath.dijkstra.write.estimate`
-.4+<.^| All Shortest Paths Dijkstra
+| `gds.beta.shortestPath.dijkstra.mutate`
+| `gds.beta.shortestPath.dijkstra.mutate.estimate`
+.6+<.^| All Shortest Paths Dijkstra
 | `gds.beta.allShortestPaths.dijkstra.stream`
 | `gds.beta.allShortestPaths.dijkstra.stream.estimate`
 | `gds.beta.allShortestPaths.dijkstra.write`
 | `gds.beta.allShortestPaths.dijkstra.write.estimate`
-.4+<.^| Shortest Paths Yens
+| `gds.beta.allShortestPaths.dijkstra.mutate`
+| `gds.beta.allShortestPaths.dijkstra.mutate.estimate`
+.6+<.^| Shortest Paths Yens
 | `gds.beta.shortestPath.yens.stream`
 | `gds.beta.shortestPath.yens.stream.estimate`
 | `gds.beta.shortestPath.yens.write`
 | `gds.beta.shortestPath.yens.write.estimate`
+| `gds.beta.shortestPath.yens.mutate`
+| `gds.beta.shortestPath.yens.mutate.estimate`
 |===
 
 [[alpha-tier]]
