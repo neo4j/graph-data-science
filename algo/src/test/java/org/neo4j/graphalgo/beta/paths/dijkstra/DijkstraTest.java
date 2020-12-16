@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -379,7 +380,7 @@ final class DijkstraTest {
         private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Label { distance: 1.0 })" +
-            ", (b:Label { distance: 42.0 })" +
+            ", (b:Label { distance: 42.0 })" + // avoid visiting that node
             ", (c:Label { distance: 1.0 })" +
             ", (d:Label { distance: 1.0 })" +
             ", (e:Label { distance: 1.0 })" +
@@ -408,7 +409,12 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            Dijkstra.HeuristicFunction heuristicFunction = (nodeId) -> graph.nodeProperties("distance").doubleValue(nodeId);
+            var heapComparisons = new ArrayList<Long>();
+
+            Dijkstra.HeuristicFunction heuristicFunction = (nodeId) -> {
+                heapComparisons.add(nodeId);
+                return graph.nodeProperties("distance").doubleValue(nodeId);
+            };
 
             var path = Dijkstra
                 .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
@@ -417,6 +423,7 @@ final class DijkstraTest {
                 .findFirst()
                 .get();
 
+            assertEquals(List.of(2L, 1L, 4L, 1L, 3L, 1L, 5L, 1L), heapComparisons);
             assertEquals(expected, path);
         }
     }

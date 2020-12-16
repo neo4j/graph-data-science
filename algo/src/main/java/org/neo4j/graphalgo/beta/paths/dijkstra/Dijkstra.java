@@ -287,11 +287,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         boolean test(long source, long target, long relationshipId);
     }
 
-    public static HugeLongPriorityQueue min(long capacity, LongToDoubleFunction costFunction) {
+    public static HugeLongPriorityQueue min(long capacity, HeuristicFunction heuristicFunction) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
-                return costFunction.applyAsDouble(a) + costValues.get(a) < costFunction.applyAsDouble(b) + costValues.get(b);
+                return heuristicFunction.applyAsDouble(a) + costValues.get(a) < heuristicFunction.applyAsDouble(b) + costValues.get(b);
             }
         };
     }
