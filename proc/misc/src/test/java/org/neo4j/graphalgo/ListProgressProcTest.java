@@ -35,7 +35,10 @@ import org.neo4j.test.FakeClockJobScheduler;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -66,7 +69,7 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.algo('1')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 1");
@@ -78,7 +81,7 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.algo('2')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(result).containsExactly("hello 2");
@@ -91,16 +94,50 @@ public class ListProgressProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(aliceResult).containsExactly("hello Alice");
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.beta.listProgress() YIELD id, message RETURN id, message",
+            "CALL gds.beta.listProgress() YIELD source, message RETURN id, message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
         assertThat(bobResult).containsExactly("hello Bob");
+    }
+
+    @Test
+    void progressIsListedWithOneEventPerSource() {
+        runQuery("CALL gds.test.algo('foo', 'pagerank')");
+        runQuery("CALL gds.test.algo('bar', 'wcc')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        List<Map<String, Object>> expected1 = List.of(
+            Map.of("source", "pagerank", "message", "hello foo"),
+            Map.of("source", "wcc", "message", "hello bar")
+        );
+        var result1 = runQuery(
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            r -> r.stream().collect(Collectors.toList())
+        );
+
+        assertThat(result1).containsExactlyInAnyOrderElementsOf(expected1);
+
+        // causing new events, the newer events will be returned for the same keys
+        runQuery("CALL gds.test.algo('apa', 'pagerank')");
+        runQuery("CALL gds.test.algo('bepa', 'wcc')");
+        scheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        List<Map<String, Object>> expected2 = List.of(
+            Map.of("source", "pagerank", "message", "hello apa"),
+            Map.of("source", "wcc", "message", "hello bepa")
+        );
+        var result2 = runQuery(
+            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            r -> r.stream().collect(Collectors.toList())
+        );
+
+        assertThat(result2).containsExactlyInAnyOrderElementsOf(expected2);
     }
 
     public static class AlgoProc extends BaseProc {
@@ -110,7 +147,7 @@ public class ListProgressProcTest extends BaseTest {
         @Procedure("gds.test.algo")
         public Stream<Bar> foo(
             @Name(value = "param") String param,
-            @Name(value = "id", defaultValue = "test") String id
+            @Name(value = "source", defaultValue = "test") String id
         ) {
             progress.addLogEvent(id, "hello " + param);
             return Stream.empty();
