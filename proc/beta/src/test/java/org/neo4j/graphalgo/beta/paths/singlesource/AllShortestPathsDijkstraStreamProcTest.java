@@ -51,16 +51,9 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
 
     @Test
     void returnCorrectResult() {
-        AllShortestPathsDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-        String createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty("cost")
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        String query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.allShortestPaths.dijkstra")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())

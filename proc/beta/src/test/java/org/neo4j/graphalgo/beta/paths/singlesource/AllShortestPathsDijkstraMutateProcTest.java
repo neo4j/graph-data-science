@@ -64,24 +64,13 @@ class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraPro
 
     @Test
     void testMutate() {
-        var graphName = "graph";
-        var relationshipWeightProperty = "cost";
-
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate(graphName)
-            .yields();
-        runQuery(createQuery);
-
-        var query = GdsCypher.call().explicitCreation(graphName)
+        var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.allShortestPaths.dijkstra")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
-            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("mutateRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .yields();
 
@@ -94,7 +83,7 @@ class AllShortestPathsDijkstraMutateProcTest extends AllShortestPathsDijkstraPro
             "configuration", isA(Map.class)
         )));
 
-        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), graphName).graphStore().getUnion();
+        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(
             "CREATE" +
             "  (a)-[{w: 4.0D}]->(b)" +

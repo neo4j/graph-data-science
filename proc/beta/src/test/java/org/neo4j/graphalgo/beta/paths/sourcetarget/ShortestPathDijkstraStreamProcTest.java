@@ -54,16 +54,9 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
     @Test
     void testStream() {
-        ShortestPathDijkstraStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-        String createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty("cost")
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        String query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.dijkstra")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())

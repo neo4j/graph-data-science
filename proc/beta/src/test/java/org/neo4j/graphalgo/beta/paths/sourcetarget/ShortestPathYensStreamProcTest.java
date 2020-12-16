@@ -51,16 +51,9 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
 
     @Test
     void testStream() {
-        ShortestPathYensStreamConfig config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-        String createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty("cost")
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        String query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.yens")
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())

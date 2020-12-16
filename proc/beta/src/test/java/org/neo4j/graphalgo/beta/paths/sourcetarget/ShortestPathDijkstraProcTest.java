@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
@@ -83,6 +84,13 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
 
         ids0 = new long[]{idA, idC, idE, idD, idF};
         costs0 = new double[]{0.0, 2.0, 5.0, 9.0, 20.0};
+
+        runQuery(GdsCypher.call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withRelationshipProperty("cost")
+            .graphCreate("graph")
+            .yields());
     }
 
     @AfterEach

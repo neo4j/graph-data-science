@@ -69,17 +69,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
 
     @Test
     void testWrite() {
-        var relationshipWeightProperty = "cost";
-
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
 
         var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.yens")
@@ -87,7 +77,7 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())
             .addParameter("k", config.k())
-            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .addParameter("writeNodeIds", true)
             .addParameter("writeCosts", true)

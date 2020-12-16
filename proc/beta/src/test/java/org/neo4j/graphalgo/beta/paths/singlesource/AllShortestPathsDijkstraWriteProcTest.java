@@ -69,23 +69,13 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
 
     @Test
     void testWrite() {
-        var relationshipWeightProperty = "cost";
-
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
 
         var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.allShortestPaths.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
-            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .addParameter("writeNodeIds", true)
             .addParameter("writeCosts", true)

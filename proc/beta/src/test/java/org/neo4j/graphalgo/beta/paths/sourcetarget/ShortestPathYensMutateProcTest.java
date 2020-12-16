@@ -64,27 +64,15 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
 
     @Test
     void testMutate() {
-        var relationshipWeightProperty = "cost";
-        var graphName = "graph";
-
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate(graphName)
-            .yields();
-
-        runQuery(createQuery);
-
-        var query = GdsCypher.call().explicitCreation(graphName)
+        var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.yens")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())
             .addParameter("k", config.k())
-            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("relationshipWeightProperty", "cost")
             .addParameter("mutateRelationshipType", WRITE_RELATIONSHIP_TYPE)
             .yields();
 
@@ -97,7 +85,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
             "configuration", isA(Map.class)
         )));
 
-        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), graphName).graphStore().getUnion();
+        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(
             "CREATE" +
             ", (c)-[{w: 3.0}]->(d)" +
