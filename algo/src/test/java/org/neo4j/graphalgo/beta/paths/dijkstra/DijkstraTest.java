@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -126,7 +127,7 @@ final class DijkstraTest {
                 .build();
 
             var paths = Dijkstra
-                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -143,7 +144,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -166,7 +167,7 @@ final class DijkstraTest {
                 .build();
 
             var dijkstra = Dijkstra
-                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
@@ -192,7 +193,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -232,7 +233,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -254,7 +255,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -271,7 +272,7 @@ final class DijkstraTest {
                 .build();
 
             var ignored = Dijkstra
-                .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), testLogger, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -337,7 +338,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -364,11 +365,59 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
             assertEquals(expected, paths);
+        }
+    }
+
+    @Nested
+    class Graph3 {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label { distance: 1.0 })" +
+            ", (b:Label { distance: 42.0 })" +
+            ", (c:Label { distance: 1.0 })" +
+            ", (d:Label { distance: 1.0 })" +
+            ", (e:Label { distance: 1.0 })" +
+            ", (f:Label { distance: 0.0 })" +
+
+            ", (a)-[:TYPE {cost: 4}]->(b)" +
+            ", (a)-[:TYPE {cost: 2}]->(c)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (b)-[:TYPE {cost: 10}]->(d)" +
+            ", (c)-[:TYPE {cost: 3}]->(e)" +
+            ", (d)-[:TYPE {cost: 11}]->(f)" +
+            ", (e)-[:TYPE {cost: 4}]->(d)";
+
+        @Inject
+        Graph graph;
+
+        @Inject
+        IdFunction idFunction;
+
+        @Test
+        void sourceTargetWithHeuristic() {
+            var expected = expected(idFunction, 0, new double[]{0.0, 2.0, 5.0, 9.0, 20.0}, "a", "c", "e", "d", "f");
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .build();
+
+            Dijkstra.HeuristicFunction heuristicFunction = (nodeId) -> graph.nodeProperties("distance").doubleValue(nodeId);
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
         }
     }
 }
