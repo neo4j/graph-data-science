@@ -20,7 +20,10 @@
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
 final class ShortestPathAStarProc {
-    static final String ASTAR_DESCRIPTION = "The AStar shortest path algorithm computes the shortest (weighted) path between a pair of nodes using the haversine distance between two nodes.";
+    static final String ASTAR_DESCRIPTION =
+        "The A* shortest path algorithm computes the shortest path between a pair of nodes. " +
+        "It uses the relationship weight property to compare path lengths. " +
+        "In addition, this implementation uses the haversine distance as a heuristic to converge faster.";
 
     private ShortestPathAStarProc() {}
 }
