@@ -59,7 +59,32 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     }
 
-    default Map<I, Map<String, PROPERTY_SCHEMA>> unionProperties(Map<I, Map<String, PROPERTY_SCHEMA>> rightProperties) {
+    default Map<String, PROPERTY_SCHEMA> unionProperties() {
+        return properties()
+            .values()
+            .stream()
+            .flatMap(e -> e.entrySet().stream())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (leftSchema, rightSchema) -> {
+                    if (leftSchema.valueType() != rightSchema.valueType()) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Combining schema entries with value type %s and %s is not supported.",
+                            leftSchema.valueType(),
+                            rightSchema.valueType()
+                        ));
+                    } else {
+                        return leftSchema;
+                    }
+                }
+            ));
+    }
+
+    /**
+     * For internal use only!
+     */
+    default Map<I, Map<String, PROPERTY_SCHEMA>> unionSchema(Map<I, Map<String, PROPERTY_SCHEMA>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()

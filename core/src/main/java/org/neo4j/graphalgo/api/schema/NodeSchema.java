@@ -55,7 +55,7 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
 
     @Override
     default NodeSchema union(NodeSchema other) {
-        return of(unionProperties(other.properties()));
+        return of(unionSchema(other.properties()));
     }
 
     static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {
