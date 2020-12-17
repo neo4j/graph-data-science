@@ -77,10 +77,6 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.shortestPath.deltaStepping.write",
         "gds.alpha.shortestPath.deltaStepping.stream",
         "gds.alpha.randomWalk.stream",
-        "gds.alpha.shortestPath.write",
-        "gds.alpha.shortestPath.stream",
-        "gds.alpha.shortestPaths.write",
-        "gds.alpha.shortestPaths.stream",
         "gds.alpha.similarity.cosine.write",
         "gds.alpha.similarity.cosine.stream",
         "gds.alpha.similarity.cosine.stats",
@@ -101,11 +97,8 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.triangles",
         "gds.alpha.eigenvector.write",
         "gds.alpha.eigenvector.stream",
-        "gds.alpha.kShortestPaths.write",
-        "gds.alpha.kShortestPaths.stream",
         "gds.alpha.ml.ann.write",
-        "gds.alpha.ml.ann.stream",
-        "gds.alpha.shortestPath.astar.stream"
+        "gds.alpha.ml.ann.stream"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
