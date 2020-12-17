@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.export.Exporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
@@ -34,12 +34,12 @@ public final class FileExporter extends Exporter {
 
     public static FileExporter csv(
         GraphStoreInput graphStoreInput,
-        GraphStore graphStore,
+        GraphSchema graphSchema,
         Path exportLocation
     ) {
         return new FileExporter(
             graphStoreInput,
-            () -> new CsvNodeVisitor(exportLocation, graphStore)
+            () -> new CsvNodeVisitor(exportLocation, graphSchema)
         );
     }
 

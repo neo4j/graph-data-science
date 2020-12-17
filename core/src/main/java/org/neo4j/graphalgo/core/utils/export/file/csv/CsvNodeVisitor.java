@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
 import java.io.IOException;
@@ -35,12 +35,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
 
+    public static final String ID_COLUMN_NAME = "ID";
+
     private final Path fileLocation;
     private final Map<String, CsvAppender> csvAppenders;
     private final CsvWriter csvWriter;
 
-    public CsvNodeVisitor(Path fileLocation, GraphStore graphStore) {
-        super(graphStore);
+    public CsvNodeVisitor(Path fileLocation, GraphSchema graphSchema) {
+        super(graphSchema);
         this.fileLocation = fileLocation;
         this.csvAppenders = new HashMap<>();
         this.csvWriter = new CsvWriter();
@@ -52,7 +54,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         var csvAppender = getAppender();
         try {
             // write Id
-            csvAppender.appendField(Long.toString(getId()));
+            csvAppender.appendField(Long.toString(id()));
 
             // write properties
             forEachProperty(((key, value, type) -> {
@@ -86,7 +88,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         var labelsString = String.join("_", labels());
 
         return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
-            var fileName = formatWithLocale("nodes_%s", labelsString);
+            var fileName = labelsString.isBlank() ? "nodes" : formatWithLocale("nodes_%s", labelsString);
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
             var dataFileName = formatWithLocale("%s.csv", fileName);
 
@@ -102,7 +104,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     private void writeHeaderFile(String headerFileName) {
         try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
-            headerAppender.appendField("ID");
+            headerAppender.appendField(ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(

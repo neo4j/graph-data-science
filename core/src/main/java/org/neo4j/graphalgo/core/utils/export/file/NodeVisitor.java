@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
@@ -31,11 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+
 public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
+
+    private final List<String> EMPTY_LABELS = List.of(ALL_NODES.name());
 
     private long currentId;
     private List<String> currentLabels;
-    private final GraphStore graphStore;
+    private final GraphSchema graphSchema;
     private final Object[] currentProperties;
 
     // TODO use String instead of List<String>?
@@ -43,12 +47,14 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
 
     private final Map<String, Integer> propertyKeyPositions;
 
-    protected NodeVisitor(GraphStore graphStore) {
-        this.graphStore = graphStore;
+    protected NodeVisitor(GraphSchema graphSchema) {
+        currentId = -1;
+        currentLabels = EMPTY_LABELS;
+
+        this.graphSchema = graphSchema;
         this.propertyKeys = new HashMap<>();
         this.propertyKeyPositions = new HashMap<>();
-        var allProperties = graphStore
-            .schema()
+        var allProperties = graphSchema
             .nodeSchema()
             .allProperties();
         var i = 0;
@@ -61,7 +67,7 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
 
     protected abstract void importNode();
 
-    public long getId() {
+    public long id() {
         return currentId;
     }
 
@@ -99,6 +105,7 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
 
     @Override
     public void endOfEntity() {
+        // Check if we encounter a new label combination
         if (!propertyKeys.containsKey(currentLabels)) {
             calculateLabelSchema();
         }
@@ -107,14 +114,14 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
         importNode();
 
         // reset
+        currentId = -1;
+        currentLabels = EMPTY_LABELS;
         Arrays.fill(currentProperties, null);
     }
 
-
-
     private void calculateLabelSchema() {
         var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
-        var propertySchemaForLabels = graphStore.schema().nodeSchema().filter(nodeLabelList);
+        var propertySchemaForLabels = graphSchema.nodeSchema().filter(nodeLabelList);
         var unionProperties = propertySchemaForLabels.unionProperties();
         var sortedPropertyEntries = unionProperties
             .entrySet()

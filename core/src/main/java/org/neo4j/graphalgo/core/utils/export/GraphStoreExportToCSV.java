@@ -51,7 +51,7 @@ public class GraphStoreExportToCSV {
             config.batchSize()
         );
 
-        FileExporter.csv(graphStoreInput, graphStore, exportPath).export();
+        FileExporter.csv(graphStoreInput, graphStore.schema(), exportPath).export();
 
         long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
