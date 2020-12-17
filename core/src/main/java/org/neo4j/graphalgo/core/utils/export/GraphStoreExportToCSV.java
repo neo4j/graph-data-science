@@ -126,10 +126,7 @@ public class GraphStoreExportToCSV {
                         Collectors.joining(";")));
 
                     for (var propName : nodeProperties) {
-                        // FIXME also write other property types
-                        csvAppender.appendField(Double.toString(graphStore
-                            .nodePropertyValues(propName)
-                            .doubleValue(id)));
+                        csvAppender.appendField(graphStore.nodePropertyValues(propName).value(id).prettyPrint());
                     }
 
                     csvAppender.endLine();
