@@ -17,22 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.yens;
+package org.neo4j.graphalgo.beta.paths.astar;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
-public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements AlgorithmFactory<Yens, CONFIG> {
+public abstract class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
 
     @Override
-    public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {
-        return Yens.memoryEstimation();
+    public MemoryEstimation memoryEstimation(ShortestPathAStarBaseConfig configuration) {
+        return AStar.memoryEstimation();
     }
 
     @NotNull
@@ -40,13 +40,13 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
-            "Yens",
+            "AStar",
             1
         );
     }
 
     @Override
-    public Yens build(Graph graph, ShortestPathYensBaseConfig configuration, AllocationTracker tracker, Log log) {
-        return Yens.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
+    public AStar build(Graph graph, ShortestPathAStarBaseConfig configuration, AllocationTracker tracker, Log log) {
+        return AStar.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
     }
 }

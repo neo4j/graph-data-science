@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.paths.yens.config;
+package org.neo4j.graphalgo.beta.paths.astar.config;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -30,15 +30,15 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig, ReturnsPathConfig {
+public interface ShortestPathAStarStreamConfig extends ShortestPathAStarBaseConfig, ReturnsPathConfig {
 
-    static ShortestPathYensStreamConfig of(
+    static ShortestPathAStarStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ShortestPathYensStreamConfigImpl(
+        return new ShortestPathAStarStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
