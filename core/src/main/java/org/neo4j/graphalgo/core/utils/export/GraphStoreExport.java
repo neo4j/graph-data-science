@@ -19,49 +19,19 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.common.Validator;
-import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.graphalgo.core.utils.export.db.DatabaseExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.ImportLogic;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.Neo4jLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.internal.LogService;
-import org.neo4j.logging.internal.NullLogService;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.io.ByteUnit.mebiBytes;
-import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
 public class GraphStoreExport {
 
     private final GraphStore graphStore;
 
-    private final Path neo4jHome;
-
+    private final GraphDatabaseAPI api;
     private final GraphStoreExportConfig config;
 
-    private final FileSystemAbstraction fs;
 
     public GraphStoreExport(
         GraphStore graphStore,
@@ -69,108 +39,24 @@ public class GraphStoreExport {
         GraphStoreExportConfig config
     ) {
         this.graphStore = graphStore;
-        this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
+        this.api = api;
         this.config = config;
-        this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
     }
 
     public ImportedProperties run(AllocationTracker tracker) {
-        return run(false, tracker);
-    }
+        var nodeStore = NodeStore.of(graphStore, tracker);
+        var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
+        var graphStoreInput = new GraphStoreInput(
+            nodeStore,
+            relationshipStore,
+            config.batchSize()
+        );
 
-    /**
-     * Runs with default configuration geared towards
-     * unit/integration test environments, for example,
-     * lower default buffer sizes.
-     */
-    @TestOnly
-    public void runFromTests() {
-        run(true, AllocationTracker.empty());
-    }
+        new DatabaseExporter(graphStoreInput, api, config).export();
 
-    private ImportedProperties run(boolean defaultSettingsSuitableForTests, AllocationTracker tracker) {
-        DIRECTORY_IS_WRITABLE.validate(neo4jHome);
-        var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
-        var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
-        var importConfig = getImportConfig(defaultSettingsSuitableForTests);
-
-        var lifeSupport = new LifeSupport();
-
-       try {
-            LogService logService;
-            if (config.enableDebugLog()) {
-                var storeInternalLogPath = databaseConfig.get(Settings.storeInternalLogPath());
-                logService = Neo4jProxy.logProviderForStoreAndRegister(storeInternalLogPath, fs, lifeSupport);
-            } else {
-                logService = NullLogService.getInstance();
-            }
-            var jobScheduler = lifeSupport.add(createScheduler());
-
-            lifeSupport.start();
-
-            var nodeStore = NodeStore.of(graphStore, tracker);
-            var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
-            Input input = Neo4jProxy.batchInputFrom(new GraphStoreInput(
-                nodeStore,
-                relationshipStore,
-                config.batchSize()
-            ));
-
-            var metaDataPath = Neo4jProxy.metadataStore(databaseLayout);
-            var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-            if (dbExists) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The database [%s] already exists. The graph export procedure can only create new databases.",
-                    config.dbName()
-                ));
-            }
-
-            var importer = Neo4jProxy.instantiateBatchImporter(
-                BatchImporterFactory.withHighestPriority(),
-                databaseLayout,
-                fs,
-                null, // no external page cache
-                PageCacheTracer.NULL,
-                importConfig,
-                logService,
-                ExecutionMonitors.invisible(),
-                AdditionalInitialIds.EMPTY,
-                databaseConfig,
-                RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
-                ImportLogic.NO_MONITOR,
-                jobScheduler,
-                Collector.EMPTY
-            );
-            importer.doImport(input);
-
-            long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
-            long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
-            return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            lifeSupport.shutdown();
-        }
-    }
-
-    @NotNull
-    private Configuration getImportConfig(boolean defaultSettingsSuitableForTests) {
-        return new Configuration() {
-            @Override
-            public int maxNumberOfProcessors() {
-                return config.writeConcurrency();
-            }
-
-            @Override
-            public long pageCacheMemory() {
-                return defaultSettingsSuitableForTests ? mebiBytes(8) : Configuration.super.pageCacheMemory();
-            }
-
-            @Override
-            public boolean highIO() {
-                return false;
-            }
-        };
+        long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
+        long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
+        return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
     }
 
     @ValueClass
@@ -181,17 +67,4 @@ public class GraphStoreExport {
         long relationshipPropertyCount();
     }
 
-    public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
-        try {
-            Files.createDirectories(value);
-            if (!Files.isDirectory(value)) {
-                throw new IllegalArgumentException("'" + value + "' is not a directory");
-            }
-            if (!Files.isWritable(value)) {
-                throw new IllegalArgumentException("Directory '" + value + "' not writable");
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Directory '" + value + "' not writable: ", e);
-        }
-    };
 }
