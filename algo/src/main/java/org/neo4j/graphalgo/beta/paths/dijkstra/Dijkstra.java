@@ -38,6 +38,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
+import java.util.Optional;
+import java.util.function.LongToDoubleFunction;
 import java.util.stream.Stream;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
@@ -70,16 +72,19 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     public static Dijkstra sourceTarget(
         Graph graph,
         ShortestPathBaseConfig config,
+        Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         long sourceNode = graph.toMappedNodeId(config.sourceNode());
         long targetNode = graph.toMappedNodeId(config.targetNode());
+
         return new Dijkstra(
             graph,
             sourceNode,
             node -> node == targetNode,
             config.trackRelationships(),
+            heuristicFunction,
             progressLogger,
             tracker
         );
@@ -91,6 +96,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     public static Dijkstra singleSource(
         Graph graph,
         AllShortestPathsBaseConfig config,
+        Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -98,6 +104,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.toMappedNodeId(config.sourceNode()),
             node -> true,
             config.trackRelationships(),
+            heuristicFunction,
             progressLogger,
             tracker
         );
@@ -124,6 +131,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         long sourceNode,
         LongPredicate stopPredicate,
         boolean trackRelationships,
+        Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -131,7 +139,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.sourceNode = sourceNode;
         this.stopPredicate = stopPredicate;
         this.trackRelationships = trackRelationships;
-        this.queue = HugeLongPriorityQueue.min(graph.nodeCount());
+        this.queue = heuristicFunction
+            .map(fn -> minPriorityQueue(graph.nodeCount(), fn))
+            .orElseGet(() -> HugeLongPriorityQueue.min(graph.nodeCount()));
         this.predecessors = new HugeLongLongMap(tracker);
         this.relationships = trackRelationships ? new HugeLongLongMap(tracker) : null;
         this.visited = new BitSet();
@@ -278,4 +288,16 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     public interface RelationshipFilter {
         boolean test(long source, long target, long relationshipId);
     }
+
+    public static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
+        return new HugeLongPriorityQueue(capacity) {
+            @Override
+            protected boolean lessThan(long a, long b) {
+                return heuristicFunction.applyAsDouble(a) + costValues.get(a) < heuristicFunction.applyAsDouble(b) + costValues.get(b);
+            }
+        };
+    }
+
+    @FunctionalInterface
+    public interface HeuristicFunction extends LongToDoubleFunction {}
 }

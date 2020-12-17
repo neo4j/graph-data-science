@@ -60,13 +60,13 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
 
     private long size = 0;
 
-    HugeDoubleArray costValues;
+    protected HugeDoubleArray costValues;
 
     /**
      * Creates a new priority queue with the given capacity.
      * The size is fixed, the queue cannot shrink or grow.
      */
-    HugeLongPriorityQueue(long capacity) {
+    protected HugeLongPriorityQueue(long capacity) {
         long heapSize;
         if (0 == capacity) {
             // We allocate 1 extra to avoid if statement in top()

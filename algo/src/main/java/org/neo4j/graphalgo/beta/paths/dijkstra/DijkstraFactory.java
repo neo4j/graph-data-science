@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.logging.Log;
 
+import java.util.Optional;
+
 public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> implements AlgorithmFactory<Dijkstra, T> {
 
     @Override
@@ -55,6 +57,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 return Dijkstra.sourceTarget(
                     graph,
                     configuration,
+                    Optional.empty(),
                     progressLogger(graph, log),
                     tracker
                 );
@@ -69,6 +72,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 return Dijkstra.singleSource(
                     graph,
                     configuration,
+                    Optional.empty(),
                     progressLogger(graph, log),
                     tracker
                 );

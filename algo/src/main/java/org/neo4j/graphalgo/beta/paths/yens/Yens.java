@@ -74,7 +74,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             .trackRelationships(graph.isMultiGraph())
             .build();
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, progressLogger, tracker);
+        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressLogger, tracker);
         return new Yens(graph, dijkstra, newConfig, progressLogger);
     }
 
