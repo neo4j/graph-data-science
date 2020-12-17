@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.utils.export.Exporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -28,9 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
-public class FileExporter {
-    protected final GraphStoreInput graphStoreInput;
-    protected final GraphStore graphStore;
+public final class FileExporter extends Exporter {
     private final Supplier<NodeVisitor> nodeVisitorSupplier;
 
     public static FileExporter csv(
@@ -40,28 +39,25 @@ public class FileExporter {
     ) {
         return new FileExporter(
             graphStoreInput,
-            graphStore,
             () -> new CsvNodeVisitor(exportLocation, graphStore)
         );
     }
 
-
-    FileExporter(
+    private FileExporter(
         GraphStoreInput graphStoreInput,
-        GraphStore graphStore,
         Supplier<NodeVisitor> nodeVisitorSupplier
     ) {
-        this.graphStoreInput = graphStoreInput;
-        this.graphStore = graphStore;
+        super(graphStoreInput);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
     }
 
-    public void doExport() {
+    @Override
+    public void export() {
         exportNodes();
         exportRelationships();
     }
 
-    void exportNodes() {
+    private void exportNodes() {
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
         var nodeVisitor = nodeVisitorSupplier.get();

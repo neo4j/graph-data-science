@@ -19,15 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.export.file.FileExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.internal.batchimport.Configuration;
 
 import java.nio.file.Path;
-
-import static org.neo4j.io.ByteUnit.mebiBytes;
 
 public class GraphStoreExportToCSV {
 
@@ -47,38 +43,18 @@ public class GraphStoreExportToCSV {
     }
 
     public GraphStoreExport.ImportedProperties run(AllocationTracker tracker) {
-        var nodeStore = GraphStoreExport.NodeStore.of(graphStore, tracker);
-        var relationshipStore = GraphStoreExport.RelationshipStore.of(graphStore, config.defaultRelationshipType());
+        var nodeStore = NodeStore.of(graphStore, tracker);
+        var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphStoreInput = new GraphStoreInput(
             nodeStore,
             relationshipStore,
             config.batchSize()
         );
 
-        FileExporter.csv(graphStoreInput, graphStore, exportPath).doExport();
+        FileExporter.csv(graphStoreInput, graphStore, exportPath).export();
 
         long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
         return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
-    }
-
-    @NotNull
-    private Configuration getImportConfig(boolean defaultSettingsSuitableForTests) {
-        return new Configuration() {
-            @Override
-            public int maxNumberOfProcessors() {
-                return config.writeConcurrency();
-            }
-
-            @Override
-            public long pageCacheMemory() {
-                return defaultSettingsSuitableForTests ? mebiBytes(8) : Configuration.super.pageCacheMemory();
-            }
-
-            @Override
-            public boolean highIO() {
-                return false;
-            }
-        };
     }
 }

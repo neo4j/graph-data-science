@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.core.utils.export;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.NodeStore;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExport.RelationshipStore;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;

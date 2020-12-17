@@ -23,20 +23,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
@@ -57,14 +48,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.eclipse.collections.impl.tuple.Tuples.pair;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -195,213 +179,6 @@ public class GraphStoreExport {
         long nodePropertyCount();
 
         long relationshipPropertyCount();
-    }
-
-    public static class NodeStore {
-
-        static final String[] EMPTY_LABELS = new String[0];
-
-        final long nodeCount;
-
-        final HugeIntArray labelCounts;
-
-        final NodeMapping nodeLabels;
-
-        final Map<String, Map<String, NodeProperties>> nodeProperties;
-
-        private final Set<NodeLabel> availableNodeLabels;
-
-        public NodeStore(
-            long nodeCount,
-            HugeIntArray labelCounts,
-            NodeMapping nodeLabels,
-            Map<String, Map<String, NodeProperties>> nodeProperties
-        ) {
-            this.nodeCount = nodeCount;
-            this.labelCounts = labelCounts;
-            this.nodeLabels = nodeLabels;
-            this.nodeProperties = nodeProperties;
-            this.availableNodeLabels = nodeLabels != null ? nodeLabels.availableNodeLabels() : null;
-        }
-
-        boolean hasLabels() {
-            return nodeLabels != null;
-        }
-
-        boolean hasProperties() {
-            return nodeProperties != null;
-        }
-
-        int labelCount() {
-            return !hasLabels() ? 0 : nodeLabels.availableNodeLabels().size();
-        }
-
-        int propertyCount() {
-            if (nodeProperties == null) {
-                return 0;
-            } else {
-                return nodeProperties.values().stream().mapToInt(Map::size).sum();
-            }
-        }
-
-        String[] labels(long nodeId) {
-            int labelCount = labelCounts.get(nodeId);
-            if (labelCount == 0) {
-                return EMPTY_LABELS;
-            }
-            String[] labels = new String[labelCount];
-
-            int i = 0;
-            for (var nodeLabel : availableNodeLabels) {
-                if (nodeLabels.hasLabel(nodeId, nodeLabel)) {
-                    labels[i++] = nodeLabel.name;
-                }
-            }
-
-            return labels;
-        }
-
-        static NodeStore of(GraphStore graphStore, AllocationTracker tracker) {
-            HugeIntArray labelCounts = null;
-            Map<String, Map<String, NodeProperties>> nodeProperties;
-
-            var nodeLabels = graphStore.nodes();
-
-            if (!nodeLabels.containsOnlyAllNodesLabel()) {
-                labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), tracker);
-                labelCounts.setAll(i -> {
-                    int labelCount = 0;
-                    for (var nodeLabel : nodeLabels.availableNodeLabels()) {
-                        if (nodeLabels.hasLabel(i, nodeLabel)) {
-                            labelCount++;
-                        }
-                    }
-                    return labelCount;
-                });
-            }
-
-            if (graphStore.nodePropertyKeys().isEmpty()) {
-                nodeProperties = null;
-            } else {
-                nodeProperties = graphStore.nodePropertyKeys().entrySet().stream().collect(Collectors.toMap(
-                    entry -> entry.getKey().name,
-                    entry -> entry.getValue().stream().collect(Collectors.toMap(
-                        propertyKey -> propertyKey,
-                        propertyKey -> graphStore.nodePropertyValues(entry.getKey(), propertyKey)
-                    ))
-                ));
-            }
-            return new NodeStore(
-                graphStore.nodeCount(),
-                labelCounts,
-                nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
-                nodeProperties
-            );
-        }
-    }
-
-    public static class RelationshipStore {
-
-        final long nodeCount;
-        final long relationshipCount;
-
-        final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
-
-        RelationshipStore(
-            long nodeCount,
-            long relationshipCount,
-            Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
-        ) {
-            this.nodeCount = nodeCount;
-            this.relationshipCount = relationshipCount;
-            this.relationshipIterators = relationshipIterators;
-        }
-
-        long propertyCount() {
-            return relationshipIterators.values().stream().mapToInt(CompositeRelationshipIterator::propertyCount).sum();
-        }
-
-        RelationshipStore concurrentCopy() {
-            return new RelationshipStore(
-                nodeCount,
-                relationshipCount,
-                relationshipIterators.entrySet().stream().collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> entry.getValue().concurrentCopy()
-                ))
-            );
-        }
-
-        static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
-            Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
-            Map<RelationshipType, Map<String, Relationships.Properties>> properties = new HashMap<>();
-
-            graphStore.relationshipTypes().stream()
-                // extract (relationshipType, propertyKey) tuples
-                .flatMap(relType -> graphStore.relationshipPropertyKeys(relType).isEmpty()
-                    ? Stream.of(pair(relType, Optional.<String>empty()))
-                    : graphStore
-                        .relationshipPropertyKeys(relType)
-                        .stream()
-                        .map(propertyKey -> pair(relType, Optional.of(propertyKey))))
-                // extract graph for relationship type and property
-                .map(relTypeAndProperty -> pair(
-                    relTypeAndProperty,
-                    graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-                ))
-                // extract Topology list and associated Properties lists
-                .forEach(relTypeAndPropertyAndGraph -> {
-                    var relationshipType = relTypeAndPropertyAndGraph.getOne().getOne();
-                    var maybePropertyKey = relTypeAndPropertyAndGraph.getOne().getTwo();
-                    var graph = relTypeAndPropertyAndGraph.getTwo();
-
-                    topologies.computeIfAbsent(relationshipType, ignored -> ((HugeGraph) graph).relationshipTopology());
-                    maybePropertyKey.ifPresent(propertyKey -> properties
-                        .computeIfAbsent(relationshipType, ignored -> new HashMap<>())
-                        // .get() is safe, since we have a property key
-                        .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
-                });
-
-            Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
-
-            // for each relationship type, merge its Topology list and all associated Property lists
-            topologies.forEach((relationshipType, topology) -> {
-                var adjacencyList = (TransientAdjacencyList) topology.list();
-                var adjacencyOffsets = (TransientAdjacencyOffsets) topology.offsets();
-
-                var propertyLists = properties.getOrDefault(relationshipType, Map.of())
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> (TransientAdjacencyList) entry.getValue().list()
-                    ));
-
-                var propertyOffsets = properties.getOrDefault(relationshipType, Map.of())
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> (TransientAdjacencyOffsets) entry.getValue().offsets()
-                    ));
-
-                // iff relationshipType is '*', change it the given default
-                var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
-                    ? RelationshipType.of(defaultRelationshipType)
-                    : relationshipType;
-
-                relationshipIterators.put(
-                    outputRelationshipType,
-                    new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
-                );
-            });
-
-            return new RelationshipStore(
-                graphStore.nodeCount(),
-                graphStore.relationshipCount(),
-                relationshipIterators
-            );
-        }
     }
 
     public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
