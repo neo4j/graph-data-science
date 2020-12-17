@@ -282,7 +282,6 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-shortest-path, Shortest Path>>
 | `gds.alpha.shortestPath.stream`
 | `gds.alpha.shortestPath.write`
-|<<alpha-algorithms-a_star, A-Star>>| `gds.alpha.shortestPath.astar.stream`
 .2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
 | `gds.alpha.shortestPath.deltaStepping.write`
 | `gds.alpha.shortestPath.deltaStepping.stream`

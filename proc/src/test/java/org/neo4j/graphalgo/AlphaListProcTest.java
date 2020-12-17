@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
 import org.neo4j.graphalgo.shortestpaths.DijkstraProc;
-import org.neo4j.graphalgo.shortestpaths.KShortestPathsProc;
 import org.neo4j.graphalgo.shortestpaths.ShortestPathAStarProc;
 import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
@@ -149,7 +148,6 @@ class AlphaListProcTest extends BaseProcTest {
             EigenvectorCentralityProc.class,
             HarmonicCentralityProc.class,
             IsFiniteFunc.class,
-            KShortestPathsProc.class,
             KSpanningTreeProc.class,
             ListProc.class,
             CosineProc.class,
