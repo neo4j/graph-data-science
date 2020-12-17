@@ -22,20 +22,15 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvValueFormatter.format;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
@@ -61,7 +56,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
             // write properties
             forEachProperty(((key, value, type) -> {
-                var propertyString = formatValue(value, type);
+                var propertyString = format(value);
                 try {
                     csvAppender.appendField(propertyString);
                 } catch (IOException e) {
@@ -125,46 +120,6 @@ public class CsvNodeVisitor extends NodeVisitor {
             headerAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException("Could not write header file", e);
-        }
-    }
-
-    private String formatValue(Object value, ValueType valueType) {
-        if (value == null) {
-            return "";
-        }
-        switch (valueType) {
-            case LONG:
-                var longValue = (long) value;
-                if (longValue == LONG_DEFAULT_FALLBACK || longValue == INTEGER_DEFAULT_FALLBACK) {
-                    return "";
-                }
-                return Long.toString(longValue);
-
-            case DOUBLE:
-                var doubleValue = (double) value;
-                if (Double.isNaN(doubleValue) || Float.isNaN((float) doubleValue)) {
-                    return "";
-                }
-                return Double.toString(doubleValue);
-
-            case DOUBLE_ARRAY:
-                var doubleArray = (double[]) value;
-                return Arrays.stream(doubleArray).mapToObj(Double::toString).collect(Collectors.joining(";"));
-
-            case FLOAT_ARRAY:
-                var floatArray = (float[]) value;
-                return IntStream
-                    .range(0, floatArray.length)
-                    .mapToDouble(i -> floatArray[i])
-                    .mapToObj(Double::toString)
-                    .collect(Collectors.joining(";"));
-
-            case LONG_ARRAY:
-                var longArray = (long[]) value;
-                return Arrays.stream(longArray).mapToObj(Long::toString).collect(Collectors.joining(";"));
-
-            default:
-                return value.toString();
         }
     }
 }
