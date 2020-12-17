@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Map;
@@ -141,7 +142,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.log(),
             dimensions.nodeCount() + relationshipCount,
             TASK_LOADING,
-            graphCreateConfig.readConcurrency()
+            graphCreateConfig.readConcurrency(),
+            // TODO: actual tracker
+            EmptyProgressEventTracker.INSTANCE
         );
     }
 

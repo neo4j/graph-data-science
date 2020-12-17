@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> implements AlgorithmFactory<ModularityOptimization, T> {
@@ -68,22 +69,37 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     }
 
     @Override
-    public ModularityOptimization build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+    public ModularityOptimization build(
+        Graph graph,
+        T configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         return build(
             graph,
             configuration,
             configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null,
             tracker,
-            log
+            log,
+            eventTracker
         );
     }
 
-    public ModularityOptimization build(Graph graph, T configuration, NodeProperties seed, AllocationTracker tracker, Log log) {
+    public ModularityOptimization build(
+        Graph graph,
+        T configuration,
+        NodeProperties seed,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "ModularityOptimization",
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new ModularityOptimization(

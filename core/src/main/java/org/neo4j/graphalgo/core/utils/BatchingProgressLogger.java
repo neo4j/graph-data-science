@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
@@ -54,6 +55,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
+    @TestOnly
     public BatchingProgressLogger(Log log, long taskVolume, String task, int concurrency) {
         this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency, EmptyProgressEventTracker.INSTANCE);
     }
@@ -62,6 +64,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         this(log, taskVolume, calculateBatchSize(taskVolume, concurrency), task, concurrency, progressTracker);
     }
 
+    @TestOnly
     public BatchingProgressLogger(Log log, long taskVolume, long batchSize, String task, int concurrency) {
         this(log, taskVolume, batchSize, task, concurrency, EmptyProgressEventTracker.INSTANCE);
     }
@@ -169,6 +172,11 @@ public class BatchingProgressLogger implements ProgressLogger {
     @Override
     public Log getLog() {
         return this.log;
+    }
+
+    @Override
+    public ProgressEventTracker eventTracker() {
+        return progressTracker;
     }
 
     @Override

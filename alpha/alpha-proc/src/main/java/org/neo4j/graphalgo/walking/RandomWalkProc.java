@@ -87,7 +87,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
 
     @Override
     protected AlgorithmFactory<RandomWalk, RandomWalkConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>) (graph, configuration, tracker, log) -> {
+        return (AlphaAlgorithmFactory<RandomWalk, RandomWalkConfig>) (graph, configuration, tracker, log, eventTracker) -> {
             Number returnParam = configuration.returnKey();
             Number inOut = configuration.inOut();
 

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -71,7 +72,11 @@ public class NodeLogisticRegressionTrainProc extends TrainProc<NodeLogisticRegre
         return new AlgorithmFactory<>() {
             @Override
             public NodeLogisticRegressionTrain build(
-                Graph graph, NodeLogisticRegressionTrainConfig configuration, AllocationTracker tracker, Log log
+                Graph graph,
+                NodeLogisticRegressionTrainConfig configuration,
+                AllocationTracker tracker,
+                Log log,
+                ProgressEventTracker eventTracker
             ) {
                 //TODO: make configuration extend TrainingSettings
                 TrainingSettings trainingSettings = ImmutableTrainingSettings.builder().build();

@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -142,6 +143,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
             proc.log = new TestLog();
+            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
 
             func.accept(proc);
         }

@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
@@ -32,9 +33,10 @@ class EigenvectorCentralityAlgorithmFactory implements AlphaAlgorithmFactory<Pag
 
     @Override
     public PageRank build(
-        Graph graph, EigenvectorCentralityConfig configuration, AllocationTracker tracker, Log log
+        Graph graph, EigenvectorCentralityConfig configuration, AllocationTracker tracker, Log log,
+        ProgressEventTracker eventTracker
     ) {
-        return buildAlphaAlgo(graph, configuration, tracker, log);
+        return buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
     }
 
     @Override
@@ -42,7 +44,8 @@ class EigenvectorCentralityAlgorithmFactory implements AlphaAlgorithmFactory<Pag
         Graph graph,
         EigenvectorCentralityConfig configuration,
         AllocationTracker tracker,
-        Log log
+        Log log,
+        ProgressEventTracker eventTracker
     ) {
         configuration = ImmutableEigenvectorCentralityConfig.builder().from(configuration).dampingFactor(1.0).build();
         return LabsPageRankAlgorithmType.EIGENVECTOR_CENTRALITY
@@ -51,7 +54,7 @@ class EigenvectorCentralityAlgorithmFactory implements AlphaAlgorithmFactory<Pag
                 configuration.sourceNodeIds(),
                 configuration,
                 Pools.DEFAULT,
-                new BatchingProgressLogger(log, 0, "PageRank", configuration.concurrency()),
+                new BatchingProgressLogger(log, 0, "PageRank", configuration.concurrency(), eventTracker),
                 tracker
             );
     }

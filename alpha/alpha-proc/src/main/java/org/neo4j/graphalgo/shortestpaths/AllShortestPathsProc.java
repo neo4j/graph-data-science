@@ -72,7 +72,7 @@ public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream
 
     @Override
     protected AlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig>) (graph, configuration, tracker, log) -> {
+        return (AlphaAlgorithmFactory<MSBFSASPAlgorithm, AllShortestPathsConfig>) (graph, configuration, tracker, log, eventTracker) -> {
             if (configuration.relationshipWeightProperty() != null) {
                 return new WeightedAllShortestPaths(
                     graph,

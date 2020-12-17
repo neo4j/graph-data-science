@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -195,7 +196,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         applyOnProcedure(proc -> {
             WccBaseConfig config = proc.newConfig(Optional.of(GRAPH_NAME), userInput);
-            WccProc.algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog);
+            WccProc.algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog, EmptyProgressEventTracker.INSTANCE);
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
         String actual = testLog.getMessages("warn").get(0);

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -73,6 +75,8 @@ public interface ProgressLogger {
     void release();
 
     Log getLog();
+
+    ProgressEventTracker eventTracker();
 
     @Deprecated
     void logProgress(double percentDone, Supplier<String> msg);
@@ -136,6 +140,11 @@ public interface ProgressLogger {
         }
 
         @Override
+        public ProgressEventTracker eventTracker() {
+            return EmptyProgressEventTracker.INSTANCE;
+        }
+
+        @Override
         public void logProgress(double percentDone, Supplier<String> msg) {
 
         }
@@ -145,10 +154,7 @@ public interface ProgressLogger {
 
     interface ProgressLoggerFactory {
         ProgressLogger newLogger(
-            Log log,
-            long taskVolume,
-            String task,
-            int concurrency
+            Log log, long taskVolume, String task, int concurrency, ProgressEventTracker eventTracker
         );
     }
 }

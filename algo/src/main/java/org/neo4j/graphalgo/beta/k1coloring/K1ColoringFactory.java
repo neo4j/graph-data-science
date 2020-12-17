@@ -28,17 +28,25 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmFactory<K1Coloring, T> {
 
     @Override
-    public K1Coloring build(Graph graph, T configuration, AllocationTracker tracker, Log log) {
+    public K1Coloring build(
+        Graph graph,
+        T configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         var progressLogger = new BatchingProgressLogger(
             log,
             graph.nodeCount() * 2,
             "K1Coloring",
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new K1Coloring(

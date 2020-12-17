@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -187,7 +188,8 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelConfig configuration, AllocationTracker tracker, Log log
+                    PregelConfig configuration, AllocationTracker tracker, Log log,
+                    ProgressEventTracker eventTracker
                 ) {
                     return new CompositeTestAlgorithm(graph, configuration, tracker, log);
                 }
@@ -237,7 +239,8 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelConfig configuration, AllocationTracker tracker, Log log
+                    PregelConfig configuration, AllocationTracker tracker, Log log,
+                    ProgressEventTracker eventTracker
                 ) {
                     return new CompositeTestAlgorithm(graph, configuration, tracker, log);
                 }
@@ -286,7 +289,8 @@ public class PregelProcTest extends BaseProcTest {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelConfig configuration, AllocationTracker tracker, Log log
+                    PregelConfig configuration, AllocationTracker tracker, Log log,
+                    ProgressEventTracker eventTracker
                 ) {
                     return new CompositeTestAlgorithm(graph, configuration, tracker, log);
                 }

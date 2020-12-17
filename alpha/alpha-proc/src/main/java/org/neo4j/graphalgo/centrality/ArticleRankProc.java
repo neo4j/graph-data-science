@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
@@ -138,9 +139,10 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
         return new AlphaAlgorithmFactory<>() {
             @Override
             public PageRank build(
-                Graph graph, ArticleRankConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, ArticleRankConfig configuration, AllocationTracker tracker, Log log,
+                ProgressEventTracker eventTracker
             ) {
-                return buildAlphaAlgo(graph, configuration, tracker, log);
+                return buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
             }
 
             @Override
@@ -148,14 +150,15 @@ public final class ArticleRankProc extends AlgoBaseProc<PageRank, PageRank, Arti
                 Graph graph,
                 ArticleRankConfig configuration,
                 AllocationTracker tracker,
-                Log log
+                Log log,
+                ProgressEventTracker eventTracker
             ) {
                 return LabsPageRankAlgorithmType.ARTICLE_RANK.create(
                     graph,
                     configuration.sourceNodeIds(),
                     configuration,
                     Pools.DEFAULT,
-                    new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", configuration.concurrency()),
+                    new BatchingProgressLogger(NullLog.getInstance(), 0, "PageRank", configuration.concurrency(), eventTracker),
                     tracker
                 );
             }

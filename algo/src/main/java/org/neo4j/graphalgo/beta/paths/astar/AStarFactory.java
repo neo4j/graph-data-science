@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
@@ -36,17 +37,18 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
     }
 
     @NotNull
-    public static BatchingProgressLogger progressLogger(Graph graph, Log log) {
+    public static BatchingProgressLogger progressLogger(Graph graph, Log log, ProgressEventTracker eventTracker) {
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "AStar",
-            1
+            1,
+            eventTracker
         );
     }
 
     @Override
-    public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        return AStar.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
+    public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
+        return AStar.sourceTarget(graph, configuration, progressLogger(graph, log, eventTracker), tracker);
     }
 }

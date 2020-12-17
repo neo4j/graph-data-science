@@ -16,6 +16,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -62,7 +63,7 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
         return new AlgorithmFactory<ComputationAlgorithm, PregelConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelConfig configuration,
-                    AllocationTracker tracker, Log log) {
+                    AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
                 return new ComputationAlgorithm(graph, configuration, tracker, log);
             }
 

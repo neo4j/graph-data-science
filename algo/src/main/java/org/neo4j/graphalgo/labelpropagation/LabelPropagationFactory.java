@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -42,13 +43,15 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        Log log
+        Log log,
+        ProgressEventTracker eventTracker
     ) {
         var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "LabelPropagation",
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new LabelPropagation(

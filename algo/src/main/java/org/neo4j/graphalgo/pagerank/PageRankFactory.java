@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
@@ -39,13 +40,15 @@ public class PageRankFactory<CONFIG extends PageRankBaseConfig> implements Algor
         Graph graph,
         PageRankBaseConfig configuration,
         AllocationTracker tracker,
-        Log log
+        Log log,
+        ProgressEventTracker eventTracker
     ) {
         var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             getClass().getSimpleName(),
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return algorithmType(configuration).create(

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -70,6 +72,11 @@ public class ProgressLoggerAdapter implements ProgressLogger {
     @Override
     public Log getLog() {
         return this.log;
+    }
+
+    @Override
+    public ProgressEventTracker eventTracker() {
+        return EmptyProgressEventTracker.INSTANCE;
     }
 
     @Override

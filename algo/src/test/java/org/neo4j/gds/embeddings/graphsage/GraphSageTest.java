@@ -47,6 +47,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -138,7 +139,7 @@ class GraphSageTest {
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(orphanGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        var graphSage = algorithmFactory.build(orphanGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
         GraphSage.GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
             Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> {
@@ -187,7 +188,7 @@ class GraphSageTest {
         var trainGraph = randomGraphGenerator.generate();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(trainGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        var graphSage = algorithmFactory.build(trainGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
         graphSage.compute();
     }
 
@@ -216,7 +217,7 @@ class GraphSageTest {
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
         graphSage.compute();
 
         var testLogger = (TestProgressLogger) graphSage.getProgressLogger();

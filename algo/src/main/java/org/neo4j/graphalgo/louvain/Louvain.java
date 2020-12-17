@@ -179,7 +179,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 modularityOptimizationConfig,
                 seed,
                 tracker,
-                progressLogger.getLog()
+                progressLogger.getLog(),
+                progressLogger.eventTracker()
             ).withTerminationFlag(terminationFlag);
 
         modularityOptimization.compute();

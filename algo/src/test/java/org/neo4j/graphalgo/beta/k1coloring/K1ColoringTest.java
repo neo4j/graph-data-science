@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -204,7 +205,7 @@ class K1ColoringTest {
             .build()
             .generate();
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8);
+        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8, EmptyProgressEventTracker.INSTANCE);
 
         var k1Coloring = new K1Coloring(
             graph,

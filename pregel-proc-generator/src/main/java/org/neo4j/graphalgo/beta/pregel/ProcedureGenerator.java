@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
@@ -196,6 +197,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addParameter(AllocationTracker.class, "tracker")
                 .addParameter(Log.class, "log")
+                .addParameter(ProgressEventTracker.class, "eventTracker")
                 .returns(algorithmClassName)
                 .addStatement("return new $T(graph, configuration, tracker, log)", algorithmClassName)
                 .build()

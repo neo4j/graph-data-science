@@ -21,6 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
@@ -31,14 +33,18 @@ import java.util.function.Supplier;
 public class TestProgressLogger extends TestLog implements ProgressLogger {
 
     public static final ProgressLoggerFactory FACTORY =
-        (log, taskVolume, task, concurrency) -> new TestProgressLogger(taskVolume, task, concurrency);
+        (log, taskVolume, task, concurrency, eventTracker) -> new TestProgressLogger(taskVolume, task, concurrency, eventTracker);
 
     private final BatchingProgressLogger batchingLogger;
     private final List<AtomicLong> progresses;
 
     public TestProgressLogger(long initialTaskVolume, String task, int concurrency) {
+        this(initialTaskVolume, task, concurrency, EmptyProgressEventTracker.INSTANCE);
+    }
+
+    public TestProgressLogger(long initialTaskVolume, String task, int concurrency, ProgressEventTracker eventTracker) {
         super();
-        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency);
+        this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency, eventTracker);
         progresses = new ArrayList<>();
         progresses.add(new AtomicLong(0));
     }
@@ -93,6 +99,11 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     @Override
     public Log getLog() {
         return this;
+    }
+
+    @Override
+    public ProgressEventTracker eventTracker() {
+        return batchingLogger.eventTracker();
     }
 }
 

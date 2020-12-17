@@ -76,7 +76,8 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             context.log(),
             (long) Math.ceil(config.sampleRate() * config.topK() * nodeCount),
             "KNN-Graph",
-            config.concurrency()
+            config.concurrency(),
+            context.eventTracker()
         );
     }
 

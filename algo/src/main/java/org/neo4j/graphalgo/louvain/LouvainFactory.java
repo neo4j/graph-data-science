@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements AlgorithmFactory<Louvain, CONFIG> {
@@ -48,10 +49,15 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
         final Graph graph,
         final LouvainBaseConfig configuration,
         final AllocationTracker tracker,
-        final Log log
+        final Log log,
+        ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(log, 1, "Louvain",
-            configuration.concurrency()
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            1,
+            "Louvain",
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new Louvain(

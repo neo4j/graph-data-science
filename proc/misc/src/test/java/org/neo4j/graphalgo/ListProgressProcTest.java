@@ -290,13 +290,15 @@ public class ListProgressProcTest extends BaseTest {
 
                 @Override
                 public FastRP build(
-                    Graph graph, FastRPStreamConfig configuration, AllocationTracker tracker, Log log
+                    Graph graph, FastRPStreamConfig configuration, AllocationTracker tracker, Log log,
+                    ProgressEventTracker eventTracker
                 ) {
                     var progressLogger = new BatchingProgressLogger(
                         log,
                         graph.nodeCount(),
                         "FastRP",
                         configuration.concurrency(),
+                        // use the field, not the provided one
                         progressTracker
                     );
 

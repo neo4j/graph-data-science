@@ -28,20 +28,23 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> implements AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
     @Override
     public IntersectingTriangleCount build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
+        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
+        ProgressEventTracker eventTracker
     ) {
 
         ProgressLogger progressLogger = new BatchingProgressLogger(
             log,
             graph.nodeCount(),
             getClass().getSimpleName(),
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new IntersectingTriangleCount(

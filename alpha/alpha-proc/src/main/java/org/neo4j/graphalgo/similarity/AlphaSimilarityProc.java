@@ -136,7 +136,7 @@ abstract class AlphaSimilarityProc
 
     @Override
     protected final AlgorithmFactory<ALGO, CONFIG> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ALGO, CONFIG>) (graph, configuration, tracker, log) -> {
+        return (AlphaAlgorithmFactory<ALGO, CONFIG>) (graph, configuration, tracker, log, eventTracker) -> {
             removeGraph();
             return newAlgo(configuration, tracker);
         };

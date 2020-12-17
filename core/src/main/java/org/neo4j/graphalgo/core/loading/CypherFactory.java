@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
@@ -173,7 +174,9 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             loadingContext.log(),
             dimensions.nodeCount() + dimensions.maxRelCount(),
             TASK_LOADING,
-            graphCreateConfig.readConcurrency()
+            graphCreateConfig.readConcurrency(),
+            // TODO: actual tracker
+            EmptyProgressEventTracker.INSTANCE
         );
     }
 

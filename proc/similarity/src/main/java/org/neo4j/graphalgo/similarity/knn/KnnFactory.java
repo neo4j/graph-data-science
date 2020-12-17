@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
@@ -38,12 +39,19 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashConta
 public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactory<Knn, CONFIG> {
     @Override
     public Knn build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
+        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
+        ProgressEventTracker eventTracker
     ) {
         return new Knn(
             graph,
             configuration,
-            ImmutableKnnContext.builder().log(log).tracker(tracker).executor(Pools.DEFAULT).build()
+            ImmutableKnnContext
+                .builder()
+                .log(log)
+                .tracker(tracker)
+                .executor(Pools.DEFAULT)
+                .eventTracker(eventTracker)
+                .build()
         );
     }
 

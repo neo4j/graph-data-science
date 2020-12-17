@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -110,7 +111,8 @@ class WccTest {
             graph,
             ImmutableWccStreamConfig.builder().concurrency(2).build(),
             AllocationTracker.empty(),
-            NullLog.getInstance()
+            NullLog.getInstance(),
+            EmptyProgressEventTracker.INSTANCE
         );
         wcc.compute();
 

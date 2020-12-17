@@ -24,15 +24,17 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
 
     @Override
     public FastRP build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log
+        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
+        ProgressEventTracker eventTracker
     ) {
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency());
+        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency(), eventTracker);
 
         return new FastRP(
             graph,

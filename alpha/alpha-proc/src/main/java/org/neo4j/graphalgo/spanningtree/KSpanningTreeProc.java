@@ -125,7 +125,7 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
     @Override
     protected AlgorithmFactory<KSpanningTree, KSpanningTreeConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<KSpanningTree, KSpanningTreeConfig>) (graph, configuration, tracker, log) -> {
+        return (AlphaAlgorithmFactory<KSpanningTree, KSpanningTreeConfig>) (graph, configuration, tracker, log, eventTracker) -> {
             validateStartNode(configuration.startNodeId(), graph);
             return new KSpanningTree(graph, graph, graph, minMax, configuration.startNodeId(), configuration.k());
         };

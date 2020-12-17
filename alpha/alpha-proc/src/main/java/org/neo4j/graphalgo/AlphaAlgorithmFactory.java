@@ -24,18 +24,31 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
 @FunctionalInterface
 public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> extends AlgorithmFactory<ALGO, CONFIG> {
     @Override
-    default ALGO build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
-        ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log);
+    default ALGO build(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
+        ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
         return algo.withProgressLogger(new ProgressLoggerAdapter(log, algo.getClass().getSimpleName()));
     }
 
-    ALGO buildAlphaAlgo(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log);
+    ALGO buildAlphaAlgo(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    );
 
     @Override
     default MemoryEstimation memoryEstimation(CONFIG configuration) {

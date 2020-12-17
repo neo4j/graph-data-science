@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -37,7 +38,13 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> implements AlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
-    public BetweennessCentrality build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+    public BetweennessCentrality build(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         var samplingSize = configuration.samplingSize();
         var samplingSeed = configuration.samplingSeed();
 

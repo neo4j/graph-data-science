@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.logging.Log;
 
@@ -38,12 +39,19 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> implements AlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
-    public NodeSimilarity build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log) {
+    public NodeSimilarity build(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         var progressLogger = new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "NodeSimilarity",
-            configuration.concurrency()
+            configuration.concurrency(),
+            eventTracker
         );
 
         return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressLogger, tracker);

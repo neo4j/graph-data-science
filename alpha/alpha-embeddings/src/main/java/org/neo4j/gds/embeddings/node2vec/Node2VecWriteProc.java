@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
@@ -76,13 +77,15 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
         return new AlgorithmFactory<>() {
             @Override
             public Node2Vec build(
-                Graph graph, Node2VecWriteConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, Node2VecWriteConfig configuration, AllocationTracker tracker, Log log,
+                ProgressEventTracker eventTracker
             ) {
                 var progressLogger = new BatchingProgressLogger(
                     log,
                     0, //dummy value, gets overridden
                     "Node2Vec",
-                    configuration.concurrency()
+                    configuration.concurrency(),
+                    eventTracker
                 );
                 validateConfig(configuration, graph);
                 return new Node2Vec(graph, configuration, progressLogger, tracker);

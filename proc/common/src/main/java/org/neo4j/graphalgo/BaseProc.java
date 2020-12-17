@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.mem.ImmutableMemoryEstimationWithDimension
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -81,6 +82,9 @@ public abstract class BaseProc {
 
     @Context
     public AllocationTracker tracker;
+
+    @Context
+    public ProgressEventTracker progressTracker;
 
     protected BaseProc() {
         if (GdsEdition.instance().isInvalidLicense()) {

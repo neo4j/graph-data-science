@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.NullLog;
 
@@ -32,7 +33,14 @@ public abstract class AlgoTestBase extends BaseTest {
 
     @BeforeEach
     void resetProgressLogger() {
-        this.progressLogger = new BatchingProgressLogger(NullLog.getInstance(), 0, "Test", 1);
+        // TODO: actual event tracker?
+        this.progressLogger = new BatchingProgressLogger(
+            NullLog.getInstance(),
+            0,
+            "Test",
+            1,
+            EmptyProgressEventTracker.INSTANCE
+        );
     }
 
     protected void runQuery(String query) {

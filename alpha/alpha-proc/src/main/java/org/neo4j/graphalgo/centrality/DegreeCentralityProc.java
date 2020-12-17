@@ -129,7 +129,7 @@ public class DegreeCentralityProc extends AlgoBaseProc<DegreeCentrality, DegreeC
 
     @Override
     protected AlgorithmFactory<DegreeCentrality, DegreeCentralityConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<DegreeCentrality, DegreeCentralityConfig>) (graph, configuration, tracker, log) ->
+        return (AlphaAlgorithmFactory<DegreeCentrality, DegreeCentralityConfig>) (graph, configuration, tracker, log, eventTracker) ->
             new DegreeCentrality(
                 graph,
                 Pools.DEFAULT,

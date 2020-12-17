@@ -44,6 +44,7 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.gdl.GdlGraphs;
 import org.neo4j.logging.NullLog;
 
@@ -394,7 +395,8 @@ class GraphSageAlgorithmFactoryTest {
                 GdlGraphs.EMPTY,
                 multiLabelConfig,
                 AllocationTracker.empty(),
-                NullLog.getInstance()
+                NullLog.getInstance(),
+                EmptyProgressEventTracker.INSTANCE
             );
         assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
 
@@ -412,7 +414,8 @@ class GraphSageAlgorithmFactoryTest {
                 GdlGraphs.EMPTY,
                 singleLabelConfig,
                 AllocationTracker.empty(),
-                NullLog.getInstance()
+                NullLog.getInstance(),
+                EmptyProgressEventTracker.INSTANCE
             );
         assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);
     }

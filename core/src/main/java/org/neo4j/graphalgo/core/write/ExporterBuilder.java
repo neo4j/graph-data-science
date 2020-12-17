@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 import java.util.Objects;
@@ -39,6 +41,7 @@ public abstract class ExporterBuilder<T> {
 
     ExecutorService executorService;
     ProgressLogger progressLogger;
+    ProgressEventTracker eventTracker;
     int writeConcurrency;
 
     ExporterBuilder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
@@ -49,6 +52,7 @@ public abstract class ExporterBuilder<T> {
         this.writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         this.terminationFlag = terminationFlag;
         this.progressLogger = ProgressLogger.NULL_LOGGER;
+        this.eventTracker = EmptyProgressEventTracker.INSTANCE;
     }
 
     public abstract T build();
@@ -58,7 +62,11 @@ public abstract class ExporterBuilder<T> {
     abstract long taskVolume();
 
     public ExporterBuilder<T> withLog(Log log) {
-        progressLogger = new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency);
+        return withLog(log, eventTracker);
+    }
+
+    public ExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
+        progressLogger = new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker);
         return this;
     }
 

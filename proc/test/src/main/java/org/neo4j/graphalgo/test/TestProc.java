@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -84,7 +85,8 @@ public class TestProc extends StatsProc<TestAlgorithm, TestAlgorithm, TestProc.T
         return new AlgorithmFactory<>() {
             @Override
             public TestAlgorithm build(
-                Graph graph, TestConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, TestConfig configuration, AllocationTracker tracker, Log log,
+                ProgressEventTracker eventTracker
             ) {
                 return new TestAlgorithm(graph, allocationTracker(), 0L);
             }

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
 public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements AlgorithmFactory<Yens, CONFIG> {
@@ -36,17 +37,28 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     }
 
     @NotNull
-    public static BatchingProgressLogger progressLogger(Graph graph, Log log) {
+    public static BatchingProgressLogger progressLogger(
+        Graph graph,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
             "Yens",
-            1
+            1,
+            eventTracker
         );
     }
 
     @Override
-    public Yens build(Graph graph, ShortestPathYensBaseConfig configuration, AllocationTracker tracker, Log log) {
-        return Yens.sourceTarget(graph, configuration, progressLogger(graph, log), tracker);
+    public Yens build(
+        Graph graph,
+        ShortestPathYensBaseConfig configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
+        return Yens.sourceTarget(graph, configuration, progressLogger(graph, log, eventTracker), tracker);
     }
 }

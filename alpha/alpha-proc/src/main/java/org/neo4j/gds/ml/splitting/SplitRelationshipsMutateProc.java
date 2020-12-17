@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.logging.Log;
@@ -73,7 +74,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         return new AlgorithmFactory<>() {
             @Override
             public SplitRelationships build(
-                Graph graph, SplitRelationshipsMutateConfig configuration, AllocationTracker tracker, Log log
+                Graph graph, SplitRelationshipsMutateConfig configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker
             ) {
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
