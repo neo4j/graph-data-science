@@ -197,7 +197,7 @@ public class GraphStoreExport {
         long relationshipPropertyCount();
     }
 
-    static class NodeStore {
+    public static class NodeStore {
 
         static final String[] EMPTY_LABELS = new String[0];
 
@@ -211,7 +211,7 @@ public class GraphStoreExport {
 
         private final Set<NodeLabel> availableNodeLabels;
 
-        NodeStore(
+        public NodeStore(
             long nodeCount,
             HugeIntArray labelCounts,
             NodeMapping nodeLabels,
@@ -300,7 +300,7 @@ public class GraphStoreExport {
         }
     }
 
-    static class RelationshipStore {
+    public static class RelationshipStore {
 
         final long nodeCount;
         final long relationshipCount;
@@ -404,7 +404,7 @@ public class GraphStoreExport {
         }
     }
 
-    private static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
+    public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {
             Files.createDirectories(value);
             if (!Files.isDirectory(value)) {
