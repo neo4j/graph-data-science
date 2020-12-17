@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.utils.export.file.FileExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.batchimport.Configuration;
 
@@ -54,7 +55,7 @@ public class GraphStoreExportToCSV {
             config.batchSize()
         );
 
-        new CsvExporter(graphStoreInput, exportPath, graphStore).doExport();
+        FileExporter.csv(graphStoreInput, graphStore, exportPath).doExport();
 
         long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
