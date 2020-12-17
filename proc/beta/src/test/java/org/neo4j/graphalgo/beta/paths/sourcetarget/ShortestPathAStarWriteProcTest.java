@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.beta.paths.astar.AStar;
@@ -33,11 +36,15 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.validationQuery;
 import static org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestPathAStarWriteConfig> {
 
@@ -77,6 +84,8 @@ class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestP
             .addParameter(LONGITUDE_PROPERTY_KEY, config.longitudeProperty())
             .addParameter("relationshipWeightProperty", relationshipWeightProperty)
             .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .addParameter("writeNodeIds", true)
+            .addParameter("writeCosts", true)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
@@ -89,5 +98,49 @@ class ShortestPathAStarWriteProcTest extends ShortestPathAStarProcTest<ShortestP
         )));
 
         assertCypherResult(validationQuery(idA), List.of(Map.of("totalCost", 2979.0D, "nodeIds", ids0, "costs", costs0)));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"true,false", "false,true", "false,false"})
+    void testWriteFlags(boolean writeNodeIds, boolean writeCosts) {
+        var relationshipWeightProperty = "cost";
+
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+
+        var query = GdsCypher.call().explicitCreation("graph")
+            .algo("gds.beta.shortestPath.astar")
+            .writeMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter(LATITUDE_PROPERTY_KEY, config.latitudeProperty())
+            .addParameter(LONGITUDE_PROPERTY_KEY, config.longitudeProperty())
+            .addParameter("relationshipWeightProperty", relationshipWeightProperty)
+            .addParameter("writeRelationshipType", WRITE_RELATIONSHIP_TYPE)
+            .addParameter("writeNodeIds", writeNodeIds)
+            .addParameter("writeCosts", writeCosts)
+            .yields();
+
+        runQuery(query);
+
+        var validationQuery = "MATCH ()-[r:%s]->() RETURN r.nodeIds AS nodeIds, r.costs AS costs";
+        var rowCount = new MutableInt(0);
+        runQueryWithRowConsumer(formatWithLocale(validationQuery, WRITE_RELATIONSHIP_TYPE), row -> {
+            rowCount.increment();
+            var nodeIds = row.get("nodeIds");
+            var costs = row.get("costs");
+
+            if (writeNodeIds) {
+                assertNotNull(nodeIds);
+            } else {
+                assertNull(nodeIds);
+            }
+
+            if (writeCosts) {
+                assertNotNull(costs);
+            } else {
+                assertNull(costs);
+            }
+        });
+        assertEquals(1, rowCount.getValue());
     }
 }

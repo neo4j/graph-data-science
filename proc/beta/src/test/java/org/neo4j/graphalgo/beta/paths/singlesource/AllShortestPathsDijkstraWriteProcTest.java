@@ -107,14 +107,6 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
-
         var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.allShortestPaths.dijkstra")
             .writeMode()

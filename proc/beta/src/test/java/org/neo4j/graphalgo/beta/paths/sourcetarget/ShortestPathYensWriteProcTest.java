@@ -106,14 +106,6 @@ class ShortestPathYensWriteProcTest extends ShortestPathYensProcTest<ShortestPat
 
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var createQuery = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
-            .withRelationshipProperty(relationshipWeightProperty)
-            .graphCreate("graph")
-            .yields();
-        runQuery(createQuery);
-
         var query = GdsCypher.call().explicitCreation("graph")
             .algo("gds.beta.shortestPath.yens")
             .writeMode()
