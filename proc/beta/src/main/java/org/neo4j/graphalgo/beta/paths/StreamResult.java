@@ -101,7 +101,7 @@ public final class StreamResult {
             // 😿
             var nodeIdsList = new ArrayList<Long>(nodeIds.length);
             for (long nodeId : nodeIds) {
-                nodeIdsList.add(nodeId);
+                nodeIdsList.add(idMapping.toOriginalNodeId(nodeId));
             }
             var costsList = new ArrayList<Double>(costs.length);
             for (double cost : costs) {
