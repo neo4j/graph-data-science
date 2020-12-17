@@ -24,9 +24,7 @@ import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -41,9 +39,6 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, FastRPStreamProc.StreamResult, FastRPStreamConfig> {
-
-    @Context
-    public ProgressEventTracker progressTracker;
 
     @Procedure(value = "gds.fastRP.stream", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)
@@ -91,7 +86,7 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
 
     @Override
     protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
-        return new FooFastRPFactory<>(progressTracker);
+        return new FastRPFactory<>();
     }
 
     public static final class StreamResult {

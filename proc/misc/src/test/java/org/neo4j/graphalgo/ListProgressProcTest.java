@@ -24,14 +24,21 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.embeddings.fastrp.FastRP;
+import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.LogEvent;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.logging.Level;
+import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -71,7 +78,7 @@ public class ListProgressProcTest extends BaseTest {
             ListProgressProc.class,
             ProgressLoggingAlgoProc.class,
             GraphGenerateProc.class,
-            FastRPStreamProc.class
+            ProgressLoggingTestFastRP.class
         );
     }
 
@@ -172,8 +179,8 @@ public class ListProgressProcTest extends BaseTest {
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         List<Map<String, Object>> expected = List.of(
-            Map.of("source", "pagerank", "message", "hello apa"),
-            Map.of("source", "wcc", "message", "hello bepa")
+            Map.of("source", "pagerank", "message", "[main] pagerank 100% hello foo"),
+            Map.of("source", "wcc", "message", "[main] wcc 100% hello bar")
         );
         var result = runQuery(
             "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
@@ -184,9 +191,9 @@ public class ListProgressProcTest extends BaseTest {
     }
 
     @Test
-    void progressLoggerShouldEmitProgressEvents_for_realsies() {
+    void progressLoggerShouldEmitProgressEventsOnActualAlgo() {
         runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
-        runQuery("CALL gds.fastRP.stream('foo', {embeddingDimension: 42})");
+        runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         List<Map<String, Object>> result = runQuery(
@@ -203,17 +210,15 @@ public class ListProgressProcTest extends BaseTest {
     @Test
     void progressLoggerShouldClearProgressEventsOnLogFinish() {
         runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
-        runQuery("CALL gds.fastRP.stream('foo', {embeddingDimension: 42})");
+        runQuery("CALL gds.test.fastrp('foo', {embeddingDimension: 42})");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-        List<Map<String, Object>> expected = List.of();
 
         List<Map<String, Object>> result = runQuery(
             "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
             r -> r.stream().collect(Collectors.toList())
         );
 
-        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(result).isEmpty();
     }
 
     public static class ProgressLoggingAlgoProc extends BaseProc {
@@ -225,9 +230,84 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "param") String param,
             @Name(value = "source", defaultValue = "test") String source
         ) {
-            var progressLogger = new BatchingProgressLogger(log, 0, source, 2, progress);
+            var progressLogger = new BatchingProgressLogger(log, 1, source, 2, progress);
             progressLogger.logProgress(() -> "hello " + param);
             return Stream.empty();
+        }
+    }
+
+    public static class ProgressLoggingTestFastRP extends FastRPStreamProc {
+        @Context
+        public ProgressEventTracker progressTracker;
+
+        @Override
+        @Procedure("gds.test.fastrp")
+        public Stream<FastRPStreamProc.StreamResult> stream(
+            @Name(value = "graphName") Object graphNameOrConfig,
+            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        ) {
+            return super.stream(graphNameOrConfig, configuration);
+        }
+
+        @Procedure("gds.test.fakerp")
+        public Stream<FastRPStreamProc.StreamResult> fakeStream(
+            @Name(value = "graphName") Object graphNameOrConfig,
+            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        ) {
+            var tracker = this.progressTracker;
+            this.progressTracker = new ProgressEventTracker() {
+                @Override
+                public void addLogEvent(String id, String message) {
+                    tracker.addLogEvent(id, message);
+                }
+
+                @Override
+                public void addLogEvent(String id, String message, double progress) {
+                    tracker.addLogEvent(id, message, progress);
+                }
+
+                @Override
+                public void addLogEvent(LogEvent event) {
+                    tracker.addLogEvent(event);
+                }
+
+                @Override
+                public void release(String id) {
+                    // skip the release because we want to observe the messages after the algo is done
+                }
+            };
+            try {
+                return super.stream(graphNameOrConfig, configuration);
+            } finally {
+                this.progressTracker = tracker;
+            }
+        }
+
+        @Override
+        protected AlgorithmFactory<FastRP, FastRPStreamConfig> algorithmFactory() {
+
+            return new FastRPFactory<>() {
+
+                @Override
+                public FastRP build(
+                    Graph graph, FastRPStreamConfig configuration, AllocationTracker tracker, Log log
+                ) {
+                    var progressLogger = new BatchingProgressLogger(
+                        log,
+                        graph.nodeCount(),
+                        "FastRP",
+                        configuration.concurrency(),
+                        progressTracker
+                    );
+
+                    return new FastRP(
+                        graph,
+                        configuration,
+                        progressLogger,
+                        tracker
+                    );
+                }
+            };
         }
     }
 
