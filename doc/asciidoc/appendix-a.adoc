@@ -250,11 +250,13 @@ The following table lists all alpha procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
-|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>> | `gds.alpha.allShortestPaths.stream`
+.1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
+| `gds.alpha.allShortestPaths.stream`
 .2+<.^|<<algorithms-articlerank, Article Rank>>
 | `gds.alpha.articleRank.stream`
 | `gds.alpha.articleRank.write`
-|<<algorithms-bfs, Breadth First Search>> | `gds.alpha.bfs.stream`
+.1+<.^|<<algorithms-bfs, Breadth First Search>>
+| `gds.alpha.bfs.stream`
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
 | `gds.alpha.closeness.stream`
 | `gds.alpha.closeness.write`
@@ -265,23 +267,16 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<algorithms-degree-centrality, Degree Centrality>>
 | `gds.alpha.degree.stream`
 | `gds.alpha.degree.write`
-|<<algorithms-dfs, Depth First Search>> | `gds.alpha.dfs.stream`
+.1+<.^|<<algorithms-dfs, Depth First Search>>
+| `gds.alpha.dfs.stream`
 .2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
 | `gds.alpha.eigenvector.stream`
 | `gds.alpha.eigenvector.write`
-.2+<.^|<<alpha-algorithms-yens-k-shortest-path, K-Shortest Paths>>
-| `gds.alpha.kShortestPaths.stream`
-| `gds.alpha.kShortestPaths.write`
-.2+<.^|Shortest Paths
-| `gds.alpha.shortestPaths.stream`
-| `gds.alpha.shortestPaths.write`
-|<<alpha-algorithms-random-walk, Random Walk>> | `gds.alpha.randomWalk.stream`
+.1+<.^|<<alpha-algorithms-random-walk, Random Walk>>
+| `gds.alpha.randomWalk.stream`
 .2+<.^|<<algorithms-strongly-connected-components, Strongly Connected Components>>
 | `gds.alpha.scc.stream`
 | `gds.alpha.scc.write`
-.2+<.^|<<alpha-algorithms-shortest-path, Shortest Path>>
-| `gds.alpha.shortestPath.stream`
-| `gds.alpha.shortestPath.write`
 .2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
 | `gds.alpha.shortestPath.deltaStepping.write`
 | `gds.alpha.shortestPath.deltaStepping.stream`
