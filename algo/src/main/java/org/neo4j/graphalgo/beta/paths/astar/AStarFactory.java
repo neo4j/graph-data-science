@@ -40,7 +40,7 @@ public abstract class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> i
         return new BatchingProgressLogger(
             log,
             graph.relationshipCount(),
-            "Yens",
+            "AStar",
             1
         );
     }
