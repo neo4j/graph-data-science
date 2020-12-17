@@ -205,9 +205,8 @@ public abstract class AlgoBaseProc<
 
         log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
 
-        if (releaseAlgorithm) {
-            algo.release();
-        }
+        algo.releaseAll(releaseAlgorithm);
+
         if (releaseTopology) {
             graph.releaseTopology();
         }

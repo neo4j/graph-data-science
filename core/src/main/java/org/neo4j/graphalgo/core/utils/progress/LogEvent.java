@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.OptionalDouble;
@@ -34,5 +35,9 @@ public interface LogEvent {
 
     OptionalDouble progress();
 
-    boolean finished();
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean release() {
+        return false;
+    }
 }

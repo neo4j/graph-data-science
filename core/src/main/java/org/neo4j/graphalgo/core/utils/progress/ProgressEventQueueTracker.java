@@ -38,7 +38,7 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
         String id,
         String message
     ) {
-        var logEvent = ImmutableLogEvent.of(username, id, message, OptionalDouble.empty(), false);
+        var logEvent = ImmutableLogEvent.of(username, id, message, OptionalDouble.empty());
         this.queue.offer(logEvent);
     }
 
@@ -61,7 +61,7 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
     }
 
     @Override
-    public void clear(String id, String message) {
-        queue.offer(ImmutableLogEvent.of(username, id, message, OptionalDouble.empty(), true));
+    public void release(String id) {
+        queue.offer(ImmutableLogEvent.builder().username(username).id(id).message("").release(true).build());
     }
 }

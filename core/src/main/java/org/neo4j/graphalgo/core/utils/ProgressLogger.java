@@ -70,6 +70,8 @@ public interface ProgressLogger {
 
     long reset(long newTaskVolume);
 
+    void release();
+
     Log getLog();
 
     @Deprecated
@@ -125,6 +127,10 @@ public interface ProgressLogger {
         }
 
         @Override
+        public void release() {
+        }
+
+        @Override
         public Log getLog() {
             return NullLog.getInstance();
         }
@@ -133,6 +139,8 @@ public interface ProgressLogger {
         public void logProgress(double percentDone, Supplier<String> msg) {
 
         }
+
+
     };
 
     interface ProgressLoggerFactory {

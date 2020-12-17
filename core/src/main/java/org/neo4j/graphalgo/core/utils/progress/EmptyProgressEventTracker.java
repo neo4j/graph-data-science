@@ -35,6 +35,6 @@ public enum EmptyProgressEventTracker implements ProgressEventTracker {
     }
 
     @Override
-    public void clear(String id, String message) {
+    public void release(String id) {
     }
 }

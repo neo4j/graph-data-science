@@ -116,9 +116,8 @@ public class BatchingProgressLogger implements ProgressLogger {
     }
 
     @Override
-    public void logFinish(String message) {
-        logMessage((message + " :: Finished").trim());
-        progressTracker.clear(task, (message + " :: Finished").trim());
+    public void release() {
+        progressTracker.release(task);
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {

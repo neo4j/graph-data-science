@@ -86,6 +86,11 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
     }
 
     @Override
+    public void release() {
+        batchingLogger.release();
+    }
+
+    @Override
     public Log getLog() {
         return this;
     }

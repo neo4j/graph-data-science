@@ -38,5 +38,5 @@ public interface ProgressEventTracker {
         LogEvent event
     );
 
-    void clear(String id, String message);
+    void release(String id);
 }

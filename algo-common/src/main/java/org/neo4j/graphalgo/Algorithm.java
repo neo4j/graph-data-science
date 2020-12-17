@@ -37,6 +37,13 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
      */
     public abstract void release();
 
+    public final void releaseAll(boolean releaseAlgorithm) {
+        progressLogger.release();
+        if (releaseAlgorithm) {
+            release();
+        }
+    }
+
     @Deprecated
     // This is kept for alpha algorithms using the ProgressLoggerAdapter
     public ME withProgressLogger(ProgressLogger progressLogger) {
