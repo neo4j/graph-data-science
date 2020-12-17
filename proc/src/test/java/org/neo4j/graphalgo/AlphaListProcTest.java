@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
-import org.neo4j.graphalgo.shortestpaths.ShortestPathsProc;
 import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
 import org.neo4j.graphalgo.similarity.CosineProc;
 import org.neo4j.graphalgo.similarity.EuclideanProc;
@@ -155,7 +154,6 @@ class AlphaListProcTest extends BaseProcTest {
             OneHotEncodingFunc.class,
             SpanningTreeProc.class,
             ShortestPathDeltaSteppingProc.class,
-            ShortestPathsProc.class,
             SimilaritiesFunc.class,
             SccProc.class,
             TraverseProc.class,
