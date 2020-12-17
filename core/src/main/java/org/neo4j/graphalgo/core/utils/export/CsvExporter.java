@@ -23,6 +23,8 @@ import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
@@ -34,7 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvExporter {
@@ -61,12 +66,12 @@ public class CsvExporter {
 
         try (var chunk = nodeInputIterator.newChunk()) {
             while (nodeInputIterator.next(chunk)) {
-                while(chunk.next(nodeVisitor)) {
+                while (chunk.next(nodeVisitor)) {
 
                 }
             }
-        } catch ( IOException e ) {
-            throw new RuntimeException( e );
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         nodeVisitor.close();
@@ -84,7 +89,7 @@ public class CsvExporter {
         private final Object[] currentProperties;
         private final Map<String, CsvAppender> csvAppenders;
         private final CsvWriter csvWriter;
-        private final Map<String, List<String>> propertyKeys;
+        private final Map<String, List<Map.Entry<String, PropertySchema>>> propertyKeys;
         private final Map<String, Integer> propertyKeyPositions;
 
         NodeVisitor(Path fileLocation, GraphStore graphStore) {
@@ -134,10 +139,11 @@ public class CsvExporter {
                 // write Id
                 csvAppender.appendField(Long.toString(currentId));
                 // write properties
-                for (String propertyKey : propertyKeys.get(labelString())) {
-                    var propertyPosition = propertyKeyPositions.get(propertyKey);
+                for (Map.Entry<String, PropertySchema> propertyEntry : propertyKeys.get(labelString())) {
+                    var propertyPosition = propertyKeyPositions.get(propertyEntry.getKey());
                     var propertyValue = currentProperties[propertyPosition];
-                    csvAppender.appendField(propertyValue == null ? "" : propertyValue.toString());
+                    var propertyString = formatValue(propertyValue, propertyEntry.getValue().valueType());
+                    csvAppender.appendField(propertyString);
                 }
                 csvAppender.endLine();
             } catch (IOException e) {
@@ -164,15 +170,15 @@ public class CsvExporter {
             var labelsString = labelString();
 
             return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
-                var fileName = formatWithLocale("nodes_%s.csv", labelsString);
+                var fileName = formatWithLocale("nodes_%s", labelsString);
+                var headerFileName = formatWithLocale("%s_header.csv", fileName);
+                var dataFileName = formatWithLocale("%s.csv", fileName);
 
-                // Calculate the property schema for this label combination
-                var nodeLabelList = Arrays.stream(currentLabels).map(NodeLabel::of).collect(Collectors.toList());
-                var properties = graphStore.nodePropertyKeys(nodeLabelList);
-                propertyKeys.put(labelsString, properties.stream().sorted().collect(Collectors.toList()));
+                calculateLabelSchema(labelsString);
+                writeHeaderFile(labelsString, headerFileName);
 
                 try {
-                    return csvWriter.append(fileLocation.resolve(fileName), StandardCharsets.UTF_8);
+                    return csvWriter.append(fileLocation.resolve(dataFileName), StandardCharsets.UTF_8);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -181,6 +187,77 @@ public class CsvExporter {
 
         private String labelString() {
             return String.join("_", currentLabels);
+        }
+
+        private void calculateLabelSchema(String labelsString) {
+            var nodeLabelList = Arrays.stream(currentLabels).map(NodeLabel::of).collect(Collectors.toSet());
+            var propertySchemaForLabels = graphStore.schema().nodeSchema().filter(nodeLabelList);
+            var unionProperties = propertySchemaForLabels.unionProperties();
+            var sortedPropertyEntries = unionProperties
+                .entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByKey())
+                .collect(Collectors.toList());
+            propertyKeys.put(labelsString, sortedPropertyEntries);
+        }
+
+        private void writeHeaderFile(String labelString, String headerFileName) {
+            try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
+                headerAppender.appendField("ID");
+
+                var propertyEntries = propertyKeys.get(labelString);
+                for (Map.Entry<String, PropertySchema> propertyEntry : propertyEntries) {
+                    var propertyHeader = formatWithLocale(
+                        "%s:%s",
+                        propertyEntry.getKey(),
+                        propertyEntry.getValue().valueType().cypherName()
+                    );
+                    headerAppender.appendField(propertyHeader);
+                }
+                headerAppender.endLine();
+            } catch (IOException e) {
+                throw new RuntimeException("Could not write header file", e);
+            }
+        }
+
+        private String formatValue(Object value, ValueType valueType) {
+            if (value == null) {
+                return "";
+            }
+            switch (valueType) {
+                case LONG:
+                    var longValue = (long) value;
+                    if (longValue == LONG_DEFAULT_FALLBACK || longValue == INTEGER_DEFAULT_FALLBACK) {
+                        return "";
+                    }
+                    return Long.toString(longValue);
+
+                case DOUBLE:
+                    var doubleValue = (double) value;
+                    if (Double.isNaN(doubleValue) || Float.isNaN((float) doubleValue)) {
+                        return "";
+                    }
+                    return Double.toString(doubleValue);
+
+                case DOUBLE_ARRAY:
+                    var doubleArray = (double[]) value;
+                    return Arrays.stream(doubleArray).mapToObj(Double::toString).collect(Collectors.joining(";"));
+
+                case FLOAT_ARRAY:
+                    var floatArray = (float[]) value;
+                    return IntStream
+                        .range(0, floatArray.length)
+                        .mapToDouble(i -> floatArray[i])
+                        .mapToObj(Double::toString)
+                        .collect(Collectors.joining(";"));
+
+                case LONG_ARRAY:
+                    var longArray = (long[]) value;
+                    return Arrays.stream(longArray).mapToObj(Long::toString).collect(Collectors.joining(";"));
+
+                default:
+                    return value.toString();
+            }
         }
     }
 }
