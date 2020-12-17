@@ -22,7 +22,7 @@ package gds.example;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -53,7 +53,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     }
 
     @Override
-    public void compute(ComputeContext<ExampleConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<ExampleConfig> context, Messages messages) {
         // Silence is golden
         context.voteToHalt();
     }
