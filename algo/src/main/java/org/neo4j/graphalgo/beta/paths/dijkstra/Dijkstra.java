@@ -139,7 +139,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.sourceNode = sourceNode;
         this.stopPredicate = stopPredicate;
         this.trackRelationships = trackRelationships;
-        this.queue = heuristicFunction.map(fn -> min(graph.nodeCount(), fn)).orElse(HugeLongPriorityQueue.min(graph.nodeCount()));
+        this.queue = heuristicFunction
+            .map(fn -> minPriorityQueue(graph.nodeCount(), fn))
+            .orElseGet(() -> HugeLongPriorityQueue.min(graph.nodeCount()));
         this.predecessors = new HugeLongLongMap(tracker);
         this.relationships = trackRelationships ? new HugeLongLongMap(tracker) : null;
         this.visited = new BitSet();
@@ -287,7 +289,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         boolean test(long source, long target, long relationshipId);
     }
 
-    public static HugeLongPriorityQueue min(long capacity, HeuristicFunction heuristicFunction) {
+    public static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
