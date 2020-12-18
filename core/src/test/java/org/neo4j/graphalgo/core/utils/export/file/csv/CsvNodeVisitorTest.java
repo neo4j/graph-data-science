@@ -32,7 +32,6 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_C
 
 class CsvNodeVisitorTest extends CsvVisitorTest{
 
-
     @Test
     void visitNodesWithoutLabelsAndProperties() {
         var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build());

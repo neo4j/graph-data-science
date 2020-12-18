@@ -25,25 +25,25 @@ import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 abstract class ElementVisitor<
     ELEMENT_SCHEMA extends ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA>,
     I extends ElementIdentifier,
-    PROPERTY_SCHEMA extends PropertySchema
-> extends InputEntityVisitor.Adapter {
+    PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter {
 
     final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
+
     private final Object[] currentProperties;
-    private final Map<String, List<Map.Entry<String, PROPERTY_SCHEMA>>> propertyKeys;
+    private final Map<String, List<PROPERTY_SCHEMA>> propertySchemas;
     private final Map<String, Integer> propertyKeyPositions;
 
     ElementVisitor(ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema) {
         this.elementSchema = elementSchema;
-        this.propertyKeys = new HashMap<>();
+        this.propertySchemas = new HashMap<>();
 
         this.propertyKeyPositions = new HashMap<>();
         var allProperties = elementSchema.allProperties();
@@ -59,7 +59,7 @@ abstract class ElementVisitor<
 
     abstract String elementIdentifier();
 
-    abstract Map<String, PROPERTY_SCHEMA> getPropertySchema();
+    abstract List<PROPERTY_SCHEMA> getPropertySchema();
 
     abstract void reset();
 
@@ -73,11 +73,11 @@ abstract class ElementVisitor<
     @Override
     public void endOfEntity() {
         // Check if we encounter a new label combination
-        if (!propertyKeys.containsKey(elementIdentifier())) {
+        if (!propertySchemas.containsKey(elementIdentifier())) {
             calculateElementSchema();
         }
 
-        // do the import
+        // do the export
         exportElement();
 
         // reset
@@ -86,20 +86,17 @@ abstract class ElementVisitor<
     }
 
     protected void forEachProperty(PropertyConsumer propertyConsumer) {
-        for (Map.Entry<String, ? extends PROPERTY_SCHEMA> propertyEntry : propertyKeys.get(elementIdentifier())) {
-            var propertyPosition = propertyKeyPositions.get(propertyEntry.getKey());
+        for (PROPERTY_SCHEMA propertySchema : propertySchemas.get(elementIdentifier())) {
+            var propertyPosition = propertyKeyPositions.get(propertySchema.key());
             var propertyValue = currentProperties[propertyPosition];
-            propertyConsumer.accept(propertyEntry.getKey(), propertyValue, propertyEntry.getValue().valueType());
+            propertyConsumer.accept(propertySchema.key(), propertyValue, propertySchema.valueType());
         }
     }
 
     private void calculateElementSchema() {
-        var sortedPropertyEntries = getPropertySchema()
-            .entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .collect(Collectors.toList());
-        propertyKeys.put(elementIdentifier(), sortedPropertyEntries);
+        var propertySchema = getPropertySchema();
+        propertySchema.sort(Comparator.comparing(PropertySchema::key));
+        propertySchemas.put(elementIdentifier(), propertySchema);
     }
 
 }

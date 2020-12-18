@@ -23,9 +23,9 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
@@ -77,10 +77,10 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     }
 
     @Override
-    Map<String, PropertySchema> getPropertySchema() {
+    List<PropertySchema> getPropertySchema() {
         var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
         var propertySchemaForLabels = elementSchema.filter(nodeLabelList);
-        return propertySchemaForLabels.unionProperties();
+        return new ArrayList<>(propertySchemaForLabels.unionProperties().values());
     }
 
     @Override

@@ -23,7 +23,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
@@ -71,16 +72,18 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
         return true;
     }
 
+    // Overrides from ElementVisitor
+
     @Override
     String elementIdentifier() {
         return relationshipType;
     }
 
     @Override
-    Map<String, RelationshipPropertySchema> getPropertySchema() {
+    List<RelationshipPropertySchema> getPropertySchema() {
         var relationshipType = RelationshipType.of(this.relationshipType);
         var propertySchemaForLabels = elementSchema.filter(Set.of(relationshipType));
-        return propertySchemaForLabels.unionProperties();
+        return new ArrayList<>(propertySchemaForLabels.unionProperties().values());
     }
 
     @Override
