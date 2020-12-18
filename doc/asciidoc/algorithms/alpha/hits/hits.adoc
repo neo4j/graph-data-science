@@ -1,8 +1,9 @@
+
 [[algorithms-hits]]
 [.alpha]
 = HITS
 :entity: node
-:result: authorirty and hub scores
+:result: authority and hub scores
 :algorithm: HITS
 
 [abstract]

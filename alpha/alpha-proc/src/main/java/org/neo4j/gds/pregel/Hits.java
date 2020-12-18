@@ -48,6 +48,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     static final String AUTH_PROPERTY = "auth";
     private static final String NEIGHBOR_IDS = "neighborIds";
 
+    // Global norm aggregator shared by all workers
     private final DoubleAdder globalNorm = new DoubleAdder();
     private HitsState state = HitsState.SEND_IDS;
 
@@ -67,54 +68,26 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     }
 
     @Override
-    public void compute(
-        ComputeContext<HitsConfig> context, Pregel.Messages messages
-    ) {
-        if (state == HitsState.SEND_IDS) {
-            context.sendToNeighbors(context.nodeId());
-
-        } else if (state == HitsState.RECEIVE_IDS) {
-            // will only work with directed graphs
-            var neighborIds = StreamSupport
-                .stream(messages.spliterator(), false)
-                .mapToLong(Double::longValue)
-                .toArray();
-            context.setNodeValue(NEIGHBOR_IDS, neighborIds);
-
-            // compute auths
-            var auth = neighborIds.length;
-            context.setNodeValue(AUTH_PROPERTY, (double) auth);
-            updateGlobalNorm(auth);
-
-        } else if (state == HitsState.CALCULATE_AUTHS) {
-            var auth = 0D;
-            for (Double message : messages) {
-                auth += message;
-            }
-            context.setNodeValue(AUTH_PROPERTY, auth);
-            updateGlobalNorm(auth);
-
-        } else if (state == HitsState.NORMALIZE_AUTHS) {
-            // normalise auth
-            var normalizedValue = normalize(context, AUTH_PROPERTY);
-            // send normalised auths to incoming neighbors
-            for (long neighbor : context.longArrayNodeValue(NEIGHBOR_IDS)) {
-                context.sendTo(neighbor, normalizedValue);
-            }
-
-        } else if (state == HitsState.CALCULATE_HUBS) {
-            var hub = 0D;
-            for (Double message : messages) {
-                hub += message;
-            }
-            context.setNodeValue(HUB_PROPERTY, hub);
-            updateGlobalNorm(hub);
-
-        } else if (state == HitsState.NORMALIZE_HUBS) {
-            // normalise hub
-            var normalizedValue = normalize(context, HUB_PROPERTY);
-            // send normalised hubs to outgoing neighbors
-            context.sendToNeighbors(normalizedValue);
+    public void compute(ComputeContext<HitsConfig> context, Pregel.Messages messages) {
+        switch (state) {
+            case SEND_IDS:
+                context.sendToNeighbors(context.nodeId());
+                break;
+            case RECEIVE_IDS:
+                receiveIds(context, messages);
+                break;
+            case CALCULATE_AUTHS:
+                calculateValue(context, messages, AUTH_PROPERTY);
+                break;
+            case NORMALIZE_AUTHS:
+                normalizeAuthValue(context);
+                break;
+            case CALCULATE_HUBS:
+                calculateValue(context, messages, HUB_PROPERTY);
+                break;
+            case NORMALIZE_HUBS:
+                normalizeHubValue(context);
+                break;
         }
     }
 
@@ -129,8 +102,47 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         state = state.advance();
     }
 
+    private void receiveIds(ComputeContext<HitsConfig> context, Pregel.Messages messages) {
+        // will only work with directed graphs
+        var neighborIds = StreamSupport
+            .stream(messages.spliterator(), false)
+            .mapToLong(Double::longValue)
+            .toArray();
+        context.setNodeValue(NEIGHBOR_IDS, neighborIds);
+
+        // compute auths
+        var auth = neighborIds.length;
+        context.setNodeValue(AUTH_PROPERTY, (double) auth);
+        updateGlobalNorm(auth);
+    }
+
+    private void calculateValue(ComputeContext<HitsConfig> context, Pregel.Messages messages, String authProperty) {
+        var auth = 0D;
+        for (Double message : messages) {
+            auth += message;
+        }
+        context.setNodeValue(authProperty, auth);
+        updateGlobalNorm(auth);
+    }
+
+    private void normalizeHubValue(ComputeContext<HitsConfig> context) {
+        // normalise hub
+        var normalizedValue = normalize(context, HUB_PROPERTY);
+        // send normalised hubs to outgoing neighbors
+        context.sendToNeighbors(normalizedValue);
+    }
+
+    private void normalizeAuthValue(ComputeContext<HitsConfig> context) {
+        // normalise auth
+        var normalizedValue = normalize(context, AUTH_PROPERTY);
+        // send normalised auths to incoming neighbors
+        for (long neighbor : context.longArrayNodeValue(NEIGHBOR_IDS)) {
+            context.sendTo(neighbor, normalizedValue);
+        }
+    }
+
     private void updateGlobalNorm(double value) {
-        globalNorm.add(Math.pow(value,2));
+        globalNorm.add(Math.pow(value, 2));
     }
 
     private double normalize(ComputeContext<HitsConfig> context, String property) {
@@ -140,7 +152,6 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         context.setNodeValue(property, normalizedValue);
         return normalizedValue;
     }
-
 
     @ValueClass
     @Configuration
