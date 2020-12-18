@@ -62,15 +62,15 @@ import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 @GdlExtension
 class GraphSageTest {
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "protein")
-    private static final String PROTEIN_GRAPH = "CREATE " +
-                                                    "(a:P {f1: 0.0, f2: 0.0, f3: 0.0})" +
-                                                    ", (b:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
-                                                    ", (c:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
-                                                    ", (c)-[:T]->(c)";
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "orphan")
+    private static final String ORPHAN_GRAPH = "CREATE " +
+                                               "(a:P {f1: 0.0, f2: 0.0, f3: 0.0})" +
+                                               ", (b:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
+                                               ", (c:P {f1: 1.0, f2: 0.0, f3: 0.0})" +
+                                               ", (c)-[:T]->(c)";
 
     @Inject
-    private Graph proteinGraph;
+    private Graph orphanGraph;
 
     private static final int NODE_COUNT = 20;
     private static final int FEATURES_COUNT = 1;
@@ -120,10 +120,10 @@ class GraphSageTest {
             .concurrency(4)
             .build();
 
-        features = initializeFeatures(proteinGraph, trainConfig, AllocationTracker.empty());
+        features = initializeFeatures(orphanGraph, trainConfig, AllocationTracker.empty());
 
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
-            proteinGraph,
+            orphanGraph,
             trainConfig,
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
@@ -138,9 +138,9 @@ class GraphSageTest {
             .build();
 
         var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(proteinGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
+        var graphSage = algorithmFactory.build(orphanGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance());
         GraphSage.GraphSageResult compute = graphSage.compute();
-        for (int i = 0; i < proteinGraph.nodeCount() - 1; i++) {
+        for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
             Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> {
                 assertThat(embeddingValue).isNotNaN();
             });
