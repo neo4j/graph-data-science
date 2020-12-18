@@ -36,14 +36,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, ShortestPathYensWriteConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.yens.write", mode = WRITE)
-    @Description(DIJKSTRA_DESCRIPTION)
+    @Description(YENS_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

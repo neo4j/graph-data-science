@@ -36,13 +36,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensProc.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, ShortestPathYensMutateConfig> {
 
     @Procedure(name = "gds.beta.shortestPath.yens.mutate", mode = READ)
-    @Description(DIJKSTRA_DESCRIPTION)
+    @Description(YENS_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
