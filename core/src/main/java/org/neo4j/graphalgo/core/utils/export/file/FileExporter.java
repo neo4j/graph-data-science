@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.export.Exporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.function.Supplier;
 
 public final class FileExporter extends Exporter {
     private final Supplier<NodeVisitor> nodeVisitorSupplier;
+    private final Supplier<RelationshipVisitor> relationshipVisitorSupplier;
 
     public static FileExporter csv(
         GraphStoreInput graphStoreInput,
@@ -39,16 +41,19 @@ public final class FileExporter extends Exporter {
     ) {
         return new FileExporter(
             graphStoreInput,
-            () -> new CsvNodeVisitor(exportLocation, graphSchema)
+            () -> new CsvNodeVisitor(exportLocation, graphSchema),
+            () -> new CsvRelationshipVisitor(exportLocation, graphSchema)
         );
     }
 
     private FileExporter(
         GraphStoreInput graphStoreInput,
-        Supplier<NodeVisitor> nodeVisitorSupplier
+        Supplier<NodeVisitor> nodeVisitorSupplier,
+        Supplier<RelationshipVisitor> relationshipVisitorSupplier
     ) {
         super(graphStoreInput);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
+        this.relationshipVisitorSupplier = relationshipVisitorSupplier;
     }
 
     @Override
@@ -75,6 +80,22 @@ public final class FileExporter extends Exporter {
         nodeVisitor.close();
     }
 
-    void exportRelationships() {}
+    void exportRelationships() {
+        var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
+        var relationshipInputIterator = relationshipInput.iterator();
+        var relationshipVisitor = relationshipVisitorSupplier.get();
+
+        try (var chunk = relationshipInputIterator.newChunk()) {
+            while (relationshipInputIterator.next(chunk)) {
+                while (chunk.next(relationshipVisitor)) {
+
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        relationshipVisitor.close();
+    }
 
 }

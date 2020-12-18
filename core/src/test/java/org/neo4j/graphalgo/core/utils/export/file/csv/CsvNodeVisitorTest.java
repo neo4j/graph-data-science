@@ -20,30 +20,20 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 
-class CsvNodeVisitorTest {
+class CsvNodeVisitorTest extends CsvVisitorTest{
 
-    @TempDir
-    Path tempDir;
 
     @Test
     void visitNodesWithoutLabelsAndProperties() {
@@ -241,31 +231,8 @@ class CsvNodeVisitorTest {
 
     }
 
-    private void assertCsvFiles(Collection<String> expectedFiles) {
-        for (String expectedFile : expectedFiles) {
-            assertThat(tempDir.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
-        }
-    }
-
-    private void assertHeaderFile(String fileName, Map<String, PropertySchema> properties) {
-        var expectedContent = new ArrayList<String>();
-        expectedContent.add(ID_COLUMN_NAME);
-
-        properties
-            .entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().csvName()));
-
-        assertThat(tempDir.resolve(fileName)).hasContent(String.join(",", expectedContent));
-    }
-
-    private void assertDataContent(String fileName, List<List<String>> data) {
-        var expectedContent = data
-            .stream()
-            .map(row -> String.join(",", row))
-            .collect(Collectors.joining("\n"));
-
-        assertThat(tempDir.resolve(fileName)).hasContent(expectedContent);
+    @Override
+    List<String> defaultHeaderColumns() {
+        return List.of(ID_COLUMN_NAME);
     }
 }

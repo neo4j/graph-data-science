@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @ValueClass
 public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, PropertySchema> {
@@ -38,15 +37,6 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     @Value.Derived
     default Set<NodeLabel> availableLabels() {
         return properties().keySet();
-    }
-
-    @Value.Derived
-    default Set<String> allProperties() {
-        return properties()
-            .values()
-            .stream()
-            .flatMap(propertyMapping -> propertyMapping.keySet().stream())
-            .collect(Collectors.toSet());
     }
 
     default NodeSchema filter(Set<NodeLabel> labelsToKeep) {

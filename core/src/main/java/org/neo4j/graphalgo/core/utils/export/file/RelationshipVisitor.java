@@ -19,42 +19,39 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+public abstract class RelationshipVisitor extends InputEntityVisitor.Adapter {
 
-public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
 
-    private final List<String> EMPTY_LABELS = List.of(ALL_NODES.name());
-
-    private long currentId;
-    private List<String> currentLabels;
+    private long currentStartNode;
+    private long currentEndNode;
+    private String relationshipType;
     private final GraphSchema graphSchema;
     private final Object[] currentProperties;
 
-    // TODO use String instead of List<String>?
-    private final Map<List<String>, List<Map.Entry<String, PropertySchema>>> propertyKeys;
-
+    private final Map<String, List<Map.Entry<String, RelationshipPropertySchema>>> propertyKeys;
     private final Map<String, Integer> propertyKeyPositions;
 
-    protected NodeVisitor(GraphSchema graphSchema) {
-        currentId = -1;
-        currentLabels = EMPTY_LABELS;
+    protected RelationshipVisitor(GraphSchema graphSchema) {
+        currentStartNode = -1;
+        relationshipType = RelationshipType.ALL_RELATIONSHIPS.name;
 
         this.graphSchema = graphSchema;
         this.propertyKeys = new HashMap<>();
         this.propertyKeyPositions = new HashMap<>();
         var allProperties = graphSchema
-            .nodeSchema()
+            .relationshipSchema()
             .allProperties();
         var i = 0;
         for (String propertyKey : allProperties) {
@@ -64,18 +61,22 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
         this.currentProperties = new Object[propertyKeyPositions.size()];
     }
 
-    protected abstract void importNode();
+    protected abstract void importRelationship();
 
-    public long id() {
-        return currentId;
+    public long startNode() {
+        return currentStartNode;
     }
 
-    public List<String> labels() {
-        return currentLabels;
+    public long endNode() {
+        return currentEndNode;
+    }
+
+    public String relationshipType() {
+        return relationshipType;
     }
 
     public void forEachProperty(PropertyConsumer propertyConsumer) {
-        for (Map.Entry<String, PropertySchema> propertyEntry : propertyKeys.get(currentLabels)) {
+        for (Map.Entry<String, RelationshipPropertySchema> propertyEntry : propertyKeys.get(relationshipType)) {
             var propertyPosition = propertyKeyPositions.get(propertyEntry.getKey());
             var propertyValue = currentProperties[propertyPosition];
             propertyConsumer.accept(propertyEntry.getKey(), propertyValue, propertyEntry.getValue().valueType());
@@ -83,15 +84,21 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
     }
 
     @Override
-    public boolean id(long id) {
-        currentId = id;
+    public boolean startId(long id) {
+        currentStartNode = id;
         return true;
     }
 
     @Override
-    public boolean labels(String[] labels) {
-        Arrays.sort(labels);
-        currentLabels = Arrays.asList(labels);
+    public boolean endId(long id) {
+        currentEndNode = id;
+        return true;
+    }
+
+
+    @Override
+    public boolean type(String type) {
+        relationshipType = type;
         return true;
     }
 
@@ -105,29 +112,29 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
     @Override
     public void endOfEntity() {
         // Check if we encounter a new label combination
-        if (!propertyKeys.containsKey(currentLabels)) {
-            calculateLabelSchema();
+        if (!propertyKeys.containsKey(relationshipType)) {
+            calculateTypeSchema();
         }
 
         // do the import
-        importNode();
+        importRelationship();
 
         // reset
-        currentId = -1;
-        currentLabels = EMPTY_LABELS;
+        currentStartNode = -1;
+        currentEndNode = -1;
+        relationshipType = RelationshipType.ALL_RELATIONSHIPS.name;
         Arrays.fill(currentProperties, null);
     }
 
-    private void calculateLabelSchema() {
-        var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
-        var propertySchemaForLabels = graphSchema.nodeSchema().filter(nodeLabelList);
+    private void calculateTypeSchema() {
+        var relationshipType = RelationshipType.of(this.relationshipType);
+        var propertySchemaForLabels = graphSchema.relationshipSchema().filter(Set.of(relationshipType));
         var unionProperties = propertySchemaForLabels.unionProperties();
         var sortedPropertyEntries = unionProperties
             .entrySet()
             .stream()
             .sorted(Map.Entry.comparingByKey())
             .collect(Collectors.toList());
-        propertyKeys.put(currentLabels, sortedPropertyEntries);
+        propertyKeys.put(this.relationshipType, sortedPropertyEntries);
     }
-
 }

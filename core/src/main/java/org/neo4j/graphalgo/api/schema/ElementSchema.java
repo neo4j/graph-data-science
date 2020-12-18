@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.api.schema;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.ElementIdentifier;
 
 import java.util.Map;
@@ -36,6 +37,16 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     SELF union(SELF other);
 
+    @Value.Derived
+    default Set<String> allProperties() {
+        return properties()
+            .values()
+            .stream()
+            .flatMap(propertyMapping -> propertyMapping.keySet().stream())
+            .collect(Collectors.toSet());
+    }
+
+    @Value.Derived
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().name,
@@ -50,6 +61,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
         ));
     }
 
+    @Value.Derived
     default Map<I, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<I> identifiersToKeep) {
         return properties()
             .entrySet()
@@ -59,6 +71,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     }
 
+    @Value.Derived
     default Map<String, PROPERTY_SCHEMA> unionProperties() {
         return properties()
             .values()
