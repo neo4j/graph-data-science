@@ -31,7 +31,7 @@ import java.util.Set;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
-class CsvRelationshipVisitorTest extends CsvVisitorTest{
+class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitRelationshipsWithTypes() {
@@ -137,7 +137,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest{
     }
 
     @Override
-    List<String> defaultHeaderColumns() {
+    protected List<String> defaultHeaderColumns() {
         return List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
     }
 }

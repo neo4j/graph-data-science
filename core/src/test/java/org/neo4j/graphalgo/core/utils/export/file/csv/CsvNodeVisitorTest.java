@@ -30,7 +30,7 @@ import java.util.Set;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 
-class CsvNodeVisitorTest extends CsvVisitorTest{
+class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithoutLabelsAndProperties() {
@@ -223,7 +223,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest{
     }
 
     @Override
-    List<String> defaultHeaderColumns() {
+    protected List<String> defaultHeaderColumns() {
         return List.of(ID_COLUMN_NAME);
     }
 }

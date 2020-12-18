@@ -23,6 +23,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +31,10 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract public class CsvVisitorTest extends CsvTest {
+abstract public class CsvTest {
 
     @TempDir
     protected Path tempDir;
-
-    protected abstract List<String> defaultHeaderColumns();
 
     protected void assertCsvFiles(Collection<String> expectedFiles) {
         for (String expectedFile : expectedFiles) {
@@ -43,8 +42,16 @@ abstract public class CsvVisitorTest extends CsvTest {
         }
     }
 
-    protected void assertHeaderFile(String fileName, Map<String, ? extends PropertySchema> properties) {
-       assertHeaderFile(fileName, defaultHeaderColumns(), properties);
+    protected void assertHeaderFile(String fileName, List<String> mandatoryColumns, Map<String, ? extends PropertySchema> properties) {
+        var expectedContent = new ArrayList<>(mandatoryColumns);
+
+        properties
+            .entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().csvName()));
+
+        assertThat(tempDir.resolve(fileName)).hasContent(String.join(",", expectedContent));
     }
 
     protected void assertDataContent(String fileName, List<List<String>> data) {
