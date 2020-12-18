@@ -365,18 +365,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         });
     }
 
-    @Test
-    default void testNonConsecutiveIds() {
-        RESULT originalResult = loadGraphAndRunCompute("originalGraph");
-
-        createRandomNodes();
-        emptyDb();
-
-        RESULT reloadedResult = loadGraphAndRunCompute("reloadedGraph");
-
-        assertResultEquals(originalResult, reloadedResult);
-    }
-
     default void loadGraph(String graphName){
         runQuery(
             graphDb(),

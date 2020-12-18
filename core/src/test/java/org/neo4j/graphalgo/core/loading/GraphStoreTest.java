@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,6 +43,7 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -65,21 +65,20 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class GraphStoreTest extends BaseTest {
 
-    private static final NodeLabel LABEL_A = NodeLabel.of("A");
-
-    @BeforeEach
-    void setup() {
-        runQuery(" CREATE (a:A {nodeProperty: 33, a: 33})" +
-                 ", (b:B {nodeProperty: 42, b: 42})" +
-                 ", (c:Ignore)" +
-                 ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
-                 ", (a)-[:T2 {property1: 43}]->(b)" +
-                 ", (a)-[:T3 {property2: 1338}]->(b)" +
-                 ", (a)-[:T1 {property1: 33}]->(c)" +
-                 ", (c)-[:T1 {property1: 33}]->(a)" +
-                 ", (b)-[:T1 {property1: 33}]->(c)" +
-                 ", (c)-[:T1 {property1: 33}]->(b)");
-    }
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (i1:Ignore)" +
+        ", (a:A {nodeProperty: 33, a: 33})" +
+        ", (b:B {nodeProperty: 42, b: 42})" +
+        ", (i2:Ignore)" +
+        ", (a)-[:T1 {property1: 42, property2: 1337}]->(b)" +
+        ", (a)-[:T2 {property1: 43}]->(b)" +
+        ", (a)-[:T3 {property2: 1338}]->(b)" +
+        ", (a)-[:T1 {property1: 33}]->(c)" +
+        ", (c)-[:T1 {property1: 33}]->(a)" +
+        ", (b)-[:T1 {property1: 33}]->(c)" +
+        ", (c)-[:T1 {property1: 33}]->(b)";
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("validRelationshipFilterParameters")
