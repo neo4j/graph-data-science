@@ -47,10 +47,10 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY;
@@ -70,48 +70,48 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     static final String LATITUDE_PROPERTY = "latitude";
     static final String COST_PROPERTY = "cost";
 
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (nA:Node {latitude: 1.304444,    longitude: 103.717373})" + // name: 'SINGAPORE'
+        ", (nB:Node {latitude: 1.1892,      longitude: 103.4689})" + // name: 'SINGAPORE STRAIT'
+        ", (nC:Node {latitude: 8.83055556,  longitude: 111.8725})" + // name: 'WAYPOINT 68'
+        ", (nD:Node {latitude: 10.82916667, longitude: 113.9722222})" + // name: 'WAYPOINT 70'
+        ", (nE:Node {latitude: 11.9675,     longitude: 115.2366667})" + // name: 'WAYPOINT 74'
+        ", (nF:Node {latitude: 16.0728,     longitude: 119.6128})" + // name: 'SOUTH CHINA SEA'
+        ", (nG:Node {latitude: 20.5325,     longitude: 121.845})" + // name: 'LUZON STRAIT'
+        ", (nH:Node {latitude: 29.32611111, longitude: 131.2988889})" + // name: 'WAYPOINT 87'
+        ", (nI:Node {latitude: -2.0428,     longitude: 108.6225})" + // name: 'KARIMATA STRAIT'
+        ", (nJ:Node {latitude: -8.3256,     longitude: 115.8872})" + // name: 'LOMBOK STRAIT'
+        ", (nK:Node {latitude: -8.5945,     longitude: 116.6867})" + // name: 'SUMBAWA STRAIT'
+        ", (nL:Node {latitude: -8.2211,     longitude: 125.2411})" + // name: 'KOLANA AREA'
+        ", (nM:Node {latitude: -1.8558,     longitude: 126.5572})" + // name: 'EAST MANGOLE'
+        ", (nN:Node {latitude: 3.96861111,  longitude: 128.3052778})" + // name: 'WAYPOINT 88'
+        ", (nO:Node {latitude: 12.76305556, longitude: 131.2980556})" + // name: 'WAYPOINT 89'
+        ", (nP:Node {latitude: 22.32027778, longitude: 134.700000})" + // name: 'WAYPOINT 90'
+        ", (nX:Node {latitude: 35.562222,   longitude: 140.059187})" + // name: 'CHIBA'
+        ", (nA)-[:TYPE {cost: 29.0}]->(nB)" +
+        ", (nB)-[:TYPE {cost: 694.0}]->(nC)" +
+        ", (nC)-[:TYPE {cost: 172.0}]->(nD)" +
+        ", (nD)-[:TYPE {cost: 101.0}]->(nE)" +
+        ", (nE)-[:TYPE {cost: 357.0}]->(nF)" +
+        ", (nF)-[:TYPE {cost: 299.0}]->(nG)" +
+        ", (nG)-[:TYPE {cost: 740.0}]->(nH)" +
+        ", (nH)-[:TYPE {cost: 587.0}]->(nX)" +
+        ", (nB)-[:TYPE {cost: 389.0}]->(nI)" +
+        ", (nI)-[:TYPE {cost: 584.0}]->(nJ)" +
+        ", (nJ)-[:TYPE {cost: 82.0}]->(nK)" +
+        ", (nK)-[:TYPE {cost: 528.0}]->(nL)" +
+        ", (nL)-[:TYPE {cost: 391.0}]->(nM)" +
+        ", (nM)-[:TYPE {cost: 364.0}]->(nN)" +
+        ", (nN)-[:TYPE {cost: 554.0}]->(nO)" +
+        ", (nO)-[:TYPE {cost: 603.0}]->(nP)" +
+        ", (nP)-[:TYPE {cost: 847.0}]->(nX)";
+
     long idA, idB, idC, idD, idE, idF, idG, idH, idX;
     long[] ids0;
     double[] costs0;
 
-    @Override
-    public String createQuery() {
-        return "CREATE" +
-               "  (nA:Node {id: 1,  latitude: 1.304444,    longitude: 103.717373})" + // name: 'SINGAPORE'
-               ", (nB:Node {id: 2,  latitude: 1.1892,      longitude: 103.4689})" + // name: 'SINGAPORE STRAIT'
-               ", (nC:Node {id: 3,  latitude: 8.83055556,  longitude: 111.8725})" + // name: 'WAYPOINT 68'
-               ", (nD:Node {id: 4,  latitude: 10.82916667, longitude: 113.9722222})" + // name: 'WAYPOINT 70'
-               ", (nE:Node {id: 5,  latitude: 11.9675,     longitude: 115.2366667})" + // name: 'WAYPOINT 74'
-               ", (nF:Node {id: 6,  latitude: 16.0728,     longitude: 119.6128})" + // name: 'SOUTH CHINA SEA'
-               ", (nG:Node {id: 7,  latitude: 20.5325,     longitude: 121.845})" + // name: 'LUZON STRAIT'
-               ", (nH:Node {id: 8,  latitude: 29.32611111, longitude: 131.2988889})" + // name: 'WAYPOINT 87'
-               ", (nI:Node {id: 9,  latitude: -2.0428,     longitude: 108.6225})" + // name: 'KARIMATA STRAIT'
-               ", (nJ:Node {id: 10, latitude: -8.3256,     longitude: 115.8872})" + // name: 'LOMBOK STRAIT'
-               ", (nK:Node {id: 11, latitude: -8.5945,     longitude: 116.6867})" + // name: 'SUMBAWA STRAIT'
-               ", (nL:Node {id: 12, latitude: -8.2211,     longitude: 125.2411})" + // name: 'KOLANA AREA'
-               ", (nM:Node {id: 13, latitude: -1.8558,     longitude: 126.5572})" + // name: 'EAST MANGOLE'
-               ", (nN:Node {id: 14, latitude: 3.96861111,  longitude: 128.3052778})" + // name: 'WAYPOINT 88'
-               ", (nO:Node {id: 15, latitude: 12.76305556, longitude: 131.2980556})" + // name: 'WAYPOINT 89'
-               ", (nP:Node {id: 16, latitude: 22.32027778, longitude: 134.700000})" + // name: 'WAYPOINT 90'
-               ", (nX:Node {id: 17, latitude: 35.562222,   longitude: 140.059187})" + // name: 'CHIBA'
-               ", (nA)-[:TYPE {cost: 29.0}]->(nB)" +
-               ", (nB)-[:TYPE {cost: 694.0}]->(nC)" +
-               ", (nC)-[:TYPE {cost: 172.0}]->(nD)" +
-               ", (nD)-[:TYPE {cost: 101.0}]->(nE)" +
-               ", (nE)-[:TYPE {cost: 357.0}]->(nF)" +
-               ", (nF)-[:TYPE {cost: 299.0}]->(nG)" +
-               ", (nG)-[:TYPE {cost: 740.0}]->(nH)" +
-               ", (nH)-[:TYPE {cost: 587.0}]->(nX)" +
-               ", (nB)-[:TYPE {cost: 389.0}]->(nI)" +
-               ", (nI)-[:TYPE {cost: 584.0}]->(nJ)" +
-               ", (nJ)-[:TYPE {cost: 82.0}]->(nK)" +
-               ", (nK)-[:TYPE {cost: 528.0}]->(nL)" +
-               ", (nL)-[:TYPE {cost: 391.0}]->(nM)" +
-               ", (nM)-[:TYPE {cost: 364.0}]->(nN)" +
-               ", (nN)-[:TYPE {cost: 554.0}]->(nO)" +
-               ", (nO)-[:TYPE {cost: 603.0}]->(nP)" +
-               ", (nP)-[:TYPE {cost: 847.0}]->(nX)";
-    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -119,17 +119,16 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
             getProcedureClazz(),
             GraphCreateProc.class
         );
-        runQuery(createQuery());
 
-        idA = nodeIdByProperty(db, 1);
-        idB = nodeIdByProperty(db, 2);
-        idC = nodeIdByProperty(db, 3);
-        idD = nodeIdByProperty(db, 4);
-        idE = nodeIdByProperty(db, 5);
-        idF = nodeIdByProperty(db, 6);
-        idG = nodeIdByProperty(db, 7);
-        idH = nodeIdByProperty(db, 8);
-        idX = nodeIdByProperty(db, 17);
+        idA = idFunction.of("nA");
+        idB = idFunction.of("nB");
+        idC = idFunction.of("nC");
+        idD = idFunction.of("nD");
+        idE = idFunction.of("nE");
+        idF = idFunction.of("nF");
+        idG = idFunction.of("nG");
+        idH = idFunction.of("nH");
+        idX = idFunction.of("nX");
 
         ids0 = new long[]{idA, idB, idC, idD, idE, idF, idG, idH, idX};
         costs0 = new double[]{0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0};
@@ -157,8 +156,8 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
-            .withNumber(SOURCE_NODE_KEY, nodeIdByProperty(db, 1))
-            .withNumber(TARGET_NODE_KEY, nodeIdByProperty(db, 17))
+            .withNumber(SOURCE_NODE_KEY, idFunction.of("nA"))
+            .withNumber(TARGET_NODE_KEY, idFunction.of("nX"))
             .withString(LONGITUDE_PROPERTY_KEY, LONGITUDE_PROPERTY)
             .withString(LATITUDE_PROPERTY_KEY, LATITUDE_PROPERTY);
     }

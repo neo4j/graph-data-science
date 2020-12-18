@@ -62,7 +62,8 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
             .orElseThrow(() -> new IllegalStateException("No database was found."));
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
-        Map<String, Node> idMapping = neo4jGraphSetup(db, requiredTestClass);
+        Optional<String> createQuery = graphCreateQuery(requiredTestClass);
+        Map<String, Node> idMapping = neo4jGraphSetup(db, createQuery);
         injectFields(context, db, idMapping);
     }
 
@@ -70,12 +71,16 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
     }
 
-    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Class<?> testClass) {
+    private Optional<String> graphCreateQuery(Class<?> testClass) {
         return Stream.<Class<?>>iterate(testClass, c -> c.getSuperclass() != null, Class::getSuperclass)
             .flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
-            .map(ExtensionUtil::getStringValueOfField)
+            .map(ExtensionUtil::getStringValueOfField);
+    }
+
+    private Map<String, Node> neo4jGraphSetup(GraphDatabaseService db, Optional<String> createQuery) {
+        return createQuery
             .map(query -> formatWithLocale("%s %s", query, RETURN_STATEMENT))
             .map(query -> QueryRunner.runQuery(db, query, Neo4jSupportExtension::extractVariableIds))
             .orElseGet(Map::of);

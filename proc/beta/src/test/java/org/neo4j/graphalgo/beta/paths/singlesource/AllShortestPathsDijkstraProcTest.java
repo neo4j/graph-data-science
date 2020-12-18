@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 
 abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsBaseConfig> extends BaseProcTest implements
@@ -53,12 +52,12 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
 
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE" +
-           "  (a:Label { id: 1 })" +
-           ", (b:Label { id: 2 })" +
-           ", (c:Label { id: 3 })" +
-           ", (d:Label { id: 4 })" +
-           ", (e:Label { id: 5 })" +
-           ", (f:Label { id: 6 })" +
+           "  (a:Label)" +
+           ", (b:Label)" +
+           ", (c:Label)" +
+           ", (d:Label)" +
+           ", (e:Label)" +
+           ", (f:Label)" +
            ", (a)-[:TYPE {cost: 4}]->(b)" +
            ", (a)-[:TYPE {cost: 2}]->(c)" +
            ", (b)-[:TYPE {cost: 5}]->(c)" +
@@ -74,12 +73,12 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
             GraphCreateProc.class
         );
 
-        idA = nodeIdByProperty(db, 1);
-        idB = nodeIdByProperty(db, 2);
-        idC = nodeIdByProperty(db, 3);
-        idD = nodeIdByProperty(db, 4);
-        idE = nodeIdByProperty(db, 5);
-        idF = nodeIdByProperty(db, 6);
+        idA = idFunction.of("a");
+        idB = idFunction.of("b");
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
 
         costs0 = new double[]{0.0};
         costs1 = new double[]{0.0, 2.0};
@@ -115,7 +114,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
 
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = nodeIdByProperty(db, 1);
+        long sourceId = idFunction.of("a");
 
         if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
             mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);

@@ -19,16 +19,18 @@
  */
 package org.neo4j.graphalgo.extension;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class Neo4jSupportExtensionTest extends BaseTest {
 
@@ -72,4 +74,18 @@ class Neo4jSupportExtensionTest extends BaseTest {
         );
     }
 
+    @Test
+    void shouldInjectOriginalCreateQuery() {
+        assertEquals(DB_CYPHER, createQuery);
+    }
+
+    public static long nodeIdByProperty(GraphDatabaseService db, long propertyValue) {
+        var nodeId = new MutableLong(0L);
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            formatWithLocale("MATCH (n) WHERE n.id = %d RETURN id(n) AS id", propertyValue),
+            resultRow -> nodeId.setValue(resultRow.getNumber("id"))
+        );
+        return nodeId.longValue();
+    }
 }

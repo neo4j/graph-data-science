@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -46,30 +46,27 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class RelationshipStreamExporterTest extends BaseTest {
 
-    private static final String DB_CYPHER =
-        "CREATE" +
-        "  (a { id: 0 })" +
-        ", (b { id: 1 })" +
-        ", (c { id: 2 })" +
-        ", (d { id: 3 })";
+    private static final List<String> nodeVariables = List.of("a", "b", "c", "d");
+
+    @Neo4jGraph
+    private static final String DB_CYPHER = "CREATE (" + String.join("), (", nodeVariables) + ")";
 
     private Graph graph;
 
     @BeforeEach
     void setup() {
-        runQuery(DB_CYPHER);
         graph = new StoreLoaderBuilder().api(db).build().graphStore().getUnion();
     }
 
     @Test
     void exportScalar() {
         var exportRelationships = List.of(
-            relationship(0, 1, Values.longValue(42L), Values.doubleValue(1332)),
-            relationship(0, 2, Values.longValue(43L), Values.doubleValue(1333)),
-            relationship(1, 0, Values.longValue(44L), Values.doubleValue(1334)),
-            relationship(2, 2, Values.longValue(45L), Values.doubleValue(1335)),
-            relationship(2, 3, Values.longValue(46L), Values.doubleValue(1336)),
-            relationship(2, 3, Values.longValue(47L), Values.doubleValue(1337))
+            relationship("a", "b", Values.longValue(42L), Values.doubleValue(1332)),
+            relationship("a", "c", Values.longValue(43L), Values.doubleValue(1333)),
+            relationship("b", "a", Values.longValue(44L), Values.doubleValue(1334)),
+            relationship("c", "c", Values.longValue(45L), Values.doubleValue(1335)),
+            relationship("c", "d", Values.longValue(46L), Values.doubleValue(1336)),
+            relationship("c", "d", Values.longValue(47L), Values.doubleValue(1337))
         );
 
         var exporter = RelationshipStreamExporter
@@ -113,12 +110,12 @@ class RelationshipStreamExporterTest extends BaseTest {
     @Test
     void exportArray() {
         var exportRelationships = List.of(
-            relationship(0, 1, Values.longArray(new long[]{1, 3, 3, 2}), Values.doubleArray(new double[]{4, 2})),
-            relationship(0, 2, Values.longArray(new long[]{1, 3, 3, 3}), Values.doubleArray(new double[]{4, 3})),
-            relationship(1, 0, Values.longArray(new long[]{1, 3, 3, 4}), Values.doubleArray(new double[]{4, 4})),
-            relationship(2, 2, Values.longArray(new long[]{1, 3, 3, 5}), Values.doubleArray(new double[]{4, 5})),
-            relationship(2, 3, Values.longArray(new long[]{1, 3, 3, 6}), Values.doubleArray(new double[]{4, 6})),
-            relationship(2, 3, Values.longArray(new long[]{1, 3, 3, 7}), Values.doubleArray(new double[]{4, 7}))
+            relationship("a", "b", Values.longArray(new long[]{1, 3, 3, 2}), Values.doubleArray(new double[]{4, 2})),
+            relationship("a", "c", Values.longArray(new long[]{1, 3, 3, 3}), Values.doubleArray(new double[]{4, 3})),
+            relationship("b", "a", Values.longArray(new long[]{1, 3, 3, 4}), Values.doubleArray(new double[]{4, 4})),
+            relationship("c", "c", Values.longArray(new long[]{1, 3, 3, 5}), Values.doubleArray(new double[]{4, 5})),
+            relationship("c", "d", Values.longArray(new long[]{1, 3, 3, 6}), Values.doubleArray(new double[]{4, 6})),
+            relationship("c", "d", Values.longArray(new long[]{1, 3, 3, 7}), Values.doubleArray(new double[]{4, 7}))
         );
 
         var exporter = RelationshipStreamExporter
@@ -132,13 +129,18 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
+        var idA =  idFunction.of("a");
+        var idB =  idFunction.of("b");
+        var idC =  idFunction.of("c");
+        var idD =  idFunction.of("d");
+
         //@formatter:off
-        var query = "MATCH (a {id: $idA})-[r:FOOBAR]->(b {id: $idB}) RETURN r.x AS x, r.y AS y";
-        assertCypherResult(query, Map.of("idA", 0, "idB", 1), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
-        assertCypherResult(query, Map.of("idA", 0, "idB", 2), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
-        assertCypherResult(query, Map.of("idA", 1, "idB", 0), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
-        assertCypherResult(query, Map.of("idA", 2, "idB", 2), List.of(Map.of("x", new long[]{1, 3, 3, 5}, "y", new double[]{4, 5})));
-        assertCypherResult(query, Map.of("idA", 2, "idB", 3),
+        var query = "MATCH (a)-[r:FOOBAR]->(b) WHERE id(a) = $idA AND id(b) = $idB RETURN r.x AS x, r.y AS y";
+        assertCypherResult(query, Map.of("idA", idA, "idB", idB), List.of(Map.of("x", new long[]{1, 3, 3, 2}, "y", new double[]{4, 2})));
+        assertCypherResult(query, Map.of("idA", idA, "idB", idC), List.of(Map.of("x", new long[]{1, 3, 3, 3}, "y", new double[]{4, 3})));
+        assertCypherResult(query, Map.of("idA", idB, "idB", idA), List.of(Map.of("x", new long[]{1, 3, 3, 4}, "y", new double[]{4, 4})));
+        assertCypherResult(query, Map.of("idA", idC, "idB", idC), List.of(Map.of("x", new long[]{1, 3, 3, 5}, "y", new double[]{4, 5})));
+        assertCypherResult(query, Map.of("idA", idC, "idB", idD),
             List.of(
                 Map.of("x", new long[]{1, 3, 3, 6}, "y", new double[]{4, 6}),
                 Map.of("x", new long[]{1, 3, 3, 7}, "y", new double[]{4, 7})
@@ -158,7 +160,7 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         var relationshipStream = IntStream
             .range(0, relationshipCount)
-            .mapToObj(ignored -> relationship(rand.nextInt(nodeCount), rand.nextInt(nodeCount)));
+            .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
         var exporter = RelationshipStreamExporter
             .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
@@ -198,7 +200,7 @@ class RelationshipStreamExporterTest extends BaseTest {
 
         var relationshipStream = IntStream
             .range(0, relationshipCount)
-            .mapToObj(ignored -> relationship(rand.nextInt(nodeCount), rand.nextInt(nodeCount)));
+            .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
         var exporter = RelationshipStreamExporter
             .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
@@ -226,7 +228,7 @@ class RelationshipStreamExporterTest extends BaseTest {
     void throwsForParallelStreams() {
         var relationshipStream = IntStream
             .range(0, 10)
-            .mapToObj(ignored -> relationship(0, 0))
+            .mapToObj(ignored -> relationship("a", "a"))
             .parallel();
 
         assertThatThrownBy(() -> RelationshipStreamExporter.builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE).build())
@@ -234,11 +236,15 @@ class RelationshipStreamExporterTest extends BaseTest {
             .hasMessageContaining("supports only sequential streams");
     }
 
-    RelationshipStreamExporter.Relationship relationship(int sourceProperty, int targetProperty, Value... values) {
+    RelationshipStreamExporter.Relationship relationship(String sourceVariable, String targetVariable, Value... values) {
         return ImmutableRelationship.of(
-            graph.toMappedNodeId(TestSupport.nodeIdByProperty(db, sourceProperty)),
-            graph.toMappedNodeId(TestSupport.nodeIdByProperty(db, targetProperty)),
+            graph.toMappedNodeId(idFunction.of(sourceVariable)),
+            graph.toMappedNodeId(idFunction.of(targetVariable)),
             values
         );
+    }
+
+    private String randomVariable(Random rand, int limit) {
+        return nodeVariables.get(rand.nextInt(limit));
     }
 }

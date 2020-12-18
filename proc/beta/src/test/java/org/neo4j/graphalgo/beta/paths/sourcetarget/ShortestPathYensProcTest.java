@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig.TARGET_NODE_KEY;
 import static org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensBaseConfig.K_KEY;
@@ -54,12 +53,12 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
-           "  (c {id: 1})" +
-           ", (d {id: 2})" +
-           ", (e {id: 3})" +
-           ", (f {id: 4})" +
-           ", (g {id: 5})" +
-           ", (h {id: 6})" +
+           "  (c)" +
+           ", (d)" +
+           ", (e)" +
+           ", (f)" +
+           ", (g)" +
+           ", (h)" +
            ", (c)-[:TYPE {cost: 3.0}]->(d)" +
            ", (c)-[:TYPE {cost: 2.0}]->(e)" +
            ", (d)-[:TYPE {cost: 4.0}]->(f)" +
@@ -77,12 +76,12 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             GraphCreateProc.class
         );
 
-        idC = nodeIdByProperty(db, 1);
-        idD = nodeIdByProperty(db, 2);
-        idE = nodeIdByProperty(db, 3);
-        idF = nodeIdByProperty(db, 4);
-        idG = nodeIdByProperty(db, 5);
-        idH = nodeIdByProperty(db, 6);
+        idC = idFunction.of("c");
+        idD = idFunction.of("d");
+        idE = idFunction.of("e");
+        idF = idFunction.of("f");
+        idG = idFunction.of("g");
+        idH = idFunction.of("h");
 
         ids0 = new long[]{idC, idE, idF, idH};
         ids1 = new long[]{idC, idE, idG, idH};
@@ -113,8 +112,8 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper
-            .withNumber(SOURCE_NODE_KEY, nodeIdByProperty(db, 1))
-            .withNumber(TARGET_NODE_KEY, nodeIdByProperty(db, 6))
+            .withNumber(SOURCE_NODE_KEY, idFunction.of("c"))
+            .withNumber(TARGET_NODE_KEY, idFunction.of("h"))
             .withNumber(K_KEY, 3);
     }
 

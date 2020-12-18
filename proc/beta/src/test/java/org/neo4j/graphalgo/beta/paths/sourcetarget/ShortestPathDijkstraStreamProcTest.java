@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.TestSupport.nodeIdByProperty;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -75,8 +74,8 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             );
             var expected = Map.of(
                 "index", 0L,
-                "sourceNode", nodeIdByProperty(db, 1),
-                "targetNode", nodeIdByProperty(db, 6),
+                "sourceNode", idFunction.of("a"),
+                "targetNode", idFunction.of("f"),
                 "totalCost", 20.0D,
                 "costs", Arrays.stream(costs0).boxed().collect(Collectors.toList()),
                 "nodeIds", Arrays.stream(ids0).boxed().collect(Collectors.toList()),
