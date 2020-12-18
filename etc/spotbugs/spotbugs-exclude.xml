@@ -1,11 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <FindBugsFilter>
     <Match>
-        <Class name="~.*\.*Immutable.*" />
+        <Class name="~.*\.Immutable.*" />
+    </Match>
+    <Match>
+        <Class name="~.*\.Modifiable.*" />
     </Match>
     <Match>
         <Class name="~.*\.*ConfigImpl" />
     </Match>
+
+    <!--
+        The following classes are being generated but
+        don't match one of the naming patterns from above
+    -->
+    <Match>
+        <Class name="~org.neo4j.graphalgo.NodeProjections?" />
+    </Match>
+    <Match>
+        <Class name="~org.neo4j.graphalgo.RelationshipProjections?" />
+    </Match>
+    <Match>
+        <Class name="~org.neo4j.graphalgo.PropertyMappings" />
+    </Match>
+
 
     <!--
         Below are exclusions of issues found in our project,
@@ -196,62 +214,62 @@
     <Match>
         <Bug pattern="RV_NEGATING_RESULT_OF_COMPARETO"/>
     </Match>
-    
+
     <!-- Uninitialized read of field in constructor -->
     <Match>
         <Bug pattern="UR_UNINIT_READ"/>
     </Match>
-    
+
     <!-- Exception is caught when Exception is not thrown -->
     <Match>
         <Bug pattern="REC_CATCH_EXCEPTION"/>
     </Match>
-    
+
     <!-- Useless non-empty void method -->
     <Match>
         <Bug pattern="UC_USELESS_VOID_METHOD"/>
     </Match>
-    
+
     <!-- Should be a static inner class -->
     <Match>
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC"/>
     </Match>
-    
+
     <!-- Field should be moved out of an interface and made package protected -->
     <Match>
         <Bug pattern="MS_OOI_PKGPROTECT"/>
     </Match>
-    
+
     <!-- Method ignores exceptional return value -->
     <Match>
         <Bug pattern="RV_RETURN_VALUE_IGNORED_BAD_PRACTICE"/>
     </Match>
-    
+
     <!-- Code contains a hard coded reference to an absolute pathname -->
     <Match>
         <Bug pattern="DMI_HARDCODED_ABSOLUTE_FILENAME"/>
     </Match>
-    
+
     <!-- Method may fail to clean up stream or resource -->
     <Match>
         <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
     </Match>
-    
+
     <!-- Nullcheck of value previously dereferenced -->
     <Match>
         <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
     </Match>
-    
+
     <!-- Inefficient use of keySet iterator instead of entrySet iterator -->
     <Match>
         <Bug pattern="WMI_WRONG_MAP_ITERATOR"/>
     </Match>
-    
+
     <!-- Method may fail to close stream -->
     <Match>
         <Bug pattern="OS_OPEN_STREAM"/>
     </Match>
-    
+
     <!-- Method allocates an object, only to get the class object -->
     <Match>
         <Bug pattern="DM_NEW_FOR_GETCLASS"/>
@@ -357,5 +375,9 @@
     <Match>
         <Bug pattern="RV_RETURN_VALUE_IGNORED"/>
     </Match>
+
+<!--    <Match>-->
+<!--        <Bug pattern="NP_METHOD_PARAMETER_TIGHTENS_ANNOTATION"/>-->
+<!--    </Match>-->
 
 </FindBugsFilter>
