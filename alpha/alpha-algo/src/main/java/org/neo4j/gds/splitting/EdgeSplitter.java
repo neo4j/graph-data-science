@@ -137,6 +137,11 @@ public class EdgeSplitter {
         return SplitResult.of(remainingRelsBuilder.build(), selectedRelsBuilder.build());
     }
 
+    int negativeEdgesPerNode(int maxSamples, long remainingSamples, long remainingNodes) {
+        var numSamplesOnAverage = remainingSamples / remainingNodes;
+        return Math.min(maxSamples, (int) numSamplesOnAverage);
+    }
+
     private long targetAtOffset(Graph graph, long source, long offset) {
         MutableLong target = new MutableLong();
         MutableLong currentOffset = new MutableLong();

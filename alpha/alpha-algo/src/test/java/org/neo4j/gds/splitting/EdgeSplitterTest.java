@@ -70,4 +70,18 @@ class EdgeSplitterTest {
         });
     }
 
+    @Test
+    void negativeEdgeSampling() {
+        var splitter = new EdgeSplitter(42L);
+
+        var sum = 0;
+        for (int i = 0; i < 100; i++) {
+            var prev = splitter.negativeEdgesPerNode(i, 100 - sum, 100 - i);
+            System.out.println("prev = " + prev);
+            sum += prev;
+        }
+
+        assertEquals(100, sum);
+    }
+
 }
