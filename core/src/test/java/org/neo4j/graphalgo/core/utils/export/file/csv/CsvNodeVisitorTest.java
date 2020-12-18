@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -140,9 +141,110 @@ class CsvNodeVisitorTest {
         );
     }
 
+    @Test
+    void visitNodesWithLabelsAndProperties() {
+        var aLabel = NodeLabel.of("A");
+        var bLabel = NodeLabel.of("B");
+        var cLabel = NodeLabel.of("C");
+
+        var graphSchema = GraphSchema.of(
+            NodeSchema.builder()
+                .addProperty(aLabel, "foo", ValueType.LONG)
+                .addProperty(aLabel, "bar", ValueType.LONG)
+
+                .addProperty(bLabel, "bar", ValueType.LONG)
+                .addProperty(bLabel, "baz", ValueType.DOUBLE)
+
+                .addProperty(cLabel, "isolated", ValueType.DOUBLE)
+
+                .build(),
+            RelationshipSchema.builder().build()
+        );
+        var nodeVisitor = new CsvNodeVisitor(tempDir, graphSchema);
+
+        // :A:B
+        nodeVisitor.id(0L);
+        nodeVisitor.labels(new String[]{"A", "B"});
+        nodeVisitor.property("foo", 42);
+        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.endOfEntity();
+
+        // :A
+        nodeVisitor.id(1L);
+        nodeVisitor.labels(new String[]{"A"});
+        nodeVisitor.property("foo", 42);
+        nodeVisitor.property("bar", 21);
+        nodeVisitor.endOfEntity();
+
+        // :B
+        nodeVisitor.id(2L);
+        nodeVisitor.labels(new String[]{"B"});
+        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.endOfEntity();
+
+        // :C
+        nodeVisitor.id(3L);
+        nodeVisitor.labels(new String[]{"C"});
+        nodeVisitor.property("isolated", 1337.0);
+        nodeVisitor.endOfEntity();
+
+        // :A:B
+        nodeVisitor.id(4L);
+        nodeVisitor.labels(new String[]{"A", "B"});
+        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("baz", 21.0);
+        nodeVisitor.endOfEntity();
+
+        nodeVisitor.close();
+
+        assertCsvFiles(List.of(
+            "nodes_A_B.csv", "nodes_A_B_header.csv",
+            "nodes_A.csv", "nodes_A_header.csv",
+            "nodes_B.csv", "nodes_B_header.csv",
+            "nodes_C.csv", "nodes_C_header.csv"
+        ));
+
+        assertHeaderFile("nodes_A_B_header.csv", graphSchema.nodeSchema().filter(Set.of(aLabel, bLabel)).unionProperties());
+        assertDataContent(
+            "nodes_A_B.csv",
+            List.of(  //id   bar   baz     foo
+                List.of("0", "21", "21.0", "42"),
+                List.of("4", "21", "21.0", "")
+            )
+        );
+
+        assertHeaderFile("nodes_A_header.csv", graphSchema.nodeSchema().filter(Set.of(aLabel)).unionProperties());
+        assertDataContent(
+            "nodes_A.csv",
+            List.of(  //id   bar    foo
+                List.of("1", "21", "42")
+            )
+        );
+
+        assertHeaderFile("nodes_B_header.csv", graphSchema.nodeSchema().filter(Set.of(bLabel)).unionProperties());
+        assertDataContent(
+            "nodes_B.csv",
+            List.of(  //id   bar    baz
+                List.of("2", "21", "21.0")
+            )
+        );
+
+        assertHeaderFile("nodes_C_header.csv", graphSchema.nodeSchema().filter(Set.of(cLabel)).unionProperties());
+        assertDataContent(
+            "nodes_C.csv",
+            List.of(  //id   isolated
+                List.of("3", "1337.0")
+            )
+        );
+
+    }
+
     private void assertCsvFiles(Collection<String> expectedFiles) {
-        assertThat(tempDir.toFile()).isDirectoryContaining(file -> expectedFiles.contains(file.getName()));
-        assertThat(tempDir.toFile().listFiles().length).isEqualTo(expectedFiles.size());
+        for (String expectedFile : expectedFiles) {
+            assertThat(tempDir.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
+        }
     }
 
     private void assertHeaderFile(String fileName, Map<String, PropertySchema> properties) {
