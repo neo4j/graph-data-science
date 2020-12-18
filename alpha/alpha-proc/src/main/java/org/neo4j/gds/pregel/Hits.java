@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -68,7 +68,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     }
 
     @Override
-    public void compute(ComputeContext<HitsConfig> context, Pregel.Messages messages) {
+    public void compute(ComputeContext<HitsConfig> context, Messages messages) {
         switch (state) {
             case SEND_IDS:
                 context.sendToNeighbors(context.nodeId());
@@ -102,7 +102,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         state = state.advance();
     }
 
-    private void receiveIds(ComputeContext<HitsConfig> context, Pregel.Messages messages) {
+    private void receiveIds(ComputeContext<HitsConfig> context, Messages messages) {
         // will only work with directed graphs
         var neighborIds = StreamSupport
             .stream(messages.spliterator(), false)
@@ -116,7 +116,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         updateGlobalNorm(auth);
     }
 
-    private void calculateValue(ComputeContext<HitsConfig> context, Pregel.Messages messages, String authProperty) {
+    private void calculateValue(ComputeContext<HitsConfig> context, Messages messages, String authProperty) {
         var auth = 0D;
         for (Double message : messages) {
             auth += message;
