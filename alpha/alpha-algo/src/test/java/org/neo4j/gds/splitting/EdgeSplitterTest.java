@@ -21,15 +21,14 @@ package org.neo4j.gds.splitting;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.splitting.EdgeSplitter.NEGATIVE;
 import static org.neo4j.gds.splitting.EdgeSplitter.POSITIVE;
 
@@ -44,7 +43,7 @@ class EdgeSplitterTest {
 
     @Test
     void test() {
-        var splitter = new EdgeSplitter();
+        var splitter = new EdgeSplitter(42L);
 
         var result = splitter.split(
             graph,
@@ -66,8 +65,8 @@ class EdgeSplitterTest {
         assertFalse(selectedRels.topology().isMultiGraph());
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(2L, p.elementCount());
-            assertEquals(NEGATIVE, Double.longBitsToDouble(p.list().cursor(0L).nextLong()));
-            assertEquals(NEGATIVE, Double.longBitsToDouble(p.list().cursor(1L).nextLong()));
+            assertEquals(NEGATIVE, Double.longBitsToDouble(p.list().cursor(p.offsets().get(0L)).nextLong()));
+            assertEquals(POSITIVE, Double.longBitsToDouble(p.list().cursor(p.offsets().get(1L)).nextLong()));
         });
     }
 

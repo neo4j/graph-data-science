@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.helpers.collection.Pair;
 
 import java.util.HashSet;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 public class EdgeSplitter {
 
@@ -42,16 +42,16 @@ public class EdgeSplitter {
 //    private final RelationshipType remainingRelationships;
 //    private final RelationshipType selectedRelationships;
 //
-//    private final ThreadLocal<Random> rng;
+    private final ThreadLocal<Random> rng;
 
     public EdgeSplitter(
 //        RelationshipType remainingRelationships,
 //        RelationshipType selectedRelationships,
-//        long seed
+        long seed
     ) {
 //        this.remainingRelationships = remainingRelationships;
 //        this.selectedRelationships = selectedRelationships;
-//        this.rng = ThreadLocal.withInitial(() -> new Random(seed));
+        this.rng = ThreadLocal.withInitial(() -> new Random(seed));
     }
 
     public SplitResult split(
@@ -151,7 +151,7 @@ public class EdgeSplitter {
     }
 
     private long randomLong(long bound) {
-        return ThreadLocalRandom.current().nextLong(bound);
+        return Math.abs(rng.get().nextLong() % bound);
     }
 
     private long randomNodeId(Graph graph) {
