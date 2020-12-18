@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipVisitor;
 
 import java.io.IOException;
@@ -42,15 +42,15 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     private final Map<String, CsvAppender> csvAppenders;
     private final CsvWriter csvWriter;
 
-    public CsvRelationshipVisitor(Path fileLocation, GraphSchema graphSchema) {
-        super(graphSchema);
+    public CsvRelationshipVisitor(Path fileLocation, RelationshipSchema relationshipSchema) {
+        super(relationshipSchema);
         this.fileLocation = fileLocation;
         this.csvAppenders = new HashMap<>();
         this.csvWriter = new CsvWriter();
     }
 
     @Override
-    protected void importRelationship() {
+    protected void exportElement() {
         // do the import
         var csvAppender = getAppender();
         try {

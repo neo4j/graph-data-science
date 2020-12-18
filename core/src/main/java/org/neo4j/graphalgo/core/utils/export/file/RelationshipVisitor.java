@@ -20,48 +20,24 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-public abstract class RelationshipVisitor extends InputEntityVisitor.Adapter {
-
+public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
     private long currentStartNode;
     private long currentEndNode;
     private String relationshipType;
-    private final GraphSchema graphSchema;
-    private final Object[] currentProperties;
 
-    private final Map<String, List<Map.Entry<String, RelationshipPropertySchema>>> propertyKeys;
-    private final Map<String, Integer> propertyKeyPositions;
-
-    protected RelationshipVisitor(GraphSchema graphSchema) {
-        currentStartNode = -1;
-        relationshipType = RelationshipType.ALL_RELATIONSHIPS.name;
-
-        this.graphSchema = graphSchema;
-        this.propertyKeys = new HashMap<>();
-        this.propertyKeyPositions = new HashMap<>();
-        var allProperties = graphSchema
-            .relationshipSchema()
-            .allProperties();
-        var i = 0;
-        for (String propertyKey : allProperties) {
-            propertyKeyPositions.put(propertyKey, i++);
-        }
-
-        this.currentProperties = new Object[propertyKeyPositions.size()];
+    protected RelationshipVisitor(RelationshipSchema relationshipSchema) {
+        super(relationshipSchema);
+        reset();
     }
 
-    protected abstract void importRelationship();
+    // Accessors for node related data
 
     public long startNode() {
         return currentStartNode;
@@ -75,13 +51,7 @@ public abstract class RelationshipVisitor extends InputEntityVisitor.Adapter {
         return relationshipType;
     }
 
-    public void forEachProperty(PropertyConsumer propertyConsumer) {
-        for (Map.Entry<String, RelationshipPropertySchema> propertyEntry : propertyKeys.get(relationshipType)) {
-            var propertyPosition = propertyKeyPositions.get(propertyEntry.getKey());
-            var propertyValue = currentProperties[propertyPosition];
-            propertyConsumer.accept(propertyEntry.getKey(), propertyValue, propertyEntry.getValue().valueType());
-        }
-    }
+    // Additional listeners for node related data
 
     @Override
     public boolean startId(long id) {
@@ -95,7 +65,6 @@ public abstract class RelationshipVisitor extends InputEntityVisitor.Adapter {
         return true;
     }
 
-
     @Override
     public boolean type(String type) {
         relationshipType = type;
@@ -103,38 +72,21 @@ public abstract class RelationshipVisitor extends InputEntityVisitor.Adapter {
     }
 
     @Override
-    public boolean property(String key, Object value) {
-        var propertyPosition = propertyKeyPositions.get(key);
-        currentProperties[propertyPosition] = value;
-        return true;
+    String elementIdentifier() {
+        return relationshipType;
     }
 
     @Override
-    public void endOfEntity() {
-        // Check if we encounter a new label combination
-        if (!propertyKeys.containsKey(relationshipType)) {
-            calculateTypeSchema();
-        }
+    Map<String, RelationshipPropertySchema> getPropertySchema() {
+        var relationshipType = RelationshipType.of(this.relationshipType);
+        var propertySchemaForLabels = elementSchema.filter(Set.of(relationshipType));
+        return propertySchemaForLabels.unionProperties();
+    }
 
-        // do the import
-        importRelationship();
-
-        // reset
+    @Override
+    void reset() {
         currentStartNode = -1;
         currentEndNode = -1;
         relationshipType = RelationshipType.ALL_RELATIONSHIPS.name;
-        Arrays.fill(currentProperties, null);
-    }
-
-    private void calculateTypeSchema() {
-        var relationshipType = RelationshipType.of(this.relationshipType);
-        var propertySchemaForLabels = graphSchema.relationshipSchema().filter(Set.of(relationshipType));
-        var unionProperties = propertySchemaForLabels.unionProperties();
-        var sortedPropertyEntries = unionProperties
-            .entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .collect(Collectors.toList());
-        propertyKeys.put(this.relationshipType, sortedPropertyEntries);
     }
 }

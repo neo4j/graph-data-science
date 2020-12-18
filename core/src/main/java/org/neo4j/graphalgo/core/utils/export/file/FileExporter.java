@@ -41,8 +41,8 @@ public final class FileExporter extends Exporter {
     ) {
         return new FileExporter(
             graphStoreInput,
-            () -> new CsvNodeVisitor(exportLocation, graphSchema),
-            () -> new CsvRelationshipVisitor(exportLocation, graphSchema)
+            () -> new CsvNodeVisitor(exportLocation, graphSchema.nodeSchema()),
+            () -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema())
         );
     }
 

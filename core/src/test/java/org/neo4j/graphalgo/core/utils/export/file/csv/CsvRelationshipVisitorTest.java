@@ -22,8 +22,6 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
 import java.util.Collections;
@@ -37,7 +35,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest{
 
     @Test
     void visitRelationshipsWithTypes() {
-        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, GraphSchema.empty());
+        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, RelationshipSchema.builder().build());
 
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);
@@ -80,18 +78,15 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest{
         var aType = RelationshipType.of("A");
         var bType = RelationshipType.of("B");
 
-        var graphSchema = GraphSchema.of(
-            NodeSchema.builder().build(),
-            RelationshipSchema.builder()
-                .addProperty(aType, "foo", ValueType.LONG)
-                .addProperty(aType, "bar", ValueType.LONG)
+        var relationshipSchema = RelationshipSchema.builder()
+            .addProperty(aType, "foo", ValueType.LONG)
+            .addProperty(aType, "bar", ValueType.LONG)
 
-                .addProperty(bType, "bar", ValueType.LONG)
-                .addProperty(bType, "baz", ValueType.DOUBLE)
+            .addProperty(bType, "bar", ValueType.LONG)
+            .addProperty(bType, "baz", ValueType.DOUBLE)
 
-                .build()
-        );
-        var relationshipVisitor= new CsvRelationshipVisitor(tempDir, graphSchema);
+            .build();
+        var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
 
         // :A
         relationshipVisitor.startId(0L);
@@ -122,7 +117,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest{
             "relationship_B.csv", "relationship_B_header.csv"
         ));
 
-        assertHeaderFile("relationship_A_header.csv", graphSchema.relationshipSchema().filter(Set.of(aType)).unionProperties());
+        assertHeaderFile("relationship_A_header.csv", relationshipSchema.filter(Set.of(aType)).unionProperties());
         assertDataContent(
             "relationship_A.csv",
             List.of(  //src  tgt  bar   foo
@@ -131,7 +126,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest{
             )
         );
 
-        assertHeaderFile("relationship_B_header.csv", graphSchema.relationshipSchema().filter(Set.of(bType)).unionProperties());
+        assertHeaderFile("relationship_B_header.csv", relationshipSchema.filter(Set.of(bType)).unionProperties());
         assertDataContent(
             "relationship_B.csv",
             List.of(  //src  tgt  bar   baz

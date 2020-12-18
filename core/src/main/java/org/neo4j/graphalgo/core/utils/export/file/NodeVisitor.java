@@ -20,51 +20,30 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
-public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
+public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, PropertySchema> {
 
     private final List<String> EMPTY_LABELS = List.of(ALL_NODES.name());
 
     private long currentId;
     private List<String> currentLabels;
-    private final GraphSchema graphSchema;
-    private final Object[] currentProperties;
 
-    // TODO use String instead of List<String>?
-    private final Map<List<String>, List<Map.Entry<String, PropertySchema>>> propertyKeys;
-
-    private final Map<String, Integer> propertyKeyPositions;
-
-    protected NodeVisitor(GraphSchema graphSchema) {
+    protected NodeVisitor(NodeSchema nodeSchema) {
+        super(nodeSchema);
         currentId = -1;
         currentLabels = EMPTY_LABELS;
-
-        this.graphSchema = graphSchema;
-        this.propertyKeys = new HashMap<>();
-        this.propertyKeyPositions = new HashMap<>();
-        var allProperties = graphSchema
-            .nodeSchema()
-            .allProperties();
-        var i = 0;
-        for (String propertyKey : allProperties) {
-            propertyKeyPositions.put(propertyKey, i++);
-        }
-
-        this.currentProperties = new Object[propertyKeyPositions.size()];
     }
 
-    protected abstract void importNode();
+    // Accessors for node related data
 
     public long id() {
         return currentId;
@@ -74,13 +53,8 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
         return currentLabels;
     }
 
-    public void forEachProperty(PropertyConsumer propertyConsumer) {
-        for (Map.Entry<String, PropertySchema> propertyEntry : propertyKeys.get(currentLabels)) {
-            var propertyPosition = propertyKeyPositions.get(propertyEntry.getKey());
-            var propertyValue = currentProperties[propertyPosition];
-            propertyConsumer.accept(propertyEntry.getKey(), propertyValue, propertyEntry.getValue().valueType());
-        }
-    }
+
+    // Additional listeners for node related data
 
     @Override
     public boolean id(long id) {
@@ -95,39 +69,23 @@ public abstract class NodeVisitor extends InputEntityVisitor.Adapter {
         return true;
     }
 
+    // Overrides from ElementVisitor
+
     @Override
-    public boolean property(String key, Object value) {
-        var propertyPosition = propertyKeyPositions.get(key);
-        currentProperties[propertyPosition] = value;
-        return true;
+    String elementIdentifier() {
+        return String.join("_", labels());
     }
 
     @Override
-    public void endOfEntity() {
-        // Check if we encounter a new label combination
-        if (!propertyKeys.containsKey(currentLabels)) {
-            calculateLabelSchema();
-        }
+    Map<String, PropertySchema> getPropertySchema() {
+        var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
+        var propertySchemaForLabels = elementSchema.filter(nodeLabelList);
+        return propertySchemaForLabels.unionProperties();
+    }
 
-        // do the import
-        importNode();
-
-        // reset
+    @Override
+    void reset() {
         currentId = -1;
         currentLabels = EMPTY_LABELS;
-        Arrays.fill(currentProperties, null);
     }
-
-    private void calculateLabelSchema() {
-        var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
-        var propertySchemaForLabels = graphSchema.nodeSchema().filter(nodeLabelList);
-        var unionProperties = propertySchemaForLabels.unionProperties();
-        var sortedPropertyEntries = unionProperties
-            .entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .collect(Collectors.toList());
-        propertyKeys.put(currentLabels, sortedPropertyEntries);
-    }
-
 }
