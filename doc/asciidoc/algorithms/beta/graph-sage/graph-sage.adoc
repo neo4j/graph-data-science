@@ -354,7 +354,7 @@ CALL gds.beta.graphSage.train(
 
 === Train with relationship weights
 
-The GraphSage implementation supports training using relationship weights.
+The GraphSAGE implementation supports training using relationship weights.
 Greater relationship weight between nodes signifies that the nodes should have more similar embedding values.
 
 [source, cypher, role=query-example, no-result=true]
@@ -375,7 +375,7 @@ CALL gds.beta.graphSage.train(
 )
 ----
 
-Relationship weights are only used during GraphSage training.
+Relationship weights are only used during GraphSAGE training.
 The trained models can then be used to stream or write back the generated node embeddings.
 
 === Stream
@@ -481,7 +481,7 @@ CALL gds.beta.graphSage.write(
 [[algorithms-embeddings-graph-sage-caveats]]
 == Caveats
 
-If you are embedding a graph that has isolated nodes, the aggregation step in GraphSage can only draw information from the node itself.
-If furthermore all the properties of that node are `0.0`, and the activation function is relu, this leads to an all-zero vector for that node.
-However, since GraphSage normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
-In conclusion, bear in mind that some nodes may have all-zero embeddings if that can have an impact for downstream tasks like nearest-neighbour type algorithms.
+If you are embedding a graph that has an isolated node, the aggregation step in GraphSAGE can only draw information from the node itself.
+When all the properties of that node are `0.0`, and the activation function is relu, this leads to an all-zero vector for that node.
+However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
+In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
