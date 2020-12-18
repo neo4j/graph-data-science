@@ -187,7 +187,15 @@ public class ListProgressProcTest extends BaseTest {
             r -> r.stream().collect(Collectors.toList())
         );
 
-        assertThat(result).containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(result)
+            .hasSize(2)
+            .element(0, InstanceOfAssertFactories.map(String.class, String.class))
+            .hasEntrySatisfying("message", v -> assertThat(v).contains("wcc 100% hello bar"))
+            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("wcc"));
+        assertThat(result)
+            .element(1, InstanceOfAssertFactories.map(String.class, String.class))
+            .hasEntrySatisfying("message", v -> assertThat(v).contains("pagerank 100% hello foo"))
+            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("pagerank"));
     }
 
     @Test
