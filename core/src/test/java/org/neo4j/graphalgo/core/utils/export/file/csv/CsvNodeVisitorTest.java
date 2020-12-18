@@ -255,7 +255,7 @@ class CsvNodeVisitorTest {
             .entrySet()
             .stream()
             .sorted(Map.Entry.comparingByKey())
-            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().cypherName()));
+            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().csvName()));
 
         assertThat(tempDir.resolve(fileName)).hasContent(String.join(",", expectedContent));
     }

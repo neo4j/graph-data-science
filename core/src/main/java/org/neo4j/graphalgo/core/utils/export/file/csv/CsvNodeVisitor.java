@@ -35,7 +35,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
 
-    public static final String ID_COLUMN_NAME = "ID";
+    public static final String ID_COLUMN_NAME = ":ID";
 
     private final Path fileLocation;
     private final Map<String, CsvAppender> csvAppenders;
@@ -110,7 +110,7 @@ public class CsvNodeVisitor extends NodeVisitor {
                 var propertyHeader = formatWithLocale(
                     "%s:%s",
                     key,
-                    type.cypherName()
+                    type.csvName()
                 );
                 try {
                     headerAppender.appendField(propertyHeader);

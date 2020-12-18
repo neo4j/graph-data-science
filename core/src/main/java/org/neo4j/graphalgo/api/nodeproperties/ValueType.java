@@ -30,6 +30,11 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            return "long";
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forLong();
         }
@@ -38,6 +43,11 @@ public enum ValueType {
         @Override
         public String cypherName() {
             return "Float";
+        }
+
+        @Override
+        public String csvName() {
+            return "double";
         }
 
         @Override
@@ -52,6 +62,11 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            return "double[]";
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forDoubleArray();
         }
@@ -60,6 +75,11 @@ public enum ValueType {
         @Override
         public String cypherName() {
             return "List of Float";
+        }
+
+        @Override
+        public String csvName() {
+            return "float[]";
         }
 
         @Override
@@ -74,6 +94,11 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            return "long[]";
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forLongArray();
         }
@@ -85,12 +110,19 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            throw new UnsupportedOperationException("Value Type UKNONWN is not supported in CSV");
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
     };
 
     public abstract String cypherName();
+
+    public abstract String csvName();
 
     public abstract DefaultValue fallbackValue();
 
