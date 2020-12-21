@@ -6,7 +6,7 @@
 
 [abstract]
 --
-This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
+This section describes the Dijkstra Shortest Path algorithms in the Neo4j Graph Data Science library.
 --
 
 

@@ -1,6 +1,8 @@
 [[algorithms-dijkstra-source-target]]
 = Dijkstra Source-Target
-
+// for some reason, simple boolean attributes + ifdef don't work
+:source-target: true
+:procedure-name: pass:q[gds.beta.shortestPath.dijkstra]
 
 [abstract]
 --
@@ -24,159 +26,11 @@ include::../../shared/syntax-intro-named-graph.adoc[]
 [.tabbed-example]
 ====
 
-[.include-with-stream]
-======
+include::path-stream.adoc[]
 
-.Run Dijkstra in stream mode on a named graph.
-[source, cypher]
-----
-CALL gds.beta.shortestPath.dijkstra.stream(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  index: Integer,
-  sourceNode: Integer,
-  targetNode: Integer,
-  totalCost: Float,
-  nodeIds: List of Integer,
-  costs: List of Float,
-  path: Path
-----
+include::path-mutate.adoc[]
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name       | Type    | Default | Optional | Description
-| sourceNode | Integer | n/a     | no       | The Neo4j node id of the source node.
-| targetNode | Integer | n/a     | no       | The Neo4j node id of the target node.
-| path       | Boolean | false   | yes      | Iff true, the result contains a Cypher Path object.
-|===
-
-
-.Results
-[opts="header"]
-|===
-| Name        | Type            | Description
-| index       | Integer         | 0-based index of the found path.
-| sourceNode  | Integer         | Source node of the path.
-| targetNode  | Integer         | Target node of the path.
-| totalCost   | Float           | Total cost from source to target.
-| nodeIds     | List of Integer | Node ids on the path in traversal order.
-| costs       | List of Float   | Accumulated costs for each node on the path.
-| path        | Path            | The path represented as Cypher entity.
-|===
-
-======
-
-[.include-with-mutate]
-======
-
-The mutate mode creates new relationships in the in-memory graph.
-Each relationship represents a path from the source node to a target node.
-The total cost of a path is stored via the `totalCost` relationship property.
-
-
-.Run Dijkstra in mutate mode on a named graph.
-[source, cypher]
-----
-CALL gds.beta.shortestPath.dijkstra.mutate(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  relationshipsWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  postProcessingMillis: Integer,
-  mutateMillis: Integer,
-  configuration: Map
-----
-
-include::../../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name          | Type    | Default | Optional | Description
-| sourceNode    | Integer | n/a     | no       | The Neo4j node id of the source node.
-| targetNode    | Integer | n/a     | no       | The Neo4j node id of the target node.
-|===
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| postProcessingMillis   | Integer   | Unused.
-| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
-| relationshipsWritten   | Integer   | The number of relationships that were written to the in-memory graph.
-| configuration          | Map       | The configuration used for running the algorithm.
-|===
-
-======
-
-[.include-with-write]
-======
-
-The write mode creates new relationships in the Neo4j database.
-Each relationship represents a path from the source node to a target node.
-Additional path information is stored via relationship properties.
-By default, the write mode stores a `totalCost` property.
-Optionally, one can also store `nodeIds` and `costs` of intermediate nodes on the path.
-
-
-.Run Dijkstra in write mode on a named graph.
-[source, cypher]
-----
-CALL gds.beta.shortestPath.dijkstra.write(
-  graphName: String,
-  configuration: Map
-)
-YIELD
-  relationshipsWritten: Integer,
-  createMillis: Integer,
-  computeMillis: Integer,
-  postProcessingMillis: Integer,
-  writeMillis: Integer,
-  configuration: Map
-----
-
-include::../../common-configuration/common-parameters-named-graph.adoc[]
-
-include::../../common-configuration/common-write-configuration-named-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name          | Type    | Default | Optional | Description
-| sourceNode    | Integer | n/a     | no       | The Neo4j node id of the source node.
-| targetNode    | Integer | n/a     | no       | The Neo4j node id of the target node.
-| writeNodeIds  | Boolean | false   | yes      | Iff true, the written relationship has a nodeIds list property.
-| writeCosts    | Boolean | false   | yes      | Iff true, the written relationship has a costs list property.
-|===
-
-
-.Results
-[opts="header",cols="1,1,6"]
-|===
-| Name                   | Type      | Description
-| createMillis           | Integer   | Milliseconds for creating the graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| postProcessingMillis   | Integer   | Unused.
-| writeMillis            | Integer   | Milliseconds for adding properties to the in-memory graph.
-| relationshipsWritten   | Integer   | The number of relationships that were written to Neo4j.
-| configuration          | Map       | The configuration used for running the algorithm.
-|===
-
-======
+include::path-write.adoc[]
 
 ====
 
@@ -184,38 +38,7 @@ include::../../common-configuration/common-write-configuration-named-graph.adoc[
 [[algorithms-dijkstra-single-source-syntax-anonymous]]
 === Anonymous graphs
 
-include::../../shared/syntax-anonymous-graphs.adoc[]
-
-.Run Dikstra in write mode on an anonymous graph:
-[source, cypher]
-----
-CALL gds.beta.shortestPath.dijkstra.write(
-  configuration: Map
-)
-YIELD
-  nodePropertiesWritten: Integer,
-  ranIterations: Integer,
-  didConverge: Boolean,
-  createMillis: Integer,
-  computeMillis: Integer,
-  writeMillis: Integer,
-  centralityDistribution: Map,
-  configuration: Map
-----
-
-include::../../common-configuration/common-write-configuration-anonymous-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name          | Type    | Default | Optional | Description
-| sourceNode    | Integer | n/a     | no       | The Neo4j node id of the source node.
-| targetNode    | Integer | n/a     | no       | The Neo4j node id of the target node.
-| writeNodeIds  | Boolean | false   | yes      | Iff true, the written relationship has a nodeIds list property.
-| writeCosts    | Boolean | false   | yes      | Iff true, the written relationship has a costs list property.
-|===
-
-The results are the same as for running write mode with a named graph, see the <<algorithms-dijkstra-source-target-syntax, write mode syntax above>>.
+include::path-anonymous-graph.adoc[]
 
 
 [[algorithms-dijkstra-source-target-examples]]
@@ -223,7 +46,7 @@ The results are the same as for running write mode with a named graph, see the <
 
 :algorithm-name: {algorithm}
 :graph-description: transport network
-:image-file: sssp.png
+:image-file: dijkstra.png
 include::../../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -337,8 +160,8 @@ RETURN relationshipsWritten
 |===
 --
 
-After executing the above query the in-memory graph will be updated with a new relationship with type `PATH`.
-The new relationships will be created with a single property `totalCost`.
+After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
+The new relationship will store a single property `totalCost`.
 
 
 [[algorithms-dijkstra-examples-write]]
