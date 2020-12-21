@@ -50,6 +50,14 @@ public class EdgeSplitter {
         Graph graph,
         double removeFraction
     ) {
+        return split(graph, graph, removeFraction);
+    }
+
+    public SplitResult split(
+        Graph graph,
+        Graph masterGraph,
+        double removeFraction
+    ) {
 
         RelationshipsBuilder selectedRelsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
@@ -78,7 +86,6 @@ public class EdgeSplitter {
         var selectedNegativeCount = new AtomicLong(0L);
         graph.forEachNode(nodeId -> {
             var degree = graph.degree(nodeId);
-            var neighbours = new HashSet<Long>(degree);
 
             var posEdges = samplesPerNode(
                 degree,
@@ -90,7 +97,6 @@ public class EdgeSplitter {
             var targetsRemaining = new AtomicLong(degree);
 
             graph.forEachRelationship(nodeId, (source, target) -> {
-                neighbours.add(target);
                 var localSelectedCount = selectedPositiveCount.get() - preSelectedCount;
                 double localSelectedRemaining = posEdges - localSelectedCount;
                 var pickThisOne = sample(localSelectedRemaining / targetsRemaining.getAndDecrement());
@@ -103,12 +109,20 @@ public class EdgeSplitter {
                 return true;
             });
 
-            var possibleNegEdges = (graph.nodeCount() - 1) - degree;
+            var masterDegree = masterGraph.degree(nodeId);
+            var possibleNegEdges = (masterGraph.nodeCount() - 1) - masterDegree;
             var negEdges = samplesPerNode(
                 possibleNegEdges,
                 numNegSamples - selectedNegativeCount.get(),
                 graph.nodeCount() - nodeId
             );
+
+            var neighbours = new HashSet<Long>(masterDegree);
+            masterGraph.forEachRelationship(nodeId, (source, target) -> {
+                neighbours.add(target);
+                return true;
+            });
+
             for (int i = 0; i < negEdges; i++) {
                 var negativeTarget = randomNodeId(graph);
                 // no self-relationships
