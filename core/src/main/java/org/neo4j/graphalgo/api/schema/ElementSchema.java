@@ -71,7 +71,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     }
 
-    @Value.Derived
+    @Value.Lazy
     default Map<String, PROPERTY_SCHEMA> unionProperties() {
         return properties()
             .values()
