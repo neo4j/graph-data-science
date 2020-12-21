@@ -165,7 +165,7 @@ class AStarTest {
 
         List<AtomicLong> progresses = testLogger.getProgresses();
         assertEquals(1, progresses.size());
-        assertEquals(graph.relationshipCount(), progresses.get(0).get());
+        assertEquals(9, progresses.get(0).get());
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Start"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 5%"));
@@ -176,14 +176,6 @@ class AStarTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 41%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 47%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 52%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 58%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 64%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 70%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 76%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 82%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 88%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 94%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 100%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Finished"));
 
         // no duplicate entries in progress logger
