@@ -88,7 +88,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
     private CsvAppender getAppender() {
         return csvAppenders.computeIfAbsent(relationshipType(), (ignore) -> {
-            var fileName = formatWithLocale("relationship_%s", relationshipType());
+            var fileName = formatWithLocale("relationships_%s", relationshipType());
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
             var dataFileName = formatWithLocale("%s.csv", fileName);
 

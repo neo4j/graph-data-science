@@ -90,6 +90,5 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
     void reset() {
         currentStartNode = -1;
         currentEndNode = -1;
-        relationshipType = RelationshipType.ALL_RELATIONSHIPS.name;
     }
 }

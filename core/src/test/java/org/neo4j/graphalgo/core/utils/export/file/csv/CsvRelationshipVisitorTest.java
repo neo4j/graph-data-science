@@ -54,19 +54,19 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         
         relationshipVisitor.close();
 
-        assertCsvFiles(List.of("relationship_Foo.csv", "relationship_Foo_header.csv", "relationship_Bar.csv", "relationship_Bar_header.csv"));
-        assertHeaderFile("relationship_Foo_header.csv", Collections.emptyMap());
+        assertCsvFiles(List.of("relationships_Foo.csv", "relationships_Foo_header.csv", "relationships_Bar.csv", "relationships_Bar_header.csv"));
+        assertHeaderFile("relationships_Foo_header.csv", Collections.emptyMap());
         assertDataContent(
-            "relationship_Foo.csv",
+            "relationships_Foo.csv",
             List.of(
                 List.of("0","1"),
                 List.of("2", "0")
             )
         );
 
-        assertHeaderFile("relationship_Bar_header.csv", Collections.emptyMap());
+        assertHeaderFile("relationships_Bar_header.csv", Collections.emptyMap());
         assertDataContent(
-            "relationship_Bar.csv",
+            "relationships_Bar.csv",
             List.of(
                 List.of("1", "2")
             )
@@ -113,22 +113,22 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         relationshipVisitor.close();
 
         assertCsvFiles(List.of(
-            "relationship_A.csv", "relationship_A_header.csv",
-            "relationship_B.csv", "relationship_B_header.csv"
+            "relationships_A.csv", "relationships_A_header.csv",
+            "relationships_B.csv", "relationships_B_header.csv"
         ));
 
-        assertHeaderFile("relationship_A_header.csv", relationshipSchema.filter(Set.of(aType)).unionProperties());
+        assertHeaderFile("relationships_A_header.csv", relationshipSchema.filter(Set.of(aType)).unionProperties());
         assertDataContent(
-            "relationship_A.csv",
+            "relationships_A.csv",
             List.of(  //src  tgt  bar   foo
                 List.of("0", "1", "21", "42"),
                 List.of("2", "0", "",   "")
             )
         );
 
-        assertHeaderFile("relationship_B_header.csv", relationshipSchema.filter(Set.of(bType)).unionProperties());
+        assertHeaderFile("relationships_B_header.csv", relationshipSchema.filter(Set.of(bType)).unionProperties());
         assertDataContent(
-            "relationship_B.csv",
+            "relationships_B.csv",
             List.of(  //src  tgt  bar   baz
                 List.of("1", "2", "21", "21.0")
             )

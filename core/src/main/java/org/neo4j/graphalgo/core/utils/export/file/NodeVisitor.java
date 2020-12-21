@@ -25,22 +25,20 @@ import org.neo4j.graphalgo.api.schema.PropertySchema;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-
 public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, PropertySchema> {
 
-    private final List<String> EMPTY_LABELS = List.of(ALL_NODES.name());
+    private final List<String> EMPTY_LABELS = Collections.emptyList();
 
     private long currentId;
     private List<String> currentLabels;
 
     protected NodeVisitor(NodeSchema nodeSchema) {
         super(nodeSchema);
-        currentId = -1;
-        currentLabels = EMPTY_LABELS;
+        reset();
     }
 
     // Accessors for node related data

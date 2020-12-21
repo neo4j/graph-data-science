@@ -87,8 +87,8 @@ class GraphStoreExportToCSVTest extends CsvTest {
             "nodes_A_B.csv", "nodes_A_B_header.csv",
             "nodes_A_C.csv", "nodes_A_C_header.csv",
             "nodes_B.csv", "nodes_B_header.csv",
-            "relationship_REL1.csv", "relationship_REL1_header.csv",
-            "relationship_REL2.csv", "relationship_REL2_header.csv"
+            "relationships_REL1.csv", "relationships_REL1_header.csv",
+            "relationships_REL2.csv", "relationships_REL2_header.csv"
         ));
 
         // Assert nodes
@@ -120,9 +120,9 @@ class GraphStoreExportToCSVTest extends CsvTest {
 
         // assert relationships
 
-        assertHeaderFile("relationship_REL1_header.csv", relationshipColumns, rel1Schema);
+        assertHeaderFile("relationships_REL1_header.csv", relationshipColumns, rel1Schema);
         assertDataContent(
-            "relationship_REL1.csv",
+            "relationships_REL1.csv",
             List.of(
                 List.of("0","0","42.0"),
                 List.of("0","1","43.0"),
@@ -130,9 +130,9 @@ class GraphStoreExportToCSVTest extends CsvTest {
             )
         );
 
-        assertHeaderFile("relationship_REL2_header.csv", relationshipColumns, rel2Schema);
+        assertHeaderFile("relationships_REL2_header.csv", relationshipColumns, rel2Schema);
         assertDataContent(
-            "relationship_REL2.csv",
+            "relationships_REL2.csv",
             List.of(
                 List.of("1","2","45.0"),
                 List.of("2","3","46.0"),

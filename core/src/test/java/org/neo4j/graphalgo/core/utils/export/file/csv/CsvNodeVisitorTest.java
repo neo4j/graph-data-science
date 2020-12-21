@@ -42,10 +42,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeVisitor.endOfEntity();
         nodeVisitor.close();
 
-        assertCsvFiles(List.of("nodes___ALL__.csv", "nodes___ALL___header.csv"));
-        assertHeaderFile("nodes___ALL___header.csv", Collections.emptyMap());
+        assertCsvFiles(List.of("nodes.csv", "nodes_header.csv"));
+        assertHeaderFile("nodes_header.csv", Collections.emptyMap());
         assertDataContent(
-            "nodes___ALL__.csv",
+            "nodes.csv",
             List.of(
                 List.of("0"),
                 List.of("1")
@@ -113,10 +113,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         nodeVisitor.close();
 
-        assertCsvFiles(List.of("nodes___ALL__.csv", "nodes___ALL___header.csv"));
-        assertHeaderFile("nodes___ALL___header.csv", nodeSchema.unionProperties());
+        assertCsvFiles(List.of("nodes.csv", "nodes_header.csv"));
+        assertHeaderFile("nodes_header.csv", nodeSchema.unionProperties());
         assertDataContent(
-            "nodes___ALL__.csv",
+            "nodes.csv",
             List.of(
                 List.of("0", "21.0", "42.0"),
                 List.of("1", "", "42.0"),
