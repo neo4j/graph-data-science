@@ -80,19 +80,21 @@ public class EdgeSplitter {
             var degree = graph.degree(nodeId);
             var neighbours = new HashSet<Long>(degree);
 
-            var sampledPosEdges = samplesPerNode(
+            var posEdges = samplesPerNode(
                 degree,
                 numPosSamples - selectedPositiveCount.get(),
                 graph.nodeCount() - nodeId
             );
             var preSelectedCount = selectedPositiveCount.get();
 
+            var targetsRemaining = new AtomicLong(degree);
+
             graph.forEachRelationship(nodeId, (source, target) -> {
                 neighbours.add(target);
                 var localSelectedCount = selectedPositiveCount.get() - preSelectedCount;
-                double localSelectedRemaining = sampledPosEdges - localSelectedCount;
-                var pickThisOne = sample(localSelectedRemaining / sampledPosEdges);
-                if (sampledPosEdges > 0 && localSelectedRemaining > 0 && pickThisOne) {
+                double localSelectedRemaining = posEdges - localSelectedCount;
+                var pickThisOne = sample(localSelectedRemaining / targetsRemaining.getAndDecrement());
+                if (posEdges > 0 && localSelectedRemaining > 0 && pickThisOne) {
                     selectedPositiveCount.incrementAndGet();
                     selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
                 } else {
@@ -102,12 +104,12 @@ public class EdgeSplitter {
             });
 
             var possibleNegEdges = (graph.nodeCount() - 1) - degree;
-            var sampledNegEdges = samplesPerNode(
+            var negEdges = samplesPerNode(
                 possibleNegEdges,
                 numNegSamples - selectedNegativeCount.get(),
                 graph.nodeCount() - nodeId
             );
-            for (int i = 0; i < sampledNegEdges; i++) {
+            for (int i = 0; i < negEdges; i++) {
                 var negativeTarget = randomNodeId(graph);
                 // no self-relationships
                 if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
