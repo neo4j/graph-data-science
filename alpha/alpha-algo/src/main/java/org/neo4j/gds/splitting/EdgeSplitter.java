@@ -83,7 +83,7 @@ public class EdgeSplitter {
             var sampledPosEdges = samplesPerNode(
                 degree,
                 numPosSamples - selectedPositiveCount.get(),
-                graph.nodeCount() - nodeId - 1
+                graph.nodeCount() - nodeId
             );
             var preSelectedCount = selectedPositiveCount.get();
 
@@ -105,7 +105,7 @@ public class EdgeSplitter {
             var sampledNegEdges = samplesPerNode(
                 possibleNegEdges,
                 numNegSamples - selectedNegativeCount.get(),
-                graph.nodeCount() - nodeId - 1
+                graph.nodeCount() - nodeId
             );
             for (int i = 0; i < sampledNegEdges; i++) {
                 var negativeTarget = randomNodeId(graph);
@@ -123,7 +123,7 @@ public class EdgeSplitter {
 
     long samplesPerNode(long maxSamples, long remainingSamples, long remainingNodes) {
         var numSamplesOnAverage = ((double) remainingSamples) / remainingNodes;
-        return Math.min(Math.min(maxSamples, remainingSamples), Math.round(numSamplesOnAverage));
+        return Math.min(maxSamples, Math.round(numSamplesOnAverage));
     }
 
     private boolean sample(double probability) {

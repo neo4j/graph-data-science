@@ -57,20 +57,20 @@ class EdgeSplitterTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 3,1 (neg) and 3,5 (pos) relationships
+            // it selected 4,1 (neg) and 4,5 (pos) relationships
             assertEquals(2L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L));
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(4L));
             assertEquals(1L, cursor.nextVLong());
-            assertEquals(4L, cursor.nextVLong());
+            assertEquals(5L, cursor.nextVLong());
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(2L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(3L));
-            // 3,1 is negative
+            var cursor = p.list().cursor(p.offsets().get(4L));
+            // 4,1 is negative
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            // 3,5 is positive
+            // 4,5 is positive
             assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
         });
     }
@@ -93,7 +93,7 @@ class EdgeSplitterTest {
         var splitter = new EdgeSplitter(42L);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
-        assertEquals(1, splitter.samplesPerNode(100, 1, 0));
+        assertEquals(1, splitter.samplesPerNode(100, 1, 1));
     }
 
 }
