@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
@@ -28,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NormalizeRowsTest extends GraphSageBaseTest implements FiniteDifferenceTest {
     @Override
@@ -64,7 +65,7 @@ class NormalizeRowsTest extends GraphSageBaseTest implements FiniteDifferenceTes
         };
         Weights<Matrix> w = new Weights<>(new Matrix(data, 3, 2));
         Variable<Matrix> normalizeRows = new NormalizeRows(w);
-        assertArrayEquals(expectedData, ctx.forward(normalizeRows).data());
+        assertThat(ctx.forward(normalizeRows).data()).contains(expectedData, Offset.offset(1e-8));
     }
 
 
