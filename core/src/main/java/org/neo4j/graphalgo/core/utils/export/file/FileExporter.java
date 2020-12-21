@@ -31,13 +31,15 @@ import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.function.Supplier;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public final class FileExporter extends Exporter {
 
     private final int concurrency;
-    private final Supplier<NodeVisitor> nodeVisitorSupplier;
-    private final Supplier<RelationshipVisitor> relationshipVisitorSupplier;
+    private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
+    private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
 
     public static FileExporter csv(
         GraphStoreInput graphStoreInput,
@@ -45,18 +47,20 @@ public final class FileExporter extends Exporter {
         Path exportLocation,
         int concurrency
     ) {
+        Set<String> headerFiles = ConcurrentHashMap.newKeySet();
+
         return new FileExporter(
             graphStoreInput,
-            () -> new CsvNodeVisitor(exportLocation, graphSchema.nodeSchema()),
-            () -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema()),
+            (index) -> new CsvNodeVisitor(exportLocation, graphSchema.nodeSchema(), headerFiles, index),
+            (index) -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema(), headerFiles, index),
             concurrency
         );
     }
 
     private FileExporter(
         GraphStoreInput graphStoreInput,
-        Supplier<NodeVisitor> nodeVisitorSupplier,
-        Supplier<RelationshipVisitor> relationshipVisitorSupplier,
+        VisitorProducer<NodeVisitor> nodeVisitorSupplier,
+        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
         int concurrency
     ) {
         super(graphStoreInput);
@@ -78,7 +82,7 @@ public final class FileExporter extends Exporter {
 
         var tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new ImportRunner(nodeVisitorSupplier.get(), nodeInputIterator)
+            (index) -> new ImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
@@ -90,7 +94,7 @@ public final class FileExporter extends Exporter {
 
         var tasks = ParallelUtil.tasks(
             concurrency,
-            () -> new ImportRunner(relationshipVisitorSupplier.get(), relationshipInputIterator)
+            (index) -> new ImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
@@ -122,5 +126,8 @@ public final class FileExporter extends Exporter {
 
             visitor.close();
         }
+    }
+
+    private interface VisitorProducer<VISITOR> extends Function<Integer, VISITOR> {
     }
 }

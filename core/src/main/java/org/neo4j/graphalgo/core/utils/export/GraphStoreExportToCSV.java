@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.export.file.FileExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -30,6 +31,7 @@ public class GraphStoreExportToCSV {
     private final GraphStore graphStore;
 
     private final GraphStoreFileExportConfig config;
+    private final int batchSize;
 
     public GraphStoreExportToCSV(
         GraphStore graphStore,
@@ -37,6 +39,18 @@ public class GraphStoreExportToCSV {
     ) {
         this.graphStore = graphStore;
         this.config = config;
+        this.batchSize = DEFAULT_BATCH_SIZE;
+    }
+
+    @TestOnly
+    public GraphStoreExportToCSV(
+        GraphStore graphStore,
+        GraphStoreFileExportConfig config,
+        int batchSize
+    ) {
+        this.graphStore = graphStore;
+        this.config = config;
+        this.batchSize = batchSize;
     }
 
     public GraphStoreExport.ImportedProperties run(AllocationTracker tracker) {
@@ -45,7 +59,7 @@ public class GraphStoreExportToCSV {
         var graphStoreInput = new GraphStoreInput(
             nodeStore,
             relationshipStore,
-            DEFAULT_BATCH_SIZE
+            batchSize
         );
 
         FileExporter.csv(graphStoreInput, graphStore.schema(), config.exportLocationPath(), config.writeConcurrency()).export();

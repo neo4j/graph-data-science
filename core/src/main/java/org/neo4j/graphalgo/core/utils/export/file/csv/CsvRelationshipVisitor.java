@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipVisitor;
 
@@ -28,7 +29,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvValueFormatter.format;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -39,14 +42,31 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     public static final String END_ID_COLUMN_NAME = ":END_ID";
 
     private final Path fileLocation;
+    private final Set<String> headerFiles;
+    private final int visitorId;
     private final Map<String, CsvAppender> csvAppenders;
     private final CsvWriter csvWriter;
 
-    public CsvRelationshipVisitor(Path fileLocation, RelationshipSchema relationshipSchema) {
+    public CsvRelationshipVisitor(
+        Path fileLocation,
+        RelationshipSchema relationshipSchema,
+        Set<String> headerFiles,
+        int visitorId
+    ) {
         super(relationshipSchema);
         this.fileLocation = fileLocation;
+        this.headerFiles = headerFiles;
+        this.visitorId = visitorId;
         this.csvAppenders = new HashMap<>();
         this.csvWriter = new CsvWriter();
+    }
+
+    @TestOnly
+    CsvRelationshipVisitor(
+        Path fileLocation,
+        RelationshipSchema relationshipSchema
+    ) {
+        this(fileLocation, relationshipSchema, new HashSet<>(), 0);
     }
 
     @Override
@@ -90,9 +110,11 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         return csvAppenders.computeIfAbsent(relationshipType(), (ignore) -> {
             var fileName = formatWithLocale("relationships_%s", relationshipType());
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
-            var dataFileName = formatWithLocale("%s.csv", fileName);
+            var dataFileName = formatWithLocale("%s_%d.csv", fileName, visitorId);
 
-            writeHeaderFile(headerFileName);
+            if (headerFiles.add(headerFileName)) {
+                writeHeaderFile(headerFileName);
+            }
 
             try {
                 return csvWriter.append(fileLocation.resolve(dataFileName), StandardCharsets.UTF_8);

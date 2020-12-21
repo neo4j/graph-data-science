@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
@@ -28,7 +29,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvValueFormatter.format;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -38,14 +41,23 @@ public class CsvNodeVisitor extends NodeVisitor {
     public static final String ID_COLUMN_NAME = ":ID";
 
     private final Path fileLocation;
+    private final int visitorId;
     private final Map<String, CsvAppender> csvAppenders;
     private final CsvWriter csvWriter;
+    private final Set<String> headerFiles;
 
-    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema) {
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, Set<String> headerFiles, int visitorId) {
         super(nodeSchema);
         this.fileLocation = fileLocation;
+        this.headerFiles = headerFiles;
+        this.visitorId = visitorId;
         this.csvAppenders = new HashMap<>();
         this.csvWriter = new CsvWriter();
+    }
+
+    @TestOnly
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema) {
+        this(fileLocation, nodeSchema, new HashSet<>(), 0);
     }
 
     @Override
@@ -90,9 +102,11 @@ public class CsvNodeVisitor extends NodeVisitor {
         return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
             var fileName = labelsString.isBlank() ? "nodes" : formatWithLocale("nodes_%s", labelsString);
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
-            var dataFileName = formatWithLocale("%s.csv", fileName);
+            var dataFileName = formatWithLocale("%s_%d.csv", fileName, visitorId);
 
-            writeHeaderFile(headerFileName);
+            if (headerFiles.add(headerFileName)) {
+                writeHeaderFile(headerFileName);
+            }
 
             try {
                 return csvWriter.append(fileLocation.resolve(dataFileName), StandardCharsets.UTF_8);

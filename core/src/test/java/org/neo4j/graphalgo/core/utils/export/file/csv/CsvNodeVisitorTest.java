@@ -42,10 +42,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeVisitor.endOfEntity();
         nodeVisitor.close();
 
-        assertCsvFiles(List.of("nodes.csv", "nodes_header.csv"));
+        assertCsvFiles(List.of("nodes_0.csv", "nodes_header.csv"));
         assertHeaderFile("nodes_header.csv", Collections.emptyMap());
         assertDataContent(
-            "nodes.csv",
+            "nodes_0.csv",
             List.of(
                 List.of("0"),
                 List.of("1")
@@ -71,10 +71,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         
         nodeVisitor.close();
 
-        assertCsvFiles(List.of("nodes_Bar_Foo.csv", "nodes_Bar_Foo_header.csv", "nodes_Baz.csv", "nodes_Baz_header.csv"));
+        assertCsvFiles(List.of("nodes_Bar_Foo_0.csv", "nodes_Bar_Foo_header.csv", "nodes_Baz_0.csv", "nodes_Baz_header.csv"));
         assertHeaderFile("nodes_Bar_Foo_header.csv", Collections.emptyMap());
         assertDataContent(
-            "nodes_Bar_Foo.csv",
+            "nodes_Bar_Foo_0.csv",
             List.of(
                 List.of("0"),
                 List.of("2")
@@ -83,7 +83,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("nodes_Baz_header.csv", Collections.emptyMap());
         assertDataContent(
-            "nodes_Baz.csv",
+            "nodes_Baz_0.csv",
             List.of(
                 List.of("1")
             )
@@ -113,10 +113,10 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         nodeVisitor.close();
 
-        assertCsvFiles(List.of("nodes.csv", "nodes_header.csv"));
+        assertCsvFiles(List.of("nodes_0.csv", "nodes_header.csv"));
         assertHeaderFile("nodes_header.csv", nodeSchema.unionProperties());
         assertDataContent(
-            "nodes.csv",
+            "nodes_0.csv",
             List.of(
                 List.of("0", "21.0", "42.0"),
                 List.of("1", "", "42.0"),
@@ -181,15 +181,15 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeVisitor.close();
 
         assertCsvFiles(List.of(
-            "nodes_A_B.csv", "nodes_A_B_header.csv",
-            "nodes_A.csv", "nodes_A_header.csv",
-            "nodes_B.csv", "nodes_B_header.csv",
-            "nodes_C.csv", "nodes_C_header.csv"
+            "nodes_A_B_0.csv", "nodes_A_B_header.csv",
+            "nodes_A_0.csv", "nodes_A_header.csv",
+            "nodes_B_0.csv", "nodes_B_header.csv",
+            "nodes_C_0.csv", "nodes_C_header.csv"
         ));
 
         assertHeaderFile("nodes_A_B_header.csv", nodeSchema.filter(Set.of(aLabel, bLabel)).unionProperties());
         assertDataContent(
-            "nodes_A_B.csv",
+            "nodes_A_B_0.csv",
             List.of(  //id   bar   baz     foo
                 List.of("0", "21", "21.0", "42"),
                 List.of("4", "21", "21.0", "")
@@ -198,7 +198,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("nodes_A_header.csv", nodeSchema.filter(Set.of(aLabel)).unionProperties());
         assertDataContent(
-            "nodes_A.csv",
+            "nodes_A_0.csv",
             List.of(  //id   bar    foo
                 List.of("1", "21", "42")
             )
@@ -206,7 +206,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("nodes_B_header.csv", nodeSchema.filter(Set.of(bLabel)).unionProperties());
         assertDataContent(
-            "nodes_B.csv",
+            "nodes_B_0.csv",
             List.of(  //id   bar    baz
                 List.of("2", "21", "21.0")
             )
@@ -214,7 +214,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("nodes_C_header.csv", nodeSchema.filter(Set.of(cLabel)).unionProperties());
         assertDataContent(
-            "nodes_C.csv",
+            "nodes_C_0.csv",
             List.of(  //id   isolated
                 List.of("3", "1337.0")
             )

@@ -27,11 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, PropertySchema> {
 
     private final List<String> EMPTY_LABELS = Collections.emptyList();
+    private final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
+
 
     private long currentId;
     private List<String> currentLabels;
@@ -76,7 +79,9 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
 
     @Override
     List<PropertySchema> getPropertySchema() {
-        var nodeLabelList = currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
+        var nodeLabelList = currentLabels.isEmpty()
+            ? EMPTY_LABELS_LABEL
+            : currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
         var propertySchemaForLabels = elementSchema.filter(nodeLabelList);
         return new ArrayList<>(propertySchemaForLabels.unionProperties().values());
     }

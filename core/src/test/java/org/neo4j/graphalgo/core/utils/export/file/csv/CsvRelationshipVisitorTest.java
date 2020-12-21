@@ -54,10 +54,10 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         
         relationshipVisitor.close();
 
-        assertCsvFiles(List.of("relationships_Foo.csv", "relationships_Foo_header.csv", "relationships_Bar.csv", "relationships_Bar_header.csv"));
+        assertCsvFiles(List.of("relationships_Foo_0.csv", "relationships_Foo_header.csv", "relationships_Bar_0.csv", "relationships_Bar_header.csv"));
         assertHeaderFile("relationships_Foo_header.csv", Collections.emptyMap());
         assertDataContent(
-            "relationships_Foo.csv",
+            "relationships_Foo_0.csv",
             List.of(
                 List.of("0","1"),
                 List.of("2", "0")
@@ -66,7 +66,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("relationships_Bar_header.csv", Collections.emptyMap());
         assertDataContent(
-            "relationships_Bar.csv",
+            "relationships_Bar_0.csv",
             List.of(
                 List.of("1", "2")
             )
@@ -113,13 +113,13 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         relationshipVisitor.close();
 
         assertCsvFiles(List.of(
-            "relationships_A.csv", "relationships_A_header.csv",
-            "relationships_B.csv", "relationships_B_header.csv"
+            "relationships_A_0.csv", "relationships_A_header.csv",
+            "relationships_B_0.csv", "relationships_B_header.csv"
         ));
 
         assertHeaderFile("relationships_A_header.csv", relationshipSchema.filter(Set.of(aType)).unionProperties());
         assertDataContent(
-            "relationships_A.csv",
+            "relationships_A_0.csv",
             List.of(  //src  tgt  bar   foo
                 List.of("0", "1", "21", "42"),
                 List.of("2", "0", "",   "")
@@ -128,7 +128,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
         assertHeaderFile("relationships_B_header.csv", relationshipSchema.filter(Set.of(bType)).unionProperties());
         assertDataContent(
-            "relationships_B.csv",
+            "relationships_B_0.csv",
             List.of(  //src  tgt  bar   baz
                 List.of("1", "2", "21", "21.0")
             )
