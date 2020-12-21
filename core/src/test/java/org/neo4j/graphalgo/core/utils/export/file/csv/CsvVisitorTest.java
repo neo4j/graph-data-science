@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
-import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -30,10 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract public class CsvVisitorTest extends CsvTest {
-
-    @TempDir
-    protected Path tempDir;
+public abstract class CsvVisitorTest extends CsvTest {
 
     protected abstract List<String> defaultHeaderColumns();
 
@@ -43,7 +38,7 @@ abstract public class CsvVisitorTest extends CsvTest {
         }
     }
 
-    protected void assertHeaderFile(String fileName, Map<String, ? extends PropertySchema> properties) {
+    void assertHeaderFile(String fileName, Map<String, ? extends PropertySchema> properties) {
        assertHeaderFile(fileName, defaultHeaderColumns(), properties);
     }
 
