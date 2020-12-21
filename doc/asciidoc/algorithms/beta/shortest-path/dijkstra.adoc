@@ -1,7 +1,7 @@
 [[algorithms-dijkstra]]
 = Dijkstra
-//:entity: node
-//:result: component ID
+:entity: path
+:result: path
 :algorithm: Dijkstra
 
 [abstract]
@@ -19,9 +19,176 @@ This topic includes:
 [[algorithms-dijkstra-intro]]
 == Introduction
 
-The Dijkstra Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.
-In this category, Dijkstra's algorithm is the most well known.
+The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
+The algorithm supports weighted graphs with positive relationship weights.
+Dijkstra's algorithm can be configured in two ways:
+
+. Find the shortest path between a source and a target node.
+. Find the shortest paths between a source node and all nodes reachable from that node.
+
+The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
+The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
 
 [[algorithms-dijkstra-syntax]]
+== Syntax
+
+include::../../shared/syntax-intro-named-graph.adoc[]
+
+.Dijkstra syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-stream]
+======
+
+.Run Dijkstra in stream mode on a named graph.
+[source, cypher]
+----
+CALL gds.beta.shortestPath.dijkstra.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  index: Integer,
+  sourceNode: Integer,
+  targetNode: Integer,
+  totalCost: Float,
+  nodeIds: List of Integer,
+  costs: List of Float,
+  path: Path
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::dijkstra-specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name        | Type            | Description
+| index       | Integer         | 0-based index of the found path.
+| sourceNode  | Integer         | Source node of the path.
+| targetNode  | Integer         | Target node of the path.
+| totalCost   | Float           | Total cost from source to target.
+| nodeIds     | List of Integer | Node ids on the path in traversal order.
+| costs       | List of Float   | Accumulated costs for each node on the path.
+| path        | Path            | The path represented as Cypher entity.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run Dijkstra in mutate mode on a named graph.
+[source, cypher]
+----
+CALL gds.beta.shortestPath.dijkstra.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  relationshipsWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::dijkstra-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten   | Integer   | The number of relationships that were written to the in-memory graph.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run Dijkstra in write mode on a named graph.
+[source, cypher]
+----
+CALL gds.beta.shortestPath.dijkstra.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  relationshipsWritten: Integer,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::dijkstra-specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| writeMillis            | Integer   | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten   | Integer   | The number of relationships that were written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+
+[[algorithms-dijkstra-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Dikstra in write mode on an anonymous graph:
+[source, cypher]
+----
+CALL gds.beta.shortestPath.dijkstra.write(
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::dijkstra-specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, see the <<algorithms-dijkstra-syntax, write mode syntax above>>.
+
+
 [[algorithms-dijkstra-examples]]
+== Examples
 

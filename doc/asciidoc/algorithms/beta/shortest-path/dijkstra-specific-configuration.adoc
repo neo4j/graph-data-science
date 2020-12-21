@@ -1,0 +1,8 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name       | Type    | Default | Optional | Description
+| sourceNode | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode | Integer | n/a     | no       | The Neo4j node id of the target node.
+| path       | Boolean | false   | yes      | Iff true, the result contains a Cypher Path object.
+|===
