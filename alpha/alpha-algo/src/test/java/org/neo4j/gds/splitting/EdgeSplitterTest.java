@@ -76,12 +76,19 @@ class EdgeSplitterTest {
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
-            var prev = splitter.negativeEdgesPerNode(i, 100 - sum, 100 - i);
-            System.out.println("prev = " + prev);
+            var prev = splitter.samplesPerNode(i, 1000 - sum, 100 - i);
             sum += prev;
         }
 
-        assertEquals(100, sum);
+        assertEquals(1000, sum);
+    }
+
+    @Test
+    void samplesWithinBounds() {
+        var splitter = new EdgeSplitter(42L);
+
+        assertEquals(1, splitter.samplesPerNode(1, 100, 10));
+        assertEquals(1, splitter.samplesPerNode(100, 1, 0));
     }
 
 }
