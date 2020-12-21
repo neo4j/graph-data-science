@@ -42,7 +42,7 @@ class EdgeSplitterTest {
     TestGraph graph;
 
     @Test
-    void test() {
+    void split() {
         var splitter = new EdgeSplitter(12L);
 
         // select 20%, which is 1 rel in this graph
