@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.export;
+package org.neo4j.graphalgo.core.utils.export.db;
 
 import org.immutables.value.Value;
 import org.neo4j.cli.Converters;
@@ -26,12 +26,12 @@ import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExportBaseConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStoreExportConfig extends GraphStoreExportBaseConfig {
+public interface GraphStoreDatabaseExportConfig extends GraphStoreExportBaseConfig {
 
     String DB_NAME_KEY = "dbName";
 
@@ -43,21 +43,16 @@ public interface GraphStoreExportConfig extends GraphStoreExportBaseConfig {
         return false;
     }
 
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
-    }
-
     @Value.Check
     default void validate() {
         DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
     }
 
-    static GraphStoreExportConfig of(String username, CypherMapWrapper config) {
+    static GraphStoreDatabaseExportConfig of(String username, CypherMapWrapper config) {
         if (config.containsKey(DB_NAME_KEY)) {
             var dbName = new Converters.DatabaseNameConverter().convert(config.getString(DB_NAME_KEY).get()).name();
             config = config.withString(DB_NAME_KEY, dbName);
         }
-        return new GraphStoreExportConfigImpl(username, config);
+        return new GraphStoreDatabaseExportConfigImpl(username, config);
     }
 }

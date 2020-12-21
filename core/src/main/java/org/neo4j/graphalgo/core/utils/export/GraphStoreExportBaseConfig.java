@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 public interface GraphStoreExportBaseConfig extends BaseConfig {
 
@@ -36,4 +37,8 @@ public interface GraphStoreExportBaseConfig extends BaseConfig {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
+    @Value.Default
+    default int batchSize() {
+        return ParallelUtil.DEFAULT_BATCH_SIZE;
+    }
 }

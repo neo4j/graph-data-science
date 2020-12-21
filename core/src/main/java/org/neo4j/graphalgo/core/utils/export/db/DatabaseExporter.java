@@ -23,10 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.export.Exporter;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExportConfig;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -53,40 +53,47 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
-public class DatabaseExporter extends Exporter {
+public final class DatabaseExporter extends Exporter<GraphStoreDatabaseExportConfig> {
 
     private final Path neo4jHome;
-    private final GraphStoreExportConfig config;
+    private final GraphStoreDatabaseExportConfig config;
     private final FileSystemAbstraction fs;
+    private final boolean defaultSettingsSuitableForTests;
+    private final GraphDatabaseAPI api;
 
-    public DatabaseExporter(
-        GraphStoreInput graphStoreInput,
+    public static DatabaseExporter newExporter(
+        GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreExportConfig config
+        GraphStoreDatabaseExportConfig config
     ) {
-        super(graphStoreInput);
+        return new DatabaseExporter(graphStore, api, config, false);
+    }
+
+    @TestOnly
+    public static DatabaseExporter forTest(
+        GraphStore graphStore,
+        GraphDatabaseAPI api,
+        GraphStoreDatabaseExportConfig config
+    ) {
+        return new DatabaseExporter(graphStore, api, config, true);
+    }
+
+    private DatabaseExporter(
+        GraphStore graphStore,
+        GraphDatabaseAPI api,
+        GraphStoreDatabaseExportConfig config,
+        boolean defaultSettingsSuitableForTests
+    ) {
+        super(graphStore, config);
+        this.api = api;
         this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
         this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
+        this.defaultSettingsSuitableForTests = defaultSettingsSuitableForTests;
     }
 
     @Override
-    public void export() {
-        run(false);
-    }
-
-
-    /**
-     * Runs with default configuration geared towards
-     * unit/integration test environments, for example,
-     * lower default buffer sizes.
-     */
-    @TestOnly
-    public void runFromTests() {
-        run(true);
-    }
-
-    private void run(boolean defaultSettingsSuitableForTests) {
+    public void export(GraphStoreInput graphStoreInput) {
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
         var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
@@ -161,7 +168,7 @@ public class DatabaseExporter extends Exporter {
         };
     }
 
-    public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
+    private static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {
             Files.createDirectories(value);
             if (!Files.isDirectory(value)) {

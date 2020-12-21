@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.Exporter;
@@ -30,74 +30,69 @@ import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public final class FileExporter extends Exporter {
+public final class FileExporter extends Exporter<GraphStoreFileExportConfig> {
 
-    private final int concurrency;
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
 
     public static FileExporter csv(
-        GraphStoreInput graphStoreInput,
-        GraphSchema graphSchema,
-        Path exportLocation,
-        int concurrency
+        GraphStore graphStore,
+        GraphStoreFileExportConfig config
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
         return new FileExporter(
-            graphStoreInput,
-            (index) -> new CsvNodeVisitor(exportLocation, graphSchema.nodeSchema(), headerFiles, index),
-            (index) -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema(), headerFiles, index),
-            concurrency
+            graphStore,
+            config,
+            (index) -> new CsvNodeVisitor(config.exportLocationPath(), graphStore.schema().nodeSchema(), headerFiles, index),
+            (index) -> new CsvRelationshipVisitor(config.exportLocationPath(), graphStore.schema().relationshipSchema(), headerFiles, index)
         );
     }
 
     private FileExporter(
-        GraphStoreInput graphStoreInput,
+        GraphStore graphStore,
+        GraphStoreFileExportConfig config,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
-        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
-        int concurrency
+        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
-        super(graphStoreInput);
+        super(graphStore, config);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
-        this.concurrency = concurrency;
     }
 
     @Override
-    public void export() {
-        exportNodes();
-        exportRelationships();
+    public void export(GraphStoreInput graphStoreInput) {
+        exportNodes(graphStoreInput);
+        exportRelationships(graphStoreInput);
     }
 
-    private void exportNodes() {
+    private void exportNodes(GraphStoreInput graphStoreInput) {
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
 
 
         var tasks = ParallelUtil.tasks(
-            concurrency,
+            config.writeConcurrency(),
             (index) -> new ImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
     }
 
-    private void exportRelationships() {
+    private void exportRelationships(GraphStoreInput graphStoreInput) {
         var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(
-            concurrency,
+            config.writeConcurrency(),
             (index) -> new ImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
     }
 
     private static final class ImportRunner implements Runnable {

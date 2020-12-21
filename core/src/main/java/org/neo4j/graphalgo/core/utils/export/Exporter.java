@@ -19,11 +19,43 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
-public abstract class Exporter {
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-    protected final GraphStoreInput graphStoreInput;
+public abstract class Exporter <CONFIG extends GraphStoreExportBaseConfig> {
 
-    protected Exporter(GraphStoreInput graphStoreInput) {this.graphStoreInput = graphStoreInput;}
+    private final GraphStore graphStore;
+    protected final CONFIG config;
 
-    public abstract void export();
+    protected Exporter(GraphStore graphStore, CONFIG config) {
+        this.graphStore = graphStore;
+        this.config = config;
+    }
+
+    protected abstract void export(GraphStoreInput graphStoreInput);
+
+    public ImportedProperties run(AllocationTracker tracker) {
+        var nodeStore = NodeStore.of(graphStore, tracker);
+        var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
+        var graphStoreInput = new GraphStoreInput(
+            nodeStore,
+            relationshipStore,
+            config.batchSize()
+        );
+
+        export(graphStoreInput);
+
+        long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
+        long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
+        return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
+    }
+
+    @ValueClass
+    public interface ImportedProperties {
+
+        long nodePropertyCount();
+
+        long relationshipPropertyCount();
+    }
 }
