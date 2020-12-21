@@ -45,7 +45,7 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
 @GdlExtension
-class GraphStoreExportToCSVTest extends CsvTest {
+class FileExporterTest extends CsvTest {
 
     @GdlGraph
     private static final String GDL = "CREATE" +
