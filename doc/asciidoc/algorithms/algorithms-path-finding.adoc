@@ -29,8 +29,6 @@ include::beta/shortest-path/yens.adoc[leveloffset=+1]
 
 include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
-//include::alpha/alpha-shortest-path.adoc[leveloffset=+1]
-
 include::alpha/alpha-single-shortest-path.adoc[leveloffset=+1]
 
 include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
