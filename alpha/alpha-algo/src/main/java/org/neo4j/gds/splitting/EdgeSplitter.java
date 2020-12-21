@@ -38,18 +38,11 @@ public class EdgeSplitter {
     static final double NEGATIVE = 0D;
     static final double POSITIVE = 1D;
 
-//    private final RelationshipType remainingRelationships;
-//    private final RelationshipType selectedRelationships;
-//
     private final ThreadLocal<Random> rng;
 
     public EdgeSplitter(
-//        RelationshipType remainingRelationships,
-//        RelationshipType selectedRelationships,
         long seed
     ) {
-//        this.remainingRelationships = remainingRelationships;
-//        this.selectedRelationships = selectedRelationships;
         this.rng = ThreadLocal.withInitial(() -> new Random(seed));
     }
 
@@ -150,9 +143,4 @@ public class EdgeSplitter {
             return ImmutableSplitResult.of(remainingRels, selectedRels);
         }
     }
-
-    interface EdgePredicate {
-        boolean allow(long source, long target);
-    }
-
 }
