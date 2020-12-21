@@ -1,0 +1,27 @@
+[[algorithms-dijkstra]]
+= Dijkstra
+//:entity: node
+//:result: component ID
+:algorithm: Dijkstra
+
+[abstract]
+--
+This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-dijkstra-intro, Introduction>>
+* <<algorithms-dijkstra-syntax, Syntax>>
+* <<algorithms-dijkstra-examples, Examples>>
+
+
+[[algorithms-dijkstra-intro]]
+== Introduction
+
+The Dijkstra Shortest Path algorithm calculates the shortest (weighted) path between a pair of nodes.
+In this category, Dijkstra's algorithm is the most well known.
+
+[[algorithms-dijkstra-syntax]]
+[[algorithms-dijkstra-examples]]
+

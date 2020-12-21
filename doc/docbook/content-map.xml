@@ -139,23 +139,24 @@
 
             <d:tocentry linkend="algorithms-path-finding">
                 <?dbhtml filename="algorithms/pathfinding/index.html"?>
+                <d:tocentry linkend="algorithms-dijkstra">
+                    <?dbhtml filename="algorithms/dijkstra/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-astar">
+                    <?dbhtml filename="algorithms/astar/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-yens">
+                    <?dbhtml filename="algorithms/yens/index.html"?>
+                </d:tocentry>
+
                 <d:tocentry linkend="alpha-algorithms-minimum-weight-spanning-tree">
                     <?dbhtml filename="alpha-algorithms/minimum-weight-spanning-tree/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-shortest-path">
-                    <?dbhtml filename="alpha-algorithms/shortest-path/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="alpha-algorithms-single-source-shortest-path">
                     <?dbhtml filename="alpha-algorithms/single-source-shortest-path/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="alpha-algorithm-all-pairs-shortest-path">
                     <?dbhtml filename="alpha-algorithms/all-pairs-shortest-path/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-a_star">
-                    <?dbhtml filename="alpha-algorithms/a_star/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-yens-k-shortest-path">
-                    <?dbhtml filename="alpha-algorithms/yen-s-k-shortest-path/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="alpha-algorithms-random-walk">
                     <?dbhtml filename="alpha-algorithms/random-walk/index.html"?>

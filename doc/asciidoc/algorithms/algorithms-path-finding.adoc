@@ -9,28 +9,35 @@ This chapter provides explanations and examples for each of the path finding alg
 Path finding algorithms find the shortest path between two or more nodes or evaluate the availability and quality of paths.
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
+* Beta
+** <<algorithms-dijkstra, Dijkstra>>
+** <<algorithms-astar, A*>>
+** <<algorithms-yens, Yen's algorithm>>
 * Alpha
 ** <<alpha-algorithms-minimum-weight-spanning-tree, Minimum Weight Spanning Tree>>
-** <<alpha-algorithms-shortest-path, Shortest Path>>
 ** <<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
 ** <<alpha-algorithm-all-pairs-shortest-path, All Pairs Shortest Path>>
-** <<alpha-algorithms-a_star, A*>>
-** <<alpha-algorithms-yens-k-shortest-path, Yen’s K-shortest paths>>
 ** <<alpha-algorithms-random-walk, Random Walk>>
 ** <<algorithms-bfs, Breadth First Search>>
 ** <<algorithms-dfs, Depth First Search>>
 
+include::beta/shortest-path/dijkstra.adoc[leveloffset=+1]
+
+include::beta/shortest-path/astar.adoc[leveloffset=+1]
+
+include::beta/shortest-path/yens.adoc[leveloffset=+1]
+
 include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 
-include::alpha/alpha-shortest-path.adoc[leveloffset=+1]
+//include::alpha/alpha-shortest-path.adoc[leveloffset=+1]
 
 include::alpha/alpha-single-shortest-path.adoc[leveloffset=+1]
 
 include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
 
-include::alpha/alpha-astar.adoc[leveloffset=+1]
+//include::alpha/alpha-astar.adoc[leveloffset=+1]
 
-include::alpha/alpha-yens-k-shortest-paths.adoc[leveloffset=+1]
+//include::alpha/alpha-yens-k-shortest-paths.adoc[leveloffset=+1]
 
 include::alpha/alpha-random-walk.adoc[leveloffset=+1]
 

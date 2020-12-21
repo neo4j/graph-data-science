@@ -1,0 +1,5 @@
+[[algorithms-yens]]
+= Yen's algorithm
+//:entity: node
+//:result: component ID
+:algorithm: Yen's algorithm
