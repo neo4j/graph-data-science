@@ -20,10 +20,13 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.Exporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
+import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
@@ -31,29 +34,35 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public final class FileExporter extends Exporter {
+
+    private final int concurrency;
     private final Supplier<NodeVisitor> nodeVisitorSupplier;
     private final Supplier<RelationshipVisitor> relationshipVisitorSupplier;
 
     public static FileExporter csv(
         GraphStoreInput graphStoreInput,
         GraphSchema graphSchema,
-        Path exportLocation
+        Path exportLocation,
+        int concurrency
     ) {
         return new FileExporter(
             graphStoreInput,
             () -> new CsvNodeVisitor(exportLocation, graphSchema.nodeSchema()),
-            () -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema())
+            () -> new CsvRelationshipVisitor(exportLocation, graphSchema.relationshipSchema()),
+            concurrency
         );
     }
 
     private FileExporter(
         GraphStoreInput graphStoreInput,
         Supplier<NodeVisitor> nodeVisitorSupplier,
-        Supplier<RelationshipVisitor> relationshipVisitorSupplier
+        Supplier<RelationshipVisitor> relationshipVisitorSupplier,
+        int concurrency
     ) {
         super(graphStoreInput);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -65,37 +74,53 @@ public final class FileExporter extends Exporter {
     private void exportNodes() {
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
-        var nodeVisitor = nodeVisitorSupplier.get();
 
-        try (var chunk = nodeInputIterator.newChunk()) {
-            while (nodeInputIterator.next(chunk)) {
-                while (chunk.next(nodeVisitor)) {
 
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        var tasks = ParallelUtil.tasks(
+            concurrency,
+            () -> new ImportRunner(nodeVisitorSupplier.get(), nodeInputIterator)
+        );
 
-        nodeVisitor.close();
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
     }
 
-    void exportRelationships() {
+    private void exportRelationships() {
         var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
         var relationshipInputIterator = relationshipInput.iterator();
-        var relationshipVisitor = relationshipVisitorSupplier.get();
 
-        try (var chunk = relationshipInputIterator.newChunk()) {
-            while (relationshipInputIterator.next(chunk)) {
-                while (chunk.next(relationshipVisitor)) {
+        var tasks = ParallelUtil.tasks(
+            concurrency,
+            () -> new ImportRunner(relationshipVisitorSupplier.get(), relationshipInputIterator)
+        );
 
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        relationshipVisitor.close();
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
     }
 
+    private static final class ImportRunner implements Runnable {
+        private final ElementVisitor<?, ?, ?> visitor;
+        private final InputIterator inputIterator;
+
+        private ImportRunner(
+            ElementVisitor<?, ?, ?> visitor,
+            InputIterator inputIterator
+        ) {
+            this.visitor = visitor;
+            this.inputIterator = inputIterator;
+        }
+
+        @Override
+        public void run() {
+            try (var chunk = inputIterator.newChunk()) {
+                while (inputIterator.next(chunk)) {
+                    while (chunk.next(visitor)) {
+
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            visitor.close();
+        }
+    }
 }
