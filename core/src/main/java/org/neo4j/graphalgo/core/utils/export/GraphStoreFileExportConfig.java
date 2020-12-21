@@ -46,11 +46,11 @@ public interface GraphStoreFileExportConfig extends GraphStoreExportBaseConfig {
         var exportLocationFile = exportLocationPath().toFile();
 
         if (!exportLocationPath().isAbsolute()) {
-            throw new RuntimeException("The parameter `exportLocation` must be an absolute path.");
+            throw new IllegalArgumentException("The parameter `exportLocation` must be an absolute path.");
         }
 
         if (!exportLocationFile.exists() || !exportLocationFile.canWrite()) {
-            throw new RuntimeException(formatWithLocale(
+            throw new IllegalArgumentException(formatWithLocale(
                 "Cannot access the specified export location at %s. Please make sure it exists and is accessible",
                 exportLocation()
             ));
