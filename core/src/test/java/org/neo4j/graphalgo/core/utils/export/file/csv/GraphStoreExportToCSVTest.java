@@ -23,9 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExportConfig;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExportToCSV;
+import org.neo4j.graphalgo.core.utils.export.ImmutableGraphStoreFileExportConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -59,14 +58,14 @@ class GraphStoreExportToCSVTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var config = GraphStoreExportConfig.of(
-            "test-user",
-            CypherMapWrapper.empty()
-                .withString("dbName", "filler")
-        );
+        var config = ImmutableGraphStoreFileExportConfig
+            .builder()
+            .exportLocation(tempDir.toString())
+            .writeConcurrency(1)
+            .build();
 
         // export db
-        var graphStoreExport = new GraphStoreExportToCSV(graphStore, config, tempDir);
+        var graphStoreExport = new GraphStoreExportToCSV(graphStore, config);
         graphStoreExport.run(AllocationTracker.empty());
 
         var aLabel = NodeLabel.of("A");

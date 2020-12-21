@@ -20,44 +20,44 @@
 package org.neo4j.graphalgo.core.utils.export;
 
 import org.immutables.value.Value;
-import org.neo4j.cli.Converters;
-import org.neo4j.configuration.helpers.DatabaseNameValidator;
-import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+
+import java.nio.file.Path;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStoreExportConfig extends GraphStoreExportBaseConfig {
+public interface GraphStoreFileExportConfig extends GraphStoreExportBaseConfig {
 
-    String DB_NAME_KEY = "dbName";
+    String exportLocation();
 
-    @Configuration.Key(DB_NAME_KEY)
-    String dbName();
-
-    @Value.Default
-    default boolean enableDebugLog() {
-        return false;
-    }
-
-    @Value.Default
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
+    @Value.Derived
+    @Configuration.Ignore
+    default Path exportLocationPath() {
+        return Path.of(exportLocation());
     }
 
     @Value.Check
-    default void validate() {
-        DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
+    default void validateExportLocation() {
+        var exportLocationFile = exportLocationPath().toFile();
+
+        if (!exportLocationPath().isAbsolute()) {
+            throw new RuntimeException("The parameter `exportLocation` must be an absolute path.");
+        }
+
+        if (!exportLocationFile.exists() || !exportLocationFile.canWrite()) {
+            throw new RuntimeException(formatWithLocale(
+                "Cannot access the specified export location at %s. Please make sure it exists and is accessible",
+                exportLocation()
+            ));
+        }
     }
 
-    static GraphStoreExportConfig of(String username, CypherMapWrapper config) {
-        if (config.containsKey(DB_NAME_KEY)) {
-            var dbName = new Converters.DatabaseNameConverter().convert(config.getString(DB_NAME_KEY).get()).name();
-            config = config.withString(DB_NAME_KEY, dbName);
-        }
-        return new GraphStoreExportConfigImpl(username, config);
+    static GraphStoreFileExportConfig of(String username, CypherMapWrapper config) {
+        return new GraphStoreFileExportConfigImpl(username, config);
     }
 }

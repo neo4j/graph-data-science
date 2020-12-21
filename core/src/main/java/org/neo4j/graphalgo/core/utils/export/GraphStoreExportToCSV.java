@@ -23,23 +23,20 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.export.file.FileExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.nio.file.Path;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 
 public class GraphStoreExportToCSV {
 
     private final GraphStore graphStore;
 
-    private final GraphStoreExportConfig config;
-    private final Path exportPath;
+    private final GraphStoreFileExportConfig config;
 
     public GraphStoreExportToCSV(
         GraphStore graphStore,
-        GraphStoreExportConfig config,
-        Path exportPath
+        GraphStoreFileExportConfig config
     ) {
         this.graphStore = graphStore;
         this.config = config;
-        this.exportPath = exportPath;
     }
 
     public GraphStoreExport.ImportedProperties run(AllocationTracker tracker) {
@@ -48,10 +45,10 @@ public class GraphStoreExportToCSV {
         var graphStoreInput = new GraphStoreInput(
             nodeStore,
             relationshipStore,
-            config.batchSize()
+            DEFAULT_BATCH_SIZE
         );
 
-        FileExporter.csv(graphStoreInput, graphStore.schema(), exportPath).export();
+        FileExporter.csv(graphStoreInput, graphStore.schema(), config.exportLocationPath(), config.writeConcurrency()).export();
 
         long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
