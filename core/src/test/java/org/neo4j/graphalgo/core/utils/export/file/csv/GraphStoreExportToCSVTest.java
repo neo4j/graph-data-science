@@ -30,12 +30,14 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
@@ -163,7 +165,7 @@ class GraphStoreExportToCSVTest extends CsvTest {
     }
 
     @Test
-    void exportMultithreaded() throws IOException {
+    void exportMultithreaded() {
         var config = ImmutableGraphStoreFileExportConfig
             .builder()
             .exportLocation(tempDir.toString())
@@ -174,41 +176,36 @@ class GraphStoreExportToCSVTest extends CsvTest {
         var graphStoreExport = new GraphStoreExportToCSV(concurrentGraphStore, config, 1);
         graphStoreExport.run(AllocationTracker.empty());
 
-        assertCsvFiles(List.of(
-            "nodes_0.csv", "nodes_1.csv", "nodes_header.csv",
-            "relationships_REL1_0.csv", "relationships_REL1_1.csv", "relationships_REL1_header.csv"
-        ));
-
         // Assert headers
         assertHeaderFile("nodes_header.csv", NODE_COLUMNS, Collections.emptyMap());
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
-        var nodes0 = Files.readAllLines(tempDir.resolve("nodes_0.csv"));
-        var nodes1 = Files.readAllLines(tempDir.resolve("nodes_1.csv"));
-        assertThat(nodes0)
-            .isNotEmpty()
-            .doesNotContainAnyElementsOf(nodes1);
-        assertThat(nodes1)
-            .isNotEmpty()
-            .doesNotContainAnyElementsOf(nodes0);
-        var nodeData = new ArrayList<String>();
-        nodeData.addAll(nodes0);
-        nodeData.addAll(nodes1);
-        assertThat(nodeData).containsExactlyInAnyOrder("0", "1", "2", "3");
+        // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
+        var nodeContents = Arrays.stream(tempDir
+            .toFile()
+            .listFiles((file, name) -> name.startsWith("nodes") && !name.contains("header")))
+            .map(File::toPath)
+            .flatMap(path -> {
+                try {
+                    return Files.readAllLines(path).stream();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+        assertThat(nodeContents).containsExactlyInAnyOrder("0", "1", "2", "3");
 
-
-        var rels0 = Files.readAllLines(tempDir.resolve("relationships_REL1_0.csv"));
-        var rels1 = Files.readAllLines(tempDir.resolve("relationships_REL1_1.csv"));
-        assertThat(rels0)
-            .isNotEmpty()
-            .doesNotContainAnyElementsOf(rels1);
-        assertThat(rels1)
-            .isNotEmpty()
-            .doesNotContainAnyElementsOf(rels0);
-        var relData = new ArrayList<String>();
-        relData.addAll(rels0);
-        relData.addAll(rels1);
-        assertThat(relData).containsExactlyInAnyOrder(
+        var relationshipContents = Arrays.stream(tempDir
+            .toFile()
+            .listFiles((file, name) -> name.startsWith("relationships") && !name.contains("header")))
+            .map(File::toPath)
+            .flatMap(path -> {
+                try {
+                    return Files.readAllLines(path).stream();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList());
+        assertThat(relationshipContents).containsExactlyInAnyOrder(
             "0,0",
             "0,1",
             "1,0",
@@ -217,5 +214,4 @@ class GraphStoreExportToCSVTest extends CsvTest {
             "3,0"
         );
     }
-
 }
