@@ -74,12 +74,7 @@ class Neo4jSupportExtensionTest extends BaseTest {
         );
     }
 
-    @Test
-    void shouldInjectOriginalCreateQuery() {
-        assertEquals(DB_CYPHER, createQuery);
-    }
-
-    public static long nodeIdByProperty(GraphDatabaseService db, long propertyValue) {
+    static long nodeIdByProperty(GraphDatabaseService db, long propertyValue) {
         var nodeId = new MutableLong(0L);
         QueryRunner.runQueryWithRowConsumer(
             db,
