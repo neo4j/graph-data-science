@@ -43,30 +43,35 @@ class EdgeSplitterTest {
 
     @Test
     void test() {
-        var splitter = new EdgeSplitter(42L);
+        var splitter = new EdgeSplitter(12L);
 
-        var result = splitter.split(
-            graph,
-            .2,
-            graph::exists,
-            100000,
-            100000
-        );
+        // select 20%, which is 1 rel in this graph
+        var result = splitter.split(graph, .2);
 
         var remainingRels = result.remainingRels();
-        assertEquals(3L, remainingRels.topology().elementCount());
+        // 1 positive selected reduces remaining
+        assertEquals(4L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isEmpty();
 
         var selectedRels = result.selectedRels();
-        assertEquals(2L, selectedRels.topology().elementCount());
-        assertEquals(Orientation.NATURAL, selectedRels.topology().orientation());
-        assertFalse(selectedRels.topology().isMultiGraph());
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            // it selected 3,1 (neg) and 3,5 (pos) relationships
+            assertEquals(2L, topology.elementCount());
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L));
+            assertEquals(1L, cursor.nextVLong());
+            assertEquals(4L, cursor.nextVLong());
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(2L, p.elementCount());
-            assertEquals(NEGATIVE, Double.longBitsToDouble(p.list().cursor(p.offsets().get(0L)).nextLong()));
-            assertEquals(POSITIVE, Double.longBitsToDouble(p.list().cursor(p.offsets().get(1L)).nextLong()));
+            var cursor = p.list().cursor(p.offsets().get(3L));
+            // 3,1 is negative
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+            // 3,5 is positive
+            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
         });
     }
 
