@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) 2017-2020 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.splitting;
+
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.gds.splitting.DirectedEdgeSplitter.NEGATIVE;
+import static org.neo4j.gds.splitting.DirectedEdgeSplitter.POSITIVE;
+
+@GdlExtension
+class UndirectedEdgeSplitterTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    static String gdl = "(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)";
+
+    @Inject
+    TestGraph graph;
+
+    @Test
+    void split() {
+        var splitter = new UndirectedEdgeSplitter(1337L);
+
+        // select 20%, which is 1 (undirected) rels in this graph
+        var result = splitter.split(graph, .2);
+
+        var remainingRels = result.remainingRels();
+        // 1 positive selected reduces remaining
+        assertEquals(8L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            // it selected 2,5 (neg) and 3,2 (pos) relationships
+            assertEquals(2L, topology.elementCount());
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L));
+            assertEquals(2L, cursor.nextVLong());
+            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(2L));
+            assertEquals(5L, cursor2.nextVLong());
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
+            assertEquals(2L, p.elementCount());
+            var cursor = p.list().cursor(p.offsets().get(3L));
+            // 3,2 is positive
+            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
+            var cursor2 = p.list().cursor(p.offsets().get(2L));
+            // 2,5 is negative
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+        });
+    }
+
+    @Test
+    void negativeEdgeSampling() {
+        var splitter = new UndirectedEdgeSplitter(42L);
+
+        var sum = 0;
+        for (int i = 0; i < 100; i++) {
+            var prev = splitter.samplesPerNode(i, 1000 - sum, 100 - i);
+            sum += prev;
+        }
+
+        assertEquals(1000, sum);
+    }
+
+    @Test
+    void samplesWithinBounds() {
+        var splitter = new UndirectedEdgeSplitter(42L);
+
+        assertEquals(1, splitter.samplesPerNode(1, 100, 10));
+        assertEquals(1, splitter.samplesPerNode(100, 1, 1));
+    }
+
+}

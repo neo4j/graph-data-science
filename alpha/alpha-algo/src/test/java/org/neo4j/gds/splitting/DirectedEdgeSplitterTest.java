@@ -29,11 +29,11 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.gds.splitting.EdgeSplitter.NEGATIVE;
-import static org.neo4j.gds.splitting.EdgeSplitter.POSITIVE;
+import static org.neo4j.gds.splitting.DirectedEdgeSplitter.NEGATIVE;
+import static org.neo4j.gds.splitting.DirectedEdgeSplitter.POSITIVE;
 
 @GdlExtension
-class EdgeSplitterTest {
+class DirectedEdgeSplitterTest {
 
     @GdlGraph
     static String gdl = "(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)";
@@ -43,41 +43,51 @@ class EdgeSplitterTest {
 
     @Test
     void split() {
-        var splitter = new EdgeSplitter(12L);
+        var splitter = new DirectedEdgeSplitter(3L);
 
-        // select 20%, which is 1 rel in this graph
-        var result = splitter.split(graph, .2);
+        // select 40%, which is 2 rels in this graph
+        var result = splitter.split(graph, .4);
 
         var remainingRels = result.remainingRels();
-        // 1 positive selected reduces remaining
-        assertEquals(4L, remainingRels.topology().elementCount());
+        // 2 positive selected reduces remaining
+        assertEquals(3L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isEmpty();
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 4,1 (neg) and 4,5 (pos) relationships
-            assertEquals(2L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(4L));
-            assertEquals(1L, cursor.nextVLong());
-            assertEquals(5L, cursor.nextVLong());
+            // it selected 5,0 and 5,3 (neg) and 1,2 and 2,3 (pos) relationships
+            assertEquals(4L, topology.elementCount());
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(5L));
+            assertEquals(0L, cursor.nextVLong());
+            assertEquals(3L, cursor.nextVLong());
+            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(1L));
+            assertEquals(2L, cursor2.nextVLong());
+            var cursor3 = topology.list().decompressingCursor(topology.offsets().get(2L));
+            assertEquals(3L, cursor3.nextVLong());
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(2L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(4L));
-            // 4,1 is negative
+            assertEquals(4L, p.elementCount());
+            var cursor = p.list().cursor(p.offsets().get(5L));
+            // 5,0 is negative
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            // 4,5 is positive
-            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
+            // 5,3 is positive
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+            var cursor2 = p.list().cursor(p.offsets().get(1L));
+            // 1,2 is positive
+            assertEquals(POSITIVE, Double.longBitsToDouble(cursor2.nextLong()));
+            var cursor3 = p.list().cursor(p.offsets().get(2L));
+            // 2,3 is positive
+            assertEquals(POSITIVE, Double.longBitsToDouble(cursor3.nextLong()));
         });
     }
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new EdgeSplitter(42L);
+        var splitter = new DirectedEdgeSplitter(42L);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -90,7 +100,7 @@ class EdgeSplitterTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new EdgeSplitter(42L);
+        var splitter = new DirectedEdgeSplitter(42L);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
