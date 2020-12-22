@@ -93,7 +93,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         dijkstra.release();
     }
 
-    static class HaversineHeuristic implements Dijkstra.HeuristicFunction {
+    public static class HaversineHeuristic implements Dijkstra.HeuristicFunction {
 
         // kilometer to nautical mile
         static final double KM_TO_NM = 0.539957;
@@ -124,7 +124,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         }
 
         // https://rosettacode.org/wiki/Haversine_formula#Java
-        static double distance(
+        public static double distance(
             double sourceLatitude,
             double sourceLongitude,
             double targetLatitude,
