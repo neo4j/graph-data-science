@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import java.util.Arrays;
 import java.util.List;
 
-public class DijkstraSingleSourceDocTest extends DocTestBase {
+class DijkstraSingleSourceDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {

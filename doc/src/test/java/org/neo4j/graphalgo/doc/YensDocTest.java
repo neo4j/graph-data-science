@@ -19,29 +19,29 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraWriteProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensMutateProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
+import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;
 import java.util.List;
 
-class DijkstraSourceTargetDocTest extends DocTestBase {
+class YensDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
-            ShortestPathDijkstraStreamProc.class,
-            ShortestPathDijkstraWriteProc.class,
-            ShortestPathDijkstraMutateProc.class,
+            ShortestPathYensStreamProc.class,
+            ShortestPathYensWriteProc.class,
+            ShortestPathYensMutateProc.class,
             GraphCreateProc.class
         );
     }
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/dijkstra-source-target.adoc";
+        return "algorithms/beta/shortest-path/yens.adoc";
     }
 
 }

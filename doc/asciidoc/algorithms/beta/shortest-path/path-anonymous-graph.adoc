@@ -28,6 +28,9 @@ ifeval::["{algorithm}" == "A*"]
 | latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
 | longitudeProperty | Float   | n/a     | no       | The node property that stores the longitude value.
 endif::[]
+ifeval::["{algorithm}" == "Yen's"]
+| k                 | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
+endif::[]
 | writeNodeIds      | Boolean | false   | yes      | Iff true, the written relationship has a nodeIds list property.
 | writeCosts        | Boolean | false   | yes      | Iff true, the written relationship has a costs list property.
 |===
