@@ -1,6 +1,5 @@
 [[algorithms-dijkstra-single-source]]
 = Dijkstra Single-Source
-// for some reason, simple boolean attributes + ifdef don't work
 :source-target: false
 :procedure-name: pass:q[gds.beta.allShortestPaths.dijkstra]
 

@@ -3,7 +3,6 @@
 :entity: source-target pair
 :result: shortest path
 :algorithm: Yen's
-// for some reason, simple boolean attributes + ifdef don't work
 :source-target: true
 :procedure-name: pass:q[gds.beta.shortestPath.yens]
 
