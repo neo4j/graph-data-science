@@ -19,14 +19,19 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+
+import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -54,26 +59,14 @@ class GraphStoreExportProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
     }
 
+    @AfterEach
+   void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
     @Test
     void exportGraph() {
-        runQuery(GdsCypher.call()
-            .withAnyLabel()
-            .withNodeProperty("prop1")
-            .withNodeProperty("prop2")
-            .withRelationshipType("REL1", RelationshipProjection
-                .of("REL1", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
-            )
-            .withRelationshipType("REL2", RelationshipProjection
-                .of("REL2", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
-            )
-            .withRelationshipType("REL3", RelationshipProjection
-                .of("REL3", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
-            )
-            .graphCreate("test-graph")
-            .yields());
+        createGraph();
 
         var exportQuery = formatWithLocale(
             "CALL gds.graph.export('test-graph', {" +
@@ -92,4 +85,45 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
+    @Test
+    void exportCsv(@TempDir Path tempDir) {
+        createGraph();
+
+        var exportQuery = formatWithLocale(
+            "CALL gds.graph.export.csv('test-graph', {" +
+            "  exportLocation: '%s'" +
+            "})"
+        , tempDir);
+
+        runQueryWithRowConsumer(exportQuery, row -> {
+            assertEquals(tempDir.toString(), row.getString("exportLocation"));
+            assertEquals(4, row.getNumber("nodeCount").longValue());
+            assertEquals(6, row.getNumber("relationshipCount").longValue());
+            assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
+            assertEquals(8, row.getNumber("nodePropertyCount").longValue());
+            assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
+            assertThat(row.getNumber("writeMillis").longValue(), greaterThan(0L));
+        });
+    }
+
+    private void createGraph() {
+        runQuery(GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("prop1")
+            .withNodeProperty("prop2")
+            .withRelationshipType("REL1", RelationshipProjection
+                .of("REL1", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
+            )
+            .withRelationshipType("REL2", RelationshipProjection
+                .of("REL2", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
+            )
+            .withRelationshipType("REL3", RelationshipProjection
+                .of("REL3", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
+            )
+            .graphCreate("test-graph")
+            .yields());
+    }
 }

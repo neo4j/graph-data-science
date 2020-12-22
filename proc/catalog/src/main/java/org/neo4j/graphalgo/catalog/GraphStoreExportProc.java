@@ -37,7 +37,7 @@ public class GraphStoreExportProc extends BaseProc {
 
     @Procedure(name = "gds.graph.export", mode = READ)
     @Description("Exports a named graph into a new offline Neo4j database.")
-    public Stream<GraphStoreExportResult> create(
+    public Stream<DatabaseExportResult> database(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -55,7 +55,7 @@ public class GraphStoreExportProc extends BaseProc {
                 var importedProperties = exporter.run(allocationTracker());
                 var end = System.nanoTime();
 
-                return new GraphStoreExportResult(
+                return new DatabaseExportResult(
                     graphName,
                     exportConfig.dbName(),
                     graphStore.nodeCount(),
@@ -71,9 +71,44 @@ public class GraphStoreExportProc extends BaseProc {
         return Stream.of(result);
     }
 
-    public static class GraphStoreExportResult {
+    @Procedure(name = "gds.graph.export.csv", mode = READ)
+    @Description("Exports a named graph into CSV files.")
+    public Stream<FileExportResult> csv(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var exportConfig = GraphStoreFileExportConfig.of(username(), cypherConfig);
+        validateConfig(cypherConfig, exportConfig);
+
+        var result = runWithExceptionLogging(
+            "CSV export failed", () -> {
+                var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
+
+                var exporter = FileExporter.csv(graphStore, exportConfig);
+
+                var start = System.nanoTime();
+                var importedProperties = exporter.run(allocationTracker());
+                var end = System.nanoTime();
+
+                return new FileExportResult(
+                    graphName,
+                    exportConfig.exportLocation(),
+                    graphStore.nodeCount(),
+                    graphStore.relationshipCount(),
+                    graphStore.relationshipTypes().size(),
+                    importedProperties.nodePropertyCount(),
+                    importedProperties.relationshipPropertyCount(),
+                    java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
+                );
+            }
+        );
+
+        return Stream.of(result);
+    }
+
+    public abstract static class GraphStoreExportResult {
         public final String graphName;
-        public final String dbName;
         public final long nodeCount;
         public final long relationshipCount;
         public final long relationshipTypeCount;
@@ -83,7 +118,6 @@ public class GraphStoreExportProc extends BaseProc {
 
         public GraphStoreExportResult(
             String graphName,
-            String dbName,
             long nodeCount,
             long relationshipCount,
             long relationshipTypeCount,
@@ -92,13 +126,64 @@ public class GraphStoreExportProc extends BaseProc {
             long writeMillis
         ) {
             this.graphName = graphName;
-            this.dbName = dbName;
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
             this.relationshipTypeCount = relationshipTypeCount;
             this.nodePropertyCount = nodePropertyCount;
             this.relationshipPropertyCount = relationshipPropertyCount;
             this.writeMillis = writeMillis;
+        }
+    }
+
+    public static class DatabaseExportResult extends GraphStoreExportResult {
+        public final String dbName;
+
+        public DatabaseExportResult(
+            String graphName,
+            String dbName,
+            long nodeCount,
+            long relationshipCount,
+            long relationshipTypeCount,
+            long nodePropertyCount,
+            long relationshipPropertyCount,
+            long writeMillis
+        ) {
+            super(
+                graphName,
+                nodeCount,
+                relationshipCount,
+                relationshipTypeCount,
+                nodePropertyCount,
+                relationshipPropertyCount,
+                writeMillis
+            );
+            this.dbName = dbName;
+        }
+    }
+
+    public static class FileExportResult extends GraphStoreExportResult {
+        public final String exportLocation;
+
+        public FileExportResult(
+            String graphName,
+            String exportLocation,
+            long nodeCount,
+            long relationshipCount,
+            long relationshipTypeCount,
+            long nodePropertyCount,
+            long relationshipPropertyCount,
+            long writeMillis
+        ) {
+            super(
+                graphName,
+                nodeCount,
+                relationshipCount,
+                relationshipTypeCount,
+                nodePropertyCount,
+                relationshipPropertyCount,
+                writeMillis
+            );
+            this.exportLocation = exportLocation;
         }
     }
 }
