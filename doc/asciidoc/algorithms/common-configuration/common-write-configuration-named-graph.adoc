@@ -11,7 +11,7 @@ ifeval::["{entity}" == "relationship"]
 | writeProperty          | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
 endif::[]
 
-ifeval::["{entity}" == "path"]
+ifeval::["{entity}" == "source-target-pair"]
 | writeRelationshipType  | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
 endif::[]
 

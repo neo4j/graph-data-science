@@ -11,7 +11,7 @@ ifeval::["{entity}" == "relationship"]
 | mutateProperty         | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
 endif::[]
 
-ifeval::["{entity}" == "path"]
+ifeval::["{entity}" == "source-target-pair"]
 | mutateRelationshipType | String      | n/a                    | no       | The relationship type used for the new relationships written to the in-memory graph.
 endif::[]
 
