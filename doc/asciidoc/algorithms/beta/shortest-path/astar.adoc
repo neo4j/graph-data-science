@@ -63,11 +63,11 @@ include::../../shared/examples-intro.adoc[]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
 ----
-CREATE (a:Station {name: 'King\'s Cross St. Pancras', latitude: 51.5308, longitude: -0.1238}),
-       (b:Station {name: 'Euston',                    latitude: 51.5282, longitude: -0.1337}),
-       (c:Station {name: 'Camden Town',               latitude: 51.5392, longitude: -0.1426}),
-       (d:Station {name: 'Mornington Crescent',       latitude: 51.5342, longitude: -0.1387}),
-       (e:Station {name: 'Kentish Town',              latitude: 51.5507, longitude: -0.1402}),
+CREATE (a:Station {name: 'Kings Cross',         latitude: 51.5308, longitude: -0.1238}),
+       (b:Station {name: 'Euston',              latitude: 51.5282, longitude: -0.1337}),
+       (c:Station {name: 'Camden Town',         latitude: 51.5392, longitude: -0.1426}),
+       (d:Station {name: 'Mornington Crescent', latitude: 51.5342, longitude: -0.1387}),
+       (e:Station {name: 'Kentish Town',        latitude: 51.5507, longitude: -0.1402}),
        (a)-[:CONNECTION {time: 2}]->(b),
        (b)-[:CONNECTION {time: 3}]->(c),
        (b)-[:CONNECTION {time: 2}]->(d),
@@ -111,7 +111,7 @@ include::../../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.stream('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
@@ -125,7 +125,7 @@ RETURN
     gds.util.asNode(sourceNode).name AS sourceNodeName,
     gds.util.asNode(targetNode).name AS targetNodeName,
     totalCost,
-    nodeIds,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
     costs
 ORDER BY index
 ----
@@ -133,12 +133,12 @@ ORDER BY index
 .Results
 [opts="header"]
 |===
-| index | sourceNodeName              | targetNodeName | totalCost | nodeIds      | costs
-| 0     | "King\'s Cross St. Pancras" | "Kentish Town" | 7.0       | [0, 1, 2, 4] | [0.0, 2.0, 5.0, 7.0]
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs
+| 0     | "Kings Cross"  | "Kentish Town" | 7.0       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 2.0, 5.0, 7.0]
 |===
 --
 
-The result shows the total cost of the shortest path between node `King's Cross St. Pancras` and `Kentish Town` in the graph.
+The result shows the total cost of the shortest path between node `King's Cross` and `Kentish Town` in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
 This can be verified in the <<algorithms-astar-examples, example graph>>.
 
@@ -153,7 +153,7 @@ include::path-examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher]
 ----
-MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.mutate('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
@@ -188,7 +188,7 @@ include::path-examples-write-intro.adoc[]
 .The following will run the algorithm in `write` mode:
 [source, cypher]
 ----
-MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.write('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),

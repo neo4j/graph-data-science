@@ -115,7 +115,7 @@ RETURN
     gds.util.asNode(sourceNode).name AS sourceNodeName,
     gds.util.asNode(targetNode).name AS targetNodeName,
     totalCost,
-    nodeIds,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
     costs
 ORDER BY index
 ----
@@ -123,8 +123,8 @@ ORDER BY index
 .Results
 [opts="header"]
 |===
-| index | sourceNodeName | targetNodeName | totalCost | nodeIds         | costs
-| 0     | "A"            | "F"            | 160.0     | [0, 1, 3, 4, 5] | [0.0, 50.0, 90.0, 120.0, 160.0]
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs
+| 0     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
 |===
 --
 
