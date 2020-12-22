@@ -21,16 +21,28 @@ package org.neo4j.gds.splitting;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.splitting.DirectedEdgeSplitter.NEGATIVE;
 import static org.neo4j.gds.splitting.DirectedEdgeSplitter.POSITIVE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class UndirectedEdgeSplitterTest {
@@ -74,6 +86,46 @@ class UndirectedEdgeSplitterTest {
             var cursor2 = p.list().cursor(p.offsets().get(2L));
             // 2,5 is negative
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+        });
+    }
+
+    @Test
+    void negativeEdgesShouldNotOverlapMasterGraph() {
+        var huuuuugeDenseGraph = new RandomGraphGenerator(
+            100,
+            95,
+            RelationshipDistribution.UNIFORM,
+            123L,
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Aggregation.SINGLE,
+            Orientation.UNDIRECTED,
+            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
+            AllocationTracker.empty()
+        ).generate();
+
+        var splitter = new UndirectedEdgeSplitter(42L);
+        var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
+        var graph = GraphFactory.create(
+            huuuuugeDenseGraph.idMap(),
+            splitResult.remainingRels(),
+            AllocationTracker.empty()
+        );
+        var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
+        Relationships nestedHoldout = nestedSplit.selectedRels();
+        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph.nodeMapping(), nestedHoldout, AllocationTracker.empty());
+        nestedHoldoutGraph.forEachNode(nodeId -> {
+            nestedHoldoutGraph.forEachRelationship(nodeId, Double.NaN, (src, trg, val) -> {
+                if (Double.compare(val, NEGATIVE) == 0) {
+                    assertFalse(
+                        huuuuugeDenseGraph.exists(src, trg),
+                        formatWithLocale("Sampled negative edge %d,%d is an edge of the master graph.", src, trg)
+                    );
+                }
+                return true;
+            } );
+            return true;
         });
     }
 
