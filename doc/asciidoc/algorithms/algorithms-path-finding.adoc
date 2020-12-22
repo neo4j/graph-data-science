@@ -33,8 +33,6 @@ include::alpha/alpha-single-shortest-path.adoc[leveloffset=+1]
 
 include::alpha/alpha-all-pairs-shortest-path.adoc[leveloffset=+1]
 
-//include::alpha/alpha-yens-k-shortest-paths.adoc[leveloffset=+1]
-
 include::alpha/alpha-random-walk.adoc[leveloffset=+1]
 
 include::alpha/alpha-bfs.adoc[leveloffset=+1]
