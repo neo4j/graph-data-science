@@ -19,10 +19,17 @@
  */
 package org.neo4j.gds.splitting;
 
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.Optional;
 import java.util.Random;
 
 public class EdgeSplitterBase {
@@ -49,6 +56,26 @@ public class EdgeSplitterBase {
         var wholeSamples = (long) numSamplesOnAverage;
         var extraSample = sample(numSamplesOnAverage - wholeSamples) ? 1 : 0;
         return Math.min(maxSamples, wholeSamples + extraSample);
+    }
+
+    protected RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
+        return newRelationshipsBuilder(graph, orientation, Optional.of(true));
+    }
+
+    protected RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
+        return newRelationshipsBuilder(graph, orientation, Optional.empty());
+    }
+
+    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, Optional<Boolean> loadRelationshipProperty) {
+        return GraphFactory.initRelationshipsBuilder()
+            .aggregation(Aggregation.SINGLE)
+            .nodes(graph.nodeMapping())
+            .orientation(orientation)
+            .loadRelationshipProperty(loadRelationshipProperty)
+            .concurrency(1)
+            .executorService(Pools.DEFAULT)
+            .tracker(AllocationTracker.empty())
+            .build();
     }
 
     @ValueClass
