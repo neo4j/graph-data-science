@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.utils.export.file.FileExporter;
-import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreFileExportConfig;
+import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
+import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -45,7 +45,7 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
 @GdlExtension
-class FileExporterTest extends CsvTest {
+class GraphStoreToFileExporterTest extends CsvTest {
 
     @GdlGraph
     private static final String GDL = "CREATE" +
@@ -83,14 +83,14 @@ class FileExporterTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var config = ImmutableGraphStoreFileExportConfig
+        var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
             .exportLocation(tempDir.toString())
             .writeConcurrency(1)
             .build();
 
         // export db
-        var exporter = FileExporter.csv(graphStore, config);
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config);
         exporter.run(AllocationTracker.empty());
 
         var aLabel = NodeLabel.of("A");
@@ -166,14 +166,14 @@ class FileExporterTest extends CsvTest {
 
     @Test
     void exportMultithreaded() {
-        var config = ImmutableGraphStoreFileExportConfig
+        var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
             .exportLocation(tempDir.toString())
             .writeConcurrency(2)
             .build();
 
         // export db
-        var exporter = FileExporter.csv(concurrentGraphStore, config);
+        var exporter = GraphStoreToFileExporter.csv(concurrentGraphStore, config);
         exporter.run(AllocationTracker.empty());
 
         // Assert headers

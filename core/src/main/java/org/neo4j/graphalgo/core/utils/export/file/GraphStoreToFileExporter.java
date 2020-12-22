@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.export.Exporter;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
@@ -34,18 +34,18 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public final class FileExporter extends Exporter<GraphStoreFileExportConfig> {
+public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
 
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
 
-    public static FileExporter csv(
+    public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
-        GraphStoreFileExportConfig config
+        GraphStoreToFileExporterConfig config
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
-        return new FileExporter(
+        return new GraphStoreToFileExporter(
             graphStore,
             config,
             (index) -> new CsvNodeVisitor(config.exportLocationPath(), graphStore.schema().nodeSchema(), headerFiles, index),
@@ -53,9 +53,9 @@ public final class FileExporter extends Exporter<GraphStoreFileExportConfig> {
         );
     }
 
-    private FileExporter(
+    private GraphStoreToFileExporter(
         GraphStore graphStore,
-        GraphStoreFileExportConfig config,
+        GraphStoreToFileExporterConfig config,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {

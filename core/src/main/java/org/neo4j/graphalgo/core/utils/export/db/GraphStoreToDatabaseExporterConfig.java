@@ -26,12 +26,12 @@ import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExportBaseConfig;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExporterBaseConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStoreDatabaseExportConfig extends GraphStoreExportBaseConfig {
+public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBaseConfig {
 
     String DB_NAME_KEY = "dbName";
 
@@ -48,11 +48,11 @@ public interface GraphStoreDatabaseExportConfig extends GraphStoreExportBaseConf
         DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
     }
 
-    static GraphStoreDatabaseExportConfig of(String username, CypherMapWrapper config) {
+    static GraphStoreToDatabaseExporterConfig of(String username, CypherMapWrapper config) {
         if (config.containsKey(DB_NAME_KEY)) {
             var dbName = new Converters.DatabaseNameConverter().convert(config.getString(DB_NAME_KEY).get()).name();
             config = config.withString(DB_NAME_KEY, dbName);
         }
-        return new GraphStoreDatabaseExportConfigImpl(username, config);
+        return new GraphStoreToDatabaseExporterConfigImpl(username, config);
     }
 }

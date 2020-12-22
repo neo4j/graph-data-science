@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.export.db.DatabaseExporter;
-import org.neo4j.graphalgo.core.utils.export.db.GraphStoreDatabaseExportConfig;
+import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
+import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,14 +42,14 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreDatabaseExportConfig.of(username(), cypherConfig);
+        var exportConfig = GraphStoreToDatabaseExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
-                var exporter = DatabaseExporter.newExporter(graphStore, api, exportConfig);
+                var exporter = GraphStoreToDatabaseExporter.newExporter(graphStore, api, exportConfig);
 
                 var start = System.nanoTime();
                 var importedProperties = exporter.run(allocationTracker());

@@ -22,19 +22,19 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreFileExportConfig;
+import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 
 import java.io.File;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class GraphStoreFileExportConfigTest {
+class GraphStoreToFileExporterConfigTest {
 
     @Test
     void exportPathMustBeAbsolute() {
         var ex = assertThrows(IllegalArgumentException.class, () -> {
-            ImmutableGraphStoreFileExportConfig
+            ImmutableGraphStoreToFileExporterConfig
                 .builder()
                 .exportLocation("_THIS_IS_NOT_ABSOLUTE")
                 .build()
@@ -47,7 +47,7 @@ class GraphStoreFileExportConfigTest {
     @Test
     void exportPathMustExist() {
         var ex = assertThrows(IllegalArgumentException.class, () -> {
-            ImmutableGraphStoreFileExportConfig
+            ImmutableGraphStoreToFileExporterConfig
                 .builder()
                 .exportLocation("/this/does/not/exist")
                 .build()
@@ -63,7 +63,7 @@ class GraphStoreFileExportConfigTest {
         tempDir.setReadOnly();
 
         var ex = assertThrows(IllegalArgumentException.class, () -> {
-            ImmutableGraphStoreFileExportConfig
+            ImmutableGraphStoreToFileExporterConfig
                 .builder()
                 .exportLocation(tempDir.getAbsolutePath())
                 .build()

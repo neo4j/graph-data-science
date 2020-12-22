@@ -23,12 +23,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-public abstract class Exporter <CONFIG extends GraphStoreExportBaseConfig> {
+public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseConfig> {
 
     private final GraphStore graphStore;
     protected final CONFIG config;
 
-    protected Exporter(GraphStore graphStore, CONFIG config) {
+    protected GraphStoreExporter(GraphStore graphStore, CONFIG config) {
         this.graphStore = graphStore;
         this.config = config;
     }

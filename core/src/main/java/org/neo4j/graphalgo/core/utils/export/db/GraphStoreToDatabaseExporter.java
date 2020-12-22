@@ -26,7 +26,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.utils.export.Exporter;
+import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -53,35 +53,35 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
-public final class DatabaseExporter extends Exporter<GraphStoreDatabaseExportConfig> {
+public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
     private final Path neo4jHome;
-    private final GraphStoreDatabaseExportConfig config;
+    private final GraphStoreToDatabaseExporterConfig config;
     private final FileSystemAbstraction fs;
     private final boolean defaultSettingsSuitableForTests;
     private final GraphDatabaseAPI api;
 
-    public static DatabaseExporter newExporter(
+    public static GraphStoreToDatabaseExporter newExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreDatabaseExportConfig config
+        GraphStoreToDatabaseExporterConfig config
     ) {
-        return new DatabaseExporter(graphStore, api, config, false);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config, false);
     }
 
     @TestOnly
-    public static DatabaseExporter forTest(
+    public static GraphStoreToDatabaseExporter forTest(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreDatabaseExportConfig config
+        GraphStoreToDatabaseExporterConfig config
     ) {
-        return new DatabaseExporter(graphStore, api, config, true);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config, true);
     }
 
-    private DatabaseExporter(
+    private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreDatabaseExportConfig config,
+        GraphStoreToDatabaseExporterConfig config,
         boolean defaultSettingsSuitableForTests
     ) {
         super(graphStore, config);

@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
-public interface GraphStoreExportBaseConfig extends BaseConfig {
+public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
     @Value.Default
     default String defaultRelationshipType() {
