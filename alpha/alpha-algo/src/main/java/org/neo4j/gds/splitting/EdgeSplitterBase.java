@@ -29,8 +29,10 @@ import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class EdgeSplitterBase {
 
@@ -77,6 +79,40 @@ public class EdgeSplitterBase {
             .tracker(AllocationTracker.empty())
             .build();
     }
+
+    protected void negativeSampling(
+        Graph graph,
+        Graph masterGraph,
+        RelationshipsBuilder selectedRelsBuilder,
+        AtomicLong negativeSamplesRemaining,
+        long nodeId
+    ) {
+        var masterDegree = masterGraph.degree(nodeId);
+        var negativeEdgeCount = samplesPerNode(
+            (masterGraph.nodeCount() - 1) - masterDegree,
+            (double) negativeSamplesRemaining.get(),
+            graph.nodeCount() - nodeId
+        );
+
+        var neighbours = new HashSet<Long>(masterDegree);
+        masterGraph.forEachRelationship(nodeId, (source, target) -> {
+            neighbours.add(target);
+            return true;
+        });
+
+        // this will not try to avoid duplicate negative relationships,
+        // nor will it avoid sampling edges that are sampled as negative in
+        // an outer split.
+        for (int i = 0; i < negativeEdgeCount; i++) {
+            var negativeTarget = randomNodeId(graph);
+            // no self-relationships
+            if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
+                negativeSamplesRemaining.decrementAndGet();
+                selectedRelsBuilder.addFromInternal(nodeId, negativeTarget, NEGATIVE);
+            }
+        }
+    }
+
 
     @ValueClass
     interface SplitResult {

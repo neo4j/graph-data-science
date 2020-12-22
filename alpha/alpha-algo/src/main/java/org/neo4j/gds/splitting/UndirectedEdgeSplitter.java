@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -69,56 +68,57 @@ public class UndirectedEdgeSplitter extends EdgeSplitterBase {
         var edgesRemaining = new AtomicLong(graph.relationshipCount());
 
         graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, (source, target) -> {
-                if (source == target) {
-                    edgesRemaining.decrementAndGet();
-                }
-                if (source < target) {
-                    // we handle also reverse edge here
-                    // the effect of self-loops are disregarded
-                    if (sample((double) 2 * positiveSamplesRemaining.get() / edgesRemaining.get())) {
-                        positiveSamplesRemaining.decrementAndGet();
-                        if (sample(0.5)) {
-                            selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
-                        } else {
-                            selectedRelsBuilder.addFromInternal(target, source, POSITIVE);
-                        }
-                    } else {
-                        remainingRelsBuilder.addFromInternal(source, target);
-                    }
-                    // because of reverse edge
-                    edgesRemaining.addAndGet(-2);
-                }
-                return true;
-            });
-
-            var masterDegree = masterGraph.degree(nodeId);
-            var negativeEdgeCount = samplesPerNode(
-                (masterGraph.nodeCount() - 1) - masterDegree,
-                (double) negativeSamplesRemaining.get(),
-                graph.nodeCount() - nodeId
+            positiveSampling(
+                graph,
+                selectedRelsBuilder,
+                remainingRelsBuilder,
+                positiveSamplesRemaining,
+                edgesRemaining,
+                nodeId
             );
 
-            var neighbours = new HashSet<Long>(masterDegree);
-            masterGraph.forEachRelationship(nodeId, (source, target) -> {
-                neighbours.add(target);
-                return true;
-            });
-
-            // this will not try to avoid duplicate negative relationships,
-            // nor will it avoid sampling edges that are sampled as negative in
-            // an outer split.
-            for (int i = 0; i < negativeEdgeCount; i++) {
-                var negativeTarget = randomNodeId(graph);
-                // no self-relationships
-                if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                    negativeSamplesRemaining.decrementAndGet();
-                    selectedRelsBuilder.addFromInternal(nodeId, negativeTarget, NEGATIVE);
-                }
-            }
+            negativeSampling(
+                graph,
+                masterGraph,
+                selectedRelsBuilder,
+                negativeSamplesRemaining,
+                nodeId
+            );
             return true;
         });
 
         return SplitResult.of(remainingRelsBuilder.build(), selectedRelsBuilder.build());
+    }
+
+    private void positiveSampling(
+        Graph graph,
+        RelationshipsBuilder selectedRelsBuilder,
+        RelationshipsBuilder remainingRelsBuilder,
+        AtomicLong positiveSamplesRemaining,
+        AtomicLong edgesRemaining,
+        long nodeId
+    ) {
+        graph.forEachRelationship(nodeId, (source, target) -> {
+            if (source == target) {
+                edgesRemaining.decrementAndGet();
+            }
+            if (source < target) {
+                // we handle also reverse edge here
+                // the effect of self-loops are disregarded
+                if (sample((double) 2 * positiveSamplesRemaining.get() / edgesRemaining.get())) {
+                    positiveSamplesRemaining.decrementAndGet();
+                    if (sample(0.5)) {
+                        selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
+                    } else {
+                        selectedRelsBuilder.addFromInternal(target, source, POSITIVE);
+                    }
+                } else {
+                    remainingRelsBuilder.addFromInternal(source, target);
+                }
+                // because of reverse edge
+                edgesRemaining.addAndGet(-2);
+            }
+            return true;
+        });
     }
 }

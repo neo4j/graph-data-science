@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DirectedEdgeSplitter extends EdgeSplitterBase {
@@ -50,59 +49,62 @@ public class DirectedEdgeSplitter extends EdgeSplitterBase {
         RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
 
         int totalPositiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
-        int totalNegativeSamples = (int) (graph.relationshipCount() * holdoutFraction);
+        var negativeSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction));
 
         var selectedPositiveCount = new AtomicLong(0L);
-        var selectedNegativeCount = new AtomicLong(0L);
         graph.forEachNode(nodeId -> {
-            var degree = graph.degree(nodeId);
-
-            var positiveEdgeCount = samplesPerNode(
-                degree,
-                totalPositiveSamples - selectedPositiveCount.get(),
-                graph.nodeCount() - nodeId
-            );
-            var preSelectedCount = selectedPositiveCount.get();
-
-            var targetsRemaining = new AtomicLong(degree);
-
-            graph.forEachRelationship(nodeId, (source, target) -> {
-                var localSelectedCount = selectedPositiveCount.get() - preSelectedCount;
-                double localSelectedRemaining = positiveEdgeCount - localSelectedCount;
-                var isSelected = sample(localSelectedRemaining / targetsRemaining.getAndDecrement());
-                if (positiveEdgeCount > 0 && localSelectedRemaining > 0 && isSelected) {
-                    selectedPositiveCount.incrementAndGet();
-                    selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
-                } else {
-                    remainingRelsBuilder.addFromInternal(source, target);
-                }
-                return true;
-            });
-
-            var masterDegree = masterGraph.degree(nodeId);
-            var negativeEdgeCount = samplesPerNode(
-                (masterGraph.nodeCount() - 1) - masterDegree,
-                totalNegativeSamples - selectedNegativeCount.get(),
-                graph.nodeCount() - nodeId
+            positiveSampling(
+                graph,
+                selectedRelsBuilder,
+                remainingRelsBuilder,
+                totalPositiveSamples,
+                selectedPositiveCount,
+                nodeId
             );
 
-            var neighbours = new HashSet<Long>(masterDegree);
-            masterGraph.forEachRelationship(nodeId, (source, target) -> {
-                neighbours.add(target);
-                return true;
-            });
-
-            for (int i = 0; i < negativeEdgeCount; i++) {
-                var negativeTarget = randomNodeId(graph);
-                // no self-relationships
-                if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
-                    selectedNegativeCount.incrementAndGet();
-                    selectedRelsBuilder.addFromInternal(nodeId, negativeTarget, NEGATIVE);
-                }
-            }
+            negativeSampling(
+                graph,
+                masterGraph,
+                selectedRelsBuilder,
+                negativeSamplesRemaining,
+                nodeId
+            );
             return true;
         });
 
         return SplitResult.of(remainingRelsBuilder.build(), selectedRelsBuilder.build());
+    }
+
+    private void positiveSampling(
+        Graph graph,
+        RelationshipsBuilder selectedRelsBuilder,
+        RelationshipsBuilder remainingRelsBuilder,
+        int totalPositiveSamples,
+        AtomicLong selectedPositiveCount,
+        long nodeId
+    ) {
+        var degree = graph.degree(nodeId);
+
+        var positiveEdgeCount = samplesPerNode(
+            degree,
+            totalPositiveSamples - selectedPositiveCount.get(),
+            graph.nodeCount() - nodeId
+        );
+        var preSelectedCount = selectedPositiveCount.get();
+
+        var targetsRemaining = new AtomicLong(degree);
+
+        graph.forEachRelationship(nodeId, (source, target) -> {
+            var localSelectedCount = selectedPositiveCount.get() - preSelectedCount;
+            double localSelectedRemaining = positiveEdgeCount - localSelectedCount;
+            var isSelected = sample(localSelectedRemaining / targetsRemaining.getAndDecrement());
+            if (positiveEdgeCount > 0 && localSelectedRemaining > 0 && isSelected) {
+                selectedPositiveCount.incrementAndGet();
+                selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
+            } else {
+                remainingRelsBuilder.addFromInternal(source, target);
+            }
+            return true;
+        });
     }
 }
