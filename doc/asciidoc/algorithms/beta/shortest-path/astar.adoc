@@ -1,7 +1,7 @@
 [[algorithms-astar]]
 = A*
 :entity: source-target pair
-:result: path
+:result: shortest path
 :algorithm: A*
 // for some reason, simple boolean attributes + ifdef don't work
 :source-target: true
@@ -19,6 +19,7 @@ This topic includes:
 * <<algorithms-astar-examples, Examples>>
 ** <<algorithms-astar-examples-stream, Stream>>
 ** <<algorithms-astar-examples-mutate, Mutate>>
+** <<algorithms-astar-examples-write, Write>>
 
 [[algorithms-astar-intro]]
 == Introduction
@@ -102,6 +103,7 @@ In the following example we will demonstrate the use of the A* Shortest Path alg
 [[algorithms-astar-examples-stream]]
 === Stream
 
+:!stream-details:
 include::../../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
@@ -136,7 +138,7 @@ ORDER BY index
 |===
 --
 
-The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
+The result shows the total cost of the shortest path between node `King's Cross St. Pancras` and `Kentish Town` in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
 This can be verified in the <<algorithms-astar-examples, example graph>>.
 
@@ -144,7 +146,7 @@ This can be verified in the <<algorithms-astar-examples, example graph>>.
 [[algorithms-astar-examples-mutate]]
 === Mutate
 
-include::../../shared/examples-mutate-intro.adoc[]
+include::path-examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
@@ -179,7 +181,7 @@ The new relationships will store a single property `totalCost`.
 [[algorithms-astar-examples-write]]
 === Write
 
-include::../../shared/examples-write-intro.adoc[]
+include::path-examples-write-intro.adoc[]
 
 [role=query-example]
 --

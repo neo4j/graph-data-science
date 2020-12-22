@@ -15,6 +15,7 @@ This topic includes:
 * <<algorithms-dijkstra-single-source-examples, Examples>>
 ** <<algorithms-dijkstra-single-source-examples-stream, Stream>>
 ** <<algorithms-dijkstra-single-source-examples-mutate, Mutate>>
+** <<algorithms-dijkstra-single-source-examples-write, Write>>
 
 
 [[algorithms-dijkstra-single-source-syntax]]
@@ -81,7 +82,8 @@ In the following example we will demonstrate the use of the Dijkstra Shortest Pa
 [[algorithms-dijkstra-single-source-examples-stream]]
 === Stream
 
-include::../../shared/examples-stream-intro.adoc[]
+:!stream-details:
+include::../../shared/examples-stream-intro.adoc[]]
 
 [role=query-example]
 --
@@ -125,7 +127,7 @@ This can be verified in the <<algorithms-dijkstra-single-source-examples, exampl
 [[algorithms-dijkstra-single-source-examples-mutate]]
 === Mutate
 
-include::../../shared/examples-mutate-intro.adoc[]
+include::path-examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
@@ -154,10 +156,10 @@ After executing the above query, the in-memory graph will be updated with new re
 The new relationships will store a single property `totalCost`.
 
 
-[[algorithms-dijkstra-examples-write]]
+[[algorithms-dijkstra-single-source-examples-write]]
 === Write
 
-include::../../shared/examples-write-intro.adoc[]
+include::path-examples-write-intro.adoc[]
 
 [role=query-example]
 --

@@ -1,7 +1,7 @@
 [[algorithms-dijkstra]]
 = Dijkstra
 :entity: source-target pair
-:result: path
+:result: shortest path
 :algorithm: Dijkstra
 
 [abstract]

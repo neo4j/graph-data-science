@@ -1,0 +1,8 @@
+The `mutate` execution mode updates the named graph with new relationships.
+Each new relationship represents a path from source node to target node.
+The relationship type is configured using the `mutateRelationshipType` option.
+The total path cost is stored using the `totalCost` property.
+
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
