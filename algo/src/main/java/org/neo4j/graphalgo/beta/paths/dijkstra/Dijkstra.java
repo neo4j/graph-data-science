@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.paths.dijkstra;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
-import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -42,11 +41,18 @@ import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_CONTINUE;
+import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
+
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
 
     private final Graph graph;
-    private final LongPredicate stopPredicate;
+    // Takes a visited node as input and decides if a path should be emitted.
+    private final TraversalPredicate traversalPredicate;
+    // Holds the current state of the traversal.
+    private TraversalState traversalState;
 
     private long sourceNode;
     // priority queue
@@ -82,7 +88,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return new Dijkstra(
             graph,
             sourceNode,
-            node -> node == targetNode,
+            node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
             progressLogger,
@@ -102,7 +108,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     ) {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
-            node -> true,
+            node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
             progressLogger,
@@ -129,7 +135,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private Dijkstra(
         Graph graph,
         long sourceNode,
-        LongPredicate stopPredicate,
+        TraversalPredicate traversalPredicate,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
@@ -137,7 +143,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     ) {
         this.graph = graph;
         this.sourceNode = sourceNode;
-        this.stopPredicate = stopPredicate;
+        this.traversalPredicate = traversalPredicate;
+        this.traversalState = CONTINUE;
         this.trackRelationships = trackRelationships;
         this.queue = heuristicFunction
             .map(fn -> minPriorityQueue(graph.nodeCount(), fn))
@@ -161,6 +168,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
     // Resets the internal state of the algorithm.
     public void clear() {
+        traversalState = CONTINUE;
         queue.clear();
         visited.clear();
         predecessors.clear();
@@ -178,7 +186,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .sourceNode(sourceNode);
 
         var paths = Stream
-            .generate(() -> next(stopPredicate, pathResultBuilder))
+            .generate(() -> next(traversalPredicate, pathResultBuilder))
             .takeWhile(pathResult -> pathResult != PathResult.EMPTY);
 
         return ImmutableDijkstraResult
@@ -187,10 +195,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .build();
     }
 
-    private PathResult next(LongPredicate stopPredicate, ImmutablePathResult.Builder pathResultBuilder) {
+    private PathResult next(TraversalPredicate traversalPredicate, ImmutablePathResult.Builder pathResultBuilder) {
         var relationshipId = new MutableInt();
 
-        while (!queue.isEmpty() && running()) {
+        while (!queue.isEmpty() && running() && traversalState != EMIT_AND_STOP) {
             var node = queue.pop();
             var cost = queue.cost(node);
             visited.set(node);
@@ -211,7 +219,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 }
             );
 
-            if (stopPredicate.apply(node)) {
+            // Using the current node, decide if we need to emit a path and continue the traversal.
+            traversalState = traversalPredicate.apply(node);
+
+            if (traversalState == EMIT_AND_CONTINUE || traversalState == EMIT_AND_STOP) {
                 return pathResult(node, pathResultBuilder);
             }
         }
@@ -282,6 +293,17 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         // We do not release, since the result
         // is lazily computed when the consumer
         // iterates over the stream.
+    }
+
+    enum TraversalState {
+        EMIT_AND_STOP,
+        EMIT_AND_CONTINUE,
+        CONTINUE,
+    }
+
+    @FunctionalInterface
+    public interface TraversalPredicate {
+        TraversalState apply(long nodeId);
     }
 
     @FunctionalInterface
