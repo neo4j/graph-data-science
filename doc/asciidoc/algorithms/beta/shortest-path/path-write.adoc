@@ -2,8 +2,8 @@
 ======
 
 The write mode creates new relationships in the Neo4j database.
-Each relationship represents a path from the source node to a target node.
-Additional path information is stored via relationship properties.
+Each relationship represents a path from the source node to the target node.
+Additional path information is stored using relationship properties.
 By default, the write mode stores a `totalCost` property.
 Optionally, one can also store `nodeIds` and `costs` of intermediate nodes on the path.
 
@@ -30,13 +30,17 @@ include::../../common-configuration/common-write-configuration-named-graph.adoc[
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name          | Type    | Default | Optional | Description
-| sourceNode    | Integer | n/a     | no       | The Neo4j node id of the source node.
+| Name              | Type    | Default | Optional | Description
+| sourceNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
 ifeval::["{source-target}" == "true"]
-| targetNode    | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
 endif::[]
-| writeNodeIds  | Boolean | false   | yes      | Iff true, the written relationship has a nodeIds list property.
-| writeCosts    | Boolean | false   | yes      | Iff true, the written relationship has a costs list property.
+ifeval::["{algorithm}" == "A*"]
+| latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
+| longitudeProperty | Float   | n/a     | no       | The node property that stores the longitude value.
+endif::[]
+| writeNodeIds      | Boolean | false   | yes      | If true, the written relationship has a nodeIds list property.
+| writeCosts        | Boolean | false   | yes      | If true, the written relationship has a costs list property.
 |===
 
 .Results

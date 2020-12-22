@@ -1,0 +1,13 @@
+include::../../shared/syntax-intro-named-graph.adoc[]
+
+.{algorithm} syntax per mode
+[.tabbed-example]
+====
+
+include::path-stream.adoc[]
+
+include::path-mutate.adoc[]
+
+include::path-write.adoc[]
+
+====

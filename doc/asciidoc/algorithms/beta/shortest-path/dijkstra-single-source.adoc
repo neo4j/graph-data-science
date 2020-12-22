@@ -20,20 +20,7 @@ This topic includes:
 [[algorithms-dijkstra-single-source-syntax]]
 == Syntax
 
-include::../../shared/syntax-intro-named-graph.adoc[]
-
-.Dijkstra syntax per mode
-[.tabbed-example]
-====
-
-include::path-stream.adoc[]
-
-include::path-mutate.adoc[]
-
-include::path-write.adoc[]
-
-====
-
+include::path-syntax.adoc[]
 
 [[algorithms-dijkstra-source-target-syntax-anonymous]]
 === Anonymous graphs
@@ -198,4 +185,4 @@ RETURN relationshipsWritten
 --
 
 The above query will write 6 relationships of type `PATH` back to Neo4j.
-The relationships store three properties describing the path: `totalCost`, `nodeIds`, `costs`
+The relationships store three properties describing the path: `totalCost`, `nodeIds` and `costs`.

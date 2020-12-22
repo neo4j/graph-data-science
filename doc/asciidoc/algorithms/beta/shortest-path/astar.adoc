@@ -1,5 +1,213 @@
 [[algorithms-astar]]
 = A*
-//:entity: node
-//:result: component ID
+:entity: source-target pair
+:result: path
 :algorithm: A*
+// for some reason, simple boolean attributes + ifdef don't work
+:source-target: true
+:procedure-name: pass:q[gds.beta.shortestPath.astar]
+
+[abstract]
+--
+This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-astar-intro, Introduction>>
+* <<algorithms-astar-syntax, Syntax>>
+* <<algorithms-astar-examples, Examples>>
+** <<algorithms-astar-examples-stream, Stream>>
+** <<algorithms-astar-examples-mutate, Mutate>>
+
+[[algorithms-astar-intro]]
+== Introduction
+
+The A* (pronounced "A-Star") Shortest Path algorithm computes the shortest path between two nodes.
+A* is an informed search algorithm as it uses a heuristic function to guide the graph traversal.
+The algorithm supports weighted graphs with positive relationship weights.
+
+Unlike <<algorithms-dijkstra, Dijkstra's shortest path algorithm>>, the next node to search from is not solely picked on the already computed distance.
+Instead, the algorithm combines the already computed distance with the result of a heuristic function.
+That function takes a node as input and returns a value that corresponds to the cost to reach the target node from that node.
+In each iteration, the graph traversal is continued from the node with the lowest combined cost.
+
+In GDS, the A* algorithm is based on the <<algorithms-dijkstra, Dijkstra's shortest path algorithm>>.
+The heuristic function is the haversine distance, which defines the distance between two points on a sphere.
+Here, the sphere is the earth and the points are geo-coordinates stored on the nodes in the graph.
+
+The algorithm implementation is executed using a single thread.
+Altering the concurrency configuration has no effect.
+
+[[algorithms-astar-syntax]]
+== Syntax
+
+include::path-syntax.adoc[]
+
+
+[[algorithms-astar-syntax-anonymous]]
+=== Anonymous graphs
+
+include::path-anonymous-graph.adoc[]
+
+
+[[algorithms-astar-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: transport network
+:image-file: astar.svg
+include::../../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE (a:Station {name: 'King\'s Cross St. Pancras', latitude: 51.5308, longitude: -0.1238}),
+       (b:Station {name: 'Euston',                    latitude: 51.5282, longitude: -0.1337}),
+       (c:Station {name: 'Camden Town',               latitude: 51.5392, longitude: -0.1426}),
+       (d:Station {name: 'Mornington Crescent',       latitude: 51.5342, longitude: -0.1387}),
+       (e:Station {name: 'Kentish Town',              latitude: 51.5507, longitude: -0.1402}),
+       (a)-[:CONNECTION {time: 2}]->(b),
+       (b)-[:CONNECTION {time: 3}]->(c),
+       (b)-[:CONNECTION {time: 2}]->(d),
+       (d)-[:CONNECTION {time: 2}]->(c),
+       (c)-[:CONNECTION {time: 2}]->(e)
+----
+
+The graph represents a transport network of stations.
+Each station has a geo-coordinate, expressed by `latitude` and `longitude` properties.
+Stations are connected via connections.
+We use the `time` property as relationship weight.
+The algorithm will pick the next node in the search based on already traveled time and distance to the target station.
+
+include::../../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Station',
+    'CONNECTION',
+    {
+        nodeProperties: ['latitude', 'longitude'],
+        relationshipProperties: 'time'
+    }
+)
+----
+
+In the following example we will demonstrate the use of the A* Shortest Path algorithm using this graph.
+
+
+[[algorithms-astar-examples-stream]]
+=== Stream
+
+include::../../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher]
+----
+MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+CALL gds.beta.shortestPath.astar.stream('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    latitudeProperty: 'latitude',
+    longitudeProperty: 'longitude',
+    relationshipWeightProperty: 'time'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    nodeIds,
+    costs
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName              | targetNodeName | totalCost | nodeIds      | costs
+| 0     | "King\'s Cross St. Pancras" | "Kentish Town" | 7.0       | [0, 1, 2, 4] | [0.0, 2.0, 5.0, 7.0]
+|===
+--
+
+The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
+It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
+This can be verified in the <<algorithms-astar-examples, example graph>>.
+
+
+[[algorithms-astar-examples-mutate]]
+=== Mutate
+
+include::../../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher]
+----
+MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+CALL gds.beta.shortestPath.astar.mutate('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    latitudeProperty: 'latitude',
+    longitudeProperty: 'longitude',
+    relationshipWeightProperty: 'time',
+    mutateRelationshipType: 'PATH'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with new relationships of type `PATH`.
+The new relationships will store a single property `totalCost`.
+
+
+[[algorithms-astar-examples-write]]
+=== Write
+
+include::../../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher]
+----
+MATCH (source:Station {name: 'King\'s Cross St. Pancras'}), (target:Station {name: 'Kentish Town'})
+CALL gds.beta.shortestPath.astar.write('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    latitudeProperty: 'latitude',
+    longitudeProperty: 'longitude',
+    relationshipWeightProperty: 'time',
+    writeRelationshipType: 'PATH',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+The above query will write one relationship of type `PATH` back to Neo4j.
+The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.

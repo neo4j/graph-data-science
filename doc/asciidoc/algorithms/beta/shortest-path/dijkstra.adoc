@@ -1,6 +1,6 @@
 [[algorithms-dijkstra]]
 = Dijkstra
-:entity: path
+:entity: source-target pair
 :result: path
 :algorithm: Dijkstra
 

@@ -196,4 +196,4 @@ RETURN relationshipsWritten
 --
 
 The above query will write a single relationship of type `PATH` back to Neo4j.
-The relationship stores three properties describing the path: `totalCost`, `nodeIds`, `costs`
+The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.
