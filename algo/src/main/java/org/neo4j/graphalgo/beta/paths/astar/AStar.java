@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
 
 import java.util.Optional;
 
@@ -67,7 +68,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
         var targetNode = graph.toMappedNodeId(config.targetNode());
 
-        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
+        var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, tracker);
 
         // Init dijkstra algorithm for computing shortest paths
         var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressLogger, tracker);
@@ -95,6 +96,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
 
     public static class HaversineHeuristic implements Dijkstra.HeuristicFunction {
 
+        static final double DEFAULT_DISTANCE = Double.NaN;
         // kilometer to nautical mile
         static final double KM_TO_NM = 0.539957;
         static final double EARTH_RADIUS_IN_NM = 6371 * KM_TO_NM;
@@ -105,22 +107,33 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         private final NodeProperties latitudeProperties;
         private final NodeProperties longitudeProperties;
 
+        private final HugeLongDoubleMap distanceCache;
+
         HaversineHeuristic(
             NodeProperties latitudeProperties,
             NodeProperties longitudeProperties,
-            long targetNode
+            long targetNode,
+            AllocationTracker tracker
         ) {
             this.latitudeProperties = latitudeProperties;
             this.longitudeProperties = longitudeProperties;
             this.targetLatitude = latitudeProperties.doubleValue(targetNode);
             this.targetLongitude = longitudeProperties.doubleValue(targetNode);
+            this.distanceCache = new HugeLongDoubleMap(tracker);
         }
 
         @Override
         public double applyAsDouble(long source) {
-            var sourceLatitude = latitudeProperties.doubleValue(source);
-            var sourceLongitude = longitudeProperties.doubleValue(source);
-            return distance(sourceLatitude, sourceLongitude, targetLatitude, targetLongitude);
+            var distance = distanceCache.getOrDefault(source, DEFAULT_DISTANCE);
+
+            if (Double.isNaN(distance)) {
+                var sourceLatitude = latitudeProperties.doubleValue(source);
+                var sourceLongitude = longitudeProperties.doubleValue(source);
+                distance = distance(sourceLatitude, sourceLongitude, targetLatitude, targetLongitude);
+                distanceCache.addTo(source, distance);
+            }
+
+            return distance;
         }
 
         // https://rosettacode.org/wiki/Haversine_formula#Java
