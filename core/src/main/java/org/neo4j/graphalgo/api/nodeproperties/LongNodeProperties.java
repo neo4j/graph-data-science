@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api.nodeproperties;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -56,7 +57,7 @@ public interface LongNodeProperties extends NodeProperties {
         if (value == LONG_DEFAULT_FALLBACK) {
             return DOUBLE_DEFAULT_FALLBACK;
         }
-        return value;
+        return ValueConversion.exactLongToDouble(value);
     };
 
     @Override

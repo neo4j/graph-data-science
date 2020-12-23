@@ -85,7 +85,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double doubleValue(long nodeId) {
-        if (valueType == DOUBLE) {
+        if (valueType == DOUBLE || valueType == LONG) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : nodeProperties.doubleValue(nodeId);
         } else {
