@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
 
 import java.util.Optional;
@@ -76,7 +77,10 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
     }
 
     public static MemoryEstimation memoryEstimation() {
-        return Dijkstra.memoryEstimation();
+        return MemoryEstimations.builder(AStar.class)
+            .add("Dijkstra", Dijkstra.memoryEstimation())
+            .add("distanceCache", HugeLongDoubleMap.memoryEstimation())
+            .build();
     }
 
     @Override
