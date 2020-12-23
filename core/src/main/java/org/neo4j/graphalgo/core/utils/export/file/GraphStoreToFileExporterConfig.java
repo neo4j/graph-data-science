@@ -19,44 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporterBaseConfig;
-
-import java.nio.file.Path;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
 
-    String exportLocation();
-
-    @Value.Derived
-    @Configuration.Ignore
-    default Path exportLocationPath() {
-        return Path.of(exportLocation());
-    }
-
-    @Value.Check
-    default void validateExportLocation() {
-        var exportLocationFile = exportLocationPath().toFile();
-
-        if (!exportLocationPath().isAbsolute()) {
-            throw new IllegalArgumentException("The parameter `exportLocation` must be an absolute path.");
-        }
-
-        if (!exportLocationFile.exists() || !exportLocationFile.canWrite()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Cannot access the specified export location at %s. Please make sure it exists and is accessible",
-                exportLocation()
-            ));
-        }
-    }
+    String exportName();
 
     static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
         return new GraphStoreToFileExporterConfigImpl(username, config);

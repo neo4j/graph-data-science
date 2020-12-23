@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConfig;
+import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
+import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporterConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -78,14 +80,14 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreFileExportConfig.of(username(), cypherConfig);
+        var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
         var result = runWithExceptionLogging(
             "CSV export failed", () -> {
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
-                var exporter = FileExporter.csv(graphStore, exportConfig);
+                var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, api);
 
                 var start = System.nanoTime();
                 var importedProperties = exporter.run(allocationTracker());
@@ -93,7 +95,7 @@ public class GraphStoreExportProc extends BaseProc {
 
                 return new FileExportResult(
                     graphName,
-                    exportConfig.exportLocation(),
+                    exportConfig.exportName(),
                     graphStore.nodeCount(),
                     graphStore.relationshipCount(),
                     graphStore.relationshipTypes().size(),
@@ -162,11 +164,11 @@ public class GraphStoreExportProc extends BaseProc {
     }
 
     public static class FileExportResult extends GraphStoreExportResult {
-        public final String exportLocation;
+        public final String exportName;
 
         public FileExportResult(
             String graphName,
-            String exportLocation,
+            String exportName,
             long nodeCount,
             long relationshipCount,
             long relationshipTypeCount,
@@ -183,7 +185,7 @@ public class GraphStoreExportProc extends BaseProc {
                 relationshipPropertyCount,
                 writeMillis
             );
-            this.exportLocation = exportLocation;
+            this.exportName = exportName;
         }
     }
 }
