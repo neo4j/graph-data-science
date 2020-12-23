@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 
-import java.util.function.IntSupplier;
-
 /**
  * The signature for {@code allowsReadNodeProperty} is different in 4.0 and 4.1.
  * We have to implement this method, but we don't require the parameter that has changed.
@@ -56,10 +54,5 @@ public abstract class CompatAccessMode extends RestrictedAccessMode {
     @Override
     public boolean allowsTraverseRelType(int relType) {
         return custom.allowsTraverseRelType(relType);
-    }
-
-    @Override
-    public boolean allowsReadRelationshipProperty(IntSupplier relType, int propertyKey) {
-        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }

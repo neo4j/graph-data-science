@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.neo4j.internal.kernel.api.TokenSet;
 
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public final class CompatAccessMode42 extends CompatAccessMode {
@@ -32,5 +33,10 @@ public final class CompatAccessMode42 extends CompatAccessMode {
     @Override
     public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
         return custom.allowsReadNodeProperty(propertyKey);
+    }
+
+    @Override
+    public boolean allowsReadRelationshipProperty(IntSupplier relType, int propertyKey) {
+        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }
