@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -30,8 +29,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-
-import java.nio.file.Path;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -86,17 +83,17 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @Test
-    void exportCsv(@TempDir Path tempDir) {
+    void exportCsv() {
         createGraph();
 
         var exportQuery = formatWithLocale(
             "CALL gds.graph.export.csv('test-graph', {" +
             "  exportName: '%s'" +
             "})"
-        , tempDir);
+        , "export");
 
         runQueryWithRowConsumer(exportQuery, row -> {
-            assertEquals(tempDir.toString(), row.getString("exportLocation"));
+            assertEquals("export", row.getString("exportName"));
             assertEquals(4, row.getNumber("nodeCount").longValue());
             assertEquals(6, row.getNumber("relationshipCount").longValue());
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
