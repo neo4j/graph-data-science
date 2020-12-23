@@ -1,0 +1,68 @@
+[[catalog-graph-export-csv]]
+= Export a named graph to CSV
+
+We can export named in-memory graphs stored in the graph catalog to a set of CSV files.
+All nodes, relationships and properties present in an in-memory graph are exported.
+This includes data that has been projected in `gds.graph.create` and data that has been added by running algorithms in `mutate` mode.
+The exported CSV files will be stored in a subfolder of the Neo4j `import` directory, using the specified export name.
+
+.Export a named graph to a set of CSV files Neo4j `import` directory:
+[source,cypher]
+----
+CALL gds.graph.export.csv('my-graph', { exportName: 'mydatabase' })
+----
+
+The procedure yields information about the number of nodes, relationships and properties written.
+
+.Graph export configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                    | Type    | Default    | Optional  | Description
+| exportName              | String  | none       | No        | Name of the folder the CSV files were exported to.
+| writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
+| defaultRelationshipType | String  | "\__ALL__" | yes       | Relationship type used for `*` relationship projections.
+|===
+
+== Export format
+The format of the exported CSV files is based on the format that is supported by https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin-import/[the Neo4j Batch import tool].
+
+=== Nodes
+Nodes are exported into files grouped by the nodes labels, i.e. for every label combination that exists in the graph a set of export files is created.
+The naming schema of the exported files is: `nodes_LABELS_INDEX.csv`, where `LABELS` is the ordered list of labels joined by `_` and `INDEX` is a number between 0 and concurrency.
+For each label combination one or more data files are created, as each exporter thread exports into a separate file.
+Additionally, each label combination produces a single header files, which contains a single line describing the columns in the data files
+More information about the header files can be found here: https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin-import/#import-tool-header-format[CSV header format].
+
+For example a Graph with the node combinations `:A`, `:B` and `:A:B` might create the following files
+[source]
+----
+- nodes_A_header.csv
+- nodes_A_0.csv
+- nodes_B_header.csv
+- nodes_B_0.csv
+- nodes_B_2.csv
+- nodes_A_B_header.csv
+- nodes_A_B_0.csv
+- nodes_A_B_1.csv
+- nodes_A_B_2.csv
+----
+
+=== Relationships
+The format of the relationship files is similar to those of the nodes.
+Relationships are exported into files grouped by the relationship type.
+The naming schema of the exported files is: `relationships_TYPE_INDEX.csv`, where `TYPE` is the relationship type and `INDEX` is a number between 0 and concurrency.
+For each label combination one or more data files are created, as each exporter thread exports into a separate file.
+Additionally, each label combination produces a single header files, which contains a single line describing the columns in the data files
+
+For example a Graph with the relationship types `:KNOWS`, `:LIVES_IN` might create the following files
+[source]
+----
+- relationships_KNOWS_header.csv
+- relationships_KNOWS_0.csv
+- relationships_LIVES_IN_header.csv
+- relationships_LIVES_IN_0.csv
+- relationships_LIVES_IN_2.csv
+----
+
+
+
