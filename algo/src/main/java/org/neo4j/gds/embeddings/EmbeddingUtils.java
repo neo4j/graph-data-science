@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -28,7 +29,14 @@ public final class EmbeddingUtils {
     private EmbeddingUtils() {}
 
     public static double getCheckedDoubleNodeProperty(Graph graph, String propertyKey, long nodeId) {
-        double propertyValue = graph.nodeProperties(propertyKey).doubleValue(nodeId);
+        var nodeProperties = graph.nodeProperties(propertyKey);
+        var propertyValue = Double.NaN;
+        if (nodeProperties.valueType() == ValueType.DOUBLE) {
+            propertyValue = nodeProperties.doubleValue(nodeId);
+        }
+        if (nodeProperties.valueType() == ValueType.LONG) {
+            propertyValue = nodeProperties.longValue(nodeId);
+        }
         if (Double.isNaN(propertyValue)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",

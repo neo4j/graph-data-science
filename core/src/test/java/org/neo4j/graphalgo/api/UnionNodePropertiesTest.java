@@ -70,19 +70,13 @@ class UnionNodePropertiesTest {
     }
 
     @Test
-    void shouldConvertLongToDouble() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L));
-        assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
-    }
-
-    @Test
     void shouldThrowConversionException() {
         var unionNodeProperties = initializeUnionNodeProperties(Values.of(new double[]{1.337D}));
 
         assertThatThrownBy(() -> unionNodeProperties.doubleValue(0))
             .isInstanceOf(UnsupportedOperationException.class)
-            .hasMessageContaining("Cannot safely convert DoubleArray")
-            .hasMessageEndingWith("into a Double");
+            .hasMessageContaining("Cannot cast properties of type DOUBLE_ARRAY")
+            .hasMessageEndingWith("to double");
     }
 
     private UnionNodeProperties initializeUnionNodeProperties(Value propertyValue) {

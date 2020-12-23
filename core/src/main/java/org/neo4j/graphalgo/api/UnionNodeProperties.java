@@ -21,16 +21,15 @@ package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.FLOAT_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG;
@@ -86,10 +85,15 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double doubleValue(long nodeId) {
-        return Optional.ofNullable(getPropertiesForNodeId(nodeId))
-            .map(nodeProperties -> nodeProperties.value(nodeId))
-            .map(ValueConversion::getDoubleValue)
-            .orElse(DefaultValue.DOUBLE_DEFAULT_FALLBACK);
+        if (valueType == DOUBLE) {
+            var nodeProperties = getPropertiesForNodeId(nodeId);
+            return nodeProperties == null ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : nodeProperties.doubleValue(nodeId);
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Cannot cast properties of type %s to double",
+                valueType
+            ));
+        }
     }
 
     @Override
