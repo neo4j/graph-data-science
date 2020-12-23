@@ -25,6 +25,7 @@ ext {
             'compile-testing':              '0.18',
             'deeplearning4j':               '1.0.0-beta7',
             'ejml':                         '0.39',
+            'fastcsv':                      '1.0.4',
             'gdl':                          '0.3.6',
             'hamcrest':                     '2.1',
             'HdrHistogram':                 '2.1.9',

@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporterBaseConfig;
 
+import java.util.Optional;
+
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -41,6 +43,12 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Value.Default
     default boolean enableDebugLog() {
         return false;
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default Optional<Long> pageCacheMemory() {
+        return Optional.empty();
     }
 
     @Value.Check

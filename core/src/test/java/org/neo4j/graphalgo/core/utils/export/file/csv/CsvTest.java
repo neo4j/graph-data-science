@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract public class CsvTest {
+public abstract class CsvTest {
 
     @TempDir
     protected Path tempDir;
@@ -63,3 +63,4 @@ abstract public class CsvTest {
         assertThat(tempDir.resolve(fileName)).hasContent(expectedContent);
     }
 }
+

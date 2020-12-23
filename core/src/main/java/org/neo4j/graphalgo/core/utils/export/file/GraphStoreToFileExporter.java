@@ -74,7 +74,6 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
 
-
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
             (index) -> new ImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.export.db;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -50,7 +49,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.io.ByteUnit.mebiBytes;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
 
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
@@ -58,38 +56,24 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     private final Path neo4jHome;
     private final GraphStoreToDatabaseExporterConfig config;
     private final FileSystemAbstraction fs;
-    private final boolean defaultSettingsSuitableForTests;
-    private final GraphDatabaseAPI api;
 
     public static GraphStoreToDatabaseExporter newExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config, false);
-    }
-
-    @TestOnly
-    public static GraphStoreToDatabaseExporter forTest(
-        GraphStore graphStore,
-        GraphDatabaseAPI api,
-        GraphStoreToDatabaseExporterConfig config
-    ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config, true);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        GraphStoreToDatabaseExporterConfig config,
-        boolean defaultSettingsSuitableForTests
+        GraphStoreToDatabaseExporterConfig config
     ) {
         super(graphStore, config);
-        this.api = api;
         this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
         this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
-        this.defaultSettingsSuitableForTests = defaultSettingsSuitableForTests;
     }
 
     @Override
@@ -97,7 +81,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
         var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
-        var importConfig = getImportConfig(defaultSettingsSuitableForTests);
+        var importConfig = getImportConfig();
 
         var lifeSupport = new LifeSupport();
 
@@ -149,7 +133,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     }
 
     @NotNull
-    private org.neo4j.internal.batchimport.Configuration getImportConfig(boolean defaultSettingsSuitableForTests) {
+    private org.neo4j.internal.batchimport.Configuration getImportConfig() {
         return new org.neo4j.internal.batchimport.Configuration() {
             @Override
             public int maxNumberOfProcessors() {
@@ -158,7 +142,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
 
             @Override
             public long pageCacheMemory() {
-                return defaultSettingsSuitableForTests ? mebiBytes(8) : Configuration.super.pageCacheMemory();
+                return config.pageCacheMemory().orElseGet(() -> Configuration.super.pageCacheMemory());
             }
 
             @Override

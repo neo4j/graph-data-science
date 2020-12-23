@@ -38,7 +38,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
         reset();
     }
 
-    // Accessors for node related data
+    // Accessors for relationship related data
 
     public long startNode() {
         return currentStartNode;
@@ -52,7 +52,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
         return relationshipType;
     }
 
-    // Additional listeners for node related data
+    // Additional listeners for relationship related data
 
     @Override
     public boolean startId(long id) {

@@ -29,11 +29,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHEMA>, I extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
 
-    Map<I, Map<String, PROPERTY_SCHEMA>> properties();
+    Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> properties();
 
-    SELF filter(Set<I> elementIdentifieresToKeep);
+    SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifieresToKeep);
 
     SELF union(SELF other);
 
@@ -62,7 +62,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
     }
 
     @Value.Derived
-    default Map<I, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<I> identifiersToKeep) {
+    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<ELEMENT_IDENTIFIER> identifiersToKeep) {
         return properties()
             .entrySet()
             .stream()
@@ -71,6 +71,10 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     }
 
+    /**
+     * Returns a union of all properties in the given schema.
+     * If a property with the same key exists for more then one label, this method makes sure they have the same type.
+     */
     @Value.Lazy
     default Map<String, PROPERTY_SCHEMA> unionProperties() {
         return properties()
@@ -97,7 +101,7 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
     /**
      * For internal use only!
      */
-    default Map<I, Map<String, PROPERTY_SCHEMA>> unionSchema(Map<I, Map<String, PROPERTY_SCHEMA>> rightProperties) {
+    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> unionSchema(Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()

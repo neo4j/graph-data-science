@@ -48,33 +48,35 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 class GraphStoreToFileExporterTest extends CsvTest {
 
     @GdlGraph
-    private static final String GDL = "CREATE" +
-                                      "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
-                                      ", (b:A:B { prop1: 1, prop2: 43})" +
-                                      ", (c:A:C { prop1: 2, prop2: 44, prop3: [1L, 9L, 8L, 4L] })" +
-                                      ", (d:B { prop1: 3 })" +
-                                      ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
-                                      ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
-                                      ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
-                                      ", (b)-[:REL2 { prop3: 3, prop4: 45 }]->(c)" +
-                                      ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
-                                      ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
+    private static final String GDL =
+        "CREATE" +
+        "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
+        ", (b:A:B { prop1: 1, prop2: 43})" +
+        ", (c:A:C { prop1: 2, prop2: 44, prop3: [1L, 9L, 8L, 4L] })" +
+        ", (d:B { prop1: 3 })" +
+        ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
+        ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +
+        ", (b)-[:REL1 { prop1: 2, prop2: 44 }]->(a)" +
+        ", (b)-[:REL2 { prop3: 3, prop4: 45 }]->(c)" +
+        ", (c)-[:REL2 { prop3: 4, prop4: 46 }]->(d)" +
+        ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
 
     @Inject
     public GraphStore graphStore;
 
     @GdlGraph(graphNamePrefix = "concurrent")
-    private static final String GDL_FOR_CONCURRENCY = "CREATE" +
-                                                      "  (a)" +
-                                                      ", (b)" +
-                                                      ", (c)" +
-                                                      ", (d)" +
-                                                      ", (a)-[:REL1]->(a)" +
-                                                      ", (a)-[:REL1]->(b)" +
-                                                      ", (b)-[:REL1]->(a)" +
-                                                      ", (b)-[:REL1]->(c)" +
-                                                      ", (c)-[:REL1]->(d)" +
-                                                      ", (d)-[:REL1]->(a)";
+    private static final String GDL_FOR_CONCURRENCY =
+        "CREATE" +
+        "  (a)" +
+        ", (b)" +
+        ", (c)" +
+        ", (d)" +
+        ", (a)-[:REL1]->(a)" +
+        ", (a)-[:REL1]->(b)" +
+        ", (b)-[:REL1]->(a)" +
+        ", (b)-[:REL1]->(c)" +
+        ", (c)-[:REL1]->(d)" +
+        ", (d)-[:REL1]->(a)";
 
     @Inject
     public GraphStore concurrentGraphStore;
