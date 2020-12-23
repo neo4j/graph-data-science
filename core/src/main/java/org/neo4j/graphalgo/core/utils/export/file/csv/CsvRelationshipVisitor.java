@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvValueFormatter.format;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvRelationshipVisitor extends RelationshipVisitor {
@@ -80,7 +79,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
             // write properties
             forEachProperty(((key, value, type) -> {
-                var propertyString = format(value);
+                var propertyString = type.csvValue(value);
                 try {
                     csvAppender.appendField(propertyString);
                 } catch (IOException e) {

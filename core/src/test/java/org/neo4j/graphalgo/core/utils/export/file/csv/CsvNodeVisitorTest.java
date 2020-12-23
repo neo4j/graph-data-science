@@ -93,8 +93,8 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
     @Test
     void visitNodesWithProperties() {
         var nodeSchema = NodeSchema.builder()
-            .addProperty(NodeLabel.ALL_NODES, "foo", ValueType.LONG)
-            .addProperty(NodeLabel.ALL_NODES, "bar", ValueType.LONG)
+            .addProperty(NodeLabel.ALL_NODES, "foo", ValueType.DOUBLE)
+            .addProperty(NodeLabel.ALL_NODES, "bar", ValueType.DOUBLE)
             .build();
         var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
 
@@ -146,22 +146,22 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         // :A:B
         nodeVisitor.id(0L);
         nodeVisitor.labels(new String[]{"A", "B"});
-        nodeVisitor.property("foo", 42);
-        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("foo", 42L);
+        nodeVisitor.property("bar", 21L);
         nodeVisitor.property("baz", 21.0);
         nodeVisitor.endOfEntity();
 
         // :A
         nodeVisitor.id(1L);
         nodeVisitor.labels(new String[]{"A"});
-        nodeVisitor.property("foo", 42);
-        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("foo", 42L);
+        nodeVisitor.property("bar", 21L);
         nodeVisitor.endOfEntity();
 
         // :B
         nodeVisitor.id(2L);
         nodeVisitor.labels(new String[]{"B"});
-        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("bar", 21L);
         nodeVisitor.property("baz", 21.0);
         nodeVisitor.endOfEntity();
 
@@ -174,7 +174,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         // :A:B
         nodeVisitor.id(4L);
         nodeVisitor.labels(new String[]{"A", "B"});
-        nodeVisitor.property("bar", 21);
+        nodeVisitor.property("bar", 21L);
         nodeVisitor.property("baz", 21.0);
         nodeVisitor.endOfEntity();
 

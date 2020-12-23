@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.export.file.csv;
+package org.neo4j.graphalgo.api.nodeproperties;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,42 +28,34 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvValueFormatter.format;
 
-class CsvValueFormatterTest {
-
+class ValueTypeTest {
 
     private static Stream<Arguments> formatValues() {
         return Stream.of(
-            arguments(42L, "42"),
-            arguments(LONG_DEFAULT_FALLBACK, ""),
+            arguments(ValueType.LONG, 42L, "42"),
+            arguments(ValueType.LONG, LONG_DEFAULT_FALLBACK, ""),
+            arguments(ValueType.LONG, null, ""),
 
-            arguments(42, "42"),
-            arguments(INTEGER_DEFAULT_FALLBACK, ""),
+            arguments(ValueType.DOUBLE, 42.1337D, "42.1337"),
+            arguments(ValueType.DOUBLE, DOUBLE_DEFAULT_FALLBACK,  ""),
+            arguments(ValueType.DOUBLE, null,  ""),
 
-            arguments(42.1337D, "42.1337"),
-            arguments(DOUBLE_DEFAULT_FALLBACK,  ""),
+            arguments(ValueType.LONG_ARRAY, new long[]{1L, 3L, 3L, 7L}, "1;3;3;7"),
+            arguments(ValueType.LONG_ARRAY, null, ""),
 
-            arguments(42.1337F, "42.1337"),
-            arguments(DOUBLE_DEFAULT_FALLBACK, ""),
+            arguments(ValueType.DOUBLE_ARRAY, new double[]{1.0D, 3.0D, 3.0D, 7.0D}, "1.0;3.0;3.0;7.0"),
+            arguments(ValueType.DOUBLE_ARRAY, null, ""),
 
-            arguments(new long[]{1L, 3L, 3L, 7L}, "1;3;3;7"),
-            arguments(null, ""),
-
-            arguments(new double[]{1.0D, 3.0D, 3.0D, 7.0D}, "1.0;3.0;3.0;7.0"),
-            arguments(null, ""),
-
-            arguments(new double[]{1.0f, 3.0f, 3.0f, 7.0f}, "1.0;3.0;3.0;7.0"),
-            arguments(null, "")
+            arguments(ValueType.FLOAT_ARRAY, new float[]{1.0f, 3.0f, 3.0f, 7.0f}, "1.0;3.0;3.0;7.0"),
+            arguments(ValueType.FLOAT_ARRAY, null, "")
         );
     }
 
     @ParameterizedTest
     @MethodSource("formatValues")
-    void testFormatting(Object value, String expected) {
-        assertThat(format(value)).isEqualTo(expected);
+    void testFormatting(ValueType valueType, Object value, String expected) {
+        assertThat(valueType.csvValue(value)).isEqualTo(expected);
     }
-
 }
