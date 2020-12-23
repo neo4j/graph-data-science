@@ -91,7 +91,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
         var exportQuery = formatWithLocale(
             "CALL gds.graph.export.csv('test-graph', {" +
-            "  exportLocation: '%s'" +
+            "  exportName: '%s'" +
             "})"
         , tempDir);
 
