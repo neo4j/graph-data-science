@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.api.schema;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.ElementIdentifier;
 
 import java.util.Map;
@@ -28,14 +29,24 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHEMA>, I extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
+public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA>, ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
 
-    Map<I, Map<String, PROPERTY_SCHEMA>> properties();
+    Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> properties();
 
-    SELF filter(Set<I> elementIdentifieresToKeep);
+    SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifieresToKeep);
 
     SELF union(SELF other);
 
+    @Value.Derived
+    default Set<String> allProperties() {
+        return properties()
+            .values()
+            .stream()
+            .flatMap(propertyMapping -> propertyMapping.keySet().stream())
+            .collect(Collectors.toSet());
+    }
+
+    @Value.Derived
     default Map<String, Object> toMap() {
         return properties().entrySet().stream().collect(Collectors.toMap(
             entry -> entry.getKey().name,
@@ -50,7 +61,8 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
         ));
     }
 
-    default Map<I, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<I> identifiersToKeep) {
+    @Value.Derived
+    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> filterProperties(Set<ELEMENT_IDENTIFIER> identifiersToKeep) {
         return properties()
             .entrySet()
             .stream()
@@ -59,7 +71,37 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, I, PROPERTY_SCHE
 
     }
 
-    default Map<I, Map<String, PROPERTY_SCHEMA>> unionProperties(Map<I, Map<String, PROPERTY_SCHEMA>> rightProperties) {
+    /**
+     * Returns a union of all properties in the given schema.
+     * If a property with the same key exists for more then one label, this method makes sure they have the same type.
+     */
+    @Value.Lazy
+    default Map<String, PROPERTY_SCHEMA> unionProperties() {
+        return properties()
+            .values()
+            .stream()
+            .flatMap(e -> e.entrySet().stream())
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue,
+                (leftSchema, rightSchema) -> {
+                    if (leftSchema.valueType() != rightSchema.valueType()) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Combining schema entries with value type %s and %s is not supported.",
+                            leftSchema.valueType(),
+                            rightSchema.valueType()
+                        ));
+                    } else {
+                        return leftSchema;
+                    }
+                }
+            ));
+    }
+
+    /**
+     * For internal use only!
+     */
+    default Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> unionSchema(Map<ELEMENT_IDENTIFIER, Map<String, PROPERTY_SCHEMA>> rightProperties) {
         return Stream.concat(
             properties().entrySet().stream(),
             rightProperties.entrySet().stream()

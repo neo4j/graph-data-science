@@ -25,8 +25,10 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
+import java.util.Map;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,7 +101,7 @@ class NodeSchemaTest {
     }
 
     @Test
-    void testUnionProperties() {
+    void testUnionSchema() {
         var label1 = NodeLabel.of("Foo");
         var label2 = NodeLabel.of("Bar");
 
@@ -141,5 +143,43 @@ class NodeSchemaTest {
         assertTrue(ex
             .getMessage()
             .contains("Combining schema entries with value type {bar=DOUBLE} and {bar=LONG} is not supported."));
+    }
+
+    @Test
+    void testUnionProperties() {
+        var label1 = NodeLabel.of("Foo");
+        var label2 = NodeLabel.of("Bar");
+
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(label1, "foo", ValueType.DOUBLE)
+            .addProperty(label1, "baz", ValueType.LONG)
+            .addProperty(label2, "bar", ValueType.LONG_ARRAY)
+            .addProperty(label2, "baz", ValueType.LONG)
+            .build();
+
+        var expectedUnionSchema = Map.of(
+            "foo", PropertySchema.of("foo", ValueType.DOUBLE, DefaultValue.forDouble(), GraphStore.PropertyState.PERSISTENT),
+            "bar", PropertySchema.of("bar", ValueType.LONG_ARRAY, DefaultValue.forLongArray(), GraphStore.PropertyState.PERSISTENT),
+            "baz", PropertySchema.of("baz", ValueType.LONG, DefaultValue.forLong(), GraphStore.PropertyState.PERSISTENT)
+        );
+
+        var unionPropertySchema = nodeSchema.unionProperties();
+
+        assertThat(unionPropertySchema).containsExactlyInAnyOrderEntriesOf(expectedUnionSchema);
+    }
+
+    @Test
+    void testUnionPropertiesWithIncompatibleTypes() {
+        var label1 = NodeLabel.of("Foo");
+        var label2 = NodeLabel.of("Bar");
+
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(label1, "foo", ValueType.DOUBLE)
+            .addProperty(label2, "foo", ValueType.LONG)
+            .build();
+
+        var exception = assertThrows(IllegalArgumentException.class, nodeSchema::unionProperties);
+
+        assertThat(exception).hasMessage("Combining schema entries with value type DOUBLE and LONG is not supported.");
     }
 }

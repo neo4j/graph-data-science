@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -33,13 +34,18 @@ import java.util.Set;
 @ValueClass
 public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, PropertySchema> {
 
+    @Value.Derived
+    default Set<NodeLabel> availableLabels() {
+        return properties().keySet();
+    }
+
     default NodeSchema filter(Set<NodeLabel> labelsToKeep) {
         return of(filterProperties(labelsToKeep));
     }
 
     @Override
     default NodeSchema union(NodeSchema other) {
-        return of(unionProperties(other.properties()));
+        return of(unionSchema(other.properties()));
     }
 
     static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {

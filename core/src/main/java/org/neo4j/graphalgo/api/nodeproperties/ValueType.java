@@ -22,11 +22,31 @@ package org.neo4j.graphalgo.api.nodeproperties;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+
 public enum ValueType {
     LONG {
         @Override
         public String cypherName() {
             return "Integer";
+        }
+
+        @Override
+        public String csvName() {
+            return "long";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null || (Long) value == LONG_DEFAULT_FALLBACK || (Long) value == INTEGER_DEFAULT_FALLBACK) {
+                return "";
+            }
+            return value.toString();
         }
 
         @Override
@@ -41,6 +61,19 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            return "double";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null || ((Double) value).isNaN()) {
+                return "";
+            }
+            return value.toString();
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forDouble();
         }
@@ -49,6 +82,20 @@ public enum ValueType {
         @Override
         public String cypherName() {
             return "List of Float";
+        }
+
+        @Override
+        public String csvName() {
+            return "double[]";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null) {
+                return "";
+            }
+            var doubleArray = (double[]) value;
+            return Arrays.stream(doubleArray).mapToObj(Double::toString).collect(Collectors.joining(";"));
         }
 
         @Override
@@ -63,6 +110,24 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            return "float[]";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null) {
+                return "";
+            }
+            var floatArray = (float[]) value;
+            return IntStream
+                .range(0, floatArray.length)
+                .mapToDouble(i -> floatArray[i])
+                .mapToObj(Double::toString)
+                .collect(Collectors.joining(";"));
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forFloatArray();
         }
@@ -71,6 +136,20 @@ public enum ValueType {
         @Override
         public String cypherName() {
             return "List of Integer";
+        }
+
+        @Override
+        public String csvName() {
+            return "long[]";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null) {
+                return "";
+            }
+            var longArray = (long[]) value;
+            return Arrays.stream(longArray).mapToObj(Long::toString).collect(Collectors.joining(";"));
         }
 
         @Override
@@ -85,12 +164,29 @@ public enum ValueType {
         }
 
         @Override
+        public String csvName() {
+            throw new UnsupportedOperationException("Value Type UKNONWN is not supported in CSV");
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null) {
+                return "";
+            }
+            return value.toString();
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
     };
 
     public abstract String cypherName();
+
+    public abstract String csvName();
+
+    public abstract String csvValue(Object value);
 
     public abstract DefaultValue fallbackValue();
 

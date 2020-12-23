@@ -42,7 +42,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
     @Override
     default RelationshipSchema union(RelationshipSchema other) {
-        return of(unionProperties(other.properties()));
+        return of(unionSchema(other.properties()));
     }
 
     default RelationshipSchema singleTypeAndProperty(
