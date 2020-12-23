@@ -14,11 +14,13 @@ This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Sc
 This topic includes:
 
 * <<algorithms-astar-intro, Introduction>>
+* <<algorithms-astar-requirements, Requirements>>
 * <<algorithms-astar-syntax, Syntax>>
 * <<algorithms-astar-examples, Examples>>
 ** <<algorithms-astar-examples-stream, Stream>>
 ** <<algorithms-astar-examples-mutate, Mutate>>
 ** <<algorithms-astar-examples-write, Write>>
+
 
 [[algorithms-astar-intro]]
 == Introduction
@@ -38,6 +40,22 @@ Here, the sphere is the earth and the points are geo-coordinates stored on the n
 
 The algorithm implementation is executed using a single thread.
 Altering the concurrency configuration has no effect.
+
+
+[[algorithms-astar-requirements]]
+== Requirements
+
+In GDS, the heuristic function used to guide the search is the https://en.wikipedia.org/wiki/Haversine_formula[haversine formula].
+The formula computes the distance between two points on a sphere given their longitudes and latitudes.
+The distance is computed in nautical miles.
+
+In order to guarantee finding the optimal solution, i.e., the shortest path between two points, the heuristic must be admissible.
+To be admissible, the function must not overestimate the distance to the target, i.e., the lowest possible cost of a path must always be greater or equal to the heuristic.
+
+This leads to a requirement on the relationship weights of the input graph.
+Relationship weights must represent the distance between two nodes and ideally scaled to nautical miles.
+Kilometers or miles also work, but the heuristic works best for nautical miles.
+
 
 [[algorithms-astar-syntax]]
 == Syntax
@@ -67,18 +85,18 @@ CREATE (a:Station {name: 'Kings Cross',         latitude: 51.5308, longitude: -0
        (c:Station {name: 'Camden Town',         latitude: 51.5392, longitude: -0.1426}),
        (d:Station {name: 'Mornington Crescent', latitude: 51.5342, longitude: -0.1387}),
        (e:Station {name: 'Kentish Town',        latitude: 51.5507, longitude: -0.1402}),
-       (a)-[:CONNECTION {time: 2}]->(b),
-       (b)-[:CONNECTION {time: 3}]->(c),
-       (b)-[:CONNECTION {time: 2}]->(d),
-       (d)-[:CONNECTION {time: 2}]->(c),
-       (c)-[:CONNECTION {time: 2}]->(e)
+       (a)-[:CONNECTION {distance: 0.7}]->(b),
+       (b)-[:CONNECTION {distance: 1.3}]->(c),
+       (b)-[:CONNECTION {distance: 0.7}]->(d),
+       (d)-[:CONNECTION {distance: 0.6}]->(c),
+       (c)-[:CONNECTION {distance: 1.3}]->(e)
 ----
 
 The graph represents a transport network of stations.
 Each station has a geo-coordinate, expressed by `latitude` and `longitude` properties.
 Stations are connected via connections.
-We use the `time` property as relationship weight.
-The algorithm will pick the next node in the search based on already traveled time and distance to the target station.
+We use the `distance` property as relationship weight which represents the distance between stations in kilometers.
+The algorithm will pick the next node in the search based on the already traveled distance and the distance to the target station.
 
 include::../../shared/examples-named-native-note.adoc[]
 
@@ -91,7 +109,7 @@ CALL gds.graph.create(
     'CONNECTION',
     {
         nodeProperties: ['latitude', 'longitude'],
-        relationshipProperties: 'time'
+        relationshipProperties: 'distance'
     }
 )
 ----
@@ -116,7 +134,7 @@ CALL gds.beta.shortestPath.astar.stream('myGraph', {
     targetNode: id(target),
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
-    relationshipWeightProperty: 'time'
+    relationshipWeightProperty: 'distance'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
 RETURN
@@ -133,7 +151,7 @@ ORDER BY index
 [opts="header"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs
-| 0     | "Kings Cross"  | "Kentish Town" | 7.0       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 2.0, 5.0, 7.0]
+| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 0.7, 2.0, 3.3]
 |===
 --
 
@@ -158,7 +176,7 @@ CALL gds.beta.shortestPath.astar.mutate('myGraph', {
     targetNode: id(target),
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
-    relationshipWeightProperty: 'time',
+    relationshipWeightProperty: 'distance',
     mutateRelationshipType: 'PATH'
 })
 YIELD relationshipsWritten
@@ -193,7 +211,7 @@ CALL gds.beta.shortestPath.astar.write('myGraph', {
     targetNode: id(target),
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
-    relationshipWeightProperty: 'time',
+    relationshipWeightProperty: 'distance',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,
     writeCosts: true
