@@ -25,12 +25,13 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class DirectedEdgeSplitter extends EdgeSplitterBase {
+public class DirectedEdgeSplitter extends EdgeSplitter {
 
     public DirectedEdgeSplitter(long seed) {
         super(seed);
     }
 
+    @Override
     public SplitResult split(
         Graph graph,
         double holdoutFraction
@@ -38,6 +39,7 @@ public class DirectedEdgeSplitter extends EdgeSplitterBase {
         return split(graph, graph, holdoutFraction);
     }
 
+    @Override
     public SplitResult split(
         Graph graph,
         Graph masterGraph,

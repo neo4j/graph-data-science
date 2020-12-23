@@ -34,16 +34,28 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class EdgeSplitterBase {
+public abstract class EdgeSplitter {
 
     static final double NEGATIVE = 0D;
     static final double POSITIVE = 1D;
+    public static final String RELATIONSHIP_PROPERTY = "label";
 
     protected final ThreadLocal<Random> rng;
 
-    public EdgeSplitterBase(long seed) {
+    public EdgeSplitter(long seed) {
         this.rng = ThreadLocal.withInitial(() -> new Random(seed));
     }
+
+    public abstract SplitResult split(
+        Graph graph,
+        double holdoutFraction
+    );
+
+    public abstract SplitResult split(
+        Graph graph,
+        Graph masterGraph,
+        double holdoutFraction
+    );
 
     protected boolean sample(double probability) {
         return rng.get().nextDouble() < probability;
@@ -115,7 +127,7 @@ public class EdgeSplitterBase {
 
 
     @ValueClass
-    interface SplitResult {
+    public interface SplitResult {
         Relationships remainingRels();
         Relationships selectedRels();
 

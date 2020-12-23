@@ -34,11 +34,13 @@ import java.util.concurrent.atomic.AtomicLong;
  * an edge with the same underlying node pair but with random direction.
  * The holdout fraction is denominated in fraction of undirected edges.
  */
-public class UndirectedEdgeSplitter extends EdgeSplitterBase {
+public class UndirectedEdgeSplitter extends EdgeSplitter {
+
     UndirectedEdgeSplitter(long seed) {
         super(seed);
     }
 
+    @Override
     public SplitResult split(
         Graph graph,
         double holdoutFraction
@@ -46,6 +48,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitterBase {
         return split(graph, graph, holdoutFraction);
     }
 
+    @Override
     public SplitResult split(
         Graph graph,
         Graph masterGraph,
