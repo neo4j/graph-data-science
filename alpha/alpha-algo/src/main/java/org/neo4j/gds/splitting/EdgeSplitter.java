@@ -42,8 +42,8 @@ public abstract class EdgeSplitter {
 
     protected final ThreadLocal<Random> rng;
 
-    public EdgeSplitter(long seed) {
-        this.rng = ThreadLocal.withInitial(() -> new Random(seed));
+    public EdgeSplitter(Optional<Long> maybeSeed) {
+        this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
     }
 
     public abstract SplitResult split(

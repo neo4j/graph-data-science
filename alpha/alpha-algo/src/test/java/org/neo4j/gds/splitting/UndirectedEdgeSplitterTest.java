@@ -21,6 +21,7 @@ package org.neo4j.gds.splitting;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -36,10 +37,12 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.splitting.DirectedEdgeSplitter.NEGATIVE;
 import static org.neo4j.gds.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -130,6 +133,72 @@ class UndirectedEdgeSplitterTest {
     }
 
     @Test
+    void shouldProduceDeterministicResult() {
+        var graph = new RandomGraphGenerator(
+            100,
+            95,
+            RelationshipDistribution.UNIFORM,
+            123L,
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Aggregation.SINGLE,
+            Orientation.UNDIRECTED,
+            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
+            AllocationTracker.empty()
+        ).generate();
+
+        var splitResult1 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
+        var remainingAreEqual = relationshipsAreEqual(
+            graph.nodeMapping(),
+            splitResult1.remainingRels(),
+            splitResult2.remainingRels()
+        );
+        assertTrue(remainingAreEqual);
+
+        var holdoutAreEqual = relationshipsAreEqual(
+            graph.nodeMapping(),
+            splitResult1.selectedRels(),
+            splitResult2.selectedRels()
+        );
+        assertTrue(holdoutAreEqual);
+    }
+
+    @Test
+    void shouldProduceNonDeterministicResult() {
+        var graph = new RandomGraphGenerator(
+            100,
+            95,
+            RelationshipDistribution.UNIFORM,
+            123L,
+            Optional.empty(),
+            Map.of(),
+            Optional.empty(),
+            Aggregation.SINGLE,
+            Orientation.UNDIRECTED,
+            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
+            AllocationTracker.empty()
+        ).generate();
+
+        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
+        var remainingAreEqual = relationshipsAreEqual(
+            graph.nodeMapping(),
+            splitResult1.remainingRels(),
+            splitResult2.remainingRels()
+        );
+        assertFalse(remainingAreEqual);
+
+        var holdoutAreEqual = relationshipsAreEqual(
+            graph.nodeMapping(),
+            splitResult1.selectedRels(),
+            splitResult2.selectedRels()
+        );
+        assertFalse(holdoutAreEqual);
+    }
+
+    @Test
     void negativeEdgeSampling() {
         var splitter = new UndirectedEdgeSplitter(42L);
 
@@ -150,4 +219,24 @@ class UndirectedEdgeSplitterTest {
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
     }
 
+    private boolean relationshipsAreEqual(NodeMapping mapping, Relationships r1, Relationships r2) {
+        var fallbackValue = -0.66;
+        if (r1.topology().elementCount() != r2.topology().elementCount()) {
+            return false;
+        }
+        var g1 = GraphFactory.create(mapping, r1, AllocationTracker.empty());
+        var g2 = GraphFactory.create(mapping, r2, AllocationTracker.empty());
+        var equalSoFar = new AtomicBoolean(true);
+        g1.forEachNode(nodeId -> {
+            g1.forEachRelationship(nodeId, fallbackValue, (source, target, val) -> {
+                var g2Property = g2.relationshipProperty(source, target, fallbackValue);
+                if ((!g2.exists(source, target)) || (Double.compare(g2Property, val) != 0))  {
+                    equalSoFar.set(false);
+                }
+                return equalSoFar.get();
+            });
+            return equalSoFar.get();
+        });
+        return equalSoFar.get();
+    }
 }

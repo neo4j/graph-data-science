@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -36,8 +37,12 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class UndirectedEdgeSplitter extends EdgeSplitter {
 
-    UndirectedEdgeSplitter(long seed) {
-        super(seed);
+    public UndirectedEdgeSplitter(Optional<Long> maybeSeed) {
+        super(maybeSeed);
+    }
+
+    public UndirectedEdgeSplitter(long seed) {
+        this(Optional.of(seed));
     }
 
     @Override

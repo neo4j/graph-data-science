@@ -23,12 +23,17 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
 
+    public DirectedEdgeSplitter(Optional<Long> maybeSeed) {
+        super(maybeSeed);
+    }
+
     public DirectedEdgeSplitter(long seed) {
-        super(seed);
+        this(Optional.of(seed));
     }
 
     @Override
