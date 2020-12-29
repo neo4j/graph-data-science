@@ -63,12 +63,11 @@ class NodeLogisticRegressionTrainTest {
 
         var linearRegression = new NodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
 
-        NodeLogisticRegressionObjective result = linearRegression.compute();
+        var result = linearRegression.compute().modelData();
 
         assertThat(result).isNotNull();
 
-        assertThat(result.weights()).hasSize(1);
-        var trainedWeights = result.weights().get(0);
+        var trainedWeights = result.weights();
         assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(1);
         assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
 

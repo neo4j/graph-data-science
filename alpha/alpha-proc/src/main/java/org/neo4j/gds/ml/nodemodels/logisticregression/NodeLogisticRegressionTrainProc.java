@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrain, NodeLogisticRegressionObjective, NodeLogisticRegressionTrainConfig> {
+public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrain, NodeLogisticRegressionPredictor, NodeLogisticRegressionTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeLogisticRegression.train", mode = Mode.READ)
     @Description("Trains a binary logistic regression model for a target node property")
@@ -54,7 +54,7 @@ public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRe
             graphNameOrConfig,
             configuration
         );
-        Weights<? extends Tensor<?>> weights = result.result().weights().get(0);
+        Weights<? extends Tensor<?>> weights = result.result().modelData().weights();
         double[] weightValues = weights.data().data();
         var config = result.config();
         List<String> props = config.featureProperties();

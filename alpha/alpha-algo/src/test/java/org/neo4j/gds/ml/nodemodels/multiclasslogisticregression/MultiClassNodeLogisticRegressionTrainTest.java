@@ -63,12 +63,11 @@ class MultiClassNodeLogisticRegressionTrainTest {
 
         var algo = new MultiClassNodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
 
-        var result = algo.compute();
+        var result = algo.compute().modelData();
 
         assertThat(result).isNotNull();
 
-        assertThat(result.weights()).hasSize(1);
-        var trainedWeights = result.weights().get(0);
+        var trainedWeights = result.weights();
         assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(3);
         assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
 
