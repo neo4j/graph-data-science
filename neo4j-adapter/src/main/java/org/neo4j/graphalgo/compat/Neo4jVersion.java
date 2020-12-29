@@ -29,7 +29,8 @@ public enum Neo4jVersion {
     V_4_0,
     V_4_1,
     V_4_2,
-    V_4_3;
+    V_4_3,
+    V_Aura;
 
     @Override
     public String toString() {
@@ -42,8 +43,10 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
+            case V_Aura:
+                return "aura";
             default:
-                throw new IllegalArgumentException("Unexpected value: " + this + " (sad java 😞)");
+                throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
     }
 
@@ -56,28 +59,36 @@ public enum Neo4jVersion {
     }
 
     static String neo4jVersion() {
-        // Aura relevant implementation detail
-        //
-        // We don't call `Version.getNeo4jVersion()` directly, as this one
-        // allows for a system property override. This override is used
-        // by Aura for reasons relevant to them.
-        // The version set by Aura does not necessarily reflect the actual Neo4j version,
-        // that is, they might set the version to `4.0-Aura` while Neo4j is actually at version 4.2.x.
-        //
-        // For this reason, we read the _actual_ Neo4j version without checking the override property.
-        var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "dev");
+        var neo4jVersion = Objects.requireNonNullElse(Version.getNeo4jVersion(), "dev");
         // some versions have a build thing attached at the end
         // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
         // This regex follows the logic from org.neo4j.kernel.internal.Version.parseReleaseVersion
-        var pattern = Pattern.compile("^(\\d+\\.\\d+(:?\\.\\d+)?(:?-?[^,]+)?)");
+        Pattern pattern = Pattern.compile(
+            "(\\d+" +                  // Major version
+            "\\.\\d+" +                // Minor version
+            "(\\.\\d+)?" +             // Optional patch version
+            "(-?[^,]+)?)" +            // Optional marker, like M01, GA, SNAPSHOT - anything other than a comma
+            ".*"                       // Anything else, such as git revision
+        );
         var matcher = pattern.matcher(neo4jVersion);
         if (matcher.find()) {
             return matcher.group(1);
         }
+        // If no match is found, return the full version.
         return neo4jVersion;
     }
 
-    static Neo4jVersion parse(CharSequence version) {
+    static Neo4jVersion parse(String version) {
+        // Aura relevant implementation detail
+        //
+        // `Version.getNeo4jVersion()` allows for a system property override: `unsupported.neo4j.custom.version`
+        //
+        // This override is used by Aura for reasons relevant to them, setting the version to something like `4.2-Aura`.
+        // Before parsing the version according to major+minor version, we check if the version has this Aura suffix.
+        // If it does we set the `Neo4jVersion` to `V_Aura`.
+        if (version.endsWith("-Aura")) {
+            return Neo4jVersion.V_Aura;
+        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
@@ -88,7 +99,6 @@ public enum Neo4jVersion {
             case "4.1":
                 return Neo4jVersion.V_4_1;
             case "4.2":
-            case "aura":
                 return Neo4jVersion.V_4_2;
             case "4.3":
             case "dev":
