@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.splitting;
+package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
@@ -43,8 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.splitting.DirectedEdgeSplitter.NEGATIVE;
-import static org.neo4j.gds.splitting.DirectedEdgeSplitter.POSITIVE;
+import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.NEGATIVE;
+import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
