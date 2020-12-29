@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.Constant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.ElementSum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 

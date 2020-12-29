@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
+package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
@@ -45,6 +45,6 @@ public class ElementSum extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        return ctx.data(parent).map(ignore -> ctx.gradient(this).dataAt(0));
+        return ctx.data(parent).map(ignore -> ctx.gradient(this).value());
     }
 }
