@@ -22,6 +22,8 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainProc;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
@@ -98,7 +100,9 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.eigenvector.write",
         "gds.alpha.eigenvector.stream",
         "gds.alpha.ml.ann.write",
-        "gds.alpha.ml.ann.stream"
+        "gds.alpha.ml.ann.stream",
+        "gds.alpha.ml.nodeLogisticRegression.train",
+        "gds.alpha.ml.splitRelationships.mutate"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
@@ -141,11 +145,13 @@ class AlphaListProcTest extends BaseProcTest {
             ListProc.class,
             CosineProc.class,
             EuclideanProc.class,
+            NodeLogisticRegressionTrainProc.class,
             OverlapProc.class,
             PearsonProc.class,
             RandomWalkProc.class,
             OneHotEncodingFunc.class,
             SpanningTreeProc.class,
+            SplitRelationshipsMutateProc.class,
             ShortestPathDeltaSteppingProc.class,
             SimilaritiesFunc.class,
             SccProc.class,

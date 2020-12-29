@@ -42,7 +42,7 @@ class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperties(List.of("a", "b", "t"), DefaultValue.of(0D))
             .withAnyRelationshipType()
-            .algo("gds.alpha.nodeLogisticRegression")
+            .algo("gds.alpha.ml.nodeLogisticRegression")
             .trainMode()
             .addParameter("featureProperties", List.of("a", "b"))
             .addParameter("targetProperty", "t")

@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainAlgo;
 import org.neo4j.logging.Log;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,7 +47,8 @@ import java.util.stream.Stream;
 
 public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrainAlgo, NodeLogisticRegression, NodeLogisticRegressionTrainConfig> {
 
-    @Procedure(name = "gds.alpha.nodeLogisticRegression.train", mode = Mode.READ)
+    @Procedure(name = "gds.alpha.ml.nodeLogisticRegression.train", mode = Mode.READ)
+    @Description("Trains a binary logistic regression model for a target node property")
     public Stream<StreamResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

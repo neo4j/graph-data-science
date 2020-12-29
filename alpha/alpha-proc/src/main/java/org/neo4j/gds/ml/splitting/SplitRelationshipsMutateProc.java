@@ -48,7 +48,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships, SplitResult, SplitRelationshipsMutateProc.MutateResult, SplitRelationshipsMutateConfig> {
 
-    @Procedure(name = "gds.experimental.splitRelationships.mutate", mode = READ)
+    @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
     @Description("Splits a graph into holdout and remaining relationship types and adds them to the in-memory graph.")
     public Stream<SplitRelationshipsMutateProc.MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
