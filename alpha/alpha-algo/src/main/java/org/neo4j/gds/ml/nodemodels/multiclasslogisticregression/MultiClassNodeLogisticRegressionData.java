@@ -17,16 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.List;
 
-public interface Objective {
-    List<Weights<? extends Tensor<?>>> weights();
-    Variable<Scalar> loss(Batch batch);
+@ValueClass
+public interface MultiClassNodeLogisticRegressionData {
+    Weights<Matrix> weights();
+    LocalIdMap classIdMap();
+    List<String> nodePropertyKeys();
+
+    static ImmutableMultiClassNodeLogisticRegressionData.Builder builder() {
+        return ImmutableMultiClassNodeLogisticRegressionData.builder();
+    }
 }

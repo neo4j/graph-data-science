@@ -39,7 +39,7 @@ public class Training {
         this.log = log;
     }
 
-    public <T> void train(Objective<T> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
+    public void train(Objective objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
         Updater singleUpdater = settings.sharedUpdater() ? settings.updater(objective.weights()) : null;
         Updater[] updaters = null;
         if (!settings.sharedUpdater()) {
@@ -69,11 +69,11 @@ public class Training {
         ));
     }
 
-    private <T> double evaluateLoss(Objective<T> objective, BatchQueue batches, int concurrency) {
+    private double evaluateLoss(Objective objective, BatchQueue batches, int concurrency) {
         DoubleAdder totalLoss = new DoubleAdder();
 
         batches.parallelConsume(
-            new LossEvalConsumer<>(
+            new LossEvalConsumer(
                 objective,
                 totalLoss
             ),
@@ -83,9 +83,9 @@ public class Training {
         return totalLoss.doubleValue();
     }
 
-    private <T> void trainEpoch(
+    private void trainEpoch(
         TrainingSettings settings,
-        Objective<T> objective,
+        Objective objective,
         BatchQueue batches,
         int concurrency,
         Updater singleUpdater,
@@ -94,18 +94,18 @@ public class Training {
         batches.parallelConsume(
             concurrency,
             jobId ->
-                new ObjectiveUpdateConsumer<>(
+                new ObjectiveUpdateConsumer(
                     objective,
                     settings.sharedUpdater() ? singleUpdater : updaters[jobId]
                 )
         );
     }
 
-    static class ObjectiveUpdateConsumer<T> implements Consumer<Batch> {
-        private final Objective<T> objective;
+    static class ObjectiveUpdateConsumer implements Consumer<Batch> {
+        private final Objective objective;
         private final Updater updater;
 
-        ObjectiveUpdateConsumer(Objective<T> objective, Updater updater) {
+        ObjectiveUpdateConsumer(Objective objective, Updater updater) {
             this.objective = objective;
             this.updater = updater;
         }
@@ -120,11 +120,11 @@ public class Training {
         }
     }
 
-    static class LossEvalConsumer<T> implements Consumer<Batch> {
-        private final Objective<T> objective;
+    static class LossEvalConsumer implements Consumer<Batch> {
+        private final Objective objective;
         private final DoubleAdder totalLoss;
 
-        LossEvalConsumer(Objective<T> objective, DoubleAdder lossAdder) {
+        LossEvalConsumer(Objective objective, DoubleAdder lossAdder) {
             this.objective = objective;
             this.totalLoss = lossAdder;
         }

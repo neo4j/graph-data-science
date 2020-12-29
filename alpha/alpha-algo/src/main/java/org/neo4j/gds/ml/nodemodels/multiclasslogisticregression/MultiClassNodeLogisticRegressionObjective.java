@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiClassCrossEntropyLoss;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Softmax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
@@ -33,53 +30,60 @@ import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class MultiClassNodeLogisticRegressionObjective implements Objective<Double> {
+public class MultiClassNodeLogisticRegressionObjective extends
+             MultiClassNodeLogisticRegressionBase implements Objective {
+
     private final String targetPropertyKey;
-    private final Weights<Matrix> weights;
-    private final LocalIdMap classIdMap;
-    private final List<String> nodePropertyKeys;
     private final Graph graph;
 
     public MultiClassNodeLogisticRegressionObjective(
-        List<String> nodeProperties,
+        List<String> nodePropertyKeys,
         String targetPropertyKey,
         Graph graph
     ) {
-        this.nodePropertyKeys = nodeProperties;
-        this.graph = graph;
-        this.targetPropertyKey = targetPropertyKey;
-        this.classIdMap = new LocalIdMap();
-        graph.forEachNode(nodeId -> {
-            var targetClass = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            this.classIdMap.toMapped((long) targetClass);
-            return true;
-        });
-
-        this.weights = initWeights(this.classIdMap.originalIds().length);
+        super(makeData(nodePropertyKeys, targetPropertyKey, graph));
+        this.targetPropertyKey=targetPropertyKey;
+        this.graph=graph;
     }
 
-    private Weights<Matrix> initWeights(int numberOfClasses) {
+    private static MultiClassNodeLogisticRegressionData makeData(List<String> nodePropertyKeys, String targetPropertyKey, Graph graph) {
+        var classIdMap = makeClassIdMap(targetPropertyKey, graph);
+        return MultiClassNodeLogisticRegressionData.builder()
+            .classIdMap(classIdMap)
+            .weights(initWeights(nodePropertyKeys, classIdMap.originalIds().length))
+            .nodePropertyKeys(nodePropertyKeys)
+            .build();
+    }
+
+    private static LocalIdMap makeClassIdMap(String targetPropertyKey, Graph graph) {
+        var classIdMap = new LocalIdMap();
+        graph.forEachNode(nodeId -> {
+            var targetClass = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
+            classIdMap.toMapped((long) targetClass);
+            return true;
+        });
+        return classIdMap;
+    }
+
+    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys, int numberOfClasses) {
         var featuresPerClass = nodePropertyKeys.size() + 1;
         return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(weights);
+        return List.of(modelData.weights());
     }
 
     @Override
     public Variable<Scalar> loss(Batch batch) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int numberOfNodes = batch.size();
-        MatrixConstant features = features(batch);
-        Variable<Matrix> predictions = predictions(features, weights);
+        MatrixConstant features = features(graph, batch);
+        Variable<Matrix> predictions = predictions(features, modelData.weights());
         double[] targets = new double[numberOfNodes];
         int nodeOffset = 0;
         for (long nodeId : nodeIds) {
@@ -91,34 +95,4 @@ public class MultiClassNodeLogisticRegressionObjective implements Objective<Doub
         return new MultiClassCrossEntropyLoss(predictions, targetVariable);
     }
 
-    private Variable<Matrix> predictions(MatrixConstant features, Weights<Matrix> weights) {
-        return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
-    }
-
-    private MatrixConstant features(Batch batch) {
-        int numberOfNodes = batch.size();
-        // the +1 accounts for the always on feature with value 1.0 below
-        int nodePropertiesCount = nodePropertyKeys.size() + 1;
-        double[] features = new double[numberOfNodes * nodePropertiesCount];
-        for (int j = 0; j < nodePropertyKeys.size(); j++) {
-            NodeProperties nodeProperties = graph.nodeProperties(nodePropertyKeys.get(j));
-            int nodeOffset = 0;
-            for (long nodeId : batch.nodeIds()) {
-                features[nodeOffset * nodePropertiesCount + j] = nodeProperties.doubleValue(nodeId);
-                nodeOffset++;
-            }
-        }
-        for (int nodeOffset = 0; nodeOffset < batch.size(); nodeOffset++) {
-            features[nodeOffset * nodePropertiesCount + nodePropertiesCount - 1] = 1.0;
-        }
-        return new MatrixConstant(features, numberOfNodes, nodePropertiesCount);
-    }
-
-    @Override
-    public List<Double> apply(Batch batch) {
-        ComputationContext ctx = new ComputationContext();
-        MatrixConstant features = features(batch);
-        double[] data = ctx.forward(predictions(features, weights)).data();
-        return Arrays.stream(data).boxed().collect(Collectors.toList());
-    }
 }

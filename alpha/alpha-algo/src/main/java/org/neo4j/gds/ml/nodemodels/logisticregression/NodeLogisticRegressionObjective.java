@@ -19,57 +19,57 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LogisticLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.gds.ml.Batch;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class NodeLogisticRegressionObjective implements Objective<Double> {
-    private final List<String> nodePropertyKeys;
+public class NodeLogisticRegressionObjective extends NodeLogisticRegressionBase implements Objective {
     private final String targetPropertyKey;
-    private final Weights<Matrix> weights;
     private final Graph graph;
 
     public NodeLogisticRegressionObjective(
-        List<String> nodeProperties,
+        List<String> nodePropertyKeys,
         String targetPropertyKey,
         Graph graph
     ) {
-        this.nodePropertyKeys = nodeProperties;
+        super(makeData(nodePropertyKeys));
         this.targetPropertyKey = targetPropertyKey;
-        this.weights = initWeights();
         this.graph = graph;
     }
 
-    private Weights<Matrix> initWeights() {
+    private static NodeLogisticRegressionData makeData(
+        List<String> nodePropertyKeys
+    ) {
+        return NodeLogisticRegressionData.builder()
+            .weights(initWeights(nodePropertyKeys))
+            .nodePropertyKeys(nodePropertyKeys)
+            .build();
+    }
+
+    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys) {
         double[] weights = new double[nodePropertyKeys.size() + 1];
         return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(weights);
+        return List.of(modelData.weights());
     }
 
     @Override
     public Variable<Scalar> loss(Batch batch) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int rows = batch.size();
-        MatrixConstant features = features(batch);
+        MatrixConstant features = features(graph, batch);
         Variable<Matrix> predictions = predictions(features);
         double[] targets = new double[rows];
         int nodeOffset = 0;
@@ -78,37 +78,6 @@ public class NodeLogisticRegressionObjective implements Objective<Double> {
             nodeOffset++;
         }
         MatrixConstant targetVariable = new MatrixConstant(targets, rows, 1);
-        return new LogisticLoss(weights, predictions, features, targetVariable);
+        return new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
     }
-
-    @Override
-    public List<Double> apply(Batch batch) {
-        ComputationContext ctx = new ComputationContext();
-        MatrixConstant features = features(batch);
-        double[] data = ctx.forward(predictions(features)).data();
-        return Arrays.stream(data).boxed().collect(Collectors.toList());
-    }
-
-    private Variable<Matrix> predictions(MatrixConstant features) {
-        return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
-    }
-
-    private MatrixConstant features(Batch batch) {
-        int rows = batch.size();
-        int cols = nodePropertyKeys.size() + 1;
-        double[] features = new double[rows * cols];
-        for (int j = 0; j < nodePropertyKeys.size(); j++) {
-            NodeProperties nodeProperties = graph.nodeProperties(nodePropertyKeys.get(j));
-            int nodeOffset = 0;
-            for (long nodeId : batch.nodeIds()) {
-                features[nodeOffset * cols + j] = nodeProperties.doubleValue(nodeId);
-                nodeOffset++;
-            }
-        }
-        for (int nodeOffset = 0; nodeOffset < batch.size(); nodeOffset++) {
-            features[nodeOffset * cols + cols - 1] = 1.0;
-        }
-        return new MatrixConstant(features, rows, cols);
-    }
-
 }

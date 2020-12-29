@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.api.Graph;
 
-import java.util.List;
+public interface Predictor<T, D> {
+    /**
+     * Returns the data, such as weights, needed to store or load the model
+     * @return the data
+     */
+    D modelData();
 
-public interface Objective {
-    List<Weights<? extends Tensor<?>>> weights();
-    Variable<Scalar> loss(Batch batch);
+    /**
+     * Predicts an output given a batch of examples
+     * @param graph the graph to predict on
+     * @param batch of examples, currently only batch of node ids
+     * @return A generic output
+     */
+    T predict(Graph graph, Batch batch);
 }
