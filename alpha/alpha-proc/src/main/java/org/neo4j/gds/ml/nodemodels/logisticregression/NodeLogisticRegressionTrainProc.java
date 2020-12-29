@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.ImmutableTrainingSettings;
 import org.neo4j.gds.ml.TrainingSettings;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegression;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -33,7 +31,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainAlgo;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -45,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrainAlgo, NodeLogisticRegression, NodeLogisticRegressionTrainConfig> {
+public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrain, NodeLogisticRegressionObjective, NodeLogisticRegressionTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeLogisticRegression.train", mode = Mode.READ)
     @Description("Trains a binary logistic regression model for a target node property")
@@ -80,15 +77,15 @@ public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRe
     }
 
     @Override
-    protected AlgorithmFactory<NodeLogisticRegressionTrainAlgo, NodeLogisticRegressionTrainConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeLogisticRegressionTrain, NodeLogisticRegressionTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
-            public NodeLogisticRegressionTrainAlgo build(
+            public NodeLogisticRegressionTrain build(
                 Graph graph, NodeLogisticRegressionTrainConfig configuration, AllocationTracker tracker, Log log
             ) {
                 //TODO: make configuration extend TrainingSettings
                 TrainingSettings trainingSettings = ImmutableTrainingSettings.builder().build();
-                return new NodeLogisticRegressionTrainAlgo(graph, trainingSettings, configuration, log);
+                return new NodeLogisticRegressionTrain(graph, trainingSettings, configuration, log);
             }
 
             @Override

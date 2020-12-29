@@ -31,7 +31,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.Batch;
-import org.neo4j.gds.ml.Model;
+import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 
@@ -39,14 +39,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MultiClassNodeLogisticRegression implements Model<Double> {
+public class MultiClassNodeLogisticRegressionObjective implements Objective<Double> {
     private final String targetPropertyKey;
     private final Weights<Matrix> weights;
     private final LocalIdMap classIdMap;
     private final List<String> nodePropertyKeys;
     private final Graph graph;
 
-    public MultiClassNodeLogisticRegression(
+    public MultiClassNodeLogisticRegressionObjective(
         List<String> nodeProperties,
         String targetPropertyKey,
         Graph graph

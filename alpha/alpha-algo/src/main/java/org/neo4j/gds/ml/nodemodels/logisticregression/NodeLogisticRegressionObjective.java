@@ -29,22 +29,22 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.gds.ml.Batch;
-import org.neo4j.gds.ml.Model;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NodeLogisticRegression implements Model<Double> {
+public class NodeLogisticRegressionObjective implements Objective<Double> {
     private final List<String> nodePropertyKeys;
     private final String targetPropertyKey;
     private final Weights<Matrix> weights;
     private final Graph graph;
 
-    public NodeLogisticRegression(
+    public NodeLogisticRegressionObjective(
         List<String> nodeProperties,
         String targetPropertyKey,
         Graph graph

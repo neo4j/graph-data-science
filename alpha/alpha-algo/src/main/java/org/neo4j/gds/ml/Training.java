@@ -39,22 +39,22 @@ public class Training {
         this.log = log;
     }
 
-    public <T> void train(Model<T> model, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater singleUpdater = settings.sharedUpdater() ? settings.updater(model.weights()) : null;
+    public <T> void train(Objective<T> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
+        Updater singleUpdater = settings.sharedUpdater() ? settings.updater(objective.weights()) : null;
         Updater[] updaters = null;
         if (!settings.sharedUpdater()) {
             updaters = new Updater[concurrency];
             for (int i = 0; i < concurrency; i++) {
-                updaters[i] = settings.updater(model.weights());
+                updaters[i] = settings.updater(objective.weights());
             }
         }
         int epoch = 0;
         TrainingStopper stopper = settings.stopper();
-        double initialLoss = evaluateLoss(model, queueSupplier.get(), concurrency);
+        double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
         double lastLoss = initialLoss;
         while (!stopper.terminated()) {
-            trainEpoch(settings, model, queueSupplier.get(), concurrency, singleUpdater, updaters);
-            lastLoss = evaluateLoss(model, queueSupplier.get(), concurrency);
+            trainEpoch(settings, objective, queueSupplier.get(), concurrency, singleUpdater, updaters);
+            lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
             log.debug(formatWithLocale("Loss: %s, After Epoch: %d", lastLoss, epoch));
@@ -69,12 +69,12 @@ public class Training {
         ));
     }
 
-    private <T> double evaluateLoss(Model<T> model, BatchQueue batches, int concurrency) {
+    private <T> double evaluateLoss(Objective<T> objective, BatchQueue batches, int concurrency) {
         DoubleAdder totalLoss = new DoubleAdder();
 
         batches.parallelConsume(
             new LossEvalConsumer<>(
-                model,
+                objective,
                 totalLoss
             ),
             concurrency
@@ -85,7 +85,7 @@ public class Training {
 
     private <T> void trainEpoch(
         TrainingSettings settings,
-        Model<T> model,
+        Objective<T> objective,
         BatchQueue batches,
         int concurrency,
         Updater singleUpdater,
@@ -94,25 +94,25 @@ public class Training {
         batches.parallelConsume(
             concurrency,
             jobId ->
-                new ModelUpdateConsumer<>(
-                    model,
+                new ObjectiveUpdateConsumer<>(
+                    objective,
                     settings.sharedUpdater() ? singleUpdater : updaters[jobId]
                 )
         );
     }
 
-    static class ModelUpdateConsumer<T> implements Consumer<Batch> {
-        private final Model<T> model;
+    static class ObjectiveUpdateConsumer<T> implements Consumer<Batch> {
+        private final Objective<T> objective;
         private final Updater updater;
 
-        ModelUpdateConsumer(Model<T> model, Updater updater) {
-            this.model = model;
+        ObjectiveUpdateConsumer(Objective<T> objective, Updater updater) {
+            this.objective = objective;
             this.updater = updater;
         }
 
         @Override
         public void accept(Batch batch) {
-            Variable<Scalar> loss = model.loss(batch);
+            Variable<Scalar> loss = objective.loss(batch);
             ComputationContext ctx = new ComputationContext();
             ctx.forward(loss);
             ctx.backward(loss);
@@ -121,17 +121,17 @@ public class Training {
     }
 
     static class LossEvalConsumer<T> implements Consumer<Batch> {
-        private final Model<T> model;
+        private final Objective<T> objective;
         private final DoubleAdder totalLoss;
 
-        LossEvalConsumer(Model<T> model, DoubleAdder lossAdder) {
-            this.model = model;
+        LossEvalConsumer(Objective<T> objective, DoubleAdder lossAdder) {
+            this.objective = objective;
             this.totalLoss = lossAdder;
         }
 
         @Override
         public void accept(Batch batch) {
-            Variable<Scalar> loss = model.loss(batch);
+            Variable<Scalar> loss = objective.loss(batch);
             ComputationContext ctx = new ComputationContext();
             totalLoss.add(ctx.forward(loss).value());
         }

@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public interface Model<T> {
+public interface Objective<T> {
     List<Weights<? extends Tensor<?>>> weights();
     Variable<Scalar> loss(Batch batch);
     List<T> apply(Batch batch);

@@ -25,13 +25,13 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 
-public class NodeLogisticRegressionTrainAlgo extends Algorithm<NodeLogisticRegressionTrainAlgo, NodeLogisticRegression> {
+public class NodeLogisticRegressionTrain extends Algorithm<NodeLogisticRegressionTrain, NodeLogisticRegressionObjective> {
     private final Graph graph;
     private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
     private final Log log;
 
-    public NodeLogisticRegressionTrainAlgo(
+    public NodeLogisticRegressionTrain(
         Graph graph,
         TrainingSettings trainingSettings,
         NodeLogisticRegressionTrainConfig config,
@@ -44,19 +44,19 @@ public class NodeLogisticRegressionTrainAlgo extends Algorithm<NodeLogisticRegre
     }
 
     @Override
-    public NodeLogisticRegression compute() {
-        NodeLogisticRegression model = new NodeLogisticRegression(
+    public NodeLogisticRegressionObjective compute() {
+        var objective = new NodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),
             graph
         );
-        Training training = new Training(trainingSettings, log);
-        training.train(model, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return model;
+        var training = new Training(trainingSettings, log);
+        training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
+        return objective;
     }
 
     @Override
-    public NodeLogisticRegressionTrainAlgo me() {
+    public NodeLogisticRegressionTrain me() {
         return this;
     }
 

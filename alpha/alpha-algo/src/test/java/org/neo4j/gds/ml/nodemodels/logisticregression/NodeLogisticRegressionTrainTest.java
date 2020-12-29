@@ -35,7 +35,7 @@ import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 
 @GdlExtension
-class NodeLogisticRegressionTrainAlgoTest {
+class NodeLogisticRegressionTrainTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -61,9 +61,9 @@ class NodeLogisticRegressionTrainAlgoTest {
             .tolerance(1e-4)
             .build();
 
-        var linearRegression = new NodeLogisticRegressionTrainAlgo(graph, trainingSettings, config, new TestLog());
+        var linearRegression = new NodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
 
-        NodeLogisticRegression result = linearRegression.compute();
+        NodeLogisticRegressionObjective result = linearRegression.compute();
 
         assertThat(result).isNotNull();
 

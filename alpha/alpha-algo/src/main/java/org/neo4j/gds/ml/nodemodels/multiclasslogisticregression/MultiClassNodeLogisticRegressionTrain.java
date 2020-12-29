@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 
-public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassNodeLogisticRegressionTrain, MultiClassNodeLogisticRegression> {
+public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassNodeLogisticRegressionTrain, MultiClassNodeLogisticRegressionObjective> {
     private final Graph graph;
     private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
@@ -45,15 +45,15 @@ public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassN
     }
 
     @Override
-    public MultiClassNodeLogisticRegression compute() {
-        var model = new MultiClassNodeLogisticRegression(
+    public MultiClassNodeLogisticRegressionObjective compute() {
+        var objective = new MultiClassNodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),
             graph
         );
-        Training training = new Training(trainingSettings, log);
-        training.train(model, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return model;
+        var training = new Training(trainingSettings, log);
+        training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
+        return objective;
     }
 
     @Override

@@ -33,7 +33,7 @@ import java.util.List;
 import static java.lang.Math.log;
 
 @GdlExtension
-class MultiClassNodeLogisticRegressionTest {
+class MultiClassNodeLogisticRegressionObjectiveTest {
 
     private static final int NUMBER_OF_CLASSES = 3;
 
@@ -51,8 +51,8 @@ class MultiClassNodeLogisticRegressionTest {
     @Test
     void shouldProduceCorrectLoss() {
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        var model = new MultiClassNodeLogisticRegression(List.of("a", "b"), "t", graph);
-        var loss = model.loss(allNodesBatch);
+        var objective = new MultiClassNodeLogisticRegressionObjective(List.of("a", "b"), "t", graph);
+        var loss = objective.loss(allNodesBatch);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 

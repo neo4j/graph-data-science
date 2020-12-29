@@ -36,7 +36,7 @@ import java.util.List;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid.sigmoid;
 
 @GdlExtension
-class NodeLogisticRegressionTest {
+class NodeLogisticRegressionObjectiveTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -58,8 +58,8 @@ class NodeLogisticRegressionTest {
 
     @Test
     void shouldProduceCorrectLoss() {
-        var model = new NodeLogisticRegression(List.of("a", "b"), "t", graph);
-        var loss = model.loss(allNodesBatch);
+        var objective = new NodeLogisticRegressionObjective(List.of("a", "b"), "t", graph);
+        var loss = objective.loss(allNodesBatch);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
         // all predictions are sigmoid(0) = 0.5
@@ -70,14 +70,14 @@ class NodeLogisticRegressionTest {
 
     @Test
     void shouldProduceCorrectLossWithNonZeroWeights() {
-        var model = new NodeLogisticRegression(List.of("a", "b"), "t", graph);
+        var objective = new NodeLogisticRegressionObjective(List.of("a", "b"), "t", graph);
         // we proceed to "injecting" non-zero values for the weights of the model
-        var weights = model.weights();
+        var weights = objective.weights();
         var backingArray = weights.get(0).data().data();
         backingArray[0] = 0.2;
         backingArray[1] = -0.3;
         backingArray[2] = 0.5;
-        var loss = model.loss(allNodesBatch);
+        var loss = objective.loss(allNodesBatch);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 
