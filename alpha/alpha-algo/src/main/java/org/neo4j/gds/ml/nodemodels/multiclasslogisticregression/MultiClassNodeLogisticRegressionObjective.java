@@ -79,7 +79,7 @@ public class MultiClassNodeLogisticRegressionObjective extends
     }
 
     @Override
-    public Variable<Scalar> loss(Batch batch) {
+    public Variable<Scalar> loss(Batch batch, long trainSize) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int numberOfNodes = batch.size();
         MatrixConstant features = features(graph, batch);

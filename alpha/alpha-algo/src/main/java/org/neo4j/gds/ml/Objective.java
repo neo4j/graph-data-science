@@ -31,5 +31,5 @@ import java.util.List;
  */
 public interface Objective {
     List<Weights<? extends Tensor<?>>> weights();
-    Variable<Scalar> loss(Batch batch);
+    Variable<Scalar> loss(Batch batch, long trainSize);
 }

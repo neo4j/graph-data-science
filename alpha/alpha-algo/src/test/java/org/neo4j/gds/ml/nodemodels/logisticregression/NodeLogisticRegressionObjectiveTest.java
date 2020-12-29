@@ -59,7 +59,7 @@ class NodeLogisticRegressionObjectiveTest {
     @Test
     void shouldProduceCorrectLoss() {
         var objective = new NodeLogisticRegressionObjective(List.of("a", "b"), "t", graph);
-        var loss = objective.loss(allNodesBatch);
+        var loss = objective.loss(allNodesBatch, graph.nodeCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
         // all predictions are sigmoid(0) = 0.5
@@ -77,7 +77,7 @@ class NodeLogisticRegressionObjectiveTest {
         backingArray[0] = 0.2;
         backingArray[1] = -0.3;
         backingArray[2] = 0.5;
-        var loss = objective.loss(allNodesBatch);
+        var loss = objective.loss(allNodesBatch, graph.nodeCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 

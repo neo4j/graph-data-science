@@ -33,10 +33,12 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class Training {
     private final TrainingSettings settings;
     private final Log log;
+    private final long trainSize;
 
-    public Training(TrainingSettings settings, Log log) {
+    public Training(TrainingSettings settings, Log log, long trainSize) {
         this.settings = settings;
         this.log = log;
+        this.trainSize = trainSize;
     }
 
     public void train(Objective objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
@@ -75,7 +77,8 @@ public class Training {
         batches.parallelConsume(
             new LossEvalConsumer(
                 objective,
-                totalLoss
+                totalLoss,
+                trainSize
             ),
             concurrency
         );
@@ -96,7 +99,8 @@ public class Training {
             jobId ->
                 new ObjectiveUpdateConsumer(
                     objective,
-                    settings.sharedUpdater() ? singleUpdater : updaters[jobId]
+                    settings.sharedUpdater() ? singleUpdater : updaters[jobId],
+                    trainSize
                 )
         );
     }
@@ -104,15 +108,17 @@ public class Training {
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
         private final Objective objective;
         private final Updater updater;
+        private final long trainSize;
 
-        ObjectiveUpdateConsumer(Objective objective, Updater updater) {
+        ObjectiveUpdateConsumer(Objective objective, Updater updater, long trainSize) {
             this.objective = objective;
             this.updater = updater;
+            this.trainSize = trainSize;
         }
 
         @Override
         public void accept(Batch batch) {
-            Variable<Scalar> loss = objective.loss(batch);
+            Variable<Scalar> loss = objective.loss(batch, trainSize);
             ComputationContext ctx = new ComputationContext();
             ctx.forward(loss);
             ctx.backward(loss);
@@ -123,15 +129,17 @@ public class Training {
     static class LossEvalConsumer implements Consumer<Batch> {
         private final Objective objective;
         private final DoubleAdder totalLoss;
+        private final long trainSize;
 
-        LossEvalConsumer(Objective objective, DoubleAdder lossAdder) {
+        LossEvalConsumer(Objective objective, DoubleAdder lossAdder, long trainSize) {
             this.objective = objective;
             this.totalLoss = lossAdder;
+            this.trainSize = trainSize;
         }
 
         @Override
         public void accept(Batch batch) {
-            Variable<Scalar> loss = objective.loss(batch);
+            Variable<Scalar> loss = objective.loss(batch, trainSize);
             ComputationContext ctx = new ComputationContext();
             totalLoss.add(ctx.forward(loss).value());
         }
