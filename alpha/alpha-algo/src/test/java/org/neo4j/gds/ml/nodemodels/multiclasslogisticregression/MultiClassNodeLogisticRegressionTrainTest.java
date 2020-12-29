@@ -74,8 +74,8 @@ class MultiClassNodeLogisticRegressionTrainTest {
 
         assertThat(trainedWeights.data().data()).containsExactly(
             new double[]{
-                33.80331989615432, -35.5612283371057, 10.826705193820422,
                 13.565878816092354, 35.45071542666095, -15.413572599075732,
+                33.80331989615432, -35.5612283371057, 10.826705193820422,
                 -29.644105601850793, 32.70379721264568, 11.382482785703171
             },
             Offset.offset(1e-8)

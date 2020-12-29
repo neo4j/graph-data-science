@@ -88,7 +88,7 @@ public class MultiClassNodeLogisticRegressionObjective extends
         int nodeOffset = 0;
         for (long nodeId : nodeIds) {
             var targetValue = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            targets[nodeOffset] = targetValue;
+            targets[nodeOffset] = modelData.classIdMap().toMapped((long) targetValue);
             nodeOffset++;
         }
         MatrixConstant targetVariable = new MatrixConstant(targets, numberOfNodes, 1);

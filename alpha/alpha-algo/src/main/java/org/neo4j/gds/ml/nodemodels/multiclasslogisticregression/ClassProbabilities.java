@@ -19,29 +19,27 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.Batch;
-import org.neo4j.gds.ml.Predictor;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 
-public class MultiClassNodeLogisticRegressionPredictor extends
-             MultiClassNodeLogisticRegressionBase implements
-    Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> {
+public class ClassProbabilities {
+    private final Matrix probabilities;
+    private final LocalIdMap classMap;
 
-    MultiClassNodeLogisticRegressionPredictor(MultiClassNodeLogisticRegressionData modelData) {
-        super(modelData);
+    public ClassProbabilities(Matrix probabilities, LocalIdMap classMap) {
+        this.probabilities = probabilities;
+        this.classMap = classMap;
     }
 
-    @Override
-    public MultiClassNodeLogisticRegressionData modelData() {
-        return modelData;
+    public Matrix probabilities() {
+        return probabilities;
     }
 
-    @Override
-    public ClassProbabilities predict(Graph graph, Batch batch) {
-        ComputationContext ctx = new ComputationContext();
-        Matrix forward = ctx.forward(predictions(features(graph, batch), modelData.weights()));
-        return new ClassProbabilities(forward, modelData.classIdMap());
+    public int classToColumn(long clazz) {
+        return classMap.toMapped(clazz);
+    }
+
+    public long columnToClass(int col) {
+        return classMap.toOriginal(col);
     }
 }
