@@ -51,7 +51,7 @@ class MultiClassNodeLogisticRegressionObjectiveTest {
     @Test
     void shouldProduceCorrectLoss() {
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        var objective = new MultiClassNodeLogisticRegressionObjective(List.of("a", "b"), "t", graph);
+        var objective = new MultiClassNodeLogisticRegressionObjective(List.of("a", "b"), "t", graph, 0.0);
         var loss = objective.loss(allNodesBatch, 4);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();

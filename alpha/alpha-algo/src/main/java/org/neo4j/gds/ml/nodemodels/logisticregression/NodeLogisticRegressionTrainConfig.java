@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -34,6 +35,11 @@ public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, Featu
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();
+
+    @Value.Default
+    default double penalty() {
+        return 0.0;
+    }
 
     static NodeLogisticRegressionTrainConfig of(
         String username,

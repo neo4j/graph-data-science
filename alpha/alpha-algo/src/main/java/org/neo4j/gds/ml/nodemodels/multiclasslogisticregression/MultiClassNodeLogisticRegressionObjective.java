@@ -20,6 +20,9 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2NormSquared;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiClassCrossEntropyLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -38,15 +41,18 @@ public class MultiClassNodeLogisticRegressionObjective extends
 
     private final String targetPropertyKey;
     private final Graph graph;
+    private final double penalty;
 
     public MultiClassNodeLogisticRegressionObjective(
         List<String> nodePropertyKeys,
         String targetPropertyKey,
-        Graph graph
+        Graph graph,
+        double penalty
     ) {
         super(makeData(nodePropertyKeys, targetPropertyKey, graph));
-        this.targetPropertyKey=targetPropertyKey;
-        this.graph=graph;
+        this.targetPropertyKey = targetPropertyKey;
+        this.graph = graph;
+        this.penalty = penalty;
     }
 
     private static MultiClassNodeLogisticRegressionData makeData(List<String> nodePropertyKeys, String targetPropertyKey, Graph graph) {
@@ -92,7 +98,12 @@ public class MultiClassNodeLogisticRegressionObjective extends
             nodeOffset++;
         }
         MatrixConstant targetVariable = new MatrixConstant(targets, numberOfNodes, 1);
-        return new MultiClassCrossEntropyLoss(predictions, targetVariable);
+        var unpenalizedLoss = new MultiClassCrossEntropyLoss(
+            predictions,
+            targetVariable
+        );
+        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), batch.size() * penalty / trainSize);
+        return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
 }
