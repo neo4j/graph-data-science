@@ -86,7 +86,10 @@ public enum Neo4jVersion {
         // This override is used by Aura for reasons relevant to them, setting the version to something like `4.2-Aura`.
         // Before parsing the version according to major+minor version, we check if the version has this Aura suffix.
         // If it does we set the `Neo4jVersion` to `V_Aura`.
-        if (version.endsWith("-Aura")) {
+        //
+        // TODO: Having to fall back to matching the physical version because the version override isn't working the
+        //       way it was intended.
+        if (version.endsWith("-Aura") || version.equals("4.3.0-drop01.0")) {
             return Neo4jVersion.V_Aura;
         }
         var majorVersion = Pattern.compile("[.-]")

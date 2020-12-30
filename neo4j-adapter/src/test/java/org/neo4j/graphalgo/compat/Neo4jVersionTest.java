@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,12 +51,8 @@ class Neo4jVersionTest {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void defaultToKernelVersion(boolean withOverride) {
-        if (withOverride) {
-            System.setProperty("unsupported.neo4j.custom.version", "4.2-Aura");
-        }
+    @Test
+    void defaultToKernelVersion() {
         assertEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
     }
 }
