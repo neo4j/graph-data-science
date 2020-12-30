@@ -68,16 +68,13 @@ public class MultiClassCrossEntropyLoss extends AbstractVariable<Scalar> {
             for (int row = 0; row < gradient.rows(); row++) {
                 var trueClass = (int) targetsColumnVector.dataAt(row);
                 var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
-                for (int col = 0; col < gradient.cols(); col++) {
-                    if (col == trueClass) {
-                        gradient.setDataAt(
-                            row * predictionsMatrix.cols() + col,
-                            multiplier / predictedProbabilityForTrueClass
-                        );
-                    }
+                if (predictedProbabilityForTrueClass > 0) {
+                    gradient.setDataAt(
+                        row * predictionsMatrix.cols() + trueClass,
+                        multiplier / predictedProbabilityForTrueClass
+                    );
                 }
             }
-
             return gradient;
         } else {
             return ctx.data(parent).zeros();

@@ -20,10 +20,8 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -50,15 +48,9 @@ class MultiClassNodeLogisticRegressionTest {
     @Inject
     private Graph graph;
 
-    private Batch allNodesBatch;
-
-    @BeforeEach
-    void setup() {
-        allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-    }
-
     @Test
     void shouldProduceCorrectLoss() {
+        var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
         var model = new MultiClassNodeLogisticRegression(List.of("a", "b"), "t", graph);
         var loss = model.loss(allNodesBatch);
         var ctx = new ComputationContext();

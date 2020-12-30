@@ -54,14 +54,14 @@ public class MultiClassNodeLogisticRegression implements Model<Double> {
         this.nodePropertyKeys = nodeProperties;
         this.graph = graph;
         this.targetPropertyKey = targetPropertyKey;
-        classIdMap = new LocalIdMap();
+        this.classIdMap = new LocalIdMap();
         graph.forEachNode(nodeId -> {
             var targetClass = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            classIdMap.toMapped((long) targetClass);
+            this.classIdMap.toMapped((long) targetClass);
             return true;
         });
 
-        this.weights = initWeights(classIdMap.originalIds().length);
+        this.weights = initWeights(this.classIdMap.originalIds().length);
     }
 
     private Weights<Matrix> initWeights(int numberOfClasses) {
@@ -83,8 +83,8 @@ public class MultiClassNodeLogisticRegression implements Model<Double> {
         double[] targets = new double[numberOfNodes];
         int nodeOffset = 0;
         for (long nodeId : nodeIds) {
-            var v = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            targets[nodeOffset] = v;
+            var targetValue = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
+            targets[nodeOffset] = targetValue;
             nodeOffset++;
         }
         MatrixConstant targetVariable = new MatrixConstant(targets, numberOfNodes, 1);
@@ -97,6 +97,7 @@ public class MultiClassNodeLogisticRegression implements Model<Double> {
 
     private MatrixConstant features(Batch batch) {
         int numberOfNodes = batch.size();
+        // the +1 accounts for the always on feature with value 1.0 below
         int nodePropertiesCount = nodePropertyKeys.size() + 1;
         double[] features = new double[numberOfNodes * nodePropertiesCount];
         for (int j = 0; j < nodePropertyKeys.size(); j++) {

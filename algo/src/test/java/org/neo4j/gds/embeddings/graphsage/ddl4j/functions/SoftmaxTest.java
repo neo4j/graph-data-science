@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
@@ -30,15 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SoftmaxTest implements FiniteDifferenceTest {
 
-    private ComputationContext ctx;
-
-    @BeforeEach
-    void setUp() {
-        ctx = new ComputationContext();
-    }
-
     @Test
     void shouldApply() {
+        var ctx = new ComputationContext();
         var matrixConstant = new MatrixConstant(
             new double[]{
                 0.6, 1.1, -1.5, 1.2, 3.2, -1.1,

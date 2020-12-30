@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
@@ -29,15 +28,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
 class MultiClassCrossEntropyLossTest implements FiniteDifferenceTest {
 
-    private ComputationContext ctx;
-
-    @BeforeEach
-    void setUp() {
-        ctx = new ComputationContext();
-    }
-
     @Test
     void shouldApplyCorrectly() {
+        var ctx = new ComputationContext();
         var targets = new MatrixConstant(new double[]{1.0, 2.0, 0.0}, 3, 1);
         var predictions = new MatrixConstant(
             new double[]{
