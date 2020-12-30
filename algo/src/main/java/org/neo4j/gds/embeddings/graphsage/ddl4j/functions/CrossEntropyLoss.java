@@ -50,37 +50,38 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Matrix predTensor = ctx.data(predictions);
-        Matrix targetTensor = ctx.data(targets);
+        Matrix predictionsVector = ctx.data(predictions);
+        Matrix targetsVector = ctx.data(targets);
 
         double result = 0;
-        for(int row = 0; row < predTensor.rows(); row++) {
-            double v1 = targetTensor.dataAt(row) * log(predTensor.dataAt(row));
-            double v2 = (1.0 - targetTensor.dataAt(row)) * log(1.0 - predTensor.dataAt(row));
-            if (predTensor.dataAt(row) == 0) {
-                result += v2;
+        for(int row = 0; row < targetsVector.totalSize(); row++) {
+            if (predictionsVector.dataAt(row) > 0) {
+                result += targetsVector.dataAt(row) * log(predictionsVector.dataAt(row));
             }
-            else if (predTensor.dataAt(row) == 1.0) {
-                result += v1;
-            } else {
-                result += v1 + v2;
+            if (predictionsVector.dataAt(row) < 1.0) {
+                result += (1.0 - targetsVector.dataAt(row)) * log(1.0 - predictionsVector.dataAt(row));
             }
         }
 
-        return new Scalar(-result/predTensor.rows());
+        return new Scalar(-result/targetsVector.totalSize());
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == predictions) {
-            Matrix predTensor = ctx.data(predictions);
-            Matrix targetTensor = ctx.data(targets);
-            Matrix gradient = predTensor.zeros();
-            double multiplier = -1.0/gradient.rows();
-            for (int row = 0; row < gradient.rows(); row++) {
-                double v1 = targetTensor.dataAt(row) / predTensor.dataAt(row);
-                double v2 = -(1.0 - targetTensor.dataAt(row)) / (1.0 - predTensor.dataAt(row));
-                gradient.setDataAt(row, multiplier * (v1 + v2));
+            Matrix predictionsVector = ctx.data(predictions);
+            Matrix targetsVector = ctx.data(targets);
+            Matrix gradient = predictionsVector.zeros();
+            double multiplier = 1.0 / gradient.totalSize();
+            for (int row = 0; row < gradient.totalSize(); row++) {
+                var result = 0d;
+                if (predictionsVector.dataAt(row) > 0.0) {
+                    result -= targetsVector.dataAt(row) / predictionsVector.dataAt(row);
+                }
+                if (predictionsVector.dataAt(row) < 1.0) {
+                    result += (1.0 - targetsVector.dataAt(row)) / (1.0 - predictionsVector.dataAt(row));
+                }
+                gradient.setDataAt(row, multiplier * result);
             }
             return gradient;
         } else {

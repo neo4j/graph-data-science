@@ -42,17 +42,19 @@ public class MultiClassCrossEntropyLoss extends AbstractVariable<Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         Matrix predictionsMatrix = ctx.data(predictions);
-        Matrix targetsColumnVector = ctx.data(targets);
+        Matrix targetsVector = ctx.data(targets);
 
         double result = 0;
-        for (int row = 0; row < targetsColumnVector.rows(); row++) {
-            var trueClass = (int) targetsColumnVector.dataAt(row);
+        for (int row = 0; row < targetsVector.totalSize(); row++) {
+            var trueClass = (int) targetsVector.dataAt(row);
             var predictedProbabilityForTrueClass =
                 predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
-            result -= Math.log(predictedProbabilityForTrueClass);
+            if (predictedProbabilityForTrueClass > 0) {
+                result += Math.log(predictedProbabilityForTrueClass);
+            }
         }
 
-        return new Scalar(result / predictionsMatrix.rows());
+        return new Scalar(-result / predictionsMatrix.rows());
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -50,6 +51,7 @@ public interface FiniteDifferenceTest {
                 perturb(variable, i, epsilon());
                 ComputationContext ctx2 = new ComputationContext();
                 double f1 = ctx2.forward(loss).dataAt(0);
+                assertThat(partialDerivative).isNotNaN();
                 assertEquals(
                     (f1 - f0) / epsilon(),
                     partialDerivative,
