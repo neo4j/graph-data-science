@@ -158,8 +158,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     void testMutateYields() {
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(mutateGraphName().get())
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -185,20 +184,20 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
                 assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
                 assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
 
-                assertEquals(1L, row.get("ranLevels"));
-                assertEquals(4L, row.getNumber("communityCount"));
-                assertEquals(0.3744, ((List<Double>) row.get("modularities")).get(0), 1E-3);
+                assertEquals(2L, row.get("ranLevels"));
+                assertEquals(3L, row.getNumber("communityCount"));
+                assertEquals(0.376, ((List<Double>) row.get("modularities")).get(0), 1E-3);
 
                 assertEquals(MapUtil.map(
-                    "p99", 8L,
-                    "min", 2L,
-                    "max", 8L,
-                    "mean", 3.75D,
-                    "p90", 8L,
-                    "p50", 2L,
-                    "p999", 8L,
-                    "p95", 8L,
-                    "p75", 3L
+                    "p99", 7L,
+                    "min", 3L,
+                    "max", 7L,
+                    "mean", 5.0D,
+                    "p90", 7L,
+                    "p50", 5L,
+                    "p999", 7L,
+                    "p95", 7L,
+                    "p75", 5L
                 ), row.get("communityDistribution"));
             }
         );
@@ -208,10 +207,20 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+
+        String graphName = "emptyGraph";
+
+        var loadQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(loadQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(graphName)
             .algo("louvain")
             .mutateMode()
             .addParameter("mutateProperty", "foo")

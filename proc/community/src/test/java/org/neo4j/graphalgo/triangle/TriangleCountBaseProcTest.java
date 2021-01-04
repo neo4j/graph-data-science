@@ -46,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<IntersectingTriangleCount, CONFIG, IntersectingTriangleCount.TriangleCountResult>,
@@ -59,6 +60,9 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
            "(b)-[:T]->(c:A), " +
            "(c)-[:T]->(a)";
 
+    protected static final String TEST_GRAPH_NAME = "g";
+
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -67,7 +71,7 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
             getProcedureClazz()
         );
 
-        runQuery("CALL gds.graph.create('g', 'A', {T: { orientation: 'UNDIRECTED'}})");
+        runQuery(formatWithLocale("CALL gds.graph.create('%s', 'A', {T: { orientation: 'UNDIRECTED'}})", TEST_GRAPH_NAME));
     }
 
     @AfterEach

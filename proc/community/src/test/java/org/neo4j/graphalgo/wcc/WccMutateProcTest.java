@@ -134,10 +134,16 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
     @Test
     void testMutateYields() {
+        var testGraphName = "wccGraph";
+        var initialGraphStore = new StoreLoaderBuilder().api(db)
+            .build()
+            .graphStore();
+
+        GraphStoreCatalog.set(emptyWithNameNative(getUsername(), testGraphName), initialGraphStore);
+
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(testGraphName)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -185,10 +191,18 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+
+        String graphName = "emptyGraph";
+        var loadQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(graphName)
+            .yields();
+        runQuery(loadQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(graphName)
             .algo("wcc")
             .mutateMode()
             .addParameter("mutateProperty", "foo")

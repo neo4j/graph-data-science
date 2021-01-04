@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -35,8 +33,6 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientMutateProcTest
@@ -89,11 +85,7 @@ class LocalClusteringCoefficientMutateProcTest
     void testMutateYields() {
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withRelationshipType(
-                ALL_RELATIONSHIPS.name(),
-                RelationshipProjection.of(PROJECT_ALL, Orientation.UNDIRECTED)
-            )
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("localClusteringCoefficient")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())

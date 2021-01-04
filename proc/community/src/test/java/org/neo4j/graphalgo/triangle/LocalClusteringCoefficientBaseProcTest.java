@@ -48,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalClusteringCoefficientBaseConfig> extends BaseProcTest
     implements AlgoBaseProcTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
@@ -55,6 +56,8 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
     ConfigurableSeedConfigTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     MemoryEstimateTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result>,
     HeapControlTest<LocalClusteringCoefficient, CONFIG, LocalClusteringCoefficient.Result> {
+
+    protected static final String TEST_GRAPH_NAME = "g";
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE " +
@@ -99,7 +102,12 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
             getProcedureClazz()
         );
 
-        runQuery("CALL gds.graph.create('g', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})");
+        runQuery(
+            formatWithLocale(
+                "CALL gds.graph.create('%s', {A: {label: 'A', properties: 'seed'}}, {T: {orientation: 'UNDIRECTED'}})",
+                TEST_GRAPH_NAME
+            )
+        );
     }
 
     @AfterEach

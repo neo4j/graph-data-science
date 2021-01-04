@@ -132,8 +132,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     void testMutateYields() {
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(TEST_GRAPH_NAME)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
@@ -170,10 +169,20 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     void zeroCommunitiesInEmptyGraph() {
         runQuery("CALL db.createLabel('VeryTemp')");
         runQuery("CALL db.createRelationshipType('VERY_TEMP')");
-        String query = GdsCypher
-            .call()
+
+        String graphName = "emptyGraph";
+
+        var loadQuery = GdsCypher.call()
             .withNodeLabel("VeryTemp")
             .withRelationshipType("VERY_TEMP")
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(loadQuery);
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation(graphName)
             .algo("labelPropagation")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
