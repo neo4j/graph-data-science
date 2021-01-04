@@ -21,12 +21,12 @@ package org.neo4j.gds.ml;
 
 import org.neo4j.graphalgo.api.Graph;
 
-public interface Predictor<T, D> {
+public interface Predictor<RESULT, DATA> {
     /**
      * Returns the data, such as weights, needed to store or load the model
      * @return the data
      */
-    D modelData();
+    DATA modelData();
 
     /**
      * Predicts an output given a batch of examples
@@ -34,5 +34,5 @@ public interface Predictor<T, D> {
      * @param batch of examples, currently only batch of node ids
      * @return A generic output
      */
-    T predict(Graph graph, Batch batch);
+    RESULT predict(Graph graph, Batch batch);
 }

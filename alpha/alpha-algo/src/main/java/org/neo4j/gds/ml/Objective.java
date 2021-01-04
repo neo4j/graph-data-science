@@ -26,6 +26,9 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
+/**
+ * A training objective that computes a loss over a batch of nodes
+ */
 public interface Objective {
     List<Weights<? extends Tensor<?>>> weights();
     Variable<Scalar> loss(Batch batch);
