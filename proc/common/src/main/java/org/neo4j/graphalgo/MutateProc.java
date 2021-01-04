@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public abstract class MutateProc<
@@ -29,6 +31,16 @@ public abstract class MutateProc<
     ALGO_RESULT,
     PROC_RESULT,
     CONFIG extends MutateConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG> {
+
+    @Override
+    public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
+        if (graphName.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
+            );
+        }
+        return super.newConfig(graphName, config);
+    }
 
     protected abstract AbstractResultBuilder<PROC_RESULT> resultBuilder(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computeResult);
 

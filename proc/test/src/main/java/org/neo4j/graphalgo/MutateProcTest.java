@@ -110,6 +110,30 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
+    @Test
+    default void failOnImplicitGraph() {
+        applyOnProcedure(procedure ->
+            getProcedureMethods(procedure)
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
+                .forEach(mutateMethod -> {
+                    var ex = assertThrows(
+                        InvocationTargetException.class,
+                        () -> mutateMethod.invoke(
+                            procedure,
+                            Map.of("nodeProjection", "*"),
+                            CypherMapWrapper.empty().toMap()
+                        )
+                    );
+
+                    Throwable expectedException = ExceptionUtil.rootCause(ex);
+                    assertEquals(IllegalArgumentException.class, expectedException.getClass());
+                    assertEquals(
+                        "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog",
+                        expectedException.getMessage()
+                    );
+                }));
+    }
+
     @NotNull
     default String ensureGraphExists() {
         return mutateGraphName().orElseGet(() -> {
