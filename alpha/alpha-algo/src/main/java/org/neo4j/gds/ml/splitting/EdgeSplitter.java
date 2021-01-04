@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class EdgeSplitter {
 
-    static final double NEGATIVE = 0D;
-    static final double POSITIVE = 1D;
+    public static final double NEGATIVE = 0D;
+    public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
 
     protected final ThreadLocal<Random> rng;
