@@ -25,13 +25,14 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig {
+public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();

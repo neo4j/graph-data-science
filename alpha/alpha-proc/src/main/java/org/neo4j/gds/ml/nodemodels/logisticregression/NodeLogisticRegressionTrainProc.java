@@ -21,13 +21,12 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.ImmutableTrainingSettings;
 import org.neo4j.gds.ml.TrainingSettings;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
@@ -37,16 +36,15 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRegressionTrain, NodeLogisticRegressionPredictor, NodeLogisticRegressionTrainConfig> {
+public class NodeLogisticRegressionTrainProc extends TrainProc<NodeLogisticRegressionTrain, NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeLogisticRegression.train", mode = Mode.READ)
     @Description("Trains a binary logistic regression model for a target node property")
-    public Stream<StreamResult> train(
+    public Stream<TrainResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -54,16 +52,8 @@ public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRe
             graphNameOrConfig,
             configuration
         );
-        Weights<? extends Tensor<?>> weights = result.result().modelData().weights();
-        double[] weightValues = weights.data().data();
-        var config = result.config();
-        List<String> props = config.featureProperties();
-        var resultString = "";
-        for (int i = 0; i < props.size(); i++) {
-            resultString += " + " + weightValues[i] + props.get(i);
-        }
-        resultString += " + " + weightValues[weightValues.length - 1];
-        return Stream.of(new StreamResult(resultString));
+        ModelCatalog.set(result.result());
+        return Stream.of(trainResult(result));
     }
 
     @Override
@@ -93,13 +83,5 @@ public class NodeLogisticRegressionTrainProc extends AlgoBaseProc<NodeLogisticRe
                 throw new MemoryEstimationNotImplementedException();
             }
         };
-    }
-
-    public static final class StreamResult {
-        public final String modelDescription;
-
-        StreamResult(String modelDescription) {
-            this.modelDescription = modelDescription;
-        }
     }
 }

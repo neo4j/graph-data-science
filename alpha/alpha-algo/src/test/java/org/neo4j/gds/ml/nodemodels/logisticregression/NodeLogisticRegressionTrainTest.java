@@ -52,6 +52,7 @@ class NodeLogisticRegressionTrainTest {
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
         var config =
             ImmutableNodeLogisticRegressionTrainConfig.builder()
+                .modelName("model")
                 .featureProperties(List.of("a", "b"))
                 .targetProperty("t")
                 .concurrency(1)
@@ -63,7 +64,7 @@ class NodeLogisticRegressionTrainTest {
 
         var linearRegression = new NodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
 
-        var result = linearRegression.compute().modelData();
+        var result = linearRegression.compute().data();
 
         assertThat(result).isNotNull();
 

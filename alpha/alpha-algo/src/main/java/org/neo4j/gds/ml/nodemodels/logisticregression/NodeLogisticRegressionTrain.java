@@ -23,9 +23,15 @@ import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class NodeLogisticRegressionTrain extends Algorithm<NodeLogisticRegressionTrain, NodeLogisticRegressionPredictor> {
+public class NodeLogisticRegressionTrain extends Algorithm<
+    NodeLogisticRegressionTrain,
+    Model<NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig>> {
+
+    public static final String MODEL_TYPE = "nodeLogisticRegression";
+
     private final Graph graph;
     private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
@@ -44,7 +50,7 @@ public class NodeLogisticRegressionTrain extends Algorithm<NodeLogisticRegressio
     }
 
     @Override
-    public NodeLogisticRegressionPredictor compute() {
+    public Model<NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig> compute() {
         var objective = new NodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),
@@ -52,7 +58,14 @@ public class NodeLogisticRegressionTrain extends Algorithm<NodeLogisticRegressio
         );
         var training = new Training(trainingSettings, log, graph.nodeCount());
         training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return new NodeLogisticRegressionPredictor(objective.modelData());
+        return Model.of(
+            config.username(),
+            config.modelName(),
+            MODEL_TYPE,
+            graph.schema(),
+            objective.modelData(),
+            config
+        );
     }
 
     @Override

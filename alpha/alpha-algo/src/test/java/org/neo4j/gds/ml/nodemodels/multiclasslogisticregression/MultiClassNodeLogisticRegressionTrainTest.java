@@ -52,10 +52,11 @@ class MultiClassNodeLogisticRegressionTrainTest {
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
         var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
-                .featureProperties(List.of("a", "b"))
-                .targetProperty("t")
-                .concurrency(1)
-                .build();
+            .modelName("model")
+            .featureProperties(List.of("a", "b"))
+            .targetProperty("t")
+            .concurrency(1)
+            .build();
         var trainingSettings = ImmutableTrainingSettings.builder()
             .maxIterations(100000)
             .tolerance(1e-4)

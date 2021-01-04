@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
 
@@ -36,18 +42,32 @@ class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
         runQuery(createQuery());
     }
 
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.drop("", "model");
+    }
+
     @Test
-    void shouldNotCrash() {
+    void producesCorrectModel() {
         String query = GdsCypher.call()
             .withAnyLabel()
             .withNodeProperties(List.of("a", "b", "t"), DefaultValue.of(0D))
             .withAnyRelationshipType()
             .algo("gds.alpha.ml.nodeLogisticRegression")
             .trainMode()
+            .addParameter("concurrency", 1)
+            .addParameter("modelName", "model")
             .addParameter("featureProperties", List.of("a", "b"))
             .addParameter("targetProperty", "t")
             .yields();
-       runQueryWithRowConsumer(query, row -> System.out.println(row.getString("modelDescription")));
+
+        runQuery(query);
+
+        assertTrue(ModelCatalog.exists("", "model"));
+        Model<?, ?> model = ModelCatalog.list("", "model");
+        assertThat(model.algoType()).isEqualTo("nodeLogisticRegression");
+        var data = (NodeLogisticRegressionData) model.data();
+        assertThat(data.weights().data().data()).containsExactly(new double[]{0.001999978810290561, -0.0019999294858396984, 7.439838212749474E-4}, Offset.offset(1e-6));
     }
 
     public String createQuery() {
