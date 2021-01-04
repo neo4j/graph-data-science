@@ -26,6 +26,9 @@ import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
+import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
+
 public abstract class MutateProc<
     ALGO extends Algorithm<ALGO, ALGO_RESULT>,
     ALGO_RESULT,
@@ -34,7 +37,7 @@ public abstract class MutateProc<
 
     @Override
     public CONFIG newConfig(Optional<String> graphName, CypherMapWrapper config) {
-        if (graphName.isEmpty()) {
+        if (graphName.isEmpty() && !(config.containsKey(NODE_COUNT_KEY) || config.containsKey(RELATIONSHIP_COUNT_KEY))) {
             throw new IllegalArgumentException(
                 "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
             );
