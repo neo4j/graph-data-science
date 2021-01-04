@@ -50,6 +50,19 @@ public interface GraphCreateConfigSupport {
         );
     }
 
+    default GraphCreateFromStoreConfig withNameAndNodeProjections(
+        String userName,
+        String graphName,
+        NodeProjections nodes
+    ) {
+        return ImmutableGraphCreateFromStoreConfig.of(
+            userName,
+            graphName,
+            nodes,
+            RelationshipProjections.all()
+        );
+    }
+
     default GraphCreateFromCypherConfig emptyWithNameCypher(String userName, String graphName) {
         return withNameAndRelationshipQuery(
             userName,

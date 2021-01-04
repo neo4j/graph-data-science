@@ -28,10 +28,11 @@ import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -72,24 +73,34 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
 
     @Test
     default void testSeedPropertyValidation() {
+        String graphName = "loadedGraph";
+
         runQuery(graphDb(), "CREATE (:A {a: 1, b:2, c:3})");
-        List<String> nodeProperties = Arrays.asList("a", "b", "c");
-        Map<String, Object> tempConfig = MapUtil.map(
-            "seedProperty", "foo",
-            "nodeProjection", MapUtil.map(
-                "A", MapUtil.map(
-                    "properties", nodeProperties
+
+        List<PropertyMapping> nodeProperties = Stream.of("a", "b", "c")
+            .map(PropertyMapping::of)
+            .collect(Collectors.toList());
+
+        var graphCreateConfig = withNameAndNodeProjections(
+            "",
+            graphName,
+            NodeProjections.create(Map.of(
+                NodeLabel.of("A"), NodeProjection.of("A", PropertyMappings.of(nodeProperties))
                 )
-            ),
-            "relationshipProjection", "*"
+            )
         );
 
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
+        GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            "seedProperty", "foo"
+        ))).toMap();
 
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(
                 IllegalArgumentException.class,
-                () -> proc.compute(config, Collections.emptyMap())
+                () -> proc.compute(graphName, config)
             );
             assertThat(e.getMessage(), containsString("foo"));
             assertThat(e.getMessage(), containsString("[a, b, c]"));
@@ -117,11 +128,13 @@ public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                 configMap
             ));
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-            assertMissingProperty(error, () -> proc.compute(
-                implicitConfigMap,
-                Collections.emptyMap()
-            ));
+            if (supportsImplicitGraphCreate()) {
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+                assertMissingProperty(error, () -> proc.compute(
+                    implicitConfigMap,
+                    Collections.emptyMap()
+                ));
+            }
         });
     }
 }
