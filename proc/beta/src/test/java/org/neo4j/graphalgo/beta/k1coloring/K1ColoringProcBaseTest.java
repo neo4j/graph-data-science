@@ -55,12 +55,15 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
         return db;
     }
 
+    static final String K1COLORING_GRAPH = "myGraph";
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class
         );
+        loadGraph(K1COLORING_GRAPH);
     }
 
     @AfterEach
@@ -75,8 +78,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
 
     GdsCypher.ModeBuildStage algoBuildStage() {
         return GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(K1COLORING_GRAPH)
             .algo("gds", "beta", "k1coloring");
     }
 

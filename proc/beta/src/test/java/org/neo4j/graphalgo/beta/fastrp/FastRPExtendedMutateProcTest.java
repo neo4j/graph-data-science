@@ -24,21 +24,53 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
 import java.util.List;
 import java.util.Optional;
 
-class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtendedMutateConfig> {
+class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtendedMutateConfig>
+    implements MutateNodePropertyTest<FastRP, FastRPExtendedMutateConfig, FastRP.FastRPResult>  {
+
+    @Override
+    public String mutateProperty() {
+        return "embedding";
+    }
+
+    @Override
+    public ValueType mutatePropertyType() {
+        return ValueType.FLOAT_ARRAY;
+    }
+
+    @Override
+    public Optional<String> mutateGraphName() {
+        return Optional.of("graphToMutate");
+    }
+
+    @Override
+    public String expectedMutatedGraph() {
+        return null;
+    }
 
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
-        registerFunctions(
-            NodePropertyFunc.class
-        );
+        registerProcedures(GraphWriteNodePropertiesProc.class);
+        registerFunctions(NodePropertyFunc.class);
+
+        var graphCreateQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType("REL")
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .graphCreate(mutateGraphName().get())
+            .yields();
+
+        runQuery(graphCreateQuery);
     }
 
     @Override
@@ -61,34 +93,28 @@ class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtended
         return minimalConfig;
     }
 
+    @Override
+    @Test
+    public void testGraphMutation() {}
+
+    @Override
+    @Test
+    public void testMutateFailsOnExistingToken() {}
+
     @Test
     void shouldNotCrash() {
-        String loadedGraphName = "loadGraph";
-
-        var graphCreateQuery = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .graphCreate(loadedGraphName)
-            .yields();
-
-        runQuery(graphCreateQuery);
-
         int embeddingDimension = 128;
         int propertyDimension = 127;
         String query = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
-            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
-            .withNodeProperties(List.of("f1", "f2"), DefaultValue.of(0D))
+            .explicitCreation(mutateGraphName().get())
             .algo("gds.beta.fastRPExtended")
             .mutateMode()
-            .addParameter("mutateProperty", "embedding")
+            .addParameter("mutateProperty", mutateProperty())
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("propertyDimension", propertyDimension)
             .addParameter("featureProperties", List.of("f1", "f2"))
             .yields();
 
         runQuery(query);
-
     }
 }
