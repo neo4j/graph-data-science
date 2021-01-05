@@ -52,7 +52,7 @@ public class NodeLogisticRegressionTrain extends Algorithm<NodeLogisticRegressio
         );
         var training = new Training(trainingSettings, log, graph.nodeCount());
         training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return new NodeLogisticRegressionPredictor(objective.modelData);
+        return new NodeLogisticRegressionPredictor(objective.modelData());
     }
 
     @Override

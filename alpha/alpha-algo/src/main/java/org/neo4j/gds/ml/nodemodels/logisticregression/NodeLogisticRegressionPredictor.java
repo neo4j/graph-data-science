@@ -20,7 +20,10 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.api.Graph;
@@ -29,11 +32,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NodeLogisticRegressionPredictor extends NodeLogisticRegressionBase
-    implements Predictor<List<Double>, NodeLogisticRegressionData> {
+import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
+
+public class NodeLogisticRegressionPredictor implements Predictor<List<Double>, NodeLogisticRegressionData> {
+
+    private final NodeLogisticRegressionData modelData;
 
     NodeLogisticRegressionPredictor(NodeLogisticRegressionData modelData) {
-        super(modelData);
+        this.modelData = modelData;
     }
 
     @Override
@@ -44,8 +50,13 @@ public class NodeLogisticRegressionPredictor extends NodeLogisticRegressionBase
     @Override
     public List<Double> predict(Graph graph, Batch batch) {
         ComputationContext ctx = new ComputationContext();
-        MatrixConstant features = features(graph, batch);
-        double[] data = ctx.forward(predictions(features)).data();
+        double[] data = ctx.forward(predictionsVariable(graph, batch)).data();
         return Arrays.stream(data).boxed().collect(Collectors.toList());
+    }
+
+    Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
+        var features = features(graph, batch, modelData.nodePropertyKeys());
+        var weights = modelData.weights();
+        return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
     }
 }

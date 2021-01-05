@@ -36,7 +36,7 @@ import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase implements Objective {
+public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase implements Objective<LinkLogisticRegressionData> {
     private final Graph graph;
 
     public LinkLogisticRegressionObjective(
@@ -85,6 +85,11 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         double[] targets = makeTargetsArray(batch, rows);
         MatrixConstant targetVariable = new MatrixConstant(targets, rows, 1);
         return new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
+    }
+
+    @Override
+    public LinkLogisticRegressionData modelData() {
+        return modelData;
     }
 
     private double[] makeTargetsArray(Batch batch, int rows) {

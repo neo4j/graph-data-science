@@ -36,12 +36,12 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class MultiClassNodeLogisticRegressionObjective extends
-             MultiClassNodeLogisticRegressionBase implements Objective {
+public class MultiClassNodeLogisticRegressionObjective implements Objective<MultiClassNodeLogisticRegressionData> {
 
     private final String targetPropertyKey;
     private final Graph graph;
     private final double penalty;
+    private final MultiClassNodeLogisticRegressionPredictor predictor;
 
     public MultiClassNodeLogisticRegressionObjective(
         List<String> nodePropertyKeys,
@@ -49,13 +49,21 @@ public class MultiClassNodeLogisticRegressionObjective extends
         Graph graph,
         double penalty
     ) {
-        super(makeData(nodePropertyKeys, targetPropertyKey, graph));
+        this.predictor = new MultiClassNodeLogisticRegressionPredictor(makeData(
+            nodePropertyKeys,
+            targetPropertyKey,
+            graph
+        ));
         this.targetPropertyKey = targetPropertyKey;
         this.graph = graph;
         this.penalty = penalty;
     }
 
-    private static MultiClassNodeLogisticRegressionData makeData(List<String> nodePropertyKeys, String targetPropertyKey, Graph graph) {
+    private static MultiClassNodeLogisticRegressionData makeData(
+        List<String> nodePropertyKeys,
+        String targetPropertyKey,
+        Graph graph
+    ) {
         var classIdMap = makeClassIdMap(targetPropertyKey, graph);
         return MultiClassNodeLogisticRegressionData.builder()
             .classIdMap(classIdMap)
@@ -81,29 +89,38 @@ public class MultiClassNodeLogisticRegressionObjective extends
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(modelData.weights());
+        return List.of(modelData().weights());
     }
 
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
-        Iterable<Long> nodeIds = batch.nodeIds();
-        int numberOfNodes = batch.size();
-        MatrixConstant features = features(graph, batch);
-        Variable<Matrix> predictions = predictions(features, modelData.weights());
-        double[] targets = new double[numberOfNodes];
-        int nodeOffset = 0;
-        for (long nodeId : nodeIds) {
-            var targetValue = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            targets[nodeOffset] = modelData.classIdMap().toMapped((long) targetValue);
-            nodeOffset++;
-        }
-        MatrixConstant targetVariable = new MatrixConstant(targets, numberOfNodes, 1);
+        var targets = makeTargets(batch);
+        var predictions = predictor.predictionsVariable(graph, batch);
         var unpenalizedLoss = new MultiClassCrossEntropyLoss(
             predictions,
-            targetVariable
+            targets
         );
-        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), batch.size() * penalty / trainSize);
+        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
+    private MatrixConstant makeTargets(Batch batch) {
+        Iterable<Long> nodeIds = batch.nodeIds();
+        int numberOfNodes = batch.size();
+        double[] targets = new double[numberOfNodes];
+        int nodeOffset = 0;
+        var localIdMap = modelData().classIdMap();
+        var targetNodeProperty = graph.nodeProperties(targetPropertyKey);
+        for (long nodeId : nodeIds) {
+            var targetValue = targetNodeProperty.doubleValue(nodeId);
+            targets[nodeOffset] = localIdMap.toMapped((long) targetValue);
+            nodeOffset++;
+        }
+        return new MatrixConstant(targets, numberOfNodes, 1);
+    }
+
+    @Override
+    public MultiClassNodeLogisticRegressionData modelData() {
+        return predictor.modelData();
+    }
 }

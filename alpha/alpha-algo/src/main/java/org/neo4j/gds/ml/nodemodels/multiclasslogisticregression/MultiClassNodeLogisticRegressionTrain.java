@@ -54,7 +54,7 @@ public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassN
         );
         var training = new Training(trainingSettings, log, graph.nodeCount());
         training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return new MultiClassNodeLogisticRegressionPredictor(objective.modelData);
+        return new MultiClassNodeLogisticRegressionPredictor(objective.modelData());
     }
 
     @Override

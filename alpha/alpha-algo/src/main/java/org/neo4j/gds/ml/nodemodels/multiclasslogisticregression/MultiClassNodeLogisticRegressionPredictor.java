@@ -20,17 +20,22 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Softmax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.api.Graph;
 
-public class MultiClassNodeLogisticRegressionPredictor extends
-             MultiClassNodeLogisticRegressionBase implements
-    Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> {
+import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
+
+public class MultiClassNodeLogisticRegressionPredictor implements Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> {
+
+    private final MultiClassNodeLogisticRegressionData modelData;
 
     MultiClassNodeLogisticRegressionPredictor(MultiClassNodeLogisticRegressionData modelData) {
-        super(modelData);
+        this.modelData = modelData;
     }
 
     @Override
@@ -41,7 +46,13 @@ public class MultiClassNodeLogisticRegressionPredictor extends
     @Override
     public ClassProbabilities predict(Graph graph, Batch batch) {
         ComputationContext ctx = new ComputationContext();
-        Matrix forward = ctx.forward(predictions(features(graph, batch), modelData.weights()));
+        Matrix forward = ctx.forward(predictionsVariable(graph, batch));
         return new ClassProbabilities(forward, modelData.classIdMap());
+    }
+
+    Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
+        var features = features(graph, batch, modelData.nodePropertyKeys());
+        var weights = modelData.weights();
+        return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
     }
 }

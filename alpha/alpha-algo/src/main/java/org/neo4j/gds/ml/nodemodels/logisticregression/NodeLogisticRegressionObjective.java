@@ -32,18 +32,40 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class NodeLogisticRegressionObjective extends NodeLogisticRegressionBase implements Objective {
+import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
+
+public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRegressionData> {
     private final String targetPropertyKey;
     private final Graph graph;
+
+    private final NodeLogisticRegressionPredictor predictor;
 
     public NodeLogisticRegressionObjective(
         List<String> nodePropertyKeys,
         String targetPropertyKey,
         Graph graph
     ) {
-        super(makeData(nodePropertyKeys));
+        this.predictor = new NodeLogisticRegressionPredictor(makeData(nodePropertyKeys));
         this.targetPropertyKey = targetPropertyKey;
         this.graph = graph;
+    }
+
+    @Override
+    public List<Weights<? extends Tensor<?>>> weights() {
+        return List.of(modelData().weights());
+    }
+
+    @Override
+    public Variable<Scalar> loss(Batch batch, long trainSize) {
+        var targets = makeTargets(batch);
+        var features = features(graph, batch, modelData().nodePropertyKeys());
+        var predictions = predictor.predictionsVariable(graph, batch);
+        return new LogisticLoss(modelData().weights(), predictions, features, targets);
+    }
+
+    @Override
+    public NodeLogisticRegressionData modelData() {
+        return predictor.modelData();
     }
 
     private static NodeLogisticRegressionData makeData(
@@ -60,24 +82,15 @@ public class NodeLogisticRegressionObjective extends NodeLogisticRegressionBase 
         return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 
-    @Override
-    public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(modelData.weights());
-    }
-
-    @Override
-    public Variable<Scalar> loss(Batch batch, long trainSize) {
+    private MatrixConstant makeTargets(Batch batch) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int rows = batch.size();
-        MatrixConstant features = features(graph, batch);
-        Variable<Matrix> predictions = predictions(features);
         double[] targets = new double[rows];
         int nodeOffset = 0;
         for (long nodeId : nodeIds) {
             targets[nodeOffset] = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
             nodeOffset++;
         }
-        MatrixConstant targetVariable = new MatrixConstant(targets, rows, 1);
-        return new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
+        return new MatrixConstant(targets, rows, 1);
     }
 }

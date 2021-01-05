@@ -29,7 +29,13 @@ import java.util.List;
 /**
  * A training objective that computes a loss over a batch of nodes
  */
-public interface Objective {
+public interface Objective<DATA> {
     List<Weights<? extends Tensor<?>>> weights();
     Variable<Scalar> loss(Batch batch, long trainSize);
+
+    /**
+     * Returns the data, such as weights, needed to store or load the model
+     * @return the data
+     */
+    DATA modelData();
 }
