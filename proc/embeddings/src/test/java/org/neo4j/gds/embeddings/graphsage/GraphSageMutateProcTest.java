@@ -22,9 +22,12 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -76,7 +79,19 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
     void shouldFailOnMissingNodeProperties(GraphCreateFromStoreConfig config, List<String> nodeProperties, List<String> graphProperties, List<String> label) {
         train(16, "mean", ActivationFunction.SIGMOID);
 
-        String query = GdsCypher.call().implicitCreation(config)
+        GraphStore graphStore = ImmutableGraphLoader
+            .builder()
+            .context(ImmutableGraphLoaderContext.builder()
+                .api(db)
+                .log(new TestLog())
+                .build())
+            .username("")
+            .createConfig(config)
+            .build()
+            .graphStore();
+        GraphStoreCatalog.set(config, graphStore);
+
+        String query = GdsCypher.call().explicitCreation(config.graphName())
             .algo("gds.beta.graphSage")
             .mutateMode()
             .addParameter("concurrency", 1)
