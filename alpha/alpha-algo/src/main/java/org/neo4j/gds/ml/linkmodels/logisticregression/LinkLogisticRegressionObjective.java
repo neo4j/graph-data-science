@@ -21,6 +21,9 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2NormSquared;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LogisticLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -38,14 +41,17 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase implements Objective<LinkLogisticRegressionData> {
     private final Graph graph;
+    private final double penalty;
 
     public LinkLogisticRegressionObjective(
         List<String> nodePropertyKeys,
         LinkFeatureCombiner linkFeatureCombiner,
+        double penalty,
         Graph graph
     ) {
         super(makeData(nodePropertyKeys, linkFeatureCombiner));
         this.graph = graph;
+        this.penalty = penalty;
     }
 
     private static LinkLogisticRegressionData makeData(
@@ -84,7 +90,9 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         var rows = relationshipCount.getValue();
         double[] targets = makeTargetsArray(batch, rows);
         MatrixConstant targetVariable = new MatrixConstant(targets, rows, 1);
-        return new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
+        var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), rows * penalty / trainSize);
+        var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
+        return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
     @Override

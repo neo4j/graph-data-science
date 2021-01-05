@@ -45,6 +45,7 @@ class LinkLogisticRegressionObjectiveTest {
         ", (n2:N {a: 1.3, b: 0.5})" +
         ", (n3:N {a: 0.0, b: 2.8})" +
         ", (n4:N {a: 1.0, b: 0.9})" +
+        ", (n5:N {a: 1.0, b: 0.9})" +
         ", (n1)-[:T {label: 1.0}]->(n2)" +
         ", (n3)-[:T {label: 1.0}]->(n4)" +
         ", (n1)-[:T {label: 0.0}]->(n3)" +
@@ -62,16 +63,17 @@ class LinkLogisticRegressionObjectiveTest {
 
     @Test
     void shouldProduceCorrectLoss() {
-        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, graph);
+        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, 1.0, graph);
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
+        // zero penalty since weights are zero
         Assertions.assertThat(lossValue).isEqualTo(-Math.log(0.5));
     }
 
     @Test
     void shouldProduceCorrectLossWithNonZeroWeights() {
-        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, graph);
+        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, 1.0, graph);
         // we proceed to "injecting" non-zero values for the weights of the model
         var weights = objective.weights();
         var backingArray = weights.get(0).data().data();
@@ -88,7 +90,8 @@ class LinkLogisticRegressionObjectiveTest {
             sigmoid(0.2 * 0.09 - 0.3 * 0.16 + 0.5),
             sigmoid(0.2 * 1.0 - 0.3 * 3.61 + 0.5)
         };
-        var expectedTotalLoss = -Math.log(pred[0]) - Math.log(1 - pred[1]) - Math.log(1 - pred[2]) - Math.log(pred[3]);
-        Assertions.assertThat(lossValue).isCloseTo(expectedTotalLoss/4, Offset.offset(1e-7));
+        var expectedTotalCEL = -Math.log(pred[0]) - Math.log(1 - pred[1]) - Math.log(1 - pred[2]) - Math.log(pred[3]);
+        var expectedPenalty = Math.pow(0.2, 2) + Math.pow(0.3, 2);
+        Assertions.assertThat(lossValue).isCloseTo(expectedPenalty + expectedTotalCEL/4, Offset.offset(1e-7));
     }
 }

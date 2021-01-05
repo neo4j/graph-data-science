@@ -45,6 +45,7 @@ public class LinkLogisticRegressionTrain extends Algorithm<LinkLogisticRegressio
         var objective = new LinkLogisticRegressionObjective(
             config.featureProperties(),
             LinkFeatureCombiner.valueOf(config.linkFeatureCombiner()),
+            config.penalty(),
             graph
         );
         var training = new Training(config, log, graph.nodeCount());

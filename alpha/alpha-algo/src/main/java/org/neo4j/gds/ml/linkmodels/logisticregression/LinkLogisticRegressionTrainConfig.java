@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -33,6 +34,12 @@ import java.util.Optional;
 @Configuration
 public interface LinkLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, TrainingConfig {
 
+    @Value.Default
+    default double penalty() {
+        return 0.0;
+    }
+
+    @Value.Default
     default String linkFeatureCombiner() {
         return LinkFeatureCombiner.L2.name();
     }

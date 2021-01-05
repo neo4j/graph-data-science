@@ -43,6 +43,7 @@ class LinkLogisticRegressionTrainTest {
         ", (n2:N {a: 1.3, b: 0.5})" +
         ", (n3:N {a: 0.0, b: 2.8})" +
         ", (n4:N {a: 1.0, b: 0.9})" +
+        ", (n5:N {a: 1.0, b: 0.9})" +
         ", (n1)-[:T {label: 1.0}]->(n2)" +
         ", (n3)-[:T {label: 1.0}]->(n4)" +
         ", (n1)-[:T {label: 0.0}]->(n3)" +
