@@ -89,8 +89,7 @@ public class BetweennessCentralityMutateProcTest
     void testMutate() {
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation(BC_GRAPH_NAME)
             .algo("betweenness")
             .mutateMode()
             .addParameter("mutateProperty", DEFAULT_RESULT_PROPERTY)

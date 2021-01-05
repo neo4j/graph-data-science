@@ -33,12 +33,15 @@ import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -46,7 +49,9 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -126,28 +131,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
             GraphWriteNodePropertiesProc.class
         );
 
-        runQuery("CALL gds.graph.create(" +
-                 "'graphLabel1'," +
-                 "'Label1'," +
-                 "   {" +
-                 "      TYPE1: {" +
-                 "          type: 'TYPE1'," +
-                 "          properties: ['weight', 'equalWeight']" +
-                 "      } " +
-                 "   }" +
-                 ")");
-
-        runQuery("CALL gds.graph.create(" +
-                 "'graphLabel3'," +
-                 "'Label3'," +
-                 "   {" +
-                 "      TYPE3: {" +
-                 "          type: 'TYPE3'," +
-                 "          properties: ['equalWeight'], " +
-                 "          orientation: 'UNDIRECTED'" +
-                 "      } " +
-                 "   }" +
-                 ")");
+        graphCreateQueries().forEach(this::runQuery);
 
         runInTransaction(db, tx -> {
             final Label label = Label.label("Label1");
@@ -173,6 +157,27 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
             weightedExpected.put(tx.findNode(label, "name", "i").getId(), 0.150);
             weightedExpected.put(tx.findNode(label, "name", "j").getId(), 0.150);
         });
+    }
+
+    List<String> graphCreateQueries() {
+        return Arrays.asList(
+            GdsCypher
+                .call()
+                .withNodeLabel("Label3")
+                .withRelationshipType("TYPE3", RelationshipProjection.of(
+                    "TYPE3",
+                    Orientation.UNDIRECTED,
+                    Aggregation.DEFAULT
+                ).withProperties(PropertyMappings.of(PropertyMapping.of("equalWeight"))))
+                .graphCreate("graphLabel3").yields(),
+            GdsCypher.call()
+                .withNodeLabel("Label1")
+                .withRelationshipType("TYPE1", RelationshipProjection.builder().type("TYPE1")
+                    .addProperties(PropertyMapping.of("equalWeight"), PropertyMapping.of("weight"))
+                    .build())
+                .graphCreate("graphLabel1")
+                .yields()
+        );
     }
 
     @AfterEach

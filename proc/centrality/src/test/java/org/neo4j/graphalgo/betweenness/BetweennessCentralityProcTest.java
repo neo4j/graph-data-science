@@ -22,10 +22,14 @@ package org.neo4j.graphalgo.betweenness;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.OrientationCombinationTest;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphdb.Label;
@@ -45,6 +49,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
     OrientationCombinationTest<BetweennessCentrality, CONFIG, HugeAtomicDoubleArray> {
 
     static final String DEFAULT_RESULT_PROPERTY = "centrality";
+    protected static final String BC_GRAPH_NAME = "bcGraph";
 
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE" +
@@ -81,6 +86,21 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             EXPECTED.put(tx.findNode(label, "name", "d").getId(), 3.0);
             EXPECTED.put(tx.findNode(label, "name", "e").getId(), 0.0);
         });
+
+        String loadQuery = GdsCypher.call()
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "REL",
+                RelationshipProjection.of(
+                    "REL",
+                    Orientation.UNDIRECTED,
+                    Aggregation.DEFAULT
+                )
+            )
+            .graphCreate(BC_GRAPH_NAME)
+            .yields();
+
+        runQuery(loadQuery);
     }
 
     @Override

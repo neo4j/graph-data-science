@@ -71,9 +71,21 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
         return ValueType.DOUBLE;
     }
 
+    @Override
+    public Optional<String> mutateGraphName() {
+        return Optional.of("completeGraph");
+    }
+
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(GraphCreateProc.class, PageRankMutateProc.class, GraphWriteNodePropertiesProc.class);
+
+        String loadQuery = GdsCypher.call()
+            .withAnyLabel()
+            .graphCreate("completeGraph")
+            .withAnyRelationshipType()
+            .yields();
+        runQuery(loadQuery);
     }
 
     @Override
@@ -114,8 +126,7 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
     void testMutateYields() {
         String query = GdsCypher
             .call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation("completeGraph")
             .algo("pageRank")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
