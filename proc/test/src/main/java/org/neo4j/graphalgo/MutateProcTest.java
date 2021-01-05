@@ -51,6 +51,11 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         return Optional.empty();
     }
 
+    @Override
+    default boolean supportsImplicitGraphCreate() {
+        return false;
+    }
+
     @Test
     void testGraphMutation();
 
@@ -133,6 +138,37 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                     );
                 }));
     }
+
+    @Override
+    @Test
+    default void testImplicitGraphCreateFromCypherConfig() {}
+
+    @Override
+    @Test
+    default void failOnImplicitLoadingWithAlteringNodeQuery() {}
+
+    @Override
+    @Test
+    default void useReadConcurrencyWhenSetOnImplicitlyLoadedGraph() {}
+
+    @Override
+    @Test
+    default void testRunOnImplicitlyLoadedGraph() {}
+
+    @Override
+    @Test
+    default void failOnImplicitLoadingWithAlteringRelationshipQuery() {}
+
+    @Override
+    @Test
+    default void testImplicitGraphCreateFromStoreConfig() {}
+
+    @Override
+    default void failOnImplicitLoadingWithoutProjectionsOrQueries(
+        String expectedMessage,
+        Map<String, Object> configurationMap
+    ) {}
+
 
     @NotNull
     default String ensureGraphExists() {

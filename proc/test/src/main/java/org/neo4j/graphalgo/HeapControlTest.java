@@ -47,10 +47,13 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                        " (michael)-[:WORKS_WITH]->(karin)," +
                        " (arya)-[:FRIENDS]->(karin)";
 
+    private String heapGraphName() { return "heapTestGraph"; };
+
     @Test
     default void shouldPassOnSufficientMemory() {
         applyOnProcedure(proc -> {
-            CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty()));
+            loadGraph(heapGraphName());
+            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 10000000);
         });
     }
@@ -58,7 +61,8 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
     @Test
     default void shouldFailOnInsufficientMemory() {
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> applyOnProcedure(proc -> {
-            CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(CypherMapWrapper.empty()));
+            loadGraph(heapGraphName());
+            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
         }));
 
@@ -77,8 +81,9 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
     @Test
     default void shouldNotFailOnInsufficientMemoryIfInSudoMode() {
         applyOnProcedure(proc -> {
+            loadGraph(heapGraphName());
             CypherMapWrapper configMap = CypherMapWrapper.empty().withBoolean(BaseConfig.SUDO_KEY, true);
-            CONFIG config = proc.newConfig(Optional.empty(), createMinimalImplicitConfig(configMap));
+            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(configMap));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
         });
     }

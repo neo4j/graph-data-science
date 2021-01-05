@@ -60,9 +60,11 @@ public interface MemoryEstimateTest<ALGORITHM extends Algorithm<ALGORITHM, RESUL
             getProcedureMethods(proc)
                 .filter(procMethod -> getProcedureMethodName(procMethod).endsWith(".estimate"))
                 .forEach(estimateMethod -> {
-                    Map<String, Object> config = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     try {
-                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, config, Collections.emptyMap());
+                        var graphName = "memoryEstimateTestGraph";
+                        loadGraph(graphName);
+                        Stream<MemoryEstimateResult> result = (Stream) estimateMethod.invoke(proc, graphName, config);
                         result.forEach(row -> {
                             assertTrue(row.nodeCount > 0);
                             assertTrue(row.bytesMin > 0);

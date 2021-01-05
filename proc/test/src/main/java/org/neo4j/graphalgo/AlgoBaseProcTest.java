@@ -101,6 +101,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
+    default boolean supportsImplicitGraphCreate() {
+        return true;
+    }
+    
     GraphDatabaseAPI graphDb();
 
     default NamedDatabaseId namedDatabaseId() {
@@ -218,31 +222,34 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     @AllGraphStoreFactoryTypesTest
     default void testRunOnLoadedGraph(TestSupport.FactoryType factoryType) {
-        String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = factoryType == CYPHER
-            ? withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery())
-            : withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
+        // FIXME rethink this test for mutate
+        if (supportsImplicitGraphCreate()) {
+            String loadedGraphName = "loadedGraph";
+            GraphCreateConfig graphCreateConfig = factoryType == CYPHER
+                ? withNameAndRelationshipQuery("", loadedGraphName, relationshipQuery())
+                : withNameAndRelationshipProjections("", loadedGraphName, relationshipProjections());
 
-        applyOnProcedure((proc) -> {
-            GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
-            GraphStoreCatalog.set(
-                graphCreateConfig,
-                graphStore
-            );
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
-                loadedGraphName,
-                configMap
-            );
+            applyOnProcedure((proc) -> {
+                GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+                GraphStoreCatalog.set(
+                    graphCreateConfig,
+                    graphStore
+                );
+                Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
+                AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnLoadedGraph = proc.compute(
+                    loadedGraphName,
+                    configMap
+                );
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
-            AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
-                implicitConfigMap,
-                Collections.emptyMap()
-            );
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+                AlgoBaseProc.ComputationResult<?, RESULT, CONFIG> resultOnImplicitGraph = proc.compute(
+                    implicitConfigMap,
+                    Collections.emptyMap()
+                );
 
-            assertResultEquals(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
-        });
+                assertResultEquals(resultOnImplicitGraph.result(), resultOnLoadedGraph.result());
+            });
+        }
     }
 
     @Test

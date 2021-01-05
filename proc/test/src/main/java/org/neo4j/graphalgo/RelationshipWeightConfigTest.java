@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -50,7 +51,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -139,23 +139,27 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
     @Test
     default void testRelationshipWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE ()-[:A {a: 1}]->()");
-        List<String> relationshipProperties = singletonList("a");
-        Map<String, Object> tempConfig = map(
-            "relationshipWeightProperty", "foo",
-            NODE_PROJECTION_KEY, PROJECT_ALL,
-            RELATIONSHIP_PROJECTION_KEY, map(
-                "A", map(
-                    "properties", relationshipProperties
-                )
+        var graphName = "oneRelWeightsGraph";
+        var relationshipProperties = PropertyMappings.of(singletonList(PropertyMapping.of("a")));
+        var relationshipProjections = RelationshipProjections.of(Map.of(
+            RelationshipType.of("A"),
+            RelationshipProjection.of(
+                "A",
+                Orientation.NATURAL,
+                Aggregation.DEFAULT
+            ).withProperties(relationshipProperties)
             )
         );
+        loadExplicitGraphWithRelationshipWeights(graphName, NodeProjections.ALL,relationshipProjections);
 
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).toMap();
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper
+            .empty()
+            .withString("relationshipWeightProperty", "foo")).toMap();
 
         applyOnProcedure(proc -> {
             IllegalArgumentException e = assertThrows(
                 IllegalArgumentException.class,
-                () -> proc.compute(config, Collections.emptyMap())
+                () -> proc.compute(graphName, config)
             );
             assertThat(e.getMessage(), containsString("foo"));
             assertThat(e.getMessage(), containsString("[a]"));
@@ -184,11 +188,13 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 configMap
             ));
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-            assertMissingProperty(error, () -> proc.compute(
-                implicitConfigMap,
-                Collections.emptyMap()
-            ));
+            if (supportsImplicitGraphCreate()) {
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+                assertMissingProperty(error, () -> proc.compute(
+                    implicitConfigMap,
+                    Collections.emptyMap()
+                ));
+            }
         });
     }
 
@@ -229,11 +235,13 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 configMap
             ));
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-            assertMissingProperty(error, () -> proc.compute(
-                implicitConfigMap,
-                Collections.emptyMap()
-            ));
+            if (supportsImplicitGraphCreate()) {
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+                assertMissingProperty(error, () -> proc.compute(
+                    implicitConfigMap,
+                    Collections.emptyMap()
+                ));
+            }
         });
     }
 
@@ -317,26 +325,28 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
 
     @Test
     default void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {
-        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-        runQuery(graphDb(), CREATE_QUERY);
+        if (supportsImplicitGraphCreate()) {
+            runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+            runQuery(graphDb(), CREATE_QUERY);
 
-        String labelString = "Label";
+            String labelString = "Label";
 
-        CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
-            NODE_PROJECTION_KEY, NodeProjections.builder()
-                .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
-                .build(),
-            RELATIONSHIP_PROJECTION_KEY, "*",
-            "relationshipProperties", "weight1"
-        ));
-        CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
+            CypherMapWrapper weightConfig = CypherMapWrapper.create(map(
+                NODE_PROJECTION_KEY, NodeProjections.builder()
+                    .putProjection(NodeLabel.of(labelString), NodeProjection.of(labelString, PropertyMappings.of()))
+                    .build(),
+                RELATIONSHIP_PROJECTION_KEY, "*",
+                "relationshipProperties", "weight1"
+            ));
+            CypherMapWrapper algoConfig = createMinimalConfig(weightConfig);
 
-        applyOnProcedure((proc) -> {
-            CONFIG config = proc.newConfig(Optional.empty(), algoConfig);
-            Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.empty());
-            Graph graph = proc.createGraph(configAndName);
-            assertGraphEquals(fromGdl("(a:Label)-->(b:Label)-->(c:Label)-->(a)-->(c)"), graph);
-        });
+            applyOnProcedure((proc) -> {
+                CONFIG config = proc.newConfig(Optional.empty(), algoConfig);
+                Pair<CONFIG, Optional<String>> configAndName = Tuples.pair(config, Optional.empty());
+                Graph graph = proc.createGraph(configAndName);
+                assertGraphEquals(fromGdl("(a:Label)-->(b:Label)-->(c:Label)-->(a)-->(c)"), graph);
+            });
+        }
     }
 
     @Test
