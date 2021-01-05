@@ -66,9 +66,13 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, R
 
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), graphStore.getUnion());
         GraphSchema schema = graphStore.schema();
-        boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
-        boolean relationshipsContainMutateProperty = containsMutateProperty(schema.relationshipSchema().properties());
-        assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
+        if (mutateProperty() != null) {
+            boolean nodesContainMutateProperty = containsMutateProperty(schema.nodeSchema().properties());
+            boolean relationshipsContainMutateProperty = containsMutateProperty(schema
+                .relationshipSchema()
+                .properties());
+            assertTrue(nodesContainMutateProperty || relationshipsContainMutateProperty);
+        }
     }
 
     default <PS extends PropertySchema> boolean containsMutateProperty(Map<?, Map<String, PS>> entitySchema) {
