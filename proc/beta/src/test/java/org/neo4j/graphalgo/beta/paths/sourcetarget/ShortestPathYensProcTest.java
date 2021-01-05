@@ -47,6 +47,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     HeapControlTest<Yens, CONFIG, DijkstraResult>,
     RelationshipWeightConfigTest<Yens, CONFIG, DijkstraResult> {
 
+    protected static final String GRAPH_NAME = "graph";
     long idC, idH, idD, idE, idF, idG;
     long[] ids0, ids1, ids2;
     double[] costs0, costs1, costs2;
@@ -95,7 +96,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
             .withAnyLabel()
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate("graph")
+            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

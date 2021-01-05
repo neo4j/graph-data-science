@@ -46,6 +46,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
     RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult> {
 
+    protected static final String GRAPH_NAME = "graph";
     long idA, idC, idD, idE, idF;
     static long[] ids0;
     static double[] costs0;
@@ -86,7 +87,7 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
             .withAnyLabel()
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate("graph")
+            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

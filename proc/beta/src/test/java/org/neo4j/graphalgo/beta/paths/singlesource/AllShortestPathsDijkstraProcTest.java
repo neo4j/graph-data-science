@@ -45,6 +45,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
     RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>
 {
+    protected static final String GRAPH_NAME = "graph";
     // Track expected results
     long idA, idB, idC, idD, idE, idF;
     static double[] costs0, costs1, costs2, costs3, costs4, costs5;
@@ -98,7 +99,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
             .withAnyLabel()
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
-            .graphCreate("graph")
+            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

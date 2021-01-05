@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.beta.paths.sourcetarget;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
@@ -39,7 +41,48 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
 
-class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraMutateConfig> {
+class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraMutateConfig>
+    implements MutateRelationshipWithPropertyTest<Dijkstra, ShortestPathDijkstraMutateConfig, DijkstraResult> {
+
+    private static final String EXISTING_GRAPH =
+        "CREATE" +
+        ", (c)-[{w: 3.0}]->(d)" +
+        ", (c)-[{w: 2.0}]->(e)" +
+        ", (d)-[{w: 4.0}]->(f)" +
+        ", (e)-[{w: 1.0}]->(d)" +
+        ", (e)-[{w: 2.0}]->(f)" +
+        ", (e)-[{w: 3.0}]->(g)" +
+        ", (f)-[{w: 2.0}]->(g)" +
+        ", (f)-[{w: 1.0}]->(h)" +
+        ", (g)-[{w: 2.0}]->(h)";
+
+    @Override
+    public String expectedMutatedGraph() {
+        return EXISTING_GRAPH +
+               // new relationship as a result from mutate
+               ", (c)-[{w: 3.0}]->(h)" +
+               ", (c)-[{w: 3.0}]->(h)" +
+               ", (c)-[{w: 3.0}]->(h)";
+    }
+
+    @Override
+    public String mutateRelationshipType() {
+        return WRITE_RELATIONSHIP_TYPE;
+    }
+
+    @Override
+    public String mutateProperty() {
+        return null;
+    }
+
+    @Override
+    public ValueType mutatePropertyType() {
+        return ValueType.DOUBLE;
+    }
+
+    public Optional<String> mutateGraphName() {
+        return Optional.of(GRAPH_NAME);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraMutateConfig>> getProcedureClazz() {
@@ -63,7 +106,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
     }
 
     @Test
-    void testMutate() {
+    void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call().explicitCreation("graph")
@@ -85,18 +128,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
-        var expected = TestSupport.fromGdl(
-            "CREATE" +
-            "  (a)-[{w: 4.0D}]->(b)" +
-            ", (a)-[{w: 2.0D}]->(c)" +
-            ", (b)-[{w: 5.0D}]->(c)" +
-            ", (b)-[{w: 10.0D}]->(d)" +
-            ", (c)-[{w: 3.0D}]->(e)" +
-            ", (d)-[{w: 11.0D}]->(f)" +
-            ", (e)-[{w: 4.0D}]->(d)" +
-            // new relationship as a result from mutate
-            ", (a)-[{w: 20.0D}]->(f)"
-        );
+        var expected = TestSupport.fromGdl(createQuery() + ", (a)-[{w: 20.0D}]->(f)");
 
         assertGraphEquals(expected, actual);
     }

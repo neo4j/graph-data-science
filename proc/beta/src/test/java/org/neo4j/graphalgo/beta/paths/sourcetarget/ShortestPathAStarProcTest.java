@@ -69,6 +69,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     static final String LONGITUDE_PROPERTY = "longitude";
     static final String LATITUDE_PROPERTY = "latitude";
     static final String COST_PROPERTY = "cost";
+    protected static final String GRAPH_NAME = "graph";
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -139,7 +140,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
             .withNodeProperty(LONGITUDE_PROPERTY)
             .withAnyRelationshipType()
             .withRelationshipProperty(COST_PROPERTY)
-            .graphCreate("graph")
+            .graphCreate(GRAPH_NAME)
             .yields());
     }
 

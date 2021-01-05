@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.beta.paths.yens.Yens;
 import org.neo4j.graphalgo.beta.paths.yens.config.ShortestPathYensMutateConfig;
@@ -38,8 +41,48 @@ import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.beta.paths.PathTestUtil.WRITE_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.config.MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY;
+class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPathYensMutateConfig>
+    implements MutateRelationshipWithPropertyTest<Yens, ShortestPathYensMutateConfig, DijkstraResult> {
 
-class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPathYensMutateConfig> {
+    private static final String EXISTING_GRAPH =
+        "CREATE" +
+        ", (c)-[{w: 3.0}]->(d)" +
+        ", (c)-[{w: 2.0}]->(e)" +
+        ", (d)-[{w: 4.0}]->(f)" +
+        ", (e)-[{w: 1.0}]->(d)" +
+        ", (e)-[{w: 2.0}]->(f)" +
+        ", (e)-[{w: 3.0}]->(g)" +
+        ", (f)-[{w: 2.0}]->(g)" +
+        ", (f)-[{w: 1.0}]->(h)" +
+        ", (g)-[{w: 2.0}]->(h)";
+
+    @Override
+    public String expectedMutatedGraph() {
+        return EXISTING_GRAPH +
+               // new relationship as a result from mutate
+               ", (c)-[{w: 3.0}]->(h)" +
+               ", (c)-[{w: 3.0}]->(h)" +
+               ", (c)-[{w: 3.0}]->(h)";
+    }
+
+    @Override
+    public String mutateRelationshipType() {
+        return WRITE_RELATIONSHIP_TYPE;
+    }
+
+    @Override
+    public String mutateProperty() {
+        return null;
+    }
+
+    @Override
+    public ValueType mutatePropertyType() {
+        return ValueType.DOUBLE;
+    }
+
+    public Optional<String> mutateGraphName() {
+        return Optional.of(GRAPH_NAME);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<Yens, DijkstraResult, ShortestPathYensMutateConfig>> getProcedureClazz() {
@@ -62,11 +105,28 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
         return mapWrapper;
     }
 
+    @Override
     @Test
-    void testMutate() {
+    @Disabled("This test does not work for Dijkstra as no property is written")
+    public void testMutateFailsOnExistingToken() {}
+
+
+    @Override
+    @Test
+    @Disabled("This test does not work for Dijkstra as the source node is filtered")
+    public void testGraphMutationOnFilteredGraph() {}
+
+    @Override
+    @Test
+    @Disabled("This test does not work for Dijkstra as the source node is filtered")
+    public void testWriteBackGraphMutationOnFilteredGraph() {}
+
+    @Test
+    void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
             .algo("gds.beta.shortestPath.yens")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -87,21 +147,11 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
 
         var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(
-            "CREATE" +
-            ", (c)-[{w: 3.0}]->(d)" +
-            ", (c)-[{w: 2.0}]->(e)" +
-            ", (d)-[{w: 4.0}]->(f)" +
-            ", (e)-[{w: 1.0}]->(d)" +
-            ", (e)-[{w: 2.0}]->(f)" +
-            ", (e)-[{w: 3.0}]->(g)" +
-            ", (f)-[{w: 2.0}]->(g)" +
-            ", (f)-[{w: 1.0}]->(h)" +
-            ", (g)-[{w: 2.0}]->(h)" +
+            EXISTING_GRAPH +
             // new relationship as a result from mutate
             ", (c)-[{w: 5.0}]->(h)" +
             ", (c)-[{w: 7.0}]->(h)" +
-            ", (c)-[{w: 8.0}]->(h)" +
-            ""
+            ", (c)-[{w: 8.0}]->(h)"
         );
 
         assertGraphEquals(expected, actual);
