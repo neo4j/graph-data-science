@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -69,8 +68,7 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     void shouldComputeNonZeroEmbeddings(List<Float> weights) {
         int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
+            .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
             .writeMode()
             .addParameter("embeddingDimension", embeddingDimension)

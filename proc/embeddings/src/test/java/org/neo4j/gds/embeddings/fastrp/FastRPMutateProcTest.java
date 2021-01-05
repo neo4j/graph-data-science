@@ -20,11 +20,14 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.MutateNodePropertyTest;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
@@ -33,19 +36,41 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
+class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
+    implements MutateNodePropertyTest<FastRP, FastRPMutateConfig, FastRP.FastRPResult> {
 
     @Override
     GdsCypher.ExecutionModes mode() {
         return GdsCypher.ExecutionModes.MUTATE;
     }
 
+    @Override
+    public String mutateProperty() {
+        return "embedding";
+    }
+
+    @Override
+    public ValueType mutatePropertyType() {
+        return ValueType.FLOAT_ARRAY;
+    }
+
+    @Override
+    public String expectedMutatedGraph() {
+        return null;
+    }
+
+    @Override
+    public Optional<String> mutateGraphName() {
+        return Optional.of("graphToMutate");
+    }
+
     @BeforeEach
     void setupNodePropertyFunc() throws Exception {
-        registerFunctions(
-            NodePropertyFunc.class
-        );
+        registerProcedures(GraphWriteNodePropertiesProc.class);
+        registerFunctions(NodePropertyFunc.class);
+        loadGraph(mutateGraphName().get());
     }
 
     @Override
@@ -68,26 +93,24 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
         return minimalConfig;
     }
 
+    @Override
+    @Test
+    public void testGraphMutation() {}
+
+    @Override
+    @Test
+    public void testMutateFailsOnExistingToken() {}
+
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.embeddings.fastrp.FastRPProcTest#weights")
     void shouldMutateNonZeroEmbeddings(List<Float> weights) {
-        String loadedGraphName = "loadGraph";
-
-        var graphCreateQuery = GdsCypher.call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .graphCreate(loadedGraphName)
-            .yields();
-
-        runQuery(graphCreateQuery);
-
         int embeddingDimension = 128;
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
-            .explicitCreation(loadedGraphName)
+            .explicitCreation(mutateGraphName().get())
             .algo("fastRP")
             .mutateMode()
             .addParameter("embeddingDimension", embeddingDimension)
-            .addParameter("mutateProperty", "embedding");
+            .addParameter("mutateProperty", mutateProperty());
 
         if (!weights.isEmpty()) {
             queryBuilder.addParameter("iterationWeights", weights);
@@ -96,7 +119,12 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig> {
 
         runQuery(query);
 
-        runQueryWithRowConsumer("MATCH (n:Node) RETURN gds.util.nodeProperty('loadGraph', id(n), 'embedding') as embedding", row -> {
+        String expectedResultQuery = formatWithLocale(
+            "MATCH (n:Node) RETURN gds.util.nodeProperty('%s', id(n), 'embedding') as embedding",
+            mutateGraphName().get()
+        );
+
+        runQueryWithRowConsumer(expectedResultQuery, row -> {
             float[] embeddings = (float[]) row.get("embedding");
             assertEquals(embeddingDimension, embeddings.length);
             boolean allMatch = true;

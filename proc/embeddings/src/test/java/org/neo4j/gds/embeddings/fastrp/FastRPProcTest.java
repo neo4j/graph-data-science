@@ -63,12 +63,16 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
         ", (a)<-[:REL2 {weight: 2.0}]-(b)" +
         ", (a)<-[:REL2 {weight: 1.0}]-(e)";
 
+    protected static final String FASTRP_GRAPH = "myGraph";
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
             getProcedureClazz(),
             GraphCreateProc.class
         );
+
+        loadGraph(FASTRP_GRAPH);
     }
 
     public GraphDatabaseAPI graphDb() {
@@ -113,8 +117,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     void acceptsIntegerIterationWeights() {
         var query = GdsCypher
             .call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
+            .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
             .executionMode(mode())
             .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())
@@ -131,8 +134,7 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
     void validatesWeights(List<?> iterationWeights, String messagePart) {
         var query = GdsCypher
             .call()
-            .withNodeLabel("Node")
-            .withRelationshipType("REL")
+            .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
             .executionMode(mode())
             .addAllParameters(createMinimalConfig(CypherMapWrapper.empty()).toMap())
