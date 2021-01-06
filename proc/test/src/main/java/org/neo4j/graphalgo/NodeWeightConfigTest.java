@@ -29,9 +29,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -47,7 +47,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -103,21 +102,26 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
     @Test
     default void testNodeWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE (:A {a: 1})");
-        Map<String, Object> tempConfig = MapUtil.map(
-            "nodeProjection", MapUtil.map(
-                "A", MapUtil.map(
-                    "properties", singletonList("a")
-                )
-            ),
-            "relationshipProjection", "*"
+        String graphName = "graph";
+        GraphCreateFromStoreConfig graphCreateConfig = withNameAndNodeProjections(
+            "",
+            graphName,
+            NodeProjections.single(
+                NodeLabel.of("A"),
+                NodeProjection.of("A", PropertyMappings.of(PropertyMapping.of("a")))
+            )
         );
+        GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
 
-        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.create(tempConfig)).withString("nodeWeightProperty", "foo").toMap();
+        Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty())
+            .withString("nodeWeightProperty", "foo")
+            .toMap();
 
         IllegalArgumentException e = assertThrows(
             IllegalArgumentException.class,
             () -> {
-                applyOnProcedure(proc -> proc.compute(config, emptyMap()));
+                applyOnProcedure(proc -> proc.compute(graphName, config));
             }
         );
         assertThat(e.getMessage(), containsString("foo"));
@@ -158,15 +162,17 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 configMap
             ));
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-            implicitConfigMap.put(
-                "nodeWeightProperty",
-                "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
-            );
-            assertMissingProperty(error, () -> proc.compute(
-                implicitConfigMap,
-                emptyMap()
-            ));
+            if (supportsImplicitGraphCreate()) {
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+                implicitConfigMap.put(
+                    "nodeWeightProperty",
+                    "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
+                );
+                assertMissingProperty(error, () -> proc.compute(
+                    implicitConfigMap,
+                    emptyMap()
+                ));
+            }
         });
     }
 
@@ -203,13 +209,15 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 configMap
             ));
 
-            Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-            implicitConfigMap.put("nodeProperties", "foo");
-            implicitConfigMap.put("nodeWeightProperty", "foo");
-            assertMissingProperty(error, () -> proc.compute(
-                implicitConfigMap,
-                emptyMap()
-            ));
+            if (supportsImplicitGraphCreate()) {
+                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
+                implicitConfigMap.put("nodeProperties", "foo");
+                implicitConfigMap.put("nodeWeightProperty", "foo");
+                assertMissingProperty(error, () -> proc.compute(
+                    implicitConfigMap,
+                    emptyMap()
+                ));
+            }
         });
     }
 
