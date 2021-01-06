@@ -55,7 +55,6 @@ class LinkLogisticRegressionBaseTest {
 
     @Test
     void shouldComputeCorrectFeatures() {
-
         var nodePropertyKeys = List.of("a", "b");
         double[] weightsArray = new double[nodePropertyKeys.size() + 1];
         var weights = new Weights<>(new Matrix(weightsArray, 1, weightsArray.length));
