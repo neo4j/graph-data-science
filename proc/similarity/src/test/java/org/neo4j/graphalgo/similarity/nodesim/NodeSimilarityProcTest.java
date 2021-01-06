@@ -69,21 +69,22 @@ abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> e
     RelationshipWeightConfigTest<NodeSimilarity, CONFIG, NodeSimilarityResult> {
 
     @Neo4jGraph
-    public static final String DB_CYPHER = "CREATE" +
-           "  (a:Person {id: 0,  name: 'Alice'})" +
-           ", (b:Person {id: 1,  name: 'Bob'})" +
-           ", (c:Person {id: 2,  name: 'Charlie'})" +
-           ", (d:Person {id: 3,  name: 'Dave'})" +
-           ", (i1:Item  {id: 10, name: 'p1'})" +
-           ", (i2:Item  {id: 11, name: 'p2'})" +
-           ", (i3:Item  {id: 12, name: 'p3'})" +
-           ", (i4:Item  {id: 13, name: 'p4'})" +
-           ", (a)-[:LIKES]->(i1)" +
-           ", (a)-[:LIKES]->(i2)" +
-           ", (a)-[:LIKES]->(i3)" +
-           ", (b)-[:LIKES]->(i1)" +
-           ", (b)-[:LIKES]->(i2)" +
-           ", (c)-[:LIKES]->(i3)";
+    public static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Person {id: 0,  name: 'Alice'})" +
+        ", (b:Person {id: 1,  name: 'Bob'})" +
+        ", (c:Person {id: 2,  name: 'Charlie'})" +
+        ", (d:Person {id: 3,  name: 'Dave'})" +
+        ", (i1:Item  {id: 10, name: 'p1'})" +
+        ", (i2:Item  {id: 11, name: 'p2'})" +
+        ", (i3:Item  {id: 12, name: 'p3'})" +
+        ", (i4:Item  {id: 13, name: 'p4'})" +
+        ", (a)-[:LIKES]->(i1)" +
+        ", (a)-[:LIKES]->(i2)" +
+        ", (a)-[:LIKES]->(i3)" +
+        ", (b)-[:LIKES]->(i1)" +
+        ", (b)-[:LIKES]->(i2)" +
+        ", (c)-[:LIKES]->(i3)";
 
     @BeforeEach
     void setup() throws Exception {

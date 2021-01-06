@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -168,8 +167,4 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
         assertEquals(result1.didConverge(), result2.didConverge());
         assertEquals(result1.ranIterations(), result2.ranIterations());
     }
-
-    @Override
-    @Disabled("The algorithm is using Neo4j Node IDs to compute labels hence can't compare offset results")
-    public void testNonConsecutiveIds() {}
 }

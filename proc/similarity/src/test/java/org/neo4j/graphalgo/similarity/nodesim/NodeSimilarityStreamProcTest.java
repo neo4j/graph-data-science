@@ -20,14 +20,19 @@
 package org.neo4j.graphalgo.similarity.nodesim;
 
 import org.apache.commons.compress.utils.Sets;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.catalog.GraphDropProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -81,51 +86,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
         EXPECTED_TOP_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_TOP_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
-    void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
-        String graphCreate =
-            "CALL gds.graph.create(" +
-            "    'myGraphNATURAL'," +
-            "    ['Person', 'Item']," +
-            "    'LIKES'" +
-            ")";
-
-        int idOffset = 100;
-        long deletedNodes = clearDb();
-        registerProcedures(GraphDropProc.class);
-        runQuery(formatWithLocale("UNWIND range(1, %d) AS i CREATE (:IncrementIdSpace)", idOffset));
-        runQuery("CALL gds.graph.drop('myGraphNATURAL')");
-        runQuery(graphCreate);
-        runQuery("MATCH (n:IncrementIdSpace) DELETE n");
-
-        HashSet<String> expected = Sets.newHashSet(
-            resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 1, 2 / 3.0),
-            resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 2, 1 / 3.0),
-            resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 2, 0.0),
-            resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 0, 2 / 3.0),
-            resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 0, 1 / 3.0),
-            resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 1, 0.0)
-        );
-
-        String query = queryBuilder
-            .algo("nodeSimilarity")
-            .streamMode()
-            .addParameter("similarityCutoff", 0.0)
-            .yields("node1", "node2", "similarity");
-
-        Collection<String> result = new HashSet<>();
-        runQueryWithRowConsumer(query, row -> {
-                long node1 = row.getNumber("node1").longValue();
-                long node2 = row.getNumber("node2").longValue();
-                double similarity = row.getNumber("similarity").doubleValue();
-                result.add(resultString(node1, node2, similarity));
-            }
-        );
-
-        assertEquals(expected, result);
     }
 
     @ParameterizedTest(name = "{2}")
@@ -230,5 +190,60 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
                 );
             }
         });
+    }
+
+    @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_METHOD)
+    class NonConsecutiveIds {
+
+        @Neo4jGraph
+        private static final String DB_CYPHER_NON_CONSECUTIVE =
+            "CREATE (:IncrementIdSpace)" + DB_CYPHER;
+
+        @ParameterizedTest(name = "{1}")
+        @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allGraphVariations")
+        void shouldDealWithAnyIdSpace(GdsCypher.QueryBuilder queryBuilder, String testName) throws Exception {
+            String graphCreate =
+                "CALL gds.graph.create(" +
+                "    'myGraphNATURAL'," +
+                "    ['Person', 'Item']," +
+                "    'LIKES'" +
+                ")";
+
+            int idOffset = 1;
+            long deletedNodes = 0;
+            registerProcedures(GraphDropProc.class);
+            runQuery("CALL gds.graph.drop('myGraphNATURAL')");
+            runQuery(graphCreate);
+            GraphStore myGraphNATURAL = GraphStoreCatalog
+                .get(getUsername(), db.databaseId(), "myGraphNATURAL")
+                .graphStore();
+
+            HashSet<String> expected = Sets.newHashSet(
+                resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 1, 2 / 3.0),
+                resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 2, 1 / 3.0),
+                resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 2, 0.0),
+                resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 0, 2 / 3.0),
+                resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 0, 1 / 3.0),
+                resultString(idOffset + deletedNodes + 2, idOffset + deletedNodes + 1, 0.0)
+            );
+
+            String query = queryBuilder
+                .algo("nodeSimilarity")
+                .streamMode()
+                .addParameter("similarityCutoff", 0.0)
+                .yields("node1", "node2", "similarity");
+
+            Collection<String> result = new HashSet<>();
+            runQueryWithRowConsumer(query, row -> {
+                    long node1 = row.getNumber("node1").longValue();
+                    long node2 = row.getNumber("node2").longValue();
+                    double similarity = row.getNumber("similarity").doubleValue();
+                    result.add(resultString(node1, node2, similarity));
+                }
+            );
+
+            assertEquals(expected, result);
+        }
     }
 }

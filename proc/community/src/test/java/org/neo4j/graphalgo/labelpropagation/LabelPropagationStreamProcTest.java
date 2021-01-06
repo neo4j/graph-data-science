@@ -94,11 +94,11 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
         @Test
         void testStreamWithFilteredNodes() {
-            long deletedNodes = clearDb();
+            long ignoredNodes = 1;
 
             String graphCreateQuery = GdsCypher
                 .call()
-                .withNodeLabels("A", "B", "Ignore")
+                .withNodeLabels("A", "B")
                 .withNodeProperty("id", DefaultValue.of(-1))
                 .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
                 .withNodeProperty("weight", DefaultValue.of(Double.NaN))
@@ -107,8 +107,8 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
                 .yields("nodeCount", "relationshipCount");
 
             runQueryWithRowConsumer(graphCreateQuery, row -> {
-                assertEquals(13L, row.getNumber("nodeCount"));
-                assertEquals(12L, row.getNumber("relationshipCount"));
+                assertEquals(12L, row.getNumber("nodeCount"));
+                assertEquals(10L, row.getNumber("relationshipCount"));
             });
 
             String query = GdsCypher.call()
@@ -120,9 +120,9 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
             List<Long> actualCommunities = new ArrayList<>();
             runQueryWithRowConsumer(query, row -> {
-                int id = row.getNumber("nodeId").intValue() - (int) deletedNodes;
+                int id = row.getNumber("nodeId").intValue();
                 long community = row.getNumber("communityId").longValue();
-                actualCommunities.add(id - 1, community - 1 - deletedNodes);
+                actualCommunities.add(id - 1, community - 1);
             });
 
             assertEquals(RESULT, actualCommunities);

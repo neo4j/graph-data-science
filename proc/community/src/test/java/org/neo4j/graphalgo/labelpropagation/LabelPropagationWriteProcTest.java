@@ -399,11 +399,9 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
 
         @Test
         void shouldRunLabelPropagationNaturalOnFilteredNodes() {
-            clearDb();
-
             String graphCreateQuery = GdsCypher
                 .call()
-                .withNodeLabels("A", "B", "Ignore")
+                .withNodeLabels("A", "B")
                 .withNodeProperty("id", DefaultValue.of(-1))
                 .withNodeProperty("seed", DefaultValue.of(Long.MIN_VALUE))
                 .withNodeProperty("weight", DefaultValue.of(Double.NaN))
@@ -412,8 +410,8 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                 .yields("nodeCount", "relationshipCount");
 
             runQueryWithRowConsumer(graphCreateQuery, row -> {
-                assertEquals(13L, row.getNumber("nodeCount"));
-                assertEquals(12L, row.getNumber("relationshipCount"));
+                assertEquals(12L, row.getNumber("nodeCount"));
+                assertEquals(10L, row.getNumber("relationshipCount"));
             });
 
             String query = GdsCypher.call()
