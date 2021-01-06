@@ -101,7 +101,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
 
     @Test
     default void testNodeWeightPropertyValidation() {
-        runQuery(graphDb(), "CREATE (:A {a: 1})");
+        runQuery(graphDb(), "CREATE (:A {a: 1, knn: 2})");
         String graphName = "graph";
         GraphCreateFromStoreConfig graphCreateConfig = withNameAndNodeProjections(
             "",
@@ -125,7 +125,7 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
             }
         );
         assertThat(e.getMessage(), containsString("foo"));
-        assertThat(e.getMessage(), containsString("['a']"));
+        assertThat(e.getMessage(), containsString("['a'"));
     }
 
     @Test
