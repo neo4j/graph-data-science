@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -94,10 +95,12 @@ class FastRPExtendedMutateProcTest extends FastRPExtendedProcTest<FastRPExtended
     }
 
     @Override
+    @Disabled("This test does not work for FastRPExtended due to now expected graph")
     @Test
     public void testGraphMutation() {}
 
     @Override
+    @Disabled("This test does not work for FastRPExtended due to now expected graph")
     @Test
     public void testMutateFailsOnExistingToken() {}
 

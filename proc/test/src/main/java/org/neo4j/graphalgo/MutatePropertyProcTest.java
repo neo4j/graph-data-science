@@ -29,14 +29,13 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -131,14 +130,9 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, R
                         // write first time
                         mutateMethod.invoke(procedure, graphName, config);
                         // write second time using same `writeProperty`
-                        InvocationTargetException ex = assertThrows(
-                            InvocationTargetException.class,
-                            () -> mutateMethod.invoke(procedure, graphName, config)
-                        );
-
-                        Throwable expectedException = ExceptionUtil.rootCause(ex);
-                        assertEquals(IllegalArgumentException.class, expectedException.getClass());
-                        assertEquals(failOnExistingTokenMessage(), expectedException.getMessage());
+                        assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
+                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+                            .hasRootCauseMessage(failOnExistingTokenMessage());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }

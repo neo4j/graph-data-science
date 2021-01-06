@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -97,14 +96,10 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                         // write first time
                         mutateMethod.invoke(procedure, graphName, config);
                         // write second time using same `writeProperty`
-                        InvocationTargetException ex = assertThrows(
-                            InvocationTargetException.class,
-                            () -> mutateMethod.invoke(procedure, graphName, config)
-                        );
-
-                        Throwable expectedException = ExceptionUtil.rootCause(ex);
-                        assertEquals(IllegalArgumentException.class, expectedException.getClass());
-                        assertEquals(failOnExistingTokenMessage(), expectedException.getMessage());
+                        assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
+                            .hasCauseInstanceOf(InvocationTargetException.class)
+                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+                            .hasRootCauseMessage(failOnExistingTokenMessage());
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
@@ -121,21 +116,16 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
             getProcedureMethods(procedure)
                 .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
                 .forEach(mutateMethod -> {
-                    var ex = assertThrows(
-                        InvocationTargetException.class,
-                        () -> mutateMethod.invoke(
-                            procedure,
-                            Map.of("nodeProjection", "*"),
-                            CypherMapWrapper.empty().toMap()
-                        )
-                    );
-
-                    Throwable expectedException = ExceptionUtil.rootCause(ex);
-                    assertEquals(IllegalArgumentException.class, expectedException.getClass());
-                    assertEquals(
-                        "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog",
-                        expectedException.getMessage()
-                    );
+                    assertThatThrownBy(() -> mutateMethod.invoke(
+                        procedure,
+                        Map.of("nodeProjection", "*"),
+                        CypherMapWrapper.empty().toMap()
+                    ))
+                        .hasCauseInstanceOf(InvocationTargetException.class)
+                        .hasRootCauseInstanceOf(IllegalArgumentException.class)
+                        .hasRootCauseMessage(
+                            "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
+                        );
                 }));
     }
 

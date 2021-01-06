@@ -57,6 +57,8 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     MemoryEstimateTest<Wcc, CONFIG, DisjointSetStruct>,
     HeapControlTest<Wcc, CONFIG, DisjointSetStruct> {
 
+    private static final String GRAPH_NAME = "myGraph";
+
     @Override
     public GraphDatabaseAPI graphDb() {
         return db;
@@ -117,7 +119,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(3.14, wccConfig.threshold());
         });
     }
@@ -130,7 +132,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(3, wccConfig.threshold());
         });
     }
@@ -143,15 +145,14 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         )));
 
         applyOnProcedure(proc -> {
-            CONFIG wccConfig = proc.newConfig(Optional.of("myGraph"), config);
+            CONFIG wccConfig = proc.newConfig(Optional.of(GRAPH_NAME), config);
             assertEquals(consecutiveIds, wccConfig.consecutiveIds());
         });
     }
 
     @Test
     void testFailSeedingAndConsecutiveIds() {
-        String graphName = "graph";
-        loadGraph(graphName);
+        loadGraph(GRAPH_NAME);
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", true,
             "seedProperty", "seed"
@@ -159,7 +160,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.of(graphName), config)
+                () -> proc.newConfig(Optional.of(GRAPH_NAME), config)
             );
 
             assertTrue(exception
@@ -171,13 +172,12 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @Test
     void testFailThresholdWithoutRelationshipWeight() {
-        String graphName = "graph";
-        loadGraph(graphName);
+        loadGraph(GRAPH_NAME);
         CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty().withNumber("threshold", 3.14));
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.of(graphName), config)
+                () -> proc.newConfig(Optional.of(GRAPH_NAME), config)
             );
 
             assertTrue(exception
@@ -194,7 +194,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
         var graph = fromGdl("(a)");
 
         applyOnProcedure(proc -> {
-            WccBaseConfig config = proc.newConfig(Optional.of("graph"), userInput);
+            WccBaseConfig config = proc.newConfig(Optional.of(GRAPH_NAME), userInput);
             WccProc.algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog);
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
