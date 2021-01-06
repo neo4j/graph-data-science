@@ -181,13 +181,15 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @Test
     void failOnInvalidConfigurationParams() {
-        var configMap = createMinimalImplicitConfig(CypherMapWrapper.empty()).toMap();
+        String graphName = "graph";
+        loadGraph(graphName);
+        var configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
         applyOnProcedure(proc -> assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> {
                 CypherMapWrapper invalidConfig = CypherMapWrapper.create(configMap)
                     .withNumber("topK", 0)
                     .withNumber("sampleRate", 0.0);
-                proc.newConfig(Optional.empty(), invalidConfig);
+                proc.newConfig(Optional.of(graphName), invalidConfig);
             })
             .withMessageContainingAll("`topK`", "0", "[1, 2147483647]")
             .withMessageContainingAll("`sampleRate`", "0.00", "(0.00, 1.00]"));

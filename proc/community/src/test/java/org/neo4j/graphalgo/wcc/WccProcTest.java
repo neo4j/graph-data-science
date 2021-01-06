@@ -150,14 +150,16 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @Test
     void testFailSeedingAndConsecutiveIds() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(MapUtil.map(
+        String graphName = "graph";
+        loadGraph(graphName);
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
             "consecutiveIds", true,
             "seedProperty", "seed"
-        ))));
+        )));
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.empty(), config)
+                () -> proc.newConfig(Optional.of(graphName), config)
             );
 
             assertTrue(exception
@@ -169,13 +171,13 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @Test
     void testFailThresholdWithoutRelationshipWeight() {
-        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(
-            MapUtil.map("threshold", 3.14)
-        )));
+        String graphName = "graph";
+        loadGraph(graphName);
+        CypherMapWrapper config = createMinimalConfig(CypherMapWrapper.empty().withNumber("threshold", 3.14));
 
         applyOnProcedure(proc -> {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> proc.newConfig(Optional.empty(), config)
+                () -> proc.newConfig(Optional.of(graphName), config)
             );
 
             assertTrue(exception
@@ -187,14 +189,12 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
 
     @Test
     void testLogWarningForRelationshipWeightPropertyWithoutThreshold() {
-        CypherMapWrapper userInput = createMinimalConfig(CypherMapWrapper.create(anonymousGraphConfig(
-            MapUtil.map("relationshipWeightProperty", "cost")
-        )));
+        CypherMapWrapper userInput = createMinimalConfig(CypherMapWrapper.empty().withString("relationshipWeightProperty", "cost"));
         var testLog = new TestLog();
         var graph = fromGdl("(a)");
 
         applyOnProcedure(proc -> {
-            WccBaseConfig config = proc.newConfig(Optional.empty(), userInput);
+            WccBaseConfig config = proc.newConfig(Optional.of("graph"), userInput);
             WccProc.algorithmFactory().build(graph, config, AllocationTracker.empty(), testLog);
         });
         String expected = "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.";
