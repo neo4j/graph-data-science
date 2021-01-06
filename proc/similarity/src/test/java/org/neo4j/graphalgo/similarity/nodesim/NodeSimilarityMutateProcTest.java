@@ -108,9 +108,10 @@ class NodeSimilarityMutateProcTest
 
     @Test
     void testMutateYields() {
+        loadGraph("graph");
+
         String query = GdsCypher.call()
-            .withAnyLabel()
-            .withAnyRelationshipType()
+            .explicitCreation("graph")
             .algo("nodeSimilarity")
             .mutateMode()
             .addParameter("similarityCutoff", 0.0)
