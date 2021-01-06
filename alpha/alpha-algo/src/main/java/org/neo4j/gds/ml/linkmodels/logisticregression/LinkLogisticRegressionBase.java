@@ -54,7 +54,7 @@ public class LinkLogisticRegressionBase {
                 var sourceFeatures = nodeFeatures(graph, src);
                 var targetFeatures = nodeFeatures(graph, trg);
                 var linkFeatures = modelData.linkFeatureCombiner().combine(sourceFeatures, targetFeatures);
-                setLinkFeatures(linkFeatures, features, relationshipOffset.getValue(), cols);
+                setLinkFeatures(linkFeatures, features, relationshipOffset.getValue());
                 relationshipOffset.increment();
                 return true;
             });
@@ -92,10 +92,9 @@ public class LinkLogisticRegressionBase {
         return features;
     }
 
-    private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset, int numberOfFeatures) {
-        for (int j = 0; j < numberOfFeatures - 1; j++) {
-            features[relationshipOffset * numberOfFeatures + j] = linkFeatures[j];
-        }
+    private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset) {
+        var numberOfFeatures = linkFeatures.length;
+        System.arraycopy(linkFeatures, 0, features, relationshipOffset * numberOfFeatures, numberOfFeatures);
     }
 
 }
