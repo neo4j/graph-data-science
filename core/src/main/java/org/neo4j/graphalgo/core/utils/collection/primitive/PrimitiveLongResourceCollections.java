@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.collection.primitive;
 
-import java.util.Arrays;
-import java.util.function.LongPredicate;
-
 import org.neo4j.graphdb.Resource;
 import org.neo4j.graphdb.ResourceUtils;
+
+import java.util.Arrays;
+import java.util.function.LongPredicate;
 
 import static org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections.resourceIterator;
 

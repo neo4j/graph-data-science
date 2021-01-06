@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.concurrency;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.function.ThrowingConsumer;
 import org.neo4j.graphalgo.api.BatchNodeIterable;
 import org.neo4j.graphalgo.core.loading.HugeParallelGraphImporter;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -68,9 +68,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class ParallelUtilTest {

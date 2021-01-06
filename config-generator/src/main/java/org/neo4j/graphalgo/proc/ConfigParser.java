@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -25,10 +25,10 @@ import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.Configuration.CollectKeys;
-import org.neo4j.graphalgo.annotation.Configuration.ToMap;
 import org.neo4j.graphalgo.annotation.Configuration.Ignore;
 import org.neo4j.graphalgo.annotation.Configuration.Key;
 import org.neo4j.graphalgo.annotation.Configuration.Parameter;
+import org.neo4j.graphalgo.annotation.Configuration.ToMap;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
