@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
@@ -46,23 +47,17 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
 
     private static final String EXISTING_GRAPH =
         "CREATE" +
-        ", (c)-[{w: 3.0}]->(d)" +
-        ", (c)-[{w: 2.0}]->(e)" +
-        ", (d)-[{w: 4.0}]->(f)" +
-        ", (e)-[{w: 1.0}]->(d)" +
-        ", (e)-[{w: 2.0}]->(f)" +
-        ", (e)-[{w: 3.0}]->(g)" +
-        ", (f)-[{w: 2.0}]->(g)" +
-        ", (f)-[{w: 1.0}]->(h)" +
-        ", (g)-[{w: 2.0}]->(h)";
+        "  (a)-[{w: 4.0D}]->(b)" +
+        ", (a)-[{w: 2.0D}]->(c)" +
+        ", (b)-[{w: 5.0D}]->(c)" +
+        ", (b)-[{w: 10.0D}]->(d)" +
+        ", (c)-[{w: 3.0D}]->(e)" +
+        ", (d)-[{w: 11.0D}]->(f)" +
+        ", (e)-[{w: 4.0D}]->(d)";
 
     @Override
     public String expectedMutatedGraph() {
-        return EXISTING_GRAPH +
-               // new relationship as a result from mutate
-               ", (c)-[{w: 3.0}]->(h)" +
-               ", (c)-[{w: 3.0}]->(h)" +
-               ", (c)-[{w: 3.0}]->(h)";
+        return EXISTING_GRAPH + ", (a)-[{w: 3.0D}]->(f)";
     }
 
     @Override
@@ -105,11 +100,27 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
         return mapWrapper;
     }
 
+    @Override
+    @Test
+    @Disabled("This test does not work for Dijkstra as no property is written")
+    public void testMutateFailsOnExistingToken() {}
+
+
+    @Override
+    @Test
+    @Disabled("This test does not work for Dijkstra as the source node is filtered")
+    public void testGraphMutationOnFilteredGraph() {}
+
+    @Override
+    @Test
+    @Disabled("This test does not work for Dijkstra as the source node is filtered")
+    public void testWriteBackGraphMutationOnFilteredGraph() {}
+
     @Test
     void testWeightedMutate() {
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
-        var query = GdsCypher.call().explicitCreation("graph")
+        var query = GdsCypher.call().explicitCreation(GRAPH_NAME)
             .algo("gds.beta.shortestPath.dijkstra")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
@@ -128,7 +139,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
         )));
 
         var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
-        var expected = TestSupport.fromGdl(createQuery() + ", (a)-[{w: 20.0D}]->(f)");
+        var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (a)-[{w: 20.0D}]->(f)");
 
         assertGraphEquals(expected, actual);
     }
