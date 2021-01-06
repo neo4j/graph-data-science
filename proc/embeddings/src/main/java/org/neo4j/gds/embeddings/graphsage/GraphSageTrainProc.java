@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -28,8 +29,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -50,14 +49,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>, GraphSageTrainConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        Model<ModelData, GraphSageTrainConfig> result = computationResult.result();
-
-        ModelCatalog.set(result);
-        return Stream.of(trainResult(computationResult));
+        return train(compute(graphNameOrConfig, configuration), GraphSage.MODEL_TYPE);
     }
 
     @Description(ESTIMATE_DESCRIPTION)

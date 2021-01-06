@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
@@ -41,6 +43,14 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     TRAIN_RESULT,
     TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
     extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
+
+    protected Stream<TrainResult> train(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult, String modelType) {
+        ModelCatalog.checkStorable(username(), modelType);
+        Model<TRAIN_RESULT, TRAIN_CONFIG> result = computationResult.result();
+
+        ModelCatalog.set(result);
+        return Stream.of(trainResult(computationResult));
+    }
 
     protected TrainResult trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult) {
         return new TrainResult(
