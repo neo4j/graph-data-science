@@ -21,8 +21,10 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import java.io.Serializable;
+
 @ValueClass
-public interface ModelData {
+public interface ModelData extends Serializable {
 
     Layer[] layers();
 

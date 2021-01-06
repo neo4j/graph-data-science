@@ -78,6 +78,10 @@ public final class ModelCatalog {
         userCatalogs.clear();
     }
 
+    public static void checkStorable(String username, String modelType) {
+        getUserCatalog(username).canStoreModel(modelType);
+    }
+
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }

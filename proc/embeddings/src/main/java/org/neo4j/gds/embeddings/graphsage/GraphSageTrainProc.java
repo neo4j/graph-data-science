@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -50,6 +51,8 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        ModelCatalog.checkStorable(username(), GraphSage.MODEL_TYPE);
+
         ComputationResult<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>, GraphSageTrainConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
