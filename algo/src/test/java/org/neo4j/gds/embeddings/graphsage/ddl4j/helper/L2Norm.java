@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,10 +21,10 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.helper;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
 

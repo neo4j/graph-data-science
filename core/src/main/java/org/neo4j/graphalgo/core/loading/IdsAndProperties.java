@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;

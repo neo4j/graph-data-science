@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.loading.nodeproperties;
 
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
