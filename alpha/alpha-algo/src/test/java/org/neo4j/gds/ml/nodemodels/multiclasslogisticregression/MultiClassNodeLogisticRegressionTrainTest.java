@@ -64,7 +64,7 @@ class MultiClassNodeLogisticRegressionTrainTest {
 
         var algo = new MultiClassNodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
 
-        var result = algo.compute().modelData();
+        var result = algo.compute().data();
 
         assertThat(result).isNotNull();
 

@@ -24,9 +24,15 @@ import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassNodeLogisticRegressionTrain, MultiClassNodeLogisticRegressionPredictor> {
+public class MultiClassNodeLogisticRegressionTrain extends Algorithm<
+    MultiClassNodeLogisticRegressionTrain,
+    Model<MultiClassNodeLogisticRegressionData, NodeLogisticRegressionTrainConfig>> {
+
+    public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
+
     private final Graph graph;
     private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
@@ -45,7 +51,7 @@ public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassN
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionPredictor compute() {
+    public Model<MultiClassNodeLogisticRegressionData, NodeLogisticRegressionTrainConfig> compute() {
         var objective = new MultiClassNodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),
@@ -54,7 +60,15 @@ public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassN
         );
         var training = new Training(trainingSettings, log, graph.nodeCount());
         training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return new MultiClassNodeLogisticRegressionPredictor(objective.modelData());
+
+        return Model.of(
+            config.username(),
+            config.modelName(),
+            MODEL_TYPE,
+            graph.schema(),
+            objective.modelData(),
+            config
+        );
     }
 
     @Override
