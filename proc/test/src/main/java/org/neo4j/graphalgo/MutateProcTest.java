@@ -97,7 +97,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                         mutateMethod.invoke(procedure, graphName, config);
                         // write second time using same `writeProperty`
                         assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
-                            .hasCauseInstanceOf(InvocationTargetException.class)
                             .hasRootCauseInstanceOf(IllegalArgumentException.class)
                             .hasRootCauseMessage(failOnExistingTokenMessage());
                     } catch (IllegalAccessException | InvocationTargetException e) {
@@ -121,7 +120,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
                         Map.of("nodeProjection", "*"),
                         CypherMapWrapper.empty().toMap()
                     ))
-                        .hasCauseInstanceOf(InvocationTargetException.class)
                         .hasRootCauseInstanceOf(IllegalArgumentException.class)
                         .hasRootCauseMessage(
                             "Cannot mutate implicitly loaded graphs. Use a loaded graph in the graph-catalog"
