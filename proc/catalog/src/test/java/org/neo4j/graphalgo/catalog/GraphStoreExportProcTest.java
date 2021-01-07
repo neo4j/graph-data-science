@@ -162,7 +162,10 @@ class GraphStoreExportProcTest extends BaseProcTest {
         );
         
         assertThat(rootCause(exception)).hasMessage(
-            "Illegal parameter value for parameter exportName=../export. It attempts to write into forbidden directory /tmp/export."
+            formatWithLocale(
+                "Illegal parameter value for parameter exportName=../export. It attempts to write into forbidden directory %s.",
+                tempDir.resolve(exportName).normalize()
+            )
         );
     }
 
