@@ -87,11 +87,11 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportGraph() {
         createGraph();
 
-        var exportQuery = formatWithLocale(
+        var exportQuery =
             "CALL gds.graph.export('test-graph', {" +
             "  dbName: 'test-db'" +
-            "})"
-        );
+            "})";
+
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("test-db", row.getString("dbName"));
@@ -108,11 +108,10 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsv() {
         createGraph();
 
-        var exportQuery = formatWithLocale(
+        var exportQuery =
             "CALL gds.graph.export.csv('test-graph', {" +
-            "  exportName: '%s'" +
-            "})"
-        , "export");
+            "  exportName: 'export'" +
+            "})";
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("export", row.getString("exportName"));
@@ -125,29 +124,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
-    private void createGraph() {
-        runQuery(GdsCypher.call()
-            .withAnyLabel()
-            .withNodeProperty("prop1")
-            .withNodeProperty("prop2")
-            .withRelationshipType("REL1", RelationshipProjection
-                .of("REL1", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
-            )
-            .withRelationshipType("REL2", RelationshipProjection
-                .of("REL2", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
-            )
-            .withRelationshipType("REL3", RelationshipProjection
-                .of("REL3", Orientation.NATURAL)
-                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
-            )
-            .graphCreate("test-graph")
-            .yields());
-    }
-
     @Test
-    void failsWhenTheImportDirectoryAlreadyExists() throws IOException {
+    void failsWhenTheExportDirectoryAlreadyExists() throws IOException {
         var exportName = "export";
         Files.createDirectory(tempDir.resolve(exportName));
 
@@ -212,5 +190,26 @@ class GraphStoreExportProcTest extends BaseProcTest {
         assertThat(rootCause(exception)).hasMessage(
             "The configuration option 'gds.export.location' must be set."
         );
+    }
+
+    private void createGraph() {
+        runQuery(GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("prop1")
+            .withNodeProperty("prop2")
+            .withRelationshipType("REL1", RelationshipProjection
+                .of("REL1", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight1")))
+            )
+            .withRelationshipType("REL2", RelationshipProjection
+                .of("REL2", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight2")))
+            )
+            .withRelationshipType("REL3", RelationshipProjection
+                .of("REL3", Orientation.NATURAL)
+                .withProperties(PropertyMappings.of(PropertyMapping.of("weight3")))
+            )
+            .graphCreate("test-graph")
+            .yields());
     }
 }

@@ -82,7 +82,7 @@ public class GraphStoreExportProc extends BaseProc {
     }
 
     @Procedure(name = "gds.graph.export.csv", mode = READ)
-    @Description("Exports a named graph into CSV files.")
+    @Description("Exports a named graph to CSV files.")
     public Stream<FileExportResult> csv(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
