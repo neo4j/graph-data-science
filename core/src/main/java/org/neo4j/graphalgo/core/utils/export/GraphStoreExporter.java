@@ -64,7 +64,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
         long relationshipPropertyCount();
     }
 
-    protected static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
+    public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {
             Files.createDirectories(value);
             if (!Files.isDirectory(value)) {

@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
@@ -30,9 +33,14 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.export.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
@@ -85,9 +93,11 @@ public class GraphStoreExportProc extends BaseProc {
 
         var result = runWithExceptionLogging(
             "CSV export failed", () -> {
+                var exportPath = getExportPath(exportConfig);
+
                 var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
 
-                var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, api);
+                var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
 
                 var start = System.nanoTime();
                 var importedProperties = exporter.run(allocationTracker());
@@ -108,6 +118,43 @@ public class GraphStoreExportProc extends BaseProc {
 
         return Stream.of(result);
     }
+
+    private Path getExportPath(GraphStoreToFileExporterConfig config) {
+        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+        var exportLocation = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+
+        if (exportLocation == null) {
+            throw new RuntimeException(formatWithLocale(
+                "The configuration option '%s' must be set.",
+                GraphStoreExportSettings.export_location_setting.name()
+            ));
+        }
+
+        DIRECTORY_IS_WRITABLE.validate(exportLocation);
+
+        var resolvedExportPath = exportLocation.resolve(config.exportName()).normalize();
+
+        if (!resolvedExportPath.startsWith(exportLocation)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory %s.",
+                config.exportName(),
+                resolvedExportPath
+            ));
+        }
+
+        if (resolvedExportPath.toFile().exists()) {
+            throw new IllegalArgumentException("The specified import directory already exists.");
+        }
+
+        try {
+            Files.createDirectories(resolvedExportPath);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not create import directory", e);
+        }
+
+        return resolvedExportPath;
+    }
+
 
     public abstract static class GraphStoreExportResult {
         public final String graphName;

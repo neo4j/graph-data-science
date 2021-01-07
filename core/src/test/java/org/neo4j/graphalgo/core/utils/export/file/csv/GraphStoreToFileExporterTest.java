@@ -20,19 +20,15 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +40,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.neo4j.configuration.GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
@@ -221,33 +215,5 @@ class GraphStoreToFileExporterTest extends CsvTest {
             "2,3",
             "3,0"
         );
-    }
-
-    @Test
-    void failsWhenTheImportDirectoryAlreadyExists() throws IOException {
-        var dbms = new DatabaseManagementServiceBuilder(tempDir.toFile())
-            .setConfig(Settings.udc(), false)
-            .setConfig(Settings.failOnMissingFiles(), false)
-            .setConfig(Settings.boltEnabled(), false)
-            .setConfig(Settings.httpEnabled(), false)
-            .setConfig(Settings.httpsEnabled(), false)
-            .build();
-
-        var db = (GraphDatabaseAPI) dbms.database(DEFAULT_DATABASE_NAME);
-        var importFolder = Neo4jProxy.homeDirectory(db.databaseLayout()).resolve("import");
-
-        Files.createDirectories(importFolder.resolve("export"));
-
-        var config = ImmutableGraphStoreToFileExporterConfig
-            .builder()
-            .exportName("export")
-            .writeConcurrency(2)
-            .build();
-
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> GraphStoreToFileExporter.csv(concurrentGraphStore, config, db)
-        );
-        assertThat(exception).hasMessage("The specified import directory already exists.");
     }
 }

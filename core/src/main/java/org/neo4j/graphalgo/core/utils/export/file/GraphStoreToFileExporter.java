@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
@@ -29,10 +28,8 @@ import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,36 +43,15 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
-        GraphDatabaseAPI api
+        Path exportPath
     ) {
-        var importFolder = Neo4jProxy.homeDirectory(api.databaseLayout()).resolve("import");
-        DIRECTORY_IS_WRITABLE.validate(importFolder);
-
-        var importPath = importFolder.resolve(config.exportName());
-        if (importPath.toFile().exists()) {
-            throw new IllegalArgumentException("The specified import directory already exists.");
-        }
-        try {
-            Files.createDirectories(importPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create import directory", e);
-        }
-
-        return csv(graphStore, config, importPath);
-    }
-
-    public static GraphStoreToFileExporter csv(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path importPath
-    ) {
-        Set<String> headerFiles = ConcurrentHashMap.newKeySet();
+         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
         return new GraphStoreToFileExporter(
             graphStore,
             config,
-            (index) -> new CsvNodeVisitor(importPath, graphStore.schema().nodeSchema(), headerFiles, index),
-            (index) -> new CsvRelationshipVisitor(importPath, graphStore.schema().relationshipSchema(), headerFiles, index)
+            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index),
+            (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
         );
     }
 

@@ -22,20 +22,35 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphStoreExportProcTest extends BaseProcTest {
+
+    @TempDir
+    Path tempDir;
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -49,6 +64,13 @@ class GraphStoreExportProcTest extends BaseProcTest {
         ", (b)-[:REL2 { weight2: 42}]->(c)" +
         ", (c)-[:REL3 { weight3: 42}]->(d)" +
         ", (d)-[:REL3 { weight3: 42}]->(a)";
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -78,7 +100,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
             assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
-            assertThat(row.getNumber("writeMillis").longValue(), greaterThan(0L));
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
     }
 
@@ -99,7 +121,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
             assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
-            assertThat(row.getNumber("writeMillis").longValue(), greaterThan(0L));
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
     }
 
@@ -122,5 +144,73 @@ class GraphStoreExportProcTest extends BaseProcTest {
             )
             .graphCreate("test-graph")
             .yields());
+    }
+
+    @Test
+    void failsWhenTheImportDirectoryAlreadyExists() throws IOException {
+        var exportName = "export";
+        Files.createDirectory(tempDir.resolve(exportName));
+
+        createGraph();
+
+        var exportQuery = formatWithLocale(
+            "CALL gds.graph.export.csv('test-graph', {" +
+            "  exportName: '%s'" +
+            "})"
+            , exportName);
+
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(exportQuery)
+        );
+        assertThat(rootCause(exception)).hasMessage("The specified import directory already exists.");
+    }
+
+    @Test
+    void failsWhenTryingToEscapeExportLocation() {
+        var exportName = "../export";
+
+        createGraph();
+
+        var exportQuery = formatWithLocale(
+            "CALL gds.graph.export.csv('test-graph', {" +
+            "  exportName: '%s'" +
+            "})"
+            , exportName);
+
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(exportQuery)
+        );
+        
+        assertThat(rootCause(exception)).hasMessage(
+            "Illegal parameter value for parameter exportName=../export. It attempts to write into forbidden directory /tmp/export."
+        );
+    }
+
+    @Test
+    void failIfExportLocationIsNotSet() {
+        var exportName = "export";
+
+        createGraph();
+
+        GraphDatabaseApiProxy
+            .resolveDependency(db, Config.class)
+            .set(GraphStoreExportSettings.export_location_setting, null);
+
+        var exportQuery = formatWithLocale(
+            "CALL gds.graph.export.csv('test-graph', {" +
+            "  exportName: '%s'" +
+            "})"
+            , exportName);
+
+        var exception = assertThrows(
+            QueryExecutionException.class,
+            () -> runQuery(exportQuery)
+        );
+
+        assertThat(rootCause(exception)).hasMessage(
+            "The configuration option 'gds.export.location' must be set."
+        );
     }
 }
