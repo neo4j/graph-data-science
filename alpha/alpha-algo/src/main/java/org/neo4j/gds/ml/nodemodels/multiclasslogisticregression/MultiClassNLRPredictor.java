@@ -30,16 +30,16 @@ import org.neo4j.graphalgo.api.Graph;
 
 import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
 
-public class MultiClassNodeLogisticRegressionPredictor implements Predictor<Matrix, MultiClassNodeLogisticRegressionData> {
+public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
 
-    private final MultiClassNodeLogisticRegressionData modelData;
+    private final MultiClassNLRData modelData;
 
-    MultiClassNodeLogisticRegressionPredictor(MultiClassNodeLogisticRegressionData modelData) {
+    MultiClassNLRPredictor(MultiClassNLRData modelData) {
         this.modelData = modelData;
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionData modelData() {
+    public MultiClassNLRData modelData() {
         return modelData;
     }
 

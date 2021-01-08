@@ -27,12 +27,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import java.util.List;
 
 @ValueClass
-public interface MultiClassNodeLogisticRegressionData {
+public interface MultiClassNLRData {
     Weights<Matrix> weights();
     LocalIdMap classIdMap();
     List<String> nodePropertyKeys();
 
-    static ImmutableMultiClassNodeLogisticRegressionData.Builder builder() {
-        return ImmutableMultiClassNodeLogisticRegressionData.builder();
+    static ImmutableMultiClassNLRData.Builder builder() {
+        return ImmutableMultiClassNLRData.builder();
     }
 }

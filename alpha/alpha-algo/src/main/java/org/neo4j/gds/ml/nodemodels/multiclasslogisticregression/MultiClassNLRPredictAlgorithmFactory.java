@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
-public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFactory<MultiClassNodeLogisticRegressionPredictAlgorithm, MultiClassNLRPredictMutateConfig> {
+public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFactory<MultiClassNLRPredictAlgorithm, MultiClassNLRPredictMutateConfig> {
 
     @Override
     protected long taskVolume(
@@ -44,7 +44,7 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
     }
 
     @Override
-    protected MultiClassNodeLogisticRegressionPredictAlgorithm build(
+    protected MultiClassNLRPredictAlgorithm build(
         Graph graph,
         MultiClassNLRPredictMutateConfig configuration,
         AllocationTracker tracker,
@@ -53,11 +53,11 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
         var model = ModelCatalog.get(
             configuration.username(),
             configuration.modelName(),
-            MultiClassNodeLogisticRegressionData.class,
+            MultiClassNLRData.class,
             NodeLogisticRegressionTrainConfig.class
         );
-        return new MultiClassNodeLogisticRegressionPredictAlgorithm(
-            new MultiClassNodeLogisticRegressionPredictor(model.data()),
+        return new MultiClassNLRPredictAlgorithm(
+            new MultiClassNLRPredictor(model.data()),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

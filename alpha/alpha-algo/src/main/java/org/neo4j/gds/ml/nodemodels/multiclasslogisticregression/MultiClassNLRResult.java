@@ -27,16 +27,16 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.Optional;
 
 @ValueClass
-public interface MultiClassNodeLogisticRegressionResult {
+public interface MultiClassNLRResult {
 
     HugeAtomicLongArray predictedClasses();
     Optional<HugeObjectArray<double[]>> predictedProbabilities();
 
-    static MultiClassNodeLogisticRegressionResult of(
+    static MultiClassNLRResult of(
         HugeAtomicLongArray classes,
         @Nullable HugeObjectArray<double[]> probabilities
     ) {
-        return ImmutableMultiClassNodeLogisticRegressionResult.builder()
+        return ImmutableMultiClassNLRResult.builder()
             .predictedProbabilities(Optional.ofNullable(probabilities))
             .predictedClasses(classes)
             .build();

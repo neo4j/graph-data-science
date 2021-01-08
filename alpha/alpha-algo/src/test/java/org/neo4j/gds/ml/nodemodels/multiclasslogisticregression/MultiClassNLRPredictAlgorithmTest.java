@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @GdlExtension
-class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
+class MultiClassNLRPredictAlgorithmTest {
 
     @GdlGraph
     private static final String TRAINED_GRAPH =
@@ -83,7 +83,7 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
         classIdMap.toMapped(1);
         classIdMap.toMapped(100);
         classIdMap.toMapped(2);
-        var modelData = MultiClassNodeLogisticRegressionData.builder()
+        var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654,
                 1.63908065, -0.08391665, -1.46620738,
@@ -94,8 +94,8 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new MultiClassNodeLogisticRegressionPredictAlgorithm(
-            new MultiClassNodeLogisticRegressionPredictor(modelData),
+        var result = new MultiClassNLRPredictAlgorithm(
+            new MultiClassNLRPredictor(modelData),
             graph,
             1,
             1,
@@ -140,7 +140,7 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
     void singleClass() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(1);
-        var modelData = MultiClassNodeLogisticRegressionData.builder()
+        var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654
             }, 1, 3)))
@@ -148,8 +148,8 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new MultiClassNodeLogisticRegressionPredictAlgorithm(
-            new MultiClassNodeLogisticRegressionPredictor(modelData),
+        var result = new MultiClassNLRPredictAlgorithm(
+            new MultiClassNLRPredictor(modelData),
             graph,
             1,
             1,
@@ -199,7 +199,7 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
             "model",
             "",
             GraphSchema.empty(),
-            MultiClassNodeLogisticRegressionData.builder()
+            MultiClassNLRData.builder()
                 .weights(new Weights<>(new Matrix(new double[]{
                     1.12730619, -0.84532386, 0.93216654
                 }, 1, 3)))

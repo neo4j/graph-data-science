@@ -34,17 +34,16 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.function.Consumer;
 
-public class MultiClassNodeLogisticRegressionPredictAlgorithm
-    extends Algorithm<MultiClassNodeLogisticRegressionPredictAlgorithm, MultiClassNodeLogisticRegressionResult> {
+public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredictAlgorithm, MultiClassNLRResult> {
 
-    private final MultiClassNodeLogisticRegressionPredictor predictor;
+    private final MultiClassNLRPredictor predictor;
     private final Graph graph;
     private final int batchSize;
     private final int concurrency;
     private final boolean produceProbabilities;
 
-    MultiClassNodeLogisticRegressionPredictAlgorithm(
-        MultiClassNodeLogisticRegressionPredictor predictor,
+    MultiClassNLRPredictAlgorithm(
+        MultiClassNLRPredictor predictor,
         Graph graph,
         int batchSize,
         int concurrency,
@@ -60,7 +59,7 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionResult compute() {
+    public MultiClassNLRResult compute() {
         progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeAtomicLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
@@ -68,11 +67,11 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
         progressLogger.logFinish();
-        return MultiClassNodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
+        return MultiClassNLRResult.of(predictedClasses, predictedProbabilities);
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionPredictAlgorithm me() {
+    public MultiClassNLRPredictAlgorithm me() {
         return this;
     }
 
@@ -83,7 +82,7 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
 
     private @Nullable HugeObjectArray<double[]> initProbabilities() {
         if (produceProbabilities) {
-            var data = (MultiClassNodeLogisticRegressionData) predictor.modelData();
+            var data = (MultiClassNLRData) predictor.modelData();
             var numberOfClasses = data.classIdMap().originalIds().length;
             var predictions = HugeObjectArray.newArray(
                 double[].class,
@@ -99,14 +98,14 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
 
     private static class PredictConsumer implements Consumer<Batch> {
         private final Graph graph;
-        private final Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor;
+        private final Predictor<Matrix, MultiClassNLRData> predictor;
         private final HugeObjectArray<double[]> predictedProbabilities;
         private final HugeAtomicLongArray predictedClasses;
         private final ProgressLogger progressLogger;
 
         PredictConsumer(
             Graph graph,
-            Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor,
+            Predictor<Matrix, MultiClassNLRData> predictor,
             @Nullable HugeObjectArray<double[]> predictedProbabilities,
             HugeAtomicLongArray predictedClasses,
             ProgressLogger progressLogger

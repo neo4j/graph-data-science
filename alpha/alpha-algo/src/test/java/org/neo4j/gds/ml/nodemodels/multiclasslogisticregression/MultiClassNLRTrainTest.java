@@ -36,7 +36,7 @@ import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 
 @GdlExtension
-class MultiClassNodeLogisticRegressionTrainTest {
+class MultiClassNLRTrainTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -62,7 +62,7 @@ class MultiClassNodeLogisticRegressionTrainTest {
             .tolerance(1e-4)
             .build();
 
-        var algo = new MultiClassNodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
+        var algo = new MultiClassNLRTrain(graph, trainingSettings, config, new TestLog());
 
         var result = algo.compute().data();
 

@@ -36,20 +36,20 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class MultiClassNodeLogisticRegressionObjective implements Objective<MultiClassNodeLogisticRegressionData> {
+public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
 
     private final String targetPropertyKey;
     private final Graph graph;
     private final double penalty;
-    private final MultiClassNodeLogisticRegressionPredictor predictor;
+    private final MultiClassNLRPredictor predictor;
 
-    public MultiClassNodeLogisticRegressionObjective(
+    public MultiClassNLRObjective(
         List<String> nodePropertyKeys,
         String targetPropertyKey,
         Graph graph,
         double penalty
     ) {
-        this.predictor = new MultiClassNodeLogisticRegressionPredictor(makeData(
+        this.predictor = new MultiClassNLRPredictor(makeData(
             nodePropertyKeys,
             targetPropertyKey,
             graph
@@ -59,13 +59,13 @@ public class MultiClassNodeLogisticRegressionObjective implements Objective<Mult
         this.penalty = penalty;
     }
 
-    private static MultiClassNodeLogisticRegressionData makeData(
+    private static MultiClassNLRData makeData(
         List<String> nodePropertyKeys,
         String targetPropertyKey,
         Graph graph
     ) {
         var classIdMap = makeClassIdMap(targetPropertyKey, graph);
-        return MultiClassNodeLogisticRegressionData.builder()
+        return MultiClassNLRData.builder()
             .classIdMap(classIdMap)
             .weights(initWeights(nodePropertyKeys, classIdMap.originalIds().length))
             .nodePropertyKeys(nodePropertyKeys)
@@ -120,7 +120,7 @@ public class MultiClassNodeLogisticRegressionObjective implements Objective<Mult
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionData modelData() {
+    public MultiClassNLRData modelData() {
         return predictor.modelData();
     }
 }
