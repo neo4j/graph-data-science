@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.context;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodePropertyContainer;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.ComputeStep;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
 import java.util.Set;
@@ -36,7 +36,7 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
     private final NodePropertyContainer nodePropertyContainer;
 
     public InitContext(
-        Pregel.ComputeStep<CONFIG> computeStep,
+        ComputeStep<CONFIG> computeStep,
         CONFIG config,
         NodePropertyContainer nodePropertyContainer
     ) {

@@ -19,18 +19,18 @@
  */
 package org.neo4j.graphalgo.beta.pregel.context;
 
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.ComputeStep;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
 import java.util.stream.LongStream;
 
 public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
-    protected final Pregel.ComputeStep<CONFIG> computeStep;
+    protected final ComputeStep<CONFIG> computeStep;
 
     long nodeId;
 
-    NodeCentricContext(Pregel.ComputeStep<CONFIG> computeStep, CONFIG config) {
+    NodeCentricContext(ComputeStep<CONFIG> computeStep, CONFIG config) {
         super(config);
         this.computeStep = computeStep;
     }
