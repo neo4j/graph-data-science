@@ -36,7 +36,6 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
 
     private final long nodeCount;
     private final long relationshipCount;
-    private final boolean isAsync;
     private final boolean isMultiGraph;
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
@@ -46,6 +45,7 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
     private final HugeAtomicBitSet voteBits;
     private int iteration;
 
+    final boolean isAsync;
     final PregelComputation<CONFIG> computation;
     final RelationshipIterator relationshipIterator;
 
@@ -81,13 +81,13 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
 
     public abstract void sendToNeighborsWeighted(long sourceNodeId, double message);
 
-    public abstract @Nullable Queue<Double> receiveMessages(long nodeId);
+    public abstract Messages.MessageIterator messageIterator();
+
+    public abstract void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId);
 
     @Override
     public void run() {
-        var messageIterator = isAsync
-            ? new Messages.MessageIterator.Async()
-            : new Messages.MessageIterator.Sync();
+        var messageIterator = messageIterator();
         var messages = new Messages(messageIterator);
 
         long batchStart = nodeBatch.startNode();
@@ -104,7 +104,7 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
                 voteBits.clear(nodeId);
                 computeContext.setNodeId(nodeId);
 
-                messageIterator.init(receiveMessages(nodeId));
+                initMessageIterator(messageIterator, nodeId);
                 computation.compute(computeContext, messages);
             }
         }
@@ -172,7 +172,7 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
         return nodeValues.longArrayValue(key, nodeId);
     }
 
-     public double[] doubleArrayNodeValue(String key, long nodeId) {
+    public double[] doubleArrayNodeValue(String key, long nodeId) {
         return nodeValues.doubleArrayValue(key, nodeId);
     }
 
@@ -236,7 +236,18 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
         }
 
         @Override
-        public @Nullable Queue<Double> receiveMessages(long nodeId) {
+        public Messages.MessageIterator messageIterator() {
+            return isAsync
+                ? new Messages.MessageIterator.Async()
+                : new Messages.MessageIterator.Sync();
+        }
+
+        @Override
+        public void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId) {
+            messageIterator.init(receiveMessages(nodeId));
+        }
+
+        private @Nullable Queue<Double> receiveMessages(long nodeId) {
             return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
         }
     }
