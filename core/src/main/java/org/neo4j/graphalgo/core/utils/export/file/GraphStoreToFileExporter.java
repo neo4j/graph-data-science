@@ -67,7 +67,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     }
 
     @Override
-    public void export(GraphStoreInput graphStoreInput) {
+    protected void export(GraphStoreInput graphStoreInput) {
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
     }
