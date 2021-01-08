@@ -20,25 +20,33 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
 
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
+    // assuming utf-8
+    private static final int BYTES_PER_WRITTEN_CHARACTER = 8;
+    private static final long DIGITS_PER_VALUE = (long) Math.ceil(Math.log(Long.MAX_VALUE));
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
@@ -70,6 +78,51 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     protected void export(GraphStoreInput graphStoreInput) {
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
+    }
+
+    public static MemoryEstimation estimateCsvExport(GraphStore graphStore) {
+        NodeSchema nodeSchema = graphStore.schema().nodeSchema();
+        MemoryEstimations.Builder estimationsBuilder = MemoryEstimations
+            .builder(GraphStoreToFileExporter.class);
+
+        Stream<String> propertyKeys = graphStore.nodePropertyKeys().values().stream().flatMap(Collection::stream);
+        Long nodePropertiesEstimate = propertyKeys.map(propertyKey -> {
+            return graphStore.nodePropertyValues(propertyKey).size() * DIGITS_PER_VALUE * BYTES_PER_WRITTEN_CHARACTER;
+        }).reduce(0L, Long::sum);
+
+        // node id estimate
+        long nodeIdsEstimate = getIdEstimate(graphStore);
+
+        estimationsBuilder.fixed("Node data", nodeIdsEstimate + nodePropertiesEstimate);
+
+        long avgBytesPerNodeId = nodeIdsEstimate / graphStore.nodeCount();
+        // relationships
+        Long relationshipEstimate = graphStore.relationshipTypes().stream().map(type -> {
+            long relationshipCount = graphStore.getGraph(type).relationshipCount();
+            long relationshipIdEstimate = relationshipCount * 2 * avgBytesPerNodeId;
+            long relationshipValuesEstimate = relationshipCount * DIGITS_PER_VALUE * BYTES_PER_WRITTEN_CHARACTER;
+            return relationshipIdEstimate + relationshipValuesEstimate;
+        }).reduce(0L, Long::sum);
+
+        estimationsBuilder.fixed("Relationship data", relationshipEstimate);
+
+        return estimationsBuilder.build();
+    }
+
+    private static long getIdEstimate(GraphStore graphStore) {
+        long maxNumberOfDigits = (long) Math.floor(Math.log(graphStore.nodeCount()));
+        long nodeIdEstimate = 0;
+        long consideredNumbers = 0;
+
+        for (long digits = 1; digits < maxNumberOfDigits; digits++) {
+            long numbersWithDigitX =(10 ^ digits) - consideredNumbers;
+            consideredNumbers += numbersWithDigitX;
+
+            nodeIdEstimate += numbersWithDigitX * digits * BYTES_PER_WRITTEN_CHARACTER;
+        }
+
+        nodeIdEstimate += (graphStore.nodeCount() - consideredNumbers) * maxNumberOfDigits * BYTES_PER_WRITTEN_CHARACTER;
+        return nodeIdEstimate;
     }
 
     private void exportNodes(GraphStoreInput graphStoreInput) {
