@@ -19,20 +19,31 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
+import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.logging.NullLog;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
@@ -88,7 +99,8 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
             graph,
             1,
             1,
-            true
+            true,
+            TestProgressLogger.NULL_LOGGER
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -141,7 +153,8 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
             graph,
             1,
             1,
-            true
+            true,
+            TestProgressLogger.NULL_LOGGER
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -175,5 +188,57 @@ class MultiClassNodeLogisticRegressionPredictAlgorithmTest {
         assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n3")));
         assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n4")));
         assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n5")));
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(0);
+        var model = Model.of(
+            "",
+            "model",
+            "",
+            GraphSchema.empty(),
+            MultiClassNodeLogisticRegressionData.builder()
+                .weights(new Weights<>(new Matrix(new double[]{
+                    1.12730619, -0.84532386, 0.93216654
+                }, 1, 3)))
+                .nodePropertyKeys(List.of("a", "b"))
+                .classIdMap(classIdMap)
+                .build(),
+            ImmutableNodeLogisticRegressionTrainConfig.builder().modelName("model").targetProperty("foo").build()
+        );
+        ModelCatalog.set(model);
+
+        var mcnlrPredict = new MultiClassNLRPredictAlgorithmFactory(TestProgressLogger.FACTORY).build(
+            graph,
+            ImmutableMultiClassNLRPredictMutateConfig.builder()
+                .mutateProperty("foo")
+                .modelName("model")
+                .concurrency(2)
+                .batchSize(1)
+                .build(),
+            AllocationTracker.empty(),
+            NullLog.getInstance(),
+            EmptyProgressEventTracker.INSTANCE
+        );
+        mcnlrPredict.compute();
+
+        var messagesInOrder = ((TestProgressLogger) mcnlrPredict.getProgressLogger()).getMessages(INFO);
+
+        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .doesNotHaveDuplicates()
+            .hasSize(7)
+            .containsExactly(
+                "MultiClassNodeLogisticRegressionPredict :: Start",
+                "MultiClassNodeLogisticRegressionPredict 20%",
+                "MultiClassNodeLogisticRegressionPredict 40%",
+                "MultiClassNodeLogisticRegressionPredict 60%",
+                "MultiClassNodeLogisticRegressionPredict 80%",
+                "MultiClassNodeLogisticRegressionPredict 100%",
+                "MultiClassNodeLogisticRegressionPredict :: Finished"
+            );
     }
 }

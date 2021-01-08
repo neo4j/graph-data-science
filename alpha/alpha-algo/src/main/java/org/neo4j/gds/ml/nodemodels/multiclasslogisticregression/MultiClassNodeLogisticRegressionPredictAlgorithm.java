@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -47,22 +48,26 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
         Graph graph,
         int batchSize,
         int concurrency,
-        boolean produceProbabilities
+        boolean produceProbabilities,
+        ProgressLogger progressLogger
     ) {
         this.predictor = predictor;
         this.graph = graph;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
+        this.progressLogger = progressLogger;
     }
 
     @Override
     public MultiClassNodeLogisticRegressionResult compute() {
+        progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeAtomicLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
-        var consumer = new PredictConsumer(graph, predictor, predictedProbabilities, predictedClasses);
+        var consumer = new PredictConsumer(graph, predictor, predictedProbabilities, predictedClasses, progressLogger);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
+        progressLogger.logFinish();
         return MultiClassNodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
     }
 
@@ -97,17 +102,20 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
         private final Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor;
         private final HugeObjectArray<double[]> predictedProbabilities;
         private final HugeAtomicLongArray predictedClasses;
+        private final ProgressLogger progressLogger;
 
         PredictConsumer(
             Graph graph,
             Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor,
             @Nullable HugeObjectArray<double[]> predictedProbabilities,
-            HugeAtomicLongArray predictedClasses
+            HugeAtomicLongArray predictedClasses,
+            ProgressLogger progressLogger
         ) {
             this.graph = graph;
             this.predictor = predictor;
             this.predictedProbabilities = predictedProbabilities;
             this.predictedClasses = predictedClasses;
+            this.progressLogger = progressLogger;
         }
 
         @Override
@@ -135,6 +143,7 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm
                 var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
                 predictedClasses.set(nodeId, bestClass);
             });
+            progressLogger.logProgress(batch.size());
         }
     }
 
