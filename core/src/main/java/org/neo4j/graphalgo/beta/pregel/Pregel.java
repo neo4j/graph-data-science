@@ -50,9 +50,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
 
-    // Marks the end of messages from the previous iteration in synchronous mode.
-    private static final Double TERMINATION_SYMBOL = Double.NaN;
-
     private final CONFIG config;
 
     private final PregelComputation<CONFIG> computation;
@@ -61,7 +58,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final CompositeNodeValue nodeValues;
 
-    private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
+    private final Messenger messenger;
 
     private final int concurrency;
     private final ExecutorService executor;
@@ -168,7 +165,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.executor = executor;
         this.tracker = tracker;
 
-        this.messageQueues = initLinkedQueues(graph, tracker);
+        this.messenger = new QueueMessenger(graph, config, tracker);
     }
 
     public PregelResult run() {
@@ -193,7 +190,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 computeStep.init(iterations, messageBits, prevMessageBits);
             }
 
-            runComputeSteps(computeSteps, iterations, prevMessageBits);
+            // Init messenger with the updated state
+            messenger.initIteration(iterations, prevMessageBits);
+
+            // Run the computation
+            runComputeSteps(computeSteps);
             runMasterComputeStep(iterations);
 
             // No messages have been sent and all nodes voted to halt
@@ -216,7 +217,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     public void release() {
-        messageQueues.release();
+        messenger.release();
     }
 
     private List<ComputeStep<CONFIG>> createComputeSteps(HugeAtomicBitSet voteBits) {
@@ -225,14 +226,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
         List<ComputeStep<CONFIG>> computeSteps = new ArrayList<>(concurrency);
 
         for (Partition partition : partitions) {
-            computeSteps.add(new ComputeStep.QueueBasedComputeStep<>(
+            computeSteps.add(new ComputeStep<>(
                 graph,
                 computation,
                 config,
                 0,
                 partition,
                 nodeValues,
-                messageQueues,
+                messenger,
                 voteBits,
                 graph
             ));
@@ -240,55 +241,13 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return computeSteps;
     }
 
-    private void runComputeSteps(
-        Collection<ComputeStep<CONFIG>> computeSteps,
-        final int iteration,
-        HugeAtomicBitSet messageBits
-    ) {
-
-        if (!config.isAsynchronous()) {
-            // Synchronization barrier:
-            // Add termination flag to message queues that
-            // received messages in the previous iteration.
-            if (iteration > 0) {
-                ParallelUtil.parallelStreamConsume(
-                    LongStream.range(0, graph.nodeCount()),
-                    concurrency,
-                    nodeIds -> nodeIds.forEach(nodeId -> {
-                        if (messageBits.get(nodeId)) {
-                            messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
-                        }
-                    })
-                );
-            }
-        }
-
+    private void runComputeSteps(Collection<ComputeStep<CONFIG>> computeSteps) {
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
 
     private void runMasterComputeStep(int iteration) {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
         computation.masterCompute(context);
-    }
-
-    @SuppressWarnings({"unchecked"})
-    private HugeObjectArray<MpscLinkedQueue<Double>> initLinkedQueues(Graph graph, AllocationTracker tracker) {
-        // sad java 😞
-        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) new MpscLinkedQueue<Double>().getClass();
-
-        HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
-            queueClass,
-            graph.nodeCount(),
-            tracker
-        );
-
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, graph.nodeCount()),
-            concurrency,
-            nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, new MpscLinkedQueue<Double>()))
-        );
-
-        return messageQueues;
     }
 
     public static final class CompositeNodeValue {

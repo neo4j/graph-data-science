@@ -19,20 +19,17 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
-import java.util.Queue;
 import java.util.stream.LongStream;
 
-public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
+public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
 
     private final long nodeCount;
     private final long relationshipCount;
@@ -43,14 +40,13 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
     private final Degrees degrees;
     private final Pregel.CompositeNodeValue nodeValues;
     private final HugeAtomicBitSet voteBits;
+    private final Messenger messenger;
+    private final PregelComputation<CONFIG> computation;
+    private final RelationshipIterator relationshipIterator;
+
     private int iteration;
-
-    final boolean isAsync;
-    final PregelComputation<CONFIG> computation;
-    final RelationshipIterator relationshipIterator;
-
-    HugeAtomicBitSet messageBits;
-    HugeAtomicBitSet prevMessageBits;
+    private HugeAtomicBitSet messageBits;
+    private HugeAtomicBitSet prevMessageBits;
 
     ComputeStep(
         Graph graph,
@@ -59,13 +55,13 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
         int iteration,
         Partition nodeBatch,
         Pregel.CompositeNodeValue nodeValues,
+        Messenger messenger,
         HugeAtomicBitSet voteBits,
         RelationshipIterator relationshipIterator
     ) {
         this.iteration = iteration;
         this.nodeCount = graph.nodeCount();
         this.relationshipCount = graph.relationshipCount();
-        this.isAsync = config.isAsynchronous();
         this.computation = computation;
         this.voteBits = voteBits;
         this.nodeBatch = nodeBatch;
@@ -73,21 +69,14 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
         this.isMultiGraph = graph.isMultiGraph();
         this.nodeValues = nodeValues;
         this.relationshipIterator = relationshipIterator.concurrentCopy();
+        this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
         this.initContext = new InitContext<>(this, config, graph);
     }
 
-    public abstract void sendTo(long targetNodeId, double message);
-
-    public abstract void sendToNeighborsWeighted(long sourceNodeId, double message);
-
-    public abstract Messages.MessageIterator messageIterator();
-
-    public abstract void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId);
-
     @Override
     public void run() {
-        var messageIterator = messageIterator();
+        var messageIterator = messenger.messageIterator();
         var messages = new Messages(messageIterator);
 
         long batchStart = nodeBatch.startNode();
@@ -104,7 +93,7 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
                 voteBits.clear(nodeId);
                 computeContext.setNodeId(nodeId);
 
-                initMessageIterator(messageIterator, nodeId);
+                messenger.initMessageIterator(messageIterator, nodeId);
                 computation.compute(computeContext, messages);
             }
         }
@@ -144,9 +133,23 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
         voteBits.set(nodeId);
     }
 
+    public void sendTo(long targetNodeId, double message) {
+        messenger.sendTo(targetNodeId, message);
+        messageBits.set(targetNodeId);
+    }
+
     public void sendToNeighbors(long sourceNodeId, double message) {
         relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             sendTo(targetNodeId, message);
+            messageBits.set(targetNodeId);
+            return true;
+        });
+    }
+
+    public void sendToNeighborsWeighted(long sourceNodeId, double message) {
+        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
+            sendTo(target, computation.applyRelationshipWeight(message, weight));
+            messageBits.set(target);
             return true;
         });
     }
@@ -190,65 +193,5 @@ public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnab
 
     public void setNodeValue(String key, long nodeId, double[] value) {
         nodeValues.set(key, nodeId, value);
-    }
-
-    static final class QueueBasedComputeStep<CONFIG extends PregelConfig> extends ComputeStep<CONFIG> {
-
-        private final HugeObjectArray<? extends Queue<Double>> messageQueues;
-
-        QueueBasedComputeStep(
-            Graph graph,
-            PregelComputation<CONFIG> computation,
-            CONFIG config,
-            int iteration,
-            Partition nodeBatch,
-            Pregel.CompositeNodeValue nodeValues,
-            HugeObjectArray<? extends Queue<Double>> messageQueues,
-            HugeAtomicBitSet voteBits,
-            RelationshipIterator relationshipIterator
-        ) {
-            super(
-                graph,
-                computation,
-                config,
-                iteration,
-                nodeBatch,
-                nodeValues,
-                voteBits,
-                relationshipIterator
-            );
-            this.messageQueues = messageQueues;
-        }
-
-        @Override
-        public void sendTo(long targetNodeId, double message) {
-            messageQueues.get(targetNodeId).add(message);
-            messageBits.set(targetNodeId);
-        }
-
-        @Override
-        public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-            relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
-                messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
-                messageBits.set(target);
-                return true;
-            });
-        }
-
-        @Override
-        public Messages.MessageIterator messageIterator() {
-            return isAsync
-                ? new Messages.MessageIterator.Async()
-                : new Messages.MessageIterator.Sync();
-        }
-
-        @Override
-        public void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId) {
-            messageIterator.init(receiveMessages(nodeId));
-        }
-
-        private @Nullable Queue<Double> receiveMessages(long nodeId) {
-            return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
-        }
     }
 }
