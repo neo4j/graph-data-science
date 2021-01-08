@@ -32,25 +32,25 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import java.util.Queue;
 import java.util.stream.LongStream;
 
-public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
+public abstract class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
 
     private final long nodeCount;
     private final long relationshipCount;
     private final boolean isAsync;
     private final boolean isMultiGraph;
-    private final PregelComputation<CONFIG> computation;
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
     private final Partition nodeBatch;
     private final Degrees degrees;
     private final Pregel.CompositeNodeValue nodeValues;
-    private final HugeObjectArray<? extends Queue<Double>> messageQueues;
-    private final RelationshipIterator relationshipIterator;
-
-    private int iteration;
-    private HugeAtomicBitSet messageBits;
-    private HugeAtomicBitSet prevMessageBits;
     private final HugeAtomicBitSet voteBits;
+    private int iteration;
+
+    final PregelComputation<CONFIG> computation;
+    final RelationshipIterator relationshipIterator;
+
+    HugeAtomicBitSet messageBits;
+    HugeAtomicBitSet prevMessageBits;
 
     ComputeStep(
         Graph graph,
@@ -59,7 +59,6 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
         int iteration,
         Partition nodeBatch,
         Pregel.CompositeNodeValue nodeValues,
-        HugeObjectArray<? extends Queue<Double>> messageQueues,
         HugeAtomicBitSet voteBits,
         RelationshipIterator relationshipIterator
     ) {
@@ -73,21 +72,16 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
         this.degrees = graph;
         this.isMultiGraph = graph.isMultiGraph();
         this.nodeValues = nodeValues;
-        this.messageQueues = messageQueues;
         this.relationshipIterator = relationshipIterator.concurrentCopy();
         this.computeContext = new ComputeContext<>(this, config);
         this.initContext = new InitContext<>(this, config, graph);
     }
 
-    void init(
-        int iteration,
-        HugeAtomicBitSet messageBits,
-        HugeAtomicBitSet prevMessageBits
-    ) {
-        this.iteration = iteration;
-        this.messageBits = messageBits;
-        this.prevMessageBits = prevMessageBits;
-    }
+    public abstract void sendTo(long targetNodeId, double message);
+
+    public abstract void sendToNeighborsWeighted(long sourceNodeId, double message);
+
+    public abstract @Nullable Queue<Double> receiveMessages(long nodeId);
 
     @Override
     public void run() {
@@ -114,6 +108,16 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
                 computation.compute(computeContext, messages);
             }
         }
+    }
+
+    void init(
+        int iteration,
+        HugeAtomicBitSet messageBits,
+        HugeAtomicBitSet prevMessageBits
+    ) {
+        this.iteration = iteration;
+        this.messageBits = messageBits;
+        this.prevMessageBits = prevMessageBits;
     }
 
     public int iteration() {
@@ -156,23 +160,6 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
         return builder.build();
     }
 
-    public void sendTo(long targetNodeId, double message) {
-        messageQueues.get(targetNodeId).add(message);
-        messageBits.set(targetNodeId);
-    }
-
-    public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
-            messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
-            messageBits.set(target);
-            return true;
-        });
-    }
-
-    private @Nullable Queue<Double> receiveMessages(long nodeId) {
-        return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
-    }
-
     public double doubleNodeValue(String key, long nodeId) {
         return nodeValues.doubleValue(key, nodeId);
     }
@@ -203,5 +190,54 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
 
     public void setNodeValue(String key, long nodeId, double[] value) {
         nodeValues.set(key, nodeId, value);
+    }
+
+    static final class QueueBasedComputeStep<CONFIG extends PregelConfig> extends ComputeStep<CONFIG> {
+
+        private final HugeObjectArray<? extends Queue<Double>> messageQueues;
+
+        QueueBasedComputeStep(
+            Graph graph,
+            PregelComputation<CONFIG> computation,
+            CONFIG config,
+            int iteration,
+            Partition nodeBatch,
+            Pregel.CompositeNodeValue nodeValues,
+            HugeObjectArray<? extends Queue<Double>> messageQueues,
+            HugeAtomicBitSet voteBits,
+            RelationshipIterator relationshipIterator
+        ) {
+            super(
+                graph,
+                computation,
+                config,
+                iteration,
+                nodeBatch,
+                nodeValues,
+                voteBits,
+                relationshipIterator
+            );
+            this.messageQueues = messageQueues;
+        }
+
+        @Override
+        public void sendTo(long targetNodeId, double message) {
+            messageQueues.get(targetNodeId).add(message);
+            messageBits.set(targetNodeId);
+        }
+
+        @Override
+        public void sendToNeighborsWeighted(long sourceNodeId, double message) {
+            relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
+                messageQueues.get(target).add(computation.applyRelationshipWeight(message, weight));
+                messageBits.set(target);
+                return true;
+            });
+        }
+
+        @Override
+        public @Nullable Queue<Double> receiveMessages(long nodeId) {
+            return prevMessageBits.get(nodeId) ? messageQueues.get(nodeId) : null;
+        }
     }
 }

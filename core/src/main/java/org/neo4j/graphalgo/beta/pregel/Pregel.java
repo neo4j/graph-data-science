@@ -68,11 +68,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private final AllocationTracker tracker;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
-            Graph graph,
-            CONFIG config,
-            PregelComputation<CONFIG> computation,
-            ExecutorService executor,
-            AllocationTracker tracker
+        Graph graph,
+        CONFIG config,
+        PregelComputation<CONFIG> computation,
+        ExecutorService executor,
+        AllocationTracker tracker
     ) {
         // This prevents users from disabling concurrency
         // validation in custom PregelConfig implementations.
@@ -81,12 +81,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
         ImmutablePregelConfig.copyOf(config);
 
         return new Pregel<>(
-                graph,
-                config,
-                computation,
-                CompositeNodeValue.of(computation.schema(), graph.nodeCount(), config.concurrency(), tracker),
-                executor,
-                tracker
+            graph,
+            config,
+            computation,
+            CompositeNodeValue.of(computation.schema(), graph.nodeCount(), config.concurrency(), tracker),
+            executor,
+            tracker
         );
     }
 
@@ -125,13 +125,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
                                 break;
                             case LONG_ARRAY:
                                 builder.add(entry, MemoryEstimations.builder()
-                                    .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
+                                    .fixed(
+                                        HugeObjectArray.class.getSimpleName(),
+                                        MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                    )
                                     .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
                                     .build());
                                 break;
                             case DOUBLE_ARRAY:
                                 builder.add(entry, MemoryEstimations.builder()
-                                    .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
+                                    .fixed(
+                                        HugeObjectArray.class.getSimpleName(),
+                                        MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                    )
                                     .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
                                     .build());
                                 break;
@@ -147,12 +153,13 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     private Pregel(
-            final Graph graph,
-            final CONFIG config,
-            final PregelComputation<CONFIG> computation,
-            final CompositeNodeValue initialNodeValues,
-            final ExecutorService executor,
-            final AllocationTracker tracker) {
+        final Graph graph,
+        final CONFIG config,
+        final PregelComputation<CONFIG> computation,
+        final CompositeNodeValue initialNodeValues,
+        final ExecutorService executor,
+        final AllocationTracker tracker
+    ) {
         this.graph = graph;
         this.config = config;
         this.computation = computation;
@@ -218,7 +225,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         List<ComputeStep<CONFIG>> computeSteps = new ArrayList<>(concurrency);
 
         for (Partition partition : partitions) {
-            computeSteps.add(new ComputeStep<>(
+            computeSteps.add(new ComputeStep.QueueBasedComputeStep<>(
                 graph,
                 computation,
                 config,
@@ -245,13 +252,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
             // received messages in the previous iteration.
             if (iteration > 0) {
                 ParallelUtil.parallelStreamConsume(
-                        LongStream.range(0, graph.nodeCount()),
-                        concurrency,
-                        nodeIds -> nodeIds.forEach(nodeId -> {
-                            if (messageBits.get(nodeId)) {
-                                messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
-                            }
-                        }));
+                    LongStream.range(0, graph.nodeCount()),
+                    concurrency,
+                    nodeIds -> nodeIds.forEach(nodeId -> {
+                        if (messageBits.get(nodeId)) {
+                            messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
+                        }
+                    })
+                );
             }
         }
 
@@ -269,14 +277,16 @@ public final class Pregel<CONFIG extends PregelConfig> {
         Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) new MpscLinkedQueue<Double>().getClass();
 
         HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
-                queueClass,
-                graph.nodeCount(),
-                tracker);
+            queueClass,
+            graph.nodeCount(),
+            tracker
+        );
 
         ParallelUtil.parallelStreamConsume(
-                LongStream.range(0, graph.nodeCount()),
-                concurrency,
-                nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, new MpscLinkedQueue<Double>())));
+            LongStream.range(0, graph.nodeCount()),
+            concurrency,
+            nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, new MpscLinkedQueue<Double>()))
+        );
 
         return messageQueues;
     }
@@ -286,17 +296,25 @@ public final class Pregel<CONFIG extends PregelConfig> {
         private final PregelSchema pregelSchema;
         private final Map<String, Object> properties;
 
-        static CompositeNodeValue of(PregelSchema pregelSchema, long nodeCount, int concurrency, AllocationTracker tracker) {
+        static CompositeNodeValue of(
+            PregelSchema pregelSchema,
+            long nodeCount,
+            int concurrency,
+            AllocationTracker tracker
+        ) {
             Map<String, Object> properties = new HashMap<>();
 
             pregelSchema.elements().forEach(element -> {
-                switch(element.propertyType()) {
+                switch (element.propertyType()) {
                     case DOUBLE:
                         var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
                         ParallelUtil.parallelStreamConsume(
                             LongStream.range(0, nodeCount),
                             concurrency,
-                            nodeIds -> nodeIds.forEach(nodeId -> doubleNodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK))
+                            nodeIds -> nodeIds.forEach(nodeId -> doubleNodeValues.set(
+                                nodeId,
+                                DefaultValue.DOUBLE_DEFAULT_FALLBACK
+                            ))
                         );
                         properties.put(element.propertyKey(), doubleNodeValues);
                         break;
@@ -305,7 +323,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
                         ParallelUtil.parallelStreamConsume(
                             LongStream.range(0, nodeCount),
                             concurrency,
-                            nodeIds -> nodeIds.forEach(nodeId -> longNodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK))
+                            nodeIds -> nodeIds.forEach(nodeId -> longNodeValues.set(
+                                nodeId,
+                                DefaultValue.LONG_DEFAULT_FALLBACK
+                            ))
                         );
                         properties.put(element.propertyKey(), longNodeValues);
                         break;
@@ -322,7 +343,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
                         );
                         break;
                     default:
-                        throw new IllegalArgumentException(formatWithLocale("Unsupported value type: %s", element.propertyType()));
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Unsupported value type: %s",
+                            element.propertyType()
+                        ));
                 }
             });
 
