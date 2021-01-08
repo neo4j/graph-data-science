@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 
+import java.util.Optional;
+
 /**
  * Main interface to express user-defined logic using the
  * Pregel framework. An algorithm is expressed using a
@@ -84,6 +86,18 @@ public interface PregelComputation<C extends PregelConfig> {
      * It is called by a single thread.
      */
     default void masterCompute(MasterComputeContext<C> context) { }
+
+    /**
+     * A reducer is used to combine messages sent to a single node. Based on
+     * the reduce function, multiple messages are condensed into a single one.
+     * Use cases are computing the sum, count, minimum or maximum of messages.
+     *
+     * Specifying a reducer can significantly reduce memory consumption and
+     * runtime of the computation.
+     */
+    default Optional<Reducer> reducer() {
+        return Optional.empty();
+    }
 
     /**
      * If the input graph is weighted, i.e. relationships have a
