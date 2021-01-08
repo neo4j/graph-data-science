@@ -20,12 +20,14 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
-import java.util.Queue;
 
-public class Messages implements Iterable<Double> {
+public final class Messages implements Iterable<Double> {
+
+    interface MessageIterator extends Iterator<Double> {
+        boolean isEmpty();
+    }
 
     private final MessageIterator iterator;
 
@@ -41,67 +43,5 @@ public class Messages implements Iterable<Double> {
 
     public boolean isEmpty() {
         return iterator.isEmpty();
-    }
-
-    public abstract static class MessageIterator implements Iterator<Double> {
-
-        Queue<Double> queue;
-
-        void init(@Nullable Queue<Double> queue) {
-            this.queue = queue;
-        }
-
-        @Override
-        public Double next() {
-            return queue.poll();
-        }
-
-        public abstract boolean isEmpty();
-
-        static class Sync extends MessageIterator {
-            private boolean reachedEnd = false;
-
-            @Override
-            void init(@Nullable Queue<Double> queue) {
-                super.init(queue);
-                reachedEnd = false;
-            }
-
-            @Override
-            public boolean hasNext() {
-                if (queue == null || reachedEnd) {
-                    return false;
-                }
-
-                if (Double.isNaN(queue.peek())) {
-                    queue.poll();
-                    reachedEnd = true;
-                    return false;
-                }
-
-                return true;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return queue == null || queue.isEmpty() || reachedEnd || Double.isNaN(queue.peek());
-            }
-        }
-
-        static class Async extends MessageIterator {
-            @Override
-            public boolean hasNext() {
-                if (queue == null) {
-                    return false;
-                }
-                return (queue.peek()) != null;
-            }
-
-
-            @Override
-            public boolean isEmpty() {
-                return queue == null || queue.isEmpty();
-            }
-        }
     }
 }

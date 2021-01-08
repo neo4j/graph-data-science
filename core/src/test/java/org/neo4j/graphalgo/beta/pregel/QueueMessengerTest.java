@@ -30,21 +30,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MessagesTest {
+class QueueMessengerTest {
 
     private static Stream<Arguments> iteratorTypes() {
         return Stream.of(
-            Arguments.of(new Messages.MessageIterator.Async()),
-            Arguments.of(new Messages.MessageIterator.Sync())
+            Arguments.of(new QueueMessenger.QueueIterator.Async()),
+            Arguments.of(new QueueMessenger.QueueIterator.Sync())
         );
     }
 
     @ParameterizedTest
     @MethodSource("iteratorTypes")
-    void allowMultipleCallsToHasNext(Messages.MessageIterator messageIterator) {
+    void allowMultipleCallsToHasNext(QueueMessenger.QueueIterator messageIterator) {
         var queue = new MpscLinkedQueue<Double>();
         queue.offer(42.0);
-        if (messageIterator instanceof Messages.MessageIterator.Sync) {
+        if (messageIterator instanceof QueueMessenger.QueueIterator.Sync) {
             queue.offer(Double.NaN);
         }
 
