@@ -41,17 +41,24 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
 public abstract class HugeAtomicDoubleArray {
 
     /**
-     * @return the long value at the given index
+     * @return the double value at the given index
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     public abstract double get(long index);
 
     /**
-     * Sets the long value at the given index to the given value.
+     * Sets the double value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
     public abstract void set(long index, double value);
+
+    /**
+     * Atomically returns the double value at the given index and replaces it with the given value.
+     *
+     * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
+     */
+    public abstract double take(long index, double value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -247,6 +254,15 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
+        public double take(long index, double value) {
+            double prev;
+            do {
+                prev = (double) ARRAY_HANDLE.getVolatile(page, (int) index);
+            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, value));
+            return prev;
+        }
+
+        @Override
         public boolean compareAndSet(long index, double expect, double update) {
             return ARRAY_HANDLE.compareAndSet(page, (int) index, expect, update);
         }
@@ -335,6 +351,18 @@ public abstract class HugeAtomicDoubleArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             ARRAY_HANDLE.setVolatile(pages[pageIndex], indexInPage, value);
+        }
+
+        @Override
+        public double take(long index, double value) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            double[] page = pages[pageIndex];
+            double prev;
+            do {
+                prev = (double) ARRAY_HANDLE.getVolatile(page, indexInPage);
+            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, value));
+            return prev;
         }
 
         @Override
