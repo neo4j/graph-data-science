@@ -1,0 +1,115 @@
+/*
+ * Copyright (c) 2017-2021 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.graphalgo.beta.pregel;
+
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+
+/**
+ * A messenger implementation that is backed by two double arrays used
+ * to send and receive messages. The messenger can only be applied in
+ * combination with a {@link org.neo4j.graphalgo.beta.pregel.Reducer}
+ * which atomically reduces all incoming messages into a single one.
+ */
+public class ReducingMessenger implements Messenger {
+
+    private final Graph graph;
+    private final PregelConfig config;
+    private final Reducer reducer;
+
+    private HugeAtomicDoubleArray sendArray;
+    private HugeAtomicDoubleArray receiveArray;
+    private HugeAtomicBitSet messageBits;
+
+    ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker tracker) {
+        this.graph = graph;
+        this.config = config;
+        this.reducer = reducer;
+
+        this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+        this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+    }
+
+    @Override
+    public void initIteration(int iteration, HugeAtomicBitSet messageBits) {
+        this.messageBits = messageBits;
+
+        // Swap arrays
+        var tmp = receiveArray;
+        this.receiveArray = sendArray;
+        this.sendArray = tmp;
+
+        // fill send array with identity value
+        var identity = reducer.identity();
+        ParallelUtil.parallelForEachNode(graph, config.concurrency(), nodeId -> sendArray.set(nodeId, identity));
+    }
+
+    @Override
+    public void sendTo(long targetNodeId, double message) {
+        sendArray.update(targetNodeId, current -> reducer.reduce(current, message));
+    }
+
+    @Override
+    public Messages.MessageIterator messageIterator() {
+        return new SingleMessageIterator();
+    }
+
+    @Override
+    public void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId) {
+        var message = receiveArray.take(nodeId, reducer.identity());
+        ((SingleMessageIterator) messageIterator).init(message, messageBits.get(nodeId));
+    }
+
+    @Override
+    public void release() {
+        sendArray.release();
+        receiveArray.release();
+    }
+
+    static class SingleMessageIterator implements Messages.MessageIterator {
+
+        boolean hasNext;
+        double message;
+
+        void init(double value, boolean hasNext) {
+            this.message = value;
+            this.hasNext = hasNext;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return !hasNext;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return hasNext;
+        }
+
+        @Override
+        public Double next() {
+            hasNext = false;
+            return message;
+        }
+    }
+}

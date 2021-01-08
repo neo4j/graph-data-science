@@ -165,7 +165,11 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.executor = executor;
         this.tracker = tracker;
 
-        this.messenger = new QueueMessenger(graph, config, tracker);
+        var reducer = computation.reducer();
+
+        this.messenger = reducer.isPresent()
+            ? new ReducingMessenger(graph, config, reducer.get(), tracker)
+            : new QueueMessenger(graph, config, tracker);
     }
 
     public PregelResult run() {

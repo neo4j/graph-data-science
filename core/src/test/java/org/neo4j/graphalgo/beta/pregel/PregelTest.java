@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -203,6 +204,11 @@ class PregelTest {
                 ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
+            ),
+            Arguments.of(
+                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                new TestReduciblePregelComputation(),
+                new double[]{0.0, 1.0, 1.0}
             )
         );
     }
@@ -260,6 +266,24 @@ class PregelTest {
                 context.setNodeValue(KEY, messageSum);
             }
             context.voteToHalt();
+        }
+    }
+
+    public static class TestReduciblePregelComputation extends TestPregelComputation {
+
+        @Override
+        public Optional<Reducer> reducer() {
+            return Optional.of(new Reducer() {
+                @Override
+                public double identity() {
+                    return Double.MAX_VALUE;
+                }
+
+                @Override
+                public double reduce(double current, double message) {
+                    return Math.min(current, message);
+                }
+            });
         }
     }
 

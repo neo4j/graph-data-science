@@ -30,6 +30,10 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.Queue;
 import java.util.stream.LongStream;
 
+/**
+ * A messenger implementation that is backed by an MPSC queue
+ * for each node in the graph. The queue acts as message inbox.
+ */
 class QueueMessenger implements Messenger {
 
     // Marks the end of messages from the previous iteration in synchronous mode.
