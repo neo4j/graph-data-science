@@ -72,9 +72,4 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
 
         context.voteToHalt();
     }
-
-//    @Override
-//    public Optional<Reducer> reducer() {
-//        return Optional.of(new Reducer.Min());
-//    }
 }
