@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Predictor;
@@ -32,7 +33,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.function.Consumer;
 
-public class MultiClassNodeLogisticRegressionPredictAlgorithm extends Algorithm<MultiClassNodeLogisticRegressionPredictAlgorithm, MultiClassNodeLogisticRegressionResult> {
+public class MultiClassNodeLogisticRegressionPredictAlgorithm
+    extends Algorithm<MultiClassNodeLogisticRegressionPredictAlgorithm, MultiClassNodeLogisticRegressionResult> {
 
     private final MultiClassNodeLogisticRegressionPredictor predictor;
     private final Graph graph;
@@ -92,13 +94,13 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm extends Algorithm<
 
     private static class PredictConsumer implements Consumer<Batch> {
         private final Graph graph;
-        private final Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> predictor;
+        private final Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor;
         private final HugeObjectArray<double[]> predictedProbabilities;
         private final HugeAtomicLongArray predictedClasses;
 
         PredictConsumer(
             Graph graph,
-            Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> predictor,
+            Predictor<Matrix, MultiClassNodeLogisticRegressionData> predictor,
             @Nullable HugeObjectArray<double[]> predictedProbabilities,
             HugeAtomicLongArray predictedClasses
         ) {
@@ -110,30 +112,30 @@ public class MultiClassNodeLogisticRegressionPredictAlgorithm extends Algorithm<
 
         @Override
         public void accept(Batch batch) {
-            var classProbabilities = predictor.predict(graph, batch);
-            var numberOfClasses = classProbabilities.probabilities().cols();
-            var probabilities = classProbabilities.probabilities().data();
-                var currentRow = new MutableInt(0);
-                batch.nodeIds().forEach(nodeId -> {
-                    var offset = currentRow.getAndIncrement() * numberOfClasses;
-                    if (predictedProbabilities != null) {
-                        var probabilitiesForNode = new double[numberOfClasses];
-                        System.arraycopy(probabilities, offset, probabilitiesForNode, 0, numberOfClasses);
-                        predictedProbabilities.set(nodeId, probabilitiesForNode);
+            var probabilityMatrix = predictor.predict(graph, batch);
+            var numberOfClasses = probabilityMatrix.cols();
+            var probabilities = probabilityMatrix.data();
+            var currentRow = new MutableInt(0);
+            batch.nodeIds().forEach(nodeId -> {
+                var offset = currentRow.getAndIncrement() * numberOfClasses;
+                if (predictedProbabilities != null) {
+                    var probabilitiesForNode = new double[numberOfClasses];
+                    System.arraycopy(probabilities, offset, probabilitiesForNode, 0, numberOfClasses);
+                    predictedProbabilities.set(nodeId, probabilitiesForNode);
+                }
+                var bestClassId = -1;
+                var maxProbability = -1d;
+                for (int classId = 0; classId < numberOfClasses; classId++) {
+                    var probability = probabilities[offset + classId];
+                    if (probability > maxProbability) {
+                        maxProbability = probability;
+                        bestClassId = classId;
                     }
-                    var bestClassId = -1;
-                    var maxProbability = -1d;
-                    for (int classId = 0; classId < numberOfClasses; classId++) {
-                        var probability = probabilities[offset + classId];
-                        if (probability > maxProbability) {
-                            maxProbability = probability;
-                            bestClassId = classId;
-                        }
-                    }
-                    var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
-                    predictedClasses.set(nodeId, bestClass);
-                });
-            }
+                }
+                var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
+                predictedClasses.set(nodeId, bestClass);
+            });
+        }
     }
 
 }

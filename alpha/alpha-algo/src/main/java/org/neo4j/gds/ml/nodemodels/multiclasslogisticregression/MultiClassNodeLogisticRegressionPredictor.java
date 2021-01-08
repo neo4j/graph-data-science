@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.api.Graph;
 
 import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
 
-public class MultiClassNodeLogisticRegressionPredictor implements Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> {
+public class MultiClassNodeLogisticRegressionPredictor implements Predictor<Matrix, MultiClassNodeLogisticRegressionData> {
 
     private final MultiClassNodeLogisticRegressionData modelData;
 
@@ -44,10 +44,9 @@ public class MultiClassNodeLogisticRegressionPredictor implements Predictor<Clas
     }
 
     @Override
-    public ClassProbabilities predict(Graph graph, Batch batch) {
+    public Matrix predict(Graph graph, Batch batch) {
         ComputationContext ctx = new ComputationContext();
-        Matrix forward = ctx.forward(predictionsVariable(graph, batch));
-        return new ClassProbabilities(forward, modelData.classIdMap());
+        return ctx.forward(predictionsVariable(graph, batch));
     }
 
     Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
