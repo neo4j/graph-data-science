@@ -21,15 +21,15 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
-public interface Messenger {
+public interface Messenger<ITERATOR extends Messages.MessageIterator> {
 
     void initIteration(int iteration, HugeAtomicBitSet messageBits);
 
     void sendTo(long targetNodeId, double message);
 
-    Messages.MessageIterator messageIterator();
+    ITERATOR messageIterator();
 
-    void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId);
+    void initMessageIterator(ITERATOR messageIterator, long nodeId);
 
     void release();
 }

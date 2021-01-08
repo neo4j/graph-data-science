@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
  * combination with a {@link org.neo4j.graphalgo.beta.pregel.Reducer}
  * which atomically reduces all incoming messages into a single one.
  */
-public class ReducingMessenger implements Messenger {
+public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMessageIterator> {
 
     private final Graph graph;
     private final PregelConfig config;
@@ -70,14 +70,14 @@ public class ReducingMessenger implements Messenger {
     }
 
     @Override
-    public Messages.MessageIterator messageIterator() {
+    public ReducingMessenger.SingleMessageIterator messageIterator() {
         return new SingleMessageIterator();
     }
 
     @Override
-    public void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId) {
+    public void initMessageIterator(ReducingMessenger.SingleMessageIterator messageIterator, long nodeId) {
         var message = receiveArray.take(nodeId, reducer.identity());
-        ((SingleMessageIterator) messageIterator).init(message, messageBits.get(nodeId));
+        messageIterator.init(message, messageBits.get(nodeId));
     }
 
     @Override

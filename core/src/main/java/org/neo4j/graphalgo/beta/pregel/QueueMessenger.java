@@ -34,7 +34,7 @@ import java.util.stream.LongStream;
  * A messenger implementation that is backed by an MPSC queue
  * for each node in the graph. The queue acts as message inbox.
  */
-class QueueMessenger implements Messenger {
+class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
@@ -99,16 +99,15 @@ class QueueMessenger implements Messenger {
     }
 
     @Override
-    public Messages.MessageIterator messageIterator() {
+    public QueueMessenger.QueueIterator messageIterator() {
         return config.isAsynchronous()
             ? new QueueIterator.Async()
             : new QueueIterator.Sync();
     }
 
     @Override
-    public void initMessageIterator(Messages.MessageIterator messageIterator, long nodeId) {
-        // TODO: find a way to get rid of the cast (without using generics all over the place)
-        ((QueueIterator) messageIterator).init(messageBits.get(nodeId) ? messageQueues.get(nodeId) : null);
+    public void initMessageIterator(QueueMessenger.QueueIterator messageIterator, long nodeId) {
+        messageIterator.init(messageBits.get(nodeId) ? messageQueues.get(nodeId) : null);
     }
 
     @Override

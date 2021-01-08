@@ -58,7 +58,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final CompositeNodeValue nodeValues;
 
-    private final Messenger messenger;
+    private final Messenger<?> messenger;
 
     private final int concurrency;
     private final ExecutorService executor;
@@ -181,7 +181,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // Tracks if a node voted to halt in the previous iteration
         HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        List<ComputeStep<CONFIG>> computeSteps = createComputeSteps(voteBits);
+        var computeSteps = createComputeSteps(voteBits);
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
@@ -190,7 +190,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             }
 
             // Init compute steps with the updated state
-            for (ComputeStep<CONFIG> computeStep : computeSteps) {
+            for (var computeStep : computeSteps) {
                 computeStep.init(iterations, messageBits, prevMessageBits);
             }
 
@@ -224,10 +224,10 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messenger.release();
     }
 
-    private List<ComputeStep<CONFIG>> createComputeSteps(HugeAtomicBitSet voteBits) {
+    private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
         List<Partition> partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
 
-        List<ComputeStep<CONFIG>> computeSteps = new ArrayList<>(concurrency);
+        List<ComputeStep<CONFIG, ?>> computeSteps = new ArrayList<>(concurrency);
 
         for (Partition partition : partitions) {
             computeSteps.add(new ComputeStep<>(
@@ -245,7 +245,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return computeSteps;
     }
 
-    private void runComputeSteps(Collection<ComputeStep<CONFIG>> computeSteps) {
+    private void runComputeSteps(Collection<ComputeStep<CONFIG, ?>> computeSteps) {
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
 
