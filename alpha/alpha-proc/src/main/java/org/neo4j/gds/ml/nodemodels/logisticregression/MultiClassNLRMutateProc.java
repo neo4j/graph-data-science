@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter.NodeProperty;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
@@ -39,9 +40,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class MultiClassNLRMutateProc
     extends MutatePropertyProc<MultiClassNLRPredictAlgorithm, MultiClassNLRResult, MultiClassNLRMutateProc.MutateResult, MultiClassNLRPredictMutateConfig> {
@@ -61,6 +63,24 @@ public class MultiClassNLRMutateProc
         ComputationResult<MultiClassNLRPredictAlgorithm, MultiClassNLRResult, MultiClassNLRPredictMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
+    }
+
+    @Override
+    protected void validateConfigsAndGraphStore(
+        GraphStoreWithConfig graphStoreWithConfig, MultiClassNLRPredictMutateConfig config
+    ) {
+        config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
+            if (config.mutateProperty().equals(predictedProbabilityProperty)) {
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
+                        "mutateProperty",
+                        "predictedProbabilityProperty",
+                        predictedProbabilityProperty
+                    )
+                );
+            }
+        });
     }
 
     @Override

@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,26 +53,6 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphCreateProc.class, MultiClassNLRMutateProc.class);
-
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(0);
-        classIdMap.toMapped(1);
-        var model = Model.of(
-            "",
-            "model",
-            "",
-            GraphSchema.empty(),
-            MultiClassNLRData.builder()
-                .weights(new Weights<>(new Matrix(new double[]{
-                    1.12730619, -0.84532386, 0.93216654,
-                    -1.12730619, 0.84532386, 0.0
-                }, 2, 3)))
-                .nodePropertyKeys(List.of("a", "b"))
-                .classIdMap(classIdMap)
-                .build(),
-            ImmutableNodeLogisticRegressionTrainConfig.builder().modelName("model").targetProperty("foo").build()
-        );
-        ModelCatalog.set(model);
 
         runQuery(DB_CYPHER);
 
@@ -92,6 +73,8 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
 
     @Test
     void mutate() {
+        addModelWithFeatures("a", "b");
+
         var query = GdsCypher
             .call()
             .explicitCreation("g")
@@ -113,6 +96,8 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
 
     @Test
     void mutateWithProbabilities() {
+        addModelWithFeatures("a", "b");
+
         var query = GdsCypher
             .call()
             .explicitCreation("g")
@@ -133,4 +118,42 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         )));
     }
 
+    @Test
+    void validatePropertyNames() {
+        addModelWithFeatures("a", "b");
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .mutateMode()
+            .addParameter("mutateProperty", "foo")
+            .addParameter("predictedProbabilityProperty", "foo")
+            .addParameter("modelName", "model")
+            .yields();
+
+        assertError(query, "`mutateProperty` and `predictedProbabilityProperty` must be different (both were `foo`)");
+    }
+
+    private void addModelWithFeatures(String... properties) {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(0);
+        classIdMap.toMapped(1);
+        var model = Model.of(
+            "",
+            "model",
+            "",
+            GraphSchema.empty(),
+            MultiClassNLRData.builder()
+                .weights(new Weights<>(new Matrix(new double[]{
+                    1.12730619, -0.84532386, 0.93216654,
+                    -1.12730619, 0.84532386, 0.0
+                }, 2, 3)))
+                .nodePropertyKeys(Arrays.asList(properties))
+                .classIdMap(classIdMap)
+                .build(),
+            ImmutableNodeLogisticRegressionTrainConfig.builder().modelName("model").targetProperty("foo").build()
+        );
+        ModelCatalog.set(model);
+    }
 }
