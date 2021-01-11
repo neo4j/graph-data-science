@@ -44,31 +44,30 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     private final MultiClassNLRPredictor predictor;
 
     public MultiClassNLRObjective(
-        List<String> nodePropertyKeys,
+        List<String> featureProperties,
         String targetPropertyKey,
         Graph graph,
         double penalty
     ) {
         this.predictor = new MultiClassNLRPredictor(makeData(
-            nodePropertyKeys,
+            featureProperties,
             targetPropertyKey,
             graph
-        ));
+        ), featureProperties);
         this.targetPropertyKey = targetPropertyKey;
         this.graph = graph;
         this.penalty = penalty;
     }
 
     private static MultiClassNLRData makeData(
-        List<String> nodePropertyKeys,
+        List<String> featureProperties,
         String targetPropertyKey,
         Graph graph
     ) {
         var classIdMap = makeClassIdMap(targetPropertyKey, graph);
         return MultiClassNLRData.builder()
             .classIdMap(classIdMap)
-            .weights(initWeights(nodePropertyKeys, classIdMap.originalIds().length))
-            .nodePropertyKeys(nodePropertyKeys)
+            .weights(initWeights(featureProperties, classIdMap.originalIds().length))
             .build();
     }
 
@@ -82,8 +81,8 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
         return classIdMap;
     }
 
-    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys, int numberOfClasses) {
-        var featuresPerClass = nodePropertyKeys.size() + 1;
+    private static Weights<Matrix> initWeights(List<String> featureProperties, int numberOfClasses) {
+        var featuresPerClass = featureProperties.size() + 1;
         return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 

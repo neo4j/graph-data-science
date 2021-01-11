@@ -61,7 +61,7 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
             NodeLogisticRegressionTrainConfig.class
         );
         return new MultiClassNLRPredictAlgorithm(
-            new MultiClassNLRPredictor(model.data()),
+            new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties()),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

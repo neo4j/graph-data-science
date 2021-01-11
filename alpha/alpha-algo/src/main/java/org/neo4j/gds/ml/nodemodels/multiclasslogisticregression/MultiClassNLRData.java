@@ -24,13 +24,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.List;
-
 @ValueClass
 public interface MultiClassNLRData {
     Weights<Matrix> weights();
     LocalIdMap classIdMap();
-    List<String> nodePropertyKeys();
 
     static ImmutableMultiClassNLRData.Builder builder() {
         return ImmutableMultiClassNLRData.builder();

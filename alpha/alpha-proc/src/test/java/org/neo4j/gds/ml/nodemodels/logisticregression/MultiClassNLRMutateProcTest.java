@@ -57,7 +57,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String loadQuery = GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("N")
             .withAnyRelationshipType()
             .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
             .graphCreate("g")
@@ -135,6 +135,23 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         assertError(query, "`mutateProperty` and `predictedProbabilityProperty` must be different (both were `foo`)");
     }
 
+    @Test
+    void validateFeaturesExistOnGraph() {
+        // c is not in graph
+        addModelWithFeatures("a", "c");
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .mutateMode()
+            .addParameter("mutateProperty", "class")
+            .addParameter("modelName", "model")
+            .yields();
+
+        assertError(query, "The feature properties ['c'] are not present");
+    }
+
     private void addModelWithFeatures(String... properties) {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
@@ -149,10 +166,14 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
                     1.12730619, -0.84532386, 0.93216654,
                     -1.12730619, 0.84532386, 0.0
                 }, 2, 3)))
-                .nodePropertyKeys(Arrays.asList(properties))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableNodeLogisticRegressionTrainConfig.builder().modelName("model").targetProperty("foo").build()
+            ImmutableNodeLogisticRegressionTrainConfig
+                .builder()
+                .modelName("model")
+                .targetProperty("foo")
+                .featureProperties(Arrays.asList(properties))
+                .build()
         );
         ModelCatalog.set(model);
     }

@@ -28,14 +28,18 @@ import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.List;
+
 import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
 
 public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
 
     private final MultiClassNLRData modelData;
+    private final List<String> featureProperties;
 
-    MultiClassNLRPredictor(MultiClassNLRData modelData) {
+    MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
         this.modelData = modelData;
+        this.featureProperties = featureProperties;
     }
 
     @Override
@@ -50,7 +54,7 @@ public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRDa
     }
 
     Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
-        var features = features(graph, batch, modelData.nodePropertyKeys());
+        var features = features(graph, batch, featureProperties);
         var weights = modelData.weights();
         return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
     }

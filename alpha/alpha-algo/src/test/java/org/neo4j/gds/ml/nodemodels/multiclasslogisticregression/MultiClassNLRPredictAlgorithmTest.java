@@ -90,12 +90,11 @@ class MultiClassNLRPredictAlgorithmTest {
                 -1.07448415, 1.19160801, 0.70054154,
                 -0.63303538, 0.08735695, -3.39978931
             }, 4, 3)))
-            .nodePropertyKeys(List.of("a", "b"))
             .classIdMap(classIdMap)
             .build();
 
         var result = new MultiClassNLRPredictAlgorithm(
-            new MultiClassNLRPredictor(modelData),
+            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,
             1,
@@ -144,12 +143,11 @@ class MultiClassNLRPredictAlgorithmTest {
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654
             }, 1, 3)))
-            .nodePropertyKeys(List.of("a", "b"))
             .classIdMap(classIdMap)
             .build();
 
         var result = new MultiClassNLRPredictAlgorithm(
-            new MultiClassNLRPredictor(modelData),
+            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,
             1,
@@ -203,10 +201,14 @@ class MultiClassNLRPredictAlgorithmTest {
                 .weights(new Weights<>(new Matrix(new double[]{
                     1.12730619, -0.84532386, 0.93216654
                 }, 1, 3)))
-                .nodePropertyKeys(List.of("a", "b"))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableNodeLogisticRegressionTrainConfig.builder().modelName("model").targetProperty("foo").build()
+            ImmutableNodeLogisticRegressionTrainConfig
+                .builder()
+                .modelName("model")
+                .targetProperty("foo")
+                .featureProperties(List.of("a", "b"))
+                .build()
         );
         ModelCatalog.set(model);
 

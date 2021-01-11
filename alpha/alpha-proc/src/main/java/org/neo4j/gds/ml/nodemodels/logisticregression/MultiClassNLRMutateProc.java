@@ -19,16 +19,19 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictAlgorithm;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictMutateConfig;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
+import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter.NodeProperty;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
@@ -81,6 +84,17 @@ public class MultiClassNLRMutateProc
                 );
             }
         });
+
+        var trainConfig = ModelCatalog.get(
+            config.username(),
+            config.modelName(),
+            MultiClassNLRData.class,
+            NodeLogisticRegressionTrainConfig.class
+        ).trainConfig();
+        GraphStoreValidation.validate(
+            graphStoreWithConfig,
+            trainConfig
+        );
     }
 
     @Override
