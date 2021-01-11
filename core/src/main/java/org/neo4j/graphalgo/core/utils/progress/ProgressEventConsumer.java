@@ -97,7 +97,7 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     }
 
     private void process(LogEvent event) {
-        if (event.release()) {
+        if (event.isEndOfStream()) {
             if (events.containsKey(event.username())) {
                 events.get(event.username()).remove(event.id());
             }

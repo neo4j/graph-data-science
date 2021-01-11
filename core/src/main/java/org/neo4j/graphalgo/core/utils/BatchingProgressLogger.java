@@ -111,7 +111,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         var localProgress = callCounter.get();
         if (localProgress.longValue() < batchSize && (localProgress.addAndGet(progress) >= batchSize)) {
             doLogPercentage(msgFactory, progress);
-            progressTracker.addLogEvent("???", msgFactory.get(), progress);
+            progressTracker.addLogEvent(task, msgFactory.get(), progress);
             localProgress.setValue(localProgress.longValue() & (batchSize - 1));
         } else {
             progressCounter.add(progress);
@@ -143,7 +143,6 @@ public class BatchingProgressLogger implements ProgressLogger {
         }
     }
 
-    // Change ProgressEvent to hold a format string and an object array, like the Log.info and friends do
     private void doLog(String format, String thread, String task, int nextPercentage) {
         log.info(format, thread, task, nextPercentage);
         progressTracker.addLogEvent(task, formatWithLocale(format, thread, task, nextPercentage));

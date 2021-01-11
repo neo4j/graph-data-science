@@ -37,7 +37,7 @@ public interface LogEvent {
 
     @Value.Default
     @Value.Parameter(false)
-    default boolean release() {
+    default boolean isEndOfStream() {
         return false;
     }
 }

@@ -62,6 +62,6 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
 
     @Override
     public void release(String id) {
-        queue.offer(ImmutableLogEvent.builder().username(username).id(id).message("").release(true).build());
+        queue.offer(ImmutableLogEvent.builder().username(username).id(id).message("").isEndOfStream(true).build());
     }
 }
