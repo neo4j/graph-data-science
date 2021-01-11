@@ -151,4 +151,13 @@ class ArrayLayoutTest {
                 .isEqualTo(binarySearchValue);
         }
     }
+
+    @Test
+    void testSecondaryIndex() {
+        long[] values = {13, 37, 42};
+        int[] secondaryValues = {1, 2, 3};
+
+        ArrayLayout.constructEytzinger(values, secondaryValues);
+        assertThat(secondaryValues).containsExactly(2, 1, 3);
+    }
 }

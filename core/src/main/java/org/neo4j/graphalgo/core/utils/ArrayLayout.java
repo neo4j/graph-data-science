@@ -62,11 +62,43 @@ public final class ArrayLayout {
         return dest;
     }
 
+    /**
+     * Constructs a new binary search tree using the Eytzinger layout.
+     * Input must be sorted.
+     * A secondary array is permuted in the same fashion as the input array.
+     *
+     * @param input the sorted input data
+     * @param secondary secondary values that are permuted as well
+     */
+    public static long[] constructEytzinger(long[] input, int[] secondary) {
+        if (secondary.length != input.length) {
+            throw new IllegalArgumentException("Input arrays must be of same length");
+        }
+        // position 0 is the result of a left-biased miss (needle is smaller than the smallest entry).
+        // the actual values are stored 1-based
+        var dest = new long[input.length + 1];
+        dest[0] = -1;
+        var secondaryDest = new int[secondary.length];
+        eytzingerWithSecondary(input.length, input, dest, 0, 1, secondary, secondaryDest);
+        System.arraycopy(secondaryDest, 0, secondary, 0, secondary.length);
+        return dest;
+    }
+
     private static int eytzinger(int length, long[] source, long[] dest, int sourceIndex, int destIndex) {
         if (destIndex <= length) {
             sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex);
             dest[destIndex] = source[sourceIndex++];
             sourceIndex = eytzinger(length, source, dest, sourceIndex, 2 * destIndex + 1);
+        }
+        return sourceIndex;
+    }
+
+    private static int eytzingerWithSecondary(int length, long[] source, long[] dest, int sourceIndex, int destIndex, int[] secondarySource, int[] secondaryDest) {
+        if (destIndex <= length) {
+            sourceIndex = eytzingerWithSecondary(length, source, dest, sourceIndex, 2 * destIndex, secondarySource, secondaryDest);
+            secondaryDest[destIndex - 1] = secondarySource[sourceIndex];
+            dest[destIndex] = source[sourceIndex++];
+            sourceIndex = eytzingerWithSecondary(length, source, dest, sourceIndex, 2 * destIndex + 1, secondarySource, secondaryDest);
         }
         return sourceIndex;
     }
