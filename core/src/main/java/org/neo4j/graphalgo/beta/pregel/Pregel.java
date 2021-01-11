@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
-import org.jctools.queues.MpscLinkedQueue;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
@@ -87,66 +86,21 @@ public final class Pregel<CONFIG extends PregelConfig> {
         );
     }
 
-    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema) {
-        return MemoryEstimations.builder(Pregel.class)
+    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased) {
+        var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("message bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perNode("previous message bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
-            .add(
-                "message queues",
-                MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    MemoryEstimations.builder()
-                        .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
-                        .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
-                            .fixed("messages", dimensions.averageDegree() * Double.BYTES)
-                            .build()
-                        )
-                        .build()
-                )
-            )
-            .add(
-                "composite node value",
-                MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                    var builder = MemoryEstimations.builder();
+            .add("composite node value", CompositeNodeValue.memoryEstimation(pregelSchema));
 
-                    pregelSchema.elements().forEach(element -> {
-                        var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
+        if (isQueueBased) {
+            estimationBuilder.add("message queues", QueueMessenger.memoryEstimation());
+        } else {
+            estimationBuilder.add("message arrays", ReducingMessenger.memoryEstimation());
+        }
 
-                        switch (element.propertyType()) {
-                            case LONG:
-                                builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
-                                break;
-                            case DOUBLE:
-                                builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
-                                break;
-                            case LONG_ARRAY:
-                                builder.add(entry, MemoryEstimations.builder()
-                                    .fixed(
-                                        HugeObjectArray.class.getSimpleName(),
-                                        MemoryUsage.sizeOfInstance(HugeObjectArray.class)
-                                    )
-                                    .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
-                                    .build());
-                                break;
-                            case DOUBLE_ARRAY:
-                                builder.add(entry, MemoryEstimations.builder()
-                                    .fixed(
-                                        HugeObjectArray.class.getSimpleName(),
-                                        MemoryUsage.sizeOfInstance(HugeObjectArray.class)
-                                    )
-                                    .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
-                                    .build());
-                                break;
-                            default:
-                                builder.add(entry, MemoryEstimations.empty());
-                        }
-                    });
-
-                    return builder.build();
-                })
-            )
-            .build();
+        return estimationBuilder.build();
     }
 
     private Pregel(
@@ -314,6 +268,47 @@ public final class Pregel<CONFIG extends PregelConfig> {
             });
 
             return new CompositeNodeValue(pregelSchema, properties);
+        }
+
+        static MemoryEstimation memoryEstimation(PregelSchema pregelSchema) {
+            return MemoryEstimations.setup("", (dimensions, concurrency) -> {
+                var builder = MemoryEstimations.builder();
+
+                pregelSchema.elements().forEach(element -> {
+                    var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
+
+                    switch (element.propertyType()) {
+                        case LONG:
+                            builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
+                            break;
+                        case DOUBLE:
+                            builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
+                            break;
+                        case LONG_ARRAY:
+                            builder.add(entry, MemoryEstimations.builder()
+                                .fixed(
+                                    HugeObjectArray.class.getSimpleName(),
+                                    MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                )
+                                .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
+                                .build());
+                            break;
+                        case DOUBLE_ARRAY:
+                            builder.add(entry, MemoryEstimations.builder()
+                                .fixed(
+                                    HugeObjectArray.class.getSimpleName(),
+                                    MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                )
+                                .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
+                                .build());
+                            break;
+                        default:
+                            builder.add(entry, MemoryEstimations.empty());
+                    }
+                });
+
+                return builder.build();
+            });
         }
 
         private CompositeNodeValue(

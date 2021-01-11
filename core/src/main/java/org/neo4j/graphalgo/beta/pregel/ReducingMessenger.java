@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
@@ -48,6 +50,13 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
 
         this.receiveArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
         this.sendArray = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ReducingMessenger.class)
+            .perNode("send array", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("receive array", HugeAtomicDoubleArray::memoryEstimation)
+            .build();
     }
 
     @Override

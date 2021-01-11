@@ -24,6 +24,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -50,6 +53,18 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
         this.graph = graph;
         this.config = config;
         this.messageQueues = initQueues(tracker);
+    }
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.setup("", (dimensions, concurrency) ->
+            MemoryEstimations.builder(QueueMessenger.class)
+                .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
+                .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
+                    .fixed("messages", dimensions.averageDegree() * Double.BYTES)
+                    .build()
+                )
+                .build()
+        );
     }
 
     private HugeObjectArray<MpscLinkedQueue<Double>> initQueues(AllocationTracker tracker) {
