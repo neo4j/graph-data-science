@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableMultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -50,7 +50,7 @@ class MultiClassNLRTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
-        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
+        var config = ImmutableMultiClassNLRTrainConfig.builder()
             .modelName("model")
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")

@@ -26,19 +26,23 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
+class MultiClassNLRTrainProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(NodeLogisticRegressionTrainProc.class);
+        registerProcedures(MultiClassNLRTrainProc.class);
         runQuery(createQuery());
     }
 
@@ -53,7 +57,7 @@ class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
             .withAnyLabel()
             .withNodeProperties(List.of("a", "b", "t"), DefaultValue.of(0D))
             .withAnyRelationshipType()
-            .algo("gds.alpha.ml.nodeLogisticRegression")
+            .algo("gds.alpha.ml.node.logisticRegression")
             .trainMode()
             .addParameter("concurrency", 1)
             .addParameter("modelName", "model")
@@ -61,13 +65,18 @@ class NodeLogisticRegressionTrainProcTest extends BaseProcTest {
             .addParameter("targetProperty", "t")
             .yields();
 
-        runQuery(query);
+        assertCypherResult(query, List.of(Map.of(
+            "trainMillis", greaterThan(0L),
+            "modelInfo", ConditionFactory.containsExactlyInAnyOrderEntriesOf(Map.of(
+                "name", "model",
+                "type", "multiClassNodeLogisticRegression"
+            )),
+            "configuration", isA(Map.class)
+        )));
 
         assertTrue(ModelCatalog.exists("", "model"));
         Model<?, ?> model = ModelCatalog.list("", "model");
-        assertThat(model.algoType()).isEqualTo("nodeLogisticRegression");
-        var data = (NodeLogisticRegressionData) model.data();
-        assertThat(data.weights().data().data()).containsExactly(new double[]{0.001999978810290561, -0.0019999294858396984, 7.439838212749474E-4}, Offset.offset(1e-6));
+        assertThat(model.algoType()).isEqualTo("multiClassNodeLogisticRegression");
     }
 
     public String createQuery() {

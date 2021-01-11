@@ -21,24 +21,24 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
 public class MultiClassNLRTrain
-    extends Algorithm<MultiClassNLRTrain, Model<MultiClassNLRData, NodeLogisticRegressionTrainConfig>> {
+    extends Algorithm<MultiClassNLRTrain, Model<MultiClassNLRData, MultiClassNLRTrainConfig>> {
 
     public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
 
     private final Graph graph;
-    private final NodeLogisticRegressionTrainConfig config;
+    private final MultiClassNLRTrainConfig config;
     private final Log log;
 
     public MultiClassNLRTrain(
         Graph graph,
-        NodeLogisticRegressionTrainConfig config,
+        MultiClassNLRTrainConfig config,
         Log log
     ) {
         this.graph = graph;
@@ -47,7 +47,7 @@ public class MultiClassNLRTrain
     }
 
     @Override
-    public Model<MultiClassNLRData, NodeLogisticRegressionTrainConfig> compute() {
+    public Model<MultiClassNLRData, MultiClassNLRTrainConfig> compute() {
         var objective = new MultiClassNLRObjective(
             config.featureProperties(),
             config.targetProperty(),

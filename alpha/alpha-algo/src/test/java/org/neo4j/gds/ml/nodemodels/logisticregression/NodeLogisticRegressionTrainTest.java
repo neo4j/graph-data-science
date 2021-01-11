@@ -50,7 +50,7 @@ class NodeLogisticRegressionTrainTest {
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
         var config =
-            ImmutableNodeLogisticRegressionTrainConfig.builder()
+            ImmutableMultiClassNLRTrainConfig.builder()
                 .modelName("model")
                 .featureProperties(List.of("a", "b"))
                 .targetProperty("t")

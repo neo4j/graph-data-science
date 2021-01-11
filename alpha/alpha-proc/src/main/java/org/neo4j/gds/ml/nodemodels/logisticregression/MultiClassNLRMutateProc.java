@@ -89,7 +89,7 @@ public class MultiClassNLRMutateProc
             config.username(),
             config.modelName(),
             MultiClassNLRData.class,
-            NodeLogisticRegressionTrainConfig.class
+            MultiClassNLRTrainConfig.class
         ).trainConfig();
         GraphStoreValidation.validate(
             graphStoreWithConfig,

@@ -169,7 +169,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
                 }, 2, 3)))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableNodeLogisticRegressionTrainConfig
+            ImmutableMultiClassNLRTrainConfig
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")

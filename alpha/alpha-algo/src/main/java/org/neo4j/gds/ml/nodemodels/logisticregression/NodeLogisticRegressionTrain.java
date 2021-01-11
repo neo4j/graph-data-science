@@ -28,17 +28,17 @@ import org.neo4j.logging.Log;
 
 public class NodeLogisticRegressionTrain extends Algorithm<
     NodeLogisticRegressionTrain,
-    Model<NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig>> {
+    Model<NodeLogisticRegressionData, MultiClassNLRTrainConfig>> {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
     private final Graph graph;
-    private final NodeLogisticRegressionTrainConfig config;
+    private final MultiClassNLRTrainConfig config;
     private final Log log;
 
     public NodeLogisticRegressionTrain(
         Graph graph,
-        NodeLogisticRegressionTrainConfig config,
+        MultiClassNLRTrainConfig config,
         Log log
     ) {
         this.graph = graph;
@@ -47,7 +47,7 @@ public class NodeLogisticRegressionTrain extends Algorithm<
     }
 
     @Override
-    public Model<NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig> compute() {
+    public Model<NodeLogisticRegressionData, MultiClassNLRTrainConfig> compute() {
         var objective = new NodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),

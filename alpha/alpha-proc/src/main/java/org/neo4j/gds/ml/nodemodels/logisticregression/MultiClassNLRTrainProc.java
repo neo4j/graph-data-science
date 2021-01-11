@@ -19,11 +19,16 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -35,14 +40,22 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NodeLogisticRegressionTrainProc extends TrainProc<NodeLogisticRegressionTrain, NodeLogisticRegressionData, NodeLogisticRegressionTrainConfig> {
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
+import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 
-    @Procedure(name = "gds.alpha.ml.nodeLogisticRegression.train", mode = Mode.READ)
-    @Description("Trains a binary logistic regression model for a target node property")
+public class MultiClassNLRTrainProc extends TrainProc<MultiClassNLRTrain, MultiClassNLRData, MultiClassNLRTrainConfig> {
+
+    // TODO:
+    // new result columns
+    // train loss, etc
+
+    @Procedure(name = "gds.alpha.ml.node.logisticRegression.train", mode = Mode.READ)
+    @Description("Trains a multi-class logistic regression model for a target node property")
     public Stream<TrainResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -52,37 +65,58 @@ public class NodeLogisticRegressionTrainProc extends TrainProc<NodeLogisticRegre
             configuration
         );
         ModelCatalog.set(result.result());
-        return Stream.of(trainResult(result));
+        return Stream.of(new TrainResult(result.result(), result.computeMillis()));
     }
 
     @Override
-    protected NodeLogisticRegressionTrainConfig newConfig(
+    protected MultiClassNLRTrainConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NodeLogisticRegressionTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        return MultiClassNLRTrainConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<NodeLogisticRegressionTrain, NodeLogisticRegressionTrainConfig> algorithmFactory() {
+    protected AlgorithmFactory<MultiClassNLRTrain, MultiClassNLRTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
-            public NodeLogisticRegressionTrain build(
+            public MultiClassNLRTrain build(
                 Graph graph,
-                NodeLogisticRegressionTrainConfig configuration,
+                MultiClassNLRTrainConfig configuration,
                 AllocationTracker tracker,
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
-                return new NodeLogisticRegressionTrain(graph, configuration, log);
+                return new MultiClassNLRTrain(graph, configuration, log);
             }
 
             @Override
-            public MemoryEstimation memoryEstimation(NodeLogisticRegressionTrainConfig configuration) {
+            public MemoryEstimation memoryEstimation(MultiClassNLRTrainConfig configuration) {
                 throw new MemoryEstimationNotImplementedException();
             }
         };
     }
+
+    public static class TrainResult {
+
+        public final long trainMillis;
+        public final Map<String, Object> modelInfo;
+        public final Map<String, Object> configuration;
+
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> TrainResult(
+            Model<TRAIN_RESULT, TRAIN_CONFIG> trainedModel,
+            long trainMillis
+        ) {
+            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
+
+            this.modelInfo = new HashMap<>();
+            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
+            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+            this.configuration = trainConfig.toMap();
+            this.trainMillis = trainMillis;
+        }
+    }
+
 }

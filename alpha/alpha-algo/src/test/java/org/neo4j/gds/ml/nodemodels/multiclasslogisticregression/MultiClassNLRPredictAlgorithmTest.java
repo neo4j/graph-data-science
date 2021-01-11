@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableMultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -205,7 +205,7 @@ class MultiClassNLRPredictAlgorithmTest {
                 }, 1, 3)))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableNodeLogisticRegressionTrainConfig
+            ImmutableMultiClassNLRTrainConfig
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")

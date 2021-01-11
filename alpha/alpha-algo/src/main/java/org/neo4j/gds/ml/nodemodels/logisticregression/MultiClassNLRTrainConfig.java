@@ -33,7 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, TrainingConfig {
+public interface MultiClassNLRTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, TrainingConfig {
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();
@@ -43,13 +43,13 @@ public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, Featu
         return 0.0;
     }
 
-    static NodeLogisticRegressionTrainConfig of(
+    static MultiClassNLRTrainConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new NodeLogisticRegressionTrainConfigImpl(
+        return new MultiClassNLRTrainConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
