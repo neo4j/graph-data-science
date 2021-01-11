@@ -31,6 +31,10 @@ import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
 public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFactory<MultiClassNLRPredictAlgorithm, MultiClassNLRPredictMutateConfig> {
 
+    public MultiClassNLRPredictAlgorithmFactory() {
+        super();
+    }
+
     @Override
     protected long taskVolume(
         Graph graph, MultiClassNLRPredictMutateConfig configuration

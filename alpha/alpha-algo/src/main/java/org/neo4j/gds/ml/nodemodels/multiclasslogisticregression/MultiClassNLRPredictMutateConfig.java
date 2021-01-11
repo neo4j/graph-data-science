@@ -23,8 +23,10 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
@@ -37,6 +39,20 @@ public interface MultiClassNLRPredictMutateConfig extends AlgoBaseConfig, Mutate
     @Value.Default
     default int batchSize() {
         return 100;
+    }
+
+    static MultiClassNLRPredictMutateConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new MultiClassNLRPredictMutateConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 
 }
