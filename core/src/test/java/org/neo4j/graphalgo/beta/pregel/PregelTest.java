@@ -339,17 +339,7 @@ class PregelTest {
 
         @Override
         public Optional<Reducer> reducer() {
-            return Optional.of(new Reducer() {
-                @Override
-                public double identity() {
-                    return 0;
-                }
-
-                @Override
-                public double reduce(double current, double message) {
-                    return current + message;
-                }
-            });
+            return Optional.of(new Reducer.Sum());
         }
     }
 

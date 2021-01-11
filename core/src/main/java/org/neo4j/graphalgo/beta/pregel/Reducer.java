@@ -30,4 +30,56 @@ public interface Reducer {
      * Computes a new value based on the current value and the message.
      */
     double reduce(double current, double message);
+
+    class Sum implements Reducer {
+
+        @Override
+        public double identity() {
+            return 0;
+        }
+
+        @Override
+        public double reduce(double current, double message) {
+            return current + message;
+        }
+    }
+
+    class Min implements Reducer {
+
+        @Override
+        public double identity() {
+            return Double.MAX_VALUE;
+        }
+
+        @Override
+        public double reduce(double current, double message) {
+            return Math.min(current, message);
+        }
+    }
+
+    class Max implements Reducer {
+
+        @Override
+        public double identity() {
+            return Double.MIN_VALUE;
+        }
+
+        @Override
+        public double reduce(double current, double message) {
+            return Math.max(current, message);
+        }
+    }
+
+    class Count implements Reducer {
+
+        @Override
+        public double identity() {
+            return 0;
+        }
+
+        @Override
+        public double reduce(double current, double message) {
+            return current + 1;
+        }
+    }
 }
