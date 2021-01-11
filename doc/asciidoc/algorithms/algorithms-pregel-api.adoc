@@ -67,6 +67,8 @@ public interface PregelComputation<C extends PregelConfig> {
     default void init(PregelContext.InitContext<C> context) {}
     // Called in each superstep for each node and contains the main logic.
     void compute(PregelContext.ComputeContext<C> context, Pregel.Messages messages);
+    // Called exactly once at the end of each superstep by a single thread.
+    default void masterCompute(MasterComputeContext<C> context) {}
     // Used to apply a relationship weight on a message.
     default double applyRelationshipWeight(double message, double relationshipWeight);
 }
@@ -86,6 +88,10 @@ The `compute` method is called individually for each node in every superstep as 
 Since an implementation of `PregelComputation` is stateless, a node can only communicate with other nodes via messages.
 In each superstep, a node receives `messages` and can send new messages via the `context` parameter.
 Messages can be sent to neighbor nodes or any node if its identifier is known.
+
+The `masterCompute` method is called exactly once at the end of each superstep.
+It is executed by a single thread and can be used to modify a global state based on the current computation state.
+Details on using a master computation can be found in the <<algorithms-pregel-api-master-compute, dedicated section>>.
 
 The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
 If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
@@ -180,7 +186,7 @@ public final class ComputeContext {
 [[algorithms-pregel-api-master-compute]]
 === Master Computation
 
-Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example, to reset or evaluate a global datastructure.
+Some Pregel programs may require logic that is executed after all threads have finished the current superstep, for example, to reset or evaluate a global data structure.
 This can be achieved by overriding the `org.neo4j.graphalgo.beta.pregel.PregelComputation.masterCompute` function of the `PregelComputation`.
 This function will be called at the end of each superstep after all compute threads have finished.
 The master compute function will be called by a single thread.
