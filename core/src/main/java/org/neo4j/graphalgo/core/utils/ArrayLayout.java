@@ -79,13 +79,14 @@ public final class ArrayLayout {
      *
      * Unlike {@link java.util.Arrays#binarySearch(long[], long)}, this method returns the index of the value
      * that is either equal to the needle or the next smallest one. There are no different results to signal whether
-     * a value was found or not.
+     * a value was found or not. If you need to know whether the value is contained in the array, you need to compare
+     * the value against the array at the position of the returned index.
      * The index returned is the last index where the value is not larger than the needle.
      * This is also different from the j.u.Arrays method.
      * That one returns "the index of the first element greater than the key", that is the upper bound of the search.
      * Starting from that index upto the end of the array, all values are either equal to or greater than the needle.
      * In contrast, this method returns the lower bound.
-     * Starting from 0 upto, and including, the returned index, all values are either less than or equal to the needle.
+     * Starting from 0 up to, and including, the returned index, all values are either less than or equal to the needle.
      *
      * @param haystack the input array sorted and constructed by {@link #constructEytzinger(long[])}
      * @param needle the needle to search for
@@ -100,6 +101,10 @@ public final class ArrayLayout {
         while (index <= length) {
             index = needle < haystack[index] ? index << 1 : (index << 1) + 1;
         }
+        // The index is basically a record of the branches that we traversed in the tree,
+        // where a 0 means that we took the right branch and a 1 for the left branch.
+        // Once the index is out of bounds (i.e. index > length), we need to track back and
+        // undo all the right branches that we took.
         return index >>> (1 + Integer.numberOfTrailingZeros(index));
     }
 
