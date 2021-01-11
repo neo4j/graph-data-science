@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
@@ -96,12 +98,40 @@ class ArrayLayoutTest {
     }
 
     @Test
+    void testMissingValue() {
+        var input = new long[]{1, 2, 3, 4, 5, 6, 7, 8};
+        var layout = ArrayLayout.constructEytzinger(input);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 0)]).isEqualTo(-1);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 9)]).isEqualTo(8);
+    }
+
+    @ParameterizedTest
+    @MethodSource("duplicateValues")
+    void testDuplicateValues(long[] input) {
+        var layout = ArrayLayout.constructEytzinger(input);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 1)]).isEqualTo(1L);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 2)]).isEqualTo(1L);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 3)]).isEqualTo(3L);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 4)]).isEqualTo(3L);
+        assertThat(layout[ArrayLayout.searchEytzinger(layout, 7)]).isEqualTo(7L);
+    }
+
+    static Stream<long[]> duplicateValues() {
+        return Stream.of(
+            new long[]{1, 3, 3, 7},
+            new long[]{1, 3, 3, 7, 7},
+            new long[]{1, 1, 3, 3, 7, 7},
+            new long[]{1, 1, 3, 3, 3, 7, 7},
+            new long[]{1, 1, 3, 3, 3, 3, 7, 7}
+        );
+    }
+
+    @Test
     void testSearchFib() {
         var values = Stream.iterate(pair(0, 1), pair -> pair(pair.getTwo(), pair.getOne() + pair.getTwo()))
+            .skip(2)
+            .limit(15)
             .mapToLong(IntIntPair::getOne)
-            .distinct()
-            .limit(16)
-            .skip(1)
             .toArray();
         var layout = ArrayLayout.constructEytzinger(values);
         for (int i = 0; i < 1000; i++) {
