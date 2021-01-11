@@ -69,6 +69,10 @@ public interface PregelComputation<C extends PregelConfig> {
     void compute(PregelContext.ComputeContext<C> context, Pregel.Messages messages);
     // Called exactly once at the end of each superstep by a single thread.
     default void masterCompute(MasterComputeContext<C> context) {}
+    // Used to combine all messages sent to a node to a single value.
+    default Optional<Reducer> reducer() {
+        return Optional.empty();
+    }
     // Used to apply a relationship weight on a message.
     default double applyRelationshipWeight(double message, double relationshipWeight);
 }
@@ -92,6 +96,13 @@ Messages can be sent to neighbor nodes or any node if its identifier is known.
 The `masterCompute` method is called exactly once at the end of each superstep.
 It is executed by a single thread and can be used to modify a global state based on the current computation state.
 Details on using a master computation can be found in the <<algorithms-pregel-api-master-compute, dedicated section>>.
+
+An optional `reducer` can be used to define a function that is being applied on messages sent to a single node.
+It takes two arguments, the current value and a message value, and produces a new value.
+The function is called repeatedly for each message that is sent to a node.
+Eventually, only one message will be received by the node in the next superstep.
+By defining a reducer, memory consumption and computation runtime can be improved significantly.
+Check the <<algorithms-pregel-api-reducer, dedicated section>> for more details.
 
 The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
 If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
@@ -231,6 +242,42 @@ public final class MasterComputeContext {
     public int superstep();
 }
 ----
+
+[[algorithms-pregel-api-reducer]]
+=== Message reducer
+
+Many Pregel computations rely on computing a single value from all messages being sent to a node.
+For example, the page rank algorithm computes the sum of all messages being sent to a single node.
+In those cases, a reducer can be used to combine all messages to a single value.
+If applicable, this optimization improves memory consumption and computation runtime.
+
+By default, a Pregel computation does not make use of a reducer.
+All messages sent to a node are stored in a queue and received in the next superstep.
+To enable message reduction, one needs to implement the `reducer` method and provide either a custom or a pre-defined reducer.
+The framework already provides implementations for computing the minimum, maximum, sum and count of messages.
+
+.Applying a sum reducer in a custom computation
+[source, java]
+----
+public class CustomComputation implements PregelComputation<PregelConfig> {
+
+    @Override
+    public void compute(PregelContext.ComputeContext<CustomConfig> context, Pregel.Messages messages) {
+        // ...
+        for (var message : messages) {
+            // ...
+        }
+    }
+
+    @Override
+    public Optional<Reducer> reducer() {
+        return Optional.of(new Reducer.Sum());
+    }
+}
+----
+
+The implementation of the compute method does not need to be adapted.
+If a reducer is present, the `messages` iterator contains either zero or one message.
 
 [[algorithms-pregel-api-java-config]]
 === Configuration
