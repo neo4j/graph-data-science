@@ -19,12 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
