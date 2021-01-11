@@ -141,15 +141,13 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     public void sendToNeighbors(long sourceNodeId, double message) {
         relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             sendTo(targetNodeId, message);
-            messageBits.set(targetNodeId);
             return true;
         });
     }
 
     public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
-            sendTo(target, computation.applyRelationshipWeight(message, weight));
-            messageBits.set(target);
+        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
             return true;
         });
     }
