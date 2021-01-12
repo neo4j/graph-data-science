@@ -21,22 +21,19 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 public class DegreeCache {
 
     public static final DegreeCache EMPTY = new DegreeCache(
-            HugeDoubleArray.newArray(0, AllocationTracker.empty()),
-            HugeObjectArray.newArray(HugeDoubleArray.class, 0, AllocationTracker.empty()),
-            0.0);
+        HugeDoubleArray.newArray(0, AllocationTracker.empty()),
+        0.0
+    );
 
     private final HugeDoubleArray aggregatedDegrees;
-    private final HugeObjectArray<HugeDoubleArray> weights;
     private final double averageDegree;
 
-    public DegreeCache(HugeDoubleArray aggregatedDegrees, HugeObjectArray<HugeDoubleArray> weights, double averageDegree) {
+    public DegreeCache(HugeDoubleArray aggregatedDegrees, double averageDegree) {
         this.aggregatedDegrees = aggregatedDegrees;
-        this.weights = weights;
         this.averageDegree = averageDegree;
     }
 
@@ -49,6 +46,6 @@ public class DegreeCache {
     }
 
     public DegreeCache withAverage(double newAverage) {
-        return new DegreeCache(aggregatedDegrees, weights, newAverage);
+        return new DegreeCache(aggregatedDegrees, newAverage);
     }
 }

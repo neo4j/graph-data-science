@@ -45,6 +45,6 @@ public class WeightedDegreeComputer implements DegreeComputer {
             tracker
         );
         degreeCentrality.compute();
-        return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
+        return new DegreeCache(degreeCentrality.degrees(), -1D);
     }
 }

@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +41,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private final int concurrency;
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
 
-    private HugeDoubleArray degrees;
-    private HugeObjectArray<HugeDoubleArray> weights;
+    private final HugeDoubleArray degrees;
 
     public WeightedDegreeCentrality(
         Graph graph,
@@ -62,9 +60,8 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
-        nodeCount = graph.nodeCount();
-        degrees = HugeDoubleArray.newArray(nodeCount, tracker);
-        weights = HugeObjectArray.newArray(HugeDoubleArray.class, nodeCount, tracker);
+        this.nodeCount = graph.nodeCount();
+        this.degrees = HugeDoubleArray.newArray(nodeCount, tracker);
     }
 
     @Override
@@ -126,10 +123,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
     public HugeDoubleArray degrees() {
         return degrees;
-    }
-
-    public HugeObjectArray<HugeDoubleArray> weights() {
-        return weights;
     }
 
 }
