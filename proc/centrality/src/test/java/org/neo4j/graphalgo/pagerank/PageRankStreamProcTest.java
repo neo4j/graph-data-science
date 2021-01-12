@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -31,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -160,4 +164,24 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         );
         assertMapEqualsWithTolerance(weightedExpected, actual);
     }
+
+    @Test
+    void testCacheWeightsDeprecation() {
+        var config = createMinimalConfig(CypherMapWrapper.create(MapUtil.map(
+            "nodeProjection", "*",
+            "relationshipProjection", "*",
+            "tolerance", 3.14,
+            "cacheWeights", true
+        )));
+
+        var log = new TestLog();
+
+        applyOnProcedure(proc -> {
+            proc.log = log;
+            ((PageRankStreamProc) proc).stream(config.toMap(), Map.of());
+        });
+
+        assertThat(log.getMessages(TestLog.WARN)).anyMatch(message -> message.contains("deprecated"));
+    }
+
 }

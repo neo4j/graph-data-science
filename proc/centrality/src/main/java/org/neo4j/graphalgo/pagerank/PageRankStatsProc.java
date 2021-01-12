@@ -71,6 +71,12 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
     }
 
     @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankStatsConfig config) {
+        super.validateConfigs(graphCreateConfig, config);
+        PageRankProc.validateAlgoConfig(config, log);
+    }
+
+    @Override
     protected PageRankStatsConfig newConfig(
         String username,
         Optional<String> graphName,

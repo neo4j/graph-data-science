@@ -91,6 +91,12 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
         );
     }
 
+    @Override
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankMutateConfig config) {
+        super.validateConfigs(graphCreateConfig, config);
+        PageRankProc.validateAlgoConfig(config, log);
+    }
+
     public static final class MutateResult extends PageRankStatsProc.StatsResult {
 
         public final long mutateMillis;
