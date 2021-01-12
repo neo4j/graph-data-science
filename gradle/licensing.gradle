@@ -7,6 +7,7 @@ def whitelist = [
         [name: 'BSD-3-Clause', url: 'http://opensource.org/licenses/BSD-3-Clause', aliases: [
                 [name: 'The BSD 3-Clause License'],
                 [name: 'The 3-Clause BSD License'],
+                [name: '3-Clause BSD License'],
                 [name: 'BSD 3-Clause'],
                 [name: 'BSD 3 Clause'],
                 [name: 'BSD 3-clause'],
