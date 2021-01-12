@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -50,6 +49,13 @@ public class GraphCreateProc extends CatalogProc {
 
     private static final String NO_GRAPH_NAME = "";
     private static final String DESCRIPTION = "Creates a named graph in the catalog for use by algorithms.";
+
+    private static final Set<String> DISALLOWED_CONFIG_KEYS = Set.of(
+        GraphCreateFromStoreConfig.NODE_PROJECTION_KEY,
+        GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
+        GraphCreateFromCypherConfig.NODE_QUERY_KEY,
+        GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY
+    );
 
     @Procedure(name = "gds.graph.create", mode = READ)
     @Description(DESCRIPTION)
@@ -100,22 +106,6 @@ public class GraphCreateProc extends CatalogProc {
         return estimateGraph(config);
     }
 
-    @Override
-    protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig createConfig) {
-        var removeKeys = Set.of(
-            GraphCreateFromStoreConfig.NODE_PROJECTION_KEY,
-            GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
-            GraphCreateFromCypherConfig.NODE_QUERY_KEY,
-            GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY
-        );
-
-        var allowedKeys = createConfig.configKeys().stream()
-            .filter(key -> !removeKeys.contains(key))
-            .collect(Collectors.toList());
-
-        validateConfig(cypherConfig, allowedKeys);
-    }
-
     @Procedure(name = "gds.graph.create.cypher", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphCreateCypherResult> create(
@@ -164,6 +154,17 @@ public class GraphCreateProc extends CatalogProc {
 
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
+    }
+
+    private void validateConfig(CypherMapWrapper cypherConfig, GraphCreateConfig createConfig) {
+        var allowedKeys = createConfig.isFictitiousLoading()
+            ? createConfig.configKeys()
+            : createConfig.configKeys()
+                .stream()
+                .filter(key -> !DISALLOWED_CONFIG_KEYS.contains(key))
+                .collect(Collectors.toList());
+
+        validateConfig(cypherConfig, allowedKeys);
     }
 
     /**
