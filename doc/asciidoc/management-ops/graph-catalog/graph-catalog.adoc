@@ -43,7 +43,8 @@ This chapter explains the available graph catalog operations.
 | <<catalog-graph-stream-relationship-properties, gds.graph.streamRelationshipProperties>> | Streams relationship properties stored in a named graph.
 | <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>                   | Writes node properties stored in a named graph to Neo4j.
 | <<catalog-graph-write-relationship, gds.graph.writeRelationship>>                        | Writes relationships stored in a named graph to Neo4j.
-| <<catalog-graph-export, gds.graph.export>>                                               | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export-database, gds.graph.export>>                                      | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export-csv, gds.graph.export.csv>>                                       | Exports a named graph into CSV files.
 |===
 
 [NOTE]
@@ -73,4 +74,6 @@ include::graph-write-node-properties.adoc[leveloffset=+1]
 
 include::graph-write-relationship.adoc[leveloffset=+1]
 
-include::graph-export.adoc[leveloffset=+1]
+include::graph-export-database.adoc[leveloffset=+1]
+
+include::graph-export-csv.adoc[leveloffset=+1]

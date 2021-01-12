@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.export.db;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.common.Validator;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
@@ -151,18 +150,4 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             }
         };
     }
-
-    private static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
-        try {
-            Files.createDirectories(value);
-            if (!Files.isDirectory(value)) {
-                throw new IllegalArgumentException("'" + value + "' is not a directory");
-            }
-            if (!Files.isWritable(value)) {
-                throw new IllegalArgumentException("Directory '" + value + "' not writable");
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Directory '" + value + "' not writable: ", e);
-        }
-    };
 }

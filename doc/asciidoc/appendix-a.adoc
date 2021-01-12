@@ -40,7 +40,8 @@ The following table lists all production-quality graph operations in the GDS lib
 |<<catalog-graph-stream-relationship-properties, Stream relationship properties to the procedure caller>> | `gds.graph.streamRelationshipProperties`
 |<<catalog-graph-write-node-properties, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
 |<<catalog-graph-write-relationship, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
-|<<catalog-graph-export, Graph Export>> | `gds.graph.export`
+|<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
+|<<catalog-graph-export-csv, CSV Export>> | `gds.graph.export.csv`
 |===
 
 [[appendix-a-model-ops]]

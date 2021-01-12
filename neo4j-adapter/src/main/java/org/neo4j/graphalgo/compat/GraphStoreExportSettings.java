@@ -17,21 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.export.file;
+package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.export.GraphStoreExporterBaseConfig;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Description;
+import org.neo4j.configuration.SettingsDeclaration;
+import org.neo4j.graphdb.config.Setting;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
+import java.nio.file.Path;
 
-    String exportName();
+import static org.neo4j.configuration.SettingImpl.newBuilder;
+import static org.neo4j.configuration.SettingValueParsers.PATH;
 
-    static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToFileExporterConfigImpl(username, config);
-    }
+@ServiceProvider
+public class GraphStoreExportSettings implements SettingsDeclaration {
+
+    @Description("Sets the export location for file based exports.")
+    public static final Setting<Path> export_location_setting = newBuilder(
+        "gds.export.location",
+        PATH,
+        null
+    ).build();
 }

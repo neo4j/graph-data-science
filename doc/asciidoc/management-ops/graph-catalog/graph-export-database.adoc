@@ -1,4 +1,4 @@
-[[catalog-graph-export]]
+[[catalog-graph-export-database]]
 = Create Neo4j databases from named graphs
 
 We can create new Neo4j databases from named in-memory graphs stored in the graph catalog.
