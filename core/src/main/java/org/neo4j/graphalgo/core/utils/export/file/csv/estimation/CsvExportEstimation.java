@@ -17,59 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.export.file.csv;
+package org.neo4j.graphalgo.core.utils.export.file.csv.estimation;
 
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
-import java.util.Collection;
-import java.util.stream.Stream;
-
 public final class CsvExportEstimation {
 
     // assuming utf-8
     private static final int BYTES_PER_WRITTEN_CHARACTER = 1;
 
-    //This is a magic value, assuming that values are usually numeric and use in average 5 digits.
-    private static final long DIGITS_PER_PROPERTY_VALUE = 5;
-
-    public static MemoryEstimation estimate(GraphStore graphStore) {
+    public static MemoryEstimation estimate(GraphStore graphStore, double samplingFactor) {
         return MemoryEstimations
             .builder(GraphStoreToFileExporter.class)
-        .fixed("Node data", estimateNodes(graphStore))
-        .fixed("Relationship data", estimateRelationships(graphStore))
-        .build();
+            .fixed("Node data", estimateNodes(graphStore, samplingFactor))
+            .fixed("Relationship data", estimateRelationships(graphStore, samplingFactor))
+            .build();
     }
 
-    private static long estimateNodes(GraphStore graphStore) {
-        // node id estimate
+    private static long estimateNodes(GraphStore graphStore, double samplingFactor) {
         long nodeIdsEstimate = getIdEstimate(graphStore);
+        long nodePropertiesEstimate = sampleNodeProperties(graphStore, samplingFactor);
 
-        Stream<String> propertyKeys = graphStore.nodePropertyKeys().values().stream().flatMap(Collection::stream);
-        Long nodePropertiesEstimate = propertyKeys.map(propertyKey -> {
-            var nodeProperties = graphStore.nodePropertyValues(propertyKey);
-            return nodeProperties.size() * DIGITS_PER_PROPERTY_VALUE * BYTES_PER_WRITTEN_CHARACTER;
-        }).reduce(0L, Long::sum);
-
-        long lineBreakEstimates = graphStore.nodeCount();
-
-        return nodeIdsEstimate + nodePropertiesEstimate + lineBreakEstimates;
+        return nodeIdsEstimate + nodePropertiesEstimate;
     }
 
-    private static long estimateRelationships(GraphStore graphStore) {
-        long avgBytesPerNodeId = getIdEstimate(graphStore) / graphStore.nodeCount();
+    private static long estimateRelationships(GraphStore graphStore, double samplingFactor) {
+        long avgBytesPerNodeId = getIdEstimate(graphStore) / graphStore.nodeCount() + 1;
 
-        return graphStore.relationshipTypes().stream().map(type -> {
-            long relationshipCount = graphStore.getGraph(type).relationshipCount();
+        long sourceTargetIdEstimate = avgBytesPerNodeId * 2 * graphStore.relationshipCount();
+        var relationshipPropertiesEstimate = sampleRelationshipProperties(graphStore, samplingFactor);
 
-            long relationshipIdEstimate = relationshipCount * 2 * avgBytesPerNodeId;
-
-            long relationshipPropertiesEstimate = relationshipCount * DIGITS_PER_PROPERTY_VALUE * BYTES_PER_WRITTEN_CHARACTER;
-
-            return relationshipIdEstimate + relationshipPropertiesEstimate;
-        }).reduce(0L, Long::sum);
+        return sourceTargetIdEstimate + relationshipPropertiesEstimate;
     }
 
     private static long getIdEstimate(GraphStore graphStore) {
@@ -78,7 +59,7 @@ public final class CsvExportEstimation {
         long consideredNumbers = 0;
 
         for (long digits = 1; digits < maxNumberOfDigits; digits++) {
-            long numbersWithDigitX =(10 ^ digits) - consideredNumbers;
+            long numbersWithDigitX = (10 ^ digits) - consideredNumbers;
             consideredNumbers += numbersWithDigitX;
 
             nodeIdEstimate += numbersWithDigitX * digits * BYTES_PER_WRITTEN_CHARACTER;
@@ -86,6 +67,14 @@ public final class CsvExportEstimation {
 
         nodeIdEstimate += (graphStore.nodeCount() - consideredNumbers) * maxNumberOfDigits * BYTES_PER_WRITTEN_CHARACTER;
         return nodeIdEstimate;
+    }
+
+    private static long sampleNodeProperties(GraphStore graphStore, double samplingFactor) {
+        return graphStore.nodeCount() * new NodePropertySampler(graphStore, samplingFactor).sample();
+    }
+
+    private static long sampleRelationshipProperties(GraphStore graphStore, double samplingFactor) {
+        return graphStore.relationshipCount() * new RelationshipPropertySampler(graphStore, samplingFactor).sample();
     }
 
     private CsvExportEstimation() {}

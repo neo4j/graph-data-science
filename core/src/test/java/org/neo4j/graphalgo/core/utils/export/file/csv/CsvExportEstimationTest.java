@@ -22,12 +22,13 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class CsvExportEstimationTest {
@@ -52,10 +53,10 @@ class CsvExportEstimationTest {
     @Test
     void estimate() {
         MemoryRange estimation = CsvExportEstimation
-            .estimate(graphStore)
+            .estimate(graphStore, 1)
             .estimate(GraphDimensions.of(0), 1)
             .memoryUsage();
 
-        assertEquals("471 Bytes",estimation.toString());
+        assertThat(estimation.max).isBetween(100L, 200L);
     }
 }
