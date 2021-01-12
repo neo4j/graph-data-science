@@ -58,7 +58,7 @@ public abstract class HugeAtomicDoubleArray {
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
      */
-    public abstract double take(long index, double value);
+    public abstract double getAndReplace(long index, double value);
 
     /**
      * Atomically sets the element at position {@code index} to the given
@@ -254,7 +254,7 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
-        public double take(long index, double value) {
+        public double getAndReplace(long index, double value) {
             double prev;
             do {
                 prev = (double) ARRAY_HANDLE.getVolatile(page, (int) index);
@@ -354,7 +354,7 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
-        public double take(long index, double value) {
+        public double getAndReplace(long index, double value) {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             double[] page = pages[pageIndex];

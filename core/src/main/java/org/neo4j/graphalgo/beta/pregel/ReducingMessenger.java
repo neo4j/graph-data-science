@@ -85,7 +85,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
 
     @Override
     public void initMessageIterator(ReducingMessenger.SingleMessageIterator messageIterator, long nodeId) {
-        var message = receiveArray.take(nodeId, reducer.identity());
+        var message = receiveArray.getAndReplace(nodeId, reducer.identity());
         messageIterator.init(message, messageBits.get(nodeId));
     }
 

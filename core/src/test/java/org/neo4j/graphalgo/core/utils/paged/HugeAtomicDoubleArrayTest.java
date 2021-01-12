@@ -101,13 +101,13 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     @Test
-    void testTake() {
+    void testGetAndReplace() {
         testArray(SIZE, aa -> {
             for (int i = 0; i < SIZE; i++) {
                 aa.set(i, 1);
-                assertEquals(1, aa.take(i, 42));
-                assertEquals(42, aa.take(i, 84));
-                assertEquals(84, aa.take(i, -42));
+                assertEquals(1, aa.getAndReplace(i, 42));
+                assertEquals(42, aa.getAndReplace(i, 84));
+                assertEquals(84, aa.getAndReplace(i, -42));
                 assertEquals(-42, aa.get(i));
             }
         });
