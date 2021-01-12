@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -39,6 +40,8 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -95,6 +98,22 @@ public class GraphCreateProc extends CatalogProc {
         );
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
+    }
+
+    @Override
+    protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig createConfig) {
+        var removeKeys = Set.of(
+            GraphCreateFromStoreConfig.NODE_PROJECTION_KEY,
+            GraphCreateFromStoreConfig.RELATIONSHIP_PROJECTION_KEY,
+            GraphCreateFromCypherConfig.NODE_QUERY_KEY,
+            GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY
+        );
+
+        var allowedKeys = createConfig.configKeys().stream()
+            .filter(key -> !removeKeys.contains(key))
+            .collect(Collectors.toList());
+
+        validateConfig(cypherConfig, allowedKeys);
     }
 
     @Procedure(name = "gds.graph.create.cypher", mode = READ)

@@ -1420,6 +1420,25 @@ class GraphCreateProcTest extends BaseProcTest {
         });
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {NODE_PROJECTION_KEY, RELATIONSHIP_PROJECTION_KEY, NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
+    void failOnUsingGraphProjectionConfigurationParamsNative(String configKey) {
+        assertError(
+            formatWithLocale("CALL gds.graph.create('g', '*', '*', {%s: 'does not matter'})", configKey),
+            formatWithLocale("Unexpected configuration key: %s", configKey)
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {NODE_QUERY_KEY, RELATIONSHIP_QUERY_KEY})
+    void failOnUsingGraphProjectionConfigurationParamsCypher(String configKey) {
+        assertError(
+            formatWithLocale("CALL gds.graph.create.cypher('g', 'MATCH ...', 'MATCH ...', {%s: 'does not matter'})", configKey),
+            formatWithLocale("Unexpected configuration key: %s", configKey)
+        );
+    }
+
+
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
         return GraphStoreCatalog
             .get(getUsername(), db.databaseId(), graphName)

@@ -150,11 +150,11 @@ public abstract class BaseProc {
         }
     }
 
-    protected final void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
+    protected void validateConfig(CypherMapWrapper cypherConfig, BaseConfig config) {
         validateConfig(cypherConfig, config.configKeys());
     }
 
-    final void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
+    protected final void validateConfig(CypherMapWrapper cypherConfig, Collection<String> allowedKeys) {
         cypherConfig.requireOnlyKeysFrom(allowedKeys);
     }
 
