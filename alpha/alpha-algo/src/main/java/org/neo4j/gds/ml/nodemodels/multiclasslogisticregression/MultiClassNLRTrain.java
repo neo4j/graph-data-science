@@ -22,15 +22,10 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class MultiClassNLRTrain
-    extends Algorithm<MultiClassNLRTrain, Model<MultiClassNLRData, MultiClassNLRTrainConfig>> {
-
-    public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
+public class MultiClassNLRTrain {
 
     private final Graph graph;
     private final MultiClassNLRTrainConfig config;
@@ -46,8 +41,7 @@ public class MultiClassNLRTrain
         this.log = log;
     }
 
-    @Override
-    public Model<MultiClassNLRData, MultiClassNLRTrainConfig> compute() {
+    public MultiClassNLRData compute() {
         var objective = new MultiClassNLRObjective(
             config.featureProperties(),
             config.targetProperty(),
@@ -55,25 +49,9 @@ public class MultiClassNLRTrain
             config.penalty()
         );
         var training = new Training(config, log, graph.nodeCount());
-        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), config.concurrency());
+        // TODO: concurrency?
+        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), 1);
 
-        return Model.of(
-            config.username(),
-            config.modelName(),
-            MODEL_TYPE,
-            graph.schema(),
-            objective.modelData(),
-            config
-        );
-    }
-
-    @Override
-    public MultiClassNLRTrain me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-
+        return objective.modelData();
     }
 }

@@ -26,7 +26,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -41,8 +40,9 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
 
-class MultiClassNLRMutateProcTest extends BaseProcTest {
+class NodeClassificationPredictMutateProcTest extends BaseProcTest {
 
     private final String DB_CYPHER = "CREATE " +
             "  (n1:N {a: -1.36753705, b:  1.46853155})" +
@@ -53,7 +53,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, MultiClassNLRMutateProc.class);
+        registerProcedures(GraphCreateProc.class, NodeClassificationPredictMutateProc.class);
 
         runQuery(DB_CYPHER);
 
@@ -79,7 +79,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         var query = GdsCypher
             .call()
             .explicitCreation("g")
-            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .algo("gds.alpha.ml.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
             .addParameter("modelName", "model")
@@ -102,7 +102,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         var query = GdsCypher
             .call()
             .explicitCreation("g")
-            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .algo("gds.alpha.ml.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
             .addParameter("predictedProbabilityProperty", "probabilities")
@@ -126,7 +126,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         var query = GdsCypher
             .call()
             .explicitCreation("g")
-            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .algo("gds.alpha.ml.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "foo")
             .addParameter("predictedProbabilityProperty", "foo")
@@ -144,7 +144,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         var query = GdsCypher
             .call()
             .explicitCreation("g")
-            .algo("gds.alpha.ml.node.logisticRegression.predict")
+            .algo("gds.alpha.ml.nodeClassification.predict")
             .mutateMode()
             .addParameter("mutateProperty", "class")
             .addParameter("modelName", "model")
@@ -160,7 +160,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         var model = Model.of(
             getUsername(),
             "model",
-            MultiClassNLRTrain.MODEL_TYPE,
+            MODEL_TYPE,
             GraphSchema.empty(),
             MultiClassNLRData.builder()
                 .weights(new Weights<>(new Matrix(new double[]{
@@ -169,7 +169,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
                 }, 2, 3)))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableMultiClassNLRTrainConfig
+            ImmutableNodeClassificationTrainConfig
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")

@@ -51,17 +51,16 @@ class MultiClassNLRTrainTest {
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
         var config = ImmutableMultiClassNLRTrainConfig.builder()
-            .modelName("model")
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
-            .concurrency(1)
+            .penalty(0.0)
             .maxIterations(100000)
             .tolerance(1e-4)
             .build();
 
         var algo = new MultiClassNLRTrain(graph, config, new TestLog());
 
-        var result = algo.compute().data();
+        var result = algo.compute();
 
         assertThat(result).isNotNull();
 

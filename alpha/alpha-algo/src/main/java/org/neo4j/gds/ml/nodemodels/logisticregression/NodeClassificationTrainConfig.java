@@ -17,42 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
+package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.Map;
 
-@Configuration
 @ValueClass
-public interface MultiClassNLRPredictMutateConfig extends AlgoBaseConfig, MutatePropertyConfig, ModelConfig {
+@Configuration
+public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
 
-    Optional<String> predictedProbabilityProperty();
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    String targetProperty();
 
-    @Value.Default
-    default int batchSize() {
-        return 100;
-    }
-
-    static MultiClassNLRPredictMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new MultiClassNLRPredictMutateConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
-    }
+    List<Map<String, Object>> params();
 
 }

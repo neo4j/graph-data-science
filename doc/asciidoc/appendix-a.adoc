@@ -326,9 +326,9 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
-.2+<.^| Node Logistic Regression
-| `gds.alpha.ml.node.logisticRegression.predict.mutate`
-| `gds.alpha.ml.nodeLogisticRegression.train`
+.2+<.^| Node Classification
+| `gds.alpha.ml.nodeClassification.predict.mutate`
+| `gds.alpha.ml.nodeClassification.train`
 .1+<.^| Split Relationships
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| Triangle Finding

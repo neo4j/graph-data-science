@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.function.Consumer;
 
-public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredictAlgorithm, MultiClassNLRResult> {
+public class NodeClassificationPredictAlgorithm extends Algorithm<NodeClassificationPredictAlgorithm, MultiClassNLRResult> {
 
     private final MultiClassNLRPredictor predictor;
     private final Graph graph;
@@ -43,7 +43,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
     private final boolean produceProbabilities;
     private final AllocationTracker tracker;
 
-    MultiClassNLRPredictAlgorithm(
+    NodeClassificationPredictAlgorithm(
         MultiClassNLRPredictor predictor,
         Graph graph,
         int batchSize,
@@ -74,7 +74,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
     }
 
     @Override
-    public MultiClassNLRPredictAlgorithm me() {
+    public NodeClassificationPredictAlgorithm me() {
         return this;
     }
 

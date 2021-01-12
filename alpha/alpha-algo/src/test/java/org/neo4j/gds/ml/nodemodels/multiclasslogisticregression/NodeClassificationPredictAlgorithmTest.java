@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableMultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificationTrainConfig;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @GdlExtension
-class MultiClassNLRPredictAlgorithmTest {
+class NodeClassificationPredictAlgorithmTest {
 
     @GdlGraph
     private static final String TRAINED_GRAPH =
@@ -93,7 +93,7 @@ class MultiClassNLRPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new MultiClassNLRPredictAlgorithm(
+        var result = new NodeClassificationPredictAlgorithm(
             new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,
@@ -147,7 +147,7 @@ class MultiClassNLRPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new MultiClassNLRPredictAlgorithm(
+        var result = new NodeClassificationPredictAlgorithm(
             new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,
@@ -205,7 +205,7 @@ class MultiClassNLRPredictAlgorithmTest {
                 }, 1, 3)))
                 .classIdMap(classIdMap)
                 .build(),
-            ImmutableMultiClassNLRTrainConfig
+            ImmutableNodeClassificationTrainConfig
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")
@@ -214,9 +214,9 @@ class MultiClassNLRPredictAlgorithmTest {
         );
         ModelCatalog.set(model);
 
-        var mcnlrPredict = new MultiClassNLRPredictAlgorithmFactory(TestProgressLogger.FACTORY).build(
+        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory(TestProgressLogger.FACTORY).build(
             graph,
-            ImmutableMultiClassNLRPredictMutateConfig.builder()
+            ImmutableNodeClassificationPropertyPredictMutateConfig.builder()
                 .mutateProperty("foo")
                 .modelName("model")
                 .concurrency(2)

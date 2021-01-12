@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -29,15 +29,16 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
-public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFactory<MultiClassNLRPredictAlgorithm, MultiClassNLRPredictMutateConfig> {
+public class NodeClassificationPredictAlgorithmFactory
+    extends AbstractAlgorithmFactory<NodeClassificationPredictAlgorithm, NodeClassificationPropertyPredictMutateConfig> {
 
-    public MultiClassNLRPredictAlgorithmFactory() {
+    public NodeClassificationPredictAlgorithmFactory() {
         super();
     }
 
     @Override
     protected long taskVolume(
-        Graph graph, MultiClassNLRPredictMutateConfig configuration
+        Graph graph, NodeClassificationPropertyPredictMutateConfig configuration
     ) {
         return graph.nodeCount();
     }
@@ -48,9 +49,9 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
     }
 
     @Override
-    protected MultiClassNLRPredictAlgorithm build(
+    protected NodeClassificationPredictAlgorithm build(
         Graph graph,
-        MultiClassNLRPredictMutateConfig configuration,
+        NodeClassificationPropertyPredictMutateConfig configuration,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
@@ -58,9 +59,9 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
             configuration.username(),
             configuration.modelName(),
             MultiClassNLRData.class,
-            MultiClassNLRTrainConfig.class
+            NodeClassificationTrainConfig.class
         );
-        return new MultiClassNLRPredictAlgorithm(
+        return new NodeClassificationPredictAlgorithm(
             new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties()),
             graph,
             configuration.batchSize(),
@@ -72,12 +73,12 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(MultiClassNLRPredictMutateConfig configuration) {
+    public MemoryEstimation memoryEstimation(NodeClassificationPropertyPredictMutateConfig configuration) {
         throw new MemoryEstimationNotImplementedException();
     }
 
     @TestOnly
-    MultiClassNLRPredictAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
+    NodeClassificationPredictAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
         super(factory);
     }
 }

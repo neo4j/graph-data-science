@@ -20,9 +20,9 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictAlgorithm;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictAlgorithmFactory;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictMutateConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredictAlgorithm;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredictAlgorithmFactory;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPropertyPredictMutateConfig;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
@@ -48,10 +48,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class MultiClassNLRMutateProc
-    extends MutatePropertyProc<MultiClassNLRPredictAlgorithm, MultiClassNLRResult, MultiClassNLRMutateProc.MutateResult, MultiClassNLRPredictMutateConfig> {
+public class NodeClassificationPredictMutateProc
+    extends MutatePropertyProc<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationPropertyPredictMutateConfig> {
 
-    @Procedure(name = "gds.alpha.ml.node.logisticRegression.predict.mutate", mode = Mode.READ)
+    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -63,14 +63,14 @@ public class MultiClassNLRMutateProc
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<MultiClassNLRPredictAlgorithm, MultiClassNLRResult, MultiClassNLRPredictMutateConfig> computeResult
+        ComputationResult<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
     }
 
     @Override
     protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig, MultiClassNLRPredictMutateConfig config
+        GraphStoreWithConfig graphStoreWithConfig, NodeClassificationPropertyPredictMutateConfig config
     ) {
         config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (config.mutateProperty().equals(predictedProbabilityProperty)) {
@@ -89,7 +89,7 @@ public class MultiClassNLRMutateProc
             config.username(),
             config.modelName(),
             MultiClassNLRData.class,
-            MultiClassNLRTrainConfig.class
+            NodeClassificationTrainConfig.class
         ).trainConfig();
         GraphStoreValidation.validate(
             graphStoreWithConfig,
@@ -98,23 +98,23 @@ public class MultiClassNLRMutateProc
     }
 
     @Override
-    protected MultiClassNLRPredictMutateConfig newConfig(
+    protected NodeClassificationPropertyPredictMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return MultiClassNLRPredictMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return NodeClassificationPropertyPredictMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<MultiClassNLRPredictAlgorithm, MultiClassNLRPredictMutateConfig> algorithmFactory() {
-        return new MultiClassNLRPredictAlgorithmFactory();
+    protected AlgorithmFactory<NodeClassificationPredictAlgorithm, NodeClassificationPropertyPredictMutateConfig> algorithmFactory() {
+        return new NodeClassificationPredictAlgorithmFactory();
     }
 
     @Override
     protected List<NodeProperty> nodePropertyList(
-        ComputationResult<MultiClassNLRPredictAlgorithm, MultiClassNLRResult, MultiClassNLRPredictMutateConfig> computationResult
+        ComputationResult<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computationResult
     ) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();
@@ -155,11 +155,11 @@ public class MultiClassNLRMutateProc
             this.nodePropertiesWritten = nodePropertiesWritten;
         }
 
-        static class Builder extends AbstractResultBuilder<MultiClassNLRMutateProc.MutateResult> {
+        static class Builder extends AbstractResultBuilder<NodeClassificationPredictMutateProc.MutateResult> {
 
             @Override
-            public MultiClassNLRMutateProc.MutateResult build() {
-                return new MultiClassNLRMutateProc.MutateResult(
+            public NodeClassificationPredictMutateProc.MutateResult build() {
+                return new NodeClassificationPredictMutateProc.MutateResult(
                     createMillis,
                     computeMillis,
                     mutateMillis,

@@ -21,14 +21,11 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class NodeLogisticRegressionTrain extends Algorithm<
-    NodeLogisticRegressionTrain,
-    Model<NodeLogisticRegressionData, MultiClassNLRTrainConfig>> {
+// TODO: remove?
+public class NodeLogisticRegressionTrain {
 
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
@@ -46,32 +43,15 @@ public class NodeLogisticRegressionTrain extends Algorithm<
         this.log = log;
     }
 
-    @Override
-    public Model<NodeLogisticRegressionData, MultiClassNLRTrainConfig> compute() {
+    public NodeLogisticRegressionData compute() {
         var objective = new NodeLogisticRegressionObjective(
             config.featureProperties(),
             config.targetProperty(),
             graph
         );
+
         var training = new Training(config, log, graph.nodeCount());
-        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), config.concurrency());
-        return Model.of(
-            config.username(),
-            config.modelName(),
-            MODEL_TYPE,
-            graph.schema(),
-            objective.modelData(),
-            config
-        );
-    }
-
-    @Override
-    public NodeLogisticRegressionTrain me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-
+        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), 1);
+        return objective.modelData();
     }
 }

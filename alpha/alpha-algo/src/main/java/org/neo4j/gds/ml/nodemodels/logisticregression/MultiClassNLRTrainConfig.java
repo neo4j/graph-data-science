@@ -19,41 +19,23 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+import java.util.List;
 
 @ValueClass
 @Configuration
-public interface MultiClassNLRTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, TrainingConfig {
+public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
 
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    @Configuration.Parameter
+    List<String> featureProperties();
+
+    @Configuration.Parameter
     String targetProperty();
 
-    @Value.Default
-    default double penalty() {
-        return 0.0;
-    }
+    double penalty();
 
-    static MultiClassNLRTrainConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new MultiClassNLRTrainConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
-    }
 }

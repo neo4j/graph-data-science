@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
@@ -38,12 +36,15 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class MultiClassNLRTrainProcTest extends BaseProcTest {
+//TODO: test for validating that targetProperty exists in graph
+class NodeClassificationTrainProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(MultiClassNLRTrainProc.class);
+        registerProcedures(NodeClassificationTrainProc.class, GraphCreateProc.class);
         runQuery(createQuery());
+
+        runQuery("CALL gds.graph.create('g', 'N', '*', {nodeProperties: ['a', 'b', 't']})");
     }
 
     @AfterEach
@@ -53,17 +54,10 @@ class MultiClassNLRTrainProcTest extends BaseProcTest {
 
     @Test
     void producesCorrectModel() {
-        String query = GdsCypher.call()
-            .withAnyLabel()
-            .withNodeProperties(List.of("a", "b", "t"), DefaultValue.of(0D))
-            .withAnyRelationshipType()
-            .algo("gds.alpha.ml.node.logisticRegression")
-            .trainMode()
-            .addParameter("concurrency", 1)
-            .addParameter("modelName", "model")
-            .addParameter("featureProperties", List.of("a", "b"))
-            .addParameter("targetProperty", "t")
-            .yields();
+        var query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "modelName: 'model'," +
+                    "targetProperty: 't', featureProperties: ['a', 'b'], " +
+                    "params: [{penalty: 1.0}, {penalty: 2.0}]})";
 
         assertCypherResult(query, List.of(Map.of(
             "trainMillis", greaterThan(0L),

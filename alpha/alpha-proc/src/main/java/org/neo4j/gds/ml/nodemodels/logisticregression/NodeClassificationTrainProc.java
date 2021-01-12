@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
@@ -48,14 +48,10 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 
-public class MultiClassNLRTrainProc extends TrainProc<MultiClassNLRTrain, MultiClassNLRData, MultiClassNLRTrainConfig> {
+public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, MultiClassNLRData, NodeClassificationTrainConfig> {
 
-    // TODO:
-    // new result columns
-    // train loss, etc
-
-    @Procedure(name = "gds.alpha.ml.node.logisticRegression.train", mode = Mode.READ)
-    @Description("Trains a multi-class logistic regression model for a target node property")
+    @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
+    @Description("Trains a node classification model")
     public Stream<TrainResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -69,31 +65,36 @@ public class MultiClassNLRTrainProc extends TrainProc<MultiClassNLRTrain, MultiC
     }
 
     @Override
-    protected MultiClassNLRTrainConfig newConfig(
+    protected NodeClassificationTrainConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return MultiClassNLRTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        return new NodeClassificationTrainConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
 
     @Override
-    protected AlgorithmFactory<MultiClassNLRTrain, MultiClassNLRTrainConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
-            public MultiClassNLRTrain build(
+            public NodeClassificationTrain build(
                 Graph graph,
-                MultiClassNLRTrainConfig configuration,
+                NodeClassificationTrainConfig configuration,
                 AllocationTracker tracker,
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
-                return new MultiClassNLRTrain(graph, configuration, log);
+                return new NodeClassificationTrain(graph, configuration, log);
             }
 
             @Override
-            public MemoryEstimation memoryEstimation(MultiClassNLRTrainConfig configuration) {
+            public MemoryEstimation memoryEstimation(NodeClassificationTrainConfig configuration) {
                 throw new MemoryEstimationNotImplementedException();
             }
         };
