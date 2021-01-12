@@ -121,7 +121,6 @@ final class WeightedDegreeCentralityTest {
         var result = new WeightedDegreeCentrality(
             graph,
             1,
-            true,
             Pools.DEFAULT,
             AllocationTracker.empty()
         ).compute().weights();
@@ -148,7 +147,6 @@ final class WeightedDegreeCentralityTest {
             new WeightedDegreeCentrality(
                 graph,
                 1,
-                false,
                 Pools.DEFAULT,
                 AllocationTracker.empty()
             );
@@ -236,7 +234,6 @@ final class WeightedDegreeCentralityTest {
         var result = new WeightedDegreeCentrality(
             graph,
             concurrency,
-            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         ).compute().degrees();
