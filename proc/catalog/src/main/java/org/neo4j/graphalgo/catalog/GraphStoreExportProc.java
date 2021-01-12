@@ -24,11 +24,15 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporterConfig;
+import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.CsvExportEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -117,6 +121,32 @@ public class GraphStoreExportProc extends BaseProc {
         );
 
         return Stream.of(result);
+    }
+
+    @Procedure(name = "gds.graph.export.csv.estimate", mode = READ)
+    @Description("Estimate the required disk space for exporting a named graph to CSV files.")
+    public Stream<MemoryEstimateResult> csvEstimate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
+        validateConfig(cypherConfig, exportConfig);
+
+        var estimate = runWithExceptionLogging(
+            "CSV export estimation failed", () -> {
+                var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
+
+
+                var dimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
+                var memoryTree = CsvExportEstimation
+                    .estimate(graphStore, exportConfig.samplingFactor())
+                    .estimate(dimensions, 1);
+                return new MemoryTreeWithDimensions(memoryTree, dimensions);
+            }
+        );
+
+        return Stream.of(new MemoryEstimateResult(estimate));
     }
 
     private Path getExportPath(GraphStoreToFileExporterConfig config) {

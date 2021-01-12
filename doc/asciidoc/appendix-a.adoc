@@ -41,7 +41,9 @@ The following table lists all production-quality graph operations in the GDS lib
 |<<catalog-graph-write-node-properties, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
 |<<catalog-graph-write-relationship, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
-|<<catalog-graph-export-csv, CSV Export>> | `gds.graph.export.csv`
+.2+<.^|<<catalog-graph-export-csv, CSV Export>>
+| `gds.graph.export.csv`
+| `gds.graph.export.csv.estimate`
 |===
 
 [[appendix-a-model-ops]]

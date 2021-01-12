@@ -89,5 +89,27 @@ relationships_LIVES_IN_0.csv
 relationships_LIVES_IN_2.csv
 ----
 
+== Estimation
 
+Using the `gds.graph.export.csv.estimate` procedure it is possible to estimate the required disk space of the exported CSV files.
+The estimation uses sampling to generate a more accurate estiamte.
+
+.Estimate the required disk space for exporting a named graph to CSV files.:
+[source,cypher]
+----
+CALL gds.graph.export.csv.export('my-graph', {exportName: 'myExport'})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory;
+----
+
+The procedure yields information about the required disk space.
+
+.Graph export estimate configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                    | Type    | Default    | Optional  | Description
+| exportName              | String  | none       | No        | Name of the folder to which the CSV files are exported.
+| samplingFactor          | Double  | 0.001      | yes       | The fraction of nodes and relationships to sample for the estimation.
+| writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
+| defaultRelationshipType | String  | +__ALL__+  | yes        | Relationship type used for `*` relationship projections.
+|===
 

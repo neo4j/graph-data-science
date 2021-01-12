@@ -195,6 +195,21 @@ class GraphStoreExportProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void csvEstimation() {
+        createGraph();
+
+        var exportQuery =
+            "CALL gds.graph.export.csv.estimate('test-graph', {" +
+            "  exportName: 'export'" +
+            "})";
+
+        runQueryWithRowConsumer(exportQuery, row -> {
+            assertThat(row.getNumber("bytesMin").longValue()).isBetween(0L, 100L);
+            assertThat(row.getNumber("bytesMax").longValue()).isBetween(0L, 100L);
+        });
+    }
+
     private void createGraph() {
         runQuery(GdsCypher.call()
             .withAnyLabel()
