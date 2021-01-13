@@ -85,7 +85,8 @@ public class EstimationCli implements Runnable {
     private static final double DEFAULT_PEAK_MEMORY_FACTOR = 1.0;
     public static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
         "gds.testProc.test.estimate",
-        "gds.beta.graphSage"
+        "gds.beta.graphSage",
+        "gds.graph.export.csv"
     );
 
     @CommandLine.Spec
