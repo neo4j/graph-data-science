@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
+import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -62,7 +63,7 @@ class ModelSerializationTest {
     }
 
     @Test
-    void shouldSerializeModel() throws IOException {
+    void shouldSerializeModel() throws IOException, ClassNotFoundException {
         Model<String, TestTrainConfig> model = Model.of(
             "user1",
             "testModel",
@@ -88,6 +89,18 @@ class ModelSerializationTest {
             creationTime.getNanos()
         ), ZoneId.of(creationTime.getZoneId()));
         assertEquals(model.creationTime(), dateTime);
+
+        var resultTrainConfigBytes = protoModelDeserialized.getSerializedTrainConfig().toByteArray();
+        var deserializedTrainConfig = ObjectSerializer.fromByteArrayUnsafe(
+            resultTrainConfigBytes
+        );
+
+        assertThat(deserializedTrainConfig)
+            .isNotNull()
+            .usingRecursiveComparison()
+            .withStrictTypeChecking()
+            .isEqualTo(TestTrainConfig.of());
+
     }
 
 }

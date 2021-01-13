@@ -19,15 +19,18 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import com.google.protobuf.ByteString;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
+import java.io.IOException;
 import java.time.Instant;
 
 public final class ModelSerializer {
 
     private ModelSerializer() {}
 
-    public static ModelProto.Model serializableFormatOf(Model<?, ?> model) {
+    public static ModelProto.Model serializableFormatOf(Model<?, ?> model) throws IOException {
         Instant creationTimeInstant = model.creationTime().toInstant();
         ModelProto.ZonedDateTime serializableCreationTime = ModelProto.ZonedDateTime.newBuilder()
             .setSeconds(creationTimeInstant.getEpochSecond())
@@ -38,6 +41,7 @@ public final class ModelSerializer {
             .setUsername(model.username())
             .setName(model.name())
             .setAlgoType(model.algoType())
+            .setSerializedTrainConfig(ByteString.copyFrom(ObjectSerializer.toByteArray(model.trainConfig())))
             .setCreationTime(serializableCreationTime)
             .build();
     }

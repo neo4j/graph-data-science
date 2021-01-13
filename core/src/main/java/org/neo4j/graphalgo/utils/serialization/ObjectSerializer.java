@@ -48,4 +48,13 @@ public final class ObjectSerializer {
             return clazz.cast(inputStream.readObject());
         }
     }
+
+    public static <T extends Serializable> T fromByteArrayUnsafe(byte[] byteBuffer) throws IOException, ClassNotFoundException {
+        try (
+            var byteArrayInputStream = new ByteArrayInputStream(byteBuffer);
+            var inputStream = new ObjectInputStream(byteArrayInputStream)
+        ) {
+            return (T) inputStream.readObject();
+        }
+    }
 }
