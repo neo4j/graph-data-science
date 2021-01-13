@@ -1,12 +1,18 @@
-syntax = "proto2";
-
-package model;
+syntax = "proto3";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
 option java_outer_classname = "ModelProto";
 
+
 message Model {
-  optional string username = 1;
-  optional string name = 2;
-  optional string algoType = 3;
+  string username = 1;
+  string name = 2;
+  string algoType = 3;
+  ZonedDateTime creationTime = 4;
+}
+
+message ZonedDateTime {
+  int64 seconds = 1;
+  int32 nanos = 2;
+  string zoneId = 3;
 }

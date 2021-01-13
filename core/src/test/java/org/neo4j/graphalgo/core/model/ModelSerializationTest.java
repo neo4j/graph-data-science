@@ -21,18 +21,45 @@ package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
+import org.neo4j.graphalgo.api.schema.SchemaSerializer;
+import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ModelSerializationTest {
 
-    private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
+    private static final GraphSchema GRAPH_SCHEMA = GdlFactory
+        .of("(n1:Node {a: 1.1})-[:R {rp: 4.2}]->(n2:Node {a: 1.337})")
+        .build()
+        .graphStore()
+        .schema();
+
+    @Test
+    void shouldSerializeGraphSchema() throws IOException {
+        var serializableGraphSchema = SchemaSerializer.serializableGraphSchema(GRAPH_SCHEMA);
+
+        var output = new ByteArrayOutputStream();
+        serializableGraphSchema.writeTo(output);
+
+        var parsedGraphSchema = GraphSchemaProto.GraphSchema.parseFrom(output.toByteArray());
+        assertThat(parsedGraphSchema).isNotNull();
+
+        var deserializedGraphSchema = SchemaDeserializer.graphSchema(parsedGraphSchema);
+        assertThat(deserializedGraphSchema)
+            .isNotNull()
+            .isEqualTo(GRAPH_SCHEMA);
+    }
 
     @Test
     void shouldSerializeModel() throws IOException {
@@ -44,17 +71,23 @@ class ModelSerializationTest {
             "testTrainData",
             TestTrainConfig.of()
         );
-        ModelProto.Model protoModel = ModelProto.Model.newBuilder()
-            .setUsername(model.username())
-            .setName(model.name())
-            .setAlgoType(model.algoType())
-            .build();
+
+        ModelProto.Model protoModel = ModelSerializer.serializableFormatOf(model);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         protoModel.writeTo(output);
 
         ModelProto.Model protoModelDeserialized = ModelProto.Model.parseFrom(output.toByteArray());
-        assertEquals(protoModel, protoModelDeserialized);
+
+        assertEquals(model.algoType(), protoModelDeserialized.getAlgoType());
+        assertEquals(model.username(), protoModelDeserialized.getUsername());
+        assertEquals(model.name(), protoModelDeserialized.getName());
+        ModelProto.ZonedDateTime creationTime = protoModelDeserialized.getCreationTime();
+        ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(
+            creationTime.getSeconds(),
+            creationTime.getNanos()
+        ), ZoneId.of(creationTime.getZoneId()));
+        assertEquals(model.creationTime(), dateTime);
     }
 
 }
