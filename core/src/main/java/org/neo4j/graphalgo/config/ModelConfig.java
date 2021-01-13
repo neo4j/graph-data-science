@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.config;
 
-public interface ModelConfig {
+import java.io.Serializable;
+
+public interface ModelConfig extends Serializable {
 
     String MODEL_NAME_KEY = "name";
     String MODEL_TYPE_KEY = "type";
