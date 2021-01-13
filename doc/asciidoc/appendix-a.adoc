@@ -41,9 +41,6 @@ The following table lists all production-quality graph operations in the GDS lib
 |<<catalog-graph-write-node-properties, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
 |<<catalog-graph-write-relationship, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
-.2+<.^|<<catalog-graph-export-csv, CSV Export>>
-| `gds.graph.export.csv`
-| `gds.graph.export.csv.estimate`
 |===
 
 [[appendix-a-model-ops]]
@@ -161,6 +158,9 @@ The following table lists all beta graph operations in the GDS library:
 |===
 |Operation | Procedure
 |<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
+.2+<.^|<<catalog-graph-export-csv, CSV Export>>
+| `gds.beta.graph.export.csv`
+| `gds.beta.graph.export.csv.estimate`
 |===
 
 The following table lists all beta procedures in the GDS library:

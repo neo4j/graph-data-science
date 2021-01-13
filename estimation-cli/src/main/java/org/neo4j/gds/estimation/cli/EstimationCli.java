@@ -86,7 +86,7 @@ public class EstimationCli implements Runnable {
     public static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
         "gds.testProc.test.estimate",
         "gds.beta.graphSage",
-        "gds.graph.export.csv"
+        "gds.beta.graph.export.csv"
     );
 
     @CommandLine.Spec

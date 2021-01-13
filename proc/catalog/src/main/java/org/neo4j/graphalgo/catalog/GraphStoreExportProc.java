@@ -86,7 +86,7 @@ public class GraphStoreExportProc extends BaseProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.export.csv", mode = READ)
+    @Procedure(name = "gds.beta.graph.export.csv", mode = READ)
     @Description("Exports a named graph to CSV files.")
     public Stream<FileExportResult> csv(
         @Name(value = "graphName") String graphName,
@@ -124,7 +124,7 @@ public class GraphStoreExportProc extends BaseProc {
         return Stream.of(result);
     }
 
-    @Procedure(name = "gds.graph.export.csv.estimate", mode = READ)
+    @Procedure(name = "gds.beta.graph.export.csv.estimate", mode = READ)
     @Description("Estimate the required disk space for exporting a named graph to CSV files.")
     public Stream<MemoryEstimateResult> csvEstimate(
         @Name(value = "graphName") String graphName,

@@ -1,5 +1,5 @@
 [[catalog-graph-export-csv]]
-
+[.beta]
 
 = Export a named graph to CSV
 
@@ -18,7 +18,7 @@ The `gds.export.location` parameter must be configured for this feature.
 .Export a named graph to a set of CSV files:
 [source,cypher]
 ----
-CALL gds.graph.export.csv('my-graph', {exportName: 'myExport'})
+CALL gds.beta.graph.export.csv('my-graph', {exportName: 'myExport'})
 ----
 
 The procedure yields information about the number of nodes, relationships and properties written.
@@ -97,7 +97,7 @@ The estimation uses sampling to generate a more accurate estiamte.
 .Estimate the required disk space for exporting a named graph to CSV files.:
 [source,cypher]
 ----
-CALL gds.graph.export.csv.export('my-graph', {exportName: 'myExport'})
+CALL gds.beta.graph.export.csv.export('my-graph', {exportName: 'myExport'})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory;
 ----
 
