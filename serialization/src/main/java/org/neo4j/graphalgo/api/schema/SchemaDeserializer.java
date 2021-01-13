@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
+import static org.neo4j.graphalgo.api.nodeproperties.ValueType.valueOf;
+
 public final class SchemaDeserializer {
     private SchemaDeserializer() {}
 
@@ -44,7 +46,7 @@ public final class SchemaDeserializer {
             var nodeLabel = NodeLabel.of(serializedLabel);
             var serializedPropertyMapping = propertyMapping.getNameMappingMap();
             serializedPropertyMapping.forEach(((propertyName, propertySchema) -> {
-                var valueType = ValueType.valueOf(propertySchema.getValueType());
+                var valueType = valueOf(propertySchema.getValueType());
                 var defaultValue = propertySchema.getDefaultValue();
                 var mappedPropSchema = PropertySchema.of(
                     propertyName,
@@ -68,7 +70,7 @@ public final class SchemaDeserializer {
             } else {
                 serializedPropertyMapping.forEach(((propertyName, propertySchemaMapping) -> {
                     var propertySchema = propertySchemaMapping.getPropertySchema();
-                    var valueType = ValueType.valueOf(propertySchema.getValueType());
+                    var valueType = valueOf(propertySchema.getValueType());
                     var defaultValue = propertySchema.getDefaultValue();
                     var mappedPropSchema = RelationshipPropertySchema.of(
                         propertyName,
@@ -111,6 +113,7 @@ public final class SchemaDeserializer {
             case LONG_ARRAY:
                 value = serializedDefaultValue.getLongArrayValue();
                 break;
+            case UNKNOWN:
             default:
                 value = null;
                 break;

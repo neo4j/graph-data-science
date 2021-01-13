@@ -28,11 +28,10 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
+import org.neo4j.graphalgo.utils.serialization.ProtoUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,17 +82,11 @@ class ModelSerializationTest {
         assertEquals(model.algoType(), protoModelDeserialized.getAlgoType());
         assertEquals(model.username(), protoModelDeserialized.getUsername());
         assertEquals(model.name(), protoModelDeserialized.getName());
-        ModelProto.ZonedDateTime creationTime = protoModelDeserialized.getCreationTime();
-        ZonedDateTime dateTime = ZonedDateTime.ofInstant(Instant.ofEpochSecond(
-            creationTime.getSeconds(),
-            creationTime.getNanos()
-        ), ZoneId.of(creationTime.getZoneId()));
+        ZonedDateTime dateTime = ProtoUtils.from(protoModelDeserialized.getCreationTime());
         assertEquals(model.creationTime(), dateTime);
 
         var resultTrainConfigBytes = protoModelDeserialized.getSerializedTrainConfig().toByteArray();
-        var deserializedTrainConfig = ObjectSerializer.fromByteArrayUnsafe(
-            resultTrainConfigBytes
-        );
+        var deserializedTrainConfig = ObjectSerializer.fromByteArrayUnsafe(resultTrainConfigBytes);
 
         assertThat(deserializedTrainConfig)
             .isNotNull()
