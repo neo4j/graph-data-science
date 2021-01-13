@@ -33,8 +33,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 
 import java.util.Collection;
@@ -55,14 +53,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
         .builder(BitIdMap.class)
-        .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
-        .rangePerGraphDimension(
-            "Mapping from Neo4j identifiers to internal identifiers",
-            (dimensions, concurrency) -> HugeSparseLongArray.memoryEstimation(
-                dimensions.highestNeoId(),
-                dimensions.nodeCount()
-            )
-        )
+        .add("Mapping between Neo4j identifiers and internal identifiers", SparseLongArray.memoryEstimation())
         .perGraphDimension(
             "Node Label BitSets",
             (dimensions, concurrency) ->
