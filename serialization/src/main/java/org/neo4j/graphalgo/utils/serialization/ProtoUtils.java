@@ -26,6 +26,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ProtoUtils {
@@ -39,13 +40,13 @@ public final class ProtoUtils {
         ), ZoneId.of(protoZoneDateTime.getZoneId()));
     }
 
-    public static Collection<Double> from(double[] data) {
+    public static List<Double> toList(double[] data) {
         return Arrays.stream(data)
             .boxed()
             .collect(Collectors.toList());
     }
 
-    public static double[] from(Collection<Double> iterable) {
+    public static double[] toArray(Collection<Double> iterable) {
         return iterable.stream()
             .mapToDouble(Double::doubleValue)
             .toArray();
