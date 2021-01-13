@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.huge;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -222,7 +222,7 @@ class TransientAdjacencyListTest {
         for (long target : targets) {
             nodesBuilder.addNode(target);
         }
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = new RelationshipsBuilder(
             idMap,
             Orientation.NATURAL,

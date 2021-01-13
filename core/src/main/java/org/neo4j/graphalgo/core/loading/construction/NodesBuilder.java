@@ -101,7 +101,7 @@ public class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    public IdMap build() {
+    public NodeMapping build() {
         this.threadLocalBuilder.close();
 
         return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(

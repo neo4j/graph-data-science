@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationFactory;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -209,7 +209,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         assertRunning();
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

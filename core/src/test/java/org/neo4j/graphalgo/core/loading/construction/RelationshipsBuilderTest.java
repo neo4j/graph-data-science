@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.core.loading.construction;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.LongStream;
@@ -82,7 +82,7 @@ class RelationshipsBuilderTest {
     }
 
 
-    private IdMap createIdMap(long nodeCount) {
+    private NodeMapping createIdMap(long nodeCount) {
         var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
 
         for (long i = 0; i < nodeCount; i++) {

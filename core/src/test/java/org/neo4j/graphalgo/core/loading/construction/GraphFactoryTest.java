@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.Stream;
@@ -76,7 +76,7 @@ class GraphFactoryTest {
         nodesBuilder.addNode(2, NodeLabel.of("C"));
         nodesBuilder.addNode(3);
 
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
@@ -135,7 +135,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(i);
         }
 
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
