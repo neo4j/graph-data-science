@@ -25,12 +25,15 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -274,6 +277,23 @@ class SparseLongArrayTest {
                 formatWithLocale("wrong original id for mapped id %d", mappedId)
             );
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "10000,1424",
+        "100000,13112",
+        "1000000,130016",
+    })
+    void memoryEstimation(long highestNeoId, long expectedBytes) {
+        var dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(highestNeoId).build();
+        // does not affect SLA memory estimation
+        var concurrency = 42;
+
+        assertEquals(
+            MemoryRange.of(expectedBytes),
+            SparseLongArray.memoryEstimation().estimate(dimensions, concurrency).memoryUsage()
+        );
     }
 
     @Test

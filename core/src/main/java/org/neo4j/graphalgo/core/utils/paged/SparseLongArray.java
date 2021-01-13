@@ -24,6 +24,9 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ArrayLayout;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
 import java.lang.invoke.MethodHandles;
@@ -76,6 +79,22 @@ public final class SparseLongArray {
 
     public static FromExistingBuilder fromExistingBuilder(long[] array) {
         return new FromExistingBuilder(array);
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.setup("sparse long array", (dimensions, concurrency) -> {
+            var capacity = dimensions.highestNeoId() + 1;
+            var arraySize = (int) BitUtil.ceilDiv(capacity, BLOCK_SIZE);
+            var offsetSize = (arraySize >>> BLOCK_SHIFT) + 1;
+
+            return MemoryEstimations
+                .builder(SparseLongArray.class)
+                .fixed("id array", MemoryUsage.sizeOfLongArray(arraySize))
+                .fixed("block offsets", MemoryUsage.sizeOfLongArray(offsetSize))
+                .fixed("sorted block offsets", MemoryUsage.sizeOfLongArray(offsetSize))
+                .fixed("block mapping", MemoryUsage.sizeOfIntArray(offsetSize))
+                .build();
+        });
     }
 
     private SparseLongArray(
@@ -193,7 +212,7 @@ public final class SparseLongArray {
         private final long[] blockOffsets;
 
         Builder(long capacity) {
-            var size = (int) BitUtil.ceilDiv(capacity, Long.SIZE);
+            var size = (int) BitUtil.ceilDiv(capacity, BLOCK_SIZE);
             this.array = new long[size];
             this.blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
             // The blocks are initialized with Long.MAX_VALUE to identify
