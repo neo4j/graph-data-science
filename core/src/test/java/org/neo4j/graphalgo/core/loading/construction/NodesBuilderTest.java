@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
@@ -30,84 +31,93 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodesBuilderTest {
 
-    @Test
-    void parallelIdMapBuilder() {
-        long nodeCount = 100;
-        int concurrency = 4;
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(nodeCount)
-            .concurrency(concurrency)
-            .build();
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void parallelIdMapBuilder(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            long nodeCount = 100;
+            int concurrency = 4;
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(nodeCount)
+                .concurrency(concurrency)
+                .build();
 
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, nodeCount),
-            concurrency,
-            stream -> stream.forEach(nodesBuilder::addNode)
-        );
+            ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, nodeCount),
+                concurrency,
+                stream -> stream.forEach(nodesBuilder::addNode)
+            );
 
-        var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.build();
 
-        assertEquals(nodeCount, idMap.nodeCount());
+            assertEquals(nodeCount, idMap.nodeCount());
+        });
     }
 
-    @Test
-    void parallelIdMapBuilderWithDuplicateNodes() {
-        long attempts = 100;
-        int concurrency = 4;
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(attempts)
-            .concurrency(concurrency)
-            .build();
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void parallelIdMapBuilderWithDuplicateNodes(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            long attempts = 100;
+            int concurrency = 4;
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(attempts)
+                .concurrency(concurrency)
+                .build();
 
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, attempts),
-            concurrency,
-            stream -> stream.forEach(originalId -> nodesBuilder.addNode(0))
-        );
+            ParallelUtil.parallelStreamConsume(
+                LongStream.range(0, attempts),
+                concurrency,
+                stream -> stream.forEach(originalId -> nodesBuilder.addNode(0))
+            );
 
-        var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.build();
 
-        assertEquals(1, idMap.nodeCount());
+            assertEquals(1, idMap.nodeCount());
+        });
     }
 
-    @Test
-    void parallelIdMapBuilderWithLabels() {
-        long attempts = 100;
-        int concurrency = 4;
-        var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
-        var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void parallelIdMapBuilderWithLabels(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            long attempts = 100;
+            int concurrency = 1;
+            var labels1 = new HashSet<>(NodeLabel.listOf("Label1"));
+            var labels2 = new HashSet<>(NodeLabel.listOf("Label2"));
 
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(attempts)
-            .hasLabelInformation(true)
-            .concurrency(concurrency)
-            .build();
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(attempts)
+                .hasLabelInformation(true)
+                .concurrency(concurrency)
+                .build();
 
-        ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
-            originalId -> {
-                var labels = originalId % 2 == 0
-                    ? labels1.toArray(NodeLabel[]::new)
-                    : labels2.toArray(NodeLabel[]::new);
+            ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(
+                originalId -> {
+                    var labels = originalId % 2 == 0
+                        ? labels1.toArray(NodeLabel[]::new)
+                        : labels2.toArray(NodeLabel[]::new);
 
-                nodesBuilder.addNode(originalId, labels);
-            })
-        );
+                    nodesBuilder.addNode(originalId, labels);
+                })
+            );
 
-        var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.build();
 
-        var expectedLabels = new HashSet<NodeLabel>();
-        expectedLabels.addAll(labels1);
-        expectedLabels.addAll(labels2);
-        assertEquals(expectedLabels, idMap.availableNodeLabels());
+            var expectedLabels = new HashSet<NodeLabel>();
+            expectedLabels.addAll(labels1);
+            expectedLabels.addAll(labels2);
+            assertEquals(expectedLabels, idMap.availableNodeLabels());
 
-        idMap.forEachNode(nodeId -> {
-            var labels = idMap.toOriginalNodeId(nodeId) % 2 == 0
-                ? labels1
-                : labels2;
+            idMap.forEachNode(nodeId -> {
+                var labels = idMap.toOriginalNodeId(nodeId) % 2 == 0
+                    ? labels1
+                    : labels2;
 
-            assertEquals(labels, idMap.nodeLabels(nodeId));
+                assertEquals(labels, idMap.nodeLabels(nodeId));
 
-            return true;
+                return true;
+            });
         });
     }
 }
