@@ -32,7 +32,7 @@ public enum GdsFeatureToggles {
     USE_KERNEL_TRACKER(false),
     USE_PROPERTY_VALUE_INDEX(false),
     USE_PARALLEL_PROPERTY_VALUE_INDEX(false),
-    USE_BIT_ID_MAP(false);
+    USE_BIT_ID_MAP(true);
 
     public boolean isEnabled() {
         return current.get();
