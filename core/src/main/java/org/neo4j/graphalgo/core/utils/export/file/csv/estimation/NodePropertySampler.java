@@ -32,23 +32,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-class NodePropertySampler {
+
+/**
+ * Calculates the average number of node property characters by sampling nodes and their properties.
+ * A number of nodes is randomly selected and then classified according to their node labels.
+ */
+final class NodePropertySampler {
+
+    /**
+     * @return The average number of property characters per node entry.
+     */
+    public static long sample(GraphStore graphStore, double samplingFactor) {
+        return new NodePropertySampler(graphStore, samplingFactor).sample();
+    }
 
     private final long nodesToSample;
     private final GraphStore graphStore;
     private final Map<Set<NodeLabel>, NodeLabelSample> schemaSamples;
 
-    NodePropertySampler(GraphStore graphStore, double samplingFactor) {
+    private NodePropertySampler(GraphStore graphStore, double samplingFactor) {
         this.graphStore = graphStore;
 
         this.nodesToSample = Math.round(graphStore.nodeCount() * samplingFactor);
         this.schemaSamples = new HashMap<>();
     }
 
-    /**
-     * @return The average number of property characters per node entry.
-     */
-    long sample() {
+    private long sample() {
         var random = ThreadLocalRandom.current();
         for (long i = 0; i < nodesToSample; i++) {
             var nodeId = random.nextLong(graphStore.nodeCount());
@@ -61,7 +70,7 @@ class NodePropertySampler {
         return schemaSamples
             .values()
             .stream()
-            .mapToLong( nodeLabelSample -> {
+            .mapToLong(nodeLabelSample -> {
                 var relativeSampleSize = nodeLabelSample.encounters() / (double) nodesToSample;
                 var averageEntrySize = nodeLabelSample.averageEntrySize();
                 return Math.round(relativeSampleSize * averageEntrySize);
@@ -88,15 +97,17 @@ class NodePropertySampler {
         }
 
         long encounters() {
-            return  encounters;
+            return encounters;
         }
 
         int averageEntrySize() {
             return propertyCharactersSamples
                 .values()
                 .stream()
-                .map(propertySamples -> propertySamples.stream().reduce(0, Integer::sum) / propertySamples.size() + 1)
-                .reduce(0, Integer::sum);
+                .mapToInt(propertySamples -> propertySamples
+                                                 .stream()
+                                                 .reduce(0, Integer::sum) / propertySamples.size() + 1)
+                .sum();
         }
 
         void sample(long nodeId) {
@@ -112,7 +123,7 @@ class NodePropertySampler {
                 if (propertyValue == null) {
                     // nothing to do here
                 } else if (propertyValue.getClass().isArray()) {
-                    for(int i = 0; i < Array.getLength(propertyValue); i++){
+                    for (int i = 0; i < Array.getLength(propertyValue); i++) {
                         characterCount += getCharacterCount(Array.get(propertyValue, i)) + 1;
                     }
                 } else {

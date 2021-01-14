@@ -57,6 +57,7 @@ class CsvExportEstimationTest {
             .estimate(GraphDimensions.of(0), 1)
             .memoryUsage();
 
+        // The actual value is 40K
         assertThat(estimation.max).isBetween(100L, 200L);
     }
 }

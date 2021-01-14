@@ -28,13 +28,23 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-class RelationshipPropertySampler {
+/**
+ * Calculates the average number of relationship property characters by sampling.
+ * This is done per relationship type.
+ * For each type a number of nodes with at least one relationship of the given type are randomly chosen.
+ * The first relationship for each sampled node is used to estimate the property values.
+ */
+final class RelationshipPropertySampler {
 
     private final double samplingFactor;
     private final GraphStore graphStore;
     private final ThreadLocalRandom random;
 
-    RelationshipPropertySampler(GraphStore graphStore, double samplingFactor) {
+    public static long sample(GraphStore graphStore, double samplingFactor) {
+        return new RelationshipPropertySampler(graphStore, samplingFactor).sample();
+    }
+
+    private RelationshipPropertySampler(GraphStore graphStore, double samplingFactor) {
         this.graphStore = graphStore;
         this.random = ThreadLocalRandom.current();
 
@@ -44,7 +54,7 @@ class RelationshipPropertySampler {
     /**
      * @return The average number of relationship property characters per relationship entry.
      */
-    long sample() {
+    private long sample() {
         return graphStore
             .relationshipTypes()
             .stream()
@@ -68,25 +78,24 @@ class RelationshipPropertySampler {
             .map(property -> graphStore.getGraph(relationshipType, Optional.of(property)))
             .collect(Collectors.toList());
 
-        var nodesToSample = (int) Math.round(graphs.get(0).relationshipCount() * samplingFactor);
+        var relationshipsToSample = (int) Math.round(graphs.get(0).relationshipCount() * samplingFactor);
 
         var propertyCharactersSamples = graphs
             .stream()
-            .map((ignore) -> new ArrayList<Integer>(nodesToSample))
+            .map((ignore) -> new ArrayList<Integer>(relationshipsToSample))
             .collect(Collectors.toList());
 
-
-        long i = 0;
-        while (i < nodesToSample) {
+        long relationshipsSampled = 0;
+        while (relationshipsSampled < relationshipsToSample) {
             var nodeId = random.nextLong(graphStore.nodeCount());
 
             if (graphs.get(0).degree(nodeId) == 0) {
                 continue;
             }
 
-            for (int j = 0; j < graphs.size(); j++) {
-                var graph = graphs.get(j);
-                var samples = propertyCharactersSamples.get(j);
+            for (int graphIndex = 0; graphIndex < graphs.size(); graphIndex++) {
+                var graph = graphs.get(graphIndex);
+                var samples = propertyCharactersSamples.get(graphIndex);
 
                 graph.forEachRelationship(nodeId, Double.NaN, (s, t, w) -> {
                     samples.add(getCharacterCount(w));
@@ -94,7 +103,7 @@ class RelationshipPropertySampler {
                 });
             }
 
-            i++;
+            relationshipsSampled++;
         }
 
         return propertyCharactersSamples

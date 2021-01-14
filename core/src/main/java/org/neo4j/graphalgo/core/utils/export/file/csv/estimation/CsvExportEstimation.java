@@ -58,23 +58,29 @@ public final class CsvExportEstimation {
         long nodeIdEstimate = 0;
         long consideredNumbers = 0;
 
+        // count all nodes from 1 - log(nodeCount)
+        // 1 digit  -> 10
+        // 2 digits -> 100 - 10
+        // 3 digits -> 1000 - 100 - 10
+        // ...
         for (long digits = 1; digits < maxNumberOfDigits; digits++) {
             long numbersWithDigitX = (10 ^ digits) - consideredNumbers;
-            consideredNumbers += numbersWithDigitX;
-
             nodeIdEstimate += numbersWithDigitX * digits * BYTES_PER_WRITTEN_CHARACTER;
+            consideredNumbers += numbersWithDigitX;
         }
 
+        // count the nodes with max digit count
         nodeIdEstimate += (graphStore.nodeCount() - consideredNumbers) * maxNumberOfDigits * BYTES_PER_WRITTEN_CHARACTER;
+
         return nodeIdEstimate;
     }
 
     private static long sampleNodeProperties(GraphStore graphStore, double samplingFactor) {
-        return graphStore.nodeCount() * new NodePropertySampler(graphStore, samplingFactor).sample();
+        return graphStore.nodeCount() * NodePropertySampler.sample(graphStore, samplingFactor);
     }
 
     private static long sampleRelationshipProperties(GraphStore graphStore, double samplingFactor) {
-        return graphStore.relationshipCount() * new RelationshipPropertySampler(graphStore, samplingFactor).sample();
+        return graphStore.relationshipCount() * RelationshipPropertySampler.sample(graphStore, samplingFactor);
     }
 
     private CsvExportEstimation() {}

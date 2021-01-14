@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConf
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.CsvExportEstimation;
+import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.GraphStoreToCsvEstimationConfig;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -130,7 +131,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
+        var exportConfig = GraphStoreToCsvEstimationConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
         var estimate = runWithExceptionLogging(
@@ -184,7 +185,6 @@ public class GraphStoreExportProc extends BaseProc {
 
         return resolvedExportPath;
     }
-
 
     public abstract static class GraphStoreExportResult {
         public final String graphName;

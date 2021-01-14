@@ -29,7 +29,7 @@ The procedure yields information about the number of nodes, relationships and pr
 | Name                    | Type    | Default    | Optional  | Description
 | exportName              | String  | none       | No        | Name of the folder to which the CSV files are exported.
 | writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
-| defaultRelationshipType | String  | +__ALL__+ | yes       | Relationship type used for `*` relationship projections.
+| defaultRelationshipType | String  | +__ALL__+  | yes       | Relationship type used for `*` relationship projections.
 |===
 
 
@@ -110,6 +110,6 @@ The procedure yields information about the required disk space.
 | exportName              | String  | none       | No        | Name of the folder to which the CSV files are exported.
 | samplingFactor          | Double  | 0.001      | yes       | The fraction of nodes and relationships to sample for the estimation.
 | writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
-| defaultRelationshipType | String  | +__ALL__+  | yes        | Relationship type used for `*` relationship projections.
+| defaultRelationshipType | String  | +__ALL__+  | yes       | Relationship type used for `*` relationship projections.
 |===
 
