@@ -29,7 +29,9 @@ public interface LogEvent {
 
     String username();
 
-    String id();
+    JobId jobId();
+
+    String taskName();
 
     String message();
 

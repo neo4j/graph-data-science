@@ -20,23 +20,10 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 public interface ProgressEventTracker {
-    // MP
     void addLogEvent(
-        String id,
+        String taskName,
         String message
     );
 
-    // MP
-    void addLogEvent(
-        String id,
-        String message,
-        double progress
-    );
-
-    // MP
-    void addLogEvent(
-        LogEvent event
-    );
-
-    void release(String id);
+    void release();
 }

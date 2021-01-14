@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.LogEvent;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
@@ -74,9 +73,9 @@ public class ListProgressProcTest extends BaseTest {
     void setUp() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(
             db,
-            AlgoProc.class,
             ListProgressProc.class,
             ProgressLoggingAlgoProc.class,
+            ProgressLoggingTestProc.class,
             GraphGenerateProc.class,
             ProgressLoggingTestFastRP.class
         );
@@ -84,90 +83,69 @@ public class ListProgressProcTest extends BaseTest {
 
     @Test
     void canListProgressEvent() {
-        runQuery("CALL gds.test.algo('1')");
+        runQuery("CALL gds.test.pl('myAlgo', 'foo')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            "CALL gds.beta.listProgress() YIELD message RETURN message",
             r -> r.<String>columnAs("message").stream().collect(toList())
         );
-        assertThat(result).containsExactly("hello 1");
+        assertThat(result).containsExactly("foo");
     }
 
     @Test
     void listOnlyLastProgressEvent() {
-        runQuery("CALL gds.test.algo('1')");
-        runQuery("CALL gds.test.algo('2')");
+        runQuery("CALL gds.test.pl('myAlgo1', 'foo', 'bar', 'baz')");
+        runQuery("CALL gds.test.pl('myAlgo2', 'quux', 'frazzle')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
-        var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
+        var progressEvents = runQuery(
+            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+            r -> r.stream().collect(Collectors.toList())
         );
-        assertThat(result).containsExactly("hello 2");
+        assertThat(progressEvents).hasSize(2);
+        assertThat(progressEvents)
+            .containsExactlyInAnyOrder(
+                Map.of("taskName", "myAlgo1", "message", "baz"),
+                Map.of("taskName", "myAlgo2", "message", "frazzle")
+            );
     }
 
     @Test
     void progressIsListedFilteredByUser() {
-        runQuery("Alice", "CALL gds.test.algo('Alice')");
-        runQuery("Bob", "CALL gds.test.algo('Bob')");
+        runQuery("Alice", "CALL gds.test.pl('myAlgo', 'foo')");
+        runQuery("Bob", "CALL gds.test.pl('myAlgo','bar')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
+
         var aliceResult = runQuery(
             "Alice",
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
+            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+            r -> r.stream().collect(Collectors.toList())
         );
-        assertThat(aliceResult).containsExactly("hello Alice");
+        assertThat(aliceResult).containsExactlyInAnyOrder(Map.of("taskName", "myAlgo", "message", "foo"));
+
         var bobResult = runQuery(
             "Bob",
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
-            r -> r.<String>columnAs("message").stream().collect(toList())
-        );
-        assertThat(bobResult).containsExactly("hello Bob");
-    }
-
-    @Test
-    void progressIsListedWithOneEventPerSource() {
-        runQuery("CALL gds.test.algo('foo', 'pagerank')");
-        runQuery("CALL gds.test.algo('bar', 'wcc')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-        List<Map<String, Object>> expected1 = List.of(
-            Map.of("source", "pagerank", "message", "hello foo"),
-            Map.of("source", "wcc", "message", "hello bar")
-        );
-        var result1 = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
             r -> r.stream().collect(Collectors.toList())
         );
-
-        assertThat(result1).containsExactlyInAnyOrderElementsOf(expected1);
-
-        // causing new events, the newer events will be returned for the same keys
-        runQuery("CALL gds.test.algo('apa', 'pagerank')");
-        runQuery("CALL gds.test.algo('bepa', 'wcc')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
-
-        List<Map<String, Object>> expected2 = List.of(
-            Map.of("source", "pagerank", "message", "hello apa"),
-            Map.of("source", "wcc", "message", "hello bepa")
-        );
-        var result2 = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
-            r -> r.stream().collect(Collectors.toList())
-        );
-
-        assertThat(result2).containsExactlyInAnyOrderElementsOf(expected2);
+        assertThat(bobResult).containsExactlyInAnyOrder(Map.of("taskName", "myAlgo", "message", "bar"));
     }
 
-    public static class AlgoProc extends BaseProc {
+    public static class ProgressLoggingTestProc extends BaseProc {
         @Context
         public ProgressEventTracker progress;
 
-        @Procedure("gds.test.algo")
+        @Procedure("gds.test.pl")
         public Stream<Bar> foo(
-            @Name(value = "param") String param,
-            @Name(value = "source", defaultValue = "test") String source
+            @Name(value = "taskName") String taskName,
+            @Name(value = "message1") String message1,
+            @Name(value = "message2", defaultValue = "not set") String message2,
+            @Name(value = "message3", defaultValue = "not set") String message3
         ) {
-            progress.addLogEvent(source, "hello " + param);
+            progress.addLogEvent(taskName, message1);
+            if (message2.equals("not set")) return Stream.empty();
+            progress.addLogEvent(taskName, message2);
+            if (message3.equals("not set")) return Stream.empty();
+            progress.addLogEvent(taskName, message3);
             return Stream.empty();
         }
     }
@@ -178,55 +156,52 @@ public class ListProgressProcTest extends BaseTest {
         runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
-        List<Map<String, Object>> expected = List.of(
-            Map.of("source", "pagerank", "message", "[main] pagerank 100% hello foo"),
-            Map.of("source", "wcc", "message", "[main] wcc 100% hello bar")
-        );
         var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
             r -> r.stream().collect(Collectors.toList())
         );
 
-        assertThat(result)
-            .hasSize(2)
-            .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-            .hasEntrySatisfying("message", v -> assertThat(v).contains("wcc 100% hello bar"))
-            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("wcc"));
-        assertThat(result)
-            .element(1, InstanceOfAssertFactories.map(String.class, String.class))
-            .hasEntrySatisfying("message", v -> assertThat(v).contains("pagerank 100% hello foo"))
-            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("pagerank"));
+        assertThat(result).hasSize(2);
+
+        assertThat(result).contains(Map.of("taskName", "pagerank", "message", "[Test worker] pagerank 100% hello foo"));
+        assertThat(result).contains(Map.of("taskName", "wcc", "message", "[Test worker] wcc 100% hello bar"));
     }
 
     @Test
-    void progressLoggerShouldEmitProgressEventsOnActualAlgo() {
+    void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
         runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
         runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
         List<Map<String, Object>> result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
             r -> r.stream().collect(Collectors.toList())
         );
 
         assertThat(result).hasSize(1)
             .element(0, InstanceOfAssertFactories.map(String.class, String.class))
             .hasEntrySatisfying("message", v -> assertThat(v).contains("100%"))
-            .hasEntrySatisfying("source", v -> assertThat(v).isEqualTo("FastRP"));
+            .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
     }
 
     @Test
-    void progressLoggerShouldClearProgressEventsOnLogFinish() {
-        runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
-        runQuery("CALL gds.test.fastrp('foo', {embeddingDimension: 42})");
+    public void shouldShowProgressForIndividualAlgoRuns() {
+        runQuery("CALL gds.test.pl('algo1', 'msg1')");
+        runQuery("CALL gds.test.pl('algo1', 'msg2')");
         scheduler.forward(100, TimeUnit.MILLISECONDS);
 
-        List<Map<String, Object>> result = runQuery(
-            "CALL gds.beta.listProgress() YIELD source, message RETURN source, message",
+        var progressItems = runQuery(
+            "CALL gds.beta.listProgress() YIELD id, taskName, message RETURN id, taskName, message",
             r -> r.stream().collect(Collectors.toList())
         );
 
-        assertThat(result).isEmpty();
+        assertThat(progressItems).hasSize(2);
+        assertThat(progressItems.get(0).get("id")).isNotEqualTo(progressItems.get(1).get("id"));
+        assertThat(progressItems.get(0).get("taskName")).isEqualTo(progressItems.get(1).get("taskName"));
+        assertThat(progressItems.stream().map(fields -> fields.get("message"))).containsExactlyInAnyOrder(
+            "msg1",
+            "msg2"
+        );
     }
 
     public static class ProgressLoggingAlgoProc extends BaseProc {
@@ -265,22 +240,12 @@ public class ListProgressProcTest extends BaseTest {
             var tracker = this.progressTracker;
             this.progressTracker = new ProgressEventTracker() {
                 @Override
-                public void addLogEvent(String id, String message) {
-                    tracker.addLogEvent(id, message);
+                public void addLogEvent(String taskName, String message) {
+                    tracker.addLogEvent(taskName, message);
                 }
 
                 @Override
-                public void addLogEvent(String id, String message, double progress) {
-                    tracker.addLogEvent(id, message, progress);
-                }
-
-                @Override
-                public void addLogEvent(LogEvent event) {
-                    tracker.addLogEvent(event);
-                }
-
-                @Override
-                public void release(String id) {
+                public void release() {
                     // skip the release because we want to observe the messages after the algo is done
                 }
             };

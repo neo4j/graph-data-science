@@ -46,7 +46,7 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     private final Queue<LogEvent> queue;
 
     private volatile @Nullable JobPromise job;
-    private final Map<String, Map<String, List<LogEvent>>> events;
+    private final Map<String, Map<JobId, List<LogEvent>>> events;
 
     ProgressEventConsumer(
         Monitor monitor,
@@ -99,12 +99,12 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
     private void process(LogEvent event) {
         if (event.isEndOfStream()) {
             if (events.containsKey(event.username())) {
-                events.get(event.username()).remove(event.id());
+                events.get(event.username()).remove(event.jobId());
             }
         } else {
             events
                 .computeIfAbsent(event.username(), __ -> new ConcurrentHashMap<>())
-                .computeIfAbsent(event.id(), __ -> new ArrayList<>())
+                .computeIfAbsent(event.jobId(), __ -> new ArrayList<>())
                 .add(event);
         }
     }

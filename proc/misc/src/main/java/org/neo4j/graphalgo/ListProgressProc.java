@@ -38,11 +38,13 @@ public class ListProgressProc extends BaseProc {
 
     public static class ProgressResult {
 
-        public String source;
+        public String id;
+        public String taskName;
         public String message;
 
         ProgressResult(LogEvent logEvent) {
-            this.source = logEvent.id();
+            this.id = logEvent.jobId().asString();
+            this.taskName = logEvent.taskName();
             this.message = logEvent.message();
         }
     }

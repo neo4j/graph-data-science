@@ -27,41 +27,22 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
     private final Queue<LogEvent> queue;
     private final String username;
 
+    // for now a synthetic id, we can change to a more traceable one as and when
+    private final JobId jobId = JobId.from(String.valueOf(new Object().hashCode() % 100000));
+
     ProgressEventQueueTracker(Queue<LogEvent> queue, String username) {
         this.queue = queue;
         this.username = username;
     }
 
-    // MP
     @Override
-    public void addLogEvent(
-        String id,
-        String message
-    ) {
-        var logEvent = ImmutableLogEvent.of(username, id, message, OptionalDouble.empty());
+    public void addLogEvent(String taskName, String message) {
+        var logEvent = ImmutableLogEvent.of(username, jobId, taskName, message, OptionalDouble.empty());
         this.queue.offer(logEvent);
     }
 
-    // MP
     @Override
-    public void addLogEvent(
-        String id,
-        String message,
-        double progress
-    ) {
-
-    }
-
-    // MP
-    @Override
-    public void addLogEvent(
-        LogEvent event
-    ) {
-
-    }
-
-    @Override
-    public void release(String id) {
-        queue.offer(ImmutableLogEvent.builder().username(username).id(id).message("").isEndOfStream(true).build());
+    public void release() {
+        queue.offer(ImmutableLogEvent.builder().username(username).jobId(jobId).isEndOfStream(true).build());
     }
 }

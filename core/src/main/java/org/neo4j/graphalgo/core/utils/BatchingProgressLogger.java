@@ -111,7 +111,6 @@ public class BatchingProgressLogger implements ProgressLogger {
         var localProgress = callCounter.get();
         if (localProgress.longValue() < batchSize && (localProgress.addAndGet(progress) >= batchSize)) {
             doLogPercentage(msgFactory, progress);
-            progressTracker.addLogEvent(task, msgFactory.get(), progress);
             localProgress.setValue(localProgress.longValue() & (batchSize - 1));
         } else {
             progressCounter.add(progress);
@@ -120,7 +119,7 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     @Override
     public void release() {
-        progressTracker.release(task);
+        progressTracker.release();
     }
 
     private synchronized void doLogPercentage(Supplier<String> msgFactory, long progress) {

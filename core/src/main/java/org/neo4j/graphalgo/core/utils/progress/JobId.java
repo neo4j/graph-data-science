@@ -19,14 +19,38 @@
  */
 package org.neo4j.graphalgo.core.utils.progress;
 
-public enum EmptyProgressEventTracker implements ProgressEventTracker {
-    INSTANCE;
+import java.util.Objects;
 
-    @Override
-    public void addLogEvent(String taskName, String message) {
+public final class JobId {
+    private final Object value;
+
+    private JobId(String value) {
+        this.value = value;
+    }
+
+    public static JobId from(String value) {
+        return new JobId(value);
+    }
+
+    public String asString() {
+        return value.toString();
     }
 
     @Override
-    public void release() {
+    public String toString() {
+        return "JobId(" + value + ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        JobId that = (JobId) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }
