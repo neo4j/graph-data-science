@@ -270,8 +270,8 @@ public final class SparseLongArray {
                 idCount += Long.bitCount(array[page]);
             }
 
-            sortedBlockOffsets = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
-            return new SparseLongArray(idCount, array, blockOffsets, sortedBlockOffsets, blockMapping);
+            var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
+            return new SparseLongArray(idCount, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
     }
 
@@ -328,9 +328,9 @@ public final class SparseLongArray {
             // No need to sort as the blocks are already sorted.
             var blockMapping = new int[blockOffsets.length];
             Arrays.setAll(blockMapping, i -> i);
-            var sortedBlockOffsets = ArrayLayout.constructEytzinger(blockOffsets, blockMapping);
+            var layouts = ArrayLayout.constructEytzinger(blockOffsets, blockMapping);
 
-            return new SparseLongArray(count, array, blockOffsets, sortedBlockOffsets, blockMapping);
+            return new SparseLongArray(count, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {

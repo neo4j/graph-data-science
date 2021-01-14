@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
+
 import java.util.Objects;
 
 public final class ArrayLayout {
@@ -70,7 +72,7 @@ public final class ArrayLayout {
      * @param input the sorted input data
      * @param secondary secondary values that are permuted as well
      */
-    public static long[] constructEytzinger(long[] input, int[] secondary) {
+    public static LayoutAndSecondary constructEytzinger(long[] input, int[] secondary) {
         if (secondary.length != input.length) {
             throw new IllegalArgumentException("Input arrays must be of same length");
         }
@@ -80,8 +82,7 @@ public final class ArrayLayout {
         dest[0] = -1;
         var secondaryDest = new int[secondary.length];
         eytzingerWithSecondary(input.length, input, dest, 0, 1, secondary, secondaryDest);
-        System.arraycopy(secondaryDest, 0, secondary, 0, secondary.length);
-        return dest;
+        return ImmutableLayoutAndSecondary.of(dest, secondaryDest);
     }
 
     private static int eytzinger(int length, long[] source, long[] dest, int sourceIndex, int destIndex) {
@@ -138,6 +139,13 @@ public final class ArrayLayout {
         // Once the index is out of bounds (i.e. index > length), we need to track back and
         // undo all the right branches that we took.
         return index >>> (1 + Integer.numberOfTrailingZeros(index));
+    }
+
+    @ValueClass
+    public interface LayoutAndSecondary {
+        long[] layout();
+
+        int[] secondary();
     }
 
     private ArrayLayout() {}
