@@ -99,6 +99,7 @@ class MultiClassNLRPredictAlgorithmTest {
             1,
             1,
             true,
+            AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
 
@@ -152,6 +153,7 @@ class MultiClassNLRPredictAlgorithmTest {
             1,
             1,
             true,
+            AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
 

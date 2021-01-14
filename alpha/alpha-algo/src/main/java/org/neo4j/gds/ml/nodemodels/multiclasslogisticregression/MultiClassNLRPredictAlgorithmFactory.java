@@ -66,6 +66,7 @@ public class MultiClassNLRPredictAlgorithmFactory extends AbstractAlgorithmFacto
             configuration.batchSize(),
             configuration.concurrency(),
             configuration.predictedProbabilityProperty().isPresent(),
+            tracker,
             progressLogger
         );
     }

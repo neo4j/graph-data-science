@@ -41,6 +41,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
     private final int batchSize;
     private final int concurrency;
     private final boolean produceProbabilities;
+    private final AllocationTracker tracker;
 
     MultiClassNLRPredictAlgorithm(
         MultiClassNLRPredictor predictor,
@@ -48,6 +49,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
         int batchSize,
         int concurrency,
         boolean produceProbabilities,
+        AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
         this.predictor = predictor;
@@ -55,6 +57,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
+        this.tracker = tracker;
         this.progressLogger = progressLogger;
     }
 
@@ -62,7 +65,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
     public MultiClassNLRResult compute() {
         progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
-        var predictedClasses = HugeAtomicLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        var predictedClasses = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
         var consumer = new PredictConsumer(graph, predictor, predictedProbabilities, predictedClasses, progressLogger);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
@@ -87,7 +90,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
             var predictions = HugeObjectArray.newArray(
                 double[].class,
                 graph.nodeCount(),
-                AllocationTracker.empty()
+                tracker
             );
             predictions.setAll(i -> new double[numberOfClasses]);
             return predictions;
