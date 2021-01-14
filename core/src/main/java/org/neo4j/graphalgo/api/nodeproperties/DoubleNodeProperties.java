@@ -40,12 +40,12 @@ public interface DoubleNodeProperties extends NodeProperties {
     default Value value(long nodeId) {
         var value = doubleValue(nodeId);
         return Double.isNaN(value) ? null : Values.doubleValue(value);
-    };
+    }
 
     @Override
     default ValueType valueType() {
         return ValueType.DOUBLE;
-    };
+    }
 
     @Override
     default OptionalDouble getMaxDoublePropertyValue() {

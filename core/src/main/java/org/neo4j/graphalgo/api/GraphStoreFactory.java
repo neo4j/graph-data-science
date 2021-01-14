@@ -71,7 +71,7 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
 
     public GraphDimensions estimationDimensions() {
         return dimensions;
-    };
+    }
 
     protected abstract ProgressLogger initProgressLogger();
 

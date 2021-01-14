@@ -36,7 +36,7 @@ public interface NodeProperties {
 
     default long longValue(long nodeId) {
         throw unsupportedTypeException(ValueType.LONG);
-    };
+    }
 
     @Nullable
     default double[] doubleArrayValue(long nodeId) {

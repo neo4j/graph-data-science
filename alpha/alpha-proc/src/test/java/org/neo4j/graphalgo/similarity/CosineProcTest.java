@@ -162,7 +162,7 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
                     tx,
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0)
-                );
+                )
             ) {
 
                 int cnt = 0;
@@ -201,7 +201,7 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
                     tx,
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0)
-                );
+                )
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {

@@ -82,7 +82,7 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     default RelationshipIntersect intersection() {
         return intersection(Long.MAX_VALUE);
-    };
+    }
 
     RelationshipIntersect intersection(long maxDegree);
 

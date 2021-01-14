@@ -163,7 +163,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void selfLoop() {
-        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);;
+        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
 
         LocalClusteringCoefficient.Result result = compute(graph);
 

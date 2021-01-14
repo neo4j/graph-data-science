@@ -38,13 +38,13 @@ public interface ProgressLogger {
 
     default void logProgress() {
         logProgress(NO_MESSAGE);
-    };
+    }
 
     void logProgress(Supplier<String> msgFactory);
 
     default void logProgress(long progress) {
         logProgress(progress, NO_MESSAGE);
-    };
+    }
 
     void logProgress(long progress, Supplier<String> msgFactory);
 
@@ -150,7 +150,7 @@ public interface ProgressLogger {
         }
 
 
-    };
+    }
 
     interface ProgressLoggerFactory {
         ProgressLogger newLogger(

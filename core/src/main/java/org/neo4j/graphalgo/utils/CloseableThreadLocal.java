@@ -61,7 +61,7 @@ public class CloseableThreadLocal<T> implements Closeable {
                 return initialValueSupplier.get();
             }
         };
-    };
+    }
 
     private ThreadLocal<WeakReference<T>> t = new ThreadLocal<>();
 

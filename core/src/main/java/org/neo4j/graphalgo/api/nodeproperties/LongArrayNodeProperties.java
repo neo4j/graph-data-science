@@ -37,10 +37,10 @@ public interface LongArrayNodeProperties extends NodeProperties {
     default Value value(long nodeId) {
         var value = longArrayValue(nodeId);
         return value == null ? null : Values.longArray(value);
-    };
+    }
 
     @Override
     default ValueType valueType() {
         return ValueType.LONG_ARRAY;
-    };
+    }
 }

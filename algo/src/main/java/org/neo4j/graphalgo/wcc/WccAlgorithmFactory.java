@@ -72,4 +72,4 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
     WccAlgorithmFactory(ProgressLogger.ProgressLoggerFactory factory) {
         super(factory);
     }
-};
+}

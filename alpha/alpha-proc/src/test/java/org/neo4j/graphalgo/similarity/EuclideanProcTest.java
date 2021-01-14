@@ -161,7 +161,7 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
             try(
                 Result result1 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0), "missingValue", 0));
                 Result result2 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0), "missingValue", 0));
-                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0), "missingValue", 0))
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
@@ -187,7 +187,7 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
             try(
                 Result result1 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1), "missingValue", 0));
                 Result result2 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2), "missingValue", 0));
-                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0));
+                Result result4 = runQueryWithoutClosingTheResult(tx, STATEMENT_STREAM, map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4), "missingValue", 0))
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {

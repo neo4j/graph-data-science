@@ -53,10 +53,10 @@ public interface FloatArrayNodeProperties extends NodeProperties {
     default Value value(long nodeId) {
         var value = floatArrayValue(nodeId);
         return value == null ? null : Values.floatArray(value);
-    };
+    }
 
     @Override
     default ValueType valueType() {
         return ValueType.FLOAT_ARRAY;
-    };
+    }
 }

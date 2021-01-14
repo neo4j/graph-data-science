@@ -146,7 +146,7 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
                     tx,
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0))
-                );
+                )
             ) {
                 int cnt = 0;
                 while (result1.hasNext()) {
@@ -184,7 +184,7 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
                     tx,
                     STATEMENT_STREAM,
                     map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4))
-                );
+                )
             ) {
                 while (result1.hasNext()) {
                     Map<String, Object> row1 = result1.next();

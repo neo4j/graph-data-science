@@ -40,7 +40,7 @@ public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipCo
     @Value.Default
     default boolean allowSelfLoops() {
         return false;
-    };
+    }
 
     static CollapsePathConfig of(
         String username,

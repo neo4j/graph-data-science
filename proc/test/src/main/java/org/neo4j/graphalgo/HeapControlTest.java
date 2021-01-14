@@ -47,7 +47,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                        " (michael)-[:WORKS_WITH]->(karin)," +
                        " (arya)-[:FRIENDS]->(karin)";
 
-    private String heapGraphName() { return "heapTestGraph"; };
+    private String heapGraphName() { return "heapTestGraph"; }
 
     @Test
     default void shouldPassOnSufficientMemory() {
