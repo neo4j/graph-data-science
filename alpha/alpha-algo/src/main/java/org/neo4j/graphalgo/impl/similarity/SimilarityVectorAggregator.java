@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SimilarityVectorAggregator {
-    private List<Map<String, Object>> vector = new ArrayList<>();
+    private final List<Map<String, Object>> vector = new ArrayList<>();
     public static String CATEGORY_KEY = "category";
     public static String WEIGHT_KEY = "weight";
 

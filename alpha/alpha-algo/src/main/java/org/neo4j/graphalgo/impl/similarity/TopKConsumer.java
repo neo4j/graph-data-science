@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 public class TopKConsumer<T> implements Function<T, Integer> {
     private final int topK;
     private final T[] heap;
-    private Comparator<T> comparator;
+    private final Comparator<T> comparator;
     private int count;
     private T minValue;
     private T maxValue;

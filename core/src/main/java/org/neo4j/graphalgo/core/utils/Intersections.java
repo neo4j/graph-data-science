@@ -81,7 +81,7 @@ public class Intersections {
         return intersection;
     }
 
-    private static int[] EMPTY = new int[0];
+    private static final int[] EMPTY = new int[0];
 
     public static int[] getIntersection(int[] values1, int[] values2) {
         if (values1 == null || values2 == null) return EMPTY;

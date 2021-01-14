@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.result.CentralityResult;
 import java.util.function.DoubleUnaryOperator;
 
 public class NormalizedCentralityResult extends CentralityResult {
-    private CentralityResult result;
-    private DoubleUnaryOperator normalizationFunction;
+    private final CentralityResult result;
+    private final DoubleUnaryOperator normalizationFunction;
 
     public NormalizedCentralityResult(CentralityResult result, DoubleUnaryOperator normalizationFunction) {
         super(result.array());

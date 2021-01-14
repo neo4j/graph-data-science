@@ -28,7 +28,7 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
     private final Graph graph;
     private final AllocationTracker allocationTracker;
     private long relationshipCount = 0;
-    private long memoryLimit;
+    private final long memoryLimit;
 
     public TestAlgorithm(Graph graph, AllocationTracker allocationTracker, long memoryLimit) {
         this.graph = graph;

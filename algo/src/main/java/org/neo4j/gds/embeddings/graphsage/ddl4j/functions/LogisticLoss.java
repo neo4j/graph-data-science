@@ -44,13 +44,13 @@ import static java.lang.Math.log;
  */
 public class LogisticLoss extends AbstractVariable<Scalar> {
     // 1 x d
-    private Variable<Matrix> weights;
+    private final Variable<Matrix> weights;
     // n x 1
-    private Variable<Matrix> predictions;
+    private final Variable<Matrix> predictions;
     // n x d
-    private Variable<Matrix> features;
+    private final Variable<Matrix> features;
     // n x 1
-    private Variable<Matrix> targets;
+    private final Variable<Matrix> targets;
 
     public LogisticLoss(
         Variable<Matrix> weights,

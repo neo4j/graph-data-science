@@ -54,9 +54,9 @@ public class TopNList {
     public Stream<SimilarityResult> stream() {
         Iterable<SimilarityResult> iterable = () -> new Iterator<SimilarityResult>() {
 
-            PrimitiveIterator.OfLong elements1Iter = queue.elements1().iterator();
-            PrimitiveIterator.OfLong elements2Iter = queue.elements2().iterator();
-            PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
+            final PrimitiveIterator.OfLong elements1Iter = queue.elements1().iterator();
+            final PrimitiveIterator.OfLong elements2Iter = queue.elements2().iterator();
+            final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
 
             @Override
             public boolean hasNext() {

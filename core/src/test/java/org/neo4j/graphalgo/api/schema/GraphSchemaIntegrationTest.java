@@ -44,12 +44,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GraphSchemaIntegrationTest extends BaseTest {
 
-    private static String DB_CYPHER = "CREATE" +
-                                      "  (a:Node {prop: 1})" +
-                                      ", (b:Node {prop: 2})" +
-                                      ", (c:Node)" +
-                                      ", (a)-[:REL {relProp: 42.0}]->(b)" +
-                                      ", (b)-[:REL]->(c)";
+    private static final String DB_CYPHER = "CREATE" +
+                                            "  (a:Node {prop: 1})" +
+                                            ", (b:Node {prop: 2})" +
+                                            ", (c:Node)" +
+                                            ", (a)-[:REL {relProp: 42.0}]->(b)" +
+                                            ", (b)-[:REL]->(c)";
 
     @BeforeEach
     void setup() {

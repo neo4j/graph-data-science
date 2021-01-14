@@ -36,7 +36,7 @@ public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final BatchProvider batchProvider;
     private final int concurrency;
-    private boolean isWeighted;
+    private final boolean isWeighted;
     private final FeatureFunction featureFunction;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;

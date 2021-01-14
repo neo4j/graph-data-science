@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.impl.similarity;
 
 public class RleDecoder {
-    private RleReader item1Reader;
-    private RleReader item2Reader;
+    private final RleReader item1Reader;
+    private final RleReader item2Reader;
 
     public RleDecoder(int initialSize) {
         item1Reader = new RleReader(initialSize);

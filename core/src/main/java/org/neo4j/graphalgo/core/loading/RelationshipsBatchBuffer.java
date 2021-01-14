@@ -35,7 +35,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     private final IdMapping idMap;
     private final int type;
-    private boolean throwOnUnMappedNodeIds;
+    private final boolean throwOnUnMappedNodeIds;
 
     private final long[] sortCopy;
     private final int[] histogram;

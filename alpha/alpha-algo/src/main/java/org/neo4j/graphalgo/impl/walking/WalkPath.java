@@ -37,8 +37,8 @@ public class WalkPath implements Path {
     public static final Path EMPTY = new WalkPath(0);
     private static final RelationshipType NEXT = RelationshipType.withName("NEXT");
 
-    private List<Node> nodes;
-    private List<Relationship> relationships;
+    private final List<Node> nodes;
+    private final List<Relationship> relationships;
     private final int size;
 
     private WalkPath(int size) {

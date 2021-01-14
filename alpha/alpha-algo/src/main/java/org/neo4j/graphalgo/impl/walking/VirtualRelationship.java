@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static java.util.Arrays.asList;
 
 public class VirtualRelationship implements Relationship {
-    private static AtomicLong MIN_ID = new AtomicLong(-1);
+    private static final AtomicLong MIN_ID = new AtomicLong(-1);
     private final Node startNode;
     private final Node endNode;
     private final RelationshipType type;

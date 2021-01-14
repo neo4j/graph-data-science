@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput {
     private final long id;
-    private int itemCount;
+    private final int itemCount;
     private final double[] weights;
     private final int initialSize;
 
