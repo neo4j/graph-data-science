@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.ml.BatchQueue;
-import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfigImpl;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRObjective;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class NodeClassificationTrain
     extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
@@ -52,33 +52,37 @@ public class NodeClassificationTrain
 
     @Override
     public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
-        var objective = new MultiClassNLRObjective(
-            config.featureProperties(),
-            config.targetProperty(),
-            graph,
-            // TODO: this is madness
-            ((double) config.params().get(0).get("penalty"))
-        );
-        var multiClassNLRTrainConfig = new MultiClassNLRTrainConfigImpl(
-            config.featureProperties(),
-            config.targetProperty(),
-            CypherMapWrapper.create(config.params().get(0))
-        );
-        var training = new Training(multiClassNLRTrainConfig, log, graph.nodeCount());
-        training.train(
-            objective,
-            () -> new BatchQueue(graph.nodeCount(), multiClassNLRTrainConfig.batchSize()),
-            config.concurrency()
-        );
+        var concreteConfig = modelSelect(graph, concreteConfigs(), log);
+        var concreteTrain = new MultiClassNLRTrain(graph, concreteConfig, log);
+        var modelData = concreteTrain.compute();
 
         return Model.of(
             config.username(),
             config.modelName(),
             MODEL_TYPE,
             graph.schema(),
-            objective.modelData(),
+            modelData,
             config
         );
+    }
+
+    private MultiClassNLRTrainConfig modelSelect(
+        Graph graph,
+        List<MultiClassNLRTrainConfig> concreteConfigs,
+        Log log
+    ) {
+        // TODO: do real model selection
+        return concreteConfigs.get(0);
+    }
+
+    private List<MultiClassNLRTrainConfig> concreteConfigs() {
+        return config.params().stream()
+            .map(singleParams -> MultiClassNLRTrainConfig.of(
+                    config.featureProperties(),
+                    config.targetProperty(),
+                    singleParams
+                )
+            ).collect(Collectors.toList());
     }
 
     @Override

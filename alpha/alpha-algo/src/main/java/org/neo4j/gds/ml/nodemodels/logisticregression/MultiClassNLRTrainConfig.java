@@ -23,8 +23,10 @@ import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 @ValueClass
 @Configuration
@@ -37,5 +39,17 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
     String targetProperty();
 
     double penalty();
+
+    static MultiClassNLRTrainConfig of(
+        List<String> featureProperties,
+        String targetProperty,
+        Map<String, Object> params
+    ) {
+        return new MultiClassNLRTrainConfigImpl(
+            featureProperties,
+            targetProperty,
+            CypherMapWrapper.create(params)
+        );
+    }
 
 }
