@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -68,7 +69,7 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.drop("", "model");
+        ModelCatalog.drop(getUsername(), "model");
     }
 
     @Test
@@ -157,9 +158,9 @@ class MultiClassNLRMutateProcTest extends BaseProcTest {
         classIdMap.toMapped(0);
         classIdMap.toMapped(1);
         var model = Model.of(
-            "",
+            getUsername(),
             "model",
-            "",
+            MultiClassNLRTrain.MODEL_TYPE,
             GraphSchema.empty(),
             MultiClassNLRData.builder()
                 .weights(new Weights<>(new Matrix(new double[]{
