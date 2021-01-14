@@ -23,4 +23,14 @@ public interface TrainingStopper {
     void registerLoss(double loss);
     boolean terminated();
     boolean converged();
+
+    static TrainingStopper defaultStopper(TrainingConfig config) {
+        return new StreakStopper(
+            config.minIterations(),
+            config.maxStreakCount(),
+            config.maxIterations(),
+            config.windowSize(),
+            config.tolerance()
+        );
+    }
 }

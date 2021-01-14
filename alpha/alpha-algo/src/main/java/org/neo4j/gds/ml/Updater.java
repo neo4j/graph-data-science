@@ -19,8 +19,18 @@
  */
 package org.neo4j.gds.ml;
 
+import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+
+import java.util.List;
 
 public interface Updater {
     void update(ComputationContext ctx);
+
+    static Updater defaultUpdater(List<Weights<? extends Tensor<?>>> weights) {
+        AdamOptimizer adamOptimizer = new AdamOptimizer(weights);
+        return adamOptimizer::update;
+    }
 }

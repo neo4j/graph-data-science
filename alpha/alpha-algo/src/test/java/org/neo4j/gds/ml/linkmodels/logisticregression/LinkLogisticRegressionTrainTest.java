@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.ImmutableTrainingSettings;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -58,13 +57,11 @@ class LinkLogisticRegressionTrainTest {
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
                 .concurrency(1)
+                .maxIterations(100000)
+                .tolerance(1e-4)
                 .build();
 
-        var trainingSettings = ImmutableTrainingSettings.builder()
-            .maxIterations(100000)
-            .tolerance(1e-4)
-            .build();
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
+        var linearRegression = new LinkLogisticRegressionTrain(graph, config, new TestLog());
 
         var result = linearRegression.compute().modelData();
 

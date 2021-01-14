@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -32,7 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
+public interface NodeLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, TrainingConfig {
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();

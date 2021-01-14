@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.ImmutableTrainingSettings;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
@@ -56,13 +55,11 @@ class MultiClassNLRTrainTest {
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .concurrency(1)
-            .build();
-        var trainingSettings = ImmutableTrainingSettings.builder()
             .maxIterations(100000)
             .tolerance(1e-4)
             .build();
 
-        var algo = new MultiClassNLRTrain(graph, trainingSettings, config, new TestLog());
+        var algo = new MultiClassNLRTrain(graph, config, new TestLog());
 
         var result = algo.compute().data();
 

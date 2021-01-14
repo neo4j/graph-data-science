@@ -20,56 +20,41 @@
 package org.neo4j.gds.ml;
 
 import org.immutables.value.Value;
-import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.List;
-
-@ValueClass
-public interface TrainingSettings {
+public interface TrainingConfig {
 
     @Value.Default
     default int batchSize() {
         return 100;
     }
+
     @Value.Default
     default int minIterations() {
         return 1;
     }
+
     @Value.Default
     default int maxStreakCount() {
         return 1;
     }
+
     @Value.Default
     default int maxIterations() {
         return 100;
     }
+
     @Value.Default
     default int windowSize() {
         return 1;
     }
+
     @Value.Default
     default double tolerance() {
         return 1e-3;
     }
 
-    default Updater updater(List<Weights<? extends Tensor<?>>> weights) {
-        AdamOptimizer adamOptimizer = new AdamOptimizer(weights);
-        return adamOptimizer::update;
-    }
-
-    default TrainingStopper stopper() {
-        //TODO: move these to configuration?
-        return new StreakStopper(minIterations(), maxStreakCount(), maxIterations(), windowSize(), tolerance());
-    }
-
+    @Value.Default
     default boolean sharedUpdater() {
         return false;
-    }
-
-    default BatchQueue batchQueue(long nodeCount) {
-        return new BatchQueue(nodeCount, batchSize());
     }
 }
