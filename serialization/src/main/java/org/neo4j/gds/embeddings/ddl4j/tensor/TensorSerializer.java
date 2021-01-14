@@ -45,13 +45,13 @@ public final class TensorSerializer {
         );
     }
 
-    static ProtoTensor.Vector toSerializable(Vector vector) {
+    public static ProtoTensor.Vector toSerializable(Vector vector) {
         return ProtoTensor.Vector.newBuilder()
             .addAllData(ProtoUtils.toList(vector.data()))
             .build();
     }
 
-    static Vector fromSerializable(ProtoTensor.Vector protoVector) {
+    public static Vector fromSerializable(ProtoTensor.Vector protoVector) {
         return new Vector(ProtoUtils.toArray(protoVector.getDataList()));
     }
 
