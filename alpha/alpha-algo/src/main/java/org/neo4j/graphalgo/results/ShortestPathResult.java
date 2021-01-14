@@ -49,8 +49,6 @@ public class ShortestPathResult {
 
     public static class Builder extends AbstractResultBuilder<ShortestPathResult> {
 
-        private String targetProperty = "";
-
         @Override
         public ShortestPathResult build() {
             return new ShortestPathResult(
@@ -58,7 +56,7 @@ public class ShortestPathResult {
                 computeMillis,
                 writeMillis,
                 nodeCount,
-                targetProperty
+                ""
             );
         }
     }
