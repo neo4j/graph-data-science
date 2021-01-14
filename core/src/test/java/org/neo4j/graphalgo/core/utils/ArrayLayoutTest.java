@@ -157,7 +157,7 @@ class ArrayLayoutTest {
         long[] values = {13, 37, 42};
         int[] secondaryValues = {1, 2, 3};
 
-        ArrayLayout.constructEytzinger(values, secondaryValues);
-        assertThat(secondaryValues).containsExactly(2, 1, 3);
+        var layouts = ArrayLayout.constructEytzinger(values, secondaryValues);
+        assertThat(layouts.secondary()).containsExactly(2, 1, 3);
     }
 }
