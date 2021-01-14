@@ -132,6 +132,9 @@ public final class SparseLongArray {
 
     public long toOriginalNodeId(long mappedId) {
         var startBlockIndex = ArrayLayout.searchEytzinger(sortedBlockOffsets, mappedId);
+        // since the eytzinger layout is 1-based and reserves the index 0 for the 'lower-than-lower-bound' case
+        // and we know that we won't trigger that case, as our lower bound is 0
+        // we subtract 1 to get to the actual index in the block mapping array.
         startBlockIndex = blockMapping[startBlockIndex - 1];
         var array = this.array;
         var blockStart = startBlockIndex << BLOCK_SHIFT;
