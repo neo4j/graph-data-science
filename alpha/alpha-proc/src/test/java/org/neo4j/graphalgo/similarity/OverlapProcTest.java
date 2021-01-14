@@ -219,12 +219,6 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
 
     @Test
     void overlapStreamSourceTargetIdsTest() {
-//        Map<String, Object> config = map(
-//                "concurrency", 1,
-//                "sourceIds", Collections.singletonList(1L),
-//                "targetIds", Collections.singletonList(0L)
-//        );
-
         Map<String, Object> config = map(
             "concurrency", 1,
             "sourceIds", Collections.singletonList(1L)
