@@ -42,20 +42,17 @@ public class Training {
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater singleUpdater = config.sharedUpdater() ? Updater.defaultUpdater(objective.weights()) : null;
-        Updater[] updaters = null;
-        if (!config.sharedUpdater()) {
-            updaters = new Updater[concurrency];
-            for (int i = 0; i < concurrency; i++) {
-                updaters[i] = Updater.defaultUpdater(objective.weights());
-            }
+        Updater[] updaters = new Updater[concurrency];
+        updaters[0] = Updater.defaultUpdater(objective.weights());
+        for (int i = 1; i < concurrency; i++) {
+            updaters[i] = config.sharedUpdater() ? updaters[0] : Updater.defaultUpdater(objective.weights());
         }
         int epoch = 0;
         TrainingStopper stopper = TrainingStopper.defaultStopper(config);
         double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
         double lastLoss = initialLoss;
         while (!stopper.terminated()) {
-            trainEpoch(config, objective, queueSupplier.get(), concurrency, singleUpdater, updaters);
+            trainEpoch(objective, queueSupplier.get(), concurrency, updaters);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
@@ -87,11 +84,9 @@ public class Training {
     }
 
     private void trainEpoch(
-        TrainingConfig settings,
         Objective<?> objective,
         BatchQueue batches,
         int concurrency,
-        Updater singleUpdater,
         Updater[] updaters
     ) {
         batches.parallelConsume(
@@ -99,7 +94,7 @@ public class Training {
             jobId ->
                 new ObjectiveUpdateConsumer(
                     objective,
-                    settings.sharedUpdater() ? singleUpdater : updaters[jobId],
+                    updaters[jobId],
                     trainSize
                 )
         );
