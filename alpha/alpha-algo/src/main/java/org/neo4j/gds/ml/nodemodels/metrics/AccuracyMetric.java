@@ -27,16 +27,12 @@ import java.math.RoundingMode;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class AccuracyMetric implements Metric {
-    private long accuratePredictions;
-
-    AccuracyMetric() {
-        this.accuratePredictions = 0;
-    }
 
     @Override
     public double compute(
         HugeAtomicLongArray targets, HugeAtomicLongArray predictions
     ) {
+        long accuratePredictions = 0;
         assert targets.size() == predictions.size() : formatWithLocale(
             "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
             targets.size(),
