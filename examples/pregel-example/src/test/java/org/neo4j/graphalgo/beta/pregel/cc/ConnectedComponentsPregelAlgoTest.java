@@ -97,7 +97,7 @@ class ConnectedComponentsPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(2, result.ranIterations());
+        assertEquals(1, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);
@@ -134,7 +134,7 @@ class ConnectedComponentsPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(2, result.ranIterations());
+        assertEquals(1, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);

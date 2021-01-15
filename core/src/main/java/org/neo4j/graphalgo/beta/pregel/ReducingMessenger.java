@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 /**
@@ -41,7 +40,6 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
 
     private HugeAtomicDoubleArray sendArray;
     private HugeAtomicDoubleArray receiveArray;
-    private HugeAtomicBitSet messageBits;
 
     ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker tracker) {
         this.graph = graph;
@@ -60,22 +58,18 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     }
 
     @Override
-    public void initIteration(int iteration, HugeAtomicBitSet messageBits) {
-        this.messageBits = messageBits;
-
+    public void initIteration(int iteration) {
         // Swap arrays
         var tmp = receiveArray;
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
-        // fill send array with identity value
-        var identity = reducer.identity();
-        ParallelUtil.parallelForEachNode(graph, config.concurrency(), nodeId -> sendArray.set(nodeId, identity));
+        ParallelUtil.parallelForEachNode(graph, config.concurrency(), nodeId -> sendArray.set(nodeId, Double.NaN));
     }
 
     @Override
     public void sendTo(long targetNodeId, double message) {
-        sendArray.update(targetNodeId, current -> reducer.reduce(current, message));
+        sendArray.update(targetNodeId, current -> reducer.reduce(Double.isNaN(current) ? reducer.identity() : current, message));
     }
 
     @Override
@@ -86,7 +80,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     @Override
     public void initMessageIterator(ReducingMessenger.SingleMessageIterator messageIterator, long nodeId) {
         var message = receiveArray.getAndReplace(nodeId, reducer.identity());
-        messageIterator.init(message, messageBits.get(nodeId));
+        messageIterator.init(message);
     }
 
     @Override
@@ -100,9 +94,9 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         boolean hasNext;
         double message;
 
-        void init(double value, boolean hasNext) {
+        void init(double value) {
             this.message = value;
-            this.hasNext = hasNext;
+            this.hasNext = !Double.isNaN(value);
         }
 
         @Override

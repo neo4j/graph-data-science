@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.beta.pregel;
 
 public interface Reducer {
 
+    // TODO define noValue value
+
     /**
      * The identity element is used as the initial value.
      */

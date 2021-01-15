@@ -118,7 +118,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(4, result.ranIterations());
+        assertEquals(2, result.ranIterations());
 
        var expected = Map.of(
             "a", 0L,
@@ -154,7 +154,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(4, result.ranIterations());
+        assertEquals(2, result.ranIterations());
 
         var expected = Map.of(
             "a", 0L,
@@ -203,7 +203,7 @@ class BFSPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(3, result.ranIterations());
+        assertEquals(2, result.ranIterations());
 
         TestSupport.assertLongValues(parentGraph, (nodeId) -> result.nodeValues().longValue(BFSParentPregel.PARENT,nodeId), expected);
     }
