@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 public interface Metric {
 
-    double compute(HugeAtomicLongArray targets, HugeAtomicLongArray predictions);
+    double compute(HugeLongArray targets, HugeLongArray predictions);
 
 }

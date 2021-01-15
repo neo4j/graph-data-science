@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -36,7 +36,7 @@ public class F1Score implements Metric {
 
     @Override
     public double compute(
-        HugeAtomicLongArray targets, HugeAtomicLongArray predictions
+        HugeLongArray targets, HugeLongArray predictions
     ) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",

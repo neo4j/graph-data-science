@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,10 +27,9 @@ import java.math.RoundingMode;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class AccuracyMetric implements Metric {
-
     @Override
     public double compute(
-        HugeAtomicLongArray targets, HugeAtomicLongArray predictions
+        HugeLongArray targets, HugeLongArray predictions
     ) {
         long accuratePredictions = 0;
         assert targets.size() == predictions.size() : formatWithLocale(

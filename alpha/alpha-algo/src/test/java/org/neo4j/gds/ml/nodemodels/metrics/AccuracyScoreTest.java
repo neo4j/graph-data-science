@@ -21,44 +21,32 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.metrics.MetricsTestUtil.hugeAtomicLongArray;
 
 class AccuracyMetricTest {
 
     @Test
     void shouldComputeAccuracy() {
-        var predictions = hugeAtomicLongArray(new long[] {
-            3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
-        });
-        var targets = hugeAtomicLongArray(new long[] {
-            4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
-        });
+        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeLongArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
         var metric = new AccuracyMetric();
         assertThat(metric.compute(targets, predictions)).isCloseTo(7.0/15, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeAccuracyAllCorrect() {
-        var predictions = hugeAtomicLongArray(new long[] {
-            3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
-        });
-        var targets = hugeAtomicLongArray(new long[] {
-            3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
-        });
+        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var metric = new AccuracyMetric();
         assertThat(metric.compute(targets, predictions)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeAccuracyAllWrong() {
-        var predictions = hugeAtomicLongArray(new long[] {
-            3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
-        });
-        var targets = hugeAtomicLongArray(new long[] {
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        });
+        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeLongArray.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var metric = new AccuracyMetric();
         assertThat(metric.compute(targets, predictions)).isCloseTo(0.0, Offset.offset(1e-8));
     }

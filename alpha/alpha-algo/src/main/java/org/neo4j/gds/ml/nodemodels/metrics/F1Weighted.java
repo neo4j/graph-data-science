@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
 public class F1Weighted implements Metric {
 
     private final Multiset<Long> targetCounts;
 
-    F1Weighted(HugeAtomicLongArray targets) {
+    F1Weighted(HugeLongArray targets) {
         this.targetCounts = new Multiset<>();
         for (long offset = 0; offset < targets.size(); offset++) {
             targetCounts.add(targets.get(offset));
@@ -35,7 +35,7 @@ public class F1Weighted implements Metric {
 
     @Override
     public double compute(
-        HugeAtomicLongArray targets, HugeAtomicLongArray predictions
+        HugeLongArray targets, HugeLongArray predictions
     ) {
         var distinctTargets = this.targetCounts.keys()
             .stream();

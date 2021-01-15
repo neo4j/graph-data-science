@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.function.Consumer;
@@ -65,7 +65,7 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
     public MultiClassNLRResult compute() {
         progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
-        var predictedClasses = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
+        var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
         var consumer = new PredictConsumer(graph, predictor, predictedProbabilities, predictedClasses, progressLogger);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
@@ -103,14 +103,14 @@ public class MultiClassNLRPredictAlgorithm extends Algorithm<MultiClassNLRPredic
         private final Graph graph;
         private final Predictor<Matrix, MultiClassNLRData> predictor;
         private final HugeObjectArray<double[]> predictedProbabilities;
-        private final HugeAtomicLongArray predictedClasses;
+        private final HugeLongArray predictedClasses;
         private final ProgressLogger progressLogger;
 
         PredictConsumer(
             Graph graph,
             Predictor<Matrix, MultiClassNLRData> predictor,
             @Nullable HugeObjectArray<double[]> predictedProbabilities,
-            HugeAtomicLongArray predictedClasses,
+            HugeLongArray predictedClasses,
             ProgressLogger progressLogger
         ) {
             this.graph = graph;

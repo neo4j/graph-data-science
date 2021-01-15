@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +30,7 @@ public class F1Macro implements Metric {
 
     private final List<F1Score> metrics;
 
-    F1Macro(HugeAtomicLongArray targets) {
+    F1Macro(HugeLongArray targets) {
         Set<Long> distinctTargets = new HashSet<>();
         for (long offset = 0; offset < targets.size(); offset++) {
             distinctTargets.add(targets.get(offset));
@@ -43,7 +43,7 @@ public class F1Macro implements Metric {
 
     @Override
     public double compute(
-        HugeAtomicLongArray targets, HugeAtomicLongArray predictions
+        HugeLongArray targets, HugeLongArray predictions
     ) {
         return this.metrics
             .stream()

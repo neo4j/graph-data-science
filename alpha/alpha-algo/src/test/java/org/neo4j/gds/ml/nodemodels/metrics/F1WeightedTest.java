@@ -22,24 +22,23 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.metrics.MetricsTestUtil.hugeAtomicLongArray;
 
 class F1WeightedTest {
 
-    private HugeAtomicLongArray targets;
-    private HugeAtomicLongArray predictions;
+    private HugeLongArray targets;
+    private HugeLongArray predictions;
 
     @BeforeEach
     void setup() {
-        predictions = hugeAtomicLongArray(new long[] {
+        predictions = HugeLongArray.of(
             3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
-        });
-        targets = hugeAtomicLongArray(new long[] {
+        );
+        targets = HugeLongArray.of(
             4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
-        });
+        );
 
     }
 

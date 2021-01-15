@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -33,7 +33,7 @@ public final class MetricFactory {
         ACCURACY
     }
 
-    public static Metric create(MetricType metricType, HugeAtomicLongArray targets) {
+    public static Metric create(MetricType metricType, HugeLongArray targets) {
         switch(metricType) {
             case F1_WEIGHTED:
                 return new F1Weighted(targets);
