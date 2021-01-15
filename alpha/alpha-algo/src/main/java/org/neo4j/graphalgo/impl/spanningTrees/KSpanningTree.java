@@ -32,8 +32,7 @@ import java.util.function.DoubleUnaryOperator;
  * The algorithm computes the MST by traversing all nodes from a given
  * startNodeId. It aggregates all transitions into a MinPriorityQueue
  * and visits each (unvisited) connected node by following only the
- * cheapest transition and adding it to a specialized form of
- * {@link org.neo4j.graphalgo.core.utils.container.UndirectedTree}.
+ * cheapest transition and adding it to a specialized form of undirected tree.
  * <p>
  * After calculating the MST the algorithm cuts the tree at its k weakest
  * relationships to form k spanning trees
