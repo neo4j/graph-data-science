@@ -36,7 +36,6 @@ class ProgressEventConsumerTest {
     @Test
     void testConsumerLifecycle() {
         var username = AuthSubject.ANONYMOUS.username();
-        var expectedEvents = new ArrayList<LogEvent>();
 
         var fakeClockScheduler = new FakeClockJobScheduler();
         var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
@@ -46,8 +45,8 @@ class ProgressEventConsumerTest {
         // initial set is empty
         assertThat(consumer.query(username)).isEmpty();
 
-        var event = ImmutableLogEvent.of(username, new JobId(), "foo", "bar", 42.0);
-        queue.add(event);
+        var event1 = ImmutableLogEvent.of(username, new JobId(), "foo", "bar", 42.0);
+        queue.add(event1);
 
         // nothing polled yet
         assertThat(consumer.query(username)).isEmpty();
@@ -55,20 +54,18 @@ class ProgressEventConsumerTest {
         consumer.start();
 
         // starting the component will trigger the initial polling
-        expectedEvents.add(event);
-        assertThat(consumer.query(username)).containsExactlyElementsOf(expectedEvents);
+        assertThat(consumer.query(username)).containsExactly(event1);
 
         // add another event
-        event = ImmutableLogEvent.of(username, new JobId(), "baz", "qux", 1337.0);
-        queue.add(event);
+        var event2 = ImmutableLogEvent.of(username, new JobId(), "baz", "qux", 1337.0);
+        queue.add(event2);
 
         // nothing is polled ...
-        assertThat(consumer.query(username)).containsExactlyElementsOf(expectedEvents);
+        assertThat(consumer.query(username)).containsExactly(event1);
 
         // ...until we advance the time
-        expectedEvents.add(event);
         fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
-        assertThat(consumer.query(username)).containsExactlyElementsOf(expectedEvents);
+        assertThat(consumer.query(username)).containsExactlyInAnyOrder(event1, event2);
 
         consumer.stop();
     }
