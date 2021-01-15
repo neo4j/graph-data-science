@@ -142,9 +142,9 @@ public class ListProgressProcTest extends BaseTest {
             @Name(value = "message3", defaultValue = "not set") String message3
         ) {
             progress.addLogEvent(taskName, message1);
-            if (message2.equals("not set")) return Stream.empty();
+            if (message2.equals("not set")) { return Stream.empty(); }
             progress.addLogEvent(taskName, message2);
-            if (message3.equals("not set")) return Stream.empty();
+            if (message3.equals("not set")) { return Stream.empty(); }
             progress.addLogEvent(taskName, message3);
             return Stream.empty();
         }
