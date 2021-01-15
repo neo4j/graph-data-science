@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,10 +87,6 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
 
     public Stream<PropertyMapping> stream() {
         return mappings().stream();
-    }
-
-    public Optional<PropertyMapping> head() {
-        return stream().findFirst();
     }
 
     @Override
@@ -168,26 +163,7 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             propertyMappings.forEach(this::addMapping);
         }
 
-        void addOptionalMapping(PropertyMapping mapping) {
-            Objects.requireNonNull(mapping, "Given UnresolvedPropertyMapping must not be null.");
-            if (mapping.hasValidName()) {
-                addMapping(mapping);
-            }
-        }
-
-        public void addOptionalMappings(PropertyMapping... propertyMappings) {
-            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
-            for (PropertyMapping propertyMapping : propertyMappings) {
-                addOptionalMapping(propertyMapping);
-            }
-        }
-
-        public void addOptionalMappings(Stream<? extends PropertyMapping> propertyMappings) {
-            Objects.requireNonNull(propertyMappings, "propertyMappings must not be null.");
-            propertyMappings.forEach(this::addOptionalMapping);
-        }
-
-        public Builder withDefaultAggregation(Aggregation aggregation) {
+       public Builder withDefaultAggregation(Aggregation aggregation) {
             this.aggregation = Objects.requireNonNull(
                 aggregation,
                 "aggregation must not be empty"

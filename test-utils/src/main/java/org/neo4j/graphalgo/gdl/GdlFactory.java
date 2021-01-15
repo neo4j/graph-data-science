@@ -318,14 +318,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         ));
     }
 
-    private ValueType inferValueType(Object gdlValue) {
-        if (gdlValue instanceof Long || gdlValue instanceof Integer) {
-            return ValueType.LONG;
-        } else {
-            return ValueType.DOUBLE;
-        }
-    }
-
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
         if (gdlValue instanceof Number) {
             return ((Number) gdlValue).doubleValue();

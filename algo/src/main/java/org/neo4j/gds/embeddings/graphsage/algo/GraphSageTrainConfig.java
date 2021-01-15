@@ -194,26 +194,6 @@ public interface GraphSageTrainConfig extends
         );
     }
 
-    static GraphSageTrainConfig of(
-        String modelName,
-        ActivationFunction activationFunction,
-        Aggregator.AggregatorType aggregator,
-        int batchSize,
-        int embeddingDimension,
-        List<String> featureProperties,
-        double tolerance
-    ) {
-        return ImmutableGraphSageTrainConfig.builder()
-            .modelName(modelName)
-            .activationFunction(activationFunction)
-            .aggregator(aggregator)
-            .batchSize(batchSize)
-            .embeddingDimension(embeddingDimension)
-            .featureProperties(featureProperties)
-            .tolerance(tolerance)
-            .build();
-    }
-
     @Configuration.Ignore
     default void validateAgainstGraphStore(GraphStoreWithConfig graphStoreWithConfig) {
         var graphStore = graphStoreWithConfig.graphStore();

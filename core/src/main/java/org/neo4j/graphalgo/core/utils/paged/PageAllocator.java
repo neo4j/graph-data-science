@@ -118,14 +118,6 @@ public abstract class PageAllocator<T> {
             return numPages * bytesPerPage;
         }
 
-        public long estimateMemoryUsage(long size, Class<?> container) {
-            return sizeOfInstance(container) + estimateMemoryUsage(size);
-        }
-
-        int pageSize() {
-            return pageSize;
-        }
-
         PageAllocator<T> newAllocator(AllocationTracker tracker) {
             if (AllocationTracker.isTracking(tracker)) {
                 return new TrackingAllocator<>(

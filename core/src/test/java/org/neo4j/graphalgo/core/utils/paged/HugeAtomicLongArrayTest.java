@@ -431,13 +431,6 @@ final class HugeAtomicLongArrayTest {
     }
 
     /**
-     * Fails with message "should throw exception".
-     */
-    private void shouldThrow() {
-        fail("Should throw exception");
-    }
-
-    /**
      * Returns a new started daemon Thread running the given runnable.
      */
     private Thread newStartedThread(Runnable runnable) {

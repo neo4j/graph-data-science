@@ -161,10 +161,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
             this.pages = pages;
         }
 
-        public int length() {
-            return degree;
-        }
-
         @Override
         public boolean hasNextLong() {
             return offset < limit;

@@ -97,10 +97,6 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
         return this.spanningTree;
     }
 
-    public SpanningTree getSpanningTree() {
-        return spanningTree;
-    }
-
     @Override
     public KSpanningTree me() {
         return this;

@@ -418,10 +418,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return this.didConverge;
     }
 
-    public double getTolerance() {
-        return tolerance;
-    }
-
     public LongNodeProperties asNodeProperties() {
         return new LongNodeProperties() {
             @Override

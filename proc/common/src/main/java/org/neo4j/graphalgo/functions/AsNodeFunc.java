@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.functions;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
@@ -35,8 +34,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class AsNodeFunc {
-    @Context
-    public GraphDatabaseService api;
 
     @Context
     public KernelTransaction tx;

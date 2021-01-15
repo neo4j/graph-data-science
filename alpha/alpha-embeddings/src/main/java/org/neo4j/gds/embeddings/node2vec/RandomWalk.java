@@ -117,10 +117,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         });
     }
 
-    private long toOriginalNodeId(long currentNodeId) {
-        return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
-    }
-
     private static <T> void put(BlockingQueue<T> queue, T items) {
         try {
             queue.put(items);

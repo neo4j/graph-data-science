@@ -22,8 +22,7 @@ package org.neo4j.graphalgo.impl.similarity;
 import java.util.Arrays;
 import java.util.List;
 
-public class Weights {
-    public static final long REPEAT_CUTOFF = 3L;
+public final class Weights {
 
     public static double[] buildWeights(List<Number> weightList) {
         double[] weights = new double[weightList.size()];
@@ -115,4 +114,6 @@ public class Weights {
 
         return Arrays.copyOf(weights, i);
     }
+
+    private Weights() {}
 }

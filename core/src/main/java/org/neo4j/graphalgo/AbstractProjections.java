@@ -39,12 +39,4 @@ public abstract class AbstractProjections<I extends ElementIdentifier, P extends
     public Collection<P> allProjections() {
         return projections().values();
     }
-
-    /**
-     * Returns all projections except PROJECT_ALL projections.
-     */
-    public Collection<P> explicitProjections() {
-        return allProjections().stream().filter(p -> !p.projectAll()).collect(Collectors.toList());
-    }
-
 }
