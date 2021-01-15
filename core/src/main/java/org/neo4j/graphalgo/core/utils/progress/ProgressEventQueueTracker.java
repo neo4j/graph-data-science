@@ -28,7 +28,7 @@ final class ProgressEventQueueTracker implements ProgressEventTracker {
     private final String username;
 
     // for now a synthetic id, we can change to a more traceable one as and when
-    private final JobId jobId = JobId.from(String.valueOf(new Object().hashCode() % 100000));
+    private final JobId jobId = new JobId();
 
     ProgressEventQueueTracker(Queue<LogEvent> queue, String username) {
         this.queue = queue;

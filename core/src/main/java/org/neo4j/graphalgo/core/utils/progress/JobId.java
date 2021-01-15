@@ -20,17 +20,10 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public final class JobId {
-    private final Object value;
-
-    private JobId(String value) {
-        this.value = value;
-    }
-
-    public static JobId from(String value) {
-        return new JobId(value);
-    }
+    private final UUID value = UUID.randomUUID();
 
     public String asString() {
         return value.toString();

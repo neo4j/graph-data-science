@@ -46,7 +46,7 @@ class ProgressEventConsumerTest {
         // initial set is empty
         assertThat(consumer.query(username)).isEmpty();
 
-        var event = ImmutableLogEvent.of(username, JobId.from("job 1"), "foo", "bar", 42.0);
+        var event = ImmutableLogEvent.of(username, new JobId(), "foo", "bar", 42.0);
         queue.add(event);
 
         // nothing polled yet
@@ -59,7 +59,7 @@ class ProgressEventConsumerTest {
         assertThat(consumer.query(username)).containsExactlyElementsOf(expectedEvents);
 
         // add another event
-        event = ImmutableLogEvent.of(username, JobId.from("job 2"), "baz", "qux", 1337.0);
+        event = ImmutableLogEvent.of(username, new JobId(), "baz", "qux", 1337.0);
         queue.add(event);
 
         // nothing is polled ...
