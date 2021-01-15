@@ -37,12 +37,13 @@ public class F1Weighted implements Metric {
     public double compute(
         HugeAtomicLongArray targets, HugeAtomicLongArray predictions
     ) {
-        return this.targetCounts.keys()
-            .stream()
+        var distinctTargets = this.targetCounts.keys()
+            .stream();
+        var weightedScores = distinctTargets
             .mapToDouble(target -> {
-                var metric = new F1Score(target);
-                return targetCounts.count(target) * metric.compute(targets, predictions);
-            })
-            .sum() / targets.size();
+                var weight = targetCounts.count(target);
+                return weight * new F1Score(target).compute(targets, predictions);
+            });
+        return weightedScores.sum() / targets.size();
     }
 }

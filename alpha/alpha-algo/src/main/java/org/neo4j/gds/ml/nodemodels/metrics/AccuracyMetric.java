@@ -27,11 +27,9 @@ import java.math.RoundingMode;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class AccuracyMetric implements Metric {
-    private long count;
     private long accuratePredictions;
 
     AccuracyMetric() {
-        this.count = 0;
         this.accuratePredictions = 0;
     }
 
@@ -39,14 +37,10 @@ public class AccuracyMetric implements Metric {
     public double compute(
         HugeAtomicLongArray targets, HugeAtomicLongArray predictions
     ) {
-        if (targets.size() != predictions.size()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                    "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
-                    targets.size(),
-                    predictions.size()
-                )
-            );
-        }
+        assert targets.size() == predictions.size() : formatWithLocale(
+            "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
+            targets.size(),
+            predictions.size());
 
         for (long row = 0; row < targets.size(); row++) {
             long targetClass = targets.get(row);
@@ -54,11 +48,10 @@ public class AccuracyMetric implements Metric {
             if (predictedClass == targetClass) {
                 accuratePredictions++;
             }
-            count++;
         }
 
         return BigDecimal.valueOf(accuratePredictions)
-            .divide(BigDecimal.valueOf(count), 8, RoundingMode.UP)
+            .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
             .doubleValue();
     }
 

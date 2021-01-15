@@ -38,14 +38,11 @@ public class F1Score implements Metric {
     public double compute(
         HugeAtomicLongArray targets, HugeAtomicLongArray predictions
     ) {
-        if (targets.size() != predictions.size()) {
-            throw new IllegalArgumentException(formatWithLocale(
+        assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
                     predictions.size()
-                )
-            );
-        }
+                );
 
         long truePositives = 0L;
         long falsePositives = 0L;
