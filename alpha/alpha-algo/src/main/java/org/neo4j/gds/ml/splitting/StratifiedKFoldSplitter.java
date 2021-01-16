@@ -37,71 +37,68 @@ import java.util.stream.IntStream;
  * each bucket contains roughly the same number of nodes with that class.
  */
 public class StratifiedKFoldSplitter {
-    private final long nodeCount;
-    private final HugeLongArray[] buckets;
     private final AllocationTracker allocationTracker;
+    private final int k;
+    private final HugeLongArray targets;
+    private final HugeLongArray ids;
 
     public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets) {
-        this.buckets = makeBuckets(k, ids, targets);
-        this.nodeCount = ids.size();
+        this.k = k;
+        this.ids = ids;
+        this.targets = targets;
         this.allocationTracker = AllocationTracker.empty();
     }
 
     public List<NodeSplit> splits() {
-        return IntStream.range(0, buckets.length).mapToObj(position -> {
-            var trainSet = concatTrainSet(position);
-            return NodeSplit.of(trainSet, buckets[position]);
-        }).collect(Collectors.toList());
-    }
-
-    private HugeLongArray concatTrainSet(int position) {
-        long size = nodeCount - buckets[position].size();
-        var result = HugeLongArray.newArray(size, allocationTracker);
-        var elementsAdded = 0;
-        for (int i = 0; i < buckets.length; i++) {
-            if (i != position) {
-                for (long offset = 0; offset < buckets[i].size(); offset++) {
-                    result.set(elementsAdded, buckets[i].get(offset));
-                    elementsAdded++;
-                }
-            }
-        }
-        return result;
-    }
-
-    private HugeLongArray[] makeBuckets(int k, HugeLongArray ids, HugeLongArray targets) {
-
-        var distinctClasses = new HashSet<Long>();
-        for (long offset = 0; offset < targets.size(); offset++) {
-            distinctClasses.add(targets.get(offset));
-        }
+        var distinctClasses = distinctClasses();
 
         var nodeCount = ids.size();
-        var buckets = new HugeLongArray[k];
-        var bucketPositions = new int[k];
+        var trainSets = new HugeLongArray[k];
+        var testSets = new HugeLongArray[k];
+        var trainNodesAdded = new int[k];
+        var testNodesAdded = new int[k];
 
-        int baseBucketSize = (int) nodeCount / k;
-        for (int i = 0; i < k; i++) {
-            // make the first buckets larger when nodeCount is not divisible by k
-            var bucketSize = i < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
-            buckets[i] = HugeLongArray.newArray(bucketSize, allocationTracker);
-        }
+        allocateArrays(nodeCount, trainSets, testSets);
 
         var roundRobinPointer = new MutableInt();
-        // targets should really be integers but typed as doubles.
-        // the tolerant check protects against (worry of) rounding error
         distinctClasses.forEach(currentClass -> {
             for (long offset = 0; offset < ids.size(); offset++) {
                 var id = ids.get(offset);
                 if (targets.get(id) == currentClass) {
                     var bucketToAddTo = roundRobinPointer.getValue();
-                    buckets[bucketToAddTo].set(bucketPositions[bucketToAddTo], id);
-                    bucketPositions[bucketToAddTo]++;
+                    for (int fold = 0; fold < k; fold++) {
+                        if (fold == bucketToAddTo) {
+                            testSets[fold].set(testNodesAdded[fold], id);
+                            testNodesAdded[fold]++;
+                        } else {
+                            trainSets[fold].set(trainNodesAdded[fold], id);
+                            trainNodesAdded[fold]++;
+                        }
+                    }
                     roundRobinPointer.setValue((bucketToAddTo + 1) % k);
                 }
             }
         });
+        return IntStream.range(0, k)
+            .mapToObj(fold -> NodeSplit.of(trainSets[fold], testSets[fold]))
+            .collect(Collectors.toList());
+    }
 
-        return buckets;
+    private void allocateArrays(long nodeCount, HugeLongArray[] trainSets, HugeLongArray[] testSets) {
+        int baseBucketSize = (int) nodeCount / k;
+        for (int fold = 0; fold < k; fold++) {
+            // make the first buckets larger when nodeCount is not divisible by k
+            var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
+            testSets[fold] = HugeLongArray.newArray(testSize, allocationTracker);
+            trainSets[fold] = HugeLongArray.newArray(nodeCount - testSize, allocationTracker);
+        }
+    }
+
+    private HashSet<Long> distinctClasses() {
+        var distinctClasses = new HashSet<Long>();
+        for (long offset = 0; offset < targets.size(); offset++) {
+            distinctClasses.add(targets.get(offset));
+        }
+        return distinctClasses;
     }
 }
