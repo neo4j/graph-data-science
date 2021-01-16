@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.core.model.Model;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 abstract class ModelCatalogProc extends BaseProc {
 
@@ -41,10 +43,17 @@ abstract class ModelCatalogProc extends BaseProc {
         public final ZonedDateTime creationTime;
 
         public ModelResult(Model<?, ?> model) {
-            modelInfo = Map.of(
-                "modelName", model.name(),
-                "modelType", model.algoType()
+            modelInfo = Stream.concat(
+                Map.of(
+                    "modelName", model.name(),
+                    "modelType", model.algoType()
+                ).entrySet().stream(),
+                model.customInfo().entrySet().stream()
+            ).collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue)
             );
+
             trainConfig = model.trainConfig().toMap();
             graphSchema = model.graphSchema().toMap();
             creationTime = model.creationTime();

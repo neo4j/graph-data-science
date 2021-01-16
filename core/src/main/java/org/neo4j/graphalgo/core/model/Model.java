@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
@@ -44,6 +45,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     ZonedDateTime creationTime();
 
+    Map<String, Object> customInfo();
+
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
         String username,
         String name,
@@ -52,6 +55,26 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         D modelData,
         C trainConfig
     ) {
+        return Model.of(
+            username,
+            name,
+            algoType,
+            graphSchema,
+            modelData,
+            trainConfig,
+            Map.of()
+        );
+    }
+
+    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
+        String username,
+        String name,
+        String algoType,
+        GraphSchema graphSchema,
+        D modelData,
+        C trainConfig,
+        Map<String, Object> customInfo
+    ) {
         return ImmutableModel.of(
             username,
             name,
@@ -59,7 +82,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
             graphSchema,
             modelData,
             trainConfig,
-            TimeUtil.now()
+            TimeUtil.now(),
+            customInfo
         );
     }
 }
