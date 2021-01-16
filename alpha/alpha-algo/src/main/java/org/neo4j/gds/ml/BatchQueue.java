@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BatchQueue {
-    private final long nodeCount;
-    private final int batchSize;
-    private long currentBatch;
+    protected final long nodeCount;
+    protected final int batchSize;
+    protected long currentBatch;
 
     public BatchQueue(long nodeCount, int batchSize) {
         this.nodeCount = nodeCount;
