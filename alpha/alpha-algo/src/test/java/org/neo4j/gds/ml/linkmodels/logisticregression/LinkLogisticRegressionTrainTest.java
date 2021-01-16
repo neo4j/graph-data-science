@@ -77,4 +77,28 @@ class LinkLogisticRegressionTrainTest {
             Offset.offset(1e-8)
         );
     }
+
+    @Test
+    void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
+        var config =
+            ImmutableLinkLogisticRegressionTrainConfig.builder()
+                .featureProperties(List.of("a", "b"))
+                .penalty(1)
+                .concurrency(1)
+                .maxIterations(100000)
+                .tolerance(1e-4)
+                .build();
+
+        var linearRegression = new LinkLogisticRegressionTrain(graph, config, new TestLog());
+
+        var result = linearRegression.compute().modelData();
+
+        assertThat(result).isNotNull();
+
+        var trainedWeights = result.weights();
+
+        double[] weights = trainedWeights.data().data();
+        assertThat(Math.pow(weights[0], 2) + Math.pow(weights[1], 2))
+            .isLessThan(Math.pow(-1.0681821169962793, 2) + Math.pow(1.0115009499444914, 2));
+    }
 }
