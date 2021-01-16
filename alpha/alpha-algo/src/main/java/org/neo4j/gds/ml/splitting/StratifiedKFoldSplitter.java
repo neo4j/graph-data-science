@@ -40,7 +40,7 @@ public class StratifiedKFoldSplitter {
     public List<NodeSplit> splits() {
         return IntStream.range(0, buckets.length).mapToObj(position -> {
             var trainSet = concatTrainSet(position);
-            return new NodeSplit(trainSet, buckets[position]);
+            return NodeSplit.of(trainSet, buckets[position]);
         }).collect(Collectors.toList());
     }
 

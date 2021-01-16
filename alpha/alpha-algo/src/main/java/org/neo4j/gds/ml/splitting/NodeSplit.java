@@ -19,22 +19,15 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-public class NodeSplit {
-    private final HugeLongArray trainSet;
-    private final HugeLongArray testSet;
+@ValueClass
+public interface NodeSplit {
+    HugeLongArray trainSet();
+    HugeLongArray testSet();
 
-    NodeSplit(HugeLongArray trainSet, HugeLongArray testSet) {
-        this.trainSet = trainSet;
-        this.testSet = testSet;
-    }
-
-    public HugeLongArray trainSet() {
-        return trainSet;
-    }
-
-    public HugeLongArray testSet() {
-        return testSet;
+    static NodeSplit of(HugeLongArray trainSet, HugeLongArray testSet) {
+        return ImmutableNodeSplit.of(trainSet, testSet);
     }
 }

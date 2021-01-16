@@ -22,25 +22,38 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.function.Function;
+
 public class FractionSplitter {
+
+    private final AllocationTracker allocationTracker;
+
+    public FractionSplitter() {
+        this.allocationTracker = AllocationTracker.empty();
+    }
+
     // fraction is in [0,1]
     public NodeSplit split(long nodeCount, double trainFraction) {
         long trainSize = (long) (nodeCount * trainFraction);
         long testSize = nodeCount - trainSize;
-        var train = HugeLongArray.newArray(trainSize, AllocationTracker.empty());
-        var test = HugeLongArray.newArray(testSize, AllocationTracker.empty());
-        train.setAll(i -> i);
-        test.setAll(i -> i + trainSize);
-        return new NodeSplit(train, test);
+        var train = initHLA(trainSize, i -> i);
+        var test = initHLA(testSize, i -> i + trainSize);
+
+        return NodeSplit.of(train, test);
     }
 
     public NodeSplit split(HugeLongArray ids, double trainFraction) {
         long trainSize = (long) (ids.size() * trainFraction);
         long testSize = ids.size() - trainSize;
-        var train = HugeLongArray.newArray(trainSize, AllocationTracker.empty());
-        var test = HugeLongArray.newArray(testSize, AllocationTracker.empty());
-        train.setAll(ids::get);
-        test.setAll(i -> ids.get(i + trainSize));
-        return new NodeSplit(train, test);
+        var train = initHLA(trainSize, ids::get);
+        var test = initHLA(testSize, i -> ids.get(i + trainSize));
+        return NodeSplit.of(train, test);
     }
+
+    private HugeLongArray initHLA(long size, Function<Long, Long> transform) {
+        var array = HugeLongArray.newArray(size, allocationTracker);
+        array.setAll(transform::apply);
+        return array;
+    }
+
 }
