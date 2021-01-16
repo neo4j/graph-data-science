@@ -31,10 +31,12 @@ import java.util.stream.IntStream;
 public class StratifiedKFoldSplitter {
     private final long nodeCount;
     private final HugeLongArray[] buckets;
+    private final AllocationTracker allocationTracker;
 
     public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets) {
         this.buckets = makeBuckets(k, ids, targets);
         this.nodeCount = ids.size();
+        this.allocationTracker = AllocationTracker.empty();
     }
 
     public List<NodeSplit> splits() {
@@ -46,7 +48,7 @@ public class StratifiedKFoldSplitter {
 
     private HugeLongArray concatTrainSet(int position) {
         long size = nodeCount - buckets[position].size();
-        var result = HugeLongArray.newArray(size, AllocationTracker.empty());
+        var result = HugeLongArray.newArray(size, allocationTracker);
         var elementsAdded = 0;
         for (int i = 0; i < buckets.length; i++) {
             if (i != position) {
@@ -72,21 +74,22 @@ public class StratifiedKFoldSplitter {
 
         int baseBucketSize = (int) nodeCount / k;
         for (int i = 0; i < k; i++) {
+            // make the first buckets larger when nodeCount is not divisible by k
             var bucketSize = i < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
-            buckets[i] = HugeLongArray.newArray(bucketSize, AllocationTracker.empty());
+            buckets[i] = HugeLongArray.newArray(bucketSize, allocationTracker);
         }
 
-        var roundRobbinPointer = new MutableInt();
+        var roundRobinPointer = new MutableInt();
         // targets should really be integers but typed as doubles.
         // the tolerant check protects against (worry of) rounding error
         distinctClasses.forEach(currentClass -> {
             for (long offset = 0; offset < ids.size(); offset++) {
                 var id = ids.get(offset);
                 if (targets.get(id) == currentClass) {
-                    var bucketToAddTo = roundRobbinPointer.getValue();
+                    var bucketToAddTo = roundRobinPointer.getValue();
                     buckets[bucketToAddTo].set(bucketPositions[bucketToAddTo], id);
                     bucketPositions[bucketToAddTo]++;
-                    roundRobbinPointer.setValue((bucketToAddTo + 1) % k);
+                    roundRobinPointer.setValue((bucketToAddTo + 1) % k);
                 }
             }
         });
