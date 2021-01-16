@@ -28,6 +28,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Splits an HugeLongArray of nodes into <code>k</code> NodeSplits, each of which contains a
+ * train set and a test set. Logically, the nodes are first divided into <code>k</code> nearly equal sized
+ * buckets, and for each NodeSplit, one of the buckets is taken as test set and the remaining ones
+ * concatenated into the train set. The split is stratified, meaning that if each node is seen as having
+ * a class given by <code>targets.get(nodeId)</code>, then for each distinct class,
+ * each bucket contains roughly the same number of nodes with that class.
+ */
 public class StratifiedKFoldSplitter {
     private final long nodeCount;
     private final HugeLongArray[] buckets;
