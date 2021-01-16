@@ -19,74 +19,114 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.bouncycastle.util.Arrays;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 
 class StratifiedKFoldSplitterTest {
 
-    @Test
-    void shouldGive2CorrectSplits() {
-        var nodeIds = HugeLongArray.of(2, 0, 1);
-        var targets = HugeLongArray.of(42, 42, 5);
-        var kFoldSplitter = new StratifiedKFoldSplitter(2, nodeIds, targets);
-        var splits = kFoldSplitter.splits();
-        assertThat(splits.size()).isEqualTo(2);
-        assertThat(splits.get(0).testSet().size()).isEqualTo(2);
-        assertThat(splits.get(0).trainSet().size()).isEqualTo(1);
-        assertThat(splits.get(1).testSet().size()).isEqualTo(1);
-        assertThat(splits.get(1).trainSet().size()).isEqualTo(2);
-
-        // Because of stratification both test and train sets should both contain a nodeId that corresponds to target 42
-        assertThat(splits.get(0).testSet().toArray()).satisfiesAnyOf(this::containsZero, this::containsOne);
-        assertThat(splits.get(0).trainSet().toArray()).satisfiesAnyOf(this::containsZero, this::containsOne);
-        assertThat(splits.get(1).testSet().toArray()).satisfiesAnyOf(this::containsZero, this::containsOne);
-        assertThat(splits.get(1).trainSet().toArray()).satisfiesAnyOf(this::containsZero, this::containsOne);
-    }
-
     @ParameterizedTest
-    @ValueSource(longs = {0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L})
-    void shouldGive5CorrectSplits(long seed) {
-
-        var nodeIdsList = new ArrayList<Long>() {{
-            addAll(List.of(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L));
-        }};
-
-        Collections.shuffle(nodeIdsList, new Random(seed));
-
+    @MethodSource("splitArguments")
+    void shouldGiveCorrectSplits(long nodeCount, long seed, int k, int classCount) {
+        // shuffled consecutive ids
+        Random rnd = new Random(seed);
+        var nodeIdsList = LongStream.range(0, nodeCount).boxed()
+            .collect(Collectors.toList());
+        Collections.shuffle(nodeIdsList, rnd);
         var nodeIds = HugeLongArray.newArray(nodeIdsList.size(), AllocationTracker.empty());
         nodeIds.setAll(i -> nodeIdsList.get((int) i));
-        var targets = HugeLongArray.of(0, 1, 1, 1, 0, 0, 0, 0, 1, 1);
-        var kFoldSplitter = new StratifiedKFoldSplitter(5, nodeIds, targets);
-        var splits = kFoldSplitter.splits();
-        assertThat(splits.size()).isEqualTo(5);
-        for (int fold = 0; fold < 5; fold++) {
-            assertThat(splits.get(fold).testSet().size()).isEqualTo(2);
-            assertThat(splits.get(fold).trainSet().size()).isEqualTo(8);
-            var firstTestNode = splits.get(fold).testSet().get(0);
-            var secondTestNode = splits.get(fold).testSet().get(1);
-            // test stratification on test set. if stratified then train set is also stratified correctly.
-            assertThat(targets.get(firstTestNode)).isNotEqualTo(targets.get(secondTestNode));
+
+        // generate non-consecutive classes
+        // then pick randomly from these
+        var distinctTargets = new long[classCount];
+        for (int i = 0; i < classCount; i++) {
+            distinctTargets[i] = rnd.nextLong();
         }
+        var targets = HugeLongArray.newArray(nodeCount, AllocationTracker.empty());
+        targets.setAll(i -> {
+            var classOffset = rnd.nextInt(classCount);
+            return distinctTargets[classOffset];
+        });
+        var totalClassCounts = classCounts(targets);
+
+
+        var kFoldSplitter = new StratifiedKFoldSplitter(k, nodeIds, targets);
+        var splits = kFoldSplitter.splits();
+        assertThat(splits.size()).isEqualTo(k);
+        var unionOfTestSets = new HashSet<Long>();
+        for (int fold = 0; fold < k; fold++) {
+            var split = splits.get(fold);
+            var trainSet = split.trainSet();
+            var testSet = split.testSet();
+            var nodeSet = new HashSet<Long>();
+            stream(trainSet.toArray()).forEach(nodeSet::add);
+            stream(testSet.toArray()).forEach(nodeSet::add);
+            stream(testSet.toArray()).forEach(unionOfTestSets::add);
+            assertThat(nodeSet.size()).isEqualTo(nodeCount);
+            // (k-1) * nodeCount/k - trainSet.size() should be between -1 and 1
+            // multiply both sides by k
+            assertThat( Math.abs((k-1) * nodeCount - k * trainSet.size())).isLessThanOrEqualTo(k);
+            // nodeCount/k - testSet.size() should be between -1 and 1
+            assertThat( Math.abs(nodeCount - k * testSet.size())).isLessThanOrEqualTo(k);
+
+            // check that stratification works: class proportions approximately preserved
+            // in test and train sets
+            var testClassCounts = classCounts(testSet);
+            var trainClassCounts = classCounts(trainSet);
+            stream(distinctTargets).forEach(
+                target -> {
+                    var totalOccurances = totalClassCounts.getOrDefault(target, 0);
+                    var trainOccurances = trainClassCounts.getOrDefault(target, 0);
+                    var lowerExpectedTrain = (k - 1) * totalOccurances / k;
+                    var upperExpectedTrain = lowerExpectedTrain + 1;
+                    assertThat(trainOccurances).isLessThanOrEqualTo(upperExpectedTrain);
+                    assertThat(trainOccurances).isGreaterThanOrEqualTo(lowerExpectedTrain);
+                    var testOccurances = testClassCounts.getOrDefault(target, 0);
+                    var lowerExpectedTest = totalOccurances / k;
+                    var upperExpectedTest = lowerExpectedTest + 1;
+                    assertThat(testOccurances).isLessThanOrEqualTo(upperExpectedTest);
+                    assertThat(testOccurances).isGreaterThanOrEqualTo(lowerExpectedTest);
+                });
+        }
+        assertThat(unionOfTestSets.size()).isEqualTo(nodeCount);
     }
 
-    private boolean containsZero(long[] values) {
-        return Arrays.contains(values, 0L);
+    private Map<Long, Integer> classCounts(HugeLongArray values) {
+        // would be nice to have MultiSet or Counter class
+        var counts = new HashMap<Long, Integer>();
+        stream(values.toArray())
+            .forEach(value ->
+                counts.put(value, counts.getOrDefault(counts, 0) + 1)
+            );
+        return counts;
     }
 
-    private boolean containsOne(long[] values) {
-        return Arrays.contains(values, 1L);
+    private static Stream<Arguments> splitArguments() {
+        return crossArguments(
+            // nodeCount
+            () -> Stream.of(0, 1, 10, 100).map(Arguments::of),
+            // seed
+            () -> LongStream.range(0L, 10L).mapToObj(Arguments::of),
+            // k
+            () -> IntStream.range(2, 10).mapToObj(Arguments::of),
+            // classCount
+            () -> IntStream.range(1, 4).mapToObj(Arguments::of)
+        );
     }
-
-
 }
