@@ -17,26 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.util;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HugeBatchQueueTest {
+class ShuffleUtilTest {
+
     @Test
-    void test() {
-        HugeLongArray data = HugeLongArray.of(3, 6, 2, 3, 6, 2, 76, 3 , 2, 6, 7, 42, 43);
-        var hugeBatchQueue = new HugeBatchQueue(data, 5);
-        var b1 = hugeBatchQueue.pop();
-        assertThat(b1).isPresent();
-        assertThat(b1.get().nodeIds()).containsExactly(3L, 6L, 2L, 3L, 6L);
-        var b2 = hugeBatchQueue.pop();
-        assertThat(b2).isPresent();
-        assertThat(b2.get().nodeIds()).containsExactly(2L, 76L, 3L, 2L, 6L);
-        var b3 = hugeBatchQueue.pop();
-        assertThat(b3).isPresent();
-        assertThat(b3.get().nodeIds()).containsExactly(7L, 42L, 43L);
+    void testShuffled() {
+        RandomDataGenerator random = new RandomDataGenerator();
+        random.reSeed(123L);
+        var data = HugeLongArray.newArray(10, AllocationTracker.empty());
+        data.setAll(i -> i);
+        ShuffleUtil.shuffleHugeLongArray(data, random);
+        assertThat(data.toArray()).containsExactly(7L, 5L, 0L, 1L, 3L, 8L, 6L, 9L, 4L, 2L);
     }
+
 }
