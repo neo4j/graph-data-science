@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,8 +40,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public abstract class NodeValue {
 
     private final PregelSchema pregelSchema;
+    private final Map<String, ValueType> propertyTypes;
 
-    NodeValue(PregelSchema pregelSchema) {this.pregelSchema = pregelSchema;}
+    NodeValue(PregelSchema pregelSchema) {
+        this.pregelSchema = pregelSchema;
+        this.propertyTypes = pregelSchema.elements()
+            .stream()
+            .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
+    }
 
     static NodeValue of(PregelSchema schema, long nodeCount, int concurrency, AllocationTracker tracker) {
         var properties = schema.elements()
@@ -48,6 +56,11 @@ public abstract class NodeValue {
                 Element::propertyKey,
                 element -> initArray(element, nodeCount, concurrency, tracker)
             ));
+
+        if (properties.size() == 1) {
+            var property = properties.values().stream().findFirst().get();
+            return new SingleNodeValue(schema, property);
+        }
 
         return new CompositeNodeValue(schema, properties);
     }
@@ -139,6 +152,29 @@ public abstract class NodeValue {
         doubleArrayProperties(key).set(nodeId, value);
     }
 
+    void checkProperty(String key, ValueType expectedType) {
+        var propertyType = propertyTypes.get(key);
+
+        if (propertyType == null) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Property with key %s does not exist. Available properties are: %s",
+                key,
+                propertyTypes.keySet()
+            ));
+        }
+
+        if (propertyType != expectedType) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Requested property type %s is not compatible with available property type %s for key %s. " +
+                "Available property types: %s",
+                expectedType,
+                propertyTypes.get(key),
+                key,
+                StringJoining.join(propertyTypes.entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()))
+            ));
+        }
+    }
+
     private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker tracker) {
         switch (element.propertyType()) {
             case DOUBLE:
@@ -175,52 +211,75 @@ public abstract class NodeValue {
         }
     }
 
+    public static final class SingleNodeValue extends NodeValue {
+
+        private final Object property;
+
+        SingleNodeValue(PregelSchema pregelSchema, Object property) {
+            super(pregelSchema);
+            this.property = property;
+        }
+
+        @Override
+        public HugeDoubleArray doubleProperties(String propertyKey) {
+            checkProperty(propertyKey, ValueType.DOUBLE);
+            return (HugeDoubleArray) property;
+        }
+
+        @Override
+        public HugeLongArray longProperties(String propertyKey) {
+            checkProperty(propertyKey, ValueType.LONG);
+            return (HugeLongArray) property;
+        }
+
+        @Override
+        public HugeObjectArray<long[]> longArrayProperties(String propertyKey) {
+            checkProperty(propertyKey, ValueType.LONG_ARRAY);
+            //noinspection unchecked
+            return (HugeObjectArray<long[]>) property;
+        }
+
+        @Override
+        public HugeObjectArray<double[]> doubleArrayProperties(String propertyKey) {
+            checkProperty(propertyKey, ValueType.DOUBLE_ARRAY);
+            //noinspection unchecked
+            return (HugeObjectArray<double[]>) property;
+        }
+    }
+
     public static final class CompositeNodeValue extends NodeValue {
 
         private final Map<String, Object> properties;
 
-        private CompositeNodeValue(PregelSchema pregelSchema, Map<String, Object> properties) {
+        CompositeNodeValue(PregelSchema pregelSchema, Map<String, Object> properties) {
             super(pregelSchema);
             this.properties = properties;
         }
 
+        @Override
         public HugeDoubleArray doubleProperties(String propertyKey) {
-            return checkProperty(propertyKey, HugeDoubleArray.class);
+            checkProperty(propertyKey, ValueType.DOUBLE);
+            return (HugeDoubleArray) properties.get(propertyKey);
         }
 
+        @Override
         public HugeLongArray longProperties(String propertyKey) {
-            return checkProperty(propertyKey, HugeLongArray.class);
+            checkProperty(propertyKey, ValueType.LONG);
+            return (HugeLongArray) properties.get(propertyKey);
         }
 
+        @Override
         public HugeObjectArray<long[]> longArrayProperties(String propertyKey) {
-            return checkProperty(propertyKey, HugeObjectArray.class);
+            checkProperty(propertyKey, ValueType.LONG_ARRAY);
+            //noinspection unchecked
+            return (HugeObjectArray<long[]>) properties.get(propertyKey);
         }
 
+        @Override
         public HugeObjectArray<double[]> doubleArrayProperties(String propertyKey) {
-            return checkProperty(propertyKey, HugeObjectArray.class);
-        }
-
-        @SuppressWarnings("unchecked")
-        private <PROPERTY> PROPERTY checkProperty(String key, Class<? extends PROPERTY> propertyKlass) {
-            var property = properties.get(key);
-            if (property == null) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Property with key %s does not exist. Available properties are: %s",
-                    key,
-                    properties.keySet()
-                ));
-            }
-
-            if (!(propertyKlass.isAssignableFrom(property.getClass()))) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Could not cast property %s of type %s into %s",
-                    key,
-                    property.getClass().getSimpleName(),
-                    propertyKlass.getSimpleName()
-                ));
-            }
-
-            return (PROPERTY) property;
+            checkProperty(propertyKey, ValueType.DOUBLE_ARRAY);
+            //noinspection unchecked
+            return (HugeObjectArray<double[]>) properties.get(propertyKey);
         }
     }
 }

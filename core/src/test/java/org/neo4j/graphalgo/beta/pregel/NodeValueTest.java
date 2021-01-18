@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,43 +30,59 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-class CompositeNodeValueTest {
+class NodeValueTest {
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.beta.pregel.CompositeNodeValueTest#validPropertyTypeAndGetters")
-    void testThrowWhenAccessingUnknownProperty(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
-        var schema = new PregelSchema.Builder().add("KEY", valueType).build();
+    @Test
+    void validSingleNodeValue() {
+        var key1 = "KEY1";
+        var schema = new PregelSchema.Builder()
+            .add(key1, ValueType.DOUBLE)
+            .build();
+        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
+        assertEquals(nodeValues.doubleProperties(key1).size(), 10);
+    }
+
+    @Test
+    void validCompositeNodeValue() {
+        var key1 = "KEY1";
+        var key2 = "KEY2";
+        var schema = new PregelSchema.Builder()
+            .add(key1, ValueType.DOUBLE)
+            .add(key2, ValueType.LONG)
+            .build();
         var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
         assertThat(nodeValues).isInstanceOf(NodeValue.CompositeNodeValue.class);
-
-        var ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> valueConsumer.accept(nodeValues, "DOES_NOT_EXIST")
-        );
-
-        assert (
-            ex.getMessage().contains("Property with key DOES_NOT_EXIST does not exist. Available properties are: [KEY]")
-        );
+        assertEquals(nodeValues.doubleProperties(key1).size(), 10);
+        assertEquals(nodeValues.longProperties(key2).size(), 10);
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.beta.pregel.CompositeNodeValueTest#invalidPropertyTypeAndGetters")
+    @MethodSource("org.neo4j.graphalgo.beta.pregel.NodeValueTest#validPropertyTypeAndGetters")
+    void testThrowWhenAccessingUnknownProperty(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
+        var schema = new PregelSchema.Builder().add("KEY", valueType).build();
+        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
+
+        assertThatThrownBy(() -> valueConsumer.accept(nodeValues, "DOES_NOT_EXIST"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Property with key DOES_NOT_EXIST does not exist. Available properties are: [KEY]");
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.beta.pregel.NodeValueTest#invalidPropertyTypeAndGetters")
     void testThrowWhenAccessingPropertyOfWrongType(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
         var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
-        assertThat(nodeValues).isInstanceOf(NodeValue.CompositeNodeValue.class);
+        assertThat(nodeValues).isInstanceOf(NodeValue.SingleNodeValue.class);
 
-        var ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> valueConsumer.accept(nodeValues, "KEY")
-        );
-
-        assert (
-            ex.getMessage().contains("Could not cast property KEY")
-        );
+        assertThatThrownBy(() -> valueConsumer.accept(nodeValues, "KEY"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("is not compatible with available property type");
     }
 
     static Stream<Arguments> validPropertyTypeAndGetters() {
