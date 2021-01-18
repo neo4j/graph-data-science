@@ -1,0 +1,226 @@
+/*
+ * Copyright (c) 2017-2021 "Neo4j,"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.graphalgo.beta.pregel;
+
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public abstract class NodeValue {
+
+    private final PregelSchema pregelSchema;
+
+    NodeValue(PregelSchema pregelSchema) {this.pregelSchema = pregelSchema;}
+
+    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency, AllocationTracker tracker) {
+        var properties = schema.elements()
+            .stream()
+            .collect(Collectors.toMap(
+                Element::propertyKey,
+                element -> initArray(element, nodeCount, concurrency, tracker)
+            ));
+
+        return new CompositeNodeValue(schema, properties);
+    }
+
+    static MemoryEstimation memoryEstimation(PregelSchema pregelSchema) {
+        return MemoryEstimations.setup("", (dimensions, concurrency) -> {
+            var builder = MemoryEstimations.builder();
+
+            pregelSchema.elements().forEach(element -> {
+                var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
+
+                switch (element.propertyType()) {
+                    case LONG:
+                        builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
+                        break;
+                    case DOUBLE:
+                        builder.fixed(entry, HugeDoubleArray.memoryEstimation(dimensions.nodeCount()));
+                        break;
+                    case LONG_ARRAY:
+                        builder.add(entry, MemoryEstimations.builder()
+                            .fixed(
+                                HugeObjectArray.class.getSimpleName(),
+                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                            )
+                            .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
+                            .build());
+                        break;
+                    case DOUBLE_ARRAY:
+                        builder.add(entry, MemoryEstimations.builder()
+                            .fixed(
+                                HugeObjectArray.class.getSimpleName(),
+                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                            )
+                            .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
+                            .build());
+                        break;
+                    default:
+                        builder.add(entry, MemoryEstimations.empty());
+                }
+            });
+
+            return builder.build();
+        });
+    }
+
+    public PregelSchema schema() {
+        return pregelSchema;
+    }
+
+    public abstract HugeDoubleArray doubleProperties(String propertyKey);
+
+    public abstract HugeLongArray longProperties(String propertyKey);
+
+    public abstract HugeObjectArray<long[]> longArrayProperties(String propertyKey);
+
+    public abstract HugeObjectArray<double[]> doubleArrayProperties(String propertyKey);
+
+    public double doubleValue(String key, long nodeId) {
+        return doubleProperties(key).get(nodeId);
+    }
+
+    public long longValue(String key, long nodeId) {
+        return longProperties(key).get(nodeId);
+    }
+
+    public long[] longArrayValue(String key, long nodeId) {
+        HugeObjectArray<long[]> arrayProperties = longArrayProperties(key);
+        return arrayProperties.get(nodeId);
+    }
+
+    public double[] doubleArrayValue(String key, long nodeId) {
+        HugeObjectArray<double[]> arrayProperties = doubleArrayProperties(key);
+        return arrayProperties.get(nodeId);
+    }
+
+    public void set(String key, long nodeId, double value) {
+        doubleProperties(key).set(nodeId, value);
+    }
+
+    public void set(String key, long nodeId, long value) {
+        longProperties(key).set(nodeId, value);
+    }
+
+    public void set(String key, long nodeId, long[] value) {
+        longArrayProperties(key).set(nodeId, value);
+    }
+
+    public void set(String key, long nodeId, double[] value) {
+        doubleArrayProperties(key).set(nodeId, value);
+    }
+
+    private static Object initArray(Element element, long nodeCount, int concurrency, AllocationTracker tracker) {
+        switch (element.propertyType()) {
+            case DOUBLE:
+                var doubleNodeValues = HugeDoubleArray.newArray(nodeCount, tracker);
+                ParallelUtil.parallelStreamConsume(
+                    LongStream.range(0, nodeCount),
+                    concurrency,
+                    nodeIds -> nodeIds.forEach(nodeId -> doubleNodeValues.set(
+                        nodeId,
+                        DefaultValue.DOUBLE_DEFAULT_FALLBACK
+                    ))
+                );
+                return doubleNodeValues;
+            case LONG:
+                var longNodeValues = HugeLongArray.newArray(nodeCount, tracker);
+                ParallelUtil.parallelStreamConsume(
+                    LongStream.range(0, nodeCount),
+                    concurrency,
+                    nodeIds -> nodeIds.forEach(nodeId -> longNodeValues.set(
+                        nodeId,
+                        DefaultValue.LONG_DEFAULT_FALLBACK
+                    ))
+                );
+                return longNodeValues;
+            case LONG_ARRAY:
+                return HugeObjectArray.newArray(long[].class, nodeCount, tracker);
+            case DOUBLE_ARRAY:
+                return HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+            default:
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Unsupported value type: %s",
+                    element.propertyType()
+                ));
+        }
+    }
+
+    public static final class CompositeNodeValue extends NodeValue {
+
+        private final Map<String, Object> properties;
+
+        private CompositeNodeValue(PregelSchema pregelSchema, Map<String, Object> properties) {
+            super(pregelSchema);
+            this.properties = properties;
+        }
+
+        public HugeDoubleArray doubleProperties(String propertyKey) {
+            return checkProperty(propertyKey, HugeDoubleArray.class);
+        }
+
+        public HugeLongArray longProperties(String propertyKey) {
+            return checkProperty(propertyKey, HugeLongArray.class);
+        }
+
+        public HugeObjectArray<long[]> longArrayProperties(String propertyKey) {
+            return checkProperty(propertyKey, HugeObjectArray.class);
+        }
+
+        public HugeObjectArray<double[]> doubleArrayProperties(String propertyKey) {
+            return checkProperty(propertyKey, HugeObjectArray.class);
+        }
+
+        @SuppressWarnings("unchecked")
+        private <PROPERTY> PROPERTY checkProperty(String key, Class<? extends PROPERTY> propertyKlass) {
+            var property = properties.get(key);
+            if (property == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Property with key %s does not exist. Available properties are: %s",
+                    key,
+                    properties.keySet()
+                ));
+            }
+
+            if (!(propertyKlass.isAssignableFrom(property.getClass()))) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Could not cast property %s of type %s into %s",
+                    key,
+                    property.getClass().getSimpleName(),
+                    propertyKlass.getSimpleName()
+                ));
+            }
+
+            return (PROPERTY) property;
+        }
+    }
+}

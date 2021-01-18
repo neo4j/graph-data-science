@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel.context;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.NodeValue;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
 import java.util.function.LongPredicate;
@@ -29,18 +29,18 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
 
     private final Graph graph;
     private final int iteration;
-    private final Pregel.CompositeNodeValue nodeValues;
+    private final NodeValue nodeValue;
 
     public MasterComputeContext(
         CONFIG config,
         Graph graph,
         int iteration,
-        Pregel.CompositeNodeValue nodeValues
+        NodeValue nodeValue
     ) {
         super(config);
         this.graph = graph;
         this.iteration = iteration;
-        this.nodeValues = nodeValues;
+        this.nodeValue = nodeValue;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @throws IllegalArgumentException if the key does not exist or the value is not a double
      */
     public double doubleNodeValue(long nodeId, String key) {
-        return nodeValues.doubleValue(key, nodeId);
+        return nodeValue.doubleValue(key, nodeId);
     }
 
     /**
@@ -97,7 +97,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @throws IllegalArgumentException if the key does not exist or the value is not a long
      */
     public long longNodeValue(long nodeId, String key) {
-        return nodeValues.longValue(key, nodeId);
+        return nodeValue.longValue(key, nodeId);
     }
 
     /**
@@ -106,7 +106,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @throws IllegalArgumentException if the key does not exist or the value is not a long array
      */
     public long[] longArrayNodeValue(long nodeId, String key) {
-        return nodeValues.longArrayValue(key, nodeId);
+        return nodeValue.longArrayValue(key, nodeId);
     }
 
     /**
@@ -115,7 +115,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @throws IllegalArgumentException if the key does not exist or the value is not a double array
      */
     public double[] doubleArrayNodeValue(long nodeId, String key) {
-        return nodeValues.doubleArrayValue(key, nodeId);
+        return nodeValue.doubleArrayValue(key, nodeId);
     }
 
     /**
@@ -125,7 +125,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @param value property value
      */
     public void setNodeValue(long nodeId, String key, double value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -135,7 +135,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @param value property value
      */
     public void setNodeValue(long nodeId, String key, long value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -145,7 +145,7 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @param value property value
      */
     public void setNodeValue(long nodeId, String key, long[] value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     /**
@@ -155,6 +155,6 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      * @param value property value
      */
     public void setNodeValue(long nodeId, String key, double[] value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 }

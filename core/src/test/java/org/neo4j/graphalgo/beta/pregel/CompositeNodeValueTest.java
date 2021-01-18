@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -35,12 +36,10 @@ class CompositeNodeValueTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.beta.pregel.CompositeNodeValueTest#validPropertyTypeAndGetters")
-    void testThrowWhenAccessingUnknownProperty(
-        ValueType valueType,
-        BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
-    ) {
+    void testThrowWhenAccessingUnknownProperty(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
-        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        assertThat(nodeValues).isInstanceOf(NodeValue.CompositeNodeValue.class);
 
         var ex = assertThrows(
             IllegalArgumentException.class,
@@ -54,12 +53,10 @@ class CompositeNodeValueTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.beta.pregel.CompositeNodeValueTest#invalidPropertyTypeAndGetters")
-    void testThrowWhenAccessingPropertyOfWrongType(
-        ValueType valueType,
-        BiConsumer<Pregel.CompositeNodeValue, String> valueConsumer
-    ) {
+    void testThrowWhenAccessingPropertyOfWrongType(ValueType valueType, BiConsumer<NodeValue, String> valueConsumer) {
         var schema = new PregelSchema.Builder().add("KEY", valueType).build();
-        var nodeValues = Pregel.CompositeNodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        var nodeValues = NodeValue.of(schema, 10, 4, AllocationTracker.empty());
+        assertThat(nodeValues).isInstanceOf(NodeValue.CompositeNodeValue.class);
 
         var ex = assertThrows(
             IllegalArgumentException.class,
@@ -72,10 +69,10 @@ class CompositeNodeValueTest {
     }
 
     static Stream<Arguments> validPropertyTypeAndGetters() {
-        BiConsumer<Pregel.CompositeNodeValue, String> longGetter = Pregel.CompositeNodeValue::longProperties;
-        BiConsumer<Pregel.CompositeNodeValue, String> doubleGetter = Pregel.CompositeNodeValue::doubleProperties;
-        BiConsumer<Pregel.CompositeNodeValue, String> longArrayGetter = Pregel.CompositeNodeValue::longArrayProperties;
-        BiConsumer<Pregel.CompositeNodeValue, String> doubleArrayGetter = Pregel.CompositeNodeValue::doubleArrayProperties;
+        BiConsumer<NodeValue, String> longGetter = NodeValue::longProperties;
+        BiConsumer<NodeValue, String> doubleGetter = NodeValue::doubleProperties;
+        BiConsumer<NodeValue, String> longArrayGetter = NodeValue::longArrayProperties;
+        BiConsumer<NodeValue, String> doubleArrayGetter = NodeValue::doubleArrayProperties;
         return Stream.of(
             arguments(ValueType.LONG, longGetter),
             arguments(ValueType.DOUBLE, doubleGetter),
@@ -85,8 +82,8 @@ class CompositeNodeValueTest {
     }
 
     static Stream<Arguments> invalidPropertyTypeAndGetters() {
-        BiConsumer<Pregel.CompositeNodeValue, String> longGetter = Pregel.CompositeNodeValue::longProperties;
-        BiConsumer<Pregel.CompositeNodeValue, String> doubleGetter = Pregel.CompositeNodeValue::doubleProperties;
+        BiConsumer<NodeValue, String> longGetter = NodeValue::longProperties;
+        BiConsumer<NodeValue, String> doubleGetter = NodeValue::doubleProperties;
 
         return Stream.of(
             arguments(ValueType.LONG, doubleGetter),
