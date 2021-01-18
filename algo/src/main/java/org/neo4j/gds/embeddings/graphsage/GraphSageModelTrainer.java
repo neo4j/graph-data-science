@@ -72,7 +72,7 @@ public class GraphSageModelTrainer {
     private double degreeProbabilityNormalizer;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
-        this(config, progressLogger, GraphSageHelper::features, Collections.emptyList());
+        this(config, progressLogger, new SingleLabelFeatureFunction(), Collections.emptyList());
     }
 
     public GraphSageModelTrainer(

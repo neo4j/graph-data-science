@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -60,7 +61,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
             config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            ModelData.of(trainResult.layers(), org.neo4j.gds.embeddings.graphsage.GraphSageHelper::features),
+            ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction()),
             config
         );
     }

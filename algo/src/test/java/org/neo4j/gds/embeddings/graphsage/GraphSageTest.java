@@ -44,10 +44,10 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -163,7 +163,7 @@ class GraphSageTest {
             MODEL_NAME,
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(layers, GraphSageHelper::features),
+            ModelData.of(layers, new SingleLabelFeatureFunction()),
             trainConfig
         );
         ModelCatalog.set(model);
@@ -205,7 +205,7 @@ class GraphSageTest {
             MODEL_NAME,
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(layers, GraphSageHelper::features),
+            ModelData.of(layers, new SingleLabelFeatureFunction()),
             trainConfig
         );
         ModelCatalog.set(model);

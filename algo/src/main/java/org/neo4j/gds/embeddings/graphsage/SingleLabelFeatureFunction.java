@@ -20,12 +20,30 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-public interface FeatureFunction {
+import java.util.stream.IntStream;
 
-    Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features, Graph graph);
+public class SingleLabelFeatureFunction implements FeatureFunction {
 
+    @Override
+    public Variable<Matrix> apply(
+        long[] nodeIds, HugeObjectArray<double[]> features, Graph graph
+    ) {
+        int dimension = features.get(0).length;
+        double[] data = new double[Math.multiplyExact(nodeIds.length, dimension)];
+        IntStream
+            .range(0, nodeIds.length)
+            .forEach(nodeOffset -> System.arraycopy(
+                features.get(nodeIds[nodeOffset]),
+                0,
+                data,
+                nodeOffset * dimension,
+                dimension
+            ));
+        return new MatrixConstant(data, nodeIds.length, dimension);
+    }
 }

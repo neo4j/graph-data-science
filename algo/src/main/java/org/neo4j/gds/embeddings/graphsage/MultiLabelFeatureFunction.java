@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LabelwiseFeatureProjection;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -26,24 +28,23 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Map;
 
 public class MultiLabelFeatureFunction implements FeatureFunction {
 
-    private final Graph graph;
     private final Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
     private final int projectedFeatureDimension;
 
-    public MultiLabelFeatureFunction(
-        Graph graph,
-        Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel,
-        int projectedFeatureDimension
-    ) {
-        this.graph = graph;
-        this.weightsByLabel = weightsByLabel;
-        this.projectedFeatureDimension = projectedFeatureDimension;
+    public MultiLabelFeatureFunction(GraphSchema graphSchema, GraphSageTrainConfig config) {
+        this.weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(graphSchema, config);
+        this.projectedFeatureDimension = config.projectedFeatureDimension().orElseThrow();
+    }
+
+    public Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel() {
+        return this.weightsByLabel;
     }
 
     /**
@@ -55,7 +56,7 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
      * @return Create a matrix variable around a batch of nodes.
      */
     @Override
-    public Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features) {
+    public Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features, Graph graph) {
         NodeLabel[] labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
             labels[i] = graph.nodeLabels(nodeIds[i]).iterator().next();

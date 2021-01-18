@@ -30,10 +30,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -281,7 +281,7 @@ class GraphSageAlgorithmFactoryTest {
             "modelName",
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
+            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig
         );
 
@@ -336,7 +336,7 @@ class GraphSageAlgorithmFactoryTest {
             "modelName",
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
+            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig
         );
 
@@ -516,7 +516,7 @@ class GraphSageAlgorithmFactoryTest {
                                             modelName,
                                             "graphSage",
                                             GraphSchema.empty(),
-                                            ModelData.of(new Layer[]{}, GraphSageHelper::features),
+                                            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
                                             trainConfig
                                         );
 
@@ -561,7 +561,7 @@ class GraphSageAlgorithmFactoryTest {
             modelName,
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, GraphSageHelper::features),
+            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig
         );
 

@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
@@ -71,7 +70,8 @@ public final class GraphSageHelper {
 
         Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
             subGraphs.get(subGraphs.size() - 1).nextNodes,
-            features
+            features,
+            graph
         );
 
         for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {
@@ -289,23 +289,8 @@ public final class GraphSageHelper {
         return features;
     }
 
-    public static Variable<Matrix> features(long[] nodeIds, HugeObjectArray<double[]> features) {
-        int dimension = features.get(0).length;
-        double[] data = new double[Math.multiplyExact(nodeIds.length, dimension)];
-        IntStream
-            .range(0, nodeIds.length)
-            .forEach(nodeOffset -> System.arraycopy(
-                features.get(nodeIds[nodeOffset]),
-                0,
-                data,
-                nodeOffset * dimension,
-                dimension
-            ));
-        return new MatrixConstant(data, nodeIds.length, dimension);
-    }
-
-    public static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(Graph graph) {
-        return graph.schema()
+    public static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(GraphSchema graphSchema) {
+        return graphSchema
             .nodeSchema()
             .properties()
             .entrySet()
@@ -314,7 +299,7 @@ public final class GraphSageHelper {
     }
 
     private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, GraphSageTrainConfig config) {
-        return propertyKeysPerNodeLabel(graph)
+        return propertyKeysPerNodeLabel(graph.schema())
             .entrySet()
             .stream()
             .collect(Collectors.toMap(

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.embeddings.graphsage.FeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
@@ -27,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -45,7 +45,6 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private final Graph graph;
     private final GraphSageTrainConfig config;
     private final AllocationTracker tracker;
-    private Map<NodeLabel, Weights<? extends Tensor<?>>> weightsByLabel;
 
     public MultiLabelGraphSageTrain(
         Graph graph,
@@ -57,19 +56,19 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         this.config = config;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
-        this.weightsByLabel = makeWeightsByLabel();
     }
 
     @Override
     public Model<ModelData, GraphSageTrainConfig> compute() {
-        FeatureFunction featureFunction = new MultiLabelFeatureFunction(
-            graph,
-            weightsByLabel,
-            config.projectedFeatureDimension().orElseThrow()
+        var multiLabelFeatureFunction = new MultiLabelFeatureFunction(graph.schema(), config);
+        var trainer = new GraphSageModelTrainer(
+            config,
+            progressLogger,
+            multiLabelFeatureFunction,
+            multiLabelFeatureFunction.weightsByLabel().values()
         );
-        GraphSageModelTrainer trainer = new GraphSageModelTrainer(config, progressLogger, featureFunction, weightsByLabel.values());
 
-        GraphSageModelTrainer.ModelTrainResult trainResult = trainer.train(
+        var trainResult = trainer.train(
             graph,
             initializeFeatures(graph, config, tracker)
         );
@@ -79,18 +78,17 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
-            ModelData.of(trainResult.layers(), featureFunction),
+            ModelData.of(trainResult.layers(), multiLabelFeatureFunction),
             config
         );
     }
 
     @Override
     public void release() {
-        this.weightsByLabel = null;
     }
 
-    private Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel() {
-        return propertyKeysPerNodeLabel(graph)
+    public static Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel(GraphSchema graphSchema, GraphSageTrainConfig config) {
+        return propertyKeysPerNodeLabel(graphSchema)
             .entrySet()
             .stream()
             .collect(Collectors.toMap(Map.Entry::getKey, e -> {

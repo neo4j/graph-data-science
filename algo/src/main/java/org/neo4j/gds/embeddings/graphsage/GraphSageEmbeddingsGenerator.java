@@ -49,7 +49,7 @@ public class GraphSageEmbeddingsGenerator {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this(layers, batchSize, concurrency, isWeighted, GraphSageHelper::features, progressLogger, tracker);
+        this(layers, batchSize, concurrency, isWeighted, new SingleLabelFeatureFunction(), progressLogger, tracker);
     }
 
     public GraphSageEmbeddingsGenerator(
