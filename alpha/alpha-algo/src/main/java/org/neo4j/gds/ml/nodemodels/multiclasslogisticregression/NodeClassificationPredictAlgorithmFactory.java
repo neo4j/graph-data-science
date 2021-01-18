@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
 public class NodeClassificationPredictAlgorithmFactory
-    extends AbstractAlgorithmFactory<NodeClassificationPredictAlgorithm, NodeClassificationPropertyPredictMutateConfig> {
+    extends AbstractAlgorithmFactory<NodeClassificationPredict, NodeClassificationPropertyPredictMutateConfig> {
 
     public NodeClassificationPredictAlgorithmFactory() {
         super();
@@ -49,7 +49,7 @@ public class NodeClassificationPredictAlgorithmFactory
     }
 
     @Override
-    protected NodeClassificationPredictAlgorithm build(
+    protected NodeClassificationPredict build(
         Graph graph,
         NodeClassificationPropertyPredictMutateConfig configuration,
         AllocationTracker tracker,
@@ -61,7 +61,7 @@ public class NodeClassificationPredictAlgorithmFactory
             MultiClassNLRData.class,
             NodeClassificationTrainConfig.class
         );
-        return new NodeClassificationPredictAlgorithm(
+        return new NodeClassificationPredict(
             new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties()),
             graph,
             configuration.batchSize(),

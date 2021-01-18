@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @GdlExtension
-class NodeClassificationPredictAlgorithmTest {
+class NodeClassificationPredictTest {
 
     @GdlGraph
     private static final String TRAINED_GRAPH =
@@ -93,7 +93,7 @@ class NodeClassificationPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new NodeClassificationPredictAlgorithm(
+        var result = new NodeClassificationPredict(
             new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,
@@ -147,7 +147,7 @@ class NodeClassificationPredictAlgorithmTest {
             .classIdMap(classIdMap)
             .build();
 
-        var result = new NodeClassificationPredictAlgorithm(
+        var result = new NodeClassificationPredict(
             new MultiClassNLRPredictor(modelData, List.of("a", "b")),
             graph,
             1,

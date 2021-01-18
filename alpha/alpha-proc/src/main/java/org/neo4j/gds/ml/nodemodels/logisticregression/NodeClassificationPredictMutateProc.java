@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredictAlgorithm;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredict;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredictAlgorithmFactory;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPropertyPredictMutateConfig;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictMutateProc
-    extends MutatePropertyProc<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationPropertyPredictMutateConfig> {
+    extends MutatePropertyProc<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationPropertyPredictMutateConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -63,7 +63,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computeResult
+        ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
     }
@@ -108,13 +108,13 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected AlgorithmFactory<NodeClassificationPredictAlgorithm, NodeClassificationPropertyPredictMutateConfig> algorithmFactory() {
+    protected AlgorithmFactory<NodeClassificationPredict, NodeClassificationPropertyPredictMutateConfig> algorithmFactory() {
         return new NodeClassificationPredictAlgorithmFactory();
     }
 
     @Override
     protected List<NodeProperty> nodePropertyList(
-        ComputationResult<NodeClassificationPredictAlgorithm, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computationResult
+        ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPropertyPredictMutateConfig> computationResult
     ) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();
