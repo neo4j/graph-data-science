@@ -88,8 +88,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
-            .perNode("message bits", MemoryUsage::sizeOfHugeAtomicBitset)
-            .perNode("previous message bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
             .add("composite node value", CompositeNodeValue.memoryEstimation(pregelSchema));
