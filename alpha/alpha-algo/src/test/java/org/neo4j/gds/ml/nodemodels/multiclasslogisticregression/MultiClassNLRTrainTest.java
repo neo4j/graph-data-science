@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.ImmutableTrainingSettings;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
@@ -36,7 +35,7 @@ import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 
 @GdlExtension
-class MultiClassNodeLogisticRegressionTrainTest {
+class MultiClassNLRTrainTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -56,15 +55,13 @@ class MultiClassNodeLogisticRegressionTrainTest {
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .concurrency(1)
-            .build();
-        var trainingSettings = ImmutableTrainingSettings.builder()
             .maxIterations(100000)
             .tolerance(1e-4)
             .build();
 
-        var algo = new MultiClassNodeLogisticRegressionTrain(graph, trainingSettings, config, new TestLog());
+        var algo = new MultiClassNLRTrain(graph, config, new TestLog());
 
-        var result = algo.compute().modelData();
+        var result = algo.compute().data();
 
         assertThat(result).isNotNull();
 

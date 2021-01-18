@@ -19,13 +19,17 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
@@ -33,22 +37,26 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.TestPregelComputation.KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class PregelTest {
@@ -78,6 +86,56 @@ class PregelTest {
 
         var nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
+    }
+
+    @Test
+    void testCorrectnessForLargeGraph() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(10_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(42L)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
+
+        var configBuilder = ImmutablePregelConfig.builder()
+            .username("")
+            .maxIterations(10)
+            .isAsynchronous(false);
+
+        var singleThreadedConfig = configBuilder.concurrency(1).build();
+        var multiThreadedConfig = configBuilder.concurrency(4).build();
+
+        var singleThreaded = run(graph, singleThreadedConfig, new TestPregelComputation());
+        var singleThreadedReduce = run(graph, singleThreadedConfig, new TestReduciblePregelComputation());
+
+        var multiThreaded = run(graph, multiThreadedConfig, new TestPregelComputation());
+        var multiThreadedReduce = run(graph, multiThreadedConfig, new TestReduciblePregelComputation());
+
+        for (int nodeId = 0; nodeId < singleThreaded.size(); nodeId++) {
+            var v1 = singleThreaded.get(nodeId);
+            var v2 = singleThreadedReduce.get(nodeId);
+            var v3 = multiThreaded.get(nodeId);
+            var v4 = multiThreadedReduce.get(nodeId);
+            assertTrue(
+                v1 == v2 && v1 == v3 && v1 == v4,
+                formatWithLocale("Value mismatch for node id %d: %f, %f, %f, %f", nodeId, v1, v2, v3, v4)
+            );
+        }
+    }
+
+    @NotNull
+    private HugeDoubleArray run(Graph graph, PregelConfig config, PregelComputation<PregelConfig> computation) {
+        var pregelJob = Pregel.create(
+            graph,
+            config,
+            computation,
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        return pregelJob.run().nodeValues().doubleProperties(KEY);
     }
 
     @Test
@@ -123,17 +181,26 @@ class PregelTest {
         assertEquals(46L, result.longValue(LONG_KEY, graph.toOriginalNodeId("alice")));
         assertEquals(84.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("alice")));
         assertArrayEquals(new long[]{46L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("alice")));
-        assertArrayEquals(new double[]{84.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("alice")));
+        assertArrayEquals(
+            new double[]{84.0D},
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("alice"))
+        );
 
         assertEquals(48L, result.longValue(LONG_KEY, graph.toOriginalNodeId("bob")));
         assertEquals(86.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("bob")));
         assertArrayEquals(new long[]{48L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("bob")));
-        assertArrayEquals(new double[]{86.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("bob")));
+        assertArrayEquals(
+            new double[]{86.0D},
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("bob"))
+        );
 
         assertEquals(50L, result.longValue(LONG_KEY, graph.toOriginalNodeId("eve")));
         assertEquals(88.0D, result.doubleValue(DOUBLE_KEY, graph.toOriginalNodeId("eve")));
         assertArrayEquals(new long[]{50L}, result.longArrayValue(LONG_ARRAY_KEY, graph.toOriginalNodeId("eve")));
-        assertArrayEquals(new double[]{88.0D}, result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve")));
+        assertArrayEquals(
+            new double[]{88.0D},
+            result.doubleArrayValue(DOUBLE_ARRAY_KEY, graph.toOriginalNodeId("eve"))
+        );
     }
 
     @Test
@@ -152,15 +219,17 @@ class PregelTest {
 
     static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), 4_884_096L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), 4_884_816L),
+            // queue based
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_884_128L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_884_848L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
                     .add("key3", ValueType.LONG_ARRAY)
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
-                6_884_168L
+                true,
+                6_884_200L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -168,14 +237,36 @@ class PregelTest {
                     .add("key3", ValueType.LONG_ARRAY)
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
-                6_884_888L
+                true,
+                6_884_920L
+            ),
+            // array based
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 244_200L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 244_920L),
+            Arguments.of(1, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                false,
+                2_244_272L
+            ),
+            Arguments.of(10, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                false,
+                2_244_992L
             )
         );
     }
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void memoryEstimation(int concurrency, PregelSchema pregelSchema, long expectedBytes) {
+    void memoryEstimation(int concurrency, PregelSchema pregelSchema, boolean isQueueBased, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
@@ -183,7 +274,7 @@ class PregelTest {
 
         assertEquals(
             MemoryRange.of(expectedBytes).max,
-            Pregel.memoryEstimation(pregelSchema).estimate(dimensions, concurrency).memoryUsage().max
+            Pregel.memoryEstimation(pregelSchema, isQueueBased).estimate(dimensions, concurrency).memoryUsage().max
         );
     }
 
@@ -203,6 +294,11 @@ class PregelTest {
                 ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
+            ),
+            Arguments.of(
+                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                new TestReduciblePregelComputation(),
+                new double[]{0.0, 1.0, 1.0}
             )
         );
     }
@@ -260,6 +356,14 @@ class PregelTest {
                 context.setNodeValue(KEY, messageSum);
             }
             context.voteToHalt();
+        }
+    }
+
+    public static class TestReduciblePregelComputation extends TestPregelComputation {
+
+        @Override
+        public Optional<Reducer> reducer() {
+            return Optional.of(new Reducer.Sum());
         }
     }
 

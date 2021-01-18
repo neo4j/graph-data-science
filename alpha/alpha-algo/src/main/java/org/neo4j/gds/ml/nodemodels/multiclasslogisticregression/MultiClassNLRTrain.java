@@ -19,46 +19,56 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
+import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.logging.Log;
 
-public class MultiClassNodeLogisticRegressionTrain extends Algorithm<MultiClassNodeLogisticRegressionTrain, MultiClassNodeLogisticRegressionPredictor> {
+public class MultiClassNLRTrain
+    extends Algorithm<MultiClassNLRTrain, Model<MultiClassNLRData, NodeLogisticRegressionTrainConfig>> {
+
+    public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
+
     private final Graph graph;
-    private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
     private final Log log;
 
-    public MultiClassNodeLogisticRegressionTrain(
+    public MultiClassNLRTrain(
         Graph graph,
-        TrainingSettings trainingSettings,
         NodeLogisticRegressionTrainConfig config,
         Log log
     ) {
         this.graph = graph;
-        this.trainingSettings = trainingSettings;
         this.config = config;
         this.log = log;
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionPredictor compute() {
-        var objective = new MultiClassNodeLogisticRegressionObjective(
+    public Model<MultiClassNLRData, NodeLogisticRegressionTrainConfig> compute() {
+        var objective = new MultiClassNLRObjective(
             config.featureProperties(),
             config.targetProperty(),
             graph,
             config.penalty()
         );
-        var training = new Training(trainingSettings, log, graph.nodeCount());
-        training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
-        return new MultiClassNodeLogisticRegressionPredictor(objective.modelData());
+        var training = new Training(config, log, graph.nodeCount());
+        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), config.concurrency());
+
+        return Model.of(
+            config.username(),
+            config.modelName(),
+            MODEL_TYPE,
+            graph.schema(),
+            objective.modelData(),
+            config
+        );
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionTrain me() {
+    public MultiClassNLRTrain me() {
         return this;
     }
 

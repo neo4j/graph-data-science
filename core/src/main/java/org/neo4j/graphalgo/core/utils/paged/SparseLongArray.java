@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.ArrayLayout;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
@@ -55,7 +55,7 @@ public final class SparseLongArray {
     // the SLA (e.g. node loading does not insert blocks in a sequential order).
     private final long[] blockOffsets;
     // Sorted representation of block offsets to speed up the lookup for the
-    // correct block using binary search.
+    // correct block using binary search using the Eytzinger search layout.
     private final long[] sortedBlockOffsets;
     // Maps block indices from the sorted offsets to the unsorted offsets.
     private final int[] blockMapping;
@@ -131,8 +131,11 @@ public final class SparseLongArray {
     }
 
     public long toOriginalNodeId(long mappedId) {
-        var startBlockIndex = ArrayUtil.binaryLookup(mappedId, sortedBlockOffsets);
-        startBlockIndex = blockMapping[startBlockIndex];
+        var startBlockIndex = ArrayLayout.searchEytzinger(sortedBlockOffsets, mappedId);
+        // since the eytzinger layout is 1-based and reserves the index 0 for the 'lower-than-lower-bound' case
+        // and we know that we won't trigger that case, as our lower bound is 0
+        // we subtract 1 to get to the actual index in the block mapping array.
+        startBlockIndex = blockMapping[startBlockIndex - 1];
         var array = this.array;
         var blockStart = startBlockIndex << BLOCK_SHIFT;
         var blockEnd = Math.min((startBlockIndex + 1) << BLOCK_SHIFT, array.length);
@@ -270,7 +273,8 @@ public final class SparseLongArray {
                 idCount += Long.bitCount(array[page]);
             }
 
-            return new SparseLongArray(idCount, array, blockOffsets, sortedBlockOffsets, blockMapping);
+            var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
+            return new SparseLongArray(idCount, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
     }
 
@@ -327,8 +331,9 @@ public final class SparseLongArray {
             // No need to sort as the blocks are already sorted.
             var blockMapping = new int[blockOffsets.length];
             Arrays.setAll(blockMapping, i -> i);
+            var layouts = ArrayLayout.constructEytzinger(blockOffsets, blockMapping);
 
-            return new SparseLongArray(count, array, blockOffsets, blockOffsets, blockMapping);
+            return new SparseLongArray(count, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {

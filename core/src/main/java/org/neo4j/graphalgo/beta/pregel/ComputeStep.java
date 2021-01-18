@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 import java.util.stream.LongStream;
 
-public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable {
+public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable {
 
     private final long nodeCount;
     private final long relationshipCount;
@@ -40,7 +40,7 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
     private final Degrees degrees;
     private final Pregel.CompositeNodeValue nodeValues;
     private final HugeAtomicBitSet voteBits;
-    private final Messenger messenger;
+    private final Messenger<ITERATOR> messenger;
     private final PregelComputation<CONFIG> computation;
     private final RelationshipIterator relationshipIterator;
 
@@ -55,7 +55,7 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
         int iteration,
         Partition nodeBatch,
         Pregel.CompositeNodeValue nodeValues,
-        Messenger messenger,
+        Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
         RelationshipIterator relationshipIterator
     ) {
@@ -141,15 +141,13 @@ public final class ComputeStep<CONFIG extends PregelConfig> implements Runnable 
     public void sendToNeighbors(long sourceNodeId, double message) {
         relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             sendTo(targetNodeId, message);
-            messageBits.set(targetNodeId);
             return true;
         });
     }
 
     public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (source, target, weight) -> {
-            sendTo(target, computation.applyRelationshipWeight(message, weight));
-            messageBits.set(target);
+        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
             return true;
         });
     }

@@ -24,11 +24,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 public class WeightedPageRankVariant implements PageRankVariant {
-    private final boolean cacheWeights;
-
-    WeightedPageRankVariant(boolean cacheWeights) {
-        this.cacheWeights = cacheWeights;
-    }
 
     @Override
     public ComputeStep createComputeStep(
@@ -57,6 +52,6 @@ public class WeightedPageRankVariant implements PageRankVariant {
 
     @Override
     public DegreeComputer degreeComputer(Graph graph) {
-        return new WeightedDegreeComputer(graph, cacheWeights);
+        return new WeightedDegreeComputer(graph);
     }
 }

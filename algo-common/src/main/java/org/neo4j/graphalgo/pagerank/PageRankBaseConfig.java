@@ -52,7 +52,7 @@ public interface PageRankBaseConfig extends
         return 0.85;
     }
 
-    // TODO: consider moving this to WeightConfig or create a sub interface of that
+    @Deprecated
     @Value.Default
     default boolean cacheWeights() {
         return false;

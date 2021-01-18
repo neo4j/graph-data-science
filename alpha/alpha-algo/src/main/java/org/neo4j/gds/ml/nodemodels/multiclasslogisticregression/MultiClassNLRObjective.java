@@ -36,39 +36,38 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class MultiClassNodeLogisticRegressionObjective implements Objective<MultiClassNodeLogisticRegressionData> {
+public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
 
     private final String targetPropertyKey;
     private final Graph graph;
     private final double penalty;
-    private final MultiClassNodeLogisticRegressionPredictor predictor;
+    private final MultiClassNLRPredictor predictor;
 
-    public MultiClassNodeLogisticRegressionObjective(
-        List<String> nodePropertyKeys,
+    public MultiClassNLRObjective(
+        List<String> featureProperties,
         String targetPropertyKey,
         Graph graph,
         double penalty
     ) {
-        this.predictor = new MultiClassNodeLogisticRegressionPredictor(makeData(
-            nodePropertyKeys,
+        this.predictor = new MultiClassNLRPredictor(makeData(
+            featureProperties,
             targetPropertyKey,
             graph
-        ));
+        ), featureProperties);
         this.targetPropertyKey = targetPropertyKey;
         this.graph = graph;
         this.penalty = penalty;
     }
 
-    private static MultiClassNodeLogisticRegressionData makeData(
-        List<String> nodePropertyKeys,
+    private static MultiClassNLRData makeData(
+        List<String> featureProperties,
         String targetPropertyKey,
         Graph graph
     ) {
         var classIdMap = makeClassIdMap(targetPropertyKey, graph);
-        return MultiClassNodeLogisticRegressionData.builder()
+        return MultiClassNLRData.builder()
             .classIdMap(classIdMap)
-            .weights(initWeights(nodePropertyKeys, classIdMap.originalIds().length))
-            .nodePropertyKeys(nodePropertyKeys)
+            .weights(initWeights(featureProperties, classIdMap.originalIds().length))
             .build();
     }
 
@@ -82,8 +81,8 @@ public class MultiClassNodeLogisticRegressionObjective implements Objective<Mult
         return classIdMap;
     }
 
-    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys, int numberOfClasses) {
-        var featuresPerClass = nodePropertyKeys.size() + 1;
+    private static Weights<Matrix> initWeights(List<String> featureProperties, int numberOfClasses) {
+        var featuresPerClass = featureProperties.size() + 1;
         return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 
@@ -120,7 +119,7 @@ public class MultiClassNodeLogisticRegressionObjective implements Objective<Mult
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionData modelData() {
+    public MultiClassNLRData modelData() {
         return predictor.modelData();
     }
 }

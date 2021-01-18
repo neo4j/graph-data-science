@@ -87,12 +87,12 @@ class GraphStoreToFileExporterTest extends CsvTest {
     void exportTopology() {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
-            .exportLocation(tempDir.toString())
+            .exportName(tempDir.toString())
             .writeConcurrency(1)
             .build();
 
         // export db
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config);
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
         exporter.run(AllocationTracker.empty());
 
         var aLabel = NodeLabel.of("A");
@@ -170,12 +170,12 @@ class GraphStoreToFileExporterTest extends CsvTest {
     void exportMultithreaded() {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
-            .exportLocation(tempDir.toString())
+            .exportName(tempDir.toString())
             .writeConcurrency(2)
             .build();
 
         // export db
-        var exporter = GraphStoreToFileExporter.csv(concurrentGraphStore, config);
+        var exporter = GraphStoreToFileExporter.csv(concurrentGraphStore, config, tempDir);
         exporter.run(AllocationTracker.empty());
 
         // Assert headers

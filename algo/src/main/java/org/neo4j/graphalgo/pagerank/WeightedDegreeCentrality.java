@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,25 +40,19 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private final ExecutorService executor;
     private final int concurrency;
     private volatile AtomicInteger nodeQueue = new AtomicInteger();
-    private final boolean cacheWeights;
 
-    private HugeDoubleArray degrees;
-    private HugeObjectArray<HugeDoubleArray> weights;
-    private AllocationTracker tracker;
+    private final HugeDoubleArray degrees;
 
     public WeightedDegreeCentrality(
         Graph graph,
         int concurrency,
-        boolean cacheWeights,
         ExecutorService executor,
         AllocationTracker tracker
     ) {
-        this.cacheWeights = cacheWeights;
         if (!graph.hasRelationshipProperty()) {
             throw new UnsupportedOperationException("WeightedDegreeCentrality requires a weight property to be loaded.");
         }
 
-        this.tracker = tracker;
         if (concurrency <= 0) {
             concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
         }
@@ -67,9 +60,8 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         this.graph = graph;
         this.executor = executor;
         this.concurrency = concurrency;
-        nodeCount = graph.nodeCount();
-        degrees = HugeDoubleArray.newArray(nodeCount, tracker);
-        weights = HugeObjectArray.newArray(HugeDoubleArray.class, nodeCount, tracker);
+        this.nodeCount = graph.nodeCount();
+        this.degrees = HugeDoubleArray.newArray(nodeCount, tracker);
     }
 
     @Override
@@ -80,17 +72,14 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
         long threadSize = ParallelUtil.threadCount(batchSize, nodeCount);
         if (threadSize > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(formatWithLocale(
-                    "A concurrency of %d is too small to divide graph into at most Integer.MAX_VALUE tasks",
-                    concurrency));
+                "A concurrency of %d is too small to divide graph into at most Integer.MAX_VALUE tasks",
+                concurrency
+            ));
         }
         final List<Runnable> tasks = new ArrayList<>((int) threadSize);
 
         for (int i = 0; i < threadSize; i++) {
-            if(cacheWeights) {
-                tasks.add(new CacheDegreeTask());
-            } else {
-                tasks.add(new DegreeTask());
-            }
+            tasks.add(new DegreeTask());
         }
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
@@ -119,42 +108,10 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
                 double[] weightedDegree = new double[1];
                 threadLocalGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
-                    if(weight > 0) {
+                    if (weight > 0) {
                         weightedDegree[0] += weight;
                     }
 
-                    return true;
-                });
-
-                degrees.set(nodeId, weightedDegree[0]);
-
-            }
-        }
-    }
-
-    private class CacheDegreeTask implements Runnable {
-        @Override
-        public void run() {
-            final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
-            double[] weightedDegree = new double[1];
-            for (; ; ) {
-                final int nodeId = nodeQueue.getAndIncrement();
-                if (nodeId >= nodeCount || !running()) {
-                    return;
-                }
-
-                final HugeDoubleArray nodeWeights = HugeDoubleArray.newArray(graph.degree(nodeId), tracker);
-                weights.set(nodeId, nodeWeights);
-
-                int[] index = {0};
-                weightedDegree[0] = 0D;
-                threadLocalGraph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, weight) -> {
-                    if(weight > 0) {
-                        weightedDegree[0] += weight;
-                    }
-
-                    nodeWeights.set(index[0], weight);
-                    index[0]++;
                     return true;
                 });
 
@@ -166,9 +123,6 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
 
     public HugeDoubleArray degrees() {
         return degrees;
-    }
-    public HugeObjectArray<HugeDoubleArray> weights() {
-        return weights;
     }
 
 }

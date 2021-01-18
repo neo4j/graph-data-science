@@ -28,30 +28,33 @@ import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.List;
+
 import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
 
-public class MultiClassNodeLogisticRegressionPredictor implements Predictor<ClassProbabilities, MultiClassNodeLogisticRegressionData> {
+public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
 
-    private final MultiClassNodeLogisticRegressionData modelData;
+    private final MultiClassNLRData modelData;
+    private final List<String> featureProperties;
 
-    MultiClassNodeLogisticRegressionPredictor(MultiClassNodeLogisticRegressionData modelData) {
+    MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
         this.modelData = modelData;
+        this.featureProperties = featureProperties;
     }
 
     @Override
-    public MultiClassNodeLogisticRegressionData modelData() {
+    public MultiClassNLRData modelData() {
         return modelData;
     }
 
     @Override
-    public ClassProbabilities predict(Graph graph, Batch batch) {
+    public Matrix predict(Graph graph, Batch batch) {
         ComputationContext ctx = new ComputationContext();
-        Matrix forward = ctx.forward(predictionsVariable(graph, batch));
-        return new ClassProbabilities(forward, modelData.classIdMap());
+        return ctx.forward(predictionsVariable(graph, batch));
     }
 
     Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
-        var features = features(graph, batch, modelData.nodePropertyKeys());
+        var features = features(graph, batch, featureProperties);
         var weights = modelData.weights();
         return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
     }

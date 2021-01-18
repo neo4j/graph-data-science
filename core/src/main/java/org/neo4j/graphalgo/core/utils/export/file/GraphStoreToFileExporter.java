@@ -30,6 +30,7 @@ import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -41,15 +42,16 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
-        GraphStoreToFileExporterConfig config
+        GraphStoreToFileExporterConfig config,
+        Path exportPath
     ) {
-        Set<String> headerFiles = ConcurrentHashMap.newKeySet();
+         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
         return new GraphStoreToFileExporter(
             graphStore,
             config,
-            (index) -> new CsvNodeVisitor(config.exportLocationPath(), graphStore.schema().nodeSchema(), headerFiles, index),
-            (index) -> new CsvRelationshipVisitor(config.exportLocationPath(), graphStore.schema().relationshipSchema(), headerFiles, index)
+            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index),
+            (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
         );
     }
 
@@ -65,7 +67,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     }
 
     @Override
-    public void export(GraphStoreInput graphStoreInput) {
+    protected void export(GraphStoreInput graphStoreInput) {
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
     }

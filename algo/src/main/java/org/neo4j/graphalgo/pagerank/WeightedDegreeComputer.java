@@ -27,26 +27,24 @@ import java.util.concurrent.ExecutorService;
 public class WeightedDegreeComputer implements DegreeComputer {
 
     private final Graph graph;
-    private final boolean cacheWeights;
 
-    WeightedDegreeComputer(Graph graph, boolean cacheWeights) {
+    WeightedDegreeComputer(Graph graph) {
         this.graph = graph;
-        this.cacheWeights = cacheWeights;
     }
 
     @Override
     public DegreeCache degree(
-            ExecutorService executor,
-            int concurrency,
-            AllocationTracker tracker) {
+        ExecutorService executor,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         WeightedDegreeCentrality degreeCentrality = new WeightedDegreeCentrality(
             graph,
             concurrency,
-            cacheWeights,
             executor,
             tracker
         );
         degreeCentrality.compute();
-        return new DegreeCache(degreeCentrality.degrees(), degreeCentrality.weights(), -1D);
+        return new DegreeCache(degreeCentrality.degrees(), -1D);
     }
 }

@@ -17,29 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
+package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 
-public class ClassProbabilities {
-    private final Matrix probabilities;
-    private final LocalIdMap classMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-    public ClassProbabilities(Matrix probabilities, LocalIdMap classMap) {
-        this.probabilities = probabilities;
-        this.classMap = classMap;
-    }
+public interface Metric {
 
-    public Matrix probabilities() {
-        return probabilities;
-    }
+    double compute(HugeLongArray targets, HugeLongArray predictions);
 
-    public int classToColumn(long clazz) {
-        return classMap.toMapped(clazz);
-    }
-
-    public long columnToClass(int col) {
-        return classMap.toOriginal(col);
-    }
 }

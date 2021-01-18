@@ -19,20 +19,26 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.List;
+import java.util.Optional;
 
 @ValueClass
-public interface MultiClassNodeLogisticRegressionData {
-    Weights<Matrix> weights();
-    LocalIdMap classIdMap();
-    List<String> nodePropertyKeys();
+public interface MultiClassNLRResult {
 
-    static ImmutableMultiClassNodeLogisticRegressionData.Builder builder() {
-        return ImmutableMultiClassNodeLogisticRegressionData.builder();
+    HugeLongArray predictedClasses();
+    Optional<HugeObjectArray<double[]>> predictedProbabilities();
+
+    static MultiClassNLRResult of(
+        HugeLongArray classes,
+        @Nullable HugeObjectArray<double[]> probabilities
+    ) {
+        return ImmutableMultiClassNLRResult.builder()
+            .predictedProbabilities(Optional.ofNullable(probabilities))
+            .predictedClasses(classes)
+            .build();
     }
 }

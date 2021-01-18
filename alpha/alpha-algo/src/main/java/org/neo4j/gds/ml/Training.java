@@ -31,31 +31,28 @@ import java.util.function.Supplier;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Training {
-    private final TrainingSettings settings;
+    private final TrainingConfig config;
     private final Log log;
     private final long trainSize;
 
-    public Training(TrainingSettings settings, Log log, long trainSize) {
-        this.settings = settings;
+    public Training(TrainingConfig config, Log log, long trainSize) {
+        this.config = config;
         this.log = log;
         this.trainSize = trainSize;
     }
 
-    public void train(Objective objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater singleUpdater = settings.sharedUpdater() ? settings.updater(objective.weights()) : null;
-        Updater[] updaters = null;
-        if (!settings.sharedUpdater()) {
-            updaters = new Updater[concurrency];
-            for (int i = 0; i < concurrency; i++) {
-                updaters[i] = settings.updater(objective.weights());
-            }
+    public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
+        Updater[] updaters = new Updater[concurrency];
+        updaters[0] = Updater.defaultUpdater(objective.weights());
+        for (int i = 1; i < concurrency; i++) {
+            updaters[i] = config.sharedUpdater() ? updaters[0] : Updater.defaultUpdater(objective.weights());
         }
         int epoch = 0;
-        TrainingStopper stopper = settings.stopper();
+        TrainingStopper stopper = TrainingStopper.defaultStopper(config);
         double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
         double lastLoss = initialLoss;
         while (!stopper.terminated()) {
-            trainEpoch(settings, objective, queueSupplier.get(), concurrency, singleUpdater, updaters);
+            trainEpoch(objective, queueSupplier.get(), concurrency, updaters);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
@@ -71,7 +68,7 @@ public class Training {
         ));
     }
 
-    private double evaluateLoss(Objective objective, BatchQueue batches, int concurrency) {
+    private double evaluateLoss(Objective<?> objective, BatchQueue batches, int concurrency) {
         DoubleAdder totalLoss = new DoubleAdder();
 
         batches.parallelConsume(
@@ -87,11 +84,9 @@ public class Training {
     }
 
     private void trainEpoch(
-        TrainingSettings settings,
-        Objective objective,
+        Objective<?> objective,
         BatchQueue batches,
         int concurrency,
-        Updater singleUpdater,
         Updater[] updaters
     ) {
         batches.parallelConsume(
@@ -99,18 +94,18 @@ public class Training {
             jobId ->
                 new ObjectiveUpdateConsumer(
                     objective,
-                    settings.sharedUpdater() ? singleUpdater : updaters[jobId],
+                    updaters[jobId],
                     trainSize
                 )
         );
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
-        private final Objective objective;
+        private final Objective<?> objective;
         private final Updater updater;
         private final long trainSize;
 
-        ObjectiveUpdateConsumer(Objective objective, Updater updater, long trainSize) {
+        ObjectiveUpdateConsumer(Objective<?> objective, Updater updater, long trainSize) {
             this.objective = objective;
             this.updater = updater;
             this.trainSize = trainSize;
@@ -127,11 +122,11 @@ public class Training {
     }
 
     static class LossEvalConsumer implements Consumer<Batch> {
-        private final Objective objective;
+        private final Objective<?> objective;
         private final DoubleAdder totalLoss;
         private final long trainSize;
 
-        LossEvalConsumer(Objective objective, DoubleAdder lossAdder, long trainSize) {
+        LossEvalConsumer(Objective<?> objective, DoubleAdder lossAdder, long trainSize) {
             this.objective = objective;
             this.totalLoss = lossAdder;
             this.trainSize = trainSize;

@@ -19,26 +19,23 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
+import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 
 public class LinkLogisticRegressionTrain extends Algorithm<LinkLogisticRegressionTrain, LinkLogisticRegressionPredictor> {
     private final Graph graph;
-    private final TrainingSettings trainingSettings;
     private final LinkLogisticRegressionTrainConfig config;
     private final Log log;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
-        TrainingSettings trainingSettings,
         LinkLogisticRegressionTrainConfig config,
         Log log
     ) {
         this.graph = graph;
-        this.trainingSettings = trainingSettings;
         this.config = config;
         this.log = log;
     }
@@ -50,8 +47,12 @@ public class LinkLogisticRegressionTrain extends Algorithm<LinkLogisticRegressio
             LinkFeatureCombiner.valueOf(config.linkFeatureCombiner()),
             graph
         );
-        var training = new Training(trainingSettings, log, graph.nodeCount());
-        training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
+        var training = new Training(config, log, graph.nodeCount());
+        training.train(
+            objective,
+            () -> new BatchQueue(graph.nodeCount(), config.batchSize()),
+            config.concurrency()
+        );
         return new LinkLogisticRegressionPredictor(objective.modelData);
     }
 

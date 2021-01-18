@@ -21,11 +21,11 @@ The GDS library supports the following Neo4j versions:
 .3+<.^|`1.5.x`
 | `4.2.0` - `4.2.2`
 | `4.1.0` - `4.1.5`
-| `4.0.0` - `4.0.10`
+| `4.0.0` - `4.0.11`
 .3+<.^|`1.4.x`
 | `4.2.0` - `4.2.2`
 | `4.1.0` - `4.1.5`
-| `4.0.0` - `4.0.10`
+| `4.0.0` - `4.0.11`
 .2+<.^|`1.3.x` footnote:deprecated[This version series is end-of-life and will not receive further patches. Please use a later version.]
 | `4.1.0` - `4.1.5`
 | `4.0.0` - `4.0.9`
@@ -146,11 +146,14 @@ This can be accomplished in several ways, including:
 
 1. Dumping a snapshot of the Neo4j store and importing it in a separate standalone Neo4j server.
 2. Adding a Read Replica to the Neo4j Causal Cluster and then detaching it to safely operate GDS on a snapshot in separation from the Neo4j Causal Cluster.
-3. Adding a Read Replica to the Neo4j Causal Cluster and configuring it for GDS workloads, which requires:
+3. Adding a Read Replica to the Neo4j Causal Cluster and configuring it for GDS workloads.
+Be aware that the in-memory graph and the underlying database will eventually become out of sync due to updates to the Read Replica.
+Since GDS can consume all available resources, responsiveness of the Read Replica might decrease and its state might fall behind the cluster.
+Using GDS in this scenario requires:
 ** installing GDS on the Read Replica
-** managing cluster synchronisation events during GDS algorithm execution
-** avoiding use of GDS write-back features
-** consuming results from GDS workloads directly via Cypher
+** using mutate or stream invocation modes
+** consuming results from GDS workloads directly via Cypher (see <<utility-functions-catalog, Utility functions>>)
+** *not using GDS write-back features* (writing triggers many large transactions and will potentially terminate the cluster)
 
 After the GDS workload has finished on a detached machine (for cases 1. and 2.) it now contains out-of-sync results written to its copied version of the graph from the Neo4j Causal Cluster.
 To integrate these results back to the cluster, custom programs are necessary.

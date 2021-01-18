@@ -68,6 +68,10 @@ public class NodePropertyExporter extends StatementApi {
 
         NodeProperties properties();
 
+        static NodeProperty of(String propertyKey, NodeProperties properties) {
+            return ImmutableNodeProperty.of(propertyKey, properties);
+        }
+
         default ResolvedNodeProperty resolveWith(int propertyToken) {
             if (propertyToken == -1) {
                 throw new IllegalStateException("No write property token id is set.");

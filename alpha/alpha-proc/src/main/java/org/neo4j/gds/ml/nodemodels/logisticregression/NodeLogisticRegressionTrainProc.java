@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.neo4j.gds.ml.ImmutableTrainingSettings;
-import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
@@ -78,9 +76,7 @@ public class NodeLogisticRegressionTrainProc extends TrainProc<NodeLogisticRegre
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
-                //TODO: make configuration extend TrainingSettings
-                TrainingSettings trainingSettings = ImmutableTrainingSettings.builder().build();
-                return new NodeLogisticRegressionTrain(graph, trainingSettings, configuration, log);
+                return new NodeLogisticRegressionTrain(graph, configuration, log);
             }
 
             @Override

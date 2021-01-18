@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
@@ -85,6 +86,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         } else {
             context.sendToNeighbors(newRank / context.degree());
         }
+    }
+
+    @Override
+    public Optional<Reducer> reducer() {
+        return Optional.of(new Reducer.Sum());
     }
 
     @Override

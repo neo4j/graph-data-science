@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.logging.Log;
 
 final class PageRankProc {
 
@@ -46,6 +47,12 @@ final class PageRankProc {
 
     static <CONFIG extends PageRankBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
         return computeResult.result().result().asNodeProperties();
+    }
+
+    static <CONFIG extends PageRankBaseConfig> void validateAlgoConfig(CONFIG config, Log log) {
+        if (config.cacheWeights()) {
+            log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
+        }
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {

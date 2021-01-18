@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -98,45 +97,6 @@ final class WeightedDegreeCentralityTest {
     private GraphStore reverseGraphStore;
 
     @Test
-    void buildWeightsArray() {
-        var expected = Map.of(
-            naturalIdFunction.of("a"), new double[]{},
-            naturalIdFunction.of("b"), new double[]{2.0},
-            naturalIdFunction.of("c"), new double[]{2.0},
-            naturalIdFunction.of("d"), new double[]{5.0, 2.0},
-            naturalIdFunction.of("e"), new double[]{2.0, 7.0, 1.0},
-            naturalIdFunction.of("f"), new double[]{2.0, 2.0},
-            naturalIdFunction.of("g"), new double[]{},
-            naturalIdFunction.of("h"), new double[]{},
-            naturalIdFunction.of("i"), new double[]{},
-            naturalIdFunction.of("j"), new double[]{}
-        );
-
-        var graph = naturalGraphStore.getGraph(
-            List.of(NodeLabel.of("Label")),
-            List.of(RelationshipType.of("TYPE1")),
-            Optional.of("weight")
-        );
-
-        var result = new WeightedDegreeCentrality(
-            graph,
-            1,
-            true,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        ).compute().weights();
-
-        expected.forEach((originalNodeId, expectedPageRank) -> {
-            assertArrayEquals(
-                expected.get(originalNodeId),
-                result.get(graph.toMappedNodeId(originalNodeId)).toArray(),
-                1e-2,
-                "Node#" + originalNodeId
-            );
-        });
-    }
-
-    @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
         var graph = naturalGraphStore.getGraph(
             List.of(NodeLabel.of("Label")),
@@ -148,7 +108,6 @@ final class WeightedDegreeCentralityTest {
             new WeightedDegreeCentrality(
                 graph,
                 1,
-                false,
                 Pools.DEFAULT,
                 AllocationTracker.empty()
             );
@@ -236,7 +195,6 @@ final class WeightedDegreeCentralityTest {
         var result = new WeightedDegreeCentrality(
             graph,
             concurrency,
-            false,
             Pools.DEFAULT,
             AllocationTracker.empty()
         ).compute().degrees();

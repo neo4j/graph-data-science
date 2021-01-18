@@ -85,7 +85,7 @@ public abstract class MutatePropertyProc<
                 }
             });
 
-            resultBuilder.withNodePropertiesWritten(computationResult.graph().nodeCount());
+            resultBuilder.withNodePropertiesWritten(nodeProperties.size() * computationResult.graph().nodeCount());
         }
     }
 

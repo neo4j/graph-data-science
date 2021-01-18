@@ -19,9 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.neo4j.common.Validator;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseConfig> {
 
@@ -58,4 +63,18 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
         long relationshipPropertyCount();
     }
+
+    public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
+        try {
+            Files.createDirectories(value);
+            if (!Files.isDirectory(value)) {
+                throw new IllegalArgumentException("'" + value + "' is not a directory");
+            }
+            if (!Files.isWritable(value)) {
+                throw new IllegalArgumentException("Directory '" + value + "' not writable");
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Directory '" + value + "' not writable: ", e);
+        }
+    };
 }

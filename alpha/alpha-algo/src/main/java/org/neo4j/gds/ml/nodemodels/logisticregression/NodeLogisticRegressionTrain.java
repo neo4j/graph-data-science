@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.ml.TrainingSettings;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
@@ -33,18 +33,15 @@ public class NodeLogisticRegressionTrain extends Algorithm<
     public static final String MODEL_TYPE = "nodeLogisticRegression";
 
     private final Graph graph;
-    private final TrainingSettings trainingSettings;
     private final NodeLogisticRegressionTrainConfig config;
     private final Log log;
 
     public NodeLogisticRegressionTrain(
         Graph graph,
-        TrainingSettings trainingSettings,
         NodeLogisticRegressionTrainConfig config,
         Log log
     ) {
         this.graph = graph;
-        this.trainingSettings = trainingSettings;
         this.config = config;
         this.log = log;
     }
@@ -56,8 +53,8 @@ public class NodeLogisticRegressionTrain extends Algorithm<
             config.targetProperty(),
             graph
         );
-        var training = new Training(trainingSettings, log, graph.nodeCount());
-        training.train(objective, () -> trainingSettings.batchQueue(graph.nodeCount()), config.concurrency());
+        var training = new Training(config, log, graph.nodeCount());
+        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), config.concurrency());
         return Model.of(
             config.username(),
             config.modelName(),
