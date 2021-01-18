@@ -27,9 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -105,7 +103,7 @@ class MultiLabelGraphSageTrainTest {
             AllocationTracker.empty()
         );
         // should not fail
-        Model<ModelData, GraphSageTrainConfig> model = multiLabelGraphSageTrain.compute();
+        var model = multiLabelGraphSageTrain.compute();
         assertThat(model.data().featureFunction()).isExactlyInstanceOf(MultiLabelFeatureFunction.class);
 
     }

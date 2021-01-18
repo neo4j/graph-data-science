@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
@@ -72,9 +71,9 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         )));
 
         assertTrue(ModelCatalog.exists("", "model"));
-        Model<?, ?> model = ModelCatalog.list("", "model");
+        var model = ModelCatalog.list("", "model");
         assertThat(model.algoType()).isEqualTo("multiClassNodeLogisticRegression");
-        assertThat(model.customInfo()).containsKeys("metrics", "classes", "bestParameters");
+        assertThat(model.customInfo().toMap()).containsKeys("metrics", "classes", "bestParameters");
     }
 
     @Test

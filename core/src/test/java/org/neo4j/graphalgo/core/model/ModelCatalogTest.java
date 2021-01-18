@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -66,7 +65,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldStoreModels() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             "user1",
             "testModel",
             "testAlgo",
@@ -74,7 +73,7 @@ class ModelCatalogTest {
             "testTrainData",
             TestTrainConfig.of()
         );
-        Model<String, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             "user2",
             "testModel2",
             "testAlgo",
@@ -92,7 +91,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowWhenTryingToGetOtherUsersModel() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             "user1",
             "testModel",
             "testAlgo",
@@ -116,7 +115,7 @@ class ModelCatalogTest {
     void shouldStoreModelsPerType() {
         GdsEdition.instance().setToCommunityEdition();
 
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -124,7 +123,7 @@ class ModelCatalogTest {
             "testTrainData",
             TestTrainConfig.of()
         );
-        Model<Long, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             USERNAME,
             "testModel2",
             "testAlgo2",
@@ -144,7 +143,7 @@ class ModelCatalogTest {
     void onlyAllowOneCatalogInCE() {
         GdsEdition.instance().setToCommunityEdition();
 
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -166,7 +165,7 @@ class ModelCatalogTest {
             ));
         });
 
-        Model<Long, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             USERNAME,
             "testModel2",
             "testAlgo",
@@ -183,7 +182,7 @@ class ModelCatalogTest {
         assertEquals("Community users can only store one model in the catalog", ex.getMessage());
     }
 
-    private static Model<Integer, TestTrainConfig> testModel(String name) {
+    private static Model<Integer, TestTrainConfig, Model.Mappable> testModel(String name) {
         return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
     }
 
@@ -219,7 +218,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelDataTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -244,7 +243,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelConfigTypeMismatch() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -270,7 +269,7 @@ class ModelCatalogTest {
 
     @Test
     void checksIfModelExists() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -288,7 +287,7 @@ class ModelCatalogTest {
 
     @Test
     void getModelType() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -311,7 +310,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldDropModel() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -328,7 +327,7 @@ class ModelCatalogTest {
 
     @Test
     void cantDropOtherUsersModel() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",
@@ -348,7 +347,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldListModels() {
-        Model<String, TestTrainConfig> model1 = Model.of(
+        var model1 = Model.of(
             USERNAME,
             "testModel1",
             "testAlgo1",
@@ -357,7 +356,7 @@ class ModelCatalogTest {
             TestTrainConfig.of()
         );
 
-        Model<Long, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             USERNAME,
             "testModel2",
             "testAlgo2",
@@ -369,7 +368,7 @@ class ModelCatalogTest {
         ModelCatalog.set(model2);
 
 
-        Collection<Model<?, ?>> models = ModelCatalog.list(USERNAME);
+        var models = ModelCatalog.list(USERNAME);
         assertEquals(2, models.size());
 
         assertThat(models).containsExactlyInAnyOrder(model1, model2);
@@ -382,7 +381,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnOverridingModels() {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             USERNAME,
             "testModel",
             "testAlgo",

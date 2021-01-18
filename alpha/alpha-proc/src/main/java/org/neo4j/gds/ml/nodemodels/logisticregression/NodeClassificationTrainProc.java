@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -27,9 +28,7 @@ import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.Model;
@@ -55,7 +54,11 @@ import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, MultiClassNLRData, NodeClassificationTrainConfig> {
+public class NodeClassificationTrainProc extends TrainProc<
+    NodeClassificationTrain,
+    MultiClassNLRData,
+    NodeClassificationTrainConfig,
+    NodeClassificationModelInfo> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")
@@ -133,11 +136,11 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> configuration;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> TrainResult(
-            Model<TRAIN_RESULT, TRAIN_CONFIG> trainedModel,
+        public TrainResult(
+            Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> trainedModel,
             long trainMillis
         ) {
-            TRAIN_CONFIG trainConfig = trainedModel.trainConfig();
+            var trainConfig = trainedModel.trainConfig();
 
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.name());

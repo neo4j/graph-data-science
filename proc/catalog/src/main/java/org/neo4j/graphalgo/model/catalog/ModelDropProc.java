@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,7 +37,7 @@ public class ModelDropProc extends ModelCatalogProc {
     public Stream<ModelResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        Model<?, ?> drop = ModelCatalog.drop(username(), modelName);
+        var drop = ModelCatalog.drop(username(), modelName);
 
         return Stream.of(new ModelResult(drop));
     }

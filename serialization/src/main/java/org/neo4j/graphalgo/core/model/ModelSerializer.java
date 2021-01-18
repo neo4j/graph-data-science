@@ -30,7 +30,7 @@ public final class ModelSerializer {
 
     private ModelSerializer() {}
 
-    public static ModelProto.Model serializableFormatOf(Model<?, ?> model) throws IOException {
+    public static ModelProto.Model serializableFormatOf(Model<?, ?, ?> model) throws IOException {
         Instant creationTimeInstant = model.creationTime().toInstant();
         ModelProto.ZonedDateTime serializableCreationTime = ModelProto.ZonedDateTime.newBuilder()
             .setSeconds(creationTimeInstant.getEpochSecond())

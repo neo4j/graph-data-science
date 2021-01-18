@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -38,7 +36,7 @@ public class ModelListProc extends ModelCatalogProc {
     @Description(DESCRIPTION)
     public Stream<ModelResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
         if (modelName == null || modelName.equals(NO_VALUE)) {
-            Collection<Model<?, ?>> models = ModelCatalog.list(username());
+            var models = ModelCatalog.list(username());
             return models.stream().map(ModelResult::new);
         } else {
             validateModelName(modelName);

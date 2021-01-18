@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -89,7 +88,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        Model<ModelData, GraphSageTrainConfig> model = ModelCatalog.get(
+        var model = ModelCatalog.get(
             getUsername(),
             modelName,
             ModelData.class,
@@ -156,7 +155,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             assertTrue((long) resultRow.get("trainMillis") > 0);
         });
 
-        Model<ModelData, GraphSageTrainConfig> model = ModelCatalog.get(
+        var model = ModelCatalog.get(
             getUsername(),
             modelName,
             ModelData.class,

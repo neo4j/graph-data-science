@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class NodeClassificationTrain
-    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
+    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
     public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
 
@@ -61,7 +61,7 @@ public class NodeClassificationTrain
     }
 
     @Override
-    public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
+    public Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
         var outerSplitter = new FractionSplitter();
@@ -90,7 +90,6 @@ public class NodeClassificationTrain
 
         var modelInfo = NodeClassificationModelInfo.of(classes, modelSelectResult.bestConfig().toMap(), metrics);
 
-
         return Model.of(
             config.username(),
             config.modelName(),
@@ -98,7 +97,7 @@ public class NodeClassificationTrain
             graph.schema(),
             retrainedModelData,
             config,
-            modelInfo.toMap()
+            modelInfo
         );
     }
 

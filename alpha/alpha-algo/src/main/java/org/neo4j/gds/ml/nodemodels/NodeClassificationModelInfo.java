@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.model.Model;
 
 import java.util.List;
 import java.util.Map;
@@ -32,11 +33,12 @@ import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
 @ValueClass
 @JsonSerialize
 @JsonDeserialize
-public interface NodeClassificationModelInfo {
+public interface NodeClassificationModelInfo extends Model.Mappable {
     List<Long> classes();
     Map<String, Object> bestParameters();
     Map<String, MetricData> metrics();
 
+    @Override
     default Map<String, Object> toMap() {
         try {
             String jsonString = OBJECT_MAPPER.writeValueAsString(this);

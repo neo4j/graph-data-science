@@ -29,7 +29,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 @ValueClass
-public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
+public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, I extends Model.Mappable> {
 
     String username();
 
@@ -45,9 +45,9 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     ZonedDateTime creationTime();
 
-    Map<String, Object> customInfo();
+    I customInfo();
 
-    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
+    static <D, C extends ModelConfig & BaseConfig> Model<D, C, Mappable> of(
         String username,
         String name,
         String algoType,
@@ -62,18 +62,18 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
             graphSchema,
             modelData,
             trainConfig,
-            Map.of()
+            Mappable.EMPTY
         );
     }
 
-    static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
+    static <D, C extends ModelConfig & BaseConfig, I extends Mappable> Model<D, C, I> of(
         String username,
         String name,
         String algoType,
         GraphSchema graphSchema,
         D modelData,
         C trainConfig,
-        Map<String, Object> customInfo
+        I customInfo
     ) {
         return ImmutableModel.of(
             username,
@@ -85,5 +85,11 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
             TimeUtil.now(),
             customInfo
         );
+    }
+
+    interface Mappable {
+        Map<String, Object> toMap();
+
+        Mappable EMPTY = Map::of;
     }
 }

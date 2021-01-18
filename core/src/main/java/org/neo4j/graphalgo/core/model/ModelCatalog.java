@@ -38,7 +38,7 @@ public final class ModelCatalog {
 
     private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
-    public static void set(Model<?, ?> model) {
+    public static void set(Model<?, ?, ?> model) {
         userCatalogs.compute(model.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -48,10 +48,16 @@ public final class ModelCatalog {
         });
     }
 
-    public static <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
+    public static <D, C extends ModelConfig & BaseConfig> Model<D, C, Model.Mappable> get(
         String username, String modelName, Class<D> dataClass, Class<C> configClass
     ) {
-        return getUserCatalog(username).get(modelName, dataClass, configClass);
+        return getUserCatalog(username).get(modelName, dataClass, configClass, Model.Mappable.class);
+    }
+
+    public static <D, C extends ModelConfig & BaseConfig, I extends Model.Mappable> Model<D, C, I> get(
+        String username, String modelName, Class<D> dataClass, Class<C> configClass, Class<I> customInfoClass
+    ) {
+        return getUserCatalog(username).get(modelName, dataClass, configClass, customInfoClass);
     }
 
     public static boolean exists(String username, String modelName) {
@@ -62,15 +68,15 @@ public final class ModelCatalog {
         return getUserCatalog(username).type(modelName);
     }
 
-    public static Model<?, ?> drop(String username, String modelName) {
+    public static Model<?, ?, ?> drop(String username, String modelName) {
         return getUserCatalog(username).drop(modelName);
     }
 
-    public static Collection<Model<?, ?>> list(String username) {
+    public static Collection<Model<?, ?, ?>> list(String username) {
         return getUserCatalog(username).list();
     }
 
-    public static Model<?, ?> list(String username, String modelName) {
+    public static Model<?, ?, ?> list(String username, String modelName) {
         return getUserCatalog(username).list(modelName);
     }
 
@@ -90,9 +96,9 @@ public final class ModelCatalog {
         private static final long ALLOWED_MODELS_COUNT = 1;
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
+        private final Map<String, Model<?, ?, ?>> userModels = new ConcurrentHashMap<>();
 
-        public void set(Model<?, ?> model) {
+        public void set(Model<?, ?, ?> model) {
             canStoreModel(model.algoType());
             if (exists(model.name())) {
                 throw new IllegalArgumentException(formatWithLocale(
@@ -103,12 +109,13 @@ public final class ModelCatalog {
             userModels.put(model.name(), model);
         }
 
-        public <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
+        public <D, C extends ModelConfig & BaseConfig, I extends Model.Mappable> Model<D, C, I> get(
             String modelName,
             Class<D> dataClass,
-            Class<C> configClass
+            Class<C> configClass,
+            Class<I> customInfoClass
         ) {
-            Model<?, ?> model = get(modelName);
+            Model<?, ?, ?> model = get(modelName);
 
             var data = model.data();
             if (!dataClass.isInstance(data)) {
@@ -130,10 +137,20 @@ public final class ModelCatalog {
                     configClass.getName()
                 ));
             }
+            var customInfo = model.customInfo();
+            if (!customInfoClass.isInstance(customInfo)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The model `%s` has a custom info with different types than expected. " +
+                    "Expected train info type: `%s`, invoked with model info type: `%s`.",
+                    modelName,
+                    customInfo.getClass().getName(),
+                    customInfoClass.getName()
+                ));
+            }
 
             // We just did the check
             // noinspection unchecked
-            return (Model<D, C>) model;
+            return (Model<D, C, I>) model;
         }
 
         public boolean exists(String modelName) {
@@ -145,16 +162,16 @@ public final class ModelCatalog {
                 .map(Model::algoType);
         }
 
-        public Model<?, ?> drop(String modelName) {
+        public Model<?, ?, ?> drop(String modelName) {
             var model = get(modelName);
             return userModels.remove(model.name());
         }
 
-        public Collection<Model<?, ?>> list() {
+        public Collection<Model<?, ?, ?>> list() {
             return userModels.values();
         }
 
-        public Model<?, ?> list(String modelName) {
+        public Model<?, ?, ?> list(String modelName) {
             return get(modelName);
         }
 
@@ -179,8 +196,8 @@ public final class ModelCatalog {
             }
         }
 
-        private Model<?, ?> get(String modelName) {
-            Model<?, ?> model = userModels.get(modelName);
+        private Model<?, ?, ?> get(String modelName) {
+            Model<?, ?, ?> model = userModels.get(modelName);
             if (model == null) {
                 throw new NoSuchElementException(prettySuggestions(
                     formatWithLocale("Model with name `%s` does not exist.", modelName),

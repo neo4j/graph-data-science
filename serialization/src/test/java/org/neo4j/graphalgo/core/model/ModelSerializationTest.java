@@ -63,7 +63,7 @@ class ModelSerializationTest {
 
     @Test
     void shouldSerializeModel() throws IOException, ClassNotFoundException {
-        Model<String, TestTrainConfig> model = Model.of(
+        var model = Model.of(
             "user1",
             "testModel",
             "testAlgo",

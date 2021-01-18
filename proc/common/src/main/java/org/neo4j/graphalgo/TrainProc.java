@@ -39,20 +39,21 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 
-public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>>,
+public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, I>>,
     TRAIN_RESULT,
-    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
-    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
+    TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig,
+    I extends Model.Mappable>
+    extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, I>, TRAIN_CONFIG> {
 
-    protected Stream<TrainResult> train(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult, String modelType) {
+    protected Stream<TrainResult> train(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, I>, TRAIN_CONFIG> computationResult, String modelType) {
         ModelCatalog.checkStorable(username(), modelType);
-        Model<TRAIN_RESULT, TRAIN_CONFIG> result = computationResult.result();
+        Model<TRAIN_RESULT, TRAIN_CONFIG, I> result = computationResult.result();
 
         ModelCatalog.set(result);
         return Stream.of(trainResult(computationResult));
     }
 
-    protected TrainResult trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult) {
+    protected TrainResult trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG, I>, TRAIN_CONFIG> computationResult) {
         return new TrainResult(
             computationResult.result(),
             computationResult.computeMillis(),
@@ -69,8 +70,8 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         public final Map<String, Object> configuration;
         public final long trainMillis;
 
-        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig> TrainResult(
-            Model<TRAIN_RESULT, TRAIN_CONFIG> trainedModel,
+        public <TRAIN_RESULT, TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig, I extends Model.Mappable> TrainResult(
+            Model<TRAIN_RESULT, TRAIN_CONFIG, I> trainedModel,
             long trainMillis,
             long nodeCount,
             long relationshipCount

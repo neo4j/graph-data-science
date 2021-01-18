@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
@@ -129,7 +128,7 @@ class GraphSageTest {
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
-        Model<ModelData, GraphSageTrainConfig> model = trainAlgo.compute();
+        var model = trainAlgo.compute();
         ModelCatalog.set(model);
 
         var streamConfig = ImmutableGraphSageStreamConfig

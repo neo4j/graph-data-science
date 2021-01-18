@@ -54,7 +54,7 @@ class ModelListProcTest extends ModelProcBaseTest {
     @ParameterizedTest
     @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
     void listsModel(String query) {
-        Model<String, TestTrainConfig> model1 = Model.of(
+        var model1 = Model.of(
             getUsername(),
             "testModel1",
             "testAlgo1",
@@ -63,7 +63,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             TestTrainConfig.of()
         );
 
-        Model<Long, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             getUsername(),
             "testModel2",
             "testAlgo2",
@@ -72,7 +72,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             TestTrainConfig.of()
         );
 
-        Model<Long, TestTrainConfig> otherUserModel = Model.of(
+        var otherUserModel = Model.of(
             "anotherUser",
             "testModel1337",
             "testAlgo1337",
@@ -119,7 +119,7 @@ class ModelListProcTest extends ModelProcBaseTest {
 
     @Test
     void returnSpecificModel() {
-        Model<String, TestTrainConfig> model1 = Model.of(
+        var model1 = Model.of(
             getUsername(),
             "testModel1",
             "testAlgo1",
@@ -128,7 +128,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             TestTrainConfig.of()
         );
 
-        Model<Long, TestTrainConfig> model2 = Model.of(
+        var model2 = Model.of(
             getUsername(),
             "testModel2",
             "testAlgo2",

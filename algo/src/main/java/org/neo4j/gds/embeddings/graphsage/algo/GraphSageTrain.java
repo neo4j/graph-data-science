@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.core.model.Model;
 
-public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig>> {
+public abstract class GraphSageTrain extends Algorithm<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, Model.Mappable>> {
 
     @Override
     public GraphSageTrain me() {
