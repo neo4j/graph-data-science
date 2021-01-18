@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -58,8 +59,9 @@ public abstract class NodeValue {
             ));
 
         if (properties.size() == 1) {
+            var element = schema.elements().stream().findFirst().get();
             var property = properties.values().stream().findFirst().get();
-            return new SingleNodeValue(schema, property);
+            return new SingleNodeValue(schema, element, property);
         }
 
         return new CompositeNodeValue(schema, properties);
@@ -153,9 +155,11 @@ public abstract class NodeValue {
     }
 
     void checkProperty(String key, ValueType expectedType) {
-        var propertyType = propertyTypes.get(key);
+        checkProperty(key, propertyTypes.get(key), expectedType);
+    }
 
-        if (propertyType == null) {
+    private void checkProperty(String key, @Nullable ValueType actualType, ValueType expectedType) {
+        if (actualType == null) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Property with key %s does not exist. Available properties are: %s",
                 key,
@@ -163,12 +167,12 @@ public abstract class NodeValue {
             ));
         }
 
-        if (propertyType != expectedType) {
+        if (actualType != expectedType) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Requested property type %s is not compatible with available property type %s for key %s. " +
                 "Available property types: %s",
                 expectedType,
-                propertyTypes.get(key),
+                actualType,
                 key,
                 StringJoining.join(propertyTypes.entrySet().stream().map(e -> e.getKey() + ": " + e.getValue()))
             ));
@@ -213,10 +217,12 @@ public abstract class NodeValue {
 
     public static final class SingleNodeValue extends NodeValue {
 
+        private final Element element;
         private final Object property;
 
-        SingleNodeValue(PregelSchema pregelSchema, Object property) {
+        SingleNodeValue(PregelSchema pregelSchema, Element element, Object property) {
             super(pregelSchema);
+            this.element = element;
             this.property = property;
         }
 
@@ -244,6 +250,12 @@ public abstract class NodeValue {
             checkProperty(propertyKey, ValueType.DOUBLE_ARRAY);
             //noinspection unchecked
             return (HugeObjectArray<double[]>) property;
+        }
+
+        @Override
+        void checkProperty(String key, ValueType expectedType) {
+            var actualType = element.propertyKey().equals(key) ? element.propertyType() : null;
+            super.checkProperty(key, actualType, expectedType);
         }
     }
 
