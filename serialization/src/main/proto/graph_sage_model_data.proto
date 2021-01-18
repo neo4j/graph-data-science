@@ -9,6 +9,17 @@ option java_outer_classname = "GraphSage";
 message GraphSageModel {
   Model model = 1;
   ModelData data = 2;
+  FeatureFunction featureFunction = 3;
+}
+
+message FeatureFunction {
+  FeatureFunctionType functionType = 1;
+  map<string, Matrix> weightsByLabel = 2;
+}
+
+enum FeatureFunctionType {
+  SINGLE = 0;
+  MULTI = 1;
 }
 
 message ModelData {

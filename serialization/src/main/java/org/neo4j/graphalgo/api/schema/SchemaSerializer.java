@@ -50,7 +50,6 @@ public final class SchemaSerializer {
             .putAllNodeSchema(serializableNodeSchema(graphSchema.nodeSchema()))
             .putAllRelationshipSchema(serializableRelationshipSchema(graphSchema.relationshipSchema()))
             .build();
-
     }
 
     public static Map<String, GraphSchemaProto.PropertyMapping> serializableNodeSchema(NodeSchema nodeSchema) {

@@ -20,8 +20,13 @@
 package org.neo4j.graphalgo.core.model;
 
 import com.google.protobuf.ByteString;
+import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
+import org.neo4j.graphalgo.api.schema.SchemaSerializer;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
+import org.neo4j.graphalgo.utils.serialization.ProtoUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -41,8 +46,18 @@ public final class ModelSerializer {
             .setUsername(model.username())
             .setName(model.name())
             .setAlgoType(model.algoType())
+            .setGraphSchema(SchemaSerializer.serializableGraphSchema(model.graphSchema()))
             .setSerializedTrainConfig(ByteString.copyFrom(ObjectSerializer.toByteArray(model.trainConfig())))
             .setCreationTime(serializableCreationTime)
             .build();
+    }
+
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG, Model.Mappable> deserializableFormatOf(ModelProto.Model protoModelMeta) {
+        return ImmutableModel.<DATA, CONFIG, Model.Mappable>builder()
+            .username(protoModelMeta.getUsername())
+            .name(protoModelMeta.getName())
+            .algoType(protoModelMeta.getAlgoType())
+            .graphSchema(SchemaDeserializer.graphSchema(protoModelMeta.getGraphSchema()))
+            .creationTime(ProtoUtils.from(protoModelMeta.getCreationTime()));
     }
 }
