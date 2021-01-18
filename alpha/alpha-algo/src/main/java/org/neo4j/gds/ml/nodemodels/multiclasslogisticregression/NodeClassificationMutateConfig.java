@@ -32,7 +32,7 @@ import java.util.Optional;
 
 @Configuration
 @ValueClass
-public interface NodeClassificationPropertyPredictMutateConfig extends AlgoBaseConfig, MutatePropertyConfig, ModelConfig {
+public interface NodeClassificationMutateConfig extends AlgoBaseConfig, MutatePropertyConfig, ModelConfig {
 
     Optional<String> predictedProbabilityProperty();
 
@@ -41,13 +41,13 @@ public interface NodeClassificationPropertyPredictMutateConfig extends AlgoBaseC
         return 100;
     }
 
-    static NodeClassificationPropertyPredictMutateConfig of(
+    static NodeClassificationMutateConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new NodeClassificationPropertyPredictMutateConfigImpl(
+        return new NodeClassificationMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

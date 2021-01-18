@@ -216,7 +216,7 @@ class NodeClassificationPredictTest {
 
         var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory(TestProgressLogger.FACTORY).build(
             graph,
-            ImmutableNodeClassificationPropertyPredictMutateConfig.builder()
+            ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
                 .modelName("model")
                 .concurrency(2)
