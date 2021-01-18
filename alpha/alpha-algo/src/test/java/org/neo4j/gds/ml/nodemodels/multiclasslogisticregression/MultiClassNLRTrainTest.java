@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableMultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -60,7 +62,9 @@ class MultiClassNLRTrainTest {
             .tolerance(1e-4)
             .build();
 
-        var algo = new MultiClassNLRTrain(graph, config, new TestLog());
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        nodeIds.setAll(i -> i);
+        var algo = new MultiClassNLRTrain(graph, nodeIds, config, new TestLog());
 
         var result = algo.compute();
 

@@ -57,6 +57,9 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         var query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
                     "modelName: 'model'," +
                     "targetProperty: 't', featureProperties: ['a', 'b'], " +
+                    "metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
+                    "holdoutFraction: 0.2, " +
+                    "validationFolds: 5, " +
                     "params: [{penalty: 1.0}, {penalty: 2.0}]})";
 
         assertCypherResult(query, List.of(Map.of(
@@ -71,6 +74,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         assertTrue(ModelCatalog.exists("", "model"));
         Model<?, ?> model = ModelCatalog.list("", "model");
         assertThat(model.algoType()).isEqualTo("multiClassNodeLogisticRegression");
+        assertThat(model.customInfo()).containsKeys("metrics", "classes", "bestParameters");
     }
 
     @Test
@@ -82,6 +86,9 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .trainMode()
             .addParameter("modelName", "model")
             .addParameter("targetProperty", "nope")
+            .addParameter("metrics", List.of("F1_MACRO"))
+            .addParameter("holdoutFraction", 0.2)
+            .addParameter("validationFolds", 4)
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 

@@ -37,6 +37,11 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     long serialVersionUID = 0x42L;
 
+    Optional<Long> randomSeed();
+    List<String> metrics();
+    double holdoutFraction();
+    int validationFolds();
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();
 

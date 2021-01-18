@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,16 +43,34 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
 
     double penalty();
 
+    @Configuration.CollectKeys
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    };
+
+    @Configuration.ToMap
+    @Value.Auxiliary
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Collections.emptyMap();
+    };
+
     static MultiClassNLRTrainConfig of(
         List<String> featureProperties,
         String targetProperty,
         Map<String, Object> params
     ) {
-        return new MultiClassNLRTrainConfigImpl(
+        var cypherMapWrapper = CypherMapWrapper.create(params);
+        var config = new MultiClassNLRTrainConfigImpl(
             featureProperties,
             targetProperty,
-            CypherMapWrapper.create(params)
+            cypherMapWrapper
         );
+        cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
+        return config;
     }
 
 }

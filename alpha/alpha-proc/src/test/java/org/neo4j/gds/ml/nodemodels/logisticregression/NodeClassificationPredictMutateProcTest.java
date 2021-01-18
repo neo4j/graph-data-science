@@ -173,6 +173,8 @@ class NodeClassificationPredictMutateProcTest extends BaseProcTest {
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")
+                .holdoutFraction(0.25)
+                .validationFolds(4)
                 .featureProperties(Arrays.asList(properties))
                 .build()
         );

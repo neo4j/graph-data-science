@@ -210,6 +210,8 @@ class NodeClassificationPredictTest {
                 .modelName("model")
                 .targetProperty("foo")
                 .featureProperties(List.of("a", "b"))
+                .holdoutFraction(0.2)
+                .validationFolds(4)
                 .build()
         );
         ModelCatalog.set(model);

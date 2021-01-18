@@ -20,23 +20,30 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.ml.BatchQueue;
+import org.neo4j.gds.ml.HugeBatchQueue;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
+
+import java.util.function.Supplier;
 
 public class MultiClassNLRTrain {
 
     private final Graph graph;
+    private final HugeLongArray trainSet;
     private final MultiClassNLRTrainConfig config;
     private final Log log;
 
     public MultiClassNLRTrain(
         Graph graph,
+        HugeLongArray trainSet,
         MultiClassNLRTrainConfig config,
         Log log
     ) {
         this.graph = graph;
+        this.trainSet = trainSet;
         this.config = config;
         this.log = log;
     }
@@ -50,7 +57,8 @@ public class MultiClassNLRTrain {
         );
         var training = new Training(config, log, graph.nodeCount());
         // TODO: concurrency?
-        training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), 1);
+        Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
+        training.train(objective, queueSupplier, 1);
 
         return objective.modelData();
     }
