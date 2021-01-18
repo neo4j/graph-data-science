@@ -152,4 +152,4 @@ After the GDS workload has finished on a detached machine (for cases 1. and 2.) 
 To integrate these results back to the cluster, custom programs are necessary.
 
 
-include::system-requirements.adoc[leveloffset=2]
+include::system-requirements.adoc[leveloffset=+1]
