@@ -37,4 +37,8 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     List<Map<String, Object>> params();
 
+    static ImmutableNodeClassificationTrainConfig.Builder builder() {
+        return ImmutableNodeClassificationTrainConfig.builder();
+    }
+
 }
