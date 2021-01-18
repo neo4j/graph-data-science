@@ -36,7 +36,7 @@ public interface BaseConfig {
     @Value.Default
     default String username() {
         return AuthSubject.ANONYMOUS.username();
-    };
+    }
 
     @Value.Default
     @Value.Parameter(false)
@@ -51,12 +51,12 @@ public interface BaseConfig {
     @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
-    };
+    }
 
     @Configuration.ToMap
     @Value.Auxiliary
     @Value.Derived
     default Map<String, Object> toMap() {
         return Collections.emptyMap();
-    };
+    }
 }

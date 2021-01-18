@@ -101,7 +101,7 @@ class PrimitiveLongResourceCollectionsTest {
     }
 
     private static class CountingResource implements Resource {
-        private AtomicInteger closed = new AtomicInteger();
+        private final AtomicInteger closed = new AtomicInteger();
 
         @Override
         public void close() {

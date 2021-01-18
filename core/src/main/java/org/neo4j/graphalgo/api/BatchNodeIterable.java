@@ -53,7 +53,7 @@ public interface BatchNodeIterable {
     final class IdIterator implements PrimitiveLongIterator {
 
         private long current;
-        private long limit; // exclusive upper bound
+        private final long limit; // exclusive upper bound
 
         public IdIterator(long length) {
             this.current = 0;

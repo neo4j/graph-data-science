@@ -132,8 +132,8 @@ public class TopKMap {
 
             Iterable<SimilarityResult> iterable = () -> new Iterator<SimilarityResult>() {
 
-                PrimitiveIterator.OfLong elementsIter = queue.elements().iterator();
-                PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
+                final PrimitiveIterator.OfLong elementsIter = queue.elements().iterator();
+                final PrimitiveIterator.OfDouble prioritiesIter = queue.priorities().iterator();
 
                 @Override
                 public boolean hasNext() {

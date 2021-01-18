@@ -55,19 +55,11 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  */
 public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
-    private Graph graph;
     private final int nodeCount;
-
-    /**
-     * maximum number of workers
-     */
-    private final int concurrency;
-    /**
-     * nodeId counter (init with nodeCount,
-     * counts down for each node)
-     */
-    private AtomicInteger counter;
-    private ExecutorService executorService;
+    private final int concurrency; // maximum number of workers
+    private final ExecutorService executorService;
+    private Graph graph;
+    private AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
     private BlockingQueue<Result> resultQueue;
 
     private volatile boolean outputStreamOpen;

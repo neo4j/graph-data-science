@@ -47,7 +47,7 @@ public abstract class DoubleCodecTestBase {
     private static final boolean DEBUG_PRINT = FeatureToggles.flag(DoubleCodecTestBase.class, "debugPrint", false);
     private static final int NUMBER_OF_DOUBLES_TO_TEST = 100_000;
 
-    private DoubleCodec compressor;
+    private final DoubleCodec compressor;
 
     public DoubleCodecTestBase(DoubleCodec compressor) {
         this.compressor = compressor;

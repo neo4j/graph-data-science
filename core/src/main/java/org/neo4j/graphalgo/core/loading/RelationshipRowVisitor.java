@@ -64,7 +64,7 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private long sourceId = -1, targetId = -1;
     private long rows = 0;
     private long relationshipCount;
-    private boolean throwOnUnMappedNodeIds;
+    private final boolean throwOnUnMappedNodeIds;
 
     RelationshipRowVisitor(
         NodeMapping nodeMapping,

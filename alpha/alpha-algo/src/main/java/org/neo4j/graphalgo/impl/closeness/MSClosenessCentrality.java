@@ -42,9 +42,9 @@ import java.util.stream.Stream;
  */
 public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSClosenessCentrality> {
 
-    private Graph graph;
-    private PagedAtomicIntegerArray farness;
-    private PagedAtomicIntegerArray component;
+    private final Graph graph;
+    private final PagedAtomicIntegerArray farness;
+    private final PagedAtomicIntegerArray component;
 
     private final int concurrency;
     private final ExecutorService executorService;

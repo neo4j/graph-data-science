@@ -121,19 +121,19 @@ public interface GraphCreateConfig extends BaseConfig {
         default Void store(GraphCreateFromStoreConfig storeConfig) {
             visit(storeConfig);
             return null;
-        };
+        }
 
         @Override
         default Void cypher(GraphCreateFromCypherConfig cypherConfig) {
             visit(cypherConfig);
             return null;
-        };
+        }
 
         @Override
         default Void random(RandomGraphGeneratorConfig randomGraphConfig) {
             visit(randomGraphConfig);
             return null;
-        };
+        }
 
         default void visit(GraphCreateFromStoreConfig storeConfig) {}
 

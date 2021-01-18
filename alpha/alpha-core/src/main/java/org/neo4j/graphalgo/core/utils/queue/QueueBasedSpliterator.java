@@ -29,9 +29,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private final BlockingQueue<T> queue;
-    private T tombstone;
+    private final T tombstone;
     private T entry;
-    private TerminationFlag terminationGuard;
+    private final TerminationFlag terminationGuard;
     private final int timeout;
 
     public QueueBasedSpliterator(BlockingQueue<T> queue, T tombstone, TerminationFlag terminationGuard, int timeout) {

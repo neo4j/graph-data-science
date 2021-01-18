@@ -44,12 +44,12 @@ public interface LongNodeProperties extends NodeProperties {
     @Override
     default Value value(long nodeId) {
         return Values.longValue(longValue(nodeId));
-    };
+    }
 
     @Override
     default ValueType valueType() {
         return ValueType.LONG;
-    };
+    }
 
     @Override
     default double doubleValue(long nodeId) {
@@ -58,7 +58,7 @@ public interface LongNodeProperties extends NodeProperties {
             return DOUBLE_DEFAULT_FALLBACK;
         }
         return ValueConversion.exactLongToDouble(value);
-    };
+    }
 
     @Override
     default OptionalLong getMaxLongPropertyValue() {

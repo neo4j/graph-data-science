@@ -52,10 +52,10 @@ public interface DoubleArrayNodeProperties extends NodeProperties {
     default Value value(long nodeId) {
         var value = doubleArrayValue(nodeId);
         return value == null ? null : Values.doubleArray(value);
-    };
+    }
 
     @Override
     default ValueType valueType() {
         return ValueType.DOUBLE_ARRAY;
-    };
+    }
 }

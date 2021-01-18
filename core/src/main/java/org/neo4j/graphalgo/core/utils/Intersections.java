@@ -81,7 +81,7 @@ public class Intersections {
         return intersection;
     }
 
-    private static int[] EMPTY = new int[0];
+    private static final int[] EMPTY = new int[0];
 
     public static int[] getIntersection(int[] values1, int[] values2) {
         if (values1 == null || values2 == null) return EMPTY;
@@ -109,19 +109,6 @@ public class Intersections {
         return resIdx < intersection.length ? Arrays.copyOf(intersection, resIdx) : intersection;
     }
 
-    /*
-    public static double sumSquareDelta(double[] vector1, double[] vector2, int len) {
-        double result = 0;
-        int intersection = 0;
-        for (int i=0;i<len;i++) {
-            double delta = vector1[i] - vector2[i];
-            if (delta == 0) continue;
-            result += delta * delta;
-            intersection++;
-        }
-        return result;
-    }
-    */
     public static double sumSquareDeltaSkip(double[] vector1, double[] vector2, int len, double skipValue) {
         boolean skipNan = Double.isNaN(skipValue);
 

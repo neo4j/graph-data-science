@@ -62,7 +62,7 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
 
     public ProgressLogger getProgressLogger() {
         return this.progressLogger;
-    };
+    }
 
     @Override
     public boolean running() {

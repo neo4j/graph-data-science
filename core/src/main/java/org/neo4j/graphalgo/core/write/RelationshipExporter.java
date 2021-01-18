@@ -45,7 +45,6 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class RelationshipExporter extends StatementApi {
 
     private final Graph graph;
-    private final long nodeCount;
     private final RelationshipPropertyTranslator propertyTranslator;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
@@ -109,7 +108,6 @@ public final class RelationshipExporter extends StatementApi {
         ProgressLogger progressLogger
     ) {
         super(tx);
-        this.nodeCount = graph.nodeCount();
         this.graph = graph;
         this.propertyTranslator = propertyTranslator;
         this.terminationFlag = terminationFlag;

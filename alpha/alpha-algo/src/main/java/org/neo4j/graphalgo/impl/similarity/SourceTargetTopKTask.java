@@ -34,7 +34,7 @@ class SourceTargetTopKTask<T> implements Runnable {
     private final T[] ids;
     private final double similiarityCutoff;
     private final SimilarityComputer<T> computer;
-    private RleDecoder decoder;
+    private final RleDecoder decoder;
     private final Supplier<IntStream> sourceRange;
     private final Function<Integer, IntStream> targetRange;
     private final TopKConsumer<SimilarityResult>[] topKConsumers;

@@ -46,24 +46,24 @@ import java.util.stream.StreamSupport;
  */
 public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
 
-    private Graph graph;
-    private ExecutorService executorService;
+    private final Graph graph;
+    private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final int concurrency;
     private final int nodeCount;
-    private AtomicInteger visitedNodes;
-    private AtomicInteger runningThreads;
-    private BlockingQueue<Result> resultQueue;
+    private final AtomicInteger visitedNodes;
+    private final AtomicInteger runningThreads;
+    private final BlockingQueue<Result> resultQueue;
 
     public TriangleStream(Graph graph, ExecutorService executorService, int concurrency) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
-        nodeCount = Math.toIntExact(graph.nodeCount());
+        this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.resultQueue = new ArrayBlockingQueue<>(concurrency << 10);
-        runningThreads = new AtomicInteger();
-        visitedNodes = new AtomicInteger();
-        queue = new AtomicInteger();
+        this.runningThreads = new AtomicInteger();
+        this.visitedNodes = new AtomicInteger();
+        this.queue = new AtomicInteger();
     }
 
     @Override
@@ -144,7 +144,7 @@ public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStr
 
     private final class IntersectTask extends BaseTask implements IntersectionConsumer {
 
-        private RelationshipIntersect intersect;
+        private final RelationshipIntersect intersect;
 
         IntersectTask(Graph graph) {
             intersect = graph.intersection();

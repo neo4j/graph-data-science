@@ -52,10 +52,10 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
 public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaStepping, ShortestPathDeltaStepping> {
 
     // distance array
-    private AtomicLongArray distance;
+    private final AtomicLongArray distance;
     // bucket impl
     private Buckets buckets;
-    private Graph graph;
+    private final Graph graph;
     // collections of runnables containing either heavy edge relax-operations or light edge relax-ops.
     private Collection<Runnable> light, heavy;
     // list of futures of light and heavy edge relax-operations
@@ -66,12 +66,12 @@ public class ShortestPathDeltaStepping extends Algorithm<ShortestPathDeltaSteppi
     private final double delta;
     private final int nodeCount;
     // scaled delta
-    private int iDelta;
+    private final int iDelta;
 
     private ExecutorService executorService;
 
     // multiplier used to scale an double to int
-    private double multiplier = 100_000D; // double type is intended
+    private final double multiplier = 100_000D; // double type is intended
 
     public ShortestPathDeltaStepping(Graph graph, long startNode, double delta) {
         this.graph = graph;

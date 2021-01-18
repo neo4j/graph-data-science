@@ -273,8 +273,8 @@ public class GraphCreateProc extends CatalogProc {
         }
 
         protected static final class Builder extends GraphCreateResult.Builder {
-            private NodeProjections nodeProjections;
-            private RelationshipProjections relationshipProjections;
+            private final NodeProjections nodeProjections;
+            private final RelationshipProjections relationshipProjections;
 
             Builder(GraphCreateFromStoreConfig config) {
                 super(config);
@@ -313,8 +313,8 @@ public class GraphCreateProc extends CatalogProc {
         }
 
         protected static final class Builder extends GraphCreateResult.Builder {
-            private String nodeQuery;
-            private String relationshipQuery;
+            private final String nodeQuery;
+            private final String relationshipQuery;
 
             Builder(GraphCreateFromCypherConfig config) {
                 super(config);

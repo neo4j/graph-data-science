@@ -40,7 +40,7 @@ import java.util.stream.StreamSupport;
 import static java.util.Arrays.asList;
 
 public class VirtualNode implements Node {
-    private static AtomicLong MIN_ID = new AtomicLong(-1);
+    private static final AtomicLong MIN_ID = new AtomicLong(-1);
     private final List<Label> labels = new ArrayList<>();
     private final Map<String, Object> props = new HashMap<>();
     private final List<Relationship> rels = new ArrayList<>();

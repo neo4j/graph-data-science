@@ -67,8 +67,8 @@ public final class CentralityStatistics {
     private static class RecordTask implements Runnable {
 
         private final DoubleHistogram histogram;
-        private Partition partition;
-        private LongToDoubleFunction centralityFunction;
+        private final Partition partition;
+        private final LongToDoubleFunction centralityFunction;
 
         RecordTask(Partition partition, LongToDoubleFunction centralityFunction) {
             this.partition = partition;

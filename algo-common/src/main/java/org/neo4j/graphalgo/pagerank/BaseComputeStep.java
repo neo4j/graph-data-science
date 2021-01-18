@@ -44,7 +44,7 @@ public abstract class BaseComputeStep implements ComputeStep {
     long[] starts;
     private int[] lengths;
     protected double tolerance;
-    private long[] sourceNodeIds;
+    private final long[] sourceNodeIds;
     final RelationshipIterator relationshipIterator;
     final Degrees degrees;
     private final AllocationTracker tracker;

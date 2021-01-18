@@ -32,7 +32,7 @@ class TopKTask<T> implements Runnable {
     private final T[] ids;
     private final double similiarityCutoff;
     private final SimilarityComputer<T> computer;
-    private RleDecoder decoder;
+    private final RleDecoder decoder;
     private final TopKConsumer<SimilarityResult>[] topKConsumers;
 
     TopKTask(int batchSize, int taskOffset, int multiplier, int length, T[] ids, double similiarityCutoff, int topK, SimilarityComputer<T> computer, RleDecoder decoder) {

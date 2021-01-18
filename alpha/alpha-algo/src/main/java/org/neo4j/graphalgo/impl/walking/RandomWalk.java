@@ -182,7 +182,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     }
 
     public static class Node2VecStrategy extends NextNodeStrategy {
-        private double returnParam, inOutParam;
+        private final double returnParam;
+        private final double inOutParam;
 
 
         public Node2VecStrategy(Graph graph, Degrees degrees, double returnParam, double inOutParam) {

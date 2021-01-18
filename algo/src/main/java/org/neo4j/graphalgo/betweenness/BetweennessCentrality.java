@@ -112,7 +112,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
             // TODO: make queue growable
             this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount, tracker);
 
-            this.sigma = HugeLongArray.newArray(nodeCount, tracker);;
+            this.sigma = HugeLongArray.newArray(nodeCount, tracker);
             this.delta = HugeDoubleArray.newArray(nodeCount, tracker);
             this.distance = HugeIntArray.newArray(nodeCount, tracker);
         }

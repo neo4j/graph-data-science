@@ -61,7 +61,7 @@ public class CloseableThreadLocal<T> implements Closeable {
                 return initialValueSupplier.get();
             }
         };
-    };
+    }
 
     private ThreadLocal<WeakReference<T>> t = new ThreadLocal<>();
 
@@ -70,7 +70,7 @@ public class CloseableThreadLocal<T> implements Closeable {
     private Map<Thread, T> hardRefs = new WeakHashMap<>();
 
     // Increase this to decrease frequency of purging in get:
-    private static int PURGE_MULTIPLIER = 20;
+    private static final int PURGE_MULTIPLIER = 20;
 
     // On each get or set we decrement this; when it hits 0 we
     // purge.  After purge, we set this to
