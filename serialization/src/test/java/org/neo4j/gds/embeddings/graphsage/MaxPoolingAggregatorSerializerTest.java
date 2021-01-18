@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,7 +58,7 @@ class MaxPoolingAggregatorSerializerTest {
         var byteArrayOutputStream = new ByteArrayOutputStream();
         serializableAggregator.writeTo(byteArrayOutputStream);
 
-        var parsedAggregator = GraphSage.MaxPoolingAggregator.parseFrom(byteArrayOutputStream.toByteArray());
+        var parsedAggregator = GraphSageProto.MaxPoolingAggregator.parseFrom(byteArrayOutputStream.toByteArray());
         var deserializedAggregator = MaxPoolingAggregatorSerializer.fromSerializable(parsedAggregator);
 
         assertThat(deserializedAggregator)

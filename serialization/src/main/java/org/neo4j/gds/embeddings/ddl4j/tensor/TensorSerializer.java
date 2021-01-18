@@ -22,22 +22,22 @@ package org.neo4j.gds.embeddings.ddl4j.tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
-import org.neo4j.graphalgo.core.model.proto.ProtoTensor;
-import org.neo4j.graphalgo.utils.serialization.ProtoUtils;
+import org.neo4j.graphalgo.core.model.proto.TensorProto;
+import org.neo4j.graphalgo.utils.ProtoUtils;
 
 public final class TensorSerializer {
 
     private TensorSerializer() {}
 
-    public static ProtoTensor.Matrix toSerializable(Matrix matrix) {
-        return ProtoTensor.Matrix.newBuilder()
+    public static TensorProto.Matrix toSerializable(Matrix matrix) {
+        return TensorProto.Matrix.newBuilder()
             .addAllData(ProtoUtils.toList(matrix.data()))
             .setRows(matrix.rows())
             .setCols(matrix.cols())
             .build();
     }
 
-    public static Matrix fromSerializable(ProtoTensor.Matrix protoMatrix) {
+    public static Matrix fromSerializable(TensorProto.Matrix protoMatrix) {
         return new Matrix(
             ProtoUtils.toArray(protoMatrix.getDataList()),
             protoMatrix.getRows(),
@@ -45,23 +45,23 @@ public final class TensorSerializer {
         );
     }
 
-    public static ProtoTensor.Vector toSerializable(Vector vector) {
-        return ProtoTensor.Vector.newBuilder()
+    public static TensorProto.Vector toSerializable(Vector vector) {
+        return TensorProto.Vector.newBuilder()
             .addAllData(ProtoUtils.toList(vector.data()))
             .build();
     }
 
-    public static Vector fromSerializable(ProtoTensor.Vector protoVector) {
+    public static Vector fromSerializable(TensorProto.Vector protoVector) {
         return new Vector(ProtoUtils.toArray(protoVector.getDataList()));
     }
 
-    static ProtoTensor.Scalar toSerializable(Scalar scalar) {
-        return ProtoTensor.Scalar.newBuilder()
+    static TensorProto.Scalar toSerializable(Scalar scalar) {
+        return TensorProto.Scalar.newBuilder()
             .setValue(scalar.value())
             .build();
     }
 
-    static Scalar fromSerializable(ProtoTensor.Scalar protoScalar) {
+    static Scalar fromSerializable(TensorProto.Scalar protoScalar) {
         return new Scalar(protoScalar.getValue());
     }
 }

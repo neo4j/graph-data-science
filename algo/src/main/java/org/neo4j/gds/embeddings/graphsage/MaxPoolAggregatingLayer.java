@@ -35,8 +35,6 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights<Vector> bias;
     private final ActivationFunction activationFunction;
 
-    private long randomState;
-
     MaxPoolAggregatingLayer(
         long sampleSize,
         Weights<Matrix> poolWeights,
@@ -50,8 +48,6 @@ public class MaxPoolAggregatingLayer implements Layer {
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
-
-        this.randomState = randomState;
 
         this.sampleSize = sampleSize;
         this.sampler = new UniformNeighborhoodSampler(randomState);
@@ -98,10 +94,5 @@ public class MaxPoolAggregatingLayer implements Layer {
     @Override
     public NeighborhoodSampler sampler() {
         return sampler;
-    }
-
-    @Override
-    public long randomState() {
-        return randomState;
     }
 }

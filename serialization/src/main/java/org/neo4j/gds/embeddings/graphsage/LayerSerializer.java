@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,15 +29,15 @@ public final class LayerSerializer {
 
     private LayerSerializer() {}
 
-    public static Layer[] fromSerializable(List<GraphSage.Layer> layers) {
+    public static Layer[] fromSerializable(List<GraphSageProto.Layer> layers) {
         return layers.stream()
             .map(LayerSerializer::fromSerializable)
             .collect(Collectors.toList())
             .toArray(new Layer[]{});
     }
 
-    public static GraphSage.Layer toSerializable(Layer layer) {
-        var builder = GraphSage.Layer.newBuilder();
+    public static GraphSageProto.Layer toSerializable(Layer layer) {
+        var builder = GraphSageProto.Layer.newBuilder();
         var aggregator = layer.aggregator();
         switch (aggregator.type()) {
             case MEAN:
@@ -54,7 +54,7 @@ public final class LayerSerializer {
         return builder.build();
     }
 
-    public static Layer fromSerializable(GraphSage.Layer protoLayer) {
+    public static Layer fromSerializable(GraphSageProto.Layer protoLayer) {
         var aggregatorCase = protoLayer.getAggregatorCase();
         switch (aggregatorCase) {
             case MEAN:

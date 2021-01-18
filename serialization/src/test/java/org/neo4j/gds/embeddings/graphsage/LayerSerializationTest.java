@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -54,7 +54,7 @@ class LayerSerializationTest {
         serializableLayer.writeTo(byteArrayOutputStream);
         assertThat(byteArrayOutputStream.toByteArray()).isNotEmpty();
 
-        var deserializedLayer = LayerSerializer.fromSerializable(GraphSage.Layer.parseFrom(byteArrayOutputStream.toByteArray()));
+        var deserializedLayer = LayerSerializer.fromSerializable(GraphSageProto.Layer.parseFrom(byteArrayOutputStream.toByteArray()));
 
         assertThat(deserializedLayer)
             .isNotNull()

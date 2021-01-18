@@ -78,6 +78,11 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
     }
 
     @Override
+    public long randomState() {
+        return this.randomSeed;
+    }
+
+    @Override
     public void generateNewRandomState() {
         this.randomSeed = ThreadLocalRandom.current().nextLong();
     }

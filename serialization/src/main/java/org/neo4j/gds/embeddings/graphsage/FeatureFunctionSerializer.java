@@ -25,7 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
 
 import java.io.IOException;
@@ -38,11 +38,11 @@ public final class FeatureFunctionSerializer {
 
     private FeatureFunctionSerializer() {}
 
-    public static GraphSage.FeatureFunction toSerializable(FeatureFunction featureFunction) {
+    public static GraphSageProto.FeatureFunction toSerializable(FeatureFunction featureFunction) {
         if (featureFunction instanceof SingleLabelFeatureFunction) {
-            return GraphSage.FeatureFunction.newBuilder().setFunctionType(GraphSageProto.FeatureFunctionType.SINGLE).build();
+            return GraphSageProto.FeatureFunction.newBuilder().setFunctionType(GraphSageProto.FeatureFunctionType.SINGLE).build();
         } else if(featureFunction instanceof MultiLabelFeatureFunction) {
-            return GraphSage.FeatureFunction
+            return GraphSageProto.FeatureFunction
                 .newBuilder()
                 .setFunctionType(GraphSageProto.FeatureFunctionType.MULTI)
                 .putAllWeightsByLabel(unwrapWeightsByLabelMatrix(((MultiLabelFeatureFunction) featureFunction).weightsByLabel()))
@@ -51,7 +51,7 @@ public final class FeatureFunctionSerializer {
         throw new IllegalArgumentException(formatWithLocale("Unknown feature function class: %s", featureFunction));
     }
 
-    static FeatureFunction fromSerializable(GraphSage.FeatureFunction protoFeatureFunction, GraphSageTrainConfig config) throws
+    static FeatureFunction fromSerializable(GraphSageProto.FeatureFunction protoFeatureFunction, GraphSageTrainConfig config) throws
         IOException,
         ClassNotFoundException {
         switch (protoFeatureFunction.getFunctionType()) {

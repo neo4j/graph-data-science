@@ -21,21 +21,21 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 public final class MeanAggregatorSerializer {
 
     private MeanAggregatorSerializer() {}
 
-    public static GraphSage.MeanAggregator toSerializable(MeanAggregator aggregator) {
-        return GraphSage.MeanAggregator
+    public static GraphSageProto.MeanAggregator toSerializable(MeanAggregator aggregator) {
+        return GraphSageProto.MeanAggregator
             .newBuilder()
             .setWeights(TensorSerializer.toSerializable(aggregator.weightsData()))
-            .setActivationFunction(GraphSage.ActivationFunction.valueOf(aggregator.activationFunction().name()))
+            .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(aggregator.activationFunction().name()))
             .build();
     }
 
-    public static MeanAggregator fromSerializable(GraphSage.MeanAggregator protoMeanAggregator) {
+    public static MeanAggregator fromSerializable(GraphSageProto.MeanAggregator protoMeanAggregator) {
         var weights = new Weights<>(TensorSerializer.fromSerializable(protoMeanAggregator.getWeights()));
         var activationFunction = ActivationFunction
             .of(protoMeanAggregator.getActivationFunction().name());

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
-import org.neo4j.graphalgo.core.model.proto.ProtoTensor;
+import org.neo4j.graphalgo.core.model.proto.TensorProto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,7 +48,7 @@ class TensorSerializationTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         protoMatrix.writeTo(output);
 
-        var parsedProtoMatrix = ProtoTensor.Matrix.parseFrom(output.toByteArray());
+        var parsedProtoMatrix = TensorProto.Matrix.parseFrom(output.toByteArray());
         assertThat(parsedProtoMatrix).isNotNull();
 
         var deserializedMatrix = TensorSerializer.fromSerializable(parsedProtoMatrix);
@@ -68,7 +68,7 @@ class TensorSerializationTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         protoVector.writeTo(output);
 
-        var parsedProtoVector = ProtoTensor.Vector.parseFrom(output.toByteArray());
+        var parsedProtoVector = TensorProto.Vector.parseFrom(output.toByteArray());
         assertThat(parsedProtoVector).isNotNull();
 
         var deserializedVector = TensorSerializer.fromSerializable(parsedProtoVector);
@@ -88,7 +88,7 @@ class TensorSerializationTest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         protoScalar.writeTo(output);
 
-        var parsedProtoScalar = ProtoTensor.Scalar.parseFrom(output.toByteArray());
+        var parsedProtoScalar = TensorProto.Scalar.parseFrom(output.toByteArray());
         assertThat(parsedProtoScalar).isNotNull();
 
         var deserializedScalar = TensorSerializer.fromSerializable(parsedProtoScalar);

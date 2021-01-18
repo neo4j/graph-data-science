@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelSerializer;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
 import java.io.IOException;
@@ -32,23 +32,23 @@ public final class GraphSageModelSerializer {
 
     private GraphSageModelSerializer() {}
 
-    public static GraphSage.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig, Model.Mappable> model) throws
+    public static GraphSageProto.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig, Model.Mappable> model) throws
         IOException {
-        var modelDataBuilder = GraphSage.ModelData.newBuilder();
+        var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < model.data().layers().length; i++) {
-            var layer = LayerSerializer.toSerializable(model.data().layers()[i]);
+            GraphSageProto.Layer layer = LayerSerializer.toSerializable(model.data().layers()[i]);
             modelDataBuilder.addLayers(i, layer);
         }
 
-        var serializableModel = ModelSerializer.serializableFormatOf(model);
-        return GraphSage.GraphSageModel.newBuilder()
+        var serializableModel = ModelSerializer.toSerializable(model);
+        return GraphSageProto.GraphSageModel.newBuilder()
             .setData(modelDataBuilder)
             .setModel(serializableModel)
             .setFeatureFunction(FeatureFunctionSerializer.toSerializable(model.data().featureFunction()))
             .build();
     }
 
-    static Model<ModelData, GraphSageTrainConfig, Model.Mappable> fromSerializable(GraphSage.GraphSageModel protoModel) throws
+    static Model<ModelData, GraphSageTrainConfig, Model.Mappable> fromSerializable(GraphSageProto.GraphSageModel protoModel) throws
         IOException,
         ClassNotFoundException {
         var protoModelMeta = protoModel.getModel();
@@ -56,7 +56,7 @@ public final class GraphSageModelSerializer {
             protoModelMeta.getSerializedTrainConfig().toByteArray(),
             GraphSageTrainConfig.class
         );
-        ImmutableModel.Builder<ModelData, GraphSageTrainConfig, Model.Mappable> modelBuilder = ModelSerializer.deserializableFormatOf(protoModelMeta);
+        ImmutableModel.Builder<ModelData, GraphSageTrainConfig, Model.Mappable> modelBuilder = ModelSerializer.fromSerializable(protoModelMeta);
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),

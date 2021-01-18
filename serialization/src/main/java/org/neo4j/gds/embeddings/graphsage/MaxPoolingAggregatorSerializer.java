@@ -21,26 +21,26 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 public final class MaxPoolingAggregatorSerializer {
 
     private MaxPoolingAggregatorSerializer() {}
 
-    public static GraphSage.MaxPoolingAggregator toSerializable(
+    public static GraphSageProto.MaxPoolingAggregator toSerializable(
         MaxPoolingAggregator aggregator
     ) {
-        return GraphSage.MaxPoolingAggregator
+        return GraphSageProto.MaxPoolingAggregator
             .newBuilder()
             .setPoolWeights(TensorSerializer.toSerializable(aggregator.poolWeights()))
             .setSelfWeights(TensorSerializer.toSerializable(aggregator.selfWeights()))
             .setNeighborsWeights(TensorSerializer.toSerializable(aggregator.neighborsWeights()))
             .setBias(TensorSerializer.toSerializable(aggregator.bias()))
-            .setActivationFunction(GraphSage.ActivationFunction.valueOf(aggregator.activationFunction().name()))
+            .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(aggregator.activationFunction().name()))
             .build();
     }
 
-    public static MaxPoolingAggregator fromSerializable(GraphSage.MaxPoolingAggregator protoMaxPoolingAggregator) {
+    public static MaxPoolingAggregator fromSerializable(GraphSageProto.MaxPoolingAggregator protoMaxPoolingAggregator) {
         var poolWeights = new Weights<>(TensorSerializer.fromSerializable(protoMaxPoolingAggregator.getPoolWeights()));
         var selfWeights = new Weights<>(TensorSerializer.fromSerializable(protoMaxPoolingAggregator.getSelfWeights()));
         var neighborsWeights = new Weights<>(TensorSerializer.fromSerializable(protoMaxPoolingAggregator.getNeighborsWeights()));
