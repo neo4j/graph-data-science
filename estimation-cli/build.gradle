@@ -37,6 +37,10 @@ dependencies {
 }
 
 shadowJar {
+    if (project.hasProperty("gdsDropVersion")) {
+        version project.property("gdsDropVersion")
+    }
+
     mergeServiceFiles()
     archiveBaseName.set("estimation-cli")
     archiveClassifier.set("")
