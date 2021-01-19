@@ -44,10 +44,10 @@ class F1WeightedTest {
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
-        var metric = new F1Weighted(targets);
+        var metric = Metric.F1_WEIGHTED;
         var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
         var totalExamples = predictions.size();
-        assertThat(metric.compute(targets, predictions))
+        assertThat(metric.compute(targets, predictions, targets))
             .isCloseTo(totalF1 / totalExamples, Offset.offset(1e-8));
     }
 }

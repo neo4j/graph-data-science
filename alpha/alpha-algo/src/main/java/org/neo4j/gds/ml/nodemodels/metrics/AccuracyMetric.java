@@ -26,10 +26,13 @@ import java.math.RoundingMode;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class AccuracyMetric implements Metric {
+public class AccuracyMetric implements Metric.MetricStrategy {
+
     @Override
     public double compute(
-        HugeLongArray targets, HugeLongArray predictions
+        HugeLongArray targets,
+        HugeLongArray predictions,
+        HugeLongArray globalTargets
     ) {
         long accuratePredictions = 0;
         assert targets.size() == predictions.size() : formatWithLocale(
@@ -49,5 +52,4 @@ public class AccuracyMetric implements Metric {
             .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
             .doubleValue();
     }
-
 }

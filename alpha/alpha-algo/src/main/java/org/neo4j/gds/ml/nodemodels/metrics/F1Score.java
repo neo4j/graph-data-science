@@ -23,9 +23,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class F1Score implements Metric {
+public class F1Score {
 
-    protected static final double EPSILON = 1e-8;
+    private static final double EPSILON = 1e-8;
 
     private final long positiveTarget;
 
@@ -33,10 +33,9 @@ public class F1Score implements Metric {
         this.positiveTarget = positiveTarget;
     }
 
-
-    @Override
     public double compute(
-        HugeLongArray targets, HugeLongArray predictions
+        HugeLongArray targets,
+        HugeLongArray predictions
     ) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",

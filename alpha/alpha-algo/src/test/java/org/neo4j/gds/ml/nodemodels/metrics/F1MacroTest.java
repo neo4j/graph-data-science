@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.nodemodels.metrics.Metric.F1_MACRO;
 
 class F1MacroTest {
 
@@ -40,10 +41,10 @@ class F1MacroTest {
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
-        var metric = new F1Macro(targets);
+        var metric = F1_MACRO;
         var totalF1 = 1.0 + 2.0/3.0 + 2.0/3.0 + 2.0/3.0;
         var totalClasses = 7;
-        assertThat(metric.compute(targets, predictions))
+        assertThat(metric.compute(targets, predictions, targets))
             .isCloseTo(totalF1 / totalClasses, Offset.offset(1e-8));
     }
 }

@@ -22,23 +22,20 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
-public class F1Weighted implements Metric {
-
-    private final Multiset<Long> targetCounts;
-
-    F1Weighted(HugeLongArray targets) {
-        this.targetCounts = new Multiset<>();
-        for (long offset = 0; offset < targets.size(); offset++) {
-            targetCounts.add(targets.get(offset));
-        }
-    }
+public class F1Weighted implements Metric.MetricStrategy {
 
     @Override
     public double compute(
-        HugeLongArray targets, HugeLongArray predictions
+        HugeLongArray targets,
+        HugeLongArray predictions,
+        HugeLongArray globalTargets
     ) {
-        var distinctTargets = this.targetCounts.keys()
-            .stream();
+        var targetCounts = new Multiset<Long>();
+        for (long offset = 0; offset < globalTargets.size(); offset++) {
+            targetCounts.add(globalTargets.get(offset));
+        }
+
+        var distinctTargets = targetCounts.keys().stream();
         var weightedScores = distinctTargets
             .mapToDouble(target -> {
                 var weight = targetCounts.count(target);

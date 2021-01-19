@@ -22,30 +22,27 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class F1Macro implements Metric {
-
-    private final List<F1Score> metrics;
-
-    F1Macro(HugeLongArray targets) {
-        Set<Long> distinctTargets = new HashSet<>();
-        for (long offset = 0; offset < targets.size(); offset++) {
-            distinctTargets.add(targets.get(offset));
-        }
-
-        this.metrics = distinctTargets.stream()
-            .map(F1Score::new)
-            .collect(Collectors.toList());
-    }
+public class F1Macro implements Metric.MetricStrategy {
 
     @Override
     public double compute(
-        HugeLongArray targets, HugeLongArray predictions
+        HugeLongArray targets,
+        HugeLongArray predictions,
+        HugeLongArray globalTargets
     ) {
-        return this.metrics
+        Set<Long> distinctTargets = new HashSet<>();
+        for (long offset = 0; offset < globalTargets.size(); offset++) {
+            distinctTargets.add(globalTargets.get(offset));
+        }
+
+        var metrics = distinctTargets.stream()
+            .map(F1Score::new)
+            .collect(Collectors.toList());
+
+        return metrics
             .stream()
             .mapToDouble(metric -> metric.compute(targets, predictions))
             .average()

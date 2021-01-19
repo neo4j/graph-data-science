@@ -22,8 +22,30 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-public interface Metric {
+public enum Metric {
+    F1_WEIGHTED(new F1Weighted()),
+    F1_MACRO(new F1Macro()),
+    ACCURACY(new AccuracyMetric());
 
-    double compute(HugeLongArray targets, HugeLongArray predictions);
+    private final MetricStrategy strategy;
 
+    Metric(MetricStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public double compute(
+        HugeLongArray targets,
+        HugeLongArray predictions,
+        HugeLongArray globalTargets
+    ) {
+        return strategy.compute(targets, predictions, globalTargets);
+    }
+
+    interface MetricStrategy {
+        double compute(
+            HugeLongArray targets,
+            HugeLongArray predictions,
+            HugeLongArray globalTargets
+        );
+    }
 }
