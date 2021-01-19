@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.Model;
@@ -36,7 +37,6 @@ import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-//TODO: test for validating that targetProperty exists in graph
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
     @BeforeEach
@@ -49,7 +49,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
     @AfterEach
     void tearDown() {
-        ModelCatalog.drop("", "model");
+        ModelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -71,6 +71,21 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         assertTrue(ModelCatalog.exists("", "model"));
         Model<?, ?> model = ModelCatalog.list("", "model");
         assertThat(model.algoType()).isEqualTo("multiClassNodeLogisticRegression");
+    }
+
+    @Test
+    void validateTargetPropertyExists() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.nodeClassification")
+            .trainMode()
+            .addParameter("modelName", "model")
+            .addParameter("targetProperty", "nope")
+            .addParameter("params", List.of(Map.of("penalty", 1)))
+            .yields();
+
+        assertError(query, "`targetProperty`: `nope` not found in graph with node properties: ['a', 'b', 't']");
     }
 
     public String createQuery() {

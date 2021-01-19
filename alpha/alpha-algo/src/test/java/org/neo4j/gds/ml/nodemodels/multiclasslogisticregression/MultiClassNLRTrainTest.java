@@ -45,6 +45,8 @@ class MultiClassNLRTrainTest {
         ", (n3:N {a: 0.0, b: 2.8, t: 2.0})" +
         ", (n4:N {a: 1.0, b: 0.9, t: 1.0})";
 
+    private static final double NO_PENALTY = 0.0;
+
     @Inject
     private Graph graph;
 
@@ -53,7 +55,7 @@ class MultiClassNLRTrainTest {
         var config = ImmutableMultiClassNLRTrainConfig.builder()
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
-            .penalty(0.0)
+            .penalty(NO_PENALTY)
             .maxIterations(100000)
             .tolerance(1e-4)
             .build();

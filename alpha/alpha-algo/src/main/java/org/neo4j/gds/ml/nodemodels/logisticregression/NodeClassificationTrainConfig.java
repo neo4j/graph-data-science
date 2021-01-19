@@ -23,10 +23,13 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ValueClass
 @Configuration
@@ -36,6 +39,20 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     String targetProperty();
 
     List<Map<String, Object>> params();
+
+    static NodeClassificationTrainConfig of(
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        String username,
+        CypherMapWrapper config
+    ) {
+        return new NodeClassificationTrainConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
+    }
 
     static ImmutableNodeClassificationTrainConfig.Builder builder() {
         return ImmutableNodeClassificationTrainConfig.builder();

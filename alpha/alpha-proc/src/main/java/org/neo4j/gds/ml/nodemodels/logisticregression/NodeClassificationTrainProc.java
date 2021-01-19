@@ -22,24 +22,30 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +53,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, MultiClassNLRData, NodeClassificationTrainConfig> {
 
@@ -65,13 +72,33 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
+    protected void validateConfigsAndGraphStore(
+        GraphStoreWithConfig graphStoreWithConfig, NodeClassificationTrainConfig config
+    ) {
+        GraphStore graphStore = graphStoreWithConfig.graphStore();
+        Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
+        if (!graphStore.hasNodeProperty(filterLabels, config.targetProperty())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "`%s`: `%s` not found in graph with node properties: %s",
+                "targetProperty",
+                config.targetProperty(),
+                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
+            ));
+        }
+        GraphStoreValidation.validate(
+            graphStoreWithConfig,
+            config
+        );
+    }
+
+    @Override
     protected NodeClassificationTrainConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return new NodeClassificationTrainConfigImpl(
+        return NodeClassificationTrainConfig.of(
             graphName,
             maybeImplicitCreate,
             username,
