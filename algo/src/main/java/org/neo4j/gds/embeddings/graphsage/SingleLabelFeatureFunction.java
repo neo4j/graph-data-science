@@ -31,7 +31,7 @@ public class SingleLabelFeatureFunction implements FeatureFunction {
 
     @Override
     public Variable<Matrix> apply(
-        long[] nodeIds, HugeObjectArray<double[]> features, Graph graph
+        Graph graph, long[] nodeIds, HugeObjectArray<double[]> features
     ) {
         int dimension = features.get(0).length;
         double[] data = new double[Math.multiplyExact(nodeIds.length, dimension)];

@@ -53,7 +53,7 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
      * @return Create a matrix variable around a batch of nodes.
      */
     @Override
-    public Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features, Graph graph) {
+    public Variable<Matrix> apply(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
         NodeLabel[] labels = new NodeLabel[nodeIds.length];
         for (int i = 0; i < nodeIds.length; i++) {
             labels[i] = graph.nodeLabels(nodeIds[i]).iterator().next();

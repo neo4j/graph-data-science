@@ -69,9 +69,9 @@ public final class GraphSageHelper {
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph, useWeights);
 
         Variable<Matrix> previousLayerRepresentations = featureFunction.apply(
+            graph,
             subGraphs.get(subGraphs.size() - 1).nextNodes,
-            features,
-            graph
+            features
         );
 
         for (int layerNr = layers.length - 1; layerNr >= 0; layerNr--) {

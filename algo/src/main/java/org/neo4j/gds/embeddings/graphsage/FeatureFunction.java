@@ -26,6 +26,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 public interface FeatureFunction {
 
-    Variable<Matrix> apply(long[] nodeIds, HugeObjectArray<double[]> features, Graph graph);
+    Variable<Matrix> apply(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features);
 
 }
