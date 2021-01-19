@@ -74,7 +74,7 @@ Read more about how to use GDS in conjunction with Neo4j Causal Cluster deployme
 
 On a standalone Neo4j Server, the library will need to be installed and configured manually.
 
-1. Download `neo4j-graph-data-science-[version]-standalone.jar` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
+1. Download `neo4j-graph-data-science-[version].jar` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
 
 
 2. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
