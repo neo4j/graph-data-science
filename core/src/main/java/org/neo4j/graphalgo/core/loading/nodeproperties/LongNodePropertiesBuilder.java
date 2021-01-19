@@ -56,7 +56,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     public LongNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
         this.maxValue = Long.MIN_VALUE;
-        this.valuesBuilder = HugeSparseLongArray.Builder.create(nodeCount, defaultValue.longValue(), tracker);
+        this.valuesBuilder = HugeSparseLongArray.builder(nodeCount, defaultValue.longValue(), tracker);
     }
 
     @Override

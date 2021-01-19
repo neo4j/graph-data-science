@@ -50,9 +50,21 @@ public final class HugeSparseLongArray {
         this.defaultValue = defaultValue;
     }
 
+    public static Builder builder(long size, AllocationTracker tracker) {
+        return builder(size, NOT_FOUND, tracker);
+    }
+
+    public static Builder builder(long size, long defaultValue, AllocationTracker tracker) {
+        int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
+        long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
+        AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(numPages);
+        tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
+        return new Builder(capacity, pages, defaultValue, tracker);
+    }
+
     /**
      * @param maxId highest id that we need to represent
-     *             (equals size in {@link HugeSparseLongArray.Builder#create(long, AllocationTracker)})
+     *             (equals size in {@link HugeSparseLongArray.Builder#builder(long, AllocationTracker)})
      * @param maxEntries number of identifiers we need to store
      */
     public static MemoryRange memoryEstimation(long maxId, long maxEntries) {
@@ -114,20 +126,6 @@ public final class HugeSparseLongArray {
         private final AtomicReferenceArray<long[]> pages;
         private final AllocationTracker tracker;
         private final ReentrantLock newPageLock;
-
-        // TODO: rename to builder
-        public static Builder create(long size, AllocationTracker tracker) {
-            return create(size, NOT_FOUND, tracker);
-        }
-
-        // TODO: rename to builder
-        public static Builder create(long size, long defaultValue, AllocationTracker tracker) {
-            int numPages = PageUtil.numPagesFor(size, PAGE_SHIFT, PAGE_MASK);
-            long capacity = PageUtil.capacityFor(numPages, PAGE_SHIFT);
-            AtomicReferenceArray<long[]> pages = new AtomicReferenceArray<>(numPages);
-            tracker.add(MemoryUsage.sizeOfObjectArray(numPages));
-            return new Builder(capacity, pages, defaultValue, tracker);
-        }
 
         private Builder(long capacity, AtomicReferenceArray<long[]> pages, long defaultValue, AllocationTracker tracker) {
             this.capacity = capacity;
