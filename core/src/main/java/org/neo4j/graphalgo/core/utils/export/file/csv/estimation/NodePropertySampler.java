@@ -104,9 +104,10 @@ final class NodePropertySampler {
             return propertyCharactersSamples
                 .values()
                 .stream()
-                .mapToInt(propertySamples -> propertySamples
-                                                 .stream()
-                                                 .reduce(0, Integer::sum) / propertySamples.size() + 1)
+                .mapToInt(propertySamples ->
+                    propertySamples
+                        .stream()
+                        .reduce(0, Integer::sum) / propertySamples.size() + 1)
                 .sum();
         }
 
