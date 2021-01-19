@@ -406,6 +406,8 @@ class ModelCatalogTest {
     @SuppressWarnings("immutables:subtype")
     interface ModelCatalogTestTrainConfig extends BaseConfig, ModelConfig {
 
+        long serialVersionUID = 0x42L;
+
         static ModelCatalogTestTrainConfig of() {
             return ImmutableModelCatalogTestTrainConfig.of("username", "modelName");
         }

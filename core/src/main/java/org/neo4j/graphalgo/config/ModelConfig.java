@@ -23,6 +23,8 @@ import java.io.Serializable;
 
 public interface ModelConfig extends Serializable {
 
+    long serialVersionUID = 0x42L;
+
     String MODEL_NAME_KEY = "name";
     String MODEL_TYPE_KEY = "type";
 

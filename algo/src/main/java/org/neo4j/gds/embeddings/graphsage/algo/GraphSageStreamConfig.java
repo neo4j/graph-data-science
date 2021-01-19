@@ -31,6 +31,8 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageStreamConfig extends GraphSageBaseConfig {
 
+    long serialVersionUID = 0x42L;
+
     static GraphSageStreamConfig of(
         String username,
         Optional<String> graphName,

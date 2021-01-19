@@ -33,6 +33,8 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 public interface TestTrainConfig extends BaseConfig, ModelConfig {
 
+    long serialVersionUID = 0x42L;
+
     @Value.Default
     default String dummyConfigProperty() {
         return "dummyConfigProperty";

@@ -35,6 +35,8 @@ import java.util.Optional;
 @Configuration
 public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
 
+    long serialVersionUID = 0x42L;
+
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
     String targetProperty();
 

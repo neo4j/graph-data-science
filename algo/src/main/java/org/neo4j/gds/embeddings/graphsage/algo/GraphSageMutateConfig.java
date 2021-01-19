@@ -31,6 +31,8 @@ import java.util.Optional;
 @Configuration
 public interface GraphSageMutateConfig extends GraphSageBaseConfig, MutatePropertyConfig {
 
+    long serialVersionUID = 0x42L;
+
     static GraphSageMutateConfig of(
         String username,
         Optional<String> graphName,

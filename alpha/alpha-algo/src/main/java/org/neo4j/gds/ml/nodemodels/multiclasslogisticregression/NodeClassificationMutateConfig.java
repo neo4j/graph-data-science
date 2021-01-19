@@ -34,6 +34,8 @@ import java.util.Optional;
 @ValueClass
 public interface NodeClassificationMutateConfig extends AlgoBaseConfig, MutatePropertyConfig, ModelConfig {
 
+    long serialVersionUID = 0x42L;
+
     Optional<String> predictedProbabilityProperty();
 
     @Value.Default

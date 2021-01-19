@@ -57,6 +57,8 @@ public interface GraphSageTrainConfig extends
     RelationshipWeightConfig,
     FeaturePropertiesConfig {
 
+    long serialVersionUID = 0x42L;
+
     @Override
     @Value.Default
     default int embeddingDimension() {

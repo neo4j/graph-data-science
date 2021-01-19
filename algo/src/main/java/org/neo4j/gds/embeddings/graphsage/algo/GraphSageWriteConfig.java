@@ -32,6 +32,8 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface GraphSageWriteConfig extends GraphSageBaseConfig, WritePropertyConfig {
 
+    long serialVersionUID = 0x42L;
+
     static GraphSageWriteConfig of(
         String username,
         Optional<String> graphName,
