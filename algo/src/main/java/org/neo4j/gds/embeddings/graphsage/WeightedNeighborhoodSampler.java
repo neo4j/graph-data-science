@@ -27,17 +27,20 @@ import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
     private final double beta = 1D;
     private final Random random;
+    private long randomSeed;
 
-    public WeightedNeighborhoodSampler() {
-        this.random = new Random();
+    public WeightedNeighborhoodSampler(long randomSeed) {
+        this.randomSeed = randomSeed;
+        this.random = new Random(randomSeed);
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed) {
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
@@ -55,7 +58,7 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
                 }
 
                 double probability = (min == max) ?
-                    randomDouble(randomSeed, source, target, graph.nodeCount()) :
+                    randomDouble(source, target, graph.nodeCount()) :
                     (1.0 - Math.pow((weight - min) / (max - min), beta));
 
                 if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
@@ -69,9 +72,14 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         return neighbors;
     }
 
-    private double randomDouble(long randomState, long source, long target, long nodeCount) {
-        random.setSeed(randomState + source + nodeCount * target);
+    private double randomDouble(long source, long target, long nodeCount) {
+        random.setSeed(this.randomSeed + source + nodeCount * target);
         return random.nextDouble();
+    }
+
+    @Override
+    public void generateNewRandomState() {
+        this.randomSeed = ThreadLocalRandom.current().nextLong();
     }
 
     private DoubleDoublePair minMax(Graph graph, long nodeId) {

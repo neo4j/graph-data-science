@@ -43,9 +43,9 @@ class UniformNeighborhoodSamplerTest {
     @Test
     void shouldSampleSubsetOfNeighbors() {
 
-        UniformNeighborhoodSampler sampler = new UniformNeighborhoodSampler();
+        UniformNeighborhoodSampler sampler = new UniformNeighborhoodSampler(0L);
         int numberOfSamples = 3;
-        List<Long> sample = sampler.sample(graph, 3L, numberOfSamples, 0);
+        List<Long> sample = sampler.sample(graph, 3L, numberOfSamples);
 
         assertNotNull(sample);
         assertEquals(numberOfSamples, sample.size());
@@ -57,9 +57,9 @@ class UniformNeighborhoodSamplerTest {
 
     @Test
     void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
-        UniformNeighborhoodSampler sampler = new UniformNeighborhoodSampler();
+        UniformNeighborhoodSampler sampler = new UniformNeighborhoodSampler(0L);
         int numberOfSamples = 19;
-        List<Long> sample = sampler.sample(graph, 3L, numberOfSamples, 0);
+        List<Long> sample = sampler.sample(graph, 3L, numberOfSamples);
 
         assertNotNull(sample);
         assertEquals(4, sample.size());

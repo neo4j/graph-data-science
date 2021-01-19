@@ -25,13 +25,15 @@ import java.util.List;
 import java.util.OptionalLong;
 
 public interface NeighborhoodSampler {
-    List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed);
+    List<Long> sample(Graph graph, long nodeId, long numberOfSamples);
 
-    default OptionalLong sampleOne(Graph graph, long nodeId, long randomSeed) {
-        List<Long> samples = sample(graph, nodeId, 1, randomSeed);
+    default OptionalLong sampleOne(Graph graph, long nodeId) {
+        List<Long> samples = sample(graph, nodeId, 1);
         if (samples.size() < 1) {
             return OptionalLong.empty();
         }
         return OptionalLong.of(samples.get(0));
     }
+
+    void generateNewRandomState();
 }

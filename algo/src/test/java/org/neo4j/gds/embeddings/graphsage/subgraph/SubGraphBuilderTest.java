@@ -65,8 +65,8 @@ class SubGraphBuilderTest {
 
     @BeforeEach
     void setup() {
-        sampler = new UniformNeighborhoodSampler();
-        neighborhoodFunction = (graph, nodeId) -> sampler.sample(graph, nodeId, 100, 42);
+        sampler = new UniformNeighborhoodSampler(0L);
+        neighborhoodFunction = (graph, nodeId) -> sampler.sample(graph, nodeId, 100);
     }
 
     @Test

@@ -52,9 +52,9 @@ class WeightedNeighborhoodSamplerTest {
     @Test
     void shouldSampleSubsetOfNeighbors() {
 
-        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
         int numberOfSamples = 3;
-        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
+        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
         assertThat(sample)
             .isNotNull()
@@ -78,9 +78,9 @@ class WeightedNeighborhoodSamplerTest {
 
     @Test
     void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
-        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
         int numberOfSamples = 19;
-        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
+        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
         assertThat(sample)
             .isNotNull()
@@ -102,9 +102,9 @@ class WeightedNeighborhoodSamplerTest {
         @Test
         void shouldSampleSubsetOfNeighbors() {
 
-            NeighborhoodSampler sampler = new WeightedNeighborhoodSampler();
+            NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
             int numberOfSamples = 3;
-            List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples, 0);
+            List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
             assertThat(sample)
                 .isNotNull()

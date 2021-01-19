@@ -32,7 +32,9 @@ public interface Layer {
 
     long randomState();
 
-    void generateNewRandomState();
+    default void generateNewRandomState() {
+        sampler().generateNewRandomState();
+    }
 
     NeighborhoodSampler sampler();
 
@@ -41,6 +43,6 @@ public interface Layer {
     }
 
     default List<Long> neighborhoodFunction(Graph graph, long nodeId) {
-        return sampler().sample(graph, nodeId, sampleSize(), randomState());
+        return sampler().sample(graph, nodeId, sampleSize());
     }
 }

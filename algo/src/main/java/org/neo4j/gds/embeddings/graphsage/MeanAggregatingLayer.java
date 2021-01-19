@@ -32,16 +32,30 @@ public class MeanAggregatingLayer implements Layer {
     private long randomState;
     private final ActivationFunction activationFunction;
 
+    MeanAggregatingLayer(
+        Weights<Matrix> weights,
+        long sampleSize,
+        ActivationFunction activationFunction,
+        long randomState
+    ) {
+        this.sampleSize = sampleSize;
+        this.weights = weights;
+        this.activationFunction = activationFunction;
+        this.randomState = randomState;
+        this.sampler = new WeightedNeighborhoodSampler(randomState);
+    }
+
     public MeanAggregatingLayer(
         Weights<Matrix> weights,
         long sampleSize,
         ActivationFunction activationFunction
     ) {
-        this.sampleSize = sampleSize;
-        this.weights = weights;
-        this.activationFunction = activationFunction;
-        this.randomState = ThreadLocalRandom.current().nextLong();
-        this.sampler = new WeightedNeighborhoodSampler();
+        this(
+            weights,
+            sampleSize,
+            activationFunction,
+            ThreadLocalRandom.current().nextLong()
+        );
     }
 
     @Override
@@ -62,10 +76,5 @@ public class MeanAggregatingLayer implements Layer {
     @Override
     public long randomState() {
         return randomState;
-    }
-
-    @Override
-    public void generateNewRandomState() {
-        randomState = ThreadLocalRandom.current().nextLong();
     }
 }

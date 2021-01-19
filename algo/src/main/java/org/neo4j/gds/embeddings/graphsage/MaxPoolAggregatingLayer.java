@@ -37,6 +37,28 @@ public class MaxPoolAggregatingLayer implements Layer {
 
     private long randomState;
 
+    MaxPoolAggregatingLayer(
+        long sampleSize,
+        Weights<Matrix> poolWeights,
+        Weights<Matrix> selfWeights,
+        Weights<Matrix> neighborsWeights,
+        Weights<Vector> bias,
+        ActivationFunction activationFunction,
+        long randomState
+    ) {
+        this.poolWeights = poolWeights;
+        this.selfWeights = selfWeights;
+        this.neighborsWeights = neighborsWeights;
+        this.bias = bias;
+
+        this.randomState = randomState;
+
+        this.sampleSize = sampleSize;
+        this.sampler = new UniformNeighborhoodSampler(randomState);
+
+        this.activationFunction = activationFunction;
+    }
+
     public MaxPoolAggregatingLayer(
         long sampleSize,
         Weights<Matrix> poolWeights,
@@ -45,17 +67,16 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Vector> bias,
         ActivationFunction activationFunction
     ) {
-        this.poolWeights = poolWeights;
-        this.selfWeights = selfWeights;
-        this.neighborsWeights = neighborsWeights;
-        this.bias = bias;
 
-        this.randomState = ThreadLocalRandom.current().nextLong();
-
-        this.sampleSize = sampleSize;
-        this.sampler = new UniformNeighborhoodSampler();
-
-        this.activationFunction = activationFunction;
+        this(
+            sampleSize,
+            poolWeights,
+            selfWeights,
+            neighborsWeights,
+            bias,
+            activationFunction,
+            ThreadLocalRandom.current().nextLong()
+        );
     }
 
     @Override
@@ -82,10 +103,5 @@ public class MaxPoolAggregatingLayer implements Layer {
     @Override
     public long randomState() {
         return randomState;
-    }
-
-    @Override
-    public void generateNewRandomState() {
-        randomState = ThreadLocalRandom.current().nextLong();
     }
 }

@@ -24,16 +24,19 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class UniformNeighborhoodSampler implements NeighborhoodSampler {
     private final Random random;
+    private long randomSeed;
 
-    public UniformNeighborhoodSampler() {
-        this.random = new Random();
+    public UniformNeighborhoodSampler(long randomSeed) {
+        this.random = new Random(randomSeed);
+        this.randomSeed = randomSeed;
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples, long randomSeed) {
+    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
@@ -57,5 +60,10 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
     private double randomDouble(long randomState, long source, long target, long nodeCount) {
         random.setSeed(randomState + source + nodeCount * target);
         return random.nextDouble();
+    }
+
+    @Override
+    public void generateNewRandomState() {
+        this.randomSeed = ThreadLocalRandom.current().nextLong();
     }
 }

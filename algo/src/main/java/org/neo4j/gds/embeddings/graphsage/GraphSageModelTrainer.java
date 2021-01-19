@@ -250,9 +250,9 @@ public class GraphSageModelTrainer {
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
                 NeighborhoodSampler neighborhoodSampler = useWeights ?
-                    new WeightedNeighborhoodSampler() :
-                    new UniformNeighborhoodSampler();
-                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId, 0);
+                    new WeightedNeighborhoodSampler(0L) :
+                    new UniformNeighborhoodSampler(0L);
+                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId);
                 if (maybeSample.isPresent()) {
                     currentNode.set(maybeSample.getAsLong());
                 } else {
