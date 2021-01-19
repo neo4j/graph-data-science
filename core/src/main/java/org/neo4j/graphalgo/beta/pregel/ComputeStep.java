@@ -45,8 +45,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     private final RelationshipIterator relationshipIterator;
 
     private int iteration;
-    private HugeAtomicBitSet messageBits;
-    private HugeAtomicBitSet prevMessageBits;
+    private boolean hasSendMessage;
 
     ComputeStep(
         Graph graph,
@@ -89,24 +88,21 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
                 computation.init(initContext);
             }
 
-            if (prevMessageBits.get(nodeId) || !voteBits.get(nodeId)) {
+            messenger.initMessageIterator(messageIterator, nodeId);
+            
+            if (!messages.isEmpty() || !voteBits.get(nodeId)) {
                 voteBits.clear(nodeId);
                 computeContext.setNodeId(nodeId);
-
-                messenger.initMessageIterator(messageIterator, nodeId);
                 computation.compute(computeContext, messages);
             }
         }
     }
 
     void init(
-        int iteration,
-        HugeAtomicBitSet messageBits,
-        HugeAtomicBitSet prevMessageBits
+        int iteration
     ) {
         this.iteration = iteration;
-        this.messageBits = messageBits;
-        this.prevMessageBits = prevMessageBits;
+        this.hasSendMessage = false;
     }
 
     public int iteration() {
@@ -135,7 +131,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
 
     public void sendTo(long targetNodeId, double message) {
         messenger.sendTo(targetNodeId, message);
-        messageBits.set(targetNodeId);
+        hasSendMessage = true;
     }
 
     public void sendToNeighbors(long sourceNodeId, double message) {
@@ -191,5 +187,9 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
 
     public void setNodeValue(String key, long nodeId, double[] value) {
         nodeValues.set(key, nodeId, value);
+    }
+
+    boolean hasSendMessage() {
+        return hasSendMessage;
     }
 }

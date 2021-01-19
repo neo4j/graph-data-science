@@ -220,8 +220,8 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_884_128L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_884_848L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_881_504L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_882_152L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -229,7 +229,7 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 true,
-                6_884_200L
+                6_881_576L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -238,11 +238,11 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 true,
-                6_884_920L
+                6_882_224L
             ),
             // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 244_200L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 244_920L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 241_576L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 242_224L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -250,7 +250,7 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 false,
-                2_244_272L
+                2_241_648L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -259,7 +259,7 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 false,
-                2_244_992L
+                2_242_296L
             )
         );
     }

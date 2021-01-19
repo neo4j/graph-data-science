@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Queue;
@@ -46,8 +45,6 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
     private final PregelConfig config;
 
     private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
-
-    private HugeAtomicBitSet messageBits;
 
     QueueMessenger(Graph graph, PregelConfig config, AllocationTracker tracker) {
         this.graph = graph;
@@ -87,9 +84,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
     }
 
     @Override
-    public void initIteration(int iteration, HugeAtomicBitSet messageBits) {
-        this.messageBits = messageBits;
-
+    public void initIteration(int iteration) {
         if (!config.isAsynchronous()) {
             // Synchronization barrier:
             // Add termination flag to message queues that
@@ -99,8 +94,9 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
                     LongStream.range(0, graph.nodeCount()),
                     config.concurrency(),
                     nodeIds -> nodeIds.forEach(nodeId -> {
-                        if (messageBits.get(nodeId)) {
-                            messageQueues.get(nodeId).add(TERMINATION_SYMBOL);
+                        var queue = messageQueues.get(nodeId);
+                        if (!queue.isEmpty()) {
+                            queue.add(TERMINATION_SYMBOL);
                         }
                     })
                 );
@@ -122,7 +118,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     @Override
     public void initMessageIterator(QueueMessenger.QueueIterator messageIterator, long nodeId) {
-        messageIterator.init(messageBits.get(nodeId) ? messageQueues.get(nodeId) : null);
+        messageIterator.init(messageQueues.get(nodeId));
     }
 
     @Override
@@ -156,7 +152,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
             @Override
             public boolean hasNext() {
-                if (queue == null || reachedEnd) {
+                if (reachedEnd || queue.isEmpty()) {
                     return false;
                 }
 
@@ -171,23 +167,20 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
             @Override
             public boolean isEmpty() {
-                return queue == null || queue.isEmpty() || reachedEnd || Double.isNaN(queue.peek());
+                return queue.isEmpty() || reachedEnd || Double.isNaN(queue.peek());
             }
         }
 
         static class Async extends QueueIterator {
             @Override
             public boolean hasNext() {
-                if (queue == null) {
-                    return false;
-                }
                 return (queue.peek()) != null;
             }
 
 
             @Override
             public boolean isEmpty() {
-                return queue == null || queue.isEmpty();
+                return queue.isEmpty();
             }
         }
     }

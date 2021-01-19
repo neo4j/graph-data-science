@@ -88,8 +88,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
-            .perNode("message bits", MemoryUsage::sizeOfHugeAtomicBitset)
-            .perNode("previous message bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
             .add("composite node value", CompositeNodeValue.memoryEstimation(pregelSchema));
@@ -128,10 +126,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public PregelResult run() {
         boolean didConverge = false;
-        // Tracks if a node received messages in the current iteration
-        HugeAtomicBitSet messageBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
-        // Tracks if a node received messages in the previous iteration
-        HugeAtomicBitSet prevMessageBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
         // Tracks if a node voted to halt in the previous iteration
         HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
@@ -139,32 +133,28 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
-            if (iterations > 0) {
-                messageBits.clear();
-            }
-
             // Init compute steps with the updated state
             for (var computeStep : computeSteps) {
-                computeStep.init(iterations, messageBits, prevMessageBits);
+                computeStep.init(iterations);
             }
 
             // Init messenger with the updated state
-            messenger.initIteration(iterations, prevMessageBits);
+            messenger.initIteration(iterations);
 
             // Run the computation
             runComputeSteps(computeSteps);
             runMasterComputeStep(iterations);
 
+
+            var lastIterationSendMessages = computeSteps
+                .stream()
+                .anyMatch(ComputeStep::hasSendMessage);
+
             // No messages have been sent and all nodes voted to halt
-            if (messageBits.isEmpty() && voteBits.allSet()) {
+            if (!lastIterationSendMessages && voteBits.allSet()) {
                 didConverge = true;
                 break;
             }
-
-            // Swap message bits for next iteration
-            var tmp = messageBits;
-            messageBits = prevMessageBits;
-            prevMessageBits = tmp;
         }
 
         return ImmutablePregelResult.builder()
