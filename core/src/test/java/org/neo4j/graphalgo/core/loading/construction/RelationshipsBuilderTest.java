@@ -20,26 +20,37 @@
 package org.neo4j.graphalgo.core.loading.construction;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 
 class RelationshipsBuilderTest {
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void parallelRelationshipImport(boolean importProperty) {
+    static Stream<Arguments> propertiesAndIdMaps() {
+        return crossArguments(
+            () -> Stream.of(Arguments.of(true), Arguments.of(false)),
+            () -> TestMethodRunner.idMapImplementation().map(Arguments::of)
+        );
+    }
+
+    @ParameterizedTest()
+    @MethodSource("propertiesAndIdMaps")
+    void parallelRelationshipImport(boolean importProperty, TestMethodRunner runTest) {
         var concurrency = 4;
         var nodeCount = 100;
         var relationshipCount = 1000;
 
-        var idMap = createIdMap(nodeCount);
+        var idMap = createIdMap(nodeCount, runTest);
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
@@ -82,14 +93,19 @@ class RelationshipsBuilderTest {
     }
 
 
-    private IdMap createIdMap(long nodeCount) {
-        var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
+    private NodeMapping createIdMap(long nodeCount, TestMethodRunner runTest) {
+        var nodesBuilderRef = new AtomicReference<NodeMapping>();
+        runTest.run(() -> {
+            var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
 
-        for (long i = 0; i < nodeCount; i++) {
-            nodesBuilder.addNode(i);
-        }
+            for (long i = 0; i < nodeCount; i++) {
+                nodesBuilder.addNode(i);
+            }
 
-        return nodesBuilder.build();
+            nodesBuilderRef.set(nodesBuilder.build());
+        });
+
+        return nodesBuilderRef.get();
     }
 
 }

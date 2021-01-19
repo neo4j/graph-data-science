@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -41,7 +40,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Map;
 import java.util.Optional;
@@ -171,9 +169,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.transaction()
         );
 
-        var scanningNodesImporter = useBitIdMap()
-            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, bitIdMappingBuilderFactory(), bitIdMapBuilder())
-            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, hugeIdMappingBuilderFactory(), hugeIdMapBuilder());
+        var scanningNodesImporter = IdMapImplementations.useBitIdMap()
+            ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, bitIdMappingBuilderFactory(), IdMapImplementations.bitIdMapBuilder())
+            : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, hugeIdMappingBuilderFactory(), IdMapImplementations.hugeIdMapBuilder());
 
         return scanningNodesImporter.call(loadingContext.log());
     }
@@ -184,28 +182,8 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
     }
 
     @NotNull
-    private NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
-            idMapBuilder,
-            labelInformation,
-            tracker
-        );
-    }
-
-    @NotNull
     private InternalIdMappingBuilderFactory<InternalHugeIdMappingBuilder, InternalHugeIdMappingBuilder.BulkAdder> hugeIdMappingBuilderFactory() {
         return dimensions -> InternalHugeIdMappingBuilder.of(dimensions.nodeCount(), loadingContext.tracker());
-    }
-
-    @NotNull
-    private NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
-            idMapBuilder,
-            labelInformation,
-            graphDimensions.highestNeoId(),
-            concurrency,
-            tracker
-        );
     }
 
     private RelationshipImportResult loadRelationships(
@@ -239,9 +217,5 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         ).call(loadingContext.log());
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
-    }
-
-    private boolean useBitIdMap() {
-        return GdsEdition.instance().isOnEnterpriseEdition() && GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled();
     }
 }

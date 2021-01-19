@@ -19,20 +19,21 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class GraphFactoryTest {
@@ -62,70 +63,87 @@ class GraphFactoryTest {
         return Stream.of(Orientation.NATURAL, Orientation.REVERSE);
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("validProjections")
-    void unweighted(Orientation orientation) {
-        int nodeCount = 4;
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .maxOriginalId(nodeCount)
-            .hasLabelInformation(true)
-            .build();
-
-        nodesBuilder.addNode(0, NodeLabel.of("A"));
-        nodesBuilder.addNode(1, NodeLabel.of("A"), NodeLabel.of("B"));
-        nodesBuilder.addNode(2, NodeLabel.of("C"));
-        nodesBuilder.addNode(3);
-
-        IdMap idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(idMap)
-            .orientation(orientation)
-            .aggregation(Aggregation.SUM)
-            .build();
-
-        for (int i = 0; i < nodeCount; i++) {
-            relationshipsBuilder.add(i, (i + 1) % nodeCount);
-        }
-        Graph graph = GraphFactory.create(
-            idMap,
-            relationshipsBuilder.build(), AllocationTracker.empty()
+    static Stream<Arguments> projectionsAndIdMaps() {
+        return crossArguments(
+            () -> validProjections().map(Arguments::of),
+            () -> TestMethodRunner.idMapImplementation().map(Arguments::of)
         );
-
-        var expectedGraph = fromGdl("(a:A)-->(b:A:B)-->(c:C)-->(d)-->(a)", orientation);
-
-        assertGraphEquals(expectedGraph, graph);
-        assertEquals(nodeCount, graph.relationshipCount());
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("validProjections")
-    void weightedWithAggregation(Orientation orientation) {
-        var expected = expectedWithAggregation(orientation);
+    @MethodSource("projectionsAndIdMaps")
+    void unweighted(Orientation orientation, TestMethodRunner runTest) {
+        runTest.run(() -> {
+            int nodeCount = 4;
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(nodeCount)
+                .hasLabelInformation(true)
+                .build();
 
-        Graph graph = generateGraph(orientation, Aggregation.SUM);
-        assertGraphEquals(expected, graph);
+            nodesBuilder.addNode(0, NodeLabel.of("A"));
+            nodesBuilder.addNode(1, NodeLabel.of("A"), NodeLabel.of("B"));
+            nodesBuilder.addNode(2, NodeLabel.of("C"));
+            nodesBuilder.addNode(3);
+
+            NodeMapping idMap = nodesBuilder.build();
+            RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                .nodes(idMap)
+                .orientation(orientation)
+                .aggregation(Aggregation.SUM)
+                .build();
+
+            for (int i = 0; i < nodeCount; i++) {
+                relationshipsBuilder.add(i, (i + 1) % nodeCount);
+            }
+            Graph graph = GraphFactory.create(
+                idMap,
+                relationshipsBuilder.build(), AllocationTracker.empty()
+            );
+
+            var expectedGraph = fromGdl("(a:A)-->(b:A:B)-->(c:C)-->(d)-->(a)", orientation);
+
+            assertGraphEquals(expectedGraph, graph);
+            assertEquals(nodeCount, graph.relationshipCount());
+        });
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("validProjections")
-    void weightedWithoutAggregation(Orientation orientation) {
-        Graph graph = generateGraph(orientation, Aggregation.NONE);
-        assertGraphEquals(expectedWithoutAggregation(orientation), graph);
+    @MethodSource("projectionsAndIdMaps")
+    void weightedWithAggregation(Orientation orientation, TestMethodRunner runTest) {
+        runTest.run(() -> {
+            var expected = expectedWithAggregation(orientation);
+
+            Graph graph = generateGraph(orientation, Aggregation.SUM);
+            assertGraphEquals(expected, graph);
+        });
     }
 
-    @Test
-    void undirectedWithAggregation() {
-        Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.SUM);
-        assertGraphEquals(expectedWithAggregation(Orientation.UNDIRECTED), graph);
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("projectionsAndIdMaps")
+    void weightedWithoutAggregation(Orientation orientation, TestMethodRunner runTest) {
+        runTest.run(() -> {
+            Graph graph = generateGraph(orientation, Aggregation.NONE);
+            assertGraphEquals(expectedWithoutAggregation(orientation), graph);
+        });
     }
 
-    @Test
-    void undirectedWithoutAggregation() {
-        Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);
-        assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void undirectedWithAggregation(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.SUM);
+            assertGraphEquals(expectedWithAggregation(Orientation.UNDIRECTED), graph);
+        });
     }
 
-
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void undirectedWithoutAggregation(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            Graph graph = generateGraph(Orientation.UNDIRECTED, Aggregation.NONE);
+            assertGraphEquals(expectedWithoutAggregation(Orientation.UNDIRECTED), graph);
+        });
+    }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
@@ -135,7 +153,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(i);
         }
 
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

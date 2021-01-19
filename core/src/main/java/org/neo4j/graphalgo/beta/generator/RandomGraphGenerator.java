@@ -23,13 +23,13 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -109,7 +109,7 @@ public final class RandomGraphGenerator {
             generateNodes(nodesBuilder);
         }
 
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
@@ -203,7 +203,7 @@ public final class RandomGraphGenerator {
         Map<String, NodeProperties> nodeProperties();
     }
 
-    private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
+    private NodePropertiesAndSchema generateNodeProperties(NodeMapping idMap) {
         var propertyToLabels = new HashMap<String, List<NodeLabel>>();
         var propertyToArray = new HashMap<String, HugeDoubleArray>();
 

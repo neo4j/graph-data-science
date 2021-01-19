@@ -21,10 +21,16 @@ package org.neo4j.graphalgo.core.loading.construction;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.IdMap;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
+import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalSequentialBitIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
+import org.neo4j.graphalgo.core.loading.NodeMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -54,7 +60,8 @@ public class NodesBuilder {
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilder;
-    private final InternalHugeIdMappingBuilder internalHugeIdMappingBuilder;
+    private final NodeMappingBuilder.Capturing nodeMappingBuilder;
+
     private final NodeImporter nodeImporter;
 
     private final Lock lock;
@@ -76,9 +83,21 @@ public class NodesBuilder {
 
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
-        this.internalHugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(maxOriginalId + 1, tracker);
+        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
+        // The sequential bitidmap builder does not support labels that are added *during* the import.
+        // The default bitidmap builder does requires nodes being added in specific batches (super blocks), so it cannot be used here.
+        if (IdMapImplementations.useBitIdMap() && !hasLabelInformation) {
+            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            this.nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        } else {
+            var idMappingBuilder = InternalHugeIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            this.nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        }
+
         this.nodeImporter = new NodeImporter(
-            internalHugeIdMappingBuilder,
+            internalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
             false,
@@ -101,13 +120,17 @@ public class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    public IdMap build() {
+    public NodeMapping build() {
         this.threadLocalBuilder.close();
 
-        return org.neo4j.graphalgo.core.loading.IdMapBuilder.build(
-            internalHugeIdMappingBuilder,
+        var graphDimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(maxOriginalId)
+            .highestNeoId(maxOriginalId)
+            .build();
+
+        return this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
-            maxOriginalId,
+            graphDimensions,
             concurrency,
             tracker
         );

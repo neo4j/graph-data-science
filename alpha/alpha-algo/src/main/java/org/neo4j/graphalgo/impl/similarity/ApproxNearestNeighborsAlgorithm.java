@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
@@ -285,7 +284,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             nodesBuilder.addNode(input.getId());
         }
 
-        IdMap idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.build();
         return IdsAndProperties.of(idMap, Collections.emptyMap());
     }
 

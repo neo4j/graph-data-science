@@ -55,6 +55,24 @@ public final class IdMapBuilder {
         );
     }
 
+    public static BitIdMap build(
+        InternalSequentialBitIdMappingBuilder idMapBuilder,
+        Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+        AllocationTracker tracker
+    ) {
+        SparseLongArray graphIds = idMapBuilder.build();
+        var convertedLabelInformation = labelInformation.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            e -> e.getValue().toBitSet()
+        ));
+
+        return new BitIdMap(
+            graphIds,
+            convertedLabelInformation,
+            tracker
+        );
+    }
+
     public static IdMap build(
         InternalHugeIdMappingBuilder idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,

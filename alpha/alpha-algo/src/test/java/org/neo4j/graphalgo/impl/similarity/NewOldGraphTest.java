@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.IdMap;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -38,7 +38,7 @@ import static org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorith
 
 class NewOldGraphTest {
 
-    private static final IdMap ID_MAP = idMap(5);
+    private static final NodeMapping ID_MAP = idMap(5);
     private static final int CONCURRENCY = 1;
     private static final AllocationTracker TRACKER = AllocationTracker.empty();
 
@@ -89,7 +89,7 @@ class NewOldGraphTest {
         assertThat(ArrayUtils.toObject(oldNeighbors), arrayContainingInAnyOrder(1L));
     }
 
-    private static IdMap idMap(int numberOfNodes) {
+    private static NodeMapping idMap(int numberOfNodes) {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(numberOfNodes).build();
 
         for (int i = 0; i < numberOfNodes; i++) {

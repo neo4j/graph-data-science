@@ -36,4 +36,25 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
         int concurrency,
         AllocationTracker tracker
     );
+
+    default Capturing capture(BUILDER idMapBuilder) {
+        return ((labelInformation, graphDimensions, concurrency, tracker) -> this.build(
+            idMapBuilder,
+            labelInformation,
+            graphDimensions,
+            concurrency,
+            tracker
+        ));
+    }
+
+    interface Capturing {
+
+        NodeMapping build(
+            Map<NodeLabel, HugeAtomicBitSet> labelInformation,
+            GraphDimensions graphDimensions,
+            int concurrency,
+            AllocationTracker tracker
+        );
+    }
+
 }
