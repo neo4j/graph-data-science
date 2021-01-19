@@ -42,6 +42,10 @@ public interface Aggregator {
     // TODO: maybe turn this generic?
     List<Weights<? extends Tensor<?>>> weights();
 
+    AggregatorType type();
+
+    ActivationFunction activationFunction();
+
     enum AggregatorType {
         MEAN {
             @Override

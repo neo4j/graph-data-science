@@ -48,7 +48,7 @@ public final class LayerFactory {
             return new MeanAggregatingLayer(
                 weights,
                 layerConfig.sampleSize(),
-                activationFunction.activationFunction()
+                activationFunction
             );
         }
 
@@ -75,7 +75,7 @@ public final class LayerFactory {
                 selfWeights,
                 neighborsWeights,
                 bias,
-                activationFunction.activationFunction()
+                activationFunction
             );
         }
 

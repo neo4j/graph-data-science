@@ -42,20 +42,22 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
+    private final ActivationFunction activation;
 
     MaxPoolingAggregator(
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+        ActivationFunction activationFunction
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
 
-        this.activationFunction = activationFunction;
+        this.activationFunction = activationFunction.activationFunction();
+        this.activation = activationFunction;
     }
 
     @Override
@@ -94,4 +96,31 @@ public class MaxPoolingAggregator implements Aggregator {
             bias
         );
     }
+
+    @Override
+    public AggregatorType type() {
+        return AggregatorType.POOL;
+    }
+
+    @Override
+    public ActivationFunction activationFunction() {
+        return activation;
+    }
+
+    Matrix poolWeights() {
+        return poolWeights.data();
+    }
+
+    Matrix selfWeights() {
+        return selfWeights.data();
+    }
+
+    Matrix neighborsWeights() {
+        return neighborsWeights.data();
+    }
+
+    Vector bias() {
+        return bias.data();
+    }
+
 }

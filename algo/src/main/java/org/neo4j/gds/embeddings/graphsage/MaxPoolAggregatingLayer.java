@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 
 public class MaxPoolAggregatingLayer implements Layer {
 
@@ -35,7 +33,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
-    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
+    private final ActivationFunction activationFunction;
 
     private long randomState;
 
@@ -45,7 +43,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+        ActivationFunction activationFunction
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;

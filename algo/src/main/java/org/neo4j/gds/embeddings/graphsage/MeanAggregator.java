@@ -39,13 +39,15 @@ public class MeanAggregator implements Aggregator {
 
     private final Weights<Matrix> weights;
     private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
+    private final ActivationFunction activation;
 
     MeanAggregator(
         Weights<Matrix> weights,
-        Function<Variable<Matrix>, Variable<Matrix>> activationFunction
+        ActivationFunction activationFunction
     ) {
         this.weights = weights;
-        this.activationFunction = activationFunction;
+        this.activation = activationFunction;
+        this.activationFunction = activationFunction.activationFunction();
     }
 
     @Override
@@ -72,5 +74,19 @@ public class MeanAggregator implements Aggregator {
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
         return List.of(weights);
+    }
+
+    @Override
+    public AggregatorType type() {
+        return AggregatorType.MEAN;
+    }
+
+    @Override
+    public ActivationFunction activationFunction() {
+        return activation;
+    }
+
+    Matrix weightsData() {
+        return weights.data();
     }
 }
