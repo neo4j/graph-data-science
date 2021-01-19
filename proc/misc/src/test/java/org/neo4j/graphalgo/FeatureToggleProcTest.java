@@ -158,15 +158,15 @@ class FeatureToggleProcTest extends BaseProcTest {
             USE_BIT_ID_MAP.reset();
             assertCypherResult(
                 "CALL gds.features.useBitIdMap.reset()",
-                List.of(Map.of("enabled", false))
+                List.of(Map.of("enabled", true))
             );
-            assertEquals(false, USE_BIT_ID_MAP.isEnabled());
+            assertEquals(true, USE_BIT_ID_MAP.isEnabled());
         });
     }
 
     @Test
     void toggleUseBitIdMapFailsOnCommunity() {
-        assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap(true)"))
+        assertThatThrownBy(() -> runQuery("CALL gds.features.useBitIdMap(false)"))
             .hasMessageContaining(
                 formatWithLocale("Enterprise Edition of the Neo4j Graph Data Science Library")
             );

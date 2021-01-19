@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
@@ -170,7 +171,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             loadingContext.transaction()
         );
 
-        var scanningNodesImporter = GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()
+        var scanningNodesImporter = useBitIdMap()
             ? new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, bitIdMappingBuilderFactory(), bitIdMapBuilder())
             : new ScanningNodesImporter<>(graphCreateConfig, loadingContext, dimensions, progressLogger, concurrency, properties, hugeIdMappingBuilderFactory(), hugeIdMapBuilder());
 
@@ -238,5 +239,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         ).call(loadingContext.log());
 
         return RelationshipImportResult.of(allBuilders, relationshipCounts, dimensions);
+    }
+
+    private boolean useBitIdMap() {
+        return GdsEdition.instance().isOnEnterpriseEdition() && GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled();
     }
 }
