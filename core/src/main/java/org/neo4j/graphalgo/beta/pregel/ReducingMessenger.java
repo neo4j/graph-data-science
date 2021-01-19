@@ -75,7 +75,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     public void sendTo(long targetNodeId, double message) {
         sendArray.update(
             targetNodeId,
-            current -> reducer.reduce(Double.isNaN(current) ? reducer.identity() : current, message)
+            current -> reducer.reduce(reducer.isEmptyValue(current) ? reducer.identity() : current, message)
         );
     }
 
@@ -87,7 +87,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     @Override
     public void initMessageIterator(ReducingMessenger.SingleMessageIterator messageIterator, long nodeId) {
         var message = receiveArray.getAndReplace(nodeId, reducer.identity());
-        messageIterator.init(message);
+        messageIterator.init(message, !reducer.isEmptyValue(message));
     }
 
     @Override
@@ -101,9 +101,9 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         boolean hasNext;
         double message;
 
-        void init(double value) {
+        void init(double value, boolean hasNext) {
             this.message = value;
-            this.hasNext = !Double.isNaN(value);
+            this.hasNext = hasNext;
         }
 
         @Override

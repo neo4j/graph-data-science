@@ -148,8 +148,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
             var lastIterationSendMessages = computeSteps
                 .stream()
-                .map(ComputeStep::hasSendMessage)
-                .reduce(false, Boolean::logicalOr);
+                .anyMatch(ComputeStep::hasSendMessage);
 
             // No messages have been sent and all nodes voted to halt
             if (!lastIterationSendMessages && voteBits.allSet()) {
