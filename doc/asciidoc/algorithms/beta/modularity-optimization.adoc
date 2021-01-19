@@ -60,9 +60,9 @@ include::../common-configuration/common-configuration.adoc[]
 | Name                       | Type    | Default                | Optional | Description
 | maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
 | tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
 | seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | consecutiveIds             | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+| relationshipWeightProperty | String  | null                   | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 |===
 
 .Results
@@ -113,12 +113,12 @@ include::../common-configuration/common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                           | Type    | Default     | Optional | Description
-| weightProperty                 | String  | null        | yes      | The property name that contains weight. If `null`, treats the graph as unweighted. Must be numeric.
 | seedProperty                   | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | writeProperty                  | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
 | maxIterations                  | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
 | tolerance                      | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | consecutiveIds                 | Boolean | false       | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+| relationshipWeightProperty     | String  | null        | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 |===
 
 .Results
