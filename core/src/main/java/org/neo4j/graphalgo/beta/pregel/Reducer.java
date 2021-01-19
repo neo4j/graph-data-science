@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.beta.pregel;
 
 public interface Reducer {
 
-    // TODO define noValue value
-
     /**
      * The identity element is used as the initial value.
      */
@@ -32,6 +30,16 @@ public interface Reducer {
      * Computes a new value based on the current value and the message.
      */
     double reduce(double current, double message);
+
+    /**
+     * The empty value is used when a node did not receive any messages.
+     */
+    double emptyValue();
+
+    /**
+     * Checks if the given value is the empty value.
+     */
+    boolean isEmptyValue(double value);
 
     class Sum implements Reducer {
 
@@ -43,6 +51,16 @@ public interface Reducer {
         @Override
         public double reduce(double current, double message) {
             return current + message;
+        }
+
+        @Override
+        public double emptyValue() {
+            return Double.NaN;
+        }
+
+        @Override
+        public boolean isEmptyValue(double value) {
+            return Double.isNaN(value);
         }
     }
 
@@ -57,6 +75,16 @@ public interface Reducer {
         public double reduce(double current, double message) {
             return Math.min(current, message);
         }
+
+        @Override
+        public double emptyValue() {
+            return Double.NaN;
+        }
+
+        @Override
+        public boolean isEmptyValue(double value) {
+            return Double.isNaN(value);
+        }
     }
 
     class Max implements Reducer {
@@ -70,6 +98,16 @@ public interface Reducer {
         public double reduce(double current, double message) {
             return Math.max(current, message);
         }
+
+        @Override
+        public double emptyValue() {
+            return Double.NaN;
+        }
+
+        @Override
+        public boolean isEmptyValue(double value) {
+            return Double.isNaN(value);
+        }
     }
 
     class Count implements Reducer {
@@ -82,6 +120,16 @@ public interface Reducer {
         @Override
         public double reduce(double current, double message) {
             return current + 1;
+        }
+
+        @Override
+        public double emptyValue() {
+            return Double.NaN;
+        }
+
+        @Override
+        public boolean isEmptyValue(double value) {
+            return Double.isNaN(value);
         }
     }
 }

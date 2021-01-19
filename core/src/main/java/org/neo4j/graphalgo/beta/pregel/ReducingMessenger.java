@@ -64,12 +64,19 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
-        ParallelUtil.parallelForEachNode(graph, config.concurrency(), nodeId -> sendArray.set(nodeId, Double.NaN));
+        ParallelUtil.parallelForEachNode(
+            graph,
+            config.concurrency(),
+            nodeId -> sendArray.set(nodeId, reducer.emptyValue())
+        );
     }
 
     @Override
     public void sendTo(long targetNodeId, double message) {
-        sendArray.update(targetNodeId, current -> reducer.reduce(Double.isNaN(current) ? reducer.identity() : current, message));
+        sendArray.update(
+            targetNodeId,
+            current -> reducer.reduce(Double.isNaN(current) ? reducer.identity() : current, message)
+        );
     }
 
     @Override
