@@ -60,7 +60,12 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig> compute() {
-        var multiLabelFeatureFunction = new MultiLabelFeatureFunction(graph.schema(), config);
+        var weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(
+            graph.schema(),
+            config
+        );
+        var projectedFeatureDimension = config.projectedFeatureDimension().orElseThrow();
+        var multiLabelFeatureFunction = new MultiLabelFeatureFunction(weightsByLabel, projectedFeatureDimension);
         var trainer = new GraphSageModelTrainer(
             config,
             progressLogger,
@@ -87,7 +92,10 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     public void release() {
     }
 
-    public static Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel(GraphSchema graphSchema, GraphSageTrainConfig config) {
+    private static Map<NodeLabel, Weights<? extends Tensor<?>>> makeWeightsByLabel(
+        GraphSchema graphSchema,
+        GraphSageTrainConfig config
+    ) {
         return propertyKeysPerNodeLabel(graphSchema)
             .entrySet()
             .stream()
