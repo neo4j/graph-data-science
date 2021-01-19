@@ -39,7 +39,7 @@ dependencies {
 shadowJar {
     mergeServiceFiles()
     archiveBaseName.set("estimation-cli")
-    archiveClassifier.set("standalone")
+    archiveClassifier.set("")
     mainClassName = 'org.neo4j.gds.estimation.cli.EstimationCli'
     zip64 = true
 }

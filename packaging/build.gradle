@@ -34,7 +34,7 @@ shadowJar {
 
     mergeServiceFiles()
     archiveBaseName.set("neo4j-graph-data-science")
-    archiveClassifier.set("standalone")
+    archiveClassifier.set("")
     exclude 'META-INF/versions/**/*'
     from licenseFile
     from file("$buildDir/reports/license")
