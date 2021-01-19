@@ -96,10 +96,10 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
     public String createQuery() {
         return "CREATE " +
-               "(n1:N {a: 2.0, b: 1.2, t: 1.0})," +
-               "(n2:N {a: 1.3, b: 0.5, t: 0.0})," +
-               "(n3:N {a: 0.0, b: 2.8, t: 0.0})," +
-               "(n4:N {a: 1.0, b: 0.9, t: 1.0})";
+               "(n1:N {a: 2.0, b: 1.2, t: 1})," +
+               "(n2:N {a: 1.3, b: 0.5, t: 0})," +
+               "(n3:N {a: 0.0, b: 2.8, t: 0})," +
+               "(n4:N {a: 1.0, b: 0.9, t: 1})";
     }
 
 }
