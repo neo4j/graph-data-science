@@ -24,6 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -36,6 +37,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ModelToFileExporterTest {
 
@@ -57,7 +59,7 @@ class ModelToFileExporterTest {
         Model<ModelData, GraphSageTrainConfig> model = Model.of(
             "user1",
             "testModel",
-            "testAlgo",
+            GraphSage.MODEL_TYPE,
             GRAPH_SCHEMA,
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
             trainConfig
@@ -67,10 +69,17 @@ class ModelToFileExporterTest {
 
         ModelToFileExporter.toFile(model, exportPath);
 
-        var fileInputStream = new FileInputStream(exportPath.resolve(model.name()).toFile());
-        var bytes = fileInputStream.readAllBytes();
-        assertThat(bytes).isNotEmpty();
+        var metaDataFileName = formatWithLocale("%s.%s", model.name(), "meta");
+        try (var metaDataInputStream = new FileInputStream(exportPath.resolve(metaDataFileName).toFile())) {
+            var metaDataBytes = metaDataInputStream.readAllBytes();
+            assertThat(metaDataBytes).isNotEmpty();
+        }
 
+        var modelDataFileName = formatWithLocale("%s.%s", model.name(), "data");
+        try(var modelDataInputStream = new FileInputStream(exportPath.resolve(modelDataFileName).toFile())) {
+            var modelDataBytes = modelDataInputStream.readAllBytes();
+            assertThat(modelDataBytes).isNotEmpty();
+        }
     }
 
 }
