@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.model.Model;
 
@@ -36,7 +37,7 @@ import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
 public interface NodeClassificationModelInfo extends Model.Mappable {
     List<Long> classes();
     Map<String, Object> bestParameters();
-    Map<String, MetricData> metrics();
+    Map<Metric, MetricData> metrics();
 
     @Override
     default Map<String, Object> toMap() {
@@ -51,7 +52,7 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
     static NodeClassificationModelInfo of(
         List<Long> classes,
         Map<String, Object> bestParameters,
-        Map<String, MetricData> metrics
+        Map<Metric, MetricData> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }

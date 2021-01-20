@@ -29,9 +29,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BatchQueue {
+    static final int DEFAULT_BATCH_SIZE = 100;
     protected final long nodeCount;
     protected final int batchSize;
-    protected long currentBatch;
+    long currentBatch;
+
+    public BatchQueue(long nodeCount) {
+        this(nodeCount, DEFAULT_BATCH_SIZE);
+    }
 
     public BatchQueue(long nodeCount, int batchSize) {
         this.nodeCount = nodeCount;
@@ -43,7 +48,7 @@ public class BatchQueue {
         if (currentBatch * batchSize >= nodeCount) {
             return Optional.empty();
         }
-        LazyBatch batch = new LazyBatch(currentBatch * batchSize, batchSize, nodeCount);
+        var batch = new LazyBatch(currentBatch * batchSize, batchSize, nodeCount);
         currentBatch += 1;
         return Optional.of(batch);
     }

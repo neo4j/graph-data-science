@@ -64,7 +64,7 @@ public class Training {
             epoch,
             initialLoss,
             lastLoss,
-            stopper.converged() ? "" : "Did not converge"
+            stopper.converged() ? "" : " Did not converge"
         ));
     }
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NodeClassificationModelInfoTest {
+
     @Test
     void shouldCreateMap() {
         var info = NodeClassificationModelInfo.of(
@@ -51,13 +53,13 @@ class NodeClassificationModelInfoTest {
         var info = NodeClassificationModelInfo.of(
             List.of(42L, Long.MAX_VALUE),
             params,
-            Map.of("myMetric", metricData)
+            Map.of(Metric.F1_WEIGHTED, metricData)
         );
         var expected = Map.of(
             "bestParameters", params,
             "classes", List.of(42, Long.MAX_VALUE),
             "metrics", Map.of(
-                "myMetric", Map.of(
+                "F1_WEIGHTED", Map.of(
                     "outerTrain", 4.0,
                     "test", 4.1,
                     "train", List.of(Map.of(

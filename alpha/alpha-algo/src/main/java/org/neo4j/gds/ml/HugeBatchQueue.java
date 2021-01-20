@@ -27,6 +27,11 @@ import java.util.Optional;
 public class HugeBatchQueue extends BatchQueue {
     private final HugeLongArray data;
 
+    public HugeBatchQueue(HugeLongArray data) {
+        super(data.size(), DEFAULT_BATCH_SIZE);
+        this.data = data;
+    }
+
     public HugeBatchQueue(HugeLongArray data, int batchSize) {
         super(data.size(), batchSize);
         this.data = data;

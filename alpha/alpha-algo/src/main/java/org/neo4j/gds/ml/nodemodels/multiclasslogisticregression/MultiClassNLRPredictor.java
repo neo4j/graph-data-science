@@ -37,7 +37,7 @@ public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRDa
     private final MultiClassNLRData modelData;
     private final List<String> featureProperties;
 
-    MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
+    public MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
         this.modelData = modelData;
         this.featureProperties = featureProperties;
     }

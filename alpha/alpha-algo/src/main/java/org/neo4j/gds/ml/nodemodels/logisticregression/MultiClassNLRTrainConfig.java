@@ -49,14 +49,7 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
     @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
-    };
-
-    @Configuration.ToMap
-    @Value.Auxiliary
-    @Value.Derived
-    default Map<String, Object> toMap() {
-        return Collections.emptyMap();
-    };
+    }
 
     static MultiClassNLRTrainConfig of(
         List<String> featureProperties,
