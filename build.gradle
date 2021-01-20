@@ -7,6 +7,7 @@ plugins {
     id 'de.thetaphi.forbiddenapis'                  version '2.7'                   apply false
     id 'com.github.spotbugs'                        version '4.4.4'                 apply false
     id 'nebula.info-dependencies'                   version '9.1.1'                 apply false
+    id 'com.google.protobuf'                        version '0.8.14'                apply false
 }
 
 ext {

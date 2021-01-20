@@ -1,5 +1,4 @@
 apply plugin: 'java-library'
-apply plugin: 'com.google.protobuf'
 
 description = 'Neo4j Graph Data Science :: Core'
 
