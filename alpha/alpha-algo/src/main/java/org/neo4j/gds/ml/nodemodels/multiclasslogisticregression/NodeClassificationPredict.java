@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.BatchQueue;
-import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -32,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.function.Consumer;
+import static org.neo4j.gds.ml.nodemodels.LongArrayAccessor.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, MultiClassNLRResult> {
 
@@ -66,7 +62,11 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
-        var consumer = new PredictConsumer(graph, predictor, predictedProbabilities, predictedClasses, progressLogger);
+        var consumer = new NodeClassificationPredictConsumer(
+            graph, IDENTITY, predictor,
+            predictedProbabilities, predictedClasses,
+            progressLogger
+        );
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
         progressLogger.logFinish();
@@ -98,55 +98,4 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             return null;
         }
     }
-
-    private static class PredictConsumer implements Consumer<Batch> {
-        private final Graph graph;
-        private final Predictor<Matrix, MultiClassNLRData> predictor;
-        private final HugeObjectArray<double[]> predictedProbabilities;
-        private final HugeLongArray predictedClasses;
-        private final ProgressLogger progressLogger;
-
-        PredictConsumer(
-            Graph graph,
-            Predictor<Matrix, MultiClassNLRData> predictor,
-            @Nullable HugeObjectArray<double[]> predictedProbabilities,
-            HugeLongArray predictedClasses,
-            ProgressLogger progressLogger
-        ) {
-            this.graph = graph;
-            this.predictor = predictor;
-            this.predictedProbabilities = predictedProbabilities;
-            this.predictedClasses = predictedClasses;
-            this.progressLogger = progressLogger;
-        }
-
-        @Override
-        public void accept(Batch batch) {
-            var probabilityMatrix = predictor.predict(graph, batch);
-            var numberOfClasses = probabilityMatrix.cols();
-            var probabilities = probabilityMatrix.data();
-            var currentRow = new MutableInt(0);
-            batch.nodeIds().forEach(nodeId -> {
-                var offset = currentRow.getAndIncrement() * numberOfClasses;
-                if (predictedProbabilities != null) {
-                    var probabilitiesForNode = new double[numberOfClasses];
-                    System.arraycopy(probabilities, offset, probabilitiesForNode, 0, numberOfClasses);
-                    predictedProbabilities.set(nodeId, probabilitiesForNode);
-                }
-                var bestClassId = -1;
-                var maxProbability = -1d;
-                for (int classId = 0; classId < numberOfClasses; classId++) {
-                    var probability = probabilities[offset + classId];
-                    if (probability > maxProbability) {
-                        maxProbability = probability;
-                        bestClassId = classId;
-                    }
-                }
-                var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
-                predictedClasses.set(nodeId, bestClass);
-            });
-            progressLogger.logProgress(batch.size());
-        }
-    }
-
 }
