@@ -28,7 +28,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
@@ -36,12 +38,12 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.utils.SerializationUtil.serializationRoundTrip;
 
 @GdlExtension
 class GraphSageMultiLabelSerializationTest {
@@ -60,17 +62,18 @@ class GraphSageMultiLabelSerializationTest {
         var model = train();
         var originalEmbeddings = produceEmbeddings(model);
 
-        // Serialize the model
-        var seiralizableModel = GraphSageModelSerializer.toSerializable(model);
-        var output = new ByteArrayOutputStream();
-        assertThat(output.toByteArray()).isEmpty();
-        seiralizableModel.writeTo(output);
-        assertThat(output.toByteArray()).isNotEmpty();
+        var protoModelMetaData = serializationRoundTrip(
+            ModelMetaDataSerializer.toSerializable(model),
+            ModelProto.ModelMetaData.parser()
+        );
+        var protoGraphSageModel = serializationRoundTrip(
+            GraphSageModelSerializer.toSerializable(model),
+            GraphSageProto.GraphSageModel.parser()
+        );
 
-        var protoModel = GraphSageProto.GraphSageModel.parseFrom(output.toByteArray());
-        assertThat(protoModel).isNotNull();
+        assertThat(protoGraphSageModel).isNotNull();
 
-        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoModel);
+        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel);
 
         assertThat(deserializedModel.data().layers())
             .isNotNull()

@@ -23,7 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelSerializer;
+import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public final class GraphSageModelSerializer {
         }
 
         var metadataBuilder = GraphSageProto.GraphSageModelMetadata.newBuilder()
-            .setModel(ModelSerializer.toSerializable(model))
+            .setModel(ModelMetaDataSerializer.toSerializable(model))
             .setTrainConfig(GraphSageTrainConfigSerializer.toSerializable(model.trainConfig()));
         return GraphSageProto.GraphSageModel.newBuilder()
             .setData(modelDataBuilder)
@@ -50,12 +50,17 @@ public final class GraphSageModelSerializer {
             .build();
     }
 
-    static Model<ModelData, GraphSageTrainConfig> fromSerializable(GraphSageProto.GraphSageModel protoModel) throws
+    static Model<ModelData, GraphSageTrainConfig> fromSerializable(
+        GraphSageProto.GraphSageModel protoModel
+    ) throws
         IOException,
         ClassNotFoundException {
+
         var protoModelMeta = protoModel.getModel();
-        GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigSerializer.fromSerializable(protoModel.getModel().getTrainConfig());
-        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder = ModelSerializer.fromSerializable(protoModelMeta.getModel());
+        GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigSerializer.fromSerializable(protoModel
+            .getModel()
+            .getTrainConfig());
+        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder = ModelMetaDataSerializer.fromSerializable(protoModelMeta.getModel());
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),

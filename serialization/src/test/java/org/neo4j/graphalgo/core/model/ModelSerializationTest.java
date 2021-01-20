@@ -72,12 +72,12 @@ class ModelSerializationTest {
             TestTrainConfig.of()
         );
 
-        ModelProto.Model protoModel = ModelSerializer.toSerializable(model);
+        ModelProto.ModelMetaData protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        protoModel.writeTo(output);
+        protoModelMetaData.writeTo(output);
 
-        ModelProto.Model protoModelDeserialized = ModelProto.Model.parseFrom(output.toByteArray());
+        ModelProto.ModelMetaData protoModelDeserialized = ModelProto.ModelMetaData.parseFrom(output.toByteArray());
 
         assertEquals(model.algoType(), protoModelDeserialized.getAlgoType());
         assertEquals(model.username(), protoModelDeserialized.getUsername());

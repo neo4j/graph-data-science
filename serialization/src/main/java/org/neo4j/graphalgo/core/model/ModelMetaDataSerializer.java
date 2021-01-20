@@ -27,12 +27,12 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-public final class ModelSerializer {
+public final class ModelMetaDataSerializer {
 
-    private ModelSerializer() {}
+    private ModelMetaDataSerializer() {}
 
-    public static ModelProto.Model toSerializable(Model<?, ?> model) throws IOException {
-        return ModelProto.Model.newBuilder()
+    public static ModelProto.ModelMetaData toSerializable(Model<?, ?> model) throws IOException {
+        return ModelProto.ModelMetaData.newBuilder()
             .setUsername(model.username())
             .setName(model.name())
             .setAlgoType(model.algoType())
@@ -41,12 +41,12 @@ public final class ModelSerializer {
             .build();
     }
 
-    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(ModelProto.Model protoModelMeta) {
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(ModelProto.ModelMetaData protoModelMetaData) {
         return ImmutableModel.<DATA, CONFIG>builder()
-            .username(protoModelMeta.getUsername())
-            .name(protoModelMeta.getName())
-            .algoType(protoModelMeta.getAlgoType())
-            .graphSchema(SchemaDeserializer.graphSchema(protoModelMeta.getGraphSchema()))
-            .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMeta.getCreationTime()));
+            .username(protoModelMetaData.getUsername())
+            .name(protoModelMetaData.getName())
+            .algoType(protoModelMetaData.getAlgoType())
+            .graphSchema(SchemaDeserializer.graphSchema(protoModelMetaData.getGraphSchema()))
+            .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMetaData.getCreationTime()));
     }
 }

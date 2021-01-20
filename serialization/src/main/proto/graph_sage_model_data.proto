@@ -15,7 +15,7 @@ message GraphSageModel {
 
 message GraphSageModelMetadata {
   GraphSageTrainConfig trainConfig = 1;
-  Model model = 2;
+  ModelMetaData model = 2;
 }
 
 message FeatureFunction {
