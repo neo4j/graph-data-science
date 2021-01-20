@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
-import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityWriteProc;
+import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
