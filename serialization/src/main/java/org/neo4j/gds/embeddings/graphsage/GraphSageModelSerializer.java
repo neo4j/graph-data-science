@@ -35,14 +35,14 @@ public final class GraphSageModelSerializer {
     public static GraphSageProto.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig> model) throws
         IOException {
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
-        for (int i = 0; i < model.data().layers().length; i++) {
-            GraphSageProto.Layer layer = LayerSerializer.toSerializable(model.data().layers()[i]);
+        for (int i = 0; i < modelData.layers().length; i++) {
+            GraphSageProto.Layer layer = LayerSerializer.toSerializable(modelData.layers()[i]);
             modelDataBuilder.addLayers(i, layer);
         }
 
         return GraphSageProto.GraphSageModel.newBuilder()
             .setData(modelDataBuilder)
-            .setFeatureFunction(FeatureFunctionSerializer.toSerializable(model.data().featureFunction()))
+            .setFeatureFunction(FeatureFunctionSerializer.toSerializable(modelData.featureFunction()))
             .build();
     }
 
