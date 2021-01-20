@@ -56,18 +56,30 @@ def whitelist = [
 ]
 
 def product = [
-    ':algo',
-    ':algo-common',
-    ':alpha-algo',
-    ':alpha-core',
-    ':alpha-proc',
-    ':annotations',
-    ':config-generator',
-    ':core',
-    ':cypher-printer',
-    ':neo4j-adapter',
-    ':packaging',
-    ':proc',
+        ':algo',
+        ':algo-common',
+        ':alpha-algo',
+        ':alpha-core',
+        ':alpha-proc',
+        ':annotations',
+        ':config-generator',
+        ':core',
+        ':cypher-printer',
+        ':doc',
+        ':neo4j-adapter',
+        ':neo4j-collections',
+        ':neo4j-export-adapter',
+        ':packaging',
+        ':proc',
+        ':proc-beta',
+        ':proc-catalog',
+        ':proc-centrality',
+        ':proc-common',
+        ':proc-community',
+        ':proc-similarity',
+        ':proc-test',
+        ':test-utils',
+        ':test-utils-adapter'
 ]
 
 allprojects { proj ->
