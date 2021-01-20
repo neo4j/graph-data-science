@@ -20,6 +20,7 @@
 package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.Parser;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -27,7 +28,10 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -41,10 +45,15 @@ public final class ModelToFileExporter {
 
     private ModelToFileExporter() {}
 
-    public static <DATA, CONFIG extends BaseConfig & ModelConfig> void toFile(Model<DATA, CONFIG> model, Path exportDir) throws IOException {
-        // TODO: some validation, blah-blah
+    public static <DATA, CONFIG extends BaseConfig & ModelConfig> void toFile(Path exportDir, Model<DATA, CONFIG> model) throws IOException {
         writeMetaData(exportDir, model.name(), ModelMetaDataSerializer.toSerializable(model));
         writeModelData(exportDir, model.name(), toSerializable(model.data(), model.algoType()));
+    }
+
+    public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(Path exportDir, String modelName) throws
+        IOException, ClassNotFoundException {
+        var modelMetaData = readMetaData(exportDir, modelName);
+        return fromSerializable(exportDir, modelName, modelMetaData);
     }
 
     private static <DATA> GeneratedMessageV3 toSerializable(DATA data, String algoType) throws IOException {
@@ -53,6 +62,21 @@ public final class ModelToFileExporter {
                 return GraphSageModelSerializer.toSerializable((ModelData) data);
             default:
                 throw new IllegalArgumentException(formatWithLocale("Algo type %s was not found.", algoType));
+        }
+    }
+
+    private static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromSerializable(
+        Path exportDir,
+        String modelName,
+        ModelProto.ModelMetaData modelMetaData
+    ) throws IOException, ClassNotFoundException {
+        switch (modelMetaData.getAlgoType()) {
+            case GraphSage.MODEL_TYPE:
+                var parser = GraphSageProto.GraphSageModel.parser();
+                var graphSageModelProto = readModelData(exportDir, modelName, parser);
+                return (Model<DATA, CONFIG>) GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
@@ -65,9 +89,27 @@ public final class ModelToFileExporter {
     }
 
     private static <T extends GeneratedMessageV3> void writeDataToFile(Path exportDir, String name, String suffix, T data) throws IOException {
-        var fileName = formatWithLocale("%s.%s", name, suffix);
-        try(var out = new FileOutputStream(exportDir.resolve(fileName).toFile())) {
+        try (var out = new FileOutputStream(exportDir.resolve(getFileName(name, suffix)).toFile())) {
             data.writeTo(out);
         }
+    }
+
+    private static ModelProto.ModelMetaData readMetaData(Path exportDir, String name) throws IOException {
+        return ModelProto.ModelMetaData.parseFrom(readDataFromFile(exportDir, name, META_DATA_SUFFIX));
+    }
+
+    private static <T> T readModelData(Path exportDir, String name, Parser<T> parser) throws IOException {
+        byte[] modelDataBytes = readDataFromFile(exportDir, name, MODEL_DATA_SUFFIX);
+        return parser.parseFrom(modelDataBytes);
+    }
+
+    private static byte[] readDataFromFile(Path exportDir, String name, String suffix) throws IOException {
+        try (var in = new FileInputStream(exportDir.resolve(getFileName(name, suffix)).toFile())) {
+            return in.readAllBytes();
+        }
+    }
+
+    private static String getFileName(String name, String suffix) {
+        return formatWithLocale("%s.%s", name, suffix);
     }
 }

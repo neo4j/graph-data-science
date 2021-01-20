@@ -46,16 +46,14 @@ public final class GraphSageModelSerializer {
             .build();
     }
 
-    static Model<ModelData, GraphSageTrainConfig> fromSerializable(
+    public static Model<ModelData, GraphSageTrainConfig> fromSerializable(
         GraphSageProto.GraphSageModel protoModel,
         ModelProto.ModelMetaData modelMetaData
     ) throws
-        IOException,
-        ClassNotFoundException {
+        IOException, ClassNotFoundException {
 
         var modelBuilder =
             ModelMetaDataSerializer.<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData);
-
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),

@@ -52,8 +52,7 @@ public final class FeatureFunctionSerializer {
     }
 
     static FeatureFunction fromSerializable(GraphSageProto.FeatureFunction protoFeatureFunction, GraphSageTrainConfig config) throws
-        IOException,
-        ClassNotFoundException {
+        IOException {
         switch (protoFeatureFunction.getFunctionType()) {
             case SINGLE:
                 return new SingleLabelFeatureFunction();

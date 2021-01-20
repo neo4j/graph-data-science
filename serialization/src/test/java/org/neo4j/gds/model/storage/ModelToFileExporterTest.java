@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -41,45 +42,59 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ModelToFileExporterTest {
 
+    private static final String FILE_NAME = "TestModel";
+
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory
         .of("(n1:Node {a: 1.1})-[:R {rp: 4.2}]->(n2:Node {a: 1.337})")
         .build()
         .graphStore()
         .schema();
 
+    private static final GraphSageTrainConfig TRAIN_CONFIG = ImmutableGraphSageTrainConfig.builder()
+        .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+        .embeddingDimension(64)
+        .modelName("testModel")
+        .degreeAsProperty(true)
+        .projectedFeatureDimension(5)
+        .build();
+
+    private static final Model<ModelData, GraphSageTrainConfig> MODEL = Model.of(
+        "user1",
+        "testModel",
+        GraphSage.MODEL_TYPE,
+        GRAPH_SCHEMA,
+        ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
+        TRAIN_CONFIG
+    );
+
     @Test
     void shouldWriteToFile(@TempDir Path exportPath) throws IOException {
-        var trainConfig = ImmutableGraphSageTrainConfig.builder()
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
-            .embeddingDimension(64)
-            .modelName("testModel")
-            .degreeAsProperty(true)
-            .projectedFeatureDimension(5)
-            .build();
-        Model<ModelData, GraphSageTrainConfig> model = Model.of(
-            "user1",
-            "testModel",
-            GraphSage.MODEL_TYPE,
-            GRAPH_SCHEMA,
-            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            trainConfig
-        );
+        assertThat(exportPath.resolve(FILE_NAME)).doesNotExist();
 
-        assertThat(exportPath.resolve(model.name())).doesNotExist();
+        ModelToFileExporter.toFile(exportPath, MODEL);
 
-        ModelToFileExporter.toFile(model, exportPath);
-
-        var metaDataFileName = formatWithLocale("%s.%s", model.name(), "meta");
+        var metaDataFileName = formatWithLocale("%s.%s", MODEL.name(), "meta");
         try (var metaDataInputStream = new FileInputStream(exportPath.resolve(metaDataFileName).toFile())) {
             var metaDataBytes = metaDataInputStream.readAllBytes();
             assertThat(metaDataBytes).isNotEmpty();
         }
 
-        var modelDataFileName = formatWithLocale("%s.%s", model.name(), "data");
+        var modelDataFileName = formatWithLocale("%s.%s", MODEL.name(), "data");
         try(var modelDataInputStream = new FileInputStream(exportPath.resolve(modelDataFileName).toFile())) {
             var modelDataBytes = modelDataInputStream.readAllBytes();
             assertThat(modelDataBytes).isNotEmpty();
         }
+    }
+
+    @Test
+    void shouldReadFromFile(@TempDir Path exportPath) throws IOException, ClassNotFoundException {
+        ModelToFileExporter.toFile(exportPath, MODEL);
+        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, FILE_NAME);
+        assertThat(deserializedModel)
+            .usingRecursiveComparison()
+            .withStrictTypeChecking()
+            .ignoringFieldsOfTypes(DefaultValue.class)
+            .isEqualTo(MODEL);
     }
 
 }
