@@ -44,30 +44,7 @@ class MaxPoolingAggregatorSerializerTest {
     private static final Weights<Matrix> WEIGHTS = new Weights<>(MATRIX);
 
     @Test
-    void canSerialize() throws IOException {
-        var aggregator = new MaxPoolingAggregator(
-            WEIGHTS,
-            WEIGHTS,
-            WEIGHTS,
-            BIAS,
-            ActivationFunction.SIGMOID
-        );
-
-        var serializableAggregator = MaxPoolingAggregatorSerializer.toSerializable(
-            aggregator
-        );
-
-        var byteArrayOutputStream = new ByteArrayOutputStream();
-        var bytesBeforeWrite = byteArrayOutputStream.toByteArray();
-        assertThat(bytesBeforeWrite).isEmpty();
-        serializableAggregator.writeTo(byteArrayOutputStream);
-
-        var bytesAfterWrite = byteArrayOutputStream.toByteArray();
-        assertThat(bytesAfterWrite).isNotEmpty();
-    }
-
-    @Test
-    void canDeserialize() throws IOException {
+    void canSerializeAndDeserialize() throws IOException {
         var aggregator = new MaxPoolingAggregator(
             WEIGHTS,
             WEIGHTS,
@@ -90,5 +67,4 @@ class MaxPoolingAggregatorSerializerTest {
             .withStrictTypeChecking()
             .isEqualTo(aggregator);
     }
-
 }
