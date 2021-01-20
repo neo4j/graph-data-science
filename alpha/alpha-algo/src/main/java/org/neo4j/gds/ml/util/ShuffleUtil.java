@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.util;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-public class ShuffleUtil {
+public final class ShuffleUtil {
 
     public static void shuffleHugeLongArray(HugeLongArray data, RandomDataGenerator random) {
         for (long offset = 0; offset < data.size() - 1; offset++) {
@@ -32,4 +32,6 @@ public class ShuffleUtil {
             data.set(offset, tempValue);
         }
     }
+
+    private ShuffleUtil() {}
 }
