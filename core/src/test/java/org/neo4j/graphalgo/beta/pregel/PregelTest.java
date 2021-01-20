@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -47,6 +48,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -332,6 +334,21 @@ class PregelTest {
         ));
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void messagesInInitialSuperStepShouldBeEmpty(boolean isAsynchronous) {
+        var pregelJob = Pregel.create(
+            graph,
+            ImmutablePregelConfig.builder().maxIterations(2).isAsynchronous(isAsynchronous).build(),
+            new TestEmptyMessageInInitialSuperstep(),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        // assertion is happening in the computation
+        pregelJob.run();
+    }
+
     public static class TestPregelComputation implements PregelComputation<PregelConfig> {
 
         static final String KEY = "value";
@@ -473,6 +490,21 @@ class PregelTest {
                 context.setNodeValue(nodeId, KEY, context.longNodeValue(nodeId, KEY) + 1);
                 return true;
             });
+        }
+    }
+
+    private static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
+        @Override
+        public PregelSchema schema() {
+            return new PregelSchema.Builder().build();
+        }
+
+        @Override
+        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
+            if (context.isInitialSuperstep()) {
+                context.sendToNeighbors(context.nodeId());
+                assertThat(messages).isEmpty();
+            }
         }
     }
 }
