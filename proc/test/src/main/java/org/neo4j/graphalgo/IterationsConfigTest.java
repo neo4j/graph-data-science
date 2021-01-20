@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -20,11 +20,10 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

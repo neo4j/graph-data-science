@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.compat.SettingsProxy;
 import org.neo4j.graphalgo.core.concurrency.ConcurrencyControllerExtension;
-import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
