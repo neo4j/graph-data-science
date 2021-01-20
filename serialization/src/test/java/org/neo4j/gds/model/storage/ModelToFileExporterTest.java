@@ -21,6 +21,8 @@ package org.neo4j.gds.model.storage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -29,26 +31,29 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ModelToFileExporterTest {
-
-    private static final String FILE_NAME = "TestModel";
 
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory
         .of("(n1:Node {a: 1.1})-[:R {rp: 4.2}]->(n2:Node {a: 1.337})")
         .build()
         .graphStore()
         .schema();
+
+    private static final ModelExportConfig EXPORT_CONFIG = ImmutableModelExportConfig.builder().fileName("TestModel").build();
 
     private static final GraphSageTrainConfig TRAIN_CONFIG = ImmutableGraphSageTrainConfig.builder()
         .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
@@ -69,9 +74,9 @@ class ModelToFileExporterTest {
 
     @Test
     void shouldWriteToFile(@TempDir Path exportPath) throws IOException {
-        assertThat(exportPath.resolve(FILE_NAME)).doesNotExist();
+        assertThat(exportPath.resolve(EXPORT_CONFIG.fileName())).doesNotExist();
 
-        ModelToFileExporter.toFile(exportPath, MODEL);
+        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
 
         var metaDataFileName = formatWithLocale("%s.%s", MODEL.name(), "meta");
         try (var metaDataInputStream = new FileInputStream(exportPath.resolve(metaDataFileName).toFile())) {
@@ -88,13 +93,41 @@ class ModelToFileExporterTest {
 
     @Test
     void shouldReadFromFile(@TempDir Path exportPath) throws IOException, ClassNotFoundException {
-        ModelToFileExporter.toFile(exportPath, MODEL);
-        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, FILE_NAME);
+        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
+        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, "TestModel");
         assertThat(deserializedModel)
             .usingRecursiveComparison()
             .withStrictTypeChecking()
             .ignoringFieldsOfTypes(DefaultValue.class)
             .isEqualTo(MODEL);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path exportPath) throws
+        IOException,
+        ClassNotFoundException {
+        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
+
+        var config = ImmutableModelExportConfig.builder().from(EXPORT_CONFIG).overwrite(overwrite).build();
+
+        if (overwrite) {
+            var newTrainConfig = ImmutableGraphSageTrainConfig.builder().from(TRAIN_CONFIG).embeddingDimension(32).build();
+            var newModel = ImmutableModel.<ModelData, GraphSageTrainConfig>builder()
+                .from(MODEL)
+                .trainConfig(newTrainConfig)
+                .build();
+            ModelToFileExporter.toFile(exportPath, newModel, config);
+            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, "TestModel");
+            assertThat(deserializedModel)
+                .usingRecursiveComparison()
+                .withStrictTypeChecking()
+                .ignoringFieldsOfTypes(DefaultValue.class)
+                .isEqualTo(newModel);
+        } else {
+            assertThatThrownBy(() -> ModelToFileExporter.toFile(exportPath, MODEL, config))
+                .isInstanceOf(FileAlreadyExistsException.class);
+        }
     }
 
 }
