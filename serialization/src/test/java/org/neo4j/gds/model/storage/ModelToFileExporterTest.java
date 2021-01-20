@@ -92,9 +92,9 @@ class ModelToFileExporterTest {
     }
 
     @Test
-    void shouldReadFromFile(@TempDir Path exportPath) throws IOException, ClassNotFoundException {
+    void shouldReadFromFile(@TempDir Path exportPath) throws IOException {
         ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
-        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, "TestModel");
+        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, EXPORT_CONFIG);
         assertThat(deserializedModel)
             .usingRecursiveComparison()
             .withStrictTypeChecking()
@@ -105,8 +105,7 @@ class ModelToFileExporterTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path exportPath) throws
-        IOException,
-        ClassNotFoundException {
+        IOException {
         ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
 
         var config = ImmutableModelExportConfig.builder().from(EXPORT_CONFIG).overwrite(overwrite).build();
@@ -118,7 +117,7 @@ class ModelToFileExporterTest {
                 .trainConfig(newTrainConfig)
                 .build();
             ModelToFileExporter.toFile(exportPath, newModel, config);
-            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, "TestModel");
+            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, EXPORT_CONFIG);
             assertThat(deserializedModel)
                 .usingRecursiveComparison()
                 .withStrictTypeChecking()

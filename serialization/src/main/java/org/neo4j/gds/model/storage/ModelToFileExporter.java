@@ -19,20 +19,12 @@
  */
 package org.neo4j.gds.model.storage;
 
-import com.google.protobuf.Parser;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelToFileExporter {
 
@@ -49,40 +41,10 @@ public final class ModelToFileExporter {
         new ModelFileWriter<>(exportDir, model, config).write();
     }
 
-    public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(Path exportDir, String fileName) throws
-        IOException, ClassNotFoundException {
-        var modelMetaData = readMetaData(exportDir, fileName);
-        return fromSerializable(exportDir, fileName, modelMetaData);
-    }
-
-    private static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromSerializable(
+    public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(
         Path exportDir,
-        String fileName,
-        ModelProto.ModelMetaData modelMetaData
-    ) throws IOException, ClassNotFoundException {
-        switch (modelMetaData.getAlgoType()) {
-            case GraphSage.MODEL_TYPE:
-                var parser = GraphSageProto.GraphSageModel.parser();
-                var graphSageModelProto = readModelData(exportDir, fileName, parser);
-                return (Model<DATA, CONFIG>) GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
-            default:
-                throw new IllegalArgumentException();
-        }
+        ModelExportConfig config
+    ) throws IOException {
+        return new ModelFileReader<DATA, CONFIG>(exportDir, config).read();
     }
-
-    private static ModelProto.ModelMetaData readMetaData(Path exportDir, String fileName) throws IOException {
-        return ModelProto.ModelMetaData.parseFrom(readDataFromFile(exportDir, fileName, META_DATA_SUFFIX));
-    }
-
-    private static <T> T readModelData(Path exportDir, String fileName, Parser<T> parser) throws IOException {
-        byte[] modelDataBytes = readDataFromFile(exportDir, fileName, MODEL_DATA_SUFFIX);
-        return parser.parseFrom(modelDataBytes);
-    }
-
-    private static byte[] readDataFromFile(Path exportDir, String fileName, String suffix) throws IOException {
-        try (var in = new FileInputStream(exportDir.resolve(formatWithLocale("%s.%s", fileName, suffix)).toFile())) {
-            return in.readAllBytes();
-        }
-    }
-
 }
