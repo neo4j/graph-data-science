@@ -63,6 +63,7 @@ public class NodeClassificationTrain
     @Override
     public Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
+        nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
         var outerSplitter = new FractionSplitter();
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
