@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -29,7 +29,11 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphDeleteRelationshipProc;
+import org.neo4j.graphalgo.catalog.GraphDropProc;
+import org.neo4j.graphalgo.catalog.GraphExistsProc;
+import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
@@ -41,10 +45,6 @@ import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphDropProc;
-import org.neo4j.graphalgo.catalog.GraphExistsProc;
-import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.nodesim.NodeSimilarityStreamProc;

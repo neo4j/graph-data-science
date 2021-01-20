@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -24,7 +24,6 @@ import org.neo4j.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 

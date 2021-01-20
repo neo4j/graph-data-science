@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -48,7 +48,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 

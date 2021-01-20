@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.values.storable.Values;

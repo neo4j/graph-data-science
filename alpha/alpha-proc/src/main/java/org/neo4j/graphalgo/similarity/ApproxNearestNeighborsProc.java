@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
@@ -43,7 +44,6 @@ import org.neo4j.graphalgo.impl.similarity.PearsonConfig;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityAlgorithmResult;
 import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.ApproxSimilaritySummaryResult;
 import org.neo4j.graphalgo.results.SimilarityExporter;
 import org.neo4j.graphalgo.results.SimilarityResult;

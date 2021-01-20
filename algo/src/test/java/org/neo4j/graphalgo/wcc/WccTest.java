@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;

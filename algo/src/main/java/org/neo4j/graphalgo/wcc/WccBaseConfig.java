@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.wcc;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
 
 public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, RelationshipWeightConfig {
 

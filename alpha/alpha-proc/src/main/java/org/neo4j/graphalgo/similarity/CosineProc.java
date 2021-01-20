@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.CosineConfig;
 import org.neo4j.graphalgo.impl.similarity.CosineConfigImpl;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;

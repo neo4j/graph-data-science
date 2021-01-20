@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -42,7 +42,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import static java.lang.invoke.MethodHandles.constant;
 import static java.lang.invoke.MethodHandles.dropArguments;
 import static java.util.Collections.singletonMap;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GcListenerTest {
 

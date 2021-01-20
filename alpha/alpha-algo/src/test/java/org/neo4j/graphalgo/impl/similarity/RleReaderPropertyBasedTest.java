@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,7 +23,6 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -25,9 +25,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

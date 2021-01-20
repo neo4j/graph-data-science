@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -24,8 +24,8 @@ import com.carrotsearch.hppc.IntStack;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.container.Paths;
 
 import java.util.ArrayList;

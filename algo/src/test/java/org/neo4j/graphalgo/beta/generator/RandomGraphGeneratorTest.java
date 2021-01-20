@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -25,12 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.Aggregation;
 
 import java.io.File;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,15 +23,14 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

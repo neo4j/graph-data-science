@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
+import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.GraphStore;
@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 
 import java.util.Map;
 import java.util.Optional;

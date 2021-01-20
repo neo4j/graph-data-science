@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 
 class LongPageCreatorTest {

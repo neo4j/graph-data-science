@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -38,13 +38,10 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;

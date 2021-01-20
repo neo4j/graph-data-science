@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,10 +26,9 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.compat.GraphDbApi;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.graphalgo.core.loading.NativeFactory;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
 

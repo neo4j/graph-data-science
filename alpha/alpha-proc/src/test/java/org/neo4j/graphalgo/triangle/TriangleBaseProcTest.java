@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -30,10 +30,10 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;

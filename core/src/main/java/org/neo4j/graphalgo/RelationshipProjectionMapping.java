@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,7 +21,6 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
-import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.ANY_RELATIONSHIP_TYPE;
 import static org.neo4j.graphalgo.compat.StatementConstantsProxy.NO_SUCH_RELATIONSHIP_TYPE;
 

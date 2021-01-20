@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -68,9 +68,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
 
 final class ParallelUtilTest {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;

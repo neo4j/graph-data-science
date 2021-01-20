@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,14 +23,12 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.SetBitsIterable;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-import org.neo4j.logging.Log;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

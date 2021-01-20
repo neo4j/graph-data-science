@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.impl.triangle.TriangleConfig;
 
 public abstract class TriangleBaseProc<A extends Algorithm<A, RESULT>, RESULT, CONFIG extends TriangleConfig>
     extends AlgoBaseProc<A, RESULT, CONFIG> {

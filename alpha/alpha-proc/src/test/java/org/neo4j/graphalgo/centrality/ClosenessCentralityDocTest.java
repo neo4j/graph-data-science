@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,16 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.centrality;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphalgo.TestDatabaseCreator;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.functions.GetNodeFunc;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

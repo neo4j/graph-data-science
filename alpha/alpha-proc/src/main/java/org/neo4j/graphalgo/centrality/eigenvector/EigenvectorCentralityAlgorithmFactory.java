@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.pagerank.LabsPageRankAlgorithmType;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 class EigenvectorCentralityAlgorithmFactory extends AlphaAlgorithmFactory<PageRank, EigenvectorCentralityConfig> {
 

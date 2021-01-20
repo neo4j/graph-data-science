@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,14 +26,12 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;

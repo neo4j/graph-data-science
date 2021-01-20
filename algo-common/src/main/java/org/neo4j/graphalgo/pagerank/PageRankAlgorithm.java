@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.mem.Assessable;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.AllocationTracker;
-import org.neo4j.logging.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;

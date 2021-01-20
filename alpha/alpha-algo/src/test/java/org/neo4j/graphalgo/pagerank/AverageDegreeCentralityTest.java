@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -30,8 +30,8 @@ import org.neo4j.graphalgo.TestSupport.AllGraphTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.CypherFactory;
 import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

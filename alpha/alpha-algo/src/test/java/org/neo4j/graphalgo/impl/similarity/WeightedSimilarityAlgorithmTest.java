@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) 2017-2021 "Neo4j,"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -22,13 +22,14 @@ package org.neo4j.graphalgo.impl.similarity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestDatabaseCreator;
-import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.ProcedureConstants;
 import org.neo4j.graphalgo.results.SimilarityResult;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class WeightedSimilarityAlgorithmTest {
     private GraphDatabaseAPI db;
