@@ -23,7 +23,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
 
     WEIGHTED {
         @Override
-        public PageRankVariant variant(final PageRankBaseConfig config) {
+        public PageRankVariant variant() {
             return new WeightedPageRankVariant();
         }
 
@@ -35,7 +35,7 @@ public enum PageRankAlgorithmType implements PageRankAlgorithm {
 
     NON_WEIGHTED {
         @Override
-        public PageRankVariant variant(final PageRankBaseConfig config) {
+        public PageRankVariant variant() {
             return new NonWeightedPageRankVariant();
         }
 

@@ -59,7 +59,7 @@ public interface PageRankAlgorithm {
     ) {
         return new PageRank(
             graph,
-            variant(algoConfig),
+            variant(),
             sourceNodeIds,
             algoConfig,
             executor,
@@ -68,7 +68,7 @@ public interface PageRankAlgorithm {
         );
     }
 
-    PageRankVariant variant(PageRankBaseConfig config);
+    PageRankVariant variant();
 
     Class<? extends BaseComputeStep> computeStepClass();
 

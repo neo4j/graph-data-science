@@ -23,7 +23,7 @@ public enum LabsPageRankAlgorithmType implements PageRankAlgorithm {
 
     EIGENVECTOR_CENTRALITY {
         @Override
-        public PageRankVariant variant(PageRankBaseConfig config) {
+        public PageRankVariant variant() {
             return new EigenvectorCentralityVariant();
         }
 
@@ -35,7 +35,7 @@ public enum LabsPageRankAlgorithmType implements PageRankAlgorithm {
 
     ARTICLE_RANK {
         @Override
-        public PageRankVariant variant(final PageRankBaseConfig config) {
+        public PageRankVariant variant() {
             return new ArticleRankVariant();
         }
 
