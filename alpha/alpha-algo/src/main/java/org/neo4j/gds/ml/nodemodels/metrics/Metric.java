@@ -22,6 +22,12 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public enum Metric {
     F1_WEIGHTED(new F1Weighted()),
     F1_MACRO(new F1Macro()),
@@ -48,4 +54,27 @@ public enum Metric {
             HugeLongArray globalTargets
         );
     }
+
+    public static List<Metric> resolveMetrics(List<String> metrics) {
+        return metrics.stream()
+            .map(name -> {
+                try {
+                    return Metric.valueOf(name);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Invalid metric `%s`. Available metrics are %s",
+                        name,
+                        Arrays.toString(Metric.values())
+                    ));
+                }
+            }).collect(Collectors.toList());
+    }
+
+    public static List<String> metricsToString(List<Metric> metrics) {
+        return metrics.stream()
+            .map(Metric::name)
+            .collect(Collectors.toList());
+    }
+
+
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -38,7 +39,10 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     long serialVersionUID = 0x42L;
 
     Optional<Long> randomSeed();
-    List<String> metrics();
+
+    @Configuration.ConvertWith("org.neo4j.gds.ml.nodemodels.metrics.Metric#resolveMetrics")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.nodemodels.metrics.Metric#metricsToString")
+    List<Metric> metrics();
     double holdoutFraction();
     int validationFolds();
 
@@ -64,5 +68,4 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     static ImmutableNodeClassificationTrainConfig.Builder builder() {
         return ImmutableNodeClassificationTrainConfig.builder();
     }
-
 }

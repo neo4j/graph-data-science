@@ -93,11 +93,10 @@ public class NodeClassificationTrain
 
         // 7. evaluate it on the holdout set
         // TODO: evaluate metrics on holdout and everything minus holdout
-        var resolvedMetrics = modelSelectResult.validationStats().keySet();
-        Map<Metric, Double> testMetrics = resolvedMetrics
+        Map<Metric, Double> testMetrics = config.metrics()
             .stream()
             .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
-        Map<Metric, Double> outerTrainMetrics = resolvedMetrics
+        Map<Metric, Double> outerTrainMetrics = config.metrics()
             .stream()
             .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
 
@@ -162,12 +161,6 @@ public class NodeClassificationTrain
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets);
         var splits = splitter.splits();
 
-        var metrics = config
-            .metrics()
-            .stream()
-            .map(Metric::valueOf)
-            .collect(Collectors.toList());
-
         var trainStats = new HashMap<Metric, List<ConcreteModelStats>>();
         var validationStats = new HashMap<Metric, List<ConcreteModelStats>>();
 
@@ -189,7 +182,6 @@ public class NodeClassificationTrain
                 Map<Metric, Double> scores = computeMetrics(
                     validationTargets,
                     globalTargets,
-                    metrics,
                     predictor,
                     validationSet
                 );
@@ -200,7 +192,7 @@ public class NodeClassificationTrain
                 }
             }
             // insert the candidates metrics into validationStats
-            metrics.forEach(metric -> {
+            config.metrics().forEach(metric -> {
                 validationStats.compute(
                     metric,
                     (_m, concreteModelStats) -> {
@@ -230,7 +222,7 @@ public class NodeClassificationTrain
         });
 
         // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = metrics.get(0);
+        var mainMetric = config.metrics().get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
@@ -242,7 +234,6 @@ public class NodeClassificationTrain
     private Map<Metric, Double> computeMetrics(
         HugeLongArray targets,
         HugeLongArray globalTargets,
-        List<Metric> metrics,
         MultiClassNLRPredictor predictor,
         HugeLongArray validationSet
     ) {
@@ -262,7 +253,7 @@ public class NodeClassificationTrain
         var queue = new BatchQueue(validationSet.size());
         queue.parallelConsume(consumer, config.concurrency());
 
-        var scores = metrics.stream().collect(Collectors.toMap(
+        var scores = config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
             metric -> metric.compute(targets, predictedClasses, globalTargets)
         ));

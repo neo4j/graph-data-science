@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.nodemodels.metrics.F1Weighted;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.ml.nodemodels.metrics.Metric.F1_WEIGHTED;
 
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
@@ -92,6 +94,25 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .yields();
 
         assertError(query, "`targetProperty`: `nope` not found in graph with node properties: ['a', 'b', 't']");
+    }
+
+    @Test
+    void shouldFailWithInvalidMetric() {
+
+        String query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.nodeClassification")
+            .trainMode()
+            .addParameter("modelName", "model")
+            .addParameter("targetProperty", "t")
+            .addParameter("holdoutFraction", 0.2)
+            .addParameter("validationFolds", 4)
+            .addParameter("metrics", List.of("foo"))
+            .addParameter("params", List.of(Map.of("penalty", 1)))
+            .yields();
+
+        assertError(query, "Invalid metric `foo`.");
     }
 
     public String createQuery() {

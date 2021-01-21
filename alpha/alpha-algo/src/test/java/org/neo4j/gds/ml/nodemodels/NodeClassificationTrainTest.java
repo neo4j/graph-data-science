@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.nodemodels.metrics.Metric.F1_MACRO;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -79,7 +79,7 @@ class NodeClassificationTrainTest {
                 .concurrency(1)
                 .randomSeed(1L)
                 .targetProperty("t")
-                .metrics(List.of("F1_MACRO"))
+                .metrics(List.of(F1_MACRO))
                 .params(List.of(model1, model2))
                 .build(),
             log
@@ -87,7 +87,7 @@ class NodeClassificationTrainTest {
 
         var model = ncTrain.compute();
 
-        var validationScores = model.customInfo().metrics().get(Metric.F1_MACRO).validation();
+        var validationScores = model.customInfo().metrics().get(F1_MACRO).validation();
 
         assertThat(validationScores).hasSize(2);
         var actualWinnerParams = model.customInfo().bestParameters();
