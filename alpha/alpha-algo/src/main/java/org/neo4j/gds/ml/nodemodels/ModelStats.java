@@ -29,9 +29,9 @@ import java.util.Map;
 @ValueClass
 @JsonSerialize
 @JsonDeserialize
-public interface ConcreteModelStats {
-    Comparator<ConcreteModelStats> COMPARE_AVERAGE =
-        Comparator.comparingDouble(ConcreteModelStats::avg);
+public interface ModelStats {
+    Comparator<ModelStats> COMPARE_AVERAGE =
+        Comparator.comparingDouble(ModelStats::avg);
 
     /**
      * The input params representing a model candidate

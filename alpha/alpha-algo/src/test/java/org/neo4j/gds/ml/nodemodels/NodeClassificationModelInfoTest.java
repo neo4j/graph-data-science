@@ -47,8 +47,8 @@ class NodeClassificationModelInfoTest {
     @Test
     void shouldCreateMapWithStats() {
         Map<String, Object> params = Map.of("myParameter", "value");
-        var trainStats = ImmutableConcreteModelStats.of(params, 0.5, 0.0, 1.0);
-        var validationStats = ImmutableConcreteModelStats.of(params, 0.4, 0.0, 0.8);
+        var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
+        var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
         var info = NodeClassificationModelInfo.of(
             List.of(42L, Long.MAX_VALUE),

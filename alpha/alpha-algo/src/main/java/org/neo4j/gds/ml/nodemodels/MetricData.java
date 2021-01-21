@@ -35,13 +35,13 @@ public interface MetricData {
      * Train metrics
      * @return the metric stats for each candidate model on the train set
      */
-    List<ConcreteModelStats> train();
+    List<ModelStats> train();
 
     /**
      * Validation metrics
      * @return the metric stats for each candidate model on the validation set
      */
-    List<ConcreteModelStats> validation();
+    List<ModelStats> validation();
 
     /**
      * Outer train metric
@@ -55,7 +55,7 @@ public interface MetricData {
      */
     double test();
 
-    static MetricData of(List<ConcreteModelStats> train, List<ConcreteModelStats> validation, double outerTrain, double test) {
+    static MetricData of(List<ModelStats> train, List<ModelStats> validation, double outerTrain, double test) {
         return ImmutableMetricData.of(train, validation, outerTrain, test);
     }
 }
