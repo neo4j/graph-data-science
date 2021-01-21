@@ -35,7 +35,18 @@ import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
 @JsonSerialize
 @JsonDeserialize
 public interface NodeClassificationModelInfo extends Model.Mappable {
+    /**
+     * The distinct values of the target property which represent the
+     * allowed classes that the model can predict.
+     * @return
+     */
     List<Long> classes();
+
+    /**
+     * The parameters that yielded the best fold-averaged validation score
+     * for the selection metric.
+     * @return
+     */
     Map<String, Object> bestParameters();
     Map<Metric, MetricData> metrics();
 

@@ -72,25 +72,22 @@ public class NodeClassificationTrain
 
     @Override
     public Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
-        // 0. Init and shuffle node ids
+        // 1. Init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
-
-        // 1. enumerate all model candidates based on input config
-        var candidates = config.params();
 
         // 2a. Outer split nodes into holdout + remaining
         var outerSplitter = new FractionSplitter();
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // model selection:
-        var modelSelectResult = modelSelect(outerSplit.trainSet(), candidates);
-        var bestConfig = modelSelectResult.bestConfig();
+        var modelSelectResult = modelSelect(outerSplit.trainSet(), config.params());
+        var bestParameters = modelSelectResult.bestParameters();
 
         // 6. retrain best model on remaining
         // TODO: training may now only see outerSplitter.trainSet()
-        MultiClassNLRData winnerModelData = trainModel(bestConfig, outerSplit.trainSet());
+        MultiClassNLRData winnerModelData = trainModel(bestParameters, outerSplit.trainSet());
 
         // 7. evaluate it on the holdout set
         // TODO: evaluate metrics on holdout and everything minus holdout
@@ -103,11 +100,11 @@ public class NodeClassificationTrain
             .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
 
         // 8. retrain that model on the full graph
-        MultiClassNLRData retrainedModelData = trainModel(bestConfig, nodeIds);
+        MultiClassNLRData retrainedModelData = trainModel(bestParameters, nodeIds);
         var classes = sortedClasses(retrainedModelData);
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
 
-        var modelInfo = NodeClassificationModelInfo.of(classes, modelSelectResult.bestConfig(), metrics);
+        var modelInfo = NodeClassificationModelInfo.of(classes, modelSelectResult.bestParameters(), metrics);
 
         // 9. persist the winning model in the model catalog
         //    the model catalog will also contain training metadata
@@ -200,7 +197,7 @@ public class NodeClassificationTrain
                     validationSum.merge(score.getKey(), score.getValue(), Double::sum);
                 }
             }
-            // 5. pick the best-scoring model candidate, according to the main metric
+            // insert the candidates metrics into validationStats
             metrics.forEach(metric -> {
                 validationStats.compute(
                     metric,
@@ -230,6 +227,7 @@ public class NodeClassificationTrain
             });
         });
 
+        // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = metrics.get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats);
@@ -307,7 +305,7 @@ public class NodeClassificationTrain
 
     @ValueClass
     interface ModelSelectResult {
-        Map<String, Object> bestConfig();
+        Map<String, Object> bestParameters();
 
         // key is metric
         Map<Metric, List<ConcreteModelStats>> trainStats();

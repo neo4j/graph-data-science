@@ -31,9 +31,26 @@ import java.util.Map;
 @JsonDeserialize
 public interface ConcreteModelStats extends Comparable<ConcreteModelStats> {
 
+    /**
+     * The input params representing a model candidate
+     * @return
+     */
     Map<String, Object> params();
+
+    /**
+     * The average of the metric of the model candidate over (inner) folds
+     * @return
+     */
     double avg();
+    /**
+     * The minimum of the metric of the model candidate over (inner) folds
+     * @return
+     */
     double min();
+    /**
+     * The maximum of the metric of the model candidate over (inner) folds
+     * @return
+     */
     double max();
 
     @Override

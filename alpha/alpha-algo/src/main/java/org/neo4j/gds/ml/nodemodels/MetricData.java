@@ -29,9 +29,30 @@ import java.util.List;
 @JsonSerialize
 @JsonDeserialize
 public interface MetricData {
+
+
+    /**
+     * Train metrics
+     * @return the metric stats for each candidate model on the train set
+     */
     List<ConcreteModelStats> train();
+
+    /**
+     * Validation metrics
+     * @return the metric stats for each candidate model on the validation set
+     */
     List<ConcreteModelStats> validation();
+
+    /**
+     * Outer train metric
+     * @return the metric value for the winner model on outer training set
+     */
     double outerTrain();
+
+    /**
+     * Test metric
+     * @return the metric value for the winner model on test set (holdout)
+     */
     double test();
 
     static MetricData of(List<ConcreteModelStats> train, List<ConcreteModelStats> validation, double outerTrain, double test) {
