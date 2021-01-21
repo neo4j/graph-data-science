@@ -88,7 +88,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
                 computation.init(initContext);
             }
 
-            messenger.initMessageIterator(messageIterator, nodeId);
+            messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
             
             if (!messages.isEmpty() || !voteBits.get(nodeId)) {
                 voteBits.clear(nodeId);

@@ -27,7 +27,7 @@ public interface Messenger<ITERATOR extends Messages.MessageIterator> {
 
     ITERATOR messageIterator();
 
-    void initMessageIterator(ITERATOR messageIterator, long nodeId);
+    void initMessageIterator(ITERATOR messageIterator, long nodeId, boolean isFirstIteration);
 
     void release();
 }

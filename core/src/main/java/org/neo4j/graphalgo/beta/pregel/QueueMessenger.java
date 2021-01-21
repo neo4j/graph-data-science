@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.LongStream;
 
@@ -40,6 +41,9 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     // Marks the end of messages from the previous iteration in synchronous mode.
     private static final Double TERMINATION_SYMBOL = Double.NaN;
+
+    // Empty queue used in initial super step
+    private static final Queue<Double> EMPTY_QUEUE = new LinkedList<>();
 
     private final Graph graph;
     private final PregelConfig config;
@@ -117,8 +121,12 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
     }
 
     @Override
-    public void initMessageIterator(QueueMessenger.QueueIterator messageIterator, long nodeId) {
-        messageIterator.init(messageQueues.get(nodeId));
+    public void initMessageIterator(
+        QueueMessenger.QueueIterator messageIterator,
+        long nodeId,
+        boolean isFirstIteration
+    ) {
+        messageIterator.init(isFirstIteration ? EMPTY_QUEUE : messageQueues.get(nodeId));
     }
 
     @Override
