@@ -238,22 +238,66 @@ final class EstimationCliTest {
         "K, 1", "M, 2", "G, 3", "T, 4", "P, 5", "E, 6", "Z, 7", "Y, 8",
         "KB, 1", "MB, 2", "GB, 3", "TB, 4", "PB, 5", "EB, 6", "ZB, 7", "YB, 8"
     })
-    void canSpecifyBlockSize(String unit, int scale) {
+    void canSpecifyBlockSize(String unit, int factor) {
         var nodeCount = 1000_000_000_000L;
         var relationshipCount = 10_000_000_000_000L;
         var actual = run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, "--block-size", unit);
         var estimation = pageRankEstimate("nodeCount", nodeCount, "relationshipCount", relationshipCount);
-        var rust = Math.pow(
+        var scale = Math.pow(
             unit.endsWith("B") ? 1000.0 : 1024.0,
-            scale
+            factor
         );
 
         var expected = formatWithLocale(
             "gds.pagerank.stream.estimate,%.0f%s,%.0f%s",
-            estimation.bytesMin / rust, unit,
-            estimation.bytesMax / rust, unit
+            estimation.bytesMin / scale, unit,
+            estimation.bytesMax / scale, unit
         );
         assertEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-K, K, 1", "-M, M, 2", "-G, G, 3",
+        "-KB, KB, 1", "-MB, MB, 2", "-GB, GB, 3"
+    })
+    void canSpecifyBlockSizeWithShorthand(String option, String unit, int factor) {
+        var nodeCount = 1000_000_000_000L;
+        var relationshipCount = 10_000_000_000_000L;
+        var actual = run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, option);
+        var estimation = pageRankEstimate("nodeCount", nodeCount, "relationshipCount", relationshipCount);
+        var scale = Math.pow(
+            unit.endsWith("B") ? 1000.0 : 1024.0,
+            factor
+        );
+
+        var expected = formatWithLocale(
+            "gds.pagerank.stream.estimate,%.0f%s,%.0f%s",
+            estimation.bytesMin / scale, unit,
+            estimation.bytesMax / scale, unit
+        );
+        assertEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-K, -G",
+        "-M, -MB",
+        "--block-size=G, -K"
+    })
+    void failsForMultipleBlockSizeOptions(String option1, String option2) {
+        var nodeCount = 42;
+        var relationshipCount = 1337;
+        var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, option1, option2));
+
+        assertEquals(2, actual.exitCode);
+        assertEquals(
+            formatWithLocale(
+                "Error: %s, %s are mutually exclusive (specify only one)",
+                option1.startsWith("--block-size") ? "--block-size=<blockSize>" : option1,
+                option2
+            ), actual.stderr.lines().iterator().next()
+        );
     }
 
     @ParameterizedTest

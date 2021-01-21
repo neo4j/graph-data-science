@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -114,12 +115,9 @@ public class EstimationCli implements Runnable {
         @CommandLine.Mixin
             CountOptions counts,
 
-        @CommandLine.Option(
-            names = {"--block-size"},
-            description = "Scale sizes by SIZE before printing them; e.g., '--block-size M' prints sizes in units of 1,048,576 bytes. Valid values are: ${COMPLETION-CANDIDATES}"
-        )
-            Optional<BlockSize> blockSize,
 
+        @CommandLine.ArgGroup(exclusive = true)
+            BlockSizeOptions blockSizeOptions,
 
         @CommandLine.ArgGroup(exclusive = true)
             PrintOptions printOptions
@@ -135,7 +133,71 @@ public class EstimationCli implements Runnable {
         var estimations = procedureMethods
             .map(function(proc -> estimateProcedure(proc.name(), proc.method(), counts)))
             .collect(Collectors.toList());
-        renderResults(counts, printOpts, blockSize, estimations);
+
+        var blockSizeOpts = Optional.ofNullable(blockSizeOptions).map(BlockSizeOptions::get);
+        renderResults(counts, printOpts, blockSizeOpts, estimations);
+    }
+
+    static final class BlockSizeOptions {
+        @CommandLine.Option(
+            names = {"--block-size"},
+            description = "Scale sizes by SIZE before printing them; e.g., '--block-size M' prints sizes in units of 1,048,576 bytes. Valid values are: ${COMPLETION-CANDIDATES}"
+        )
+        BlockSize blockSize;
+
+        @CommandLine.Option(
+            names = "-K",
+            description = "Scale sizes by 1024"
+        )
+        private boolean K;
+
+        @CommandLine.Option(
+            names = "-M",
+            description = "Scale sizes by 1024*1024"
+        )
+        private boolean M;
+
+        @CommandLine.Option(
+            names = "-G",
+            description = "Scale sizes by 1024*1024*1024"
+        )
+        private boolean G;
+
+        @CommandLine.Option(
+            names = "-KB",
+            description = "Scale sizes by 1000"
+        )
+        private boolean KB;
+
+        @CommandLine.Option(
+            names = "-MB",
+            description = "Scale sizes by 1000*1000"
+        )
+        private boolean MB;
+
+        @CommandLine.Option(
+            names = "-GB",
+            description = "Scale sizes by 1000*1000*1000"
+        )
+        private boolean GB;
+
+        BlockSize get() {
+            if (K) {
+                return BlockSize.K;
+            } else if (M) {
+                return BlockSize.M;
+            } else if (G) {
+                return BlockSize.G;
+            } else if (KB) {
+                return BlockSize.KB;
+            } else if (MB) {
+                return BlockSize.MB;
+            } else if (GB) {
+                return BlockSize.GB;
+            } else {
+                return Objects.requireNonNull(blockSize);
+            }
+        }
     }
 
     static final class CountOptions {
