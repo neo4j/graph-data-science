@@ -95,8 +95,5 @@ class NodeClassificationTrainTest {
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
-
-        validationScores.forEach(c -> System.out.println("c = " + c));
     }
-
 }
