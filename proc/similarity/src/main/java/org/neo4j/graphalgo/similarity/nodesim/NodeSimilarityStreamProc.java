@@ -57,7 +57,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
             return Stream.empty();
         }
 
-        return result.result().maybeStreamResult().get()
+        return result.result().streamResult()
             .map(similarityResult -> {
                 similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
                 similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);

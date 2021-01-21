@@ -28,15 +28,4 @@ public interface GraphSageModel {
     Layer[] layers();
 
     GraphSageTrainConfig config();
-
-    static GraphSageModel of(
-        Layer[] layers,
-        GraphSageTrainConfig config
-    ) {
-        return ImmutableGraphSageModel.of(
-            layers,
-            config
-        );
-    }
-
 }

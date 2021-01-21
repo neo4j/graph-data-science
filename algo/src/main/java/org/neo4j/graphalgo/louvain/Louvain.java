@@ -247,10 +247,6 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance());
     }
 
-    public LouvainBaseConfig config() {
-        return this.config;
-    }
-
     public HugeLongArray[] dendrograms() {
         return this.dendrograms;
     }
