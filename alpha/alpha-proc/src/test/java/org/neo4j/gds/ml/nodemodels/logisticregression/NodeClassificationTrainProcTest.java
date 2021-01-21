@@ -69,7 +69,10 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                 "ACCURACY", Map.of(
                     "outerTrain", 0.0,
                     "test", 0.0,
-                    "train", List.of(),
+                    "train", List.of(
+                        Map.of("avg", 1.0, "max", 1.0, "min", 1.0, "params", Map.of("penalty", 1.0)),
+                        Map.of("avg", 1.0, "max", 1.0, "min", 1.0, "params", Map.of("penalty", 2.0))
+                    ),
                     "validation", List.of(
                         Map.of("avg", 0.4, "max", 1.0, "min", 0.0, "params", Map.of("penalty", 1.0)),
                         Map.of("avg", 0.4, "max", 1.0, "min", 0.0, "params", Map.of("penalty", 2.0))
@@ -78,7 +81,10 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                 "F1_WEIGHTED", Map.of(
                     "outerTrain", 0.0,
                     "test", 0.0,
-                    "train", List.of(),
+                    "train", List.of(
+                        Map.of("avg", 0.899999988, "max", 0.9999999875000001, "min", 0.49999999500000003, "params", Map.of("penalty", 1.0)),
+                        Map.of("avg", 0.899999988, "max", 0.9999999875000001, "min", 0.49999999500000003, "params", Map.of("penalty", 2.0))
+                    ),
                     "validation", List.of(
                         Map.of("avg", 0.19999999700000004, "max", 0.4999999925000001, "min", 0.0, "params", Map.of("penalty", 1.0)),
                         Map.of("avg", 0.19999999700000004, "max", 0.4999999925000001, "min", 0.0, "params", Map.of("penalty", 2.0))

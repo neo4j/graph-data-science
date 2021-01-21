@@ -84,7 +84,7 @@ public class NodeClassificationTrain
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // model selection:
-        var modelSelectResult = modelSelect(outerSplit.trainSet(), config.params());
+        var modelSelectResult = modelSelect(outerSplit.trainSet());
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. retrain best model on remaining
@@ -151,73 +151,33 @@ public class NodeClassificationTrain
             .collect(Collectors.toList());
     }
 
-    private ModelSelectResult modelSelect(
-        HugeLongArray remainingSet,
-        List<Map<String, Object>> concreteConfigs
-    ) {
+    private ModelSelectResult modelSelect(HugeLongArray remainingSet) {
         var globalTargets = makeGlobalTargets();
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets);
         var splits = splitter.splits();
 
-        var trainStats = new HashMap<Metric, List<ConcreteModelStats>>();
-        var validationStats = new HashMap<Metric, List<ConcreteModelStats>>();
+        Map<Metric, List<ConcreteModelStats>> trainStats = initStatsMap();
+        Map<Metric, List<ConcreteModelStats>> validationStats = initStatsMap();
 
-        concreteConfigs.forEach(modelParams -> {
-            var validationMin = new HashMap<Metric, Double>();
-            var validationMax = new HashMap<Metric, Double>();
-            var validationSum = new HashMap<Metric, Double>();
+        config.params().forEach(modelParams -> {
+            var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             for (NodeSplit split : splits) {
                 // 3. train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
-                MultiClassNLRData modelData = trainModel(trainSet, modelParams);
+                var modelData = trainModel(trainSet, modelParams);
 
-                // 4. evaluate each model candidate on the validation sets
-                var predictor = new MultiClassNLRPredictor(modelData, config.featureProperties());
-                var validationTargets = makeLocalTargets(validationSet);
-                var validationTargetDebug = Arrays.toString(validationTargets.toArray());
-
-                Map<Metric, Double> scores = computeMetrics(
-                    validationTargets,
-                    globalTargets,
-                    predictor,
-                    validationSet
-                );
-                for (var score : scores.entrySet()) {
-                    validationMin.merge(score.getKey(), score.getValue(), Math::min);
-                    validationMax.merge(score.getKey(), score.getValue(), Math::max);
-                    validationSum.merge(score.getKey(), score.getValue(), Double::sum);
-                }
+                // 4. evaluate each model candidate on the train and validation sets
+                computeMetrics(globalTargets, validationSet, modelData).forEach(validationStatsBuilder::update);
+                computeMetrics(globalTargets, trainSet, modelData).forEach(trainStatsBuilder::update);
             }
-            // insert the candidates metrics into validationStats
+            // insert the candidates metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
-                validationStats.compute(
-                    metric,
-                    (_m, concreteModelStats) -> {
-                        if (concreteModelStats == null) {
-                            concreteModelStats = new ArrayList<>();
-                        }
-                        var modelStats = ImmutableConcreteModelStats.of(
-                            modelParams,
-                            validationSum.get(metric) / splits.size(),
-                            validationMin.get(metric),
-                            validationMax.get(metric)
-                        );
-                        concreteModelStats.add(modelStats);
-                        return concreteModelStats;
-                    }
-                );
-                trainStats.compute(
-                    metric,
-                    (_m, concreteModelStats) -> {
-                        if (concreteModelStats == null) {
-                            concreteModelStats = new ArrayList<>();
-                        }
-                        return concreteModelStats;
-                    }
-                );
+                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
+                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
         });
 
@@ -230,34 +190,44 @@ public class NodeClassificationTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    @NotNull
-    private Map<Metric, Double> computeMetrics(
-        HugeLongArray targets,
-        HugeLongArray globalTargets,
-        MultiClassNLRPredictor predictor,
-        HugeLongArray validationSet
-    ) {
-        var predictedClasses = HugeLongArray.newArray(validationSet.size(), allocationTracker);
+    private Map<Metric, List<ConcreteModelStats>> initStatsMap() {
+        var statsMap = new HashMap<Metric, List<ConcreteModelStats>>();
+        config.metrics().forEach(metric -> statsMap.put(metric, new ArrayList<>()));
+        return statsMap;
+    }
 
-        // consume from queue which contains local nodeIds, i.e. indices into validationSet
+    private Map<Metric, Double> computeMetrics(
+        HugeLongArray globalTargets,
+        HugeLongArray evaluationSet,
+        MultiClassNLRData modelData
+    ) {
+        var localTargets = makeLocalTargets(evaluationSet);
+
+        var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
+
+        // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
         // the consumer internally remaps to original nodeIds before prediction
         var consumer = new NodeClassificationPredictConsumer(
             graph,
-            validationSet::get,
-            predictor,
+            evaluationSet::get,
+            predictor(modelData),
             null,
             predictedClasses,
             progressLogger
         );
 
-        var queue = new BatchQueue(validationSet.size());
+        var queue = new BatchQueue(evaluationSet.size());
         queue.parallelConsume(consumer, config.concurrency());
 
-        var scores = config.metrics().stream().collect(Collectors.toMap(
+        return config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(targets, predictedClasses, globalTargets)
+            metric -> metric.compute(localTargets, predictedClasses, globalTargets)
         ));
-        return scores;
+    }
+
+    @NotNull
+    private MultiClassNLRPredictor predictor(MultiClassNLRData modelData) {
+        return new MultiClassNLRPredictor(modelData, config.featureProperties());
     }
 
     private MultiClassNLRData trainModel(
@@ -316,5 +286,36 @@ public class NodeClassificationTrain
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
 
+    }
+
+    private class ModelStatsBuilder {
+        private final Map<Metric, Double> min;
+        private final Map<Metric, Double> max;
+        private final Map<Metric, Double> sum;
+        private final Map<String, Object> modelParams;
+        private final int numberOfSplits;
+
+        ModelStatsBuilder(Map<String, Object> modelParams, int numberOfSplits) {
+            this.modelParams = modelParams;
+            this.numberOfSplits = numberOfSplits;
+            this.min = new HashMap<>();
+            this.max = new HashMap<>();
+            this.sum = new HashMap<>();
+        }
+
+        void update(Metric metric, double value) {
+            min.merge(metric, value, Math::min);
+            max.merge(metric, value, Math::max);
+            sum.merge(metric, value, Double::sum);
+        }
+
+        ConcreteModelStats modelStats(Metric metric) {
+            return ImmutableConcreteModelStats.of(
+                modelParams,
+                sum.get(metric) / numberOfSplits,
+                min.get(metric),
+                max.get(metric)
+            );
+        }
     }
 }
