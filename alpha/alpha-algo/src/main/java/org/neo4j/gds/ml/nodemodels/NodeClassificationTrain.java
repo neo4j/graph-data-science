@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ml.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
@@ -84,28 +83,28 @@ public class NodeClassificationTrain
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // model selection:
-        var modelSelectResult = modelSelect(outerSplit.trainSet());
+        var globalTargets = makeGlobalTargets();
+        var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets);
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. retrain best model on remaining
-        // TODO: training may now only see outerSplitter.trainSet()
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
 
-        // 7. evaluate it on the holdout set
-        // TODO: evaluate metrics on holdout and everything minus holdout
-        Map<Metric, Double> testMetrics = config.metrics()
-            .stream()
-            .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
-        Map<Metric, Double> outerTrainMetrics = config.metrics()
-            .stream()
-            .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
+        // 7. evaluate it on the holdout set and outer training set
+        var testMetrics = computeMetrics(globalTargets, outerSplit.testSet(), winnerModelData);
+        var outerTrainMetrics = computeMetrics(globalTargets, outerSplit.trainSet(), winnerModelData);
+
+        // we are done with all metrics!
+        var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
 
         // 8. retrain that model on the full graph
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
-        var classes = sortedClasses(retrainedModelData);
-        var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
 
-        var modelInfo = NodeClassificationModelInfo.of(classes, modelSelectResult.bestParameters(), metrics);
+        var modelInfo = NodeClassificationModelInfo.of(
+            sortedClasses(retrainedModelData),
+            modelSelectResult.bestParameters(),
+            metrics
+        );
 
         // 9. persist the winning model in the model catalog
         //    the model catalog will also contain training metadata
@@ -151,8 +150,7 @@ public class NodeClassificationTrain
             .collect(Collectors.toList());
     }
 
-    private ModelSelectResult modelSelect(HugeLongArray remainingSet) {
-        var globalTargets = makeGlobalTargets();
+    private ModelSelectResult modelSelect(HugeLongArray remainingSet, HugeLongArray globalTargets) {
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets);
@@ -225,7 +223,6 @@ public class NodeClassificationTrain
         ));
     }
 
-    @NotNull
     private MultiClassNLRPredictor predictor(MultiClassNLRData modelData) {
         return new MultiClassNLRPredictor(modelData, config.featureProperties());
     }
