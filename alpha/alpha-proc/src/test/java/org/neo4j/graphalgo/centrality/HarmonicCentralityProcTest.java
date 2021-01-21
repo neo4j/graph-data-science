@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HarmonicCentralityProcTest extends BaseProcTest {
 
-    public static final String TYPE = "TYPE";
-
     public static final String DB_CYPHER =
         "CREATE (a:Node {name:'a'})" +
         ",      (b:Node {name:'b'})" +

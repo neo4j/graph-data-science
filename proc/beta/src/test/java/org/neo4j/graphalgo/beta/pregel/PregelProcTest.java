@@ -191,7 +191,7 @@ public class PregelProcTest extends BaseProcTest {
                     PregelConfig configuration, AllocationTracker tracker, Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker, log);
+                    return new CompositeTestAlgorithm(graph, configuration, tracker);
                 }
 
                 @Override
@@ -242,7 +242,7 @@ public class PregelProcTest extends BaseProcTest {
                     PregelConfig configuration, AllocationTracker tracker, Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker, log);
+                    return new CompositeTestAlgorithm(graph, configuration, tracker);
                 }
 
                 @Override
@@ -292,7 +292,7 @@ public class PregelProcTest extends BaseProcTest {
                     PregelConfig configuration, AllocationTracker tracker, Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker, log);
+                    return new CompositeTestAlgorithm(graph, configuration, tracker);
                 }
 
                 @Override
@@ -313,10 +313,7 @@ public class PregelProcTest extends BaseProcTest {
 
         private final Pregel<PregelConfig> pregelJob;
 
-        CompositeTestAlgorithm(
-            Graph graph, PregelConfig configuration,
-            AllocationTracker tracker, Log log
-        ) {
+        CompositeTestAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker) {
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

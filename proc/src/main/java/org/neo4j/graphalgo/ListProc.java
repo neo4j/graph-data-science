@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -53,9 +52,6 @@ public class ListProc {
             " ORDER BY name";
 
     private static final String DESCRIPTION = "CALL gds.list - lists all algorithm procedures, their description and signature";
-
-    @Context
-    public GraphDatabaseService db;
 
     @Procedure("gds.list")
     @Description(DESCRIPTION)

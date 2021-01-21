@@ -534,15 +534,6 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
         assertEquals(sqrt(16), row.get("similarity"));
     }
 
-    private void assert23Skip(Map<String, Object> row) {
-        assertEquals(2L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(1L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0.0, row.get("similarity"));
-    }
-
     private void assert13(Map<String, Object> row) {
         assertEquals(1L, row.get("item1"));
         assertEquals(3L, row.get("item2"));
@@ -550,15 +541,6 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
         assertEquals(3L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
         assertEquals(sqrt(10), row.get("similarity"));
-    }
-
-    private void assert13Skip(Map<String, Object> row) {
-        assertEquals(1L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(2L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0.0, row.get("similarity"));
     }
 
     private void assert12(Map<String, Object> row) {
@@ -586,15 +568,6 @@ class EuclideanProcTest extends AlphaSimilarityProcTest<EuclideanAlgorithm, Weig
         assertEquals(3L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
         assertEquals(sqrt(5 * 5 + 2 * 2 + 1), row.get("similarity"));
-    }
-
-    private void assert03Skip(Map<String, Object> row) {
-        assertEquals(0L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(3L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0.0, row.get("similarity"));
     }
 
     private void assert02(Map<String, Object> row) {
