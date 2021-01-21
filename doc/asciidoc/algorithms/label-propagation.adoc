@@ -100,7 +100,7 @@ include::common-configuration-named-graph.adoc[]
 | Name                       | Type    | Default | Optional | Description
 | maxIterations              | Integer | 10      | yes      | The maximum number of iterations to run.
 | nodeWeightProperty         | String  | null    | yes      | The name of the node property that represents weight.
-| relationshipWeightProperty | String  | null    | yes      | The name of the relationship property that represents weight.
+| relationshipWeightProperty | String  | null    | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | seedProperty               | String  | n/a     | yes      | Used to define initial set of labels (must be a number).
 |===
 
@@ -189,7 +189,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | Name                       | Type    | Default                | Optional | Description
 | maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
 | nodeWeightProperty         | String  | null                   | yes      | The property name of node that contain weight. Must be numeric.
-| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| relationshipWeightProperty | String  | null                   | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 |===
 

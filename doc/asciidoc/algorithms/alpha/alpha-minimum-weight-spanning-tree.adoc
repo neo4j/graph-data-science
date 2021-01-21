@@ -87,7 +87,7 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 | Name                          | Type    | Default   | Optional  | Description
 | startNodeId                   | Integer | null      | no        | The start node ID
-| relationshipWeightProperty    | String  | null      | no        | The property name that contains weight. Must be numeric.
+| relationshipWeightProperty    | String  | null      | no        | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | writeProperty                 | String  | 'mst'     | yes       | The relationship type written back as result
 | weightWriteProperty           | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 |===
@@ -121,7 +121,7 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 | Name                       | Type    | Default | Optional  | Description
 | k                          | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
 | startNodeId                | Integer | null    | no        | The start node ID
-| relationshipWeightProperty | String  | null    | no        | The property name that contains weight. Must be numeric.
+| relationshipWeightProperty | String  | null    | no        | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | writeProperty              | String  | 'MST'   | yes       | The relationship type written back as result
 | weightWriteProperty        | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
 |===

@@ -119,7 +119,7 @@ include::../common-configuration.adoc[]
 | Name                       | Type    | Default                | Optional | Description
 | maxIterations              | Integer | 10                     | yes      | The maximum number of iterations to run.
 | tolerance                  | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null                   | yes      | The property name of relationship that contain weight. Must be numeric.
+| relationshipWeightProperty | String  | null                   | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | seedProperty               | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 |===
 

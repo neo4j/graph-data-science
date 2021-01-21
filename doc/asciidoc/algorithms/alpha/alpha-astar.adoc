@@ -62,7 +62,7 @@ YIELD nodeId, cost
 | Name                          | Type   | Default  | Optional | Description
 | startNode                     | Node   | null     | no       | The start node
 | endNode                       | Node   | null     | no       | The end node
-| relationshipWeightProperty    | String | null     | yes      | The property name that contains weight
+| relationshipWeightProperty    | String | null     | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | propertyKeyLat                | String | null     | no       | The property name that contains latitude coordinate
 | propertyKeyLon                | String | null     | no       | The property name that contains longitude coordinate
 | nodeQuery                     | String | null     | yes      | The label to load from the graph. If null, load all nodes

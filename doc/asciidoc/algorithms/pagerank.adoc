@@ -105,7 +105,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
 | tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| relationshipWeightProperty | String  | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 |===
 
 .Results
@@ -186,7 +186,7 @@ include::common-configuration-anonymous-graph.adoc[]
 | dampingFactor              | Float   | 0.85      | yes      | The damping factor of the Page Rank calculation.
 | maxIterations              | Integer | 20        | yes      | The maximum number of iterations of Page Rank to run.
 | tolerance                  | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
-| relationshipWeightProperty | String  | null      | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
+| relationshipWeightProperty | String  | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 |===
 
 .Results
