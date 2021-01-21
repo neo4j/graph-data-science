@@ -96,7 +96,7 @@ def whitelist = [
 // All licenses that we accept, and their aliases
 
 def publicModules = [
-    ':algo',':algo',
+    ':algo',
     ':algo-common',
     ':alpha-algo',
     ':alpha-core',
