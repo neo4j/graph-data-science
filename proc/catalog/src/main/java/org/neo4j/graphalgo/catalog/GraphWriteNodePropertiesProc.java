@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodePropertiesProc extends CatalogProc {
@@ -87,21 +88,39 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
 
         var propertiesWritten = 0L;
+        var labelsWritten = 1L;
+        var labelCount = validNodeLabels.size();
 
-        for (NodeLabel nodeLabel : validNodeLabels) {
-            Graph subGraph = graphStore.getGraph(
-                Collections.singletonList(nodeLabel),
+        for (var label : validNodeLabels) {
+            var subGraph = graphStore.getGraph(
+                Collections.singletonList(label),
                 graphStore.relationshipTypes(),
                 Optional.empty()
             );
 
-            NodePropertyExporter exporter = NodePropertyExporter
+            // We track the progress for each label individually.
+            // This needs to be reflected in the log output.
+            var taskName = formatWithLocale(
+                "WriteNodeProperties - Label %d of %d [Label='%s']",
+                labelsWritten++,
+                labelCount,
+                label.name()
+            );
+
+            var progressLogger = new BatchingProgressLogger(
+                log,
+                subGraph.nodeCount(),
+                taskName,
+                config.writeConcurrency()
+            );
+
+            var exporter = NodePropertyExporter
                 .builder(api, subGraph, TerminationFlag.wrap(transaction))
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
-                .withLog(log)
+                .withProgressLogger(progressLogger)
                 .build();
 
-            Collection<NodePropertyExporter.NodeProperty> writeNodeProperties =
+            var writeNodeProperties =
                 config.nodeProperties().stream()
                     .map(nodePropertyKey ->
                         ImmutableNodeProperty.of(

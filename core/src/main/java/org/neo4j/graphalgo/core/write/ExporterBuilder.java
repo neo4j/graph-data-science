@@ -66,7 +66,11 @@ public abstract class ExporterBuilder<T> {
     }
 
     public ExporterBuilder<T> withLog(Log log, ProgressEventTracker eventTracker) {
-        progressLogger = new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker);
+        return withProgressLogger(new BatchingProgressLogger(log, taskVolume(), taskName(), writeConcurrency, eventTracker));
+    }
+
+    public ExporterBuilder<T> withProgressLogger(ProgressLogger progressLogger) {
+        this.progressLogger = progressLogger;
         return this;
     }
 

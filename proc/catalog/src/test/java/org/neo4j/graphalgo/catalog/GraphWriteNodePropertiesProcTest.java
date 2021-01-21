@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,13 +32,17 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -45,6 +50,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -252,6 +259,37 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             map("newProp3", 4L),
             map("newProp3", 5L)
         ));
+    }
+
+    @Test
+    void shouldLogProgressForIndividualLabels() {
+        var log = new TestLog();
+
+        try (var transactions = newKernelTransaction(db)) {
+            var proc = new GraphWriteNodePropertiesProc();
+
+            proc.transaction = transactions.ktx();
+            proc.api = db;
+            proc.callContext = ProcedureCallContext.EMPTY;
+            proc.log = log;
+
+            proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
+        }
+
+        Assertions.assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "WriteNodeProperties - Label 1 of 2 [Label='A'] :: Start",
+                "WriteNodeProperties - Label 1 of 2 [Label='A'] 33%",
+                "WriteNodeProperties - Label 1 of 2 [Label='A'] 66%",
+                "WriteNodeProperties - Label 1 of 2 [Label='A'] 100%",
+                "WriteNodeProperties - Label 1 of 2 [Label='A'] :: Finished",
+                "WriteNodeProperties - Label 2 of 2 [Label='B'] :: Start",
+                "WriteNodeProperties - Label 2 of 2 [Label='B'] 33%",
+                "WriteNodeProperties - Label 2 of 2 [Label='B'] 66%",
+                "WriteNodeProperties - Label 2 of 2 [Label='B'] 100%",
+                "WriteNodeProperties - Label 2 of 2 [Label='B'] :: Finished"
+            );
     }
 
     @Test
