@@ -89,7 +89,7 @@ public class NodeClassificationTrain
 
         // 6. retrain best model on remaining
         // TODO: training may now only see outerSplitter.trainSet()
-        MultiClassNLRData winnerModelData = trainModel(bestParameters, outerSplit.trainSet());
+        MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
 
         // 7. evaluate it on the holdout set
         // TODO: evaluate metrics on holdout and everything minus holdout
@@ -101,7 +101,7 @@ public class NodeClassificationTrain
             .collect(Collectors.toMap(metric -> metric, metric -> 0.0));
 
         // 8. retrain that model on the full graph
-        MultiClassNLRData retrainedModelData = trainModel(bestParameters, nodeIds);
+        MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
         var classes = sortedClasses(retrainedModelData);
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
 
@@ -172,7 +172,7 @@ public class NodeClassificationTrain
                 // 3. train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
-                MultiClassNLRData modelData = trainModel(modelParams, trainSet);
+                MultiClassNLRData modelData = trainModel(trainSet, modelParams);
 
                 // 4. evaluate each model candidate on the validation sets
                 var predictor = new MultiClassNLRPredictor(modelData, config.featureProperties());
@@ -260,7 +260,10 @@ public class NodeClassificationTrain
         return scores;
     }
 
-    private MultiClassNLRData trainModel(Map<String, Object> modelParams, HugeLongArray trainSet) {
+    private MultiClassNLRData trainModel(
+        HugeLongArray trainSet,
+        Map<String, Object> modelParams
+    ) {
         var nlrConfig = MultiClassNLRTrainConfig.of(
             config.featureProperties(),
             config.targetProperty(),
