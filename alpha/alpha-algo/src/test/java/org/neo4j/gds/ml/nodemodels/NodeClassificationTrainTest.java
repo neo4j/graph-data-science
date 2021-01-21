@@ -87,10 +87,11 @@ class NodeClassificationTrainTest {
 
         var model = ncTrain.compute();
 
-        var validationScores = model.customInfo().metrics().get(F1_MACRO).validation();
+        var customInfo = (NodeClassificationModelInfo) model.customInfo();
+        var validationScores = customInfo.metrics().get(F1_MACRO).validation();
 
         assertThat(validationScores).hasSize(2);
-        var actualWinnerParams = model.customInfo().bestParameters();
+        var actualWinnerParams = customInfo.bestParameters();
         assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();

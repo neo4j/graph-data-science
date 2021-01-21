@@ -182,7 +182,7 @@ class ModelCatalogTest {
         assertEquals("Community users can only store one model in the catalog", ex.getMessage());
     }
 
-    private static Model<Integer, TestTrainConfig, Model.Mappable> testModel(String name) {
+    private static Model<Integer, TestTrainConfig> testModel(String name) {
         return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
     }
 

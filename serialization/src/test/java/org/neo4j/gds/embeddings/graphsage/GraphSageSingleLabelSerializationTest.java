@@ -82,7 +82,7 @@ class GraphSageSingleLabelSerializationTest {
 
     @Test
     void e2eTest() throws IOException, ClassNotFoundException {
-        Model<ModelData, GraphSageTrainConfig, Model.Mappable> model = train();
+        var model = train();
         var originalEmbeddings = produceEmbeddings(model);
 
         // Serialize the model
@@ -96,7 +96,7 @@ class GraphSageSingleLabelSerializationTest {
 
         assertThat(protoModel).isNotNull();
 
-        Model<ModelData, GraphSageTrainConfig, Model.Mappable> deserializedModel = GraphSageModelSerializer.fromSerializable(protoModel);
+        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoModel);
         assertThat(deserializedModel).isNotNull();
         var embeddingsFromDeserializedModel = produceEmbeddings(deserializedModel);
 
@@ -106,7 +106,7 @@ class GraphSageSingleLabelSerializationTest {
             .isEqualTo(embeddingsFromDeserializedModel);
     }
 
-    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig, Model.Mappable> model) {
+    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig> model) {
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
             .modelName(model.name())
@@ -121,7 +121,7 @@ class GraphSageSingleLabelSerializationTest {
         ).compute();
     }
 
-    private Model<ModelData, GraphSageTrainConfig, Model.Mappable> train() {
+    private Model<ModelData, GraphSageTrainConfig> train() {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL_NAME)
             .featureProperties(List.of("age", "birth_year", "death_year"))

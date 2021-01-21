@@ -38,13 +38,13 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
     private final Graph graph;
     private final GraphSageBaseConfig config;
-    private final Model<ModelData, GraphSageTrainConfig, Model.Mappable> model;
+    private final Model<ModelData, GraphSageTrainConfig> model;
     private final AllocationTracker tracker;
 
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
-        Model<ModelData, GraphSageTrainConfig, Model.Mappable> model,
+        Model<ModelData, GraphSageTrainConfig> model,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {

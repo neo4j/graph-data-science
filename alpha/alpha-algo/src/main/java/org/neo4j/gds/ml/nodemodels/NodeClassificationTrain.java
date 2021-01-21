@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.nodemodels.ConcreteModelStats.COMPARE_AVERAGE;
 
 public class NodeClassificationTrain
-    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
 
     public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
 
@@ -72,7 +72,7 @@ public class NodeClassificationTrain
     }
 
     @Override
-    public Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
+    public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
         // 1. Init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
