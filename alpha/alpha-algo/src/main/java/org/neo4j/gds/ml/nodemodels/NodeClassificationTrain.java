@@ -49,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.nodemodels.ConcreteModelStats.COMPARE_AVERAGE;
+
 public class NodeClassificationTrain
     extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
 
@@ -230,7 +232,7 @@ public class NodeClassificationTrain
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = metrics.get(0);
         var modelStats = validationStats.get(mainMetric);
-        var winner = Collections.max(modelStats);
+        var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
         var bestConfig = winner.params();
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);

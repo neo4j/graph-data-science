@@ -21,15 +21,17 @@ package org.neo4j.gds.ml.nodemodels;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import java.util.Comparator;
 import java.util.Map;
 
 @ValueClass
 @JsonSerialize
 @JsonDeserialize
-public interface ConcreteModelStats extends Comparable<ConcreteModelStats> {
+public interface ConcreteModelStats {
+    Comparator<ConcreteModelStats> COMPARE_AVERAGE =
+        Comparator.comparingDouble(ConcreteModelStats::avg);
 
     /**
      * The input params representing a model candidate
@@ -52,9 +54,4 @@ public interface ConcreteModelStats extends Comparable<ConcreteModelStats> {
      * @return
      */
     double max();
-
-    @Override
-    default int compareTo(@NotNull ConcreteModelStats o) {
-        return Double.compare(this.avg(), o.avg());
-    }
 }
