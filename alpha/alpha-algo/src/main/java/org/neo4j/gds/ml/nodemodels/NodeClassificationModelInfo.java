@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
@@ -55,7 +54,7 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
         try {
             String jsonString = OBJECT_MAPPER.writeValueAsString(this);
             return OBJECT_MAPPER.readValue(jsonString, Map.class);
-        } catch (JsonProcessingException e) {
+        } catch (Throwable e) {
             throw new IllegalStateException("Failed to serialize/deserialize NodeClassificationModelInfo.", e);
         }
     }
