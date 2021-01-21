@@ -124,6 +124,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
         return new WriteResult.Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodeCount;

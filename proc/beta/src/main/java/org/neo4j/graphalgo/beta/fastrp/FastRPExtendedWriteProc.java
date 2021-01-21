@@ -88,6 +88,7 @@ public class FastRPExtendedWriteProc extends WriteProc<FastRP, FastRP.FastRPResu
         return new WriteResult.Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodeCount;

@@ -96,6 +96,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         return new GraphSageWriteResult.Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class GraphSageWriteResult {
 
         public final long nodeCount;
@@ -121,6 +122,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
             this.configuration = configuration;
         }
 
+        @SuppressWarnings("unused")
         static class Builder extends AbstractResultBuilder<GraphSageWriteResult> {
 
             @Override

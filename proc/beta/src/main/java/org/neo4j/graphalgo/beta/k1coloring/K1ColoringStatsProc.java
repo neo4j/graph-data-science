@@ -87,6 +87,7 @@ public class K1ColoringStatsProc extends StatsProc<K1Coloring, HugeLongArray, K1
         return K1ColoringStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult {
 
         public final long createMillis;

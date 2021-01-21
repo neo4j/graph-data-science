@@ -87,6 +87,7 @@ public class LabelPropagationMutateProc extends MutatePropertyProc<LabelPropagat
         );
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult extends LabelPropagationStatsProc.StatsResult {
 
         public final long mutateMillis;

@@ -31,6 +31,7 @@ import java.util.List;
 import static org.neo4j.graphalgo.beta.paths.PathFactory.create;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@SuppressWarnings("unused")
 public final class StreamResult {
 
     public static final String COST_PROPERTY_NAME = "cost";

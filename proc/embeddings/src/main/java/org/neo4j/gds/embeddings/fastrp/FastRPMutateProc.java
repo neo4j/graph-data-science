@@ -86,6 +86,7 @@ public class FastRPMutateProc extends MutatePropertyProc<FastRP, FastRP.FastRPRe
         return new FastRPFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult {
 
         public final long nodePropertiesWritten;

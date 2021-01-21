@@ -58,6 +58,7 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         ));
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final String graphName;
         public final String relationshipType;

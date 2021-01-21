@@ -134,6 +134,7 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
             );
     }
 
+    @SuppressWarnings("unused")
     public static final class StreamResult {
         public final long nodeId;
         public final double centrality;

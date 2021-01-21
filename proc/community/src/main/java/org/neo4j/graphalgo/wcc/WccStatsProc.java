@@ -87,6 +87,7 @@ public class WccStatsProc extends StatsProc<Wcc, DisjointSetStruct, WccStatsProc
         return WccProc.algorithmFactory();
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final long componentCount;

@@ -108,6 +108,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
         );
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult extends LocalClusteringCoefficientStatsProc.StatsResult {
 
         public long mutateMillis;

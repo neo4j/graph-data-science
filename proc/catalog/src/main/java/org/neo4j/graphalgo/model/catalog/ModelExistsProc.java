@@ -44,6 +44,7 @@ public class ModelExistsProc extends ModelCatalogProc {
         ));
     }
 
+    @SuppressWarnings("unused")
     public static class ModelExistsResult {
         public final String modelName;
         public final String modelType;

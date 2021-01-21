@@ -36,6 +36,7 @@ abstract class ModelCatalogProc extends BaseProc {
         CypherMapWrapper.failOnBlank("modelName", modelName);
     }
 
+    @SuppressWarnings("unused")
     public static class ModelResult {
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> trainConfig;

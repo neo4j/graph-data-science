@@ -62,6 +62,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         );
     }
 
+    @SuppressWarnings("unused")
     public static class TrainResult {
 
         public final String graphName;

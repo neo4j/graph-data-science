@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.results.StandardMutateResult;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class PregelMutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;

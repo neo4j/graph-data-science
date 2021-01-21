@@ -92,6 +92,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
         return BetweennessCentralityProc.resultBuilder(new StatsResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final Map<String, Object> centralityDistribution;

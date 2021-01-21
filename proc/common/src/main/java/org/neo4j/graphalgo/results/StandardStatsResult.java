@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.results;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class StandardStatsResult extends StandardModeResult {
 
     public final long postProcessingMillis;

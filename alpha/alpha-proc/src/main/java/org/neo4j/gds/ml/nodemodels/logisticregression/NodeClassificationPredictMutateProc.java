@@ -134,6 +134,7 @@ public class NodeClassificationPredictMutateProc
         return nodeProperties;
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends StandardMutateResult {
 
         public final long nodePropertiesWritten;

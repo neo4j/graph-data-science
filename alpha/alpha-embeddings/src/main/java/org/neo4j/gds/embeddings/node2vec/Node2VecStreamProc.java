@@ -132,6 +132,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
             "Node2VecStreamProc doesn't want to build results this way. He won't be just another brick in the wall, man.");
     }
 
+    @SuppressWarnings("unused")
     public static class StreamResult {
         public long nodeId;
         public List<Double> embedding;

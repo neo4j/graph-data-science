@@ -43,6 +43,7 @@ public class GraphExistsProc extends CatalogProc {
         )));
     }
 
+    @SuppressWarnings("unused")
     public static class GraphExistsResult {
         public final String graphName;
         public final boolean exists;

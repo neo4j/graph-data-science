@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.results.StandardWriteResult;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class PregelWriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;

@@ -84,6 +84,7 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
         return K1ColoringProc.nodeProperties(computationResult);
     }
 
+    @SuppressWarnings("unused")
     public static class StreamResult {
         public final long nodeId;
         public final long color;

@@ -92,6 +92,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
         return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
 
         public final long nodePropertiesWritten;

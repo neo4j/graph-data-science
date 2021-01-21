@@ -150,6 +150,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
     }
 
+    @SuppressWarnings("unused")
     public static class SccResult {
 
         public final long createMillis;

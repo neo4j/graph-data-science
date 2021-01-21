@@ -130,6 +130,7 @@ public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationshi
         resultBuilder.withRelationshipsWritten(computationResult.result().topology().elementCount());
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
         public final long createMillis;
         public final long computeMillis;

@@ -95,6 +95,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends BetweennessCentralityStatsProc.StatsResult {
 
         public final long nodePropertiesWritten;

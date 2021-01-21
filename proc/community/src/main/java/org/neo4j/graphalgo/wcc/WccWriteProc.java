@@ -96,6 +96,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends WccStatsProc.StatsResult {
 
         public final long writeMillis;

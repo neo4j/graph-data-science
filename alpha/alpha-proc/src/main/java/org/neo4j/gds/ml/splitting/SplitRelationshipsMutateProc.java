@@ -168,6 +168,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         }
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
         public final long createMillis;
         public final long computeMillis;

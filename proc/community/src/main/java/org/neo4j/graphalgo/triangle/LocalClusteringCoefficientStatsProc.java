@@ -96,6 +96,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
         return new LocalClusteringCoefficientFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final double averageClusteringCoefficient;

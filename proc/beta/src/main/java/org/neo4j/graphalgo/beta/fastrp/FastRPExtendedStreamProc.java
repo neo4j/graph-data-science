@@ -90,6 +90,7 @@ public class FastRPExtendedStreamProc extends StreamProc<FastRP, FastRP.FastRPRe
         return new FastRPExtendedFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class StreamResult {
         public final long nodeId;
         public final List<Number> embedding;

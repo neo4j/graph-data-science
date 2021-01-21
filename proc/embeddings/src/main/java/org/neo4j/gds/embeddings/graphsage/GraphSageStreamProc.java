@@ -118,6 +118,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         throw new UnsupportedOperationException("GraphSage handles result building individually.");
     }
 
+    @SuppressWarnings("unused")
     public static class GraphSageStreamResult {
         public long nodeId;
         public List<Double> embedding;

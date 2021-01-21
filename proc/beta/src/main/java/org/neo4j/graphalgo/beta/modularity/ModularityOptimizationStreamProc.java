@@ -84,6 +84,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
         return ModularityOptimizationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @SuppressWarnings("unused")
     public static class StreamResult {
         public final long nodeId;
         public final long communityId;

@@ -91,6 +91,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         return new ModularityOptimizationFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
 
         public final long createMillis;

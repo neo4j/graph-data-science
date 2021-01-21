@@ -96,6 +96,7 @@ public class WccMutateProc extends MutatePropertyProc<Wcc, DisjointSetStruct, Wc
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends WccStatsProc.StatsResult {
 
         public final long mutateMillis;

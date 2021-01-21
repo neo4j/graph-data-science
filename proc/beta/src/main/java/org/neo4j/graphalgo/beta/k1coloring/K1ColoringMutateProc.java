@@ -85,6 +85,7 @@ public class K1ColoringMutateProc extends MutatePropertyProc<K1Coloring, HugeLon
         return K1ColoringProc.nodeProperties(computationResult);
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
 
         public static final MutateResult EMPTY = new MutateResult(

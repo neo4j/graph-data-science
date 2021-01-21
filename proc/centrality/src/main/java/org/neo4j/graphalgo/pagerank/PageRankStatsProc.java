@@ -91,6 +91,7 @@ public class PageRankStatsProc extends StatsProc<PageRank, PageRank, PageRankSta
         return new PageRankFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final long ranIterations;

@@ -102,6 +102,7 @@ public class LocalClusteringCoefficientStreamProc
         return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final long nodeId;
         public final double localClusteringCoefficient;

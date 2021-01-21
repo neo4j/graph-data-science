@@ -207,6 +207,7 @@ public class GraphCreateProc extends CatalogProc {
         return new MemoryTreeWithDimensions(memoryTree, memoryEstimationAndDimensions.graphDimensions());
     }
 
+    @SuppressWarnings("unused")
     public static class GraphCreateResult {
         public final String graphName;
         public final long nodeCount;
@@ -254,6 +255,7 @@ public class GraphCreateProc extends CatalogProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class GraphCreateNativeResult extends GraphCreateResult {
 
         public final Map<String, Object> nodeProjection;
@@ -295,6 +297,7 @@ public class GraphCreateProc extends CatalogProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class GraphCreateCypherResult extends GraphCreateResult {
         public final String nodeQuery;
         public final String relationshipQuery;

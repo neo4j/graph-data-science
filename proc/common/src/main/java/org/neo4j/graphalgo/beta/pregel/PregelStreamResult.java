@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class PregelStreamResult {
     public final long nodeId;
 

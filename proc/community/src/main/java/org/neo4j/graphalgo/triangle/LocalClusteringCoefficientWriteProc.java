@@ -105,6 +105,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         );
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult extends LocalClusteringCoefficientStatsProc.StatsResult {
 
         public long writeMillis;

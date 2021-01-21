@@ -91,6 +91,7 @@ public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, Louv
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends LouvainStatsProc.StatsResult {
 
         public final long mutateMillis;

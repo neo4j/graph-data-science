@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.results.StandardWriteResult;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class WriteResult extends StandardWriteResult {
 
     public final long relationshipsWritten;

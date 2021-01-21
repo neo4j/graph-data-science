@@ -80,6 +80,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
         return new FastRPFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class StatsResult {
 
         public final long nodeCount;

@@ -89,6 +89,7 @@ public class K1ColoringWriteProc extends WriteProc<K1Coloring, HugeLongArray, K1
         return K1ColoringWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult {
 
         public static final WriteResult EMPTY = new WriteResult(

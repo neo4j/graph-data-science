@@ -118,6 +118,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         return propertiesWritten;
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final long writeMillis;
         public final String graphName;

@@ -81,6 +81,7 @@ public class LabelPropagationStatsProc extends StatsProc<LabelPropagation, Label
         return new LabelPropagationFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final long ranIterations;

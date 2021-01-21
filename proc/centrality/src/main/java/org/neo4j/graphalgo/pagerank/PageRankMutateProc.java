@@ -97,6 +97,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
         PageRankProc.validateAlgoConfig(config, log);
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends PageRankStatsProc.StatsResult {
 
         public final long mutateMillis;

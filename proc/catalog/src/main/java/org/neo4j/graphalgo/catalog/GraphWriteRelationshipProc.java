@@ -110,6 +110,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         return graphStore.relationshipCount(RelationshipType.of(config.relationshipType()));
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final long writeMillis;
         public final String graphName;

@@ -101,6 +101,7 @@ public class GraphSageMutateProc extends MutatePropertyProc<GraphSage, GraphSage
         return new GraphSageAlgorithmFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult {
 
         public final long nodePropertiesWritten;

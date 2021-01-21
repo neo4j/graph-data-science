@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.results;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class StandardWriteResult extends StandardStatsResult {
 
     public final long writeMillis;

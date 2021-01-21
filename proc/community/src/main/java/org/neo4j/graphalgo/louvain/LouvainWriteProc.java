@@ -92,6 +92,7 @@ public class LouvainWriteProc extends WriteProc<Louvain, Louvain, LouvainWritePr
         return new LouvainFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends LouvainStatsProc.StatsResult {
 
         public final long writeMillis;

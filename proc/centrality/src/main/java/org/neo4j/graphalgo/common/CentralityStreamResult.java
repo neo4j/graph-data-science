@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.common;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings("unused")
 public final class CentralityStreamResult {
     public final long nodeId;
     public final double score;

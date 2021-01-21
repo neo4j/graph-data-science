@@ -116,6 +116,7 @@ public class TriangleCountStreamProc
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
 
         public final long nodeId;

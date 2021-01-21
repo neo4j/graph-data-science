@@ -117,6 +117,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult {
         public final long createMillis;
         public final long computeMillis;
@@ -149,6 +150,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
             this.configuration = configuration;
         }
 
+        @SuppressWarnings("unused")
         static class Builder extends SimilarityProc.SimilarityResultBuilder<KnnWriteProc.WriteResult> {
 
             @Override

@@ -111,6 +111,7 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
         throw new UnsupportedOperationException("Louvain handles result building individually.");
     }
 
+    @SuppressWarnings("unused")
     public static final class StreamResult {
         public final long nodeId;
         public final long communityId;

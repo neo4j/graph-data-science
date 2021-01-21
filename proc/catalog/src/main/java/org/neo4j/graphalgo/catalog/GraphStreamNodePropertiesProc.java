@@ -120,6 +120,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             });
     }
 
+    @SuppressWarnings("unused")
     public static class PropertiesResult {
         public final long nodeId;
         public final String nodeProperty;
@@ -132,6 +133,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class PropertyResult {
         public final long nodeId;
         public final Object propertyValue;

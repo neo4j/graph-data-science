@@ -88,6 +88,7 @@ public class LabelPropagationWriteProc extends WriteProc<LabelPropagation, Label
         return new LabelPropagationFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult extends LabelPropagationStatsProc.StatsResult {
 
         public final long writeMillis;

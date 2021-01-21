@@ -89,6 +89,7 @@ public class ModularityOptimizationWriteProc extends WriteProc<ModularityOptimiz
         );
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult {
 
         public final long createMillis;

@@ -61,6 +61,7 @@ public class SysInfoProc {
         return debugValues(properties, Runtime.getRuntime(), GdsEdition.instance(), config);
     }
 
+    @SuppressWarnings("unused")
     public static final class DebugValue {
         public final String key;
         public final Object value;

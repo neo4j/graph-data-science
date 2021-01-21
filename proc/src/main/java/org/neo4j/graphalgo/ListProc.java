@@ -65,6 +65,7 @@ public class ListProc {
             .map(ListResult::new);
     }
 
+    @SuppressWarnings("unused")
     public static class ListResult {
         public String name;
         public String description;

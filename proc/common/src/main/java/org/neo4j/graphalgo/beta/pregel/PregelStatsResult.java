@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.results.StandardStatsResult;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class PregelStatsResult extends StandardStatsResult {
 
     public final long ranIterations;

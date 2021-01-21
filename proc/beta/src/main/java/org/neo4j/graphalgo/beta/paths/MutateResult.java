@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.results.StandardMutateResult;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public final class MutateResult extends StandardMutateResult {
     public final long relationshipsWritten;
 

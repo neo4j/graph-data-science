@@ -100,6 +100,7 @@ public class WccStreamProc extends StreamProc<
             : simpleNodeProperties;
     }
 
+    @SuppressWarnings("unused")
     public static class StreamResult {
 
         public final long nodeId;

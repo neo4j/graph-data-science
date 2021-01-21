@@ -95,6 +95,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
         return TriangleCountCompanion.resultBuilder(new TriangleCountMutateBuilder(), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult extends TriangleCountStatsProc.StatsResult {
 
         public long mutateMillis;

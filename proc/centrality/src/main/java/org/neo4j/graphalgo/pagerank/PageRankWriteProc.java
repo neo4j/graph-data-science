@@ -98,6 +98,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends PageRankStatsProc.StatsResult {
 
         public final long writeMillis;

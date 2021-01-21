@@ -88,6 +88,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
         return new IntersectingTriangleCountFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final long globalTriangleCount;

@@ -96,6 +96,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         return TriangleCountCompanion.resultBuilder(new TriangleCountWriteBuilder(), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult extends TriangleCountStatsProc.StatsResult {
 
         public long writeMillis;

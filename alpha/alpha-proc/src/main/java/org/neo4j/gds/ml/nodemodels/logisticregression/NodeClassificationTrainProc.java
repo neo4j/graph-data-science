@@ -130,6 +130,7 @@ public class NodeClassificationTrainProc extends TrainProc<
         };
     }
 
+    @SuppressWarnings("unused")
     public static class TrainResult {
 
         public final long trainMillis;

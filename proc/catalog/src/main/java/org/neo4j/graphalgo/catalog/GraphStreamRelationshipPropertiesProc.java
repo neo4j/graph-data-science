@@ -151,6 +151,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             })).flatMap(Function.identity());
     }
 
+    @SuppressWarnings("unused")
     public static class PropertiesResult {
         public final long sourceNodeId;
         public final long targetNodeId;
@@ -173,6 +174,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class PropertyResult {
         public final long sourceNodeId;
         public final long targetNodeId;

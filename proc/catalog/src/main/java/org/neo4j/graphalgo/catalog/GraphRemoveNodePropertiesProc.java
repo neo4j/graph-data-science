@@ -90,6 +90,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         return sum;
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final String graphName;
         public final List<String> nodeProperties;

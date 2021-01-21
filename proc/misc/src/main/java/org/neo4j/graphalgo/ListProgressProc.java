@@ -36,6 +36,7 @@ public class ListProgressProc extends BaseProc {
         return progress.query(username()).stream().map(ProgressResult::new);
     }
 
+    @SuppressWarnings("unused")
     public static class ProgressResult {
 
         public String id;

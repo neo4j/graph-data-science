@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import static org.neo4j.graphalgo.api.GraphStatistics.density;
 
+@SuppressWarnings("unused")
 public class GraphInfo {
 
     public final String graphName;

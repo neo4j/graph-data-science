@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class SimilarityWriteResult {
     public final long createMillis;
     public final long computeMillis;
