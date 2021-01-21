@@ -48,6 +48,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
@@ -142,9 +143,16 @@ public class NodeClassificationTrainProc extends TrainProc<
         ) {
             var trainConfig = trainedModel.trainConfig();
 
-            this.modelInfo = new HashMap<>();
-            modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-            modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+            this.modelInfo = Stream.concat(
+                Map.of(
+                    MODEL_NAME_KEY, trainedModel.name(),
+                    MODEL_TYPE_KEY, trainedModel.algoType()
+                ).entrySet().stream(),
+                trainedModel.customInfo().toMap().entrySet().stream()
+            ).collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue)
+            );
             this.configuration = trainConfig.toMap();
             this.trainMillis = trainMillis;
         }

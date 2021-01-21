@@ -61,14 +61,38 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     "metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
                     "holdoutFraction: 0.2, " +
                     "validationFolds: 5, " +
+                    "randomSeed: 2," +
                     "params: [{penalty: 1.0}, {penalty: 2.0}]})";
 
+        var expectedModelInfo = Map.of(
+            "bestParameters", Map.of("penalty", 1.0),
+            "classes", List.of(0, 1),
+            "metrics", Map.of(
+                "ACCURACY", Map.of(
+                    "outerTrain", 0.0,
+                    "test", 0.0,
+                    "train", List.of(),
+                    "validation", List.of(
+                        Map.of("avg", 0.4, "max", 1.0, "min", 0.0, "params", Map.of("penalty", 1.0)),
+                        Map.of("avg", 0.4, "max", 1.0, "min", 0.0, "params", Map.of("penalty", 2.0))
+                    )
+                ),
+                "F1_WEIGHTED", Map.of(
+                    "outerTrain", 0.0,
+                    "test", 0.0,
+                    "train", List.of(),
+                    "validation", List.of(
+                        Map.of("avg", 0.7999999880000002, "max", 1.9999999700000004, "min", 0.0, "params", Map.of("penalty", 1.0)),
+                        Map.of("avg", 0.7999999880000002, "max", 1.9999999700000004, "min", 0.0, "params", Map.of("penalty", 2.0))
+                    )
+                )
+            ),
+            "name", "model",
+            "type", "multiClassNodeLogisticRegression"
+        );
         assertCypherResult(query, List.of(Map.of(
             "trainMillis", greaterThan(0L),
-            "modelInfo", ConditionFactory.containsExactlyInAnyOrderEntriesOf(Map.of(
-                "name", "model",
-                "type", "multiClassNodeLogisticRegression"
-            )),
+            "modelInfo", ConditionFactory.containsExactlyInAnyOrderEntriesOf(expectedModelInfo),
             "configuration", isA(Map.class)
         )));
 
