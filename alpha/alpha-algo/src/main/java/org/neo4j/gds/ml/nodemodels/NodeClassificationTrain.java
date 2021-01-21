@@ -87,7 +87,7 @@ public class NodeClassificationTrain
         var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets);
         var bestParameters = modelSelectResult.bestParameters();
 
-        // 6. retrain best model on remaining
+        // 6. train best model on remaining
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
 
         // 7. evaluate it on the holdout set and outer training set
