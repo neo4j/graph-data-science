@@ -30,6 +30,9 @@ public class F1Weighted implements Metric.MetricStrategy {
         HugeLongArray predictions,
         HugeLongArray globalTargets
     ) {
+        if (targets.size() == 0) {
+            return 0.0;
+        }
         var targetCounts = new Multiset<Long>();
         for (long offset = 0; offset < globalTargets.size(); offset++) {
             targetCounts.add(globalTargets.get(offset));

@@ -48,6 +48,9 @@ public class AccuracyMetric implements Metric.MetricStrategy {
             }
         }
 
+        if (targets.size() == 0) {
+            return 0.0;
+        }
         return BigDecimal.valueOf(accuratePredictions)
             .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
             .doubleValue();
