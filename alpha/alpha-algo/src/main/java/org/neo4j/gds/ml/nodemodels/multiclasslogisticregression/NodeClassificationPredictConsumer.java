@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.MappedBatch;
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.nodemodels.LongArrayAccessor;
+import org.neo4j.gds.ml.nodemodels.BatchTransformer;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  */
 public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final Graph graph;
-    private final LongArrayAccessor nodeIds;
+    private final BatchTransformer nodeIds;
     private final Predictor<Matrix, MultiClassNLRData> predictor;
     private final HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
@@ -49,7 +49,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
 
     public NodeClassificationPredictConsumer(
         Graph graph,
-        LongArrayAccessor nodeIds,
+        BatchTransformer nodeIds,
         Predictor<Matrix, MultiClassNLRData> predictor,
         @Nullable HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
@@ -65,7 +65,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
 
     @Override
     public void accept(Batch batch) {
-        var originalNodeIdsBatch = new MappedBatch(batch, nodeIds::get);
+        var originalNodeIdsBatch = new MappedBatch(batch, nodeIds);
         var probabilityMatrix = predictor.predict(graph, originalNodeIdsBatch);
         var numberOfClasses = probabilityMatrix.cols();
         var probabilities = probabilityMatrix.data();

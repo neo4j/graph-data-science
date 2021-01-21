@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import static org.neo4j.gds.ml.nodemodels.LongArrayAccessor.IDENTITY;
+import static org.neo4j.gds.ml.nodemodels.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, MultiClassNLRResult> {
 

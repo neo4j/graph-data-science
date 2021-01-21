@@ -19,23 +19,22 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.ml.nodemodels.LongArrayAccessor;
+import org.neo4j.gds.ml.nodemodels.BatchTransformer;
 
 import java.util.Iterator;
-import java.util.function.Function;
 
 public class MappedBatch implements Batch {
     private final Batch delegate;
-    private final Function<Long, Long> fn;
+    private final BatchTransformer batchTransformer;
 
-    public MappedBatch(Batch delegate, Function<Long, Long> fn) {
+    public MappedBatch(Batch delegate, BatchTransformer batchTransformer) {
         this.delegate = delegate;
-        this.fn = fn;
+        this.batchTransformer = batchTransformer;
     }
 
     @Override
     public Iterable<Long> nodeIds() {
-        if (fn == LongArrayAccessor.IDENTITY) {
+        if (batchTransformer == BatchTransformer.IDENTITY) {
             return delegate.nodeIds();
         }
         return () -> {
@@ -48,7 +47,7 @@ public class MappedBatch implements Batch {
 
                 @Override
                 public Long next() {
-                    return fn.apply(originalIterator.next());
+                    return batchTransformer.apply(originalIterator.next());
                 }
             };
         };

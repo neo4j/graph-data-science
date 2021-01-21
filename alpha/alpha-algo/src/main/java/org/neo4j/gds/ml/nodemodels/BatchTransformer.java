@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-public interface LongArrayAccessor {
-    long get(long index);
+@FunctionalInterface
+public interface BatchTransformer {
+    long apply(long index);
 
-    LongArrayAccessor IDENTITY = index -> index;
+    BatchTransformer IDENTITY = index -> index;
 }
