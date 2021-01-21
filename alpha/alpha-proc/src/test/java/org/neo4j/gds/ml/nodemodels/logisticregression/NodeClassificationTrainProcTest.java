@@ -80,8 +80,8 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     "test", 0.0,
                     "train", List.of(),
                     "validation", List.of(
-                        Map.of("avg", 0.7999999880000002, "max", 1.9999999700000004, "min", 0.0, "params", Map.of("penalty", 1.0)),
-                        Map.of("avg", 0.7999999880000002, "max", 1.9999999700000004, "min", 0.0, "params", Map.of("penalty", 2.0))
+                        Map.of("avg", 0.19999999700000004, "max", 0.4999999925000001, "min", 0.0, "params", Map.of("penalty", 1.0)),
+                        Map.of("avg", 0.19999999700000004, "max", 0.4999999925000001, "min", 0.0, "params", Map.of("penalty", 2.0))
                     )
                 )
             ),
