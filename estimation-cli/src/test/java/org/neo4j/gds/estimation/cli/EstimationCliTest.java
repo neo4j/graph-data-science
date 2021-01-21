@@ -234,6 +234,29 @@ final class EstimationCliTest {
     }
 
     @ParameterizedTest
+    @CsvSource({
+        "K, 1", "M, 2", "G, 3", "T, 4", "P, 5", "E, 6", "Z, 7", "Y, 8",
+        "KB, 1", "MB, 2", "GB, 3", "TB, 4", "PB, 5", "EB, 6", "ZB, 7", "YB, 8"
+    })
+    void canSpecifyBlockSize(String unit, int scale) {
+        var nodeCount = 1000_000_000_000L;
+        var relationshipCount = 10_000_000_000_000L;
+        var actual = run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, "--block-size", unit);
+        var estimation = pageRankEstimate("nodeCount", nodeCount, "relationshipCount", relationshipCount);
+        var rust = Math.pow(
+            unit.endsWith("B") ? 1000.0 : 1024.0,
+            scale
+        );
+
+        var expected = formatWithLocale(
+            "gds.pagerank.stream.estimate,%.0f%s,%.0f%s",
+            estimation.bytesMin / rust, unit,
+            estimation.bytesMax / rust, unit
+        );
+        assertEquals(expected, actual);
+    }
+
+    @ParameterizedTest
     @ValueSource(strings = {"--labels", "-l"})
     void runsEstimationWithLabels(String labelsArg) {
         var actual = run(PR_ESTIMATE, "--nodes", 42, "--relationships", 1337, labelsArg, 21);

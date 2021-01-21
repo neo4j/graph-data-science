@@ -114,6 +114,13 @@ public class EstimationCli implements Runnable {
         @CommandLine.Mixin
             CountOptions counts,
 
+        @CommandLine.Option(
+            names = {"--block-size"},
+            description = "Scale sizes by SIZE before printing them; e.g., '--block-size M' prints sizes in units of 1,048,576 bytes. Valid values are: ${COMPLETION-CANDIDATES}"
+        )
+            Optional<BlockSize> blockSize,
+
+
         @CommandLine.ArgGroup(exclusive = true)
             PrintOptions printOptions
 
@@ -128,7 +135,7 @@ public class EstimationCli implements Runnable {
         var estimations = procedureMethods
             .map(function(proc -> estimateProcedure(proc.name(), proc.method(), counts)))
             .collect(Collectors.toList());
-        renderResults(counts, printOpts, estimations);
+        renderResults(counts, printOpts, blockSize, estimations);
     }
 
     static final class CountOptions {
@@ -267,6 +274,34 @@ public class EstimationCli implements Runnable {
             return IntStream.range(0, count)
                 .mapToObj(i -> formatWithLocale("%s%d", prefix, i))
                 .collect(Collectors.toList());
+        }
+    }
+
+    enum BlockSize {
+        K(1024, 1),
+        M(1024, 2),
+        G(1024, 3),
+        T(1024, 4),
+        P(1024, 5),
+        E(1024, 6),
+        Z(1024, 7),
+        Y(1024, 8),
+
+        KB(1000, 1),
+        MB(1000, 2),
+        GB(1000, 3),
+        TB(1000, 4),
+        PB(1000, 5),
+        EB(1000, 6),
+        ZB(1000, 7),
+        YB(1000, 8);
+
+        int base;
+        int factor;
+
+        BlockSize(int base, int factor) {
+            this.base = base;
+            this.factor = factor;
         }
     }
 
@@ -432,6 +467,7 @@ public class EstimationCli implements Runnable {
     private static void renderResults(
         CountOptions countOptions,
         PrintOptions printOptions,
+        Optional<BlockSize> blockSize,
         Collection<EstimatedProcedure> estimatedProcedures
     ) throws IOException {
         if (printOptions.printTree) {
@@ -444,14 +480,24 @@ public class EstimationCli implements Runnable {
                 );
             }
         } else if (!printOptions.printJson) {
+            String unit;
+            double scale;
+            if (blockSize.isPresent()) {
+                var bs = blockSize.get();
+                unit = bs.name();
+                scale = Math.pow(bs.base, bs.factor);
+            } else {
+                unit = ""; // no unit specified
+                scale = 1; // no scaling
+            }
             for (EstimatedProcedure estimatedProcedure : estimatedProcedures) {
                 var estimation = estimatedProcedure.estimation();
                 System.out.printf(
                     Locale.ENGLISH,
-                    "%s,%d,%d%n",
+                    "%s,%.0f%s,%.0f%s%n",
                     estimatedProcedure.name(),
-                    estimation.bytesMin,
-                    estimation.bytesMax
+                    estimation.bytesMin / scale, unit,
+                    estimation.bytesMax / scale, unit
                 );
             }
         } else {
