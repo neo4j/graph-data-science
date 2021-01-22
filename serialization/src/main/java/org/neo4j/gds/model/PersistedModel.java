@@ -48,17 +48,13 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private Object data;
     private boolean loaded;
 
-    PersistedModel(Path exportDir, ModelExportConfig exportConfig) {
+    public PersistedModel(Path exportDir, ModelExportConfig exportConfig) throws IOException {
         modelReader = new ModelFileReader(
             exportDir,
             exportConfig
         );
 
-        try {
-            metaData = modelReader.readMetaData();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        metaData = modelReader.readMetaData();
 
         this.loaded = false;
     }

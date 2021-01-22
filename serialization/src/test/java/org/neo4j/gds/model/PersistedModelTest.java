@@ -82,7 +82,7 @@ class PersistedModelTest {
     }
 
     @Test
-    void testLoadingMetaData() {
+    void testLoadingMetaData() throws IOException {
         var persistedModel = new PersistedModel(tempDir, exportConfig);
 
         assertThat(persistedModel.username()).isEqualTo(model.username());
@@ -96,7 +96,7 @@ class PersistedModelTest {
     }
 
     @Test
-    void testLoadingData() {
+    void testLoadingData() throws IOException {
         var persistedModel = new PersistedModel(tempDir, exportConfig);
 
         persistedModel.load();
@@ -109,7 +109,7 @@ class PersistedModelTest {
     }
 
     @Test
-    void testUnLoadingData() {
+    void testUnLoadingData() throws IOException {
         var persistedModel = new PersistedModel(tempDir, exportConfig);
 
         persistedModel.load();
