@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.graphalgo.core.model.proto.GraphSage;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -72,7 +72,7 @@ class MeanAggregatorSerializerTest {
         var byteArrayOutputStream = new ByteArrayOutputStream();
         serializableMeanAggregator.writeTo(byteArrayOutputStream);
 
-        var parsedProtoAggregator = GraphSage.MeanAggregator.parseFrom(byteArrayOutputStream.toByteArray());
+        var parsedProtoAggregator = GraphSageProto.MeanAggregator.parseFrom(byteArrayOutputStream.toByteArray());
 
         var deserializedAggregator = MeanAggregatorSerializer.fromSerializable(parsedProtoAggregator);
 

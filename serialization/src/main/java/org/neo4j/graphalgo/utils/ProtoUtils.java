@@ -17,13 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.utils.serialization;
+package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
-
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -32,13 +27,6 @@ import java.util.stream.Collectors;
 public final class ProtoUtils {
 
     private ProtoUtils() {}
-
-    public static ZonedDateTime from(ModelProto.ZonedDateTime protoZoneDateTime) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(
-            protoZoneDateTime.getSeconds(),
-            protoZoneDateTime.getNanos()
-        ), ZoneId.of(protoZoneDateTime.getZoneId()));
-    }
 
     public static List<Double> toList(double[] data) {
         return Arrays.stream(data)

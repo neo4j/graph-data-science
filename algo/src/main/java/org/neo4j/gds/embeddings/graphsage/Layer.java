@@ -30,7 +30,9 @@ public interface Layer {
 
     Aggregator aggregator();
 
-    long randomState();
+    default long randomState() {
+        return sampler().randomState();
+    }
 
     default void generateNewRandomState() {
         sampler().generateNewRandomState();

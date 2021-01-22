@@ -20,29 +20,36 @@
 package org.neo4j.graphalgo.core.model;
 
 import com.google.protobuf.ByteString;
+import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
+import org.neo4j.graphalgo.api.schema.SchemaSerializer;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
 import java.io.IOException;
-import java.time.Instant;
 
 public final class ModelSerializer {
 
     private ModelSerializer() {}
 
-    public static ModelProto.Model serializableFormatOf(Model<?, ?, ?> model) throws IOException {
-        Instant creationTimeInstant = model.creationTime().toInstant();
-        ModelProto.ZonedDateTime serializableCreationTime = ModelProto.ZonedDateTime.newBuilder()
-            .setSeconds(creationTimeInstant.getEpochSecond())
-            .setNanos(creationTimeInstant.getNano())
-            .setZoneId(model.creationTime().getZone().getId())
-            .build();
+    public static ModelProto.Model toSerializable(Model<?, ?, ?> model) throws IOException {
         return ModelProto.Model.newBuilder()
             .setUsername(model.username())
             .setName(model.name())
             .setAlgoType(model.algoType())
+            .setGraphSchema(SchemaSerializer.serializableGraphSchema(model.graphSchema()))
             .setSerializedTrainConfig(ByteString.copyFrom(ObjectSerializer.toByteArray(model.trainConfig())))
-            .setCreationTime(serializableCreationTime)
+            .setCreationTime(ZonedDateTimeSerializer.toSerializable(model.creationTime()))
             .build();
+    }
+
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG, Model.Mappable> fromSerializable(ModelProto.Model protoModelMeta) {
+        return ImmutableModel.<DATA, CONFIG, Model.Mappable>builder()
+            .username(protoModelMeta.getUsername())
+            .name(protoModelMeta.getName())
+            .algoType(protoModelMeta.getAlgoType())
+            .graphSchema(SchemaDeserializer.graphSchema(protoModelMeta.getGraphSchema()))
+            .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMeta.getCreationTime()));
     }
 }

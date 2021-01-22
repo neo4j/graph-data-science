@@ -50,13 +50,12 @@ public final class SchemaSerializer {
             .putAllNodeSchema(serializableNodeSchema(graphSchema.nodeSchema()))
             .putAllRelationshipSchema(serializableRelationshipSchema(graphSchema.relationshipSchema()))
             .build();
-
     }
 
     public static Map<String, GraphSchemaProto.PropertyMapping> serializableNodeSchema(NodeSchema nodeSchema) {
-        var propertyMapping = GraphSchemaProto.PropertyMapping.newBuilder();
         var serializableSchema = new HashMap<String, GraphSchemaProto.PropertyMapping>();
         nodeSchema.properties().forEach(((nodeLabel, properties) -> {
+            var propertyMapping = GraphSchemaProto.PropertyMapping.newBuilder();
             var label = nodeLabel.name();
             properties.forEach((name, propertySchema) -> propertyMapping.putNameMapping(
                 name,

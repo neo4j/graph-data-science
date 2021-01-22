@@ -46,7 +46,7 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
                 if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
                     return false;
                 }
-                double randomDouble = randomDouble(randomSeed, source, target, graph.nodeCount());
+                double randomDouble = randomDouble(source, target, graph.nodeCount());
                 if (remainingToConsider.getAndDecrement() * randomDouble <= remainingToSample.get()) {
                     neighbors.add(target);
                     remainingToSample.decrementAndGet();
@@ -57,9 +57,14 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
         return neighbors;
     }
 
-    private double randomDouble(long randomState, long source, long target, long nodeCount) {
-        random.setSeed(randomState + source + nodeCount * target);
+    private double randomDouble(long source, long target, long nodeCount) {
+        random.setSeed(randomSeed + source + nodeCount * target);
         return random.nextDouble();
+    }
+
+    @Override
+    public long randomState() {
+        return this.randomSeed;
     }
 
     @Override

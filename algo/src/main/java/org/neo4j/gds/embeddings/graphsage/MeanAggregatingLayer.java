@@ -29,7 +29,6 @@ public class MeanAggregatingLayer implements Layer {
     private final NeighborhoodSampler sampler;
     private final long sampleSize;
     private final Weights<Matrix> weights;
-    private long randomState;
     private final ActivationFunction activationFunction;
 
     MeanAggregatingLayer(
@@ -41,7 +40,6 @@ public class MeanAggregatingLayer implements Layer {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
-        this.randomState = randomState;
         this.sampler = new WeightedNeighborhoodSampler(randomState);
     }
 
@@ -71,10 +69,5 @@ public class MeanAggregatingLayer implements Layer {
     @Override
     public long sampleSize() {
         return sampleSize;
-    }
-
-    @Override
-    public long randomState() {
-        return randomState;
     }
 }

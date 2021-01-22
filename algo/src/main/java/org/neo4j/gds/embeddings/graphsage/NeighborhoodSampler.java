@@ -27,6 +27,8 @@ import java.util.OptionalLong;
 public interface NeighborhoodSampler {
     List<Long> sample(Graph graph, long nodeId, long numberOfSamples);
 
+    long randomState();
+
     default OptionalLong sampleOne(Graph graph, long nodeId) {
         List<Long> samples = sample(graph, nodeId, 1);
         if (samples.size() < 1) {

@@ -1,13 +1,39 @@
 syntax = "proto3";
 
 import "tensors.proto";
+import "model.proto";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
-option java_outer_classname = "GraphSage";
+option java_outer_classname = "GraphSageProto";
 
-enum ActivationFunction {
-  SIGMOID = 0;
-  RELU = 1;
+message GraphSageModel {
+  Model model = 1;
+  ModelData data = 2;
+  FeatureFunction featureFunction = 3;
+}
+
+message FeatureFunction {
+  FeatureFunctionType functionType = 1;
+  map<string, Matrix> weightsByLabel = 2;
+}
+
+enum FeatureFunctionType {
+  SINGLE = 0;
+  MULTI = 1;
+}
+
+message ModelData {
+  repeated Layer layers = 1;
+}
+
+message Layer {
+  oneof aggregator {
+    MeanAggregator mean = 1;
+    MaxPoolingAggregator pool = 2;
+  }
+
+  int64 sampleSize = 3;
+  int64 randomState = 4;
 }
 
 message MeanAggregator {
@@ -21,4 +47,9 @@ message MaxPoolingAggregator {
   Matrix neighborsWeights = 3;
   Vector bias = 4;
   ActivationFunction activationFunction = 5;
+}
+
+enum ActivationFunction {
+  SIGMOID = 0;
+  RELU = 1;
 }

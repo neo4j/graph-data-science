@@ -25,14 +25,13 @@ import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.api.schema.SchemaSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
-import org.neo4j.graphalgo.utils.serialization.ProtoUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ModelSerializationTest {
 
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory
-        .of("(n1:Node {a: 1.1})-[:R {rp: 4.2}]->(n2:Node {a: 1.337})")
+        .of(GraphSageTestGraph.GDL)
         .build()
         .graphStore()
         .schema();
@@ -72,7 +71,7 @@ class ModelSerializationTest {
             TestTrainConfig.of()
         );
 
-        ModelProto.Model protoModel = ModelSerializer.serializableFormatOf(model);
+        ModelProto.Model protoModel = ModelSerializer.toSerializable(model);
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         protoModel.writeTo(output);
@@ -82,8 +81,7 @@ class ModelSerializationTest {
         assertEquals(model.algoType(), protoModelDeserialized.getAlgoType());
         assertEquals(model.username(), protoModelDeserialized.getUsername());
         assertEquals(model.name(), protoModelDeserialized.getName());
-        ZonedDateTime dateTime = ProtoUtils.from(protoModelDeserialized.getCreationTime());
-        assertEquals(model.creationTime(), dateTime);
+        assertEquals(model.creationTime(), ZonedDateTimeSerializer.fromSerializable(protoModelDeserialized.getCreationTime()));
 
         var resultTrainConfigBytes = protoModelDeserialized.getSerializedTrainConfig().toByteArray();
         var deserializedTrainConfig = ObjectSerializer.fromByteArrayUnsafe(resultTrainConfigBytes);
