@@ -34,10 +34,11 @@ public final class GraphSageTrainConfigSerializer {
         var protoConfigBuilder = GraphSageProto.GraphSageTrainConfig.newBuilder();
 
         protoConfigBuilder
-            .setModelConfig(CommonConfigProto.ModelConfigProto
-                .newBuilder()
-                .setModelName(trainConfig.modelName())
-                .build())
+            .setModelConfig(
+                CommonConfigProto.ModelConfigProto
+                    .newBuilder()
+                    .setModelName(trainConfig.modelName())
+            )
             .setEmbeddingDimensionConfig(
                 CommonConfigProto.EmbeddingDimensionConfigProto
                     .newBuilder()
@@ -46,26 +47,29 @@ public final class GraphSageTrainConfigSerializer {
             .addAllSampleSizes(trainConfig.sampleSizes())
             .setAggregator(GraphSageProto.AggregatorType.valueOf(trainConfig.aggregator().name()))
             .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(trainConfig.activationFunction().name()))
-            .setToleranceConfig(CommonConfigProto.ToleranceConfigProto
-                .newBuilder()
-                .setTolerance(trainConfig.tolerance())
-                .build())
+            .setToleranceConfig(
+                CommonConfigProto.ToleranceConfigProto
+                    .newBuilder()
+                    .setTolerance(trainConfig.tolerance())
+            )
             .setLearningRate(trainConfig.learningRate())
             .setEpochs(trainConfig.epochs())
-            .setIterationsConfig(CommonConfigProto.IterationsConfigProto
-                .newBuilder()
-                .setMaxIterations(trainConfig.maxIterations())
-                .build())
+            .setIterationsConfig(
+                CommonConfigProto.IterationsConfigProto
+                    .newBuilder()
+                    .setMaxIterations(trainConfig.maxIterations())
+            )
             .setSearchDepth(trainConfig.searchDepth())
             .setNegativeSampleWeight(trainConfig.negativeSampleWeight())
             .setDegreeAsProperty(trainConfig.degreeAsProperty())
             .setFeaturePropertiesConfig(
-                CommonConfigProto.FeaturePropertiesConfigProto.newBuilder()
+                CommonConfigProto.FeaturePropertiesConfigProto
+                    .newBuilder()
                     .addAllFeatureProperties(trainConfig.featureProperties())
-                    .build()
             );
 
-        var projectedFeatureDimensionBuilder = GraphSageProto.ProjectedFeatureDimension.newBuilder()
+        var projectedFeatureDimensionBuilder = GraphSageProto.ProjectedFeatureDimension
+            .newBuilder()
             .setPresent(trainConfig.projectedFeatureDimension().isPresent());
         trainConfig.projectedFeatureDimension().ifPresent(projectedFeatureDimensionBuilder::setValue);
         protoConfigBuilder.setProjectedFeatureDimension(projectedFeatureDimensionBuilder);
@@ -83,20 +87,23 @@ public final class GraphSageTrainConfigSerializer {
 
     public static GraphSageTrainConfig fromSerializable(GraphSageProto.GraphSageTrainConfig protoTrainConfig) {
         var trainConfigBuilder = GraphSageTrainConfig.builder();
+
         trainConfigBuilder
             .modelName(protoTrainConfig.getModelConfig().getModelName())
             .aggregator(Aggregator.AggregatorType.of(protoTrainConfig.getAggregator().name()))
             .activationFunction(ActivationFunction.of(protoTrainConfig.getActivationFunction().name()))
             .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList())
             .degreeAsProperty(protoTrainConfig.getDegreeAsProperty());
-        var projectedFeatureDimension = protoTrainConfig.getProjectedFeatureDimension();
 
-        if(projectedFeatureDimension.getPresent()) {
+        var projectedFeatureDimension = protoTrainConfig.getProjectedFeatureDimension();
+        if (projectedFeatureDimension.getPresent()) {
             trainConfigBuilder.projectedFeatureDimension(projectedFeatureDimension.getValue());
         }
 
-        var relationshipWeightPropertyCandidate = protoTrainConfig.getRelationshipWeightConfig().getRelationshipWeightProperty();
-        if(!relationshipWeightPropertyCandidate.isBlank()) {
+        var relationshipWeightPropertyCandidate = protoTrainConfig
+            .getRelationshipWeightConfig()
+            .getRelationshipWeightProperty();
+        if (!relationshipWeightPropertyCandidate.isBlank()) {
             trainConfigBuilder.relationshipWeightProperty(relationshipWeightPropertyCandidate);
         }
 
