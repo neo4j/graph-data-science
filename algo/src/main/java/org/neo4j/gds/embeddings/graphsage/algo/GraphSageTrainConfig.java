@@ -194,6 +194,10 @@ public interface GraphSageTrainConfig extends
         );
     }
 
+    static ImmutableGraphSageTrainConfig.Builder builder() {
+        return ImmutableGraphSageTrainConfig.builder();
+    }
+
     @Configuration.Ignore
     default void validateAgainstGraphStore(GraphStoreWithConfig graphStoreWithConfig) {
         var graphStore = graphStoreWithConfig.graphStore();

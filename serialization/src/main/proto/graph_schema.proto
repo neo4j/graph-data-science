@@ -30,6 +30,7 @@ message RelationshipPropertySchema {
   PropertySchema propertySchema = 1;
   string aggregation = 2;
 }
+
 message DefaultValue {
 
   oneof defaultValue {
