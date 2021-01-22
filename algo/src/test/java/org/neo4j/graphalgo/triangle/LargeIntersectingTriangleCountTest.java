@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -26,9 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.PagedAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
@@ -44,7 +42,6 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
     private static final long TRIANGLE_COUNT = 1000L;
-    private static final double EXPECTED_COEFFICIENT = 0.666;
 
     private static long centerId;
 
@@ -122,46 +119,6 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
                 continue;
             }
             assertEquals(2, triangles.get(i));
-        }
-    }
-
-    private void assertCoefficients(Object coefficients) {
-        if (coefficients instanceof double[]) {
-            assertClusteringCoefficient((double[]) coefficients);
-        } else if (coefficients instanceof PagedAtomicDoubleArray) {
-            assertClusteringCoefficient((PagedAtomicDoubleArray) coefficients);
-        } else if (coefficients instanceof AtomicDoubleArray) {
-            assertClusteringCoefficient((AtomicDoubleArray) coefficients);
-        }
-    }
-
-    private void assertClusteringCoefficient(double[] coefficients) {
-        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
-        for (int i = 0; i < coefficients.length; i++) {
-            if (i == centerMapped) {
-                continue;
-            }
-            assertEquals(EXPECTED_COEFFICIENT, coefficients[i], 0.01);
-        }
-    }
-
-    private void assertClusteringCoefficient(AtomicDoubleArray coefficients) {
-        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
-        for (int i = 0; i < coefficients.length(); i++) {
-            if (i == centerMapped) {
-                continue;
-            }
-            assertEquals(EXPECTED_COEFFICIENT, coefficients.get(i), 0.01);
-        }
-    }
-
-    private void assertClusteringCoefficient(PagedAtomicDoubleArray coefficients) {
-        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
-        for (int i = 0; i < coefficients.size(); i++) {
-            if (i == centerMapped) {
-                continue;
-            }
-            assertEquals(EXPECTED_COEFFICIENT, coefficients.get(i), 0.01);
         }
     }
 

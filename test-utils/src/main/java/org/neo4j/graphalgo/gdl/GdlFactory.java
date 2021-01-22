@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -316,14 +316,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             entry -> RelationshipType.of(entry.getKey()),
             entry -> Tuples.pair(propertyKeysByRelType.get(entry.getKey()), entry.getValue().build())
         ));
-    }
-
-    private ValueType inferValueType(Object gdlValue) {
-        if (gdlValue instanceof Long || gdlValue instanceof Integer) {
-            return ValueType.LONG;
-        } else {
-            return ValueType.DOUBLE;
-        }
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {

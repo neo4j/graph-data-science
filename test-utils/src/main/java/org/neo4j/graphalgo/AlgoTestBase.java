@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.NullLog;
 
 
@@ -47,7 +46,4 @@ public abstract class AlgoTestBase extends BaseTest {
         QueryRunner.runQuery(db, query);
     }
 
-    protected void runQuery(GraphDatabaseService passedInDb, String query) {
-        org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction(passedInDb, tx -> QueryRunner.runQuery(passedInDb, query));
-    }
 }

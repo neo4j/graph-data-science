@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class HarmonicCentralityProcTest extends BaseProcTest {
-
-    public static final String TYPE = "TYPE";
 
     public static final String DB_CYPHER =
         "CREATE (a:Node {name:'a'})" +

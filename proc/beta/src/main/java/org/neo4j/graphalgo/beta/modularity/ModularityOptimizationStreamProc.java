@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.neo4j.graphalgo.beta.modularity;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -84,6 +83,7 @@ public class ModularityOptimizationStreamProc extends StreamProc<ModularityOptim
         return ModularityOptimizationStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
+    @SuppressWarnings("unused")
     public static class StreamResult {
         public final long nodeId;
         public final long communityId;

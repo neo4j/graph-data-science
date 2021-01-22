@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -108,6 +108,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
         );
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult extends LocalClusteringCoefficientStatsProc.StatsResult {
 
         public long mutateMillis;

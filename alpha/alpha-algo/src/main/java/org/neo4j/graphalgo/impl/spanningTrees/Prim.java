@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -40,8 +40,7 @@ import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
  * The algorithm computes the MST by traversing all nodes from a given
  * startNodeId. It aggregates all transitions into a MinPriorityQueue
  * and visits each (unvisited) connected node by following only the
- * cheapest transition and adding it to a specialized form of
- * {@link org.neo4j.graphalgo.core.utils.container.UndirectedTree}.
+ * cheapest transition and adding it to a specialized form of undirected tree.
  * <p>
  * The algorithm also computes the minimum, maximum and sum of all
  * weights in the MST.

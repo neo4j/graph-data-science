@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -110,6 +110,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         return graphStore.relationshipCount(RelationshipType.of(config.relationshipType()));
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final long writeMillis;
         public final String graphName;

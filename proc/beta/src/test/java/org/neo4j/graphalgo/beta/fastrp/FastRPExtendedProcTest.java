@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.fastrp;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -31,10 +30,6 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -74,13 +69,6 @@ public abstract class FastRPExtendedProcTest<CONFIG extends FastRPExtendedBaseCo
     ) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);
-    }
-
-    private static Stream<Arguments> weights() {
-        return Stream.of(
-            Arguments.of(Collections.emptyList()),
-            Arguments.of(List.of(1.0f, 1.0f, 2.0f, 4.0f))
-        );
     }
 
     @Override

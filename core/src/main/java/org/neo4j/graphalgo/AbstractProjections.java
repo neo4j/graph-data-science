@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -39,12 +39,4 @@ public abstract class AbstractProjections<I extends ElementIdentifier, P extends
     public Collection<P> allProjections() {
         return projections().values();
     }
-
-    /**
-     * Returns all projections except PROJECT_ALL projections.
-     */
-    public Collection<P> explicitProjections() {
-        return allProjections().stream().filter(p -> !p.projectAll()).collect(Collectors.toList());
-    }
-
 }

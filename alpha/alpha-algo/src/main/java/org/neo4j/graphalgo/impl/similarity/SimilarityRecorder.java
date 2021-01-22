@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,10 +21,6 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.neo4j.graphalgo.results.SimilarityResult;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 public class SimilarityRecorder<T extends SimilarityInput> implements Computations, SimilarityComputer<T> {
@@ -32,7 +28,6 @@ public class SimilarityRecorder<T extends SimilarityInput> implements Computatio
     private final SimilarityComputer<T> computer;
 
     private final LongAdder computations = new LongAdder();
-    private final Map<Set<Long>, AtomicLong> comparisons = new ConcurrentHashMap<>();
 
     public SimilarityRecorder(SimilarityComputer<T> computer) {
         this.computer = computer;
@@ -41,10 +36,6 @@ public class SimilarityRecorder<T extends SimilarityInput> implements Computatio
     @Override
     public long count() {
         return computations.longValue();
-    }
-
-    public Map<Set<Long>, AtomicLong> comparisons() {
-        return comparisons;
     }
 
     @Override

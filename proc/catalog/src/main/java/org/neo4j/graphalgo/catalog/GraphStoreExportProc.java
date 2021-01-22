@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -186,6 +186,7 @@ public class GraphStoreExportProc extends BaseProc {
         return resolvedExportPath;
     }
 
+    @SuppressWarnings("unused")
     public abstract static class GraphStoreExportResult {
         public final String graphName;
         public final long nodeCount;
@@ -214,6 +215,7 @@ public class GraphStoreExportProc extends BaseProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class DatabaseExportResult extends GraphStoreExportResult {
         public final String dbName;
 
@@ -240,6 +242,7 @@ public class GraphStoreExportProc extends BaseProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class FileExportResult extends GraphStoreExportResult {
         public final String exportName;
 

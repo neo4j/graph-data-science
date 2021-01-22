@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -34,10 +34,6 @@ public final class TransactionTerminationTestUtils {
 
     // Give tests 5 times more time when running on CI
     private static final long CI_SMEAR = 10;
-
-    public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfterMillis) {
-        assertTerminates(algoRunner, terminateAfterMillis, Long.MAX_VALUE);
-    }
 
     public static void assertTerminates(Consumer<TerminationFlag> algoRunner, long terminateAfterMillis, long maxDelayMillis) {
         TestTerminationFlag terminationFlag = new TestTerminationFlag();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -80,6 +80,7 @@ public class FastRPStatsProc extends StatsProc<FastRP, FastRP.FastRPResult, Fast
         return new FastRPFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static final class StatsResult {
 
         public final long nodeCount;

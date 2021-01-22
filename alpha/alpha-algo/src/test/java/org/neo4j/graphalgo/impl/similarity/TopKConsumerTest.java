@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.impl.similarity;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -32,21 +32,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TopKConsumerTest {
 
-    private static final Item ITEM1 = new Item(null, 1);
-    private static final Item ITEM3 = new Item(null, 3);
-    private static final Item ITEM2 = new Item(null, 2);
-    private static final Item ITEM4 = new Item(null, 4);
-    private static final Item ITEM5 = new Item(null, 5);
-    private static final Item ITEM6 = new Item(null, 6);
-    private static final Item ITEM7 = new Item(null, 7);
+    private static final Item ITEM1 = new Item(1);
+    private static final Item ITEM3 = new Item(3);
+    private static final Item ITEM2 = new Item(2);
+    private static final Item ITEM4 = new Item(4);
+    private static final Item ITEM5 = new Item(5);
+    private static final Item ITEM6 = new Item(6);
+    private static final Item ITEM7 = new Item(7);
 
 
     static class Item implements Comparable<Item> {
-        String name;
         int value;
 
-        Item(String name, int value) {
-            this.name = name;
+        Item(int value) {
             this.value = value;
         }
 
@@ -74,10 +72,6 @@ class TopKConsumerTest {
         }
     }
     
-    private static final int RUNS = 10000;
-    private static final int COUNT = 50000;
-    private static final int WINDOW_SIZE = 20;
-
     @Test
     void testFindTopKHeap4() {
         Collection<Item> topItems = TopKConsumer.topK(asList(ITEM1, ITEM3, ITEM2, ITEM4), 4, Item::compareTo);
@@ -143,7 +137,7 @@ class TopKConsumerTest {
         TopKConsumer<Item> comparator1 = new TopKConsumer<>(3, Item::compareTo);
         TopKConsumer<Item> comparator2 = new TopKConsumer<>(3, Item::compareTo);
 
-        asList(ITEM6).forEach(comparator1::apply);
+        Collections.singletonList(ITEM6).forEach(comparator1::apply);
         asList(ITEM3, ITEM4, ITEM5).forEach(comparator2::apply);
 
         rootConsumer.apply(comparator1);
@@ -157,13 +151,5 @@ class TopKConsumerTest {
         TopKConsumer<Item> consumer = new TopKConsumer<>(1, Item::compareTo);
         asList(ITEM3, ITEM3, ITEM3).forEach(consumer::apply);
         assertThat(consumer.list(), contains(ITEM3));
-    }
-
-    private List<Item> createItems(int count) {
-        List<Item> items = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            items.add(new Item(null, i));
-        }
-        return items;
     }
 }

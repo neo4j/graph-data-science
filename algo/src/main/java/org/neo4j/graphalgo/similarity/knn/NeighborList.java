@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.similarity.knn;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.similarity.SimilarityResult;
@@ -117,19 +115,6 @@ class NeighborList {
         var element = elements[index * 2 + 1];
         elements[index * 2 + 1] = setCheckedFlag(element);
         return element;
-    }
-
-    public void addAll(
-        LongHashSet neighbors,
-        long baseNodeId,
-        SimilarityComputer similarityComputer,
-        SplittableRandom random
-    ) {
-        for (LongCursor neighbor : neighbors) {
-            long element = neighbor.value;
-            double similarity = similarityComputer.safeSimilarity(baseNodeId, element);
-            add(element, similarity, random);
-        }
     }
 
     /**

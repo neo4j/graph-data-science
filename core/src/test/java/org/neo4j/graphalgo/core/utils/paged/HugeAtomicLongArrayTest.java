@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -428,13 +428,6 @@ final class HugeAtomicLongArrayTest {
 
     private HugeAtomicLongArray pagedArray(final int size, final LongPageCreator pageFiller) {
         return HugeAtomicLongArray.newPagedArray(size, pageFiller, AllocationTracker.empty());
-    }
-
-    /**
-     * Fails with message "should throw exception".
-     */
-    private void shouldThrow() {
-        fail("Should throw exception");
     }
 
     /**

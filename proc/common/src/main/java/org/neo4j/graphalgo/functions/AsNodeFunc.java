@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.functions;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
@@ -35,8 +34,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class AsNodeFunc {
-    @Context
-    public GraphDatabaseService api;
 
     @Context
     public KernelTransaction tx;

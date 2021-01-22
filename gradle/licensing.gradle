@@ -1,8 +1,8 @@
-// All licenses that we accept, and their aliases
 def whitelist = [
         [name: 'BSD-2-Clause', url: 'http://opensource.org/licenses/BSD-2-Clause', aliases: [
                 [name: 'BSD-style', url: 'http://www.opensource.org/licenses/bsd-license.php'],
                 [name: 'BSD 2-Clause License'],
+                [name: 'BSD', url: 'http://www.jcraft.com/jzlib/LICENSE.txt']
         ]],
         [name: 'BSD-3-Clause', url: 'http://opensource.org/licenses/BSD-3-Clause', aliases: [
                 [name: 'The BSD 3-Clause License'],
@@ -11,6 +11,8 @@ def whitelist = [
                 [name: 'BSD 3-Clause'],
                 [name: 'BSD 3 Clause'],
                 [name: 'BSD 3-clause'],
+                [name: 'BSD 3-Clause License'],
+                [name: 'BSD Licence 3'],
                 [name: 'New BSD License'],
                 [name: 'New BSD license'],
                 [name: 'The New BSD License'],
@@ -21,11 +23,13 @@ def whitelist = [
                 [name: 'BSD', url: 'http://www.jcraft.com/jsch/LICENSE.txt'],
                 [name: 'BSD', url: 'https://github.com/sbt/test-interface/blob/master/LICENSE'],
                 [name: 'BSD', url: 'LICENSE.txt'],
+                [name: 'BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)'],
                 [name: '', url: 'http://asm.ow2.org/license.html'],
         ]],
         [name: 'Apache-2.0', url: 'https://opensource.org/licenses/Apache-2.0', aliases: [
                 [name: 'The Apache Software License, Version 2.0'],
                 [name: 'The Apache License, Version 2.0'],
+                [name: 'The Apache Software License, version 2.0'],
                 [name: 'Apache 2'],
                 [name: 'Apache v2'],
                 [name: 'Apache License, Version 2.0'],
@@ -40,6 +44,7 @@ def whitelist = [
                 [name: 'ASL 2.0'],
                 [name: 'the Apache License, ASL Version 2.0'],
                 [name: 'Apache License V2.0'],
+                [name: 'Apache License v2.0'],
                 [name: 'Apache License Version 2.0'],
                 [name: '', url: 'http://www.apache.org/licenses/LICENSE-2.0.txt'],
         ]],
@@ -50,63 +55,114 @@ def whitelist = [
                 [name: 'The MIT License'],
                 [name: 'Bouncy Castle Licence'],
         ]],
-        [name: 'Eclipse Distribution License - v 1.0', url: 'https://www.eclipse.org/licenses/edl-v10.html'],
+        [name: 'Eclipse Distribution License - v 1.0', url: 'https://www.eclipse.org/licenses/edl-v10.html', aliases: [
+                [name: 'EDL 1.0'],
+        ]],
         [name: 'Eclipse Public License - v 1.0', url: 'https://www.eclipse.org/legal/epl-v10.html', aliases: [
                 [name: 'Eclipse Public License 1.0'],
+                [name: 'EPL', url: 'http://www.eclipse.org/legal/epl-v10.html']
+        ]],
+        [name: 'Eclipse Public License v2.0', url: 'http://www.eclipse.org/legal/epl-v20.html', aliases: [
+                [name: 'Eclipse Public License - v 2.0'],
+                [name: 'Eclipse Public - License 2.0'],
+                [name: 'Eclipse Public License v2.0'],
+                [name: 'EPL 2.0'],
+                [name: 'EPL-2.0,'],
         ]],
         [name: 'GNU General Public License, Version 3', url: 'http://www.gnu.org/licenses/gpl-3.0-standalone.html'],
-        [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html'],
-        [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/'],
+        [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html', aliases: [
+                [name: 'GPL-2.0']
+        ]],
+        [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/', aliases: [
+                [name: 'CC0']
+        ]],
         [name: 'MPL-2.0', url: 'https://www.mozilla.org/MPL/2.0/', aliases: [
                 [name: 'Mozilla Public License Version 2.0']
+        ]],
+        [name: 'Common Development and Distribution License Version 1.0', aliases: [
+                [name: 'COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0']
+        ]],
+        [name: 'Common Development and Distribution License Version 1.1', aliases: [
+                [name: 'CDDL1.1'],
+                [name: 'CDDL 1.1'],
+                [name: 'Common Development and Distribution License (CDDL), Version 1.1']
+        ]],
+        [name: 'Common Development and Distribution License Version 1.1 and GNU General Public License, version 2 with the Classpath Exception', aliases: [
+                [name: 'CDDL1.1-GPL2/CPE'],
+                [name: 'Dual license consisting of the CDDL v1.1 and GPL v2'],
+                [name: 'CDDL + GPLv2 with classpath exception']
         ]]
 ]
+// All licenses that we accept, and their aliases
 
-def product = [
+def publicModules = [
     ':algo',
     ':algo-common',
     ':alpha-algo',
     ':alpha-core',
+    ':alpha-embeddings',
     ':alpha-proc',
     ':annotations',
     ':config-generator',
     ':core',
     ':cypher-printer',
-    ':cypher-printer-api',
     ':cypher-printer-4.0',
     ':cypher-printer-4.1',
+    ':cypher-printer-4.2',
+    ':cypher-printer-4.3',
+    ':cypher-printer-api',
+    ':cypher-printer-aura',
     ':neo4j-adapter',
     ':neo4j-kernel-adapter',
-    ':neo4j-kernel-adapter-api',
     ':neo4j-kernel-adapter-4.0',
     ':neo4j-kernel-adapter-4.1',
+    ':neo4j-kernel-adapter-4.2',
+    ':neo4j-kernel-adapter-4.3',
+    ':neo4j-kernel-adapter-api',
+    ':neo4j-kernel-adapter-aura',
     ':packaging',
+    ':pregel-proc-generator',
     ':proc',
-    ':alpha-embeddings',
+    ':proc-beta',
+    ':proc-catalog',
+    ':proc-centrality',
+    ':proc-common',
+    ':proc-community',
+    ':proc-embeddings',
+    ':proc-misc',
+    ':proc-similarity',
+    ':proc-test',
+    ':serialization',
+    ':test-utils',
+    ':pregel-example',
+    ':doc',
 ]
+
+
+
 
 allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
-        if (proj.path in product) {
-            proj.apply plugin: 'com.github.hierynomus.license'
-            // License header checking and insertion
-            license {
-                header = rootProject.file("$publicDir/etc/licenses/headers/source-header.txt")
-                // what comment style to use
-                mapping {
-                    java = 'SLASHSTAR_STYLE'
-                }
-                // /issues/145
-                // exclude 'test/resources/**'
-                // exclude 'main/resources/**'
-                include '**/*.java'
-
-                // These files were copied from lucene and need to keep their license headers
-                exclude '**/CloseableThreadLocal*.java'
-                exclude '**/IntPriorityQueue*.java'
+        proj.apply plugin: 'com.github.hierynomus.license'
+        // License header checking and insertion
+        license {
+            header = rootProject.file("$publicDir/etc/licenses/headers/source-header.txt")
+            // what comment style to use
+            mapping {
+                java = 'SLASHSTAR_STYLE'
             }
-            tasks.check.dependsOn tasks.license
+            // /issues/145
+            // exclude 'test/resources/**'
+            // exclude 'main/resources/**'
+            include '**/*.java'
 
+            // These files were copied from lucene and need to keep their license headers
+            exclude '**/CloseableThreadLocal*.java'
+            exclude '**/IntPriorityQueue*.java'
+        }
+        tasks.check.dependsOn tasks.license
+
+        if (proj.path in publicModules) {
             // Dependency license reporting
             downloadLicenses {
                 dependencyConfiguration = 'runtimeClasspath'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -33,19 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
-    String DB_CYPHER = "CREATE " +
-                       " (zhen:Person {name: 'Zhen'})," +
-                       " (praveena:Person {name: 'Praveena'})," +
-                       " (michael:Person {name: 'Michael'})," +
-                       " (arya:Person {name: 'Arya'})," +
-                       " (karin:Person {name: 'Karin'})," +
-
-                       " (zhen)-[:FRIENDS]->(arya)," +
-                       " (zhen)-[:FRIENDS]->(praveena)," +
-                       " (praveena)-[:WORKS_WITH]->(karin)," +
-                       " (praveena)-[:FRIENDS]->(michael)," +
-                       " (michael)-[:WORKS_WITH]->(karin)," +
-                       " (arya)-[:FRIENDS]->(karin)";
 
     private String heapGraphName() { return "heapTestGraph"; }
 

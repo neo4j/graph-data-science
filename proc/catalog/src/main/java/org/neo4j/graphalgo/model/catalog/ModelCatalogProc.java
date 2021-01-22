@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -36,6 +36,7 @@ abstract class ModelCatalogProc extends BaseProc {
         CypherMapWrapper.failOnBlank("modelName", modelName);
     }
 
+    @SuppressWarnings("unused")
     public static class ModelResult {
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> trainConfig;

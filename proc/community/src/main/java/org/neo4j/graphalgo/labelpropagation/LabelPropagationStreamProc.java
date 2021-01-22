@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -84,6 +84,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
         return LabelPropagationProc.nodeProperties(computationResult, UUID.randomUUID().toString(), allocationTracker());
     }
 
+    @SuppressWarnings("unused")
     public static final class StreamResult {
         public final long nodeId;
         public final long communityId;

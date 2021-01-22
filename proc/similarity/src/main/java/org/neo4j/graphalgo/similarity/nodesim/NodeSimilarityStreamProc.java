@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -57,7 +57,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
             return Stream.empty();
         }
 
-        return result.result().maybeStreamResult().get()
+        return result.result().streamResult()
             .map(similarityResult -> {
                 similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
                 similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);

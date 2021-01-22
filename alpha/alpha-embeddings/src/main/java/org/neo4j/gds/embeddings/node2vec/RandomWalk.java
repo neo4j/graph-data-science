@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -115,10 +115,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             return nodeIds;
         });
-    }
-
-    private long toOriginalNodeId(long currentNodeId) {
-        return currentNodeId == -1 ? -1 : graph.toOriginalNodeId(currentNodeId);
     }
 
     private static <T> void put(BlockingQueue<T> queue, T items) {

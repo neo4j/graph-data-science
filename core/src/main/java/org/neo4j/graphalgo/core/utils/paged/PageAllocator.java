@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -116,14 +116,6 @@ public abstract class PageAllocator<T> {
         public long estimateMemoryUsage(long size) {
             long numPages = PageUtil.numPagesFor(size, pageSize);
             return numPages * bytesPerPage;
-        }
-
-        public long estimateMemoryUsage(long size, Class<?> container) {
-            return sizeOfInstance(container) + estimateMemoryUsage(size);
-        }
-
-        int pageSize() {
-            return pageSize;
         }
 
         PageAllocator<T> newAllocator(AllocationTracker tracker) {

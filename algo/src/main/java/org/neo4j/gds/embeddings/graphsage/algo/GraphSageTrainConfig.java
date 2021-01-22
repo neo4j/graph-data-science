@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -192,26 +192,6 @@ public interface GraphSageTrainConfig extends
             username,
             userInput
         );
-    }
-
-    static GraphSageTrainConfig of(
-        String modelName,
-        ActivationFunction activationFunction,
-        Aggregator.AggregatorType aggregator,
-        int batchSize,
-        int embeddingDimension,
-        List<String> featureProperties,
-        double tolerance
-    ) {
-        return ImmutableGraphSageTrainConfig.builder()
-            .modelName(modelName)
-            .activationFunction(activationFunction)
-            .aggregator(aggregator)
-            .batchSize(batchSize)
-            .embeddingDimension(embeddingDimension)
-            .featureProperties(featureProperties)
-            .tolerance(tolerance)
-            .build();
     }
 
     @Configuration.Ignore

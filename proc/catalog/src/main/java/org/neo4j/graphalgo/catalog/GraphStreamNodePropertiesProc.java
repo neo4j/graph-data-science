@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -120,6 +120,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             });
     }
 
+    @SuppressWarnings("unused")
     public static class PropertiesResult {
         public final long nodeId;
         public final String nodeProperty;
@@ -132,6 +133,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static class PropertyResult {
         public final long nodeId;
         public final Object propertyValue;

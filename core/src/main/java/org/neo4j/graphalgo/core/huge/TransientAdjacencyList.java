@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -159,10 +159,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
         private Cursor(byte[][] pages) {
             this.pages = pages;
-        }
-
-        public int length() {
-            return degree;
         }
 
         @Override

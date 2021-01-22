@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -43,7 +43,7 @@ final class LocalClusteringCoefficientCompanion {
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
-        return computeResult.result().localClusteringCoefficients().asNodeProperties();
+        return computeResult.result().asNodeProperties();
     }
 
     static void warnOnGraphWithParallelRelationships(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientBaseConfig config, Log log) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityProc;
-import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
 import org.neo4j.graphalgo.similarity.SimilarityWriteProc;
+import org.neo4j.graphalgo.similarity.SimilarityWriteResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -117,6 +117,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult {
         public final long createMillis;
         public final long computeMillis;
@@ -149,6 +150,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteC
             this.configuration = configuration;
         }
 
+        @SuppressWarnings("unused")
         static class Builder extends SimilarityProc.SimilarityResultBuilder<KnnWriteProc.WriteResult> {
 
             @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -168,6 +168,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         }
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
         public final long createMillis;
         public final long computeMillis;

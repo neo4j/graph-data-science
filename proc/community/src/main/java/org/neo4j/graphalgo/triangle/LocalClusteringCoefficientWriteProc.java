@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -105,6 +105,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
         );
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult extends LocalClusteringCoefficientStatsProc.StatsResult {
 
         public long writeMillis;

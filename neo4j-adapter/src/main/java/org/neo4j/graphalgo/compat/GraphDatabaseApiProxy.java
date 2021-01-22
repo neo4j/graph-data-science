@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -27,7 +27,6 @@ import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -121,12 +120,6 @@ public final class GraphDatabaseApiProxy {
         Transaction tx = db.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         return ImmutableTransactions.of(true, tx, ktx, Optional.empty());
-    }
-
-    public static Transactions newKernelTransaction(GraphDatabaseService db, SecurityContext context) {
-        Transaction tx = db.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        return ImmutableTransactions.of(true, tx, ktx, Optional.ofNullable(context).map(ktx::overrideWith));
     }
 
     @ValueClass

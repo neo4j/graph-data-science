@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -58,6 +58,7 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         ));
     }
 
+    @SuppressWarnings("unused")
     public static class Result {
         public final String graphName;
         public final String relationshipType;

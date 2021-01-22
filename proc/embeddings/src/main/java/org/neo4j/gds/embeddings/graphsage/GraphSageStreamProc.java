@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -118,6 +118,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         throw new UnsupportedOperationException("GraphSage handles result building individually.");
     }
 
+    @SuppressWarnings("unused")
     public static class GraphSageStreamResult {
         public long nodeId;
         public List<Double> embedding;

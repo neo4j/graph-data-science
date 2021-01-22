@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -115,19 +115,6 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
             .build();
     }
 
-    public static RelationshipProjections pair(
-        RelationshipType relationshipType1,
-        RelationshipProjection projection1,
-        RelationshipType relationshipType2,
-        RelationshipProjection projection2
-    ) {
-        return RelationshipProjections
-            .builder()
-            .putProjection(relationshipType1, projection1)
-            .putProjection(relationshipType2, projection2)
-            .build();
-    }
-
     private static RelationshipProjections create(Map<RelationshipType, RelationshipProjection> projections) {
         if (projections.isEmpty()) {
             throw new IllegalArgumentException(
@@ -188,9 +175,7 @@ public abstract class AbstractRelationshipProjections extends AbstractProjection
 
     public Map<String, Object> toObject() {
         Map<String, Object> value = new LinkedHashMap<>();
-        projections().forEach((identifier, projection) -> {
-            value.put(identifier.name, projection.toObject());
-        });
+        projections().forEach((identifier, projection) -> value.put(identifier.name, projection.toObject()));
         return value;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -92,6 +92,7 @@ public class BetweennessCentralityMutateProc extends MutatePropertyProc<Betweenn
         return BetweennessCentralityProc.resultBuilder(new MutateResult.Builder(callContext, computeResult.config().concurrency()), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends BetweennessCentralityStatsProc.StatsResult {
 
         public final long nodePropertiesWritten;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -33,17 +33,6 @@ public final class ArrayLayout {
      */
     public static long[] constructEytzinger(long[] input) {
         return constructEytzinger(input, 0, input.length);
-    }
-
-    /**
-     * Constructs a new binary search tree using the Eytzinger layout.
-     * Input must be sorted.
-     *
-     * @param input the sorted input data
-     * @param length how many elements to use from the input
-     */
-    public static long[] constructEytzinger(long[] input, int length) {
-        return constructEytzinger(input, 0, length);
     }
 
     /**

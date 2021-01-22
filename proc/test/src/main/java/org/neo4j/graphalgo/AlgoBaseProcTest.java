@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -54,8 +54,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -381,25 +379,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 .loadEverything()
                 .graphCreate(graphName)
                 .yields()
-        );
-    }
-
-    private RESULT loadGraphAndRunCompute(String graphName) {
-        loadGraph(graphName);
-
-        AtomicReference<AlgoBaseProc.ComputationResult<?, RESULT, CONFIG>> computationResult = new AtomicReference<>();
-        applyOnProcedure((proc) -> {
-            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.empty()).toMap();
-            computationResult.set(proc.compute(graphName, configMap));
-        });
-        return computationResult.get().result();
-    }
-
-    private void createRandomNodes() {
-        runQuery(
-            graphDb(),
-            "UNWIND range(1,$size) as _ CREATE (:Fake)",
-            Map.of("size", new Random().nextInt(1000))
         );
     }
 

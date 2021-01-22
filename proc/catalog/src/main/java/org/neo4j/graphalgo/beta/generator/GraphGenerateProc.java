@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -159,6 +159,7 @@ public final class GraphGenerateProc extends BaseProc {
         return Optional.of(propertyProducer);
     }
 
+    @SuppressWarnings("unused")
     public static class GraphGenerationStats {
         public String name;
         public long nodes;

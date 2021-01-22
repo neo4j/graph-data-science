@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -38,7 +38,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     private final ComputeContext<CONFIG> computeContext;
     private final Partition nodeBatch;
     private final Degrees degrees;
-    private final Pregel.CompositeNodeValue nodeValues;
+    private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
     private final PregelComputation<CONFIG> computation;
@@ -53,7 +53,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         CONFIG config,
         int iteration,
         Partition nodeBatch,
-        Pregel.CompositeNodeValue nodeValues,
+        NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
         RelationshipIterator relationshipIterator
@@ -66,7 +66,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         this.nodeBatch = nodeBatch;
         this.degrees = graph;
         this.isMultiGraph = graph.isMultiGraph();
-        this.nodeValues = nodeValues;
+        this.nodeValue = nodeValue;
         this.relationshipIterator = relationshipIterator.concurrentCopy();
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
@@ -158,35 +158,35 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     }
 
     public double doubleNodeValue(String key, long nodeId) {
-        return nodeValues.doubleValue(key, nodeId);
+        return nodeValue.doubleValue(key, nodeId);
     }
 
     public long longNodeValue(String key, long nodeId) {
-        return nodeValues.longValue(key, nodeId);
+        return nodeValue.longValue(key, nodeId);
     }
 
     public long[] longArrayNodeValue(String key, long nodeId) {
-        return nodeValues.longArrayValue(key, nodeId);
+        return nodeValue.longArrayValue(key, nodeId);
     }
 
     public double[] doubleArrayNodeValue(String key, long nodeId) {
-        return nodeValues.doubleArrayValue(key, nodeId);
+        return nodeValue.doubleArrayValue(key, nodeId);
     }
 
     public void setNodeValue(String key, long nodeId, double value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     public void setNodeValue(String key, long nodeId, long value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     public void setNodeValue(String key, long nodeId, long[] value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     public void setNodeValue(String key, long nodeId, double[] value) {
-        nodeValues.set(key, nodeId, value);
+        nodeValue.set(key, nodeId, value);
     }
 
     boolean hasSendMessage() {

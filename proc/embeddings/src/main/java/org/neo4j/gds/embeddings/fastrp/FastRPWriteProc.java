@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -87,6 +87,7 @@ public class FastRPWriteProc extends WriteProc<FastRP, FastRP.FastRPResult, Fast
         return new WriteResult.Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodeCount;

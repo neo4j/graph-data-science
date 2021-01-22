@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -147,6 +147,7 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureValue(GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT_DEFAULT_SETTING));
     }
 
+    @SuppressWarnings("unused")
     public static final class FeatureState {
         public final boolean enabled;
 
@@ -155,6 +156,7 @@ public final class FeatureToggleProc {
         }
     }
 
+    @SuppressWarnings("unused")
     public static final class FeatureValue {
         public final long value;
 

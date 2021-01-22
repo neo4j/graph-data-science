@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -91,6 +91,7 @@ public class ModularityOptimizationMutateProc extends MutatePropertyProc<Modular
         return new ModularityOptimizationFactory<>();
     }
 
+    @SuppressWarnings("unused")
     public static class MutateResult {
 
         public final long createMillis;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -96,6 +96,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
         return TriangleCountCompanion.resultBuilder(new TriangleCountWriteBuilder(), computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static class WriteResult extends TriangleCountStatsProc.StatsResult {
 
         public long writeMillis;

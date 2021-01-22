@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -508,29 +508,11 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
         assertEquals(0D, row.get("similarity"));
     }
 
-    private void assert23Skip(Map<String, Object> row) {
-        assertEquals(2L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(1L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0D, row.get("similarity"));
-    }
-
     private void assert13(Map<String, Object> row) {
         assertEquals(1L, row.get("item1"));
         assertEquals(3L, row.get("item2"));
         assertEquals(3L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0D, row.get("similarity"));
-    }
-
-    private void assert13Skip(Map<String, Object> row) {
-        assertEquals(1L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(2L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
         assertEquals(0D, row.get("similarity"));
     }
@@ -558,15 +540,6 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
         assertEquals(3L, row.get("item2"));
         assertEquals(3L, row.get("count1"));
         assertEquals(3L, row.get("count2"));
-        assertEquals(0L, row.get("intersection"));
-        assertEquals(0D, row.get("similarity"));
-    }
-
-    private void assert03Skip(Map<String, Object> row) {
-        assertEquals(0L, row.get("item1"));
-        assertEquals(3L, row.get("item2"));
-        assertEquals(3L, row.get("count1"));
-        assertEquals(0L, row.get("count2"));
         assertEquals(0L, row.get("intersection"));
         assertEquals(0D, row.get("similarity"));
     }

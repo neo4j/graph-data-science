@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -23,21 +23,10 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public final class GraphHelper {
-
-    public static double[] collectTargetProperties(final Graph graph, long sourceId) {
-        DoubleStream.Builder outWeights = DoubleStream.builder();
-        graph.forEachRelationship(graph.toMappedNodeId(sourceId), 0D,
-                (sourceNodeId, targetNodeId, weight) -> {
-                    outWeights.add(weight);
-                    return true;
-                });
-        return outWeights.build().toArray();
-    }
 
     public static void assertRelationships(Graph graph, long node, long... expected) {
         LongArrayList idList = new LongArrayList();

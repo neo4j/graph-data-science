@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -54,9 +53,6 @@ public class ListProc {
 
     private static final String DESCRIPTION = "CALL gds.list - lists all algorithm procedures, their description and signature";
 
-    @Context
-    public GraphDatabaseService db;
-
     @Procedure("gds.list")
     @Description(DESCRIPTION)
     public Stream<ListResult> list(@Name(value = "name", defaultValue = "") String name) {
@@ -65,6 +61,7 @@ public class ListProc {
             .map(ListResult::new);
     }
 
+    @SuppressWarnings("unused")
     public static class ListResult {
         public String name;
         public String description;

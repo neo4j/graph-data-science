@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -150,6 +150,7 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
     }
 
+    @SuppressWarnings("unused")
     public static class SccResult {
 
         public final long createMillis;

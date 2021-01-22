@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -124,6 +124,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
         return new WriteResult.Builder();
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult {
 
         public final long nodeCount;

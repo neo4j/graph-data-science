@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 "Neo4j,"
+ * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
  * This file is part of Neo4j.
@@ -31,6 +31,7 @@ import java.util.List;
 import static org.neo4j.graphalgo.beta.paths.PathFactory.create;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@SuppressWarnings("unused")
 public final class StreamResult {
 
     public static final String COST_PROPERTY_NAME = "cost";
