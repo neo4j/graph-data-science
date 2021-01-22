@@ -43,7 +43,11 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     @Configuration.ConvertWith("org.neo4j.gds.ml.nodemodels.metrics.Metric#resolveMetrics")
     @Configuration.ToMapValue("org.neo4j.gds.ml.nodemodels.metrics.Metric#metricsToString")
     List<Metric> metrics();
+
+    @Configuration.DoubleRange(min = 0, max = 1)
     double holdoutFraction();
+
+    @Configuration.IntegerRange(min = 1)
     int validationFolds();
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
