@@ -43,10 +43,10 @@ class GraphSageTrainConfigSerializerTest {
             .featureProperties(List.of("age", "birth_year", "death_year"));
 
         var trainConfig = trainConfigBuilder.build();
-        var proto = GraphSageTrainConfigSerializer.to(trainConfig);
+        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
         assertThat(proto).isNotNull();
 
-        var from = GraphSageTrainConfigSerializer.from(proto);
+        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
         assertThat(from)
             .isNotNull()
             .usingRecursiveComparison()
@@ -66,10 +66,10 @@ class GraphSageTrainConfigSerializerTest {
             .relationshipWeightProperty("blah-blah");
 
         var trainConfig = trainConfigBuilder.build();
-        var proto = GraphSageTrainConfigSerializer.to(trainConfig);
+        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
         assertThat(proto).isNotNull();
 
-        var from = GraphSageTrainConfigSerializer.from(proto);
+        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
         assertThat(from)
             .isNotNull()
             .usingRecursiveComparison()

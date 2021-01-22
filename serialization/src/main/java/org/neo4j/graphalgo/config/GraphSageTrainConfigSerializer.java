@@ -30,7 +30,7 @@ public final class GraphSageTrainConfigSerializer {
 
     private GraphSageTrainConfigSerializer() {}
 
-    public static GraphSageProto.GraphSageTrainConfig to(GraphSageTrainConfig trainConfig) {
+    public static GraphSageProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
         var protoConfigBuilder = GraphSageProto.GraphSageTrainConfig.newBuilder();
 
         protoConfigBuilder
@@ -81,7 +81,7 @@ public final class GraphSageTrainConfigSerializer {
         return protoConfigBuilder.build();
     }
 
-    public static GraphSageTrainConfig from(GraphSageProto.GraphSageTrainConfig protoTrainConfig) {
+    public static GraphSageTrainConfig fromSerializable(GraphSageProto.GraphSageTrainConfig protoTrainConfig) {
         var trainConfigBuilder = GraphSageTrainConfig.builder();
         trainConfigBuilder
             .modelName(protoTrainConfig.getModelConfig().getModelName())

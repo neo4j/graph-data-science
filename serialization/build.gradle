@@ -9,7 +9,7 @@ protobuf {
     protoc {
         // Download from repositories
         artifact = "com.google.protobuf:protoc:${ver.'protobuf'}"
-        generatedFilesBaseDir = "$projectDir/generated-protos"
+        generatedFilesBaseDir = "$buildDir/generated-protos"
     }
 }
 

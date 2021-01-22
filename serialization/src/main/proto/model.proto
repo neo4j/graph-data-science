@@ -11,7 +11,6 @@ message Model {
   string name = 2;
   string algoType = 3;
   GraphSchema graphSchema = 4;
-  bytes serializedTrainConfig = 5;
   ZonedDateTime creationTime = 6;
 }
 

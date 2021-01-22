@@ -8,9 +8,14 @@ option java_package = "org.neo4j.graphalgo.core.model.proto";
 option java_outer_classname = "GraphSageProto";
 
 message GraphSageModel {
-  Model model = 1;
+  GraphSageModelMetadata model = 1;
   ModelData data = 2;
   FeatureFunction featureFunction = 3;
+}
+
+message GraphSageModelMetadata {
+  GraphSageTrainConfig trainConfig = 1;
+  Model model = 2;
 }
 
 message FeatureFunction {

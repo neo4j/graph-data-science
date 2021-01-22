@@ -19,13 +19,11 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import com.google.protobuf.ByteString;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.api.schema.SchemaSerializer;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
 import java.io.IOException;
 
@@ -39,7 +37,6 @@ public final class ModelSerializer {
             .setName(model.name())
             .setAlgoType(model.algoType())
             .setGraphSchema(SchemaSerializer.serializableGraphSchema(model.graphSchema()))
-            .setSerializedTrainConfig(ByteString.copyFrom(ObjectSerializer.toByteArray(model.trainConfig())))
             .setCreationTime(ZonedDateTimeSerializer.toSerializable(model.creationTime()))
             .build();
     }
