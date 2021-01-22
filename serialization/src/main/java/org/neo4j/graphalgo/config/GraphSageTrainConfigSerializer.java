@@ -24,7 +24,12 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
-import java.util.Optional;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableEmbeddingDimensionsConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableIterationsConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableRelationshipWeightConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableToleranceConfig;
 
 public final class GraphSageTrainConfigSerializer {
 
@@ -34,39 +39,19 @@ public final class GraphSageTrainConfigSerializer {
         var protoConfigBuilder = GraphSageProto.GraphSageTrainConfig.newBuilder();
 
         protoConfigBuilder
-            .setModelConfig(
-                CommonConfigProto.ModelConfigProto
-                    .newBuilder()
-                    .setModelName(trainConfig.modelName())
-            )
-            .setEmbeddingDimensionConfig(
-                CommonConfigProto.EmbeddingDimensionConfigProto
-                    .newBuilder()
-                    .setEmbeddingDimension(trainConfig.embeddingDimension())
-            )
+            .setModelConfig(serializableModelConfig(trainConfig))
+            .setEmbeddingDimensionConfig(serializableEmbeddingDimensionsConfig(trainConfig))
             .addAllSampleSizes(trainConfig.sampleSizes())
             .setAggregator(GraphSageProto.AggregatorType.valueOf(trainConfig.aggregator().name()))
             .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(trainConfig.activationFunction().name()))
-            .setToleranceConfig(
-                CommonConfigProto.ToleranceConfigProto
-                    .newBuilder()
-                    .setTolerance(trainConfig.tolerance())
-            )
+            .setToleranceConfig(serializableToleranceConfig(trainConfig))
             .setLearningRate(trainConfig.learningRate())
             .setEpochs(trainConfig.epochs())
-            .setIterationsConfig(
-                CommonConfigProto.IterationsConfigProto
-                    .newBuilder()
-                    .setMaxIterations(trainConfig.maxIterations())
-            )
+            .setIterationsConfig(serializableIterationsConfig(trainConfig))
             .setSearchDepth(trainConfig.searchDepth())
             .setNegativeSampleWeight(trainConfig.negativeSampleWeight())
             .setDegreeAsProperty(trainConfig.degreeAsProperty())
-            .setFeaturePropertiesConfig(
-                CommonConfigProto.FeaturePropertiesConfigProto
-                    .newBuilder()
-                    .addAllFeatureProperties(trainConfig.featureProperties())
-            );
+            .setFeaturePropertiesConfig(serializableFeaturePropertiesConfig(trainConfig));
 
         var projectedFeatureDimensionBuilder = GraphSageProto.ProjectedFeatureDimension
             .newBuilder()
@@ -74,13 +59,7 @@ public final class GraphSageTrainConfigSerializer {
         trainConfig.projectedFeatureDimension().ifPresent(projectedFeatureDimensionBuilder::setValue);
         protoConfigBuilder.setProjectedFeatureDimension(projectedFeatureDimensionBuilder);
 
-        Optional
-            .ofNullable(trainConfig.relationshipWeightProperty())
-            .ifPresent(weightProperty -> protoConfigBuilder.setRelationshipWeightConfig(
-                CommonConfigProto.RelationshipWeightConfigProto
-                    .newBuilder()
-                    .setRelationshipWeightProperty(weightProperty)
-            ));
+        serializableRelationshipWeightConfig(trainConfig, protoConfigBuilder::setRelationshipWeightConfig);
 
         return protoConfigBuilder.build();
     }
