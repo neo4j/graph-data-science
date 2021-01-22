@@ -74,8 +74,8 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     private static LocalIdMap makeClassIdMap(String targetPropertyKey, Graph graph) {
         var classIdMap = new LocalIdMap();
         graph.forEachNode(nodeId -> {
-            var targetClass = graph.nodeProperties(targetPropertyKey).doubleValue(nodeId);
-            classIdMap.toMapped((long) targetClass);
+            var targetClass = graph.nodeProperties(targetPropertyKey).longValue(nodeId);
+            classIdMap.toMapped(targetClass);
             return true;
         });
         return classIdMap;
