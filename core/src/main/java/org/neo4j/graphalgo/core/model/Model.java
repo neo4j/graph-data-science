@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
@@ -46,6 +47,18 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     ZonedDateTime creationTime();
 
     Mappable customInfo();
+
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean loaded() {
+        return true;
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    default boolean persisted() {
+        return false;
+    }
 
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
         String username,

@@ -60,4 +60,8 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
         }
         return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureDimension, labels);
     }
+
+    public int projectedFeatureDimension() {
+        return projectedFeatureDimension;
+    }
 }

@@ -15,6 +15,7 @@ message GraphSageModel {
 message FeatureFunction {
   FeatureFunctionType functionType = 1;
   map<string, Matrix> weightsByLabel = 2;
+  int32 projectedFeatureDimension = 3;
 }
 
 enum FeatureFunctionType {

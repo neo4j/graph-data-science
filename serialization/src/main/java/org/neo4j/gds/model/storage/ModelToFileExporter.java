@@ -45,6 +45,6 @@ public final class ModelToFileExporter {
         Path exportDir,
         ModelExportConfig config
     ) throws IOException {
-        return new ModelFileReader<DATA, CONFIG>(exportDir, config).read();
+        return (Model<DATA, CONFIG>) new ModelFileReader(exportDir, config).read();
     }
 }

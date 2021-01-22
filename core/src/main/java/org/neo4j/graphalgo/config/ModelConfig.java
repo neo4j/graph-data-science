@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.config;
 
 import java.io.Serializable;
 
-public interface ModelConfig extends Serializable {
+public interface ModelConfig extends Serializable, BaseConfig {
 
     long serialVersionUID = 0x42L;
 

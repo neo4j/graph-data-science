@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
@@ -42,16 +41,18 @@ public final class FeatureFunctionSerializer {
         if (featureFunction instanceof SingleLabelFeatureFunction) {
             return GraphSageProto.FeatureFunction.newBuilder().setFunctionType(GraphSageProto.FeatureFunctionType.SINGLE).build();
         } else if(featureFunction instanceof MultiLabelFeatureFunction) {
+            var multiLabelFeatureFunction = (MultiLabelFeatureFunction) featureFunction;
             return GraphSageProto.FeatureFunction
                 .newBuilder()
                 .setFunctionType(GraphSageProto.FeatureFunctionType.MULTI)
-                .putAllWeightsByLabel(unwrapWeightsByLabelMatrix(((MultiLabelFeatureFunction) featureFunction).weightsByLabel()))
+                .putAllWeightsByLabel(unwrapWeightsByLabelMatrix(multiLabelFeatureFunction.weightsByLabel()))
+                .setProjectedFeatureDimension(multiLabelFeatureFunction.projectedFeatureDimension())
                 .build();
         }
         throw new IllegalArgumentException(formatWithLocale("Unknown feature function class: %s", featureFunction));
     }
 
-    static FeatureFunction fromSerializable(GraphSageProto.FeatureFunction protoFeatureFunction, GraphSageTrainConfig config) throws
+    static FeatureFunction fromSerializable(GraphSageProto.FeatureFunction protoFeatureFunction) throws
         IOException {
         switch (protoFeatureFunction.getFunctionType()) {
             case SINGLE:
@@ -59,7 +60,7 @@ public final class FeatureFunctionSerializer {
             case MULTI:
                 return new MultiLabelFeatureFunction(
                     wrapWeightsByLabelMatrix(protoFeatureFunction.getWeightsByLabelMap()),
-                    config.projectedFeatureDimension().orElseThrow()
+                    protoFeatureFunction.getProjectedFeatureDimension()
                 );
             default:
                 throw new IllegalArgumentException(formatWithLocale("Unknown proto feature function class: %s", protoFeatureFunction));

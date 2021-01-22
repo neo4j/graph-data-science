@@ -22,8 +22,6 @@ package org.neo4j.gds.model.storage;
 import com.google.protobuf.Parser;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
@@ -37,35 +35,46 @@ import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_SUFFIX;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_SUFFIX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class ModelFileReader<DATA, CONFIG extends BaseConfig & ModelConfig> {
+public class ModelFileReader {
 
     private final Path exportDir;
     private final String fileName;
 
-    ModelFileReader(Path exportDir, ModelExportConfig config) {
+    public ModelFileReader(Path exportDir, ModelExportConfig config) {
         this.exportDir = exportDir;
         this.fileName = config.fileName();
     }
 
-    public Model<DATA, CONFIG> read() throws IOException {
-        var modelMetaData = readMetaData();
-        return fromSerializable(modelMetaData);
+    public ModelProto.ModelMetaData readMetaData() throws IOException {
+        File file = exportDir.resolve(formatWithLocale("%s.%s", fileName, META_DATA_SUFFIX)).toFile();
+        return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
     }
 
-    private Model<DATA, CONFIG> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
-        switch (modelMetaData.getAlgoType()) {
+    public Object readData(String algoType) throws IOException {
+        switch (algoType) {
             case GraphSage.MODEL_TYPE:
                 var parser = GraphSageProto.GraphSageModel.parser();
                 var graphSageModelProto = readModelData(exportDir, fileName, parser);
-                return (Model<DATA, CONFIG>) GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
+                return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
             default:
                 throw new IllegalArgumentException();
         }
     }
 
-    private ModelProto.ModelMetaData readMetaData() throws IOException {
-        File file = exportDir.resolve(formatWithLocale("%s.%s", fileName, META_DATA_SUFFIX)).toFile();
-        return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
+    public Model<?, ?> read() throws IOException {
+        var modelMetaData = readMetaData();
+        return fromSerializable(modelMetaData);
+    }
+
+    private Model<?, ?> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
+        switch (modelMetaData.getAlgoType()) {
+            case GraphSage.MODEL_TYPE:
+                var parser = GraphSageProto.GraphSageModel.parser();
+                var graphSageModelProto = readModelData(exportDir, fileName, parser);
+                return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     private <T> T readModelData(Path exportDir, String fileName, Parser<T> parser) throws IOException {

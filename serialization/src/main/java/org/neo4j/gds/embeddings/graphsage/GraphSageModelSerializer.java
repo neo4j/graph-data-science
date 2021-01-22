@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
@@ -51,18 +51,18 @@ public final class GraphSageModelSerializer {
         ModelProto.ModelMetaData modelMetaData
     ) throws IOException {
 
-        var modelBuilder =
-            ModelMetaDataSerializer.<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData);
-        return modelBuilder.data(
-            ModelData.of(
-                LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
-                FeatureFunctionSerializer.fromSerializable(
-                    protoModel.getFeatureFunction(),
-                    GraphSageTrainConfigSerializer.fromSerializable(modelMetaData.getGraphSageTrainConfig())
-                )
-            )
-        )
+        return ModelMetaDataSerializer
+            .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
+            .data(deserializeModelData(protoModel))
             .customInfo(Model.Mappable.EMPTY)
             .build();
+    }
+
+    @NotNull
+    public static ModelData deserializeModelData(GraphSageProto.GraphSageModel protoModel) throws IOException {
+        return ModelData.of(
+            LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
+            FeatureFunctionSerializer.fromSerializable(protoModel.getFeatureFunction())
+        );
     }
 }
