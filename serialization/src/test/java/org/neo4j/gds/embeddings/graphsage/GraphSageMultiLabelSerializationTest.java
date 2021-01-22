@@ -44,7 +44,7 @@ import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class GraphSageMultiLabelEndToEndTest {
+class GraphSageMultiLabelSerializationTest {
 
     @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph

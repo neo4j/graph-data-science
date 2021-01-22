@@ -41,7 +41,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class GraphSageSingleLabelEndToEndTest {
+class GraphSageSingleLabelSerializationTest {
 
     @GdlGraph
     private static final String GRAPH =

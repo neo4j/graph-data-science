@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class LayerSerializer {
 
     private LayerSerializer() {}
@@ -76,8 +78,8 @@ public final class LayerSerializer {
                     maxPoolingAggregator.activationFunction(),
                     protoLayer.getRandomState()
                 );
+            default:
+                throw new IllegalArgumentException(formatWithLocale("Unknown aggregator: %s", aggregatorCase));
         }
-
-        return null;
     }
 }
