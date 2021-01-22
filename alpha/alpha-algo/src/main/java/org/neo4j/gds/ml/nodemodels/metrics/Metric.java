@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -59,7 +60,7 @@ public enum Metric {
         return metrics.stream()
             .map(name -> {
                 try {
-                    return Metric.valueOf(name);
+                    return Metric.valueOf(name.toUpperCase(Locale.ROOT));
                 } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Invalid metric `%s`. Available metrics are %s",

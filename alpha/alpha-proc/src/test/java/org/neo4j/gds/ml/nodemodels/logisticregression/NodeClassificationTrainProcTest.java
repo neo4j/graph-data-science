@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphdb.Result;
 
 import java.util.List;
 import java.util.Map;
@@ -122,6 +123,23 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .yields();
 
         assertError(query, "`targetProperty`: `nope` not found in graph with node properties: ['a', 'b', 't']");
+    }
+
+    @Test
+    void shouldAcceptButNotPreserveCaseInsensitiveMetricNames() {
+        String query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                       "  modelName: 'model'," +
+                       "  targetProperty: 't'," +
+                       "  metrics: ['f1_weighted','aCcUrAcY']," +
+                       "  holdoutFraction: 0.2," +
+                       "  validationFolds: 5," +
+                       "  params: [{penalty: 1.0}]" +
+                       "})";
+
+        String resultAsString = runQuery(query, Result::resultAsString);
+
+        assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY");
+        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY");
     }
 
     @Test
