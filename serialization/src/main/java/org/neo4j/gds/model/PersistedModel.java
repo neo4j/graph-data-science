@@ -20,6 +20,7 @@
 package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.model.storage.ModelExportConfig;
 import org.neo4j.gds.model.storage.ModelFileReader;
@@ -35,6 +36,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.Map;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PersistedModel implements Model<Object, ModelConfig> {
 
@@ -110,7 +113,7 @@ public class PersistedModel implements Model<Object, ModelConfig> {
 
     @Override
     public ModelConfig trainConfig() {
-        if (algoType().equals("GraphSage")) {
+        if (algoType().equals(GraphSage.MODEL_TYPE)) {
             try {
                 return ObjectSerializer.fromByteArray(
                     metaData.getSerializedTrainConfig().toByteArray(),
@@ -137,10 +140,13 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     @Override
     public Object data() {
         if (!loaded) {
-            throw new IllegalStateException("Model has not been loaded");
+            throw new IllegalStateException(formatWithLocale(
+                "The model '%s' is currently not loaded.",
+                name()
+            ));
         }
 
-        return data();
+        return data;
     }
 
 
