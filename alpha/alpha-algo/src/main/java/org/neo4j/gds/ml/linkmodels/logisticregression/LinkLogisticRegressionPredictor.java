@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.ml.Batch;
+import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.graphalgo.api.Graph;
 

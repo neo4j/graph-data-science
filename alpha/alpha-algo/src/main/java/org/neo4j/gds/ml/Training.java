@@ -22,6 +22,8 @@ package org.neo4j.gds.ml;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.logging.Log;
 
 import java.util.concurrent.atomic.DoubleAdder;

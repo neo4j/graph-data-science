@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.Batch;
-import org.neo4j.gds.ml.MappedBatch;
+import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.batch.MappedBatch;
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.nodemodels.BatchTransformer;
+import org.neo4j.gds.ml.batch.BatchTransformer;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.ml.LazyBatch;
+import org.neo4j.gds.ml.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;

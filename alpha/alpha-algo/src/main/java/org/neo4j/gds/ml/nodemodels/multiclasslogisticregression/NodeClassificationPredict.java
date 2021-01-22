@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.ml.BatchQueue;
+import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import static org.neo4j.gds.ml.nodemodels.BatchTransformer.IDENTITY;
+import static org.neo4j.gds.ml.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, MultiClassNLRResult> {
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.neo4j.gds.ml.BatchQueue;
+import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;

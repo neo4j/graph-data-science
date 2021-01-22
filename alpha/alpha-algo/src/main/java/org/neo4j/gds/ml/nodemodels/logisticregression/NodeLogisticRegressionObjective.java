@@ -26,7 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.gds.ml.Batch;
+import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
 
