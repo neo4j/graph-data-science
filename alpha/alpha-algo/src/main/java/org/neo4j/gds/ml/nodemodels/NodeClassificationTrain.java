@@ -145,7 +145,6 @@ public class NodeClassificationTrain
 
     private List<Long> sortedClasses(MultiClassNLRData modelData) {
         return Arrays.stream(modelData.classIdMap().originalIds())
-            .sorted()
             .boxed()
             .collect(Collectors.toList());
     }
