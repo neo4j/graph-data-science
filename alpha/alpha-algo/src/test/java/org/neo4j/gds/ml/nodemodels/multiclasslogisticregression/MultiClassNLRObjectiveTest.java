@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.ml.LazyBatch;
@@ -31,6 +30,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.List;
 
 import static java.lang.Math.log;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class MultiClassNLRObjectiveTest {
@@ -57,7 +57,15 @@ class MultiClassNLRObjectiveTest {
         var lossValue = ctx.forward(loss).value();
 
         // weights are zero => each class has equal probability to be correct.
-        Assertions.assertThat(lossValue).isEqualTo(-log(1.0 / NUMBER_OF_CLASSES));
+        assertThat(lossValue).isEqualTo(-log(1.0 / NUMBER_OF_CLASSES));
+    }
+
+    @Test
+    void shouldSortClasses() {
+
+        var objective = new MultiClassNLRObjective(List.of("a", "b"), "t", graph, 0.0);
+        var classList = objective.modelData().classIdMap().originalIdsList();
+        assertThat(classList).containsExactly(0L, 1L, 2L);
     }
 
 }
