@@ -36,13 +36,13 @@ public final class GraphSageTestGraph {
         ", (n10:Dish      {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
         ", (n11:Dish      {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
         ", (n12:Dish      {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
-        ", (n13:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n14:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n15:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n16:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n17:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n18:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
-        ", (n19:Customer  {dummyProp: 5.0, numPurchases: 5.0})" +
+        ", (n13:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n14:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n15:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n16:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n17:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n18:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
+        ", (n19:Customer  {dummyProp: 5.0, numPurchases: [5.0]})" +
 
         ", (n0)-[:SERVES { times: 5 }]->(n4)" +
         ", (n0)-[:SERVES { times: 5 }]->(n5)" +

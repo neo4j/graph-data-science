@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
@@ -43,6 +44,7 @@ class ModelSerializationTest {
         .graphStore()
         .schema();
 
+    @Disabled
     @Test
     void shouldSerializeGraphSchema() throws IOException {
         var serializableGraphSchema = SchemaSerializer.serializableGraphSchema(GRAPH_SCHEMA);

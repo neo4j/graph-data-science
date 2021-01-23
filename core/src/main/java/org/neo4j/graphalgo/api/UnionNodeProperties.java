@@ -111,7 +111,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public double[] doubleArrayValue(long nodeId) {
-        if (valueType == DOUBLE_ARRAY) {
+        if ((valueType == DOUBLE_ARRAY) || (valueType == FLOAT_ARRAY)) {
             var nodeProperties = getPropertiesForNodeId(nodeId);
             return nodeProperties == null ? null : nodeProperties.doubleArrayValue(nodeId);
         } else {

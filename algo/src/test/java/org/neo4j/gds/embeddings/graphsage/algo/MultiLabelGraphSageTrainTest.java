@@ -28,9 +28,9 @@ import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -40,9 +40,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class MultiLabelGraphSageTrainTest {
@@ -52,8 +54,44 @@ class MultiLabelGraphSageTrainTest {
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
+    @GdlGraph(graphNamePrefix = "missingArray")
+    public static final String MISSING_ARRAY_GRAPH =
+        " CREATE" +
+        "  (n0:A {p1: 2.0})" +
+        "  (n1:A {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n2:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n3:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n0)-[:T]->(n1)";
+
+    @GdlGraph(graphNamePrefix = "missingArray2")
+    public static final String MISSING_ARRAY_GRAPH2 =
+        " CREATE" +
+        "  (n0:A {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n1:A {p1: 2.0})" +
+        "  (n2:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n3:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n0)-[:T]->(n1)";
+
+    @GdlGraph(graphNamePrefix = "unequal")
+    public static final String UNEQUAL_ARRAY_GRAPH =
+        " CREATE" +
+        "  (n0:A {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n1:A {p1: 2.0, p2: [2.0]})" +
+        "  (n2:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n3:B {p1: 2.0, p2: [2.0, 2.0]})" +
+        "  (n0)-[:T]->(n1)";
+
     @Inject
     TestGraph graph;
+
+    @Inject
+    TestGraph missingArrayGraph;
+
+    @Inject
+    TestGraph missingArray2Graph;
+
+    @Inject
+    TestGraph unequalGraph;
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
@@ -144,6 +182,63 @@ class MultiLabelGraphSageTrainTest {
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
         assertTrue(trainConfig.degreeAsProperty());
+    }
+
+    @Test
+    void shouldFailMissingArrayPropertyNode0() {
+        shouldFailMissingArrayProperty(missingArrayGraph, "p2", 0);
+    }
+
+    @Test
+    void shouldFailMissingArrayPropertyNode1() {
+        shouldFailMissingArrayProperty(missingArray2Graph, "p2", 1);
+    }
+
+    @Test
+    void shouldFailUnequalLengthArrays() {
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .featureProperties(List.of("p1", "p2"))
+            .embeddingDimension(64)
+            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
+            .modelName("foo")
+            .projectedFeatureDimension(10)
+            .build();
+
+        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+            unequalGraph,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(multiLabelGraphSageTrain::compute)
+            .withMessageContaining(
+                "The property `p2` contains arrays of differing lengths `1` and `2`."
+            );
+    }
+
+    void shouldFailMissingArrayProperty(Graph graph, String property, long missingNode) {
+        var config = ImmutableGraphSageTrainConfig.builder()
+            .featureProperties(List.of("p1", "p2"))
+            .embeddingDimension(64)
+            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
+            .modelName("foo")
+            .projectedFeatureDimension(10)
+            .build();
+
+        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+            graph,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(multiLabelGraphSageTrain::compute)
+            .withMessageContaining(
+                formatWithLocale("Missing node property for property key `%s` on node with id `%d`.", property, missingNode)
+            );
+
     }
 
     private static Stream<Arguments> featureSizes() {

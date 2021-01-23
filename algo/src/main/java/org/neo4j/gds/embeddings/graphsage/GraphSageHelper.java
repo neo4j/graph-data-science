@@ -24,6 +24,11 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.DegreeFeatureExtractor;
+import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.features.FeatureExtractor;
+import org.neo4j.gds.ml.features.HugeObjectArrayFeatureConsumer;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -36,13 +41,15 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
+import static org.neo4j.gds.ml.features.FeatureExtraction.featureCount;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -227,30 +234,19 @@ public final class GraphSageHelper {
         GraphSageTrainConfig config,
         HugeObjectArray<double[]> features
     ) {
-        var nodeProperties =
+        var propertyFeatureExtractors = FeatureExtraction.propertyExtractors(
+            graph,
             config.featureProperties()
-                .stream()
-                .map(graph::nodeProperties)
-                .collect(toList());
+        );
 
-        var featureCount = nodeProperties.size() + (config.degreeAsProperty() ? 1 : 0);
+        List<FeatureExtractor> extractors = config.degreeAsProperty() ?
+            Stream.concat(
+                propertyFeatureExtractors.stream(),
+                Stream.of(new DegreeFeatureExtractor(graph))
+            ).collect(toList())
+            : propertyFeatureExtractors;
 
-        features.setAll(nodeId -> {
-            var nodeFeatures = new double[featureCount];
-
-            for (int i = 0; i < nodeProperties.size(); i++) {
-                double doubleValue = getCheckedDoubleNodeProperty(graph, config.featureProperties().get(i), nodeId);
-                nodeFeatures[i] = doubleValue;
-            }
-
-            if (config.degreeAsProperty()) {
-                nodeFeatures[featureCount - 1] = graph.degree(nodeId);
-            }
-
-            return nodeFeatures;
-        });
-
-        return features;
+        return FeatureExtraction.extract(graph, extractors, features);
     }
 
     private static HugeObjectArray<double[]> initializeMultiLabelFeatures(
@@ -258,34 +254,30 @@ public final class GraphSageHelper {
         GraphSageTrainConfig config,
         HugeObjectArray<double[]> features
     ) {
+        var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
+        var featureCountCache = new HashMap<NodeLabel, Integer>();
         var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
-        var featureCountPerNodeLabel = filteredKeysPerLabel.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().size()
-                         + (config.degreeAsProperty() ? 1 : 0)
-                         + 1 // Label is used as a property
-            ));
-
-        features.setAll(nodeId -> {
+        var extractorsPerLabel = new HashMap<NodeLabel, List<FeatureExtractor>>();
+        graph.forEachNode(nodeId -> {
             var nodeLabel = labelOf(graph, nodeId);
-            var filteredKeys = filteredKeysPerLabel.get(nodeLabel);
-            var featureCount = featureCountPerNodeLabel.get(nodeLabel);
-            var nodeFeatures = new double[featureCount];
-
-            int i = 0;
-            for (String propertyKey : filteredKeys) {
-                nodeFeatures[i++] = getCheckedDoubleNodeProperty(graph, propertyKey, nodeId);
-            }
-
-            if (config.degreeAsProperty()) {
-                nodeFeatures[i++] = graph.degree(nodeId);
-            }
-            // Label is used as a property
-            nodeFeatures[i] = 1.0;
-
-            return nodeFeatures;
+            var extractors = extractorsPerLabel.computeIfAbsent(nodeLabel, label -> {
+                var propertyKeys = filteredKeysPerLabel.get(label);
+                var featureExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(graph, propertyKeys, nodeId));
+                if (config.degreeAsProperty()) {
+                    featureExtractors.add(new DegreeFeatureExtractor(graph));
+                }
+                featureExtractors.add(new BiasFeature());
+                return featureExtractors;
+            });
+            var featureCount = featureCountCache.computeIfAbsent(
+                nodeLabel,
+                label -> featureCount(extractorsPerLabel.get(label))
+            );
+            features.set(nodeId, new double[featureCount]);
+            FeatureExtraction.extract(nodeId, nodeId, extractors, featureConsumer);
+            return true;
         });
+
         return features;
     }
 

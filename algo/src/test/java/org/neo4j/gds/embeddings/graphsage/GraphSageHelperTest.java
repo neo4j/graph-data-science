@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,16 +27,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.ml.features.FeatureExtractionBaseTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray; import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -130,6 +132,57 @@ class GraphSageHelperTest {
                 )
             )
         );
+    }
+
+    @Nested
+    class MultilabelGraphSage {
+
+    }
+
+    @Nested
+    class FailingFeatureExtraction extends FeatureExtractionBaseTest {
+
+        @Override
+        public void makeExtractions(Graph graph) {
+            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("foo")
+                .featureProperties(List.of("a", "b"))
+                .build();
+
+            GraphSageHelper.initializeFeatures(graph, graphSageTrainConfig, AllocationTracker.empty());
+        }
+    }
+
+    @Nested
+    class ArrayProperties {
+        @GdlGraph(graphNamePrefix = "valid")
+        private static final String VALID_GRAPH = "CREATE " +
+                                                  "  (a { prop: 1.4, arrayProp: [-1.1,2.5] })" +
+                                                  ", (b { prop: 1.8, arrayProp: [1.0,2.0] })" +
+                                                  ", (a)-[:REL]->(b)";
+
+        @Inject
+        Graph validGraph;
+
+        @Inject
+        IdFunction validIdFunction;
+
+        @Test
+        void shouldConcatenateFeatures() {
+            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+                .modelName("foo")
+                .featureProperties(List.of("prop", "arrayProp"))
+                .build();
+
+            var features = GraphSageHelper.initializeFeatures(
+                validGraph,
+                graphSageTrainConfig,
+                AllocationTracker.empty()
+            );
+            //TODO: check where rounding error is coming from
+            assertThat(features.get(validIdFunction.of("a"))).contains(new double[] {1.4, -1.1, 2.5}, Offset.offset(1e-6));
+            assertThat(features.get(validIdFunction.of("b"))).contains(new double[] {1.8, 1.0, 2.0}, Offset.offset(1e-6));
+        }
     }
 
     @Nested

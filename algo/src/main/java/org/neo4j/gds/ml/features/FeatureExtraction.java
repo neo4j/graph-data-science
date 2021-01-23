@@ -90,19 +90,9 @@ public class FeatureExtraction {
     ) {
         int featureCount = featureCount(extractors);
         features.setAll(i -> new double[featureCount]);
-        FeatureConsumer hoaConsumer = new FeatureConsumer() {
-            @Override
-            public void acceptScalar(long nodeOffset, int offset, double value) {
-                features.get(nodeOffset)[offset] = value;
-            }
-
-            @Override
-            public void acceptArray(long nodeOffset, int offset, double[] values) {
-                System.arraycopy(values, 0, features.get(nodeOffset), offset, values.length);
-            }
-        };
+        var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
         graph.forEachNode(nodeId -> {
-            extract(nodeId, nodeId, extractors, hoaConsumer);
+            extract(nodeId, nodeId, extractors, featureConsumer);
             return true;
         });
         return features;
@@ -113,6 +103,10 @@ public class FeatureExtraction {
     }
 
     public static List<FeatureExtractor> propertyExtractors(Graph graph, Collection<String> featureProperties) {
+        return propertyExtractors(graph, featureProperties, 0);
+    }
+
+    public static List<FeatureExtractor> propertyExtractors(Graph graph, Collection<String> featureProperties, long initNodeId) {
         return featureProperties.stream()
             .map(propertyKey -> {
                 var property = graph.nodeProperties(propertyKey);
@@ -121,7 +115,7 @@ public class FeatureExtraction {
                     var propertyValues = EmbeddingUtils.getCheckedDoubleArrayNodeProperty(
                         graph,
                         propertyKey,
-                        0
+                        initNodeId
                     );
                     return new ArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
                 } else if ((ValueType.DOUBLE == propertyType) || (ValueType.LONG == propertyType)) {
