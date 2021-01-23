@@ -62,7 +62,6 @@ class MultiClassNLRObjectiveTest {
 
     @Test
     void shouldSortClasses() {
-
         var objective = new MultiClassNLRObjective(List.of("a", "b"), "t", graph, 0.0);
         var classList = objective.modelData().classIdMap().originalIdsList();
         assertThat(classList).containsExactly(0L, 1L, 2L);

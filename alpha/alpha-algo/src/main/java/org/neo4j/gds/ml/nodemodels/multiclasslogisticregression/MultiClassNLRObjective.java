@@ -34,10 +34,8 @@ import org.neo4j.gds.ml.Batch;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
 
@@ -75,18 +73,13 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     }
 
     private static LocalIdMap makeClassIdMap(String targetPropertyKey, Graph graph) {
-        var classSet = new HashSet<Long>();
-        var classList = new ArrayList<Long>();
+        var classSet = new TreeSet<Long>();
         var classIdMap = new LocalIdMap();
         graph.forEachNode(nodeId -> {
-            var targetClass = graph.nodeProperties(targetPropertyKey).longValue(nodeId);
-            if (classSet.add(targetClass)) {
-                classList.add(targetClass);
-            }
+            classSet.add(graph.nodeProperties(targetPropertyKey).longValue(nodeId));
             return true;
         });
-        Collections.sort(classList);
-        classList.forEach(classIdMap::toMapped);
+        classSet.forEach(classIdMap::toMapped);
         return classIdMap;
     }
 
