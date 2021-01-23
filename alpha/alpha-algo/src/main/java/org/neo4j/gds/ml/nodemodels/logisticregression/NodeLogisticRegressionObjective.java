@@ -32,8 +32,6 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
-
 public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRegressionData> {
     private final String targetPropertyKey;
     private final Graph graph;
@@ -58,7 +56,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
         var targets = makeTargets(batch);
-        var features = features(graph, batch, modelData().nodePropertyKeys());
+        var features = predictor.features(graph, batch, modelData().nodePropertyKeys());
         var predictions = predictor.predictionsVariable(graph, batch);
         return new LogisticLoss(modelData().weights(), predictions, features, targets);
     }

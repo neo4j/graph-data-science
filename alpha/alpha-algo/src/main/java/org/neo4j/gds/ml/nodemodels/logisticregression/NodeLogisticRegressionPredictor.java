@@ -26,13 +26,15 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
 
 public class NodeLogisticRegressionPredictor implements Predictor<List<Double>, NodeLogisticRegressionData> {
 
@@ -58,5 +60,17 @@ public class NodeLogisticRegressionPredictor implements Predictor<List<Double>, 
         var features = features(graph, batch, modelData.nodePropertyKeys());
         var weights = modelData.weights();
         return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
+    }
+
+    Variable<Matrix> features(Graph graph, Batch batch, List<String> featureProperties) {
+        var extractors = featureExtractors(graph, featureProperties);
+        return FeatureExtraction.extract(batch, extractors);
+    }
+
+    private List<FeatureExtractor> featureExtractors(Graph graph, List<String> featureProperties) {
+        var featureExtractors = new ArrayList<FeatureExtractor>();
+        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        featureExtractors.add(new BiasFeature());
+        return featureExtractors;
     }
 }

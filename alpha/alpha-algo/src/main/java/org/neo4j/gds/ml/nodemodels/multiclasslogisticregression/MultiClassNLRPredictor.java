@@ -21,16 +21,21 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Softmax;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.gds.ml.nodemodels.NodeFeaturesSupport.features;
+import static org.neo4j.gds.ml.features.FeatureExtraction.extract;
 
 public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
 
@@ -54,8 +59,20 @@ public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRDa
     }
 
     Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
-        var features = features(graph, batch, featureProperties);
+        MatrixConstant features = features(graph, batch);
         var weights = modelData.weights();
         return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
+    }
+
+    private MatrixConstant features(Graph graph, Batch batch) {
+        var featureExtractors = featureExtractors(graph);
+        return extract(batch, featureExtractors);
+    }
+
+    private List<FeatureExtractor> featureExtractors(Graph graph) {
+        var featureExtractors = new ArrayList<FeatureExtractor>();
+        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        featureExtractors.add(new BiasFeature());
+        return featureExtractors;
     }
 }
