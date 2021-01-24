@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -62,11 +64,11 @@ class FastRPTest extends AlgoTestBase {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node1 {f1: 0.4, f2: 1.3})" +
-        ", (b:Node1 {f1: 2.1, f2: 0.5})" +
-        ", (c:Node2 {f1: -0.3, f2: 0.8})" +
-        ", (d:Isolated {f1: 2.5, f2: -8.1})" +
-        ", (e:Isolated {f1: -0.6, f2: 0.5})" +
+        "  (a:Node1 {f1: 0.4, f2: [1.3, 1.4]})" +
+        ", (b:Node1 {f1: 2.1, f2: [0.5, 1.8]})" +
+        ", (c:Node2 {f1: -0.3, f2: [0.8, 2.8]})" +
+        ", (d:Isolated {f1: 2.5, f2: [8.1, 1.3]})" +
+        ", (e:Isolated {f1: -0.6, f2: [0.5, 5.2]})" +
         ", (a)-[:REL {weight: 2.0}]->(b)" +
         ", (b)-[:REL {weight: 1.0}]->(a)" +
         ", (a)-[:REL {weight: 1.0}]->(c)" +
@@ -92,10 +94,12 @@ class FastRPTest extends AlgoTestBase {
         FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
             progressLogger,
             AllocationTracker.empty()
         );
 
+        fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 2, AllocationTracker.empty());
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 2);
@@ -121,10 +125,12 @@ class FastRPTest extends AlgoTestBase {
         FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
             progressLogger,
             AllocationTracker.empty()
         );
 
+        fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
@@ -161,10 +167,12 @@ class FastRPTest extends AlgoTestBase {
         FastRP fastRP = new FastRP(
             graph,
             weightedConfig,
+            defaultFeatureExtractors(graph),
             progressLogger,
             AllocationTracker.empty()
         );
 
+        fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         HugeObjectArray<float[]> randomVectors = HugeObjectArray.newArray(float[].class, 3, AllocationTracker.empty());
         fastRP.currentEmbedding(-1).copyTo(randomVectors, 3);
@@ -197,10 +205,12 @@ class FastRPTest extends AlgoTestBase {
                 .embeddingDimension(512)
                 .addIterationWeight(1.0D)
                 .build(),
+            List.of(),
             progressLogger,
             AllocationTracker.empty()
         );
 
+        fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
         double p = 1D / 6D;
         int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
@@ -241,6 +251,7 @@ class FastRPTest extends AlgoTestBase {
                 .embeddingDimension(64)
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
+            List.of(),
             progressLogger,
             AllocationTracker.empty()
         );
@@ -266,7 +277,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_808, estimate.min);
+        assertEquals(159_816, estimate.min);
     }
 
     @Test
@@ -281,7 +292,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_808, estimate.min);
+        assertEquals(159_816, estimate.min);
     }
 
     @Test
@@ -308,7 +319,7 @@ class FastRPTest extends AlgoTestBase {
             config.concurrency()
         );
 
-        new FastRP(graph, config, logger, AllocationTracker.empty()).compute();
+        new FastRP(graph, config, List.of(), logger, AllocationTracker.empty()).compute();
 
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Start"));
         assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Start"));
@@ -321,6 +332,11 @@ class FastRPTest extends AlgoTestBase {
             logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
         );
     }
+
+    private List<FeatureExtractor> defaultFeatureExtractors(Graph graph) {
+        return FeatureExtraction.propertyExtractors(graph, DEFAULT_CONFIG.featureProperties());
+    }
+
 
     @Nested
     @GdlExtension
@@ -347,6 +363,7 @@ class FastRPTest extends AlgoTestBase {
                     .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                     .addFeatureProperty("prop")
                     .build(),
+                FeatureExtraction.propertyExtractors(graph, List.of("prop")),
                 progressLogger,
                 AllocationTracker.empty()
             );

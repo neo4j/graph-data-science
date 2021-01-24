@@ -28,6 +28,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -275,9 +276,11 @@ public class ListProgressProcTest extends BaseTest {
                         progressTracker
                     );
 
+                    var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
                     return new FastRP(
                         graph,
                         configuration,
+                        featureExtractors,
                         progressLogger,
                         tracker
                     );

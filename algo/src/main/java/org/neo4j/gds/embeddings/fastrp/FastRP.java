@@ -20,6 +20,9 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.ml.features.FeatureConsumer;
+import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -39,7 +42,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.embeddings.EmbeddingUtils.getCheckedDoubleNodeProperty;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
@@ -51,7 +53,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final Graph graph;
     private final int concurrency;
     private final float normalizationStrength;
-    private final List<String> featureProperties;
+    private final List<FeatureExtractor> featureExtractors;
+    private final int inputDimension;
     private final float[][] propertyVectors;
     private final HugeObjectArray<float[]> embeddings;
     private final HugeObjectArray<float[]> embeddingA;
@@ -79,25 +82,28 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     public FastRP(
         Graph graph,
         FastRPBaseConfig config,
+        List<FeatureExtractor> featureExtractors,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this(graph, config, progressLogger, tracker, Optional.empty());
+        this(graph, config, featureExtractors, progressLogger, tracker, Optional.empty());
     }
 
     public FastRP(
         Graph graph,
         FastRPBaseConfig config,
+        List<FeatureExtractor> featureExtractors,
         ProgressLogger progressLogger,
         AllocationTracker tracker,
         Optional<Long> randomSeed
     ) {
         this.graph = graph;
+        this.featureExtractors = featureExtractors;
+        this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = randomSeed;
         this.progressLogger = progressLogger;
-        this.featureProperties = config.featureProperties();
 
-        this.propertyVectors = new float[featureProperties.size()][config.propertyDimension()];
+        this.propertyVectors = new float[inputDimension][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
@@ -136,13 +142,13 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.embeddingB.release();
     }
 
-    private void initPropertyVectors() {
+    void initPropertyVectors() {
         int propertyDimension = embeddingDimension - baseEmbeddingDimension;
         float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
         var random = randomSeed
             .map(seed -> ThreadLocal.withInitial(() -> new HighQualityRandom(seed)))
             .orElse(ThreadLocal.withInitial(HighQualityRandom::new));
-        for (int i = 0; i < featureProperties.size(); i++) {
+        for (int i = 0; i < inputDimension; i++) {
             this.propertyVectors[i] = new float[propertyDimension];
             for (int d = 0; d < propertyDimension; d++) {
                 this.propertyVectors[i][d] = computeRandomEntry(random.get(), entryValue);
@@ -330,9 +336,11 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             for (int i = 0; i < embeddingDimension; i++) {
                 randomVector[i] = computeRandomEntry(random, entryValue);
             }
-            for (int j = 0; j < featureProperties.size(); j++) {
-                String feature = featureProperties.get(j);
-                double featureValue = getCheckedDoubleNodeProperty(graph, feature, nodeId);
+
+            float[] features = features(nodeId);
+
+            for (int j = 0; j < inputDimension; j++) {
+                double featureValue = features[j];
                 if (featureValue != 0.0D) {
                     for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
                         randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
@@ -340,6 +348,25 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 }
             }
             return randomVector;
+        }
+
+        float[] features(long nodeId) {
+            var features = new float[inputDimension];
+            FeatureConsumer featureConsumer = new FeatureConsumer() {
+                @Override
+                public void acceptScalar(long nodeOffset, int offset, double value) {
+                    features[offset] = (float)value;
+                }
+
+                @Override
+                public void acceptArray(long nodeOffset, int offset, double[] values) {
+                    for (int i = 0; i < values.length; i++) {
+                        features[offset + i] = (float)values[i];
+                    }
+                }
+            };
+            FeatureExtraction.extract(nodeId, -1, featureExtractors, featureConsumer);
+            return features;
         }
     }
 

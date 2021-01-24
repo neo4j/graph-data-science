@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -35,10 +36,12 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
         ProgressEventTracker eventTracker
     ) {
         var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency(), eventTracker);
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
         return new FastRP(
             graph,
             configuration,
+            featureExtractors,
             progressLogger,
             tracker
         );
