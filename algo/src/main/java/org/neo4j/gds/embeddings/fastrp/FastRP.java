@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final HugeObjectArray<float[]> embeddingA;
     private final HugeObjectArray<float[]> embeddingB;
     private final EmbeddingCombiner embeddingCombiner;
+    private final Optional<Long> randomSeed;
 
     private final int embeddingDimension;
     private final int baseEmbeddingDimension;
@@ -80,7 +82,18 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
+        this(graph, config, progressLogger, tracker, Optional.empty());
+    }
+
+    public FastRP(
+        Graph graph,
+        FastRPBaseConfig config,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker,
+        Optional<Long> randomSeed
+    ) {
         this.graph = graph;
+        this.randomSeed = randomSeed;
         this.progressLogger = progressLogger;
         this.featureProperties = config.featureProperties();
 
@@ -126,7 +139,9 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private void initPropertyVectors() {
         int propertyDimension = embeddingDimension - baseEmbeddingDimension;
         float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
-        ThreadLocal<Random> random = ThreadLocal.withInitial(HighQualityRandom::new);
+        var random = randomSeed
+            .map(seed -> ThreadLocal.withInitial(() -> new HighQualityRandom(seed)))
+            .orElse(ThreadLocal.withInitial(HighQualityRandom::new));
         for (int i = 0; i < featureProperties.size(); i++) {
             this.propertyVectors[i] = new float[propertyDimension];
             for (int d = 0; d < propertyDimension; d++) {
@@ -295,7 +310,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         @Override
         public void run() {
-            HighQualityRandom random = new HighQualityRandom();
+            var random = randomSeed.map(HighQualityRandom::new).orElse(new HighQualityRandom());
             for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
                 int degree = graph.degree(nodeId);
                 float scaling = degree == 0
