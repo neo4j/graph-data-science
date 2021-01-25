@@ -32,7 +32,7 @@ public final class GraphSageModelSerializer {
 
     private GraphSageModelSerializer() {}
 
-    public static GraphSageProto.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig> model) throws
+    public static GraphSageProto.GraphSageModel toSerializable(ModelData modelData) throws
         IOException {
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < modelData.layers().length; i++) {
@@ -49,8 +49,7 @@ public final class GraphSageModelSerializer {
     public static Model<ModelData, GraphSageTrainConfig> fromSerializable(
         GraphSageProto.GraphSageModel protoModel,
         ModelProto.ModelMetaData modelMetaData
-    ) throws
-        IOException, ClassNotFoundException {
+    ) throws IOException {
 
         var modelBuilder =
             ModelMetaDataSerializer.<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData);

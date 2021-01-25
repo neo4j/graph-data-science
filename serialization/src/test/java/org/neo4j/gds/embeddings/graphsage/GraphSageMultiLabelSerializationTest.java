@@ -67,7 +67,7 @@ class GraphSageMultiLabelSerializationTest {
             ModelProto.ModelMetaData.parser()
         );
         var protoGraphSageModel = serializationRoundTrip(
-            GraphSageModelSerializer.toSerializable(model),
+            GraphSageModelSerializer.toSerializable(model.data()),
             GraphSageProto.GraphSageModel.parser()
         );
 
