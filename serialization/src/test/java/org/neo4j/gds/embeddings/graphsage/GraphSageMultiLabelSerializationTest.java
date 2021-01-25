@@ -57,7 +57,7 @@ class GraphSageMultiLabelSerializationTest {
 
     @Test
     void e2eTest() throws IOException, ClassNotFoundException {
-        Model<ModelData, GraphSageTrainConfig, Model.Mappable> model = train();
+        var model = train();
         var originalEmbeddings = produceEmbeddings(model);
 
         // Serialize the model
@@ -70,7 +70,7 @@ class GraphSageMultiLabelSerializationTest {
         var protoModel = GraphSageProto.GraphSageModel.parseFrom(output.toByteArray());
         assertThat(protoModel).isNotNull();
 
-        Model<ModelData, GraphSageTrainConfig, Model.Mappable> deserializedModel = GraphSageModelSerializer.fromSerializable(protoModel);
+        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoModel);
 
         assertThat(deserializedModel.data().layers())
             .isNotNull()
@@ -89,7 +89,7 @@ class GraphSageMultiLabelSerializationTest {
             .isEqualTo(produceEmbeddings(deserializedModel));
     }
 
-    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig, Model.Mappable> model) {
+    private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig> model) {
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
             .modelName(model.name())
@@ -104,7 +104,7 @@ class GraphSageMultiLabelSerializationTest {
         ).compute();
     }
 
-    private Model<ModelData, GraphSageTrainConfig, Model.Mappable> train() {
+    private Model<ModelData, GraphSageTrainConfig> train() {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(64)

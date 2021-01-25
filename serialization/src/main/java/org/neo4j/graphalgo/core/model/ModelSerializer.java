@@ -31,7 +31,7 @@ public final class ModelSerializer {
 
     private ModelSerializer() {}
 
-    public static ModelProto.Model toSerializable(Model<?, ?, ?> model) throws IOException {
+    public static ModelProto.Model toSerializable(Model<?, ?> model) throws IOException {
         return ModelProto.Model.newBuilder()
             .setUsername(model.username())
             .setName(model.name())
@@ -41,8 +41,8 @@ public final class ModelSerializer {
             .build();
     }
 
-    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG, Model.Mappable> fromSerializable(ModelProto.Model protoModelMeta) {
-        return ImmutableModel.<DATA, CONFIG, Model.Mappable>builder()
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(ModelProto.Model protoModelMeta) {
+        return ImmutableModel.<DATA, CONFIG>builder()
             .username(protoModelMeta.getUsername())
             .name(protoModelMeta.getName())
             .algoType(protoModelMeta.getAlgoType())

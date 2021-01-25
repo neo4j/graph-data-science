@@ -59,7 +59,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig, Model.Mappable> compute() {
+    public Model<ModelData, GraphSageTrainConfig> compute() {
         var weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(
             graph.schema(),
             config

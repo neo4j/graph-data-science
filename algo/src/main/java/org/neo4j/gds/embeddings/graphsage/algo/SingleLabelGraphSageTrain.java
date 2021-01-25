@@ -48,7 +48,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig, Model.Mappable> compute() {
+    public Model<ModelData, GraphSageTrainConfig> compute() {
         var graphSageModel = new GraphSageModelTrainer(config, progressLogger);
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(

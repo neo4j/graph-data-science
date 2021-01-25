@@ -48,10 +48,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.nodemodels.ConcreteModelStats.COMPARE_AVERAGE;
+import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 
 public class NodeClassificationTrain
-    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo>> {
+    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
 
     public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
 
@@ -72,7 +72,7 @@ public class NodeClassificationTrain
     }
 
     @Override
-    public Model<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationModelInfo> compute() {
+    public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
         // 1. Init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
@@ -87,7 +87,7 @@ public class NodeClassificationTrain
         var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets);
         var bestParameters = modelSelectResult.bestParameters();
 
-        // 6. retrain best model on remaining
+        // 6. train best model on remaining
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
 
         // 7. evaluate it on the holdout set and outer training set
@@ -156,8 +156,8 @@ public class NodeClassificationTrain
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets);
         var splits = splitter.splits();
 
-        Map<Metric, List<ConcreteModelStats>> trainStats = initStatsMap();
-        Map<Metric, List<ConcreteModelStats>> validationStats = initStatsMap();
+        var trainStats = initStatsMap();
+        var validationStats = initStatsMap();
 
         config.params().forEach(modelParams -> {
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
@@ -188,8 +188,8 @@ public class NodeClassificationTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private Map<Metric, List<ConcreteModelStats>> initStatsMap() {
-        var statsMap = new HashMap<Metric, List<ConcreteModelStats>>();
+    private Map<Metric, List<ModelStats>> initStatsMap() {
+        var statsMap = new HashMap<Metric, List<ModelStats>>();
         config.metrics().forEach(metric -> statsMap.put(metric, new ArrayList<>()));
         return statsMap;
     }
@@ -271,14 +271,14 @@ public class NodeClassificationTrain
         Map<String, Object> bestParameters();
 
         // key is metric
-        Map<Metric, List<ConcreteModelStats>> trainStats();
+        Map<Metric, List<ModelStats>> trainStats();
         // key is metric
-        Map<Metric, List<ConcreteModelStats>> validationStats();
+        Map<Metric, List<ModelStats>> validationStats();
 
         static ModelSelectResult of(
             Map<String, Object> bestConfig,
-            Map<Metric, List<ConcreteModelStats>> trainStats,
-            Map<Metric, List<ConcreteModelStats>> validationStats
+            Map<Metric, List<ModelStats>> trainStats,
+            Map<Metric, List<ModelStats>> validationStats
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
@@ -306,8 +306,8 @@ public class NodeClassificationTrain
             sum.merge(metric, value, Double::sum);
         }
 
-        ConcreteModelStats modelStats(Metric metric) {
-            return ImmutableConcreteModelStats.of(
+        ModelStats modelStats(Metric metric) {
+            return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,
                 min.get(metric),

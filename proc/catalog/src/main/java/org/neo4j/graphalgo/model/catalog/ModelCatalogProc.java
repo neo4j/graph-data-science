@@ -43,7 +43,7 @@ abstract class ModelCatalogProc extends BaseProc {
         public final Map<String, Object> graphSchema;
         public final ZonedDateTime creationTime;
 
-        public ModelResult(Model<?, ?, ?> model) {
+        public ModelResult(Model<?, ?> model) {
             modelInfo = Stream.concat(
                 Map.of(
                     "modelName", model.name(),

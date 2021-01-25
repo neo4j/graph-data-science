@@ -32,7 +32,7 @@ public final class GraphSageModelSerializer {
 
     private GraphSageModelSerializer() {}
 
-    public static GraphSageProto.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig, Model.Mappable> model) throws
+    public static GraphSageProto.GraphSageModel toSerializable(Model<ModelData, GraphSageTrainConfig> model) throws
         IOException {
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < model.data().layers().length; i++) {
@@ -50,12 +50,12 @@ public final class GraphSageModelSerializer {
             .build();
     }
 
-    static Model<ModelData, GraphSageTrainConfig, Model.Mappable> fromSerializable(GraphSageProto.GraphSageModel protoModel) throws
+    static Model<ModelData, GraphSageTrainConfig> fromSerializable(GraphSageProto.GraphSageModel protoModel) throws
         IOException,
         ClassNotFoundException {
         var protoModelMeta = protoModel.getModel();
         GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigSerializer.fromSerializable(protoModel.getModel().getTrainConfig());
-        ImmutableModel.Builder<ModelData, GraphSageTrainConfig, Model.Mappable> modelBuilder = ModelSerializer.fromSerializable(protoModelMeta.getModel());
+        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder = ModelSerializer.fromSerializable(protoModelMeta.getModel());
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
