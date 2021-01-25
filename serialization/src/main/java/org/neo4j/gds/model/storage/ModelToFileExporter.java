@@ -36,10 +36,9 @@ public final class ModelToFileExporter {
     //TODO remove
     public static <DATA, CONFIG extends BaseConfig & ModelConfig> void toFile(
         Path exportDir,
-        Model<DATA, CONFIG> model,
-        ModelExportConfig config
+        Model<DATA, CONFIG> model
     ) throws IOException {
-        new ModelFileWriter<>(exportDir, model, config).write();
+        new ModelFileWriter<>(exportDir, model).write();
     }
 
     public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(

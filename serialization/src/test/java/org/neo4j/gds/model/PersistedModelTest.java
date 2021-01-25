@@ -28,7 +28,6 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.model.storage.ImmutableModelExportConfig;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -71,12 +70,7 @@ class PersistedModelTest {
             trainConfig
         );
 
-        var exportConfig = ImmutableModelExportConfig
-            .builder()
-            .fileName(MODEL)
-            .build();
-
-        ModelToFileExporter.toFile(tempDir, model, exportConfig);
+        ModelToFileExporter.toFile(tempDir, model);
     }
 
     @Test

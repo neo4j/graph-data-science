@@ -54,8 +54,6 @@ class ModelToFileExporterTest {
         .graphStore()
         .schema();
 
-    private static final ModelExportConfig EXPORT_CONFIG = ImmutableModelExportConfig.builder().fileName("TestModel").build();
-
     private static final GraphSageTrainConfig TRAIN_CONFIG = ImmutableGraphSageTrainConfig.builder()
         .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
         .embeddingDimension(64)
@@ -75,16 +73,14 @@ class ModelToFileExporterTest {
 
     @Test
     void shouldWriteToFile(@TempDir Path exportPath) throws IOException {
-        assertThat(exportPath.resolve(EXPORT_CONFIG.fileName())).doesNotExist();
-
-        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
+        ModelToFileExporter.toFile(exportPath, MODEL);
 
         try (var metaDataInputStream = new FileInputStream(exportPath.resolve(META_DATA_FILE).toFile())) {
             var metaDataBytes = metaDataInputStream.readAllBytes();
             assertThat(metaDataBytes).isNotEmpty();
         }
 
-        try(var modelDataInputStream = new FileInputStream(exportPath.resolve(MODEL_DATA_FILE).toFile())) {
+        try (var modelDataInputStream = new FileInputStream(exportPath.resolve(MODEL_DATA_FILE).toFile())) {
             var modelDataBytes = modelDataInputStream.readAllBytes();
             assertThat(modelDataBytes).isNotEmpty();
         }
@@ -92,7 +88,7 @@ class ModelToFileExporterTest {
 
     @Test
     void shouldReadFromFile(@TempDir Path persistencePath) throws IOException {
-        ModelToFileExporter.toFile(persistencePath, MODEL, EXPORT_CONFIG);
+        ModelToFileExporter.toFile(persistencePath, MODEL);
         Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
         assertThat(deserializedModel)
             .usingRecursiveComparison()
@@ -105,17 +101,21 @@ class ModelToFileExporterTest {
     @ValueSource(booleans = {false, true})
     void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path persistencePath) throws
         IOException {
-        ModelToFileExporter.toFile(persistencePath, MODEL, EXPORT_CONFIG);
-
-        var config = ImmutableModelExportConfig.builder().from(EXPORT_CONFIG).overwrite(overwrite).build();
+        ModelToFileExporter.toFile(persistencePath, MODEL);
 
         if (overwrite) {
-            var newTrainConfig = ImmutableGraphSageTrainConfig.builder().from(TRAIN_CONFIG).embeddingDimension(32).build();
+            var newTrainConfig = ImmutableGraphSageTrainConfig
+                .builder()
+                .from(TRAIN_CONFIG)
+                .embeddingDimension(32)
+                .build();
+
             var newModel = ImmutableModel.<ModelData, GraphSageTrainConfig>builder()
                 .from(MODEL)
                 .trainConfig(newTrainConfig)
                 .build();
-            ModelToFileExporter.toFile(persistencePath, newModel, config);
+
+            ModelToFileExporter.toFile(persistencePath, newModel);
             Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
             assertThat(deserializedModel)
                 .usingRecursiveComparison()
@@ -123,7 +123,7 @@ class ModelToFileExporterTest {
                 .ignoringFieldsOfTypes(DefaultValue.class)
                 .isEqualTo(newModel);
         } else {
-            assertThatThrownBy(() -> ModelToFileExporter.toFile(persistencePath, MODEL, config))
+            assertThatThrownBy(() -> ModelToFileExporter.toFile(persistencePath, MODEL))
                 .isInstanceOf(FileAlreadyExistsException.class);
         }
     }

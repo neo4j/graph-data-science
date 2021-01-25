@@ -42,24 +42,19 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
 
     private final Path persistenceDir;
     private final Model<DATA, CONFIG> model;
-    private final boolean overwriteExistingFiles;
 
     ModelFileWriter(
         Path persistenceDir,
-        Model<DATA, CONFIG> model,
-        ModelExportConfig config
+        Model<DATA, CONFIG> model
     ) {
         this.persistenceDir = persistenceDir;
         this.model = model;
-        this.overwriteExistingFiles = config.overwrite();
     }
 
     public void write() throws IOException {
         File metaDataFile = persistenceDir.resolve(META_DATA_FILE).toFile();
         File modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE).toFile();
-        if (!overwriteExistingFiles) {
-            checkFilesExist(metaDataFile, modelDataFile);
-        }
+        checkFilesExist(metaDataFile, modelDataFile);
 
         writeDataToFile(metaDataFile, ModelMetaDataSerializer.toSerializable(model));
         writeDataToFile(modelDataFile, toSerializable(model.data(), model.algoType()));

@@ -24,7 +24,6 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.model.storage.ImmutableModelExportConfig;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -59,15 +58,10 @@ public class ModelPersistenceUtil {
             trainConfig
         );
 
-        var exportConfig = ImmutableModelExportConfig
-            .builder()
-            .fileName("model")
-            .build();
-
         var resolvedPersistenceDir = persistenceDir.resolve(UUID.randomUUID().toString());
         Files.createDirectory(resolvedPersistenceDir);
 
-        ModelToFileExporter.toFile(resolvedPersistenceDir, model, exportConfig);
+        ModelToFileExporter.toFile(resolvedPersistenceDir, model);
 
         return resolvedPersistenceDir;
     }

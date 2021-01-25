@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.model.PersistedModel;
-import org.neo4j.gds.model.storage.ImmutableModelExportConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -77,11 +76,6 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
 
     static void openPersistedModel(Log log, Path persistedModelPath) {
         if (Files.isDirectory(persistedModelPath)) {
-            var config = ImmutableModelExportConfig
-                .builder()
-                .fileName("model")
-                .build();
-
             PersistedModel model;
             try {
                 model = new PersistedModel(persistedModelPath);
