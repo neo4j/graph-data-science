@@ -49,6 +49,12 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private Object data;
     private boolean loaded;
 
+    public static PersistedModel withInitialData(Path persistenceDir, Object data) throws IOException {
+        var persistedModel = new PersistedModel(persistenceDir);
+        persistedModel.setData(data);
+        return persistedModel;
+    }
+
     public PersistedModel(Path persistenceDir) throws IOException {
         this(persistenceDir, new ModelFileReader(persistenceDir).readMetaData(), false);
     }
@@ -169,6 +175,11 @@ public class PersistedModel implements Model<Object, ModelConfig> {
         }
 
         return data;
+    }
+
+    public void setData(Object inputData) {
+        loaded = true;
+        data = inputData;
     }
 
     public Path fileLocation() {

@@ -51,6 +51,16 @@ public final class ModelCatalog {
         });
     }
 
+    public static void setUnsafe(Model<?, ?> model) {
+        userCatalogs.compute(model.username(), (user, userCatalog) -> {
+            if (userCatalog == null) {
+                userCatalog = new UserCatalog();
+            }
+            userCatalog.setUnsafe(model);
+            return userCatalog;
+        });
+    }
+
     public static <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
         String username, String modelName, Class<D> dataClass, Class<C> configClass
     ) {
@@ -161,6 +171,10 @@ public final class ModelCatalog {
                     model.name()
                 ));
             }
+            userModels.put(model.name(), model);
+        }
+
+        public void setUnsafe(Model<?, ?> model) {
             userModels.put(model.name(), model);
         }
 
