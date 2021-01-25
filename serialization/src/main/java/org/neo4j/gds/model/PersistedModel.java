@@ -43,20 +43,22 @@ public class PersistedModel implements Model<Object, ModelConfig> {
 
     private final ModelProto.ModelMetaData metaData;
     private final ModelFileReader modelReader;
+    private final Path fileLocation;
 
     @Nullable
     private Object data;
     private boolean loaded;
 
-    public PersistedModel(Path exportDir, ModelExportConfig exportConfig) throws IOException {
+    public PersistedModel(Path fileLocation, ModelExportConfig exportConfig) throws IOException {
         modelReader = new ModelFileReader(
-            exportDir,
+            fileLocation,
             exportConfig
         );
 
         metaData = modelReader.readMetaData();
 
         this.loaded = false;
+        this.fileLocation = fileLocation;
     }
 
     public void load() {
@@ -145,5 +147,7 @@ public class PersistedModel implements Model<Object, ModelConfig> {
         return data;
     }
 
-
+    public Path fileLocation() {
+        return fileLocation;
+    }
 }

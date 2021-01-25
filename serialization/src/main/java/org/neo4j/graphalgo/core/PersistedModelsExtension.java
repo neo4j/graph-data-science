@@ -61,28 +61,9 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
                 }
 
                 try {
-                    Files.list(persistencePath)
-                        .forEach(persistedModelPath -> {
-                            if (Files.isDirectory(persistencePath)) {
-                                var config = ImmutableModelExportConfig
-                                    .builder()
-                                    .fileName("model")
-                                    .build();
-
-                                PersistedModel model;
-                                try {
-                                    model = new PersistedModel(persistedModelPath, config);
-                                    ModelCatalog.set(model);
-                                } catch (IOException e) {
-
-                                    userLog
-                                        .error(formatWithLocale(
-                                            "Could not load model stored at %s",
-                                            persistedModelPath
-                                        ), e);
-                                }
-                            }
-                        });
+                    Files
+                        .list(persistencePath)
+                        .forEach(persistedModelPath -> openPersistedModel(userLog, persistedModelPath));
                 } catch (IOException e) {
                     userLog.error("Could not list persisted model files", e);
                 }
@@ -94,18 +75,55 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
         };
     }
 
+    static void openPersistedModel(Log log, Path persistedModelPath) {
+        if (Files.isDirectory(persistedModelPath)) {
+            var config = ImmutableModelExportConfig
+                .builder()
+                .fileName("model")
+                .build();
+
+            PersistedModel model;
+            try {
+                model = new PersistedModel(persistedModelPath, config);
+                if (ModelCatalog.exists(model.username(), model.name())) {
+                    log.error(
+                        "Cannot open persisted model %s for user %s from %s. A model with the same name already exists for that user.",
+                        model.name(),
+                        model.username(),
+                        persistedModelPath
+                    );
+                } else {
+                    ModelCatalog.set(model);
+                }
+            } catch (IOException e) {
+                log.error(
+                    formatWithLocale(
+                        "Could not load model stored at %s",
+                        persistedModelPath
+                    ), e
+                );
+            }
+        }
+    }
+
     static boolean validatePath(Path persistencePath, Log log) {
         if (persistencePath == null) {
             return false;
         }
 
         if (!Files.exists(persistencePath)) {
-            log.error("The configured model persistence path '%s' does not exist. Cannot load or persist models.", persistencePath);
+            log.error(
+                "The configured model persistence path '%s' does not exist. Cannot load or persist models.",
+                persistencePath
+            );
             return false;
         }
 
         if (!Files.isDirectory(persistencePath)) {
-            log.error("The configured model persistence path '%s' is not a directory. Cannot load or persist models.", persistencePath);
+            log.error(
+                "The configured model persistence path '%s' is not a directory. Cannot load or persist models.",
+                persistencePath
+            );
             return false;
         }
 

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.model.ModelPersistenceUtil;
+import org.neo4j.gds.model.PersistedModel;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -88,6 +89,19 @@ class PersistedModelsExtensionTest extends BaseTest {
             testLog.containsMessage(TestLog.ERROR, "is not a directory. Cannot load or persist models.");
         }
 
-    }
+        @Test
+        void shouldNotOverwriteModels() throws IOException {
+            var first = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
+            var second = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
 
+            var testLog = new TestLog();
+            PersistedModelsExtension.openPersistedModel(testLog, first);
+            PersistedModelsExtension.openPersistedModel(testLog, second);
+
+            var modelInCatalog = (PersistedModel) ModelCatalog.getUnsafe("alice", "modelAlice");
+            assertThat(modelInCatalog.fileLocation()).isEqualTo(first);
+
+            assertThat(testLog.containsMessage(TestLog.ERROR, "A model with the same name already exists for that user.")).isTrue();
+        }
+    }
 }

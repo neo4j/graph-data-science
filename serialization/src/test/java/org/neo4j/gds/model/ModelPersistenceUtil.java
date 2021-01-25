@@ -36,7 +36,7 @@ import java.util.UUID;
 
 public class ModelPersistenceUtil {
 
-    public static void createAndPersistModel(
+    public static Path createAndPersistModel(
         Path persistenceDir,
         String modelName,
         String userName
@@ -68,5 +68,7 @@ public class ModelPersistenceUtil {
         Files.createDirectory(resolvedPersistenceDir);
 
         ModelToFileExporter.toFile(resolvedPersistenceDir, model, exportConfig);
+
+        return resolvedPersistenceDir;
     }
 }
