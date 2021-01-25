@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,7 +100,7 @@ public class NodeClassificationTrain
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
 
         var modelInfo = NodeClassificationModelInfo.of(
-            sortedClasses(retrainedModelData),
+            retrainedModelData.classIdMap().originalIdsList(),
             modelSelectResult.bestParameters(),
             metrics
         );
@@ -141,13 +140,6 @@ public class NodeClassificationTrain
                     testMetrics.get(metric)
                 )
         ));
-    }
-
-    private List<Long> sortedClasses(MultiClassNLRData modelData) {
-        return Arrays.stream(modelData.classIdMap().originalIds())
-            .sorted()
-            .boxed()
-            .collect(Collectors.toList());
     }
 
     private ModelSelectResult modelSelect(HugeLongArray remainingSet, HugeLongArray globalTargets) {

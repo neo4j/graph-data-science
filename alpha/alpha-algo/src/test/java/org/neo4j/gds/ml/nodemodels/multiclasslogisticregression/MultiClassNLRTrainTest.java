@@ -42,10 +42,10 @@ class MultiClassNLRTrainTest {
     @GdlGraph
     private static final String DB_QUERY =
         "CREATE " +
-        "  (n1:N {a: 2.0, b: 1.2, t: 1.0})" +
-        ", (n2:N {a: 1.3, b: 0.5, t: 0.0})" +
-        ", (n3:N {a: 0.0, b: 2.8, t: 2.0})" +
-        ", (n4:N {a: 1.0, b: 0.9, t: 1.0})";
+        "  (n1:N {a: 2.0, b: 1.2, t: 1})" +
+        ", (n2:N {a: 1.3, b: 0.5, t: 0})" +
+        ", (n3:N {a: 0.0, b: 2.8, t: 2})" +
+        ", (n4:N {a: 1.0, b: 0.9, t: 1})";
 
     private static final double NO_PENALTY = 0.0;
 
@@ -76,11 +76,17 @@ class MultiClassNLRTrainTest {
 
         assertThat(trainedWeights.data().data()).containsExactly(
             new double[]{
-                13.565878816092354, 35.45071542666095, -15.413572599075732,
                 33.80331989615432, -35.5612283371057, 10.826705193820422,
+                13.565878816092354, 35.45071542666095, -15.413572599075732,
                 -29.644105601850793, 32.70379721264568, 11.382482785703171
             },
             Offset.offset(1e-8)
         );
+
+        // check that classIdMap is strictly increasing
+        long[] classes = result.classIdMap().originalIds();
+        for (int i = 0; i < classes.length - 1; i++) {
+            assertThat(classes[i]).isLessThan(classes[i+1]);
+        }
     }
 }

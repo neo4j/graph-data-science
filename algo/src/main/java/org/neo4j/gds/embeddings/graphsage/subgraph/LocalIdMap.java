@@ -21,6 +21,11 @@ package org.neo4j.gds.embeddings.graphsage.subgraph;
 
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntHashMap;
+import com.carrotsearch.hppc.cursors.LongCursor;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class LocalIdMap {
     private final LongArrayList originalIds;
@@ -46,5 +51,11 @@ public class LocalIdMap {
 
     public long[] originalIds() {
         return originalIds.toArray();
+    }
+
+    public List<Long> originalIdsList() {
+        var list = new ArrayList<Long>();
+        originalIds.forEach((Consumer<LongCursor>) longCursor -> list.add(longCursor.value));
+        return list;
     }
 }
