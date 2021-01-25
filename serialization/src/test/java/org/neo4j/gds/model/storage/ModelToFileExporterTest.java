@@ -43,7 +43,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 
 class ModelToFileExporterTest {
 
@@ -78,23 +79,21 @@ class ModelToFileExporterTest {
 
         ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
 
-        var metaDataFileName = formatWithLocale("%s.%s", EXPORT_CONFIG.fileName(), "meta");
-        try (var metaDataInputStream = new FileInputStream(exportPath.resolve(metaDataFileName).toFile())) {
+        try (var metaDataInputStream = new FileInputStream(exportPath.resolve(META_DATA_FILE).toFile())) {
             var metaDataBytes = metaDataInputStream.readAllBytes();
             assertThat(metaDataBytes).isNotEmpty();
         }
 
-        var modelDataFileName = formatWithLocale("%s.%s", EXPORT_CONFIG.fileName(), "data");
-        try(var modelDataInputStream = new FileInputStream(exportPath.resolve(modelDataFileName).toFile())) {
+        try(var modelDataInputStream = new FileInputStream(exportPath.resolve(MODEL_DATA_FILE).toFile())) {
             var modelDataBytes = modelDataInputStream.readAllBytes();
             assertThat(modelDataBytes).isNotEmpty();
         }
     }
 
     @Test
-    void shouldReadFromFile(@TempDir Path exportPath) throws IOException {
-        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
-        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, EXPORT_CONFIG);
+    void shouldReadFromFile(@TempDir Path persistencePath) throws IOException {
+        ModelToFileExporter.toFile(persistencePath, MODEL, EXPORT_CONFIG);
+        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
         assertThat(deserializedModel)
             .usingRecursiveComparison()
             .withStrictTypeChecking()
@@ -104,9 +103,9 @@ class ModelToFileExporterTest {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path exportPath) throws
+    void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path persistencePath) throws
         IOException {
-        ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
+        ModelToFileExporter.toFile(persistencePath, MODEL, EXPORT_CONFIG);
 
         var config = ImmutableModelExportConfig.builder().from(EXPORT_CONFIG).overwrite(overwrite).build();
 
@@ -116,15 +115,15 @@ class ModelToFileExporterTest {
                 .from(MODEL)
                 .trainConfig(newTrainConfig)
                 .build();
-            ModelToFileExporter.toFile(exportPath, newModel, config);
-            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(exportPath, EXPORT_CONFIG);
+            ModelToFileExporter.toFile(persistencePath, newModel, config);
+            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
             assertThat(deserializedModel)
                 .usingRecursiveComparison()
                 .withStrictTypeChecking()
                 .ignoringFieldsOfTypes(DefaultValue.class)
                 .isEqualTo(newModel);
         } else {
-            assertThatThrownBy(() -> ModelToFileExporter.toFile(exportPath, MODEL, config))
+            assertThatThrownBy(() -> ModelToFileExporter.toFile(persistencePath, MODEL, config))
                 .isInstanceOf(FileAlreadyExistsException.class);
         }
     }

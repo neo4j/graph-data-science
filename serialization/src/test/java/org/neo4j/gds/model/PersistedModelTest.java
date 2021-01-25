@@ -29,7 +29,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.storage.ImmutableModelExportConfig;
-import org.neo4j.gds.model.storage.ModelExportConfig;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -50,7 +49,6 @@ class PersistedModelTest {
 
     private GraphSageTrainConfig trainConfig;
     private ModelData modelData;
-    private ModelExportConfig exportConfig;
     private Model<ModelData, GraphSageTrainConfig> model;
 
     @BeforeEach
@@ -73,7 +71,7 @@ class PersistedModelTest {
             trainConfig
         );
 
-        exportConfig = ImmutableModelExportConfig
+        var exportConfig = ImmutableModelExportConfig
             .builder()
             .fileName(MODEL)
             .build();
@@ -83,7 +81,7 @@ class PersistedModelTest {
 
     @Test
     void testLoadingMetaData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir, exportConfig);
+        var persistedModel = new PersistedModel(tempDir);
 
         assertThat(persistedModel.username()).isEqualTo(model.username());
         assertThat(persistedModel.name()).isEqualTo(model.name());
@@ -97,7 +95,7 @@ class PersistedModelTest {
 
     @Test
     void testLoadingData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir, exportConfig);
+        var persistedModel = new PersistedModel(tempDir);
 
         persistedModel.load();
 
@@ -110,7 +108,7 @@ class PersistedModelTest {
 
     @Test
     void testUnLoadingData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir, exportConfig);
+        var persistedModel = new PersistedModel(tempDir);
 
         persistedModel.load();
         persistedModel.unload();

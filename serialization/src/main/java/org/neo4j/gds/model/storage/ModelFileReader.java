@@ -31,22 +31,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_SUFFIX;
-import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_SUFFIX;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 
 public class ModelFileReader {
 
-    private final Path exportDir;
-    private final String fileName;
+    private final Path persistenceDir;
 
-    public ModelFileReader(Path exportDir, ModelExportConfig config) {
-        this.exportDir = exportDir;
-        this.fileName = config.fileName();
+    public ModelFileReader(Path persistenceDir) {
+        this.persistenceDir = persistenceDir;
     }
 
     public ModelProto.ModelMetaData readMetaData() throws IOException {
-        File file = exportDir.resolve(formatWithLocale("%s.%s", fileName, META_DATA_SUFFIX)).toFile();
+        File file = persistenceDir.resolve(META_DATA_FILE).toFile();
         return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
     }
 
@@ -54,7 +51,7 @@ public class ModelFileReader {
         switch (algoType) {
             case GraphSage.MODEL_TYPE:
                 var parser = GraphSageProto.GraphSageModel.parser();
-                var graphSageModelProto = readModelData(exportDir, fileName, parser);
+                var graphSageModelProto = readModelData(persistenceDir, parser);
                 return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
             default:
                 throw new IllegalArgumentException();
@@ -70,15 +67,15 @@ public class ModelFileReader {
         switch (modelMetaData.getAlgoType()) {
             case GraphSage.MODEL_TYPE:
                 var parser = GraphSageProto.GraphSageModel.parser();
-                var graphSageModelProto = readModelData(exportDir, fileName, parser);
+                var graphSageModelProto = readModelData(persistenceDir, parser);
                 return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
             default:
                 throw new IllegalArgumentException();
         }
     }
 
-    private <T> T readModelData(Path exportDir, String fileName, Parser<T> parser) throws IOException {
-        File file = exportDir.resolve(formatWithLocale("%s.%s", fileName, MODEL_DATA_SUFFIX)).toFile();
+    private <T> T readModelData(Path exportDir, Parser<T> parser) throws IOException {
+        File file = exportDir.resolve(MODEL_DATA_FILE).toFile();
         byte[] modelDataBytes = readDataFromFile(file);
         return parser.parseFrom(modelDataBytes);
     }

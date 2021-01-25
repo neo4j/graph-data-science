@@ -84,7 +84,7 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
 
             PersistedModel model;
             try {
-                model = new PersistedModel(persistedModelPath, config);
+                model = new PersistedModel(persistedModelPath);
                 if (ModelCatalog.exists(model.username(), model.name())) {
                     log.error(
                         "Cannot open persisted model %s for user %s from %s. A model with the same name already exists for that user.",

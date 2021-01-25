@@ -28,11 +28,12 @@ import java.nio.file.Path;
 
 public final class ModelToFileExporter {
 
-    static final String META_DATA_SUFFIX = "meta";
-    static final String MODEL_DATA_SUFFIX = "data";
+    static final String META_DATA_FILE = "meta";
+    static final String MODEL_DATA_FILE = "data";
 
     private ModelToFileExporter() {}
 
+    //TODO remove
     public static <DATA, CONFIG extends BaseConfig & ModelConfig> void toFile(
         Path exportDir,
         Model<DATA, CONFIG> model,
@@ -42,9 +43,8 @@ public final class ModelToFileExporter {
     }
 
     public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(
-        Path exportDir,
-        ModelExportConfig config
+        Path exportDir
     ) throws IOException {
-        return (Model<DATA, CONFIG>) new ModelFileReader(exportDir, config).read();
+        return (Model<DATA, CONFIG>) new ModelFileReader(exportDir).read();
     }
 }

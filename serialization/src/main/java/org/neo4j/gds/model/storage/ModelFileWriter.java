@@ -34,31 +34,29 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 
-import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_SUFFIX;
-import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_SUFFIX;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
 
-    private final Path exportDir;
+    private final Path persistenceDir;
     private final Model<DATA, CONFIG> model;
-    private final String fileName;
     private final boolean overwriteExistingFiles;
 
     ModelFileWriter(
-        Path exportDir,
+        Path persistenceDir,
         Model<DATA, CONFIG> model,
         ModelExportConfig config
     ) {
-        this.exportDir = exportDir;
+        this.persistenceDir = persistenceDir;
         this.model = model;
-        this.fileName = config.fileName();
         this.overwriteExistingFiles = config.overwrite();
     }
 
     public void write() throws IOException {
-        File metaDataFile = getOrCreateModelFile(fileName, META_DATA_SUFFIX);
-        File modelDataFile = getOrCreateModelFile(fileName, MODEL_DATA_SUFFIX);
+        File metaDataFile = persistenceDir.resolve(META_DATA_FILE).toFile();
+        File modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE).toFile();
         if (!overwriteExistingFiles) {
             checkFilesExist(metaDataFile, modelDataFile);
         }
@@ -80,10 +78,6 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
         try (var out = new FileOutputStream(file)) {
             data.writeTo(out);
         }
-    }
-
-    private File getOrCreateModelFile(String fileName, String suffix) {
-        return exportDir.resolve(formatWithLocale("%s.%s", fileName, suffix)).toFile();
     }
 
     private static void checkFilesExist(File... files) throws FileAlreadyExistsException {

@@ -22,7 +22,6 @@ package org.neo4j.gds.model;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.model.storage.ModelExportConfig;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
@@ -49,16 +48,13 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private Object data;
     private boolean loaded;
 
-    public PersistedModel(Path fileLocation, ModelExportConfig exportConfig) throws IOException {
-        modelReader = new ModelFileReader(
-            fileLocation,
-            exportConfig
-        );
+    public PersistedModel(Path persistenceDir) throws IOException {
+        modelReader = new ModelFileReader(persistenceDir);
 
         metaData = modelReader.readMetaData();
 
         this.loaded = false;
-        this.fileLocation = fileLocation;
+        this.fileLocation = persistenceDir;
     }
 
     public void load() {

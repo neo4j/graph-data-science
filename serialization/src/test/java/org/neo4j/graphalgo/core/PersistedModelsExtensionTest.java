@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -40,6 +41,11 @@ class PersistedModelsExtensionTest extends BaseTest {
 
     @TempDir
     Path tempDir;
+
+    @AfterEach
+    void teardown() {
+        ModelCatalog.removeAllLoadedModels();
+    }
 
     @Override
     @ExtensionCallback
