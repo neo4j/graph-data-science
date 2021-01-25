@@ -37,6 +37,7 @@ public final class ModelCatalog {
     private ModelCatalog() {}
 
     private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
+    private static final UserCatalog publicModels = UserCatalog.EMPTY;
 
     public static void set(Model<?, ?> model) {
         userCatalogs.compute(model.username(), (user, userCatalog) -> {
@@ -78,6 +79,16 @@ public final class ModelCatalog {
         return getUserCatalog(username).list(modelName);
     }
 
+    public static void publish(String username, String modelName) {
+        if (exists(username, modelName)) {
+            Model<?, ?> model = getUserCatalog(username).getUntyped(modelName);
+            if (!model.permissions().contains(Model.ALL_USERS)) {
+                Model<?, ?> publicModel = model.publish();
+                publicModels.set(publicModel);
+            }
+        }
+    }
+
     public static void removeAllLoadedModels() {
         userCatalogs.clear();
     }
@@ -87,7 +98,7 @@ public final class ModelCatalog {
     }
 
     private static UserCatalog getUserCatalog(String username) {
-        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
+        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY).join(publicModels);
     }
 
     static class UserCatalog {
@@ -112,7 +123,7 @@ public final class ModelCatalog {
             Class<D> dataClass,
             Class<C> configClass
         ) {
-            Model<?, ?> model = get(modelName);
+            Model<?, ?> model = getUntyped(modelName);
 
             var data = model.data();
             if (!dataClass.isInstance(data)) {
@@ -150,7 +161,7 @@ public final class ModelCatalog {
         }
 
         public Model<?, ?> drop(String modelName) {
-            var model = get(modelName);
+            var model = getUntyped(modelName);
             return userModels.remove(model.name());
         }
 
@@ -159,11 +170,16 @@ public final class ModelCatalog {
         }
 
         public Model<?, ?> list(String modelName) {
-            return get(modelName);
+            return getUntyped(modelName);
         }
 
         public void removeAllLoadedModels() {
             userModels.clear();
+        }
+
+        public UserCatalog join(UserCatalog other) {
+            userModels.putAll(other.userModels);
+            return this;
         }
 
         private boolean reachedModelsLimit(String modelType) {
@@ -183,7 +199,7 @@ public final class ModelCatalog {
             }
         }
 
-        private Model<?, ?> get(String modelName) {
+        private Model<?, ?> getUntyped(String modelName) {
             Model<?, ?> model = userModels.get(modelName);
             if (model == null) {
                 throw new NoSuchElementException(prettySuggestions(

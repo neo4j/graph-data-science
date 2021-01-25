@@ -375,6 +375,37 @@ class ModelCatalogTest {
     }
 
     @Test
+    void shouldPublishModels() {
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.publish(USERNAME, "testModel");
+        assertEquals(2, ModelCatalog.list(USERNAME).size());
+
+        Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
+            "anotherUser",
+            "testModel_public",
+            String.class,
+            TestTrainConfig.class
+        );
+
+        assertThat(publicModel)
+            .usingRecursiveComparison()
+            .ignoringFields("permissions", "name")
+            .withStrictTypeChecking()
+            .isEqualTo(model);
+
+        assertEquals(List.of(Model.ALL_USERS), publicModel.permissions());
+    }
+
+    @Test
     void shouldReturnEmptyList() {
         assertEquals(0, ModelCatalog.list(USERNAME).size());
     }

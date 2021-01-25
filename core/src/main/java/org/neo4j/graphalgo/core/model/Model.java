@@ -27,12 +27,17 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
+    String ALL_USERS = "";
+
     String username();
+
+    List<String> permissions();
 
     String name();
 
@@ -60,8 +65,16 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         return false;
     }
 
+    default Model<DATA, CONFIG> publish() {
+        return ImmutableModel.<DATA, CONFIG>builder()
+            .from(this)
+            .permissions(List.of(ALL_USERS))
+            .name(name() + "_public")
+            .build();
+    }
+
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
-        String username,
+        String creator,
         String name,
         String algoType,
         GraphSchema graphSchema,
@@ -69,7 +82,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         C trainConfig
     ) {
         return Model.of(
-            username,
+            creator,
+            List.of(creator),
             name,
             algoType,
             graphSchema,
@@ -80,7 +94,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     }
 
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
-        String username,
+        String creator,
+        List<String> permissions,
         String name,
         String algoType,
         GraphSchema graphSchema,
@@ -89,7 +104,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         Mappable customInfo
     ) {
         return ImmutableModel.of(
-            username,
+            creator,
+            permissions,
             name,
             algoType,
             graphSchema,
