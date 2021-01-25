@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.graphalgo.config.proto.CommonConfigProto;
+
 import java.util.Optional;
 import java.util.function.Consumer;
 

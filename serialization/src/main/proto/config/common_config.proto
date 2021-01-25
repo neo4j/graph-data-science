@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-option java_package = "org.neo4j.graphalgo.config";
-//option java_multiple_files = true;
+option java_package = "org.neo4j.graphalgo.config.proto";
 option java_outer_classname = "CommonConfigProto";
 
 message AlgoBaseConfigProto {
