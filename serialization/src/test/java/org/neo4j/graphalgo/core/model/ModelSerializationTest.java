@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -49,7 +48,6 @@ class ModelSerializationTest {
         .graphStore()
         .schema();
 
-    @Disabled("temporarily disabled, needs more work on the model serialization. Check after #2516 is merged")
     @Test
     void shouldSerializeGraphSchema() throws IOException {
         var serializableGraphSchema = SchemaSerializer.serializableGraphSchema(GRAPH_SCHEMA);
@@ -66,7 +64,6 @@ class ModelSerializationTest {
             .isEqualTo(GRAPH_SCHEMA);
     }
 
-    @Disabled("temporarily disabled, needs more work on the model serialization. Check after #2516 is merged")
     @Test
     void shouldSerialize() throws IOException {
         var model = Model.of(

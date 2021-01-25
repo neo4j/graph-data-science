@@ -23,14 +23,10 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class SchemaSerializer {
     private static final Set<DefaultValueSerializer> defaultValueSerializers = new HashSet<>();
@@ -123,85 +119,4 @@ public final class SchemaSerializer {
         boolean canProcess(ValueType valueType);
     }
 
-    private static class LongDefaultValueSerializer implements DefaultValueSerializer {
-        @Override
-        public void processValue(DefaultValue defaultValue, GraphSchemaProto.DefaultValue.Builder defaultValueBuilder) {
-            defaultValueBuilder.setLongValue(defaultValue.longValue());
-        }
-
-        @Override
-        public boolean canProcess(ValueType valueType) {
-            return ValueType.LONG == valueType;
-        }
-    }
-
-    private static class DoubleDefaultValueSerializer implements DefaultValueSerializer {
-
-        @Override
-        public void processValue(DefaultValue defaultValue, GraphSchemaProto.DefaultValue.Builder defaultValueBuilder) {
-            defaultValueBuilder.setDoubleValue(defaultValue.doubleValue());
-        }
-
-        @Override
-        public boolean canProcess(ValueType valueType) {
-            return ValueType.DOUBLE == valueType;
-        }
-    }
-
-    private static class DoubleArrayDefaultValueSerializer implements DefaultValueSerializer {
-        @Override
-        public void processValue(DefaultValue defaultValue, GraphSchemaProto.DefaultValue.Builder defaultValueBuilder) {
-            var doubleArrayValue = defaultValue.doubleArrayValue();
-            if (doubleArrayValue != null) {
-                var doubleArrayIterable = Arrays.stream(doubleArrayValue).boxed().collect(Collectors.toList());
-                defaultValueBuilder.setDoubleArrayValue(GraphSchemaProto.DoubleArray
-                    .newBuilder()
-                    .addAllDoubleArrayValue(doubleArrayIterable));
-            }
-        }
-
-        @Override
-        public boolean canProcess(ValueType valueType) {
-            return ValueType.DOUBLE_ARRAY == valueType;
-        }
-    }
-
-    private static class LongArrayDefaultValueSerializer implements DefaultValueSerializer {
-        @Override
-        public void processValue(DefaultValue defaultValue, GraphSchemaProto.DefaultValue.Builder defaultValueBuilder) {
-            var longArrayValue = defaultValue.longArrayValue();
-            if (longArrayValue != null) {
-                var longArrayIterable = Arrays.stream(longArrayValue).boxed().collect(Collectors.toList());
-                defaultValueBuilder.setLongArrayValue(GraphSchemaProto.LongArray
-                    .newBuilder()
-                    .addAllLongArrayValue(longArrayIterable));
-            }
-        }
-
-        @Override
-        public boolean canProcess(ValueType valueType) {
-            return ValueType.LONG_ARRAY == valueType;
-        }
-    }
-
-    private static class FloatArrayDefaultValueSerializer implements DefaultValueSerializer {
-        @Override
-        public void processValue(DefaultValue defaultValue, GraphSchemaProto.DefaultValue.Builder defaultValueBuilder) {
-            var floatArrayValue = defaultValue.floatArrayValue();
-            if (floatArrayValue != null) {
-                List<Float> floatArrayIterable = new ArrayList<>(floatArrayValue.length);
-                for (int i = 0; i < floatArrayValue.length; i++) {
-                    floatArrayIterable.add(i, floatArrayValue[i]);
-                }
-                defaultValueBuilder.setFloatArrayValue(GraphSchemaProto.FloatArray
-                    .newBuilder()
-                    .addAllFloatArrayValue(floatArrayIterable));
-            }
-        }
-
-        @Override
-        public boolean canProcess(ValueType valueType) {
-            return ValueType.FLOAT_ARRAY == valueType;
-        }
-    }
 }

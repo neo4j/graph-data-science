@@ -92,7 +92,7 @@ public final class SchemaDeserializer {
         return DefaultValue.of(value, serializedDefaultValue.getIsUserDefined());
     }
 
-    private static @Nullable Object serializedDefaultValue(
+    static @Nullable Object serializedDefaultValue(
         ValueType valueType,
         GraphSchemaProto.DefaultValue serializedDefaultValue
     ) {
@@ -105,13 +105,19 @@ public final class SchemaDeserializer {
                 value = serializedDefaultValue.getDoubleValue();
                 break;
             case DOUBLE_ARRAY:
-                value = serializedDefaultValue.getDoubleArrayValue();
+                value = serializedDefaultValue.getDoubleArrayValue().getHasValue() ?
+                    serializedDefaultValue.getDoubleArrayValue().getDoubleArrayValueList() :
+                    DefaultValue.forDoubleArray().doubleArrayValue();
                 break;
             case FLOAT_ARRAY:
-                value = serializedDefaultValue.getFloatArrayValue();
+                value = serializedDefaultValue.getFloatArrayValue().getHasValue() ?
+                    serializedDefaultValue.getFloatArrayValue().getFloatArrayValueList() :
+                    DefaultValue.forFloatArray().floatArrayValue();
                 break;
             case LONG_ARRAY:
-                value = serializedDefaultValue.getLongArrayValue();
+                value = serializedDefaultValue.getLongArrayValue().getHasValue() ?
+                    serializedDefaultValue.getLongArrayValue().getLongArrayValueList() :
+                    DefaultValue.forLongArray().longArrayValue();
                 break;
             case UNKNOWN:
             default:

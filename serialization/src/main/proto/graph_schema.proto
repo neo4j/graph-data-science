@@ -48,12 +48,15 @@ message DefaultValue {
 
 message DoubleArray {
   repeated double doubleArrayValue = 1;
+  bool hasValue = 2;
 }
 
 message FloatArray {
   repeated float floatArrayValue = 1;
+  bool hasValue = 2;
 }
 
 message LongArray {
   repeated int64 longArrayValue = 1;
+  bool hasValue = 2;
 }
