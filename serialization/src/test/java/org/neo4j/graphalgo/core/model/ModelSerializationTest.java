@@ -44,7 +44,7 @@ class ModelSerializationTest {
         .graphStore()
         .schema();
 
-    @Disabled
+    @Disabled("temporarily disabled, needs more work on the model serialization")
     @Test
     void shouldSerializeGraphSchema() throws IOException {
         var serializableGraphSchema = SchemaSerializer.serializableGraphSchema(GRAPH_SCHEMA);

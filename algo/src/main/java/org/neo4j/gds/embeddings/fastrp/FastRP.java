@@ -339,7 +339,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
             float[] features = features(nodeId);
 
-            for (int j = 0; j < inputDimension; j++) {
+            for (int j = 0; j < features.length; j++) {
                 double featureValue = features[j];
                 if (featureValue != 0.0D) {
                     for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
@@ -354,12 +354,12 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             var features = new float[inputDimension];
             FeatureConsumer featureConsumer = new FeatureConsumer() {
                 @Override
-                public void acceptScalar(long nodeOffset, int offset, double value) {
+                public void acceptScalar(long ignored, int offset, double value) {
                     features[offset] = (float)value;
                 }
 
                 @Override
-                public void acceptArray(long nodeOffset, int offset, double[] values) {
+                public void acceptArray(long ignored, int offset, double[] values) {
                     for (int i = 0; i < values.length; i++) {
                         features[offset + i] = (float)values[i];
                     }

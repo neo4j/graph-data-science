@@ -52,9 +52,7 @@ public class FeatureExtraction {
             } else if (extractor instanceof ArrayFeatureExtractor) {
                 consumer.acceptArray(nodeOffset, offset, ((ArrayFeatureExtractor) extractor).extract(nodeId));
             } else {
-                var msg = "Only ScalarFeatureExtractor and ArrayFeatureExtractor are handled";
-                assert false : msg;
-                throw new RuntimeException(msg);
+                throw new IllegalStateException("Only ScalarFeatureExtractor and ArrayFeatureExtractor are handled");
             }
             offset += extractor.dimension();
         }
@@ -121,9 +119,7 @@ public class FeatureExtraction {
                 } else if ((ValueType.DOUBLE == propertyType) || (ValueType.LONG == propertyType)) {
                     return new ScalarPropertyExtractor(graph, propertyKey);
                 } else {
-                    var msg = formatWithLocale("Unknown ValueType %s", propertyType);
-                    assert false : msg;
-                    throw new RuntimeException(msg);
+                    throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }).collect(Collectors.toList());
     }
