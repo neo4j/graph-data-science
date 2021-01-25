@@ -47,7 +47,7 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     @Configuration.DoubleRange(min = 0, max = 1)
     double holdoutFraction();
 
-    @Configuration.IntegerRange(min = 1)
+    @Configuration.IntegerRange(min = 2)
     int validationFolds();
 
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
