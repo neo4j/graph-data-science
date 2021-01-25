@@ -27,6 +27,9 @@ import java.util.OptionalDouble;
 @ValueClass
 public interface LogEvent {
 
+    String NO_TASK_NAME = "";
+    String NO_MESSAGE = "";
+
     String username();
 
     JobId jobId();
@@ -41,5 +44,15 @@ public interface LogEvent {
     @Value.Parameter(false)
     default boolean isEndOfStream() {
         return false;
+    }
+
+    static LogEvent endOfStreamEvent(String username, JobId jobId) {
+        return ImmutableLogEvent.builder()
+            .username(username)
+            .taskName(NO_TASK_NAME)
+            .message(NO_MESSAGE)
+            .jobId(jobId)
+            .isEndOfStream(true)
+            .build();
     }
 }
