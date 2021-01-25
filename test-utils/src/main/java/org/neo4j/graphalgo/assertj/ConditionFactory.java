@@ -42,4 +42,11 @@ public final class ConditionFactory {
             return true;
         }, "a map containing all entries of %s", map.toString());
     }
+
+    public static Condition<double[]> hasSize(int size) {
+        return new Condition<>(array -> {
+            assertThat(array).hasSize(size);
+            return true;
+        }, "a double array of size %s", size);
+    }
 }
