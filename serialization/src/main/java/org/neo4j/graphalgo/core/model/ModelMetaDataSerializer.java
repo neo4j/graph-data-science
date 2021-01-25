@@ -41,7 +41,9 @@ public final class ModelMetaDataSerializer {
             .build();
     }
 
-    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(ModelProto.ModelMetaData protoModelMetaData) {
+    public static <DATA, CONFIG extends ModelConfig & BaseConfig> ImmutableModel.Builder<DATA, CONFIG> fromSerializable(
+        ModelProto.ModelMetaData protoModelMetaData
+    ) {
         return ImmutableModel.<DATA, CONFIG>builder()
             .username(protoModelMetaData.getUsername())
             .name(protoModelMetaData.getName())

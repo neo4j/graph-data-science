@@ -60,7 +60,8 @@ public final class GraphSageModelSerializer {
         GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigSerializer.fromSerializable(protoModel
             .getModel()
             .getTrainConfig());
-        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder = ModelMetaDataSerializer.fromSerializable(protoModelMeta.getModel());
+        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder =
+            ModelMetaDataSerializer.fromSerializable(protoModelMeta.getModel());
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),

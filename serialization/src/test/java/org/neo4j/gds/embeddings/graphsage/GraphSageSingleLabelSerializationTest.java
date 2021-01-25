@@ -96,10 +96,9 @@ class GraphSageSingleLabelSerializationTest {
             GraphSageProto.GraphSageModel.parser()
         );
 
-        assertThat(protoGraphSageModel).isNotNull();
-
-        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel);
-        assertThat(deserializedModel).isNotNull();
+        var deserializedModel = GraphSageModelSerializer.fromSerializable(
+            protoGraphSageModel
+        );
         var embeddingsFromDeserializedModel = produceEmbeddings(deserializedModel);
 
         assertThat(originalEmbeddings)
