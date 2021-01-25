@@ -175,6 +175,20 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         assertError(query, "No model candidates (params) specified, we require at least one");
     }
 
+    @Test
+    void shouldNotAcceptEmptyMetrics() {
+        var query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "  modelName: 'model'," +
+                    "  targetProperty: 't'," +
+                    "  metrics: []," +
+                    "  holdoutFraction: 0.2," +
+                    "  validationFolds: 5," +
+                    "  params: [{penalty: 1.0}]" +
+                    "})";
+
+        assertError(query, "No metrics specified, we require at least one");
+    }
+
     public String createQuery() {
         return "CREATE " +
                "(n1:N {a: 2.0, b: 1.2, t: 1})," +
