@@ -73,7 +73,7 @@ class GraphSageMultiLabelSerializationTest {
 
         assertThat(protoGraphSageModel).isNotNull();
 
-        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel);
+        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel, protoModelMetaData);
 
         assertThat(deserializedModel.data().layers())
             .isNotNull()

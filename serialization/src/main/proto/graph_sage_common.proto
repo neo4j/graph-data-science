@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "org.neo4j.graphalgo.core.model.proto";
+option java_outer_classname = "GraphSageCommonProto";
+
+enum ActivationFunction {
+  SIGMOID = 0;
+  RELU = 1;
+}
+
+enum AggregatorType {
+  MEAN = 0;
+  POOL = 1;
+}

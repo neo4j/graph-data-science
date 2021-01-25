@@ -97,7 +97,8 @@ class GraphSageSingleLabelSerializationTest {
         );
 
         var deserializedModel = GraphSageModelSerializer.fromSerializable(
-            protoGraphSageModel
+            protoGraphSageModel,
+            protoModelMetaData
         );
         var embeddingsFromDeserializedModel = produceEmbeddings(deserializedModel);
 

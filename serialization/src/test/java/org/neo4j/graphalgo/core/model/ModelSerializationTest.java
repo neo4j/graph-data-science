@@ -21,20 +21,25 @@ package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
+import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.api.schema.SchemaSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ModelSerializationTest {
 
@@ -44,7 +49,7 @@ class ModelSerializationTest {
         .graphStore()
         .schema();
 
-    @Disabled("temporarily disabled, needs more work on the model serialization")
+    @Disabled("temporarily disabled, needs more work on the model serialization. Check after #2516 is merged")
     @Test
     void shouldSerializeGraphSchema() throws IOException {
         var serializableGraphSchema = SchemaSerializer.serializableGraphSchema(GRAPH_SCHEMA);
@@ -61,28 +66,57 @@ class ModelSerializationTest {
             .isEqualTo(GRAPH_SCHEMA);
     }
 
+    @Disabled("temporarily disabled, needs more work on the model serialization. Check after #2516 is merged")
     @Test
-    void shouldSerializeModel() throws IOException, ClassNotFoundException {
+    void shouldSerialize() throws IOException {
+        var model = Model.of(
+            "user",
+            "testGS",
+            GraphSage.MODEL_TYPE,
+            GRAPH_SCHEMA,
+            "blah, blah",
+            ImmutableGraphSageTrainConfig.builder()
+                .modelName("MODEL_NAME")
+                .aggregator(Aggregator.AggregatorType.MEAN)
+                .activationFunction(ActivationFunction.SIGMOID)
+                .featureProperties(List.of("age", "birth_year", "death_year"))
+                .build()
+        );
+
+        var protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);
+        assertThat(protoModelMetaData).isNotNull();
+
+        var deserializedModel =
+            ModelMetaDataSerializer.fromSerializable(protoModelMetaData)
+                .data("blah, blah")
+                .customInfo(Model.Mappable.EMPTY)
+                .build();
+
+        assertThat(deserializedModel)
+            .isNotNull()
+            .usingRecursiveComparison()
+            .ignoringFieldsOfTypes(DefaultValue.class)
+            .isEqualTo(model);
+
+
+    }
+
+    @Test
+    void shouldThrowUnsupportedModelType() throws IOException, ClassNotFoundException {
         var model = Model.of(
             "user1",
             "testModel",
-            "testAlgo",
+            "notSupportedAlgoType",
             GRAPH_SCHEMA,
             "testTrainData",
             TestTrainConfig.of()
         );
 
-        ModelProto.ModelMetaData protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);
-
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        protoModelMetaData.writeTo(output);
-
-        ModelProto.ModelMetaData protoModelDeserialized = ModelProto.ModelMetaData.parseFrom(output.toByteArray());
-
-        assertEquals(model.algoType(), protoModelDeserialized.getAlgoType());
-        assertEquals(model.username(), protoModelDeserialized.getUsername());
-        assertEquals(model.name(), protoModelDeserialized.getName());
-        assertEquals(model.creationTime(), ZonedDateTimeSerializer.fromSerializable(protoModelDeserialized.getCreationTime()));
+        assertThatThrownBy(
+            () -> ModelMetaDataSerializer.toSerializable(model),
+            "Unsupported model type: %s",
+            "notSupportedAlgoType"
+        );
     }
 
 }

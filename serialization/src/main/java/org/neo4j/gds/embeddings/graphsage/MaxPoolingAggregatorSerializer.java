@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.graphalgo.core.model.proto.GraphSageCommonProto;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
 public final class MaxPoolingAggregatorSerializer {
@@ -36,7 +37,7 @@ public final class MaxPoolingAggregatorSerializer {
             .setSelfWeights(TensorSerializer.toSerializable(aggregator.selfWeights()))
             .setNeighborsWeights(TensorSerializer.toSerializable(aggregator.neighborsWeights()))
             .setBias(TensorSerializer.toSerializable(aggregator.bias()))
-            .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(aggregator.activationFunction().name()))
+            .setActivationFunction(GraphSageCommonProto.ActivationFunction.valueOf(aggregator.activationFunction().name()))
             .build();
     }
 

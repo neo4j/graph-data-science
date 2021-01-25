@@ -2,20 +2,14 @@ syntax = "proto3";
 
 import "tensors.proto";
 import "model.proto";
-import "config/common_config.proto";
+import "graph_sage_common.proto";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
 option java_outer_classname = "GraphSageProto";
 
 message GraphSageModel {
-  GraphSageModelMetadata model = 1;
-  ModelData data = 2;
-  FeatureFunction featureFunction = 3;
-}
-
-message GraphSageModelMetadata {
-  GraphSageTrainConfig trainConfig = 1;
-  ModelMetaData model = 2;
+  ModelData data = 1;
+  FeatureFunction featureFunction = 2;
 }
 
 message FeatureFunction {
@@ -53,40 +47,4 @@ message MaxPoolingAggregator {
   Matrix neighborsWeights = 3;
   Vector bias = 4;
   ActivationFunction activationFunction = 5;
-}
-
-message GraphSageTrainConfig {
-  AlgoBaseConfigProto algoBaseConfig = 1;
-  ModelConfigProto modelConfig = 2;
-  BatchSizeConfigProto batchSizeConfig = 3;
-  IterationsConfigProto iterationsConfig = 4;
-  ToleranceConfigProto toleranceConfig = 5;
-  EmbeddingDimensionConfigProto embeddingDimensionConfig = 6;
-  RelationshipWeightConfigProto relationshipWeightConfig = 7;
-  FeaturePropertiesConfigProto featurePropertiesConfig = 8;
-
-  repeated int64 sampleSizes = 9;
-  AggregatorType aggregator = 10;
-  ActivationFunction activationFunction = 11;
-  double learningRate = 12;
-  int32 epochs = 13;
-  int32 searchDepth = 14;
-  int32 negativeSampleWeight = 15;
-  bool degreeAsProperty = 16;
-  ProjectedFeatureDimension projectedFeatureDimension = 17;
-}
-
-message ProjectedFeatureDimension {
-  int32 value = 1;
-  bool present = 2;
-}
-
-enum ActivationFunction {
-  SIGMOID = 0;
-  RELU = 1;
-}
-
-enum AggregatorType {
-  MEAN = 0;
-  POOL = 1;
 }

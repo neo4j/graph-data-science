@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "graph_schema.proto";
+import "config/train_configs.proto";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
 option java_outer_classname = "ModelProto";
@@ -11,7 +12,11 @@ message ModelMetaData {
   string name = 2;
   string algoType = 3;
   GraphSchema graphSchema = 4;
-  ZonedDateTime creationTime = 6;
+  ZonedDateTime creationTime = 5;
+
+  oneof trainConfig {
+    GraphSageTrainConfig graphSageTrainConfig = 6;
+  }
 }
 
 message ZonedDateTime {

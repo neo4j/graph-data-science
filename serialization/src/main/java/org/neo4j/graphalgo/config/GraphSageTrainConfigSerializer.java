@@ -22,7 +22,8 @@ package org.neo4j.graphalgo.config;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.graphalgo.core.model.proto.GraphSageCommonProto;
+import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableEmbeddingDimensionsConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
@@ -35,15 +36,15 @@ public final class GraphSageTrainConfigSerializer {
 
     private GraphSageTrainConfigSerializer() {}
 
-    public static GraphSageProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
-        var protoConfigBuilder = GraphSageProto.GraphSageTrainConfig.newBuilder();
+    public static TrainConfigsProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
+        var protoConfigBuilder = TrainConfigsProto.GraphSageTrainConfig.newBuilder();
 
         protoConfigBuilder
             .setModelConfig(serializableModelConfig(trainConfig))
             .setEmbeddingDimensionConfig(serializableEmbeddingDimensionsConfig(trainConfig))
             .addAllSampleSizes(trainConfig.sampleSizes())
-            .setAggregator(GraphSageProto.AggregatorType.valueOf(trainConfig.aggregator().name()))
-            .setActivationFunction(GraphSageProto.ActivationFunction.valueOf(trainConfig.activationFunction().name()))
+            .setAggregator(GraphSageCommonProto.AggregatorType.valueOf(trainConfig.aggregator().name()))
+            .setActivationFunction(GraphSageCommonProto.ActivationFunction.valueOf(trainConfig.activationFunction().name()))
             .setToleranceConfig(serializableToleranceConfig(trainConfig))
             .setLearningRate(trainConfig.learningRate())
             .setEpochs(trainConfig.epochs())
@@ -53,7 +54,7 @@ public final class GraphSageTrainConfigSerializer {
             .setDegreeAsProperty(trainConfig.degreeAsProperty())
             .setFeaturePropertiesConfig(serializableFeaturePropertiesConfig(trainConfig));
 
-        var projectedFeatureDimensionBuilder = GraphSageProto.ProjectedFeatureDimension
+        var projectedFeatureDimensionBuilder = TrainConfigsProto.ProjectedFeatureDimension
             .newBuilder()
             .setPresent(trainConfig.projectedFeatureDimension().isPresent());
         trainConfig.projectedFeatureDimension().ifPresent(projectedFeatureDimensionBuilder::setValue);
@@ -64,7 +65,7 @@ public final class GraphSageTrainConfigSerializer {
         return protoConfigBuilder.build();
     }
 
-    public static GraphSageTrainConfig fromSerializable(GraphSageProto.GraphSageTrainConfig protoTrainConfig) {
+    public static GraphSageTrainConfig fromSerializable(TrainConfigsProto.GraphSageTrainConfig protoTrainConfig) {
         var trainConfigBuilder = GraphSageTrainConfig.builder();
 
         trainConfigBuilder

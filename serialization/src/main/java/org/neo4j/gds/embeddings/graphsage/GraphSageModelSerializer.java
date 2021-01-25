@@ -21,10 +21,10 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
-import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
+import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
@@ -40,39 +40,32 @@ public final class GraphSageModelSerializer {
             modelDataBuilder.addLayers(i, layer);
         }
 
-        var metadataBuilder = GraphSageProto.GraphSageModelMetadata.newBuilder()
-            .setModel(ModelMetaDataSerializer.toSerializable(model))
-            .setTrainConfig(GraphSageTrainConfigSerializer.toSerializable(model.trainConfig()));
         return GraphSageProto.GraphSageModel.newBuilder()
             .setData(modelDataBuilder)
-            .setModel(metadataBuilder)
             .setFeatureFunction(FeatureFunctionSerializer.toSerializable(model.data().featureFunction()))
             .build();
     }
 
     static Model<ModelData, GraphSageTrainConfig> fromSerializable(
-        GraphSageProto.GraphSageModel protoModel
+        GraphSageProto.GraphSageModel protoModel,
+        ModelProto.ModelMetaData modelMetaData
     ) throws
         IOException,
         ClassNotFoundException {
 
-        var protoModelMeta = protoModel.getModel();
-        GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigSerializer.fromSerializable(protoModel
-            .getModel()
-            .getTrainConfig());
-        ImmutableModel.Builder<ModelData, GraphSageTrainConfig> modelBuilder =
-            ModelMetaDataSerializer.fromSerializable(protoModelMeta.getModel());
+        var modelBuilder =
+            ModelMetaDataSerializer.<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData);
+
         return modelBuilder.data(
             ModelData.of(
                 LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
                 FeatureFunctionSerializer.fromSerializable(
                     protoModel.getFeatureFunction(),
-                    graphSageTrainConfig
+                    GraphSageTrainConfigSerializer.fromSerializable(modelMetaData.getGraphSageTrainConfig())
                 )
             )
         )
             .customInfo(Model.Mappable.EMPTY)
-            .trainConfig(graphSageTrainConfig)
             .build();
     }
 }
