@@ -21,8 +21,6 @@ package org.neo4j.gds.model.storage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -31,7 +29,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
@@ -97,35 +94,13 @@ class ModelToFileExporterTest {
             .isEqualTo(MODEL);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void shouldOverwriteBasedOnConfigParameter(boolean overwrite, @TempDir Path persistencePath) throws
-        IOException {
+    @Test
+    void shouldNotOverwrite(@TempDir Path persistencePath) throws IOException {
         ModelToFileExporter.toFile(persistencePath, MODEL);
 
-        if (overwrite) {
-            var newTrainConfig = ImmutableGraphSageTrainConfig
-                .builder()
-                .from(TRAIN_CONFIG)
-                .embeddingDimension(32)
-                .build();
 
-            var newModel = ImmutableModel.<ModelData, GraphSageTrainConfig>builder()
-                .from(MODEL)
-                .trainConfig(newTrainConfig)
-                .build();
-
-            ModelToFileExporter.toFile(persistencePath, newModel);
-            Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
-            assertThat(deserializedModel)
-                .usingRecursiveComparison()
-                .withStrictTypeChecking()
-                .ignoringFieldsOfTypes(DefaultValue.class)
-                .isEqualTo(newModel);
-        } else {
-            assertThatThrownBy(() -> ModelToFileExporter.toFile(persistencePath, MODEL))
-                .isInstanceOf(FileAlreadyExistsException.class);
-        }
+        assertThatThrownBy(() -> ModelToFileExporter.toFile(persistencePath, MODEL))
+            .isInstanceOf(FileAlreadyExistsException.class);
     }
 
 }
