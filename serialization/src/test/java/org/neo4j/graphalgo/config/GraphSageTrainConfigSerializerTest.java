@@ -56,7 +56,7 @@ class GraphSageTrainConfigSerializerTest {
 
     @ParameterizedTest
     @MethodSource("aggregatorsWithActivationFunctions")
-    void testRoundTripExtraProps(Aggregator.AggregatorType aggregator, ActivationFunction activationFunction) {
+    void testRoundTripWeightedMultiLabel(Aggregator.AggregatorType aggregator, ActivationFunction activationFunction) {
         var trainConfigBuilder = ImmutableGraphSageTrainConfig.builder()
             .modelName("MODEL_NAME")
             .aggregator(aggregator)

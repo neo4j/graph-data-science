@@ -81,16 +81,6 @@ class ModelSerializationTest {
         assertEquals(model.username(), protoModelDeserialized.getUsername());
         assertEquals(model.name(), protoModelDeserialized.getName());
         assertEquals(model.creationTime(), ZonedDateTimeSerializer.fromSerializable(protoModelDeserialized.getCreationTime()));
-
-//        var resultTrainConfigBytes = protoModelDeserialized.getSerializedTrainConfig().toByteArray();
-//        var deserializedTrainConfig = ObjectSerializer.fromByteArrayUnsafe(resultTrainConfigBytes);
-//
-//        assertThat(deserializedTrainConfig)
-//            .isNotNull()
-//            .usingRecursiveComparison()
-//            .withStrictTypeChecking()
-//            .isEqualTo(TestTrainConfig.of());
-
     }
 
 }
