@@ -236,4 +236,6 @@ public interface Neo4jProxyApi {
     Setting<Long> memoryTransactionMaxSize();
 
     JobRunner runnerFromScheduler(JobScheduler scheduler, Group group);
+
+    ExecutionMonitor invisibleExecutionMonitor();
 }

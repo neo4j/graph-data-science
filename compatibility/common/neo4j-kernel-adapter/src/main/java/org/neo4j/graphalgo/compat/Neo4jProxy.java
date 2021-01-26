@@ -350,6 +350,10 @@ public final class Neo4jProxy {
         return IMPL.runnerFromScheduler(scheduler, group);
     }
 
+    public static ExecutionMonitor invisibleExecutionMonitor() {
+        return IMPL.invisibleExecutionMonitor();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

@@ -32,7 +32,6 @@ import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -115,7 +114,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 PageCacheTracer.NULL,
                 importConfig,
                 logService,
-                ExecutionMonitors.invisible(),
+                Neo4jProxy.invisibleExecutionMonitor(),
                 AdditionalInitialIds.EMPTY,
                 databaseConfig,
                 RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),

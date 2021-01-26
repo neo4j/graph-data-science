@@ -422,6 +422,11 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
         return new JobRunner43(scheduler, group);
     }
 
+    @Override
+    public ExecutionMonitor invisibleExecutionMonitor() {
+        return ExecutionMonitor.INVISIBLE;
+    }
+
     private static final class InputFromCompatInput implements Input {
         private final CompatInput delegate;
 

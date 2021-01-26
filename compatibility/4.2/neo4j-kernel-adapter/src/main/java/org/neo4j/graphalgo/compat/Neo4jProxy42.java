@@ -41,6 +41,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
 import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
@@ -420,6 +421,11 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
         return new JobRunner42(scheduler, group);
+    }
+
+    @Override
+    public ExecutionMonitor invisibleExecutionMonitor() {
+        return ExecutionMonitors.invisible();
     }
 
     private static final class InputFromCompatInput implements Input {
