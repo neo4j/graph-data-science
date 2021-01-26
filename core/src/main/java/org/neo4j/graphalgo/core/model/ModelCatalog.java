@@ -68,7 +68,15 @@ public final class ModelCatalog {
     }
 
     public static Model<?, ?> drop(String username, String modelName) {
-        return getUserCatalog(username).drop(modelName);
+        if (publicModels.exists(modelName)) {
+            Model<?, ?> model = publicModels.getUntyped(modelName);
+            if (model.username().equals(username)) {
+                return publicModels.drop(modelName);
+            }
+            throw new IllegalStateException(formatWithLocale("Only the creator of model %s can drop it.", modelName));
+        } else {
+            return getUserCatalog(username).drop(modelName);
+        }
     }
 
     public static Collection<Model<?, ?>> list(String username) {

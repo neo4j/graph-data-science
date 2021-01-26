@@ -41,6 +41,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -403,6 +404,28 @@ class ModelCatalogTest {
             .isEqualTo(model);
 
         assertEquals(List.of(Model.ALL_USERS), publicModel.permissions());
+    }
+
+    @Test
+    void shouldOnlyBeDroppedByCreator() {
+        Model<String, TestTrainConfig> model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.publish(USERNAME, "testModel");
+
+        assertThatThrownBy(() -> ModelCatalog.drop("anotherUser", "testModel_public"))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Only the creator");
+
+        ModelCatalog.drop(USERNAME, "testModel_public");
+        assertEquals(1, ModelCatalog.list(USERNAME).size());
     }
 
     @Test
