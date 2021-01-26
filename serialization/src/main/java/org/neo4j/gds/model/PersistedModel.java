@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.util.Map;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -123,8 +122,8 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     }
 
     @Override
-    public Map<String, Object> customInfo() {
-        return null;
+    public Mappable customInfo() {
+        return Mappable.EMPTY;
     }
 
     @Override
