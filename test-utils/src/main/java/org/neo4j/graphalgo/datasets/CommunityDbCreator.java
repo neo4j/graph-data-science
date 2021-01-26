@@ -49,7 +49,7 @@ public final class CommunityDbCreator implements DbCreator {
     }
 
     private static DatabaseManagementServiceBuilder builder(Path storeDir) {
-        return new DatabaseManagementServiceBuilder(storeDir)
+        return new DatabaseManagementServiceBuilder(storeDir.toFile())
             .setConfig(Settings.udc(), false)
             .setConfig(Settings.boltEnabled(), false)
             .setConfig(Settings.httpEnabled(), false)
