@@ -27,12 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.PersistedModel;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GdsEdition;
-import org.neo4j.graphalgo.core.ModelPersistenceSettings;
+import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -40,13 +38,12 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-class ModelPersistProcTest extends ModelProcBaseTest {
+class ModelStoreProcTest extends ModelProcBaseTest {
 
     @TempDir
     Path tempDir;
@@ -55,12 +52,12 @@ class ModelPersistProcTest extends ModelProcBaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(ModelPersistenceSettings.model_persistence_location, tempDir);
+        builder.setConfig(ModelStoreSettings.model_store_location, tempDir);
     }
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(ModelPersistProc.class);
+        registerProcedures(ModelStoreProc.class);
         GdsEdition.instance().setToEnterpriseEdition();
     }
 
@@ -137,4 +134,3 @@ class ModelPersistProcTest extends ModelProcBaseTest {
     }
 
 }
-

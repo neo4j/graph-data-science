@@ -25,7 +25,7 @@ import org.neo4j.gds.model.PersistedModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.ModelPersistenceSettings;
+import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
@@ -42,17 +42,17 @@ import static org.neo4j.graphalgo.core.utils.export.GraphStoreExporter.DIRECTORY
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelPersistProc extends BaseProc {
+public class ModelStoreProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Persist the selected model to disk";
+    private static final String DESCRIPTION = "Store the selected model to disk";
 
-    @Procedure(name = "gds.alpha.model.persist", mode = READ)
+    @Procedure(name = "gds.alpha.model.store", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelPersistResult> persist(@Name(value = "modelName") String modelName) throws IOException {
+    public Stream<ModelStoreResult> store(@Name(value = "modelName") String modelName) throws IOException {
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (model.persisted()) {
-            return Stream.of(new ModelPersistResult(modelName, 0));
+            return Stream.of(new ModelStoreResult(modelName, 0));
         }
 
         var timer = ProgressTimer.start();
@@ -64,45 +64,45 @@ public class ModelPersistProc extends BaseProc {
             model
         );
 
-        var persistedModel = PersistedModel.withInitialData(modelDir, model.data());
-        ModelCatalog.setUnsafe(persistedModel);
+        var storedModel = PersistedModel.withInitialData(modelDir, model.data());
+        ModelCatalog.setUnsafe(storedModel);
 
         timer.stop();
 
-        return Stream.of(new ModelPersistResult(modelName, timer.getDuration()));
+        return Stream.of(new ModelStoreResult(modelName, timer.getDuration()));
     }
 
     private Path createModelDir() {
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-        var persistenceDir = neo4jConfig.get(ModelPersistenceSettings.model_persistence_location);
+        var storeDir = neo4jConfig.get(ModelStoreSettings.model_store_location);
 
-        if (persistenceDir == null) {
+        if (storeDir == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
-                ModelPersistenceSettings.model_persistence_location
+                ModelStoreSettings.model_store_location
             ));
         }
 
-        DIRECTORY_IS_WRITABLE.validate(persistenceDir);
+        DIRECTORY_IS_WRITABLE.validate(storeDir);
 
-        var modelDir = persistenceDir.resolve(UUID.randomUUID().toString());
+        var modelDir = storeDir.resolve(UUID.randomUUID().toString());
 
         try {
             Files.createDirectory(modelDir);
         } catch (IOException e) {
-            throw new RuntimeException("Could not create persistence directory", e);
+            throw new RuntimeException("Could not create model store directory", e);
         }
 
         return modelDir;
     }
 
-    public static class ModelPersistResult {
+    public static class ModelStoreResult {
         public final String modelName;
-        public final long persistMillis;
+        public final long storeMillis;
 
-        ModelPersistResult(String modelName, long persistMillis) {
+        ModelStoreResult(String modelName, long storeMillis) {
             this.modelName = modelName;
-            this.persistMillis = persistMillis;
+            this.storeMillis = storeMillis;
         }
     }
 }

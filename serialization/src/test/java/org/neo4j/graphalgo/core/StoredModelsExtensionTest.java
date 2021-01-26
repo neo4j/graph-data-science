@@ -37,7 +37,7 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PersistedModelsExtensionTest extends BaseTest {
+class StoredModelsExtensionTest extends BaseTest {
 
     @TempDir
     Path tempDir;
@@ -51,7 +51,7 @@ class PersistedModelsExtensionTest extends BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        builder.setConfig(ModelPersistenceSettings.model_persistence_location, tempDir);
+        builder.setConfig(ModelStoreSettings.model_store_location, tempDir);
 
         try {
             ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
@@ -79,7 +79,7 @@ class PersistedModelsExtensionTest extends BaseTest {
         @Test
         void shouldLogIfPersistenceDirectoryDoesNotExists() {
             var testLog = new TestLog();
-            assertThat(PersistedModelsExtension.validatePath(tempDir.resolve("DOES_NOT_EXIST"), testLog)).isFalse();
+            assertThat(StoredModelsExtension.validatePath(tempDir.resolve("DOES_NOT_EXIST"), testLog)).isFalse();
 
             testLog.containsMessage(TestLog.ERROR, "does not exist. Cannot load or persist models.");
         }
@@ -90,7 +90,7 @@ class PersistedModelsExtensionTest extends BaseTest {
             Files.createFile(filePath);
 
             var testLog = new TestLog();
-            assertThat(PersistedModelsExtension.validatePath(filePath, testLog)).isFalse();
+            assertThat(StoredModelsExtension.validatePath(filePath, testLog)).isFalse();
 
             testLog.containsMessage(TestLog.ERROR, "is not a directory. Cannot load or persist models.");
         }
@@ -101,8 +101,8 @@ class PersistedModelsExtensionTest extends BaseTest {
             var second = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
 
             var testLog = new TestLog();
-            PersistedModelsExtension.openPersistedModel(testLog, first);
-            PersistedModelsExtension.openPersistedModel(testLog, second);
+            StoredModelsExtension.openStoredModel(testLog, first);
+            StoredModelsExtension.openStoredModel(testLog, second);
 
             var modelInCatalog = (PersistedModel) ModelCatalog.getUntyped("alice", "modelAlice");
             assertThat(modelInCatalog.fileLocation()).isEqualTo(first);

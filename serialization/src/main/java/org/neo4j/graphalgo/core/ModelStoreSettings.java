@@ -30,13 +30,12 @@ import static org.neo4j.configuration.SettingImpl.newBuilder;
 import static org.neo4j.configuration.SettingValueParsers.PATH;
 
 @ServiceProvider
-public class ModelPersistenceSettings implements SettingsDeclaration {
+public class ModelStoreSettings implements SettingsDeclaration {
 
     @Description("Sets the location where persisted models are stored.")
-    public static final Setting<Path> model_persistence_location = newBuilder(
-        "gds.model_persistence.location",
+    public static final Setting<Path> model_store_location = newBuilder(
+        "gds.model.store_location",
         PATH,
         null
     ).build();
 }
-
