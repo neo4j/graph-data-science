@@ -36,8 +36,8 @@ class FloatArrayDefaultValueSerializer implements SchemaSerializer.DefaultValueS
         builder.setHasValue(hasValue);
         if (hasValue) {
             List<Float> floatArrayIterable = new ArrayList<>(floatArrayValue.length);
-            for (int i = 0; i < floatArrayValue.length; i++) {
-                floatArrayIterable.add(i, floatArrayValue[i]);
+            for (float v : floatArrayValue) {
+                floatArrayIterable.add(v);
             }
             builder.addAllFloatArrayValue(floatArrayIterable);
         }

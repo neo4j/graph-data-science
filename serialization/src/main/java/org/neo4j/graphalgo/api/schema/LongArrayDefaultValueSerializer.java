@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 class LongArrayDefaultValueSerializer implements SchemaSerializer.DefaultValueSerializer {
     @Override
@@ -35,8 +34,7 @@ class LongArrayDefaultValueSerializer implements SchemaSerializer.DefaultValueSe
         var hasValue = longArrayValue != DefaultValue.DEFAULT.longArrayValue();
         builder.setHasValue(hasValue);
         if (hasValue) {
-            var longArrayIterable = Arrays.stream(longArrayValue).boxed().collect(Collectors.toList());
-            builder.addAllLongArrayValue(longArrayIterable);
+            builder.addAllLongArrayValue(() -> Arrays.stream(longArrayValue).boxed().iterator());
         }
         defaultValueBuilder.setLongArrayValue(builder);
 
