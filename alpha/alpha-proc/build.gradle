@@ -19,6 +19,7 @@ dependencies {
 
     testImplementation project(':test-utils')
     testImplementation project(':proc-test')
+    testImplementation project(':proc-embeddings')
     testImplementation project(':proc-common')
     testImplementation project(':proc-catalog')
     // TODO: can remove when we've ported the triangle count doc test

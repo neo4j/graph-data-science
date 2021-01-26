@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
@@ -31,13 +33,16 @@ import org.neo4j.graphalgo.datasets.CommunityDbCreator;
 import org.neo4j.graphalgo.datasets.Cora;
 import org.neo4j.graphalgo.datasets.DatasetManager;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.graphalgo.model.catalog.ModelListProc;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithResultConsumer;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.registerFunctions;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.registerProcedures;
 import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
@@ -50,20 +55,25 @@ class NodeClassificationCoraIntegrationTest {
 
     private static final String GRAPH_CREATE_QUERY;
     private static final String GRAPH_NAME = "g";
-    private static final String CLASS_NODE_PROPERTY = "class";
+    private static final String MODEL_NAME = "model";
+
+    // Minimum score ('test') for the F1_WEIGHTED metric
+    private static final double MIN_METRIC_SCORE = 0.8;
+    // The ratio of nodes being classified with the correct subject
+    private static final double MIN_CORRECTNESS_RATIO = 0.85;
+
+    private static final Map<String, Integer> SUBJECT_DICTIONARY = Map.of(
+        "Neural_Networks", 0,
+        "Rule_Learning", 1,
+        "Reinforcement_Learning", 2,
+        "Probabilistic_Methods", 3,
+        "Theory", 4,
+        "Genetic_Algorithms", 5,
+        "Case_Based", 6
+    );
 
     static {
-        var subjectDictionary = Map.of(
-            "Neural_Networks", 0,
-            "Rule_Learning", 1,
-            "Reinforcement_Learning", 2,
-            "Probabilistic_Methods", 3,
-            "Theory", 4,
-            "Genetic_Algorithms", 5,
-            "Case_Based", 6
-        );
-
-        var caseWhenExpression = subjectDictionary.entrySet()
+        var caseWhenExpression = SUBJECT_DICTIONARY.entrySet()
             .stream()
             .map(entry -> formatWithLocale(
                 "WHEN \\\"%s\\\" THEN %d",
@@ -81,7 +91,7 @@ class NodeClassificationCoraIntegrationTest {
         );
 
         var relationshipQuery = formatWithLocale(
-            "MATCH (n:%1$s)-[:%2$s]->(m:%1$s) RETURN id(n) AS source, id(m) AS target, \\\"%2$s\\\" AS type",
+            "MATCH (n:%1$s)-[:%2$s]-(m:%1$s) RETURN id(n) AS source, id(m) AS target, \\\"%2$s\\\" AS type",
             PAPER_LABEL.name(),
             CITES_TYPE
         );
@@ -105,9 +115,11 @@ class NodeClassificationCoraIntegrationTest {
         registerProcedures(
             cora,
             GraphCreateProc.class,
+            FastRPMutateProc.class,
             GraphStreamNodePropertiesProc.class,
             NodeClassificationTrainProc.class,
-            NodeClassificationPredictMutateProc.class
+            NodeClassificationPredictMutateProc.class,
+            ModelListProc.class
         );
 
         registerFunctions(cora, AsNodeFunc.class);
@@ -123,56 +135,119 @@ class NodeClassificationCoraIntegrationTest {
 
     @Test
     void trainAndPredict() {
-        var trainOnN = formatWithLocale(
+        produceEmbeddings();
+        trainModel();
+        predict();
+        assertModelScore();
+        getResults();
+    }
+
+    private void produceEmbeddings() {
+        var fastRp = formatWithLocale(
+            "CALL gds.fastRP.mutate('%s', {" +
+            " mutateProperty: 'frp'," +
+            " embeddingDimension: 512" +
+            "})",
+            GRAPH_NAME
+        );
+        runQuery(cora, fastRp);
+    }
+
+    private void trainModel() {
+        var trainQuery = formatWithLocale(
             "CALL gds.alpha.ml.nodeClassification.train('%s', {" +
             "  nodeLabels: ['%s']," +
             "  modelName: 'model'," +
-            "  featureProperties: ['%s', '%s'], " +
+            "  featureProperties: ['frp'], " +
             "  targetProperty: '%s', " +
             "  metrics: ['F1_WEIGHTED'], " +
             "  holdoutFraction: 0.2, " +
             "  validationFolds: 5, " +
             "  randomSeed: 2," +
             "  params: [" +
-            "    {penalty: 0.0625, maxIterations: 1000}, " +
-            "    {penalty: 0.125, maxIterations: 1000}, " +
-            "    {penalty: 0.25, maxIterations: 1000}, " +
-            "    {penalty: 0.5, maxIterations: 1000}, " +
-            "    {penalty: 1.0, maxIterations: 1000}, " +
-            "    {penalty: 2.0, maxIterations: 1000}, " +
-            "    {penalty: 4.0, maxIterations: 1000}" +
+            "    {penalty: 9.999999999999991E-5, maxIterations: 1000}, " +
+            "    {penalty: 7.742636826811261E-4, maxIterations: 1000}, " +
+            "    {penalty: 0.005994842503189405, maxIterations: 1000}, " +
+            "    {penalty: 0.046415888336127774, maxIterations: 1000}, " +
+            "    {penalty: 0.3593813663804625, maxIterations: 1000}, " +
+            "    {penalty: 2.7825594022071267, maxIterations: 1000}, " +
+            "    {penalty: 21.544346900318843, maxIterations: 1000}," +
+            "    {penalty: 166.81005372000587, maxIterations: 1000}," +
+            "    {penalty: 1291.5496650148832, maxIterations: 1000}," +
+            "    {penalty: 10000.00000000001, maxIterations: 1000}" +
+            // produced worse score for the F1 metric
+//            "    {penalty: 0.0625, maxIterations: 1000}, " +
+//            "    {penalty: 0.125, maxIterations: 1000}, " +
+//            "    {penalty: 0.25, maxIterations: 1000}, " +
+//            "    {penalty: 0.5, maxIterations: 1000}, " +
+//            "    {penalty: 1.0, maxIterations: 1000}, " +
+//            "    {penalty: 2.0, maxIterations: 1000}, " +
+//            "    {penalty: 4.0, maxIterations: 1000}" +
             "  ]" +
             "})",
             GRAPH_NAME,
             PAPER_LABEL.name(),
-            SUBJECT_NODE_PROPERTY,
-            EXT_ID_NODE_PROPERTY,
-            CLASS_NODE_PROPERTY
+            SUBJECT_NODE_PROPERTY
         );
-        runQuery(cora, trainOnN);
+        runQuery(cora, trainQuery);
+    }
 
+    private void predict() {
         var predictOnAll = formatWithLocale(
             "CALL gds.alpha.ml.nodeClassification.predict.mutate('%s', {" +
             "  nodeLabels: ['%s']," +
-            "  modelName: 'model'," +
+            "  modelName: '%s'," +
             "  mutateProperty: 'predicted_class', " +
             "  predictedProbabilityProperty: 'predicted_proba'" +
             "})",
             GRAPH_NAME,
-            PAPER_LABEL.name()
+            PAPER_LABEL.name(),
+            MODEL_NAME
         );
         runQuery(cora, predictOnAll);
+    }
 
+    private void assertModelScore() {
+        var modelInfoStuff = formatWithLocale(
+            " CALL gds.beta.model.list('%s') YIELD modelInfo" +
+            " RETURN modelInfo.metrics.F1_WEIGHTED.test AS score ",
+            MODEL_NAME
+        );
+
+        assertThat(QueryRunner.<Double>runQuery(cora, modelInfoStuff, res -> (Double) res.next().get("score")))
+            .as("Metric score should not get worse over time.")
+            .isGreaterThan(MIN_METRIC_SCORE);
+    }
+
+    private void getResults() {
         var predictedClasses = formatWithLocale(
             "CALL gds.graph.streamNodeProperties('%s', ['predicted_class', 'predicted_proba'])" +
             " YIELD nodeId, propertyValue" +
-            " WITH nodeId, propertyValue" +
-            " WITH nodeId, collect(propertyValue) AS values" +
-            " RETURN nodeId, values[0] AS predictedClass, values[1] AS probabilities" +
-            " LIMIT 10",
+            " WITH gds.util.asNode(nodeId) AS node, propertyValue" +
+            " WITH node, collect(propertyValue) AS values" +
+            " RETURN node.subject AS actual, values[0] AS predicted, values[1] AS probabilities",
             GRAPH_NAME
         );
 
-        runQueryWithResultConsumer(cora, predictedClasses, Map.of(), result -> System.out.println(result.resultAsString()));
+        var reverseSubjectDictionary = SUBJECT_DICTIONARY
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+        // actual_subject -> (computed_subject, count)
+        var subjectClassifications = new HashMap<String, Map<String, Integer>>();
+        runQueryWithRowConsumer(cora, predictedClasses, Map.of(), (transaction, row) -> {
+                var actual = row.getString("actual");
+                var predicted = reverseSubjectDictionary.get(row.getNumber("predicted").intValue());
+                var predictedMap = subjectClassifications.computeIfAbsent(actual, (ignored) -> new HashMap<>());
+                predictedMap.put(predicted, predictedMap.getOrDefault(predicted, 0) + 1);
+            }
+        );
+
+        subjectClassifications.forEach((subject, predictions) -> {
+            var sum = predictions.values().stream().mapToInt(i -> i).sum();
+            var sameSubjectCount = predictions.get(subject);
+            assertThat((double) sameSubjectCount / sum).isGreaterThan(MIN_CORRECTNESS_RATIO);
+        });
     }
 }

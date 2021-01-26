@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 public final class CommunityDbCreator implements DbCreator {
@@ -50,6 +51,7 @@ public final class CommunityDbCreator implements DbCreator {
 
     private static DatabaseManagementServiceBuilder builder(Path storeDir) {
         return new DatabaseManagementServiceBuilder(storeDir.toFile())
+            .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))
             .setConfig(Settings.udc(), false)
             .setConfig(Settings.boltEnabled(), false)
             .setConfig(Settings.httpEnabled(), false)
