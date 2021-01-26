@@ -35,9 +35,11 @@ import org.neo4j.graphalgo.core.model.Model;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
@@ -113,11 +115,15 @@ class PersistedModelTest {
     }
 
     @Test
-    void testPublishPeristedModel() throws IOException {
+    void testPublishPersistedModel() throws IOException {
         var persistedModel = new PersistedModel(tempDir);
-//        persistedModel.load();
-        PersistedModel publishedModel = (PersistedModel)persistedModel.publish();
+        persistedModel.load();
+        persistedModel.publish();
         assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
         assertTrue(Files.exists(tempDir.resolve(MODEL_DATA_FILE)));
+
+        PersistedModel publishedModel = new PersistedModel(tempDir);
+        assertEquals(model.name() + "_public", publishedModel.name());
+        assertThat(publishedModel.sharedWith()).usingRecursiveComparison().isEqualTo(List.of(Model.ALL_USERS));
     }
 }
