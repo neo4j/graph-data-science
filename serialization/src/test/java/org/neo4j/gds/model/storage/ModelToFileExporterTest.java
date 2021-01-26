@@ -78,13 +78,13 @@ class ModelToFileExporterTest {
 
         ModelToFileExporter.toFile(exportPath, MODEL, EXPORT_CONFIG);
 
-        var metaDataFileName = formatWithLocale("%s.%s", MODEL.name(), "meta");
+        var metaDataFileName = formatWithLocale("%s.%s", EXPORT_CONFIG.fileName(), "meta");
         try (var metaDataInputStream = new FileInputStream(exportPath.resolve(metaDataFileName).toFile())) {
             var metaDataBytes = metaDataInputStream.readAllBytes();
             assertThat(metaDataBytes).isNotEmpty();
         }
 
-        var modelDataFileName = formatWithLocale("%s.%s", MODEL.name(), "data");
+        var modelDataFileName = formatWithLocale("%s.%s", EXPORT_CONFIG.fileName(), "data");
         try(var modelDataInputStream = new FileInputStream(exportPath.resolve(modelDataFileName).toFile())) {
             var modelDataBytes = modelDataInputStream.readAllBytes();
             assertThat(modelDataBytes).isNotEmpty();
