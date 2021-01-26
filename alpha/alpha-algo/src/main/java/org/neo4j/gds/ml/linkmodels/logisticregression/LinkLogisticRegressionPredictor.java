@@ -21,16 +21,12 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase
-    implements Predictor<List<Double>, LinkLogisticRegressionData> {
+    implements Predictor<double[], LinkLogisticRegressionData> {
 
     LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData) {
         super(modelData);
@@ -42,10 +38,9 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase
     }
 
     @Override
-    public List<Double> predict(Graph graph, Batch batch) {
+    public double[] predict(Graph graph, Batch batch) {
         ComputationContext ctx = new ComputationContext();
         MatrixConstant features = features(graph, batch);
-        double[] data = ctx.forward(predictions(features)).data();
-        return Arrays.stream(data).boxed().collect(Collectors.toList());
+        return ctx.forward(predictions(features)).data();
     }
 }
