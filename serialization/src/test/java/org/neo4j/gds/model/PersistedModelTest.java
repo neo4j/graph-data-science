@@ -56,7 +56,6 @@ class PersistedModelTest {
             .modelName(MODEL)
             .relationshipWeightProperty("weight")
             .degreeAsProperty(true)
-            .concurrency(1)
             .build();
 
         var modelData = ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction());
