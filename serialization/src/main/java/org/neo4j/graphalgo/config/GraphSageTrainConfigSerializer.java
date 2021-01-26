@@ -70,6 +70,7 @@ public final class GraphSageTrainConfigSerializer {
 
         trainConfigBuilder
             .modelName(protoTrainConfig.getModelConfig().getModelName())
+            .embeddingDimension(protoTrainConfig.getEmbeddingDimensionConfig().getEmbeddingDimension())
             .aggregator(Aggregator.AggregatorType.of(protoTrainConfig.getAggregator().name()))
             .activationFunction(ActivationFunction.of(protoTrainConfig.getActivationFunction().name()))
             .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList())
