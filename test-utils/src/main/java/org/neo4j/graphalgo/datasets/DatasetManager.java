@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Spliterator;
@@ -34,8 +35,8 @@ import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 public final class DatasetManager {
-    // TODO: make this a private field
-    public static final HashMap<String, Dataset> DATASETS = new HashMap<>() {{
+
+    private static final Map<String, Dataset> datasets = new HashMap<>() {{
         put(EmptyDataset.NAME, EmptyDataset.INSTANCE);
         put(FakeLdbcDataset.NAME, FakeLdbcDataset.INSTANCE);
         put(Cora.ID, new Cora());
@@ -56,19 +57,23 @@ public final class DatasetManager {
         this.dbCreator = dbCreator;
     }
 
+    public Map<String, Dataset> datasets() {
+        return Collections.unmodifiableMap(datasets);
+    }
+
     public void registerDataset(String datasetId, Dataset dataset) {
-        DATASETS.put(datasetId, dataset);
+        datasets.put(datasetId, dataset);
     }
 
     public GdsGraphDatabaseAPI openDb(String datasetId) {
-        if (!DATASETS.containsKey(datasetId)) {
+        if (!datasets.containsKey(datasetId)) {
             throw new RuntimeException("Unknown dataset name " + datasetId);
         }
 
         Path datasetDir = workingDir.resolve(datasetId);
         if (!hasDataset(datasetId)) {
             try {
-                DATASETS.get(datasetId).generate(datasetDir, dbCreator);
+                datasets.get(datasetId).generate(datasetDir, dbCreator);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to download dataset" + datasetId, e);
             }

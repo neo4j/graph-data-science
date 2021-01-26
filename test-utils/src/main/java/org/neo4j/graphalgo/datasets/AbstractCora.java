@@ -38,6 +38,7 @@ import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
 import static org.neo4j.graphalgo.datasets.CoraSchema.PAPER_LABEL;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TEST_TYPE;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TRAIN_TYPE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractCora extends Dataset {
 
@@ -49,8 +50,6 @@ public abstract class AbstractCora extends Dataset {
         super(id);
     }
 
-    public abstract int numberOfFeatures();
-
     abstract String coraNodesFile();
 
     abstract String trainRelationshipsFile();
@@ -58,6 +57,14 @@ public abstract class AbstractCora extends Dataset {
     abstract String testRelationshipsFile();
 
     abstract String citesRelationshipsFile();
+
+    public static int numberOfFeatures(String datasetId) {
+        switch (datasetId) {
+            case Cora.ID: return Cora.numberOfFeatures();
+            case TestCora.ID: return TestCora.numberOfFeatures();
+            default: throw new IllegalArgumentException(formatWithLocale("Unknown Cora dataset '%s'.", datasetId));
+        }
+    }
 
     @Override
     public void generate(Path datasetDir, DbCreator dbCreator) {

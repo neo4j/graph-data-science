@@ -23,7 +23,7 @@ public final class TestCora extends AbstractCora {
 
     public static final String ID = "TestCora";
 
-    public TestCora() {
+    TestCora() {
         super(ID);
     }
 
@@ -47,8 +47,7 @@ public final class TestCora extends AbstractCora {
         return "test.cora.cites";
     }
 
-    @Override
-    public int numberOfFeatures() {
+    static int numberOfFeatures() {
         return 7;
     }
 }

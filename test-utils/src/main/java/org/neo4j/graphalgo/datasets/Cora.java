@@ -47,8 +47,7 @@ public final class Cora extends AbstractCora {
         return "cora.cites";
     }
 
-    @Override
-    public int numberOfFeatures() {
+    static int numberOfFeatures() {
         return 1433;
     }
 }
