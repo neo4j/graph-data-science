@@ -89,10 +89,12 @@ public final class ModelCatalog {
 
     public static void publish(String username, String modelName) {
         if (exists(username, modelName)) {
-            Model<?, ?> model = getUserCatalog(username).getUntyped(modelName);
+            UserCatalog userCatalog = getUserCatalog(username);
+            Model<?, ?> model = userCatalog.getUntyped(modelName);
             if (!model.permissions().contains(Model.ALL_USERS)) {
                 Model<?, ?> publicModel = model.publish();
                 publicModels.set(publicModel);
+                userCatalog.drop(modelName);
             }
         }
     }

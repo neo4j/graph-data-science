@@ -388,7 +388,7 @@ class ModelCatalogTest {
 
         ModelCatalog.set(model);
         ModelCatalog.publish(USERNAME, "testModel");
-        assertEquals(2, ModelCatalog.list(USERNAME).size());
+        assertEquals(1, ModelCatalog.list(USERNAME).size());
 
         Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
             "anotherUser",
@@ -425,7 +425,7 @@ class ModelCatalogTest {
             .hasMessageContaining("Only the creator");
 
         ModelCatalog.drop(USERNAME, "testModel_public");
-        assertEquals(1, ModelCatalog.list(USERNAME).size());
+        assertEquals(0, ModelCatalog.list(USERNAME).size());
     }
 
     @Test
