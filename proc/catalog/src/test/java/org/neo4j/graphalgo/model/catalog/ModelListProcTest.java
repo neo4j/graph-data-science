@@ -21,14 +21,28 @@ package org.neo4j.graphalgo.model.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.ModelStoreSettings;
+import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -87,8 +101,8 @@ class ModelListProcTest extends ModelProcBaseTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD modelInfo, graphSchema, trainConfig, creationTime " +
-                "RETURN modelInfo, graphSchema, trainConfig, creationTime " +
+                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime " +
+                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime " +
                 "ORDER BY modelInfo.modelName",
                 query
             ),
@@ -97,12 +111,16 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of().toMap(),
+                    "loaded", true,
+                    "stored", false,
                     "creationTime", isA(ZonedDateTime.class)
                 ),
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
                     "graphSchema", EXPECTED_SCHEMA,
                     "trainConfig", TestTrainConfig.of().toMap(),
+                    "loaded", true,
+                    "stored", false,
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )
@@ -147,11 +165,85 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
                     "trainConfig", TestTrainConfig.of().toMap(),
                     "graphSchema", EXPECTED_SCHEMA,
+                    "loaded", true,
+                    "stored", false,
                     "creationTime", isA(ZonedDateTime.class)
                 )
             )
         );
     }
+
+    @Nested
+    class ModelListProcStoredModelsTest extends ModelProcBaseTest {
+        @TempDir
+        Path tempDir;
+
+        @Override
+        @ExtensionCallback
+        protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+            super.configuration(builder);
+            builder.setConfig(ModelStoreSettings.model_store_location, tempDir);
+        }
+
+        @Test
+        void returnLoadedModel() throws IOException {
+            var modelName = "testModel1";
+            var model1 = Model.of(
+                getUsername(),
+                modelName,
+                GraphSage.MODEL_TYPE,
+                GRAPH_SCHEMA,
+                ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
+                ImmutableGraphSageTrainConfig.builder()
+                    .username(getUsername())
+                    .modelName(modelName)
+                    .degreeAsProperty(true)
+                    .build()
+            );
+            ModelStoreProc.storeModel(db, model1);
+
+            assertCypherResult(
+                "CALL gds.beta.model.list('testModel1') YIELD loaded, stored",
+                singletonList(
+                    map(
+                        "loaded", true,
+                        "stored", true
+                    )
+                )
+            );
+        }
+
+        @Test
+        void returnStoredButUnloadedModel() throws IOException {
+            var modelName = "testModel1";
+            var model1 = Model.of(
+                getUsername(),
+                modelName,
+                GraphSage.MODEL_TYPE,
+                GRAPH_SCHEMA,
+                ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
+                ImmutableGraphSageTrainConfig.builder()
+                    .username(getUsername())
+                    .modelName(modelName)
+                    .degreeAsProperty(true)
+                    .build()
+            );
+            ModelStoreProc.storeModel(db, model1);
+            ((StoredModel) ModelCatalog.getUntyped(getUsername(), modelName)).unload();
+
+            assertCypherResult(
+                "CALL gds.beta.model.list('testModel1') YIELD loaded, stored",
+                singletonList(
+                    map(
+                        "loaded", false,
+                        "stored", true
+                    )
+                )
+            );
+        }
+
+    }
+
 
     @ParameterizedTest(name = "`{0}`")
     @MethodSource("invalidModelNames")

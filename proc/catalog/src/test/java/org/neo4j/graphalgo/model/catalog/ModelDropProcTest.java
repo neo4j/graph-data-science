@@ -68,6 +68,8 @@ class ModelDropProcTest extends ModelProcBaseTest {
                         "modelName", trainConfig.modelName(),
                         "sudo", trainConfig.sudo()
                     ),
+                    "loaded", true,
+                    "stored", false,
                     "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class)
                 )
