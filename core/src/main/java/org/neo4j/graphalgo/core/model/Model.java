@@ -34,6 +34,7 @@ import java.util.Map;
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     String ALL_USERS = "";
+    String PUBLIC_MODEL_SUFFIX = "_public";
 
     String username();
 
@@ -69,7 +70,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         return ImmutableModel.<DATA, CONFIG>builder()
             .from(this)
             .sharedWith(List.of(ALL_USERS))
-            .name(name() + "_public")
+            .name(name() + PUBLIC_MODEL_SUFFIX)
             .build();
     }
 

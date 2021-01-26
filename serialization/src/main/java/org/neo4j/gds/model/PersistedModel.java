@@ -116,7 +116,7 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     @Override
     public Model<Object, ModelConfig> publish() {
         ModelProto.ModelMetaData publishedMetaData = ModelProto.ModelMetaData.newBuilder(metaData)
-            .setName(name() + "_public")
+            .setName(name() + PUBLIC_MODEL_SUFFIX)
             .addAllSharedWith(List.of(Model.ALL_USERS))
             .build();
 
