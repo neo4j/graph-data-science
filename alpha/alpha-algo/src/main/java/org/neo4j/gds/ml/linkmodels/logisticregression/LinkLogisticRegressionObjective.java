@@ -112,7 +112,7 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
                     targets[relationshipOffset.getValue()] = 0.0;
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
-                        "The relationship property must have value %d or %d but it has %d",
+                        "The relationship property must have value %s or %s but it has %s",
                         EdgeSplitter.NEGATIVE,
                         EdgeSplitter.POSITIVE,
                         val
