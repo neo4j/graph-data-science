@@ -49,7 +49,7 @@ public class ModelPersistProc extends BaseProc {
     @Procedure(name = "gds.alpha.model.persist", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelPersistResult> persist(@Name(value = "modelName") String modelName) throws IOException {
-        var model = ModelCatalog.getUnsafe(username(), modelName);
+        var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (model.persisted()) {
             return Stream.of(new ModelPersistResult(modelName, 0));

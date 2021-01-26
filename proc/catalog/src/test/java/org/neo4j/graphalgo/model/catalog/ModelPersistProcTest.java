@@ -27,7 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelPersistenceSettings;
 import org.neo4j.graphalgo.core.model.Model;
@@ -37,6 +40,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
@@ -74,7 +78,11 @@ class ModelPersistProcTest extends ModelProcBaseTest {
             GraphSage.MODEL_TYPE,
             GRAPH_SCHEMA,
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            TestTrainConfig.of()
+            ImmutableGraphSageTrainConfig.builder()
+                .username(getUsername())
+                .modelName(modelName)
+                .degreeAsProperty(true)
+                .build()
         );
 
         ModelCatalog.set(model1);
@@ -89,7 +97,7 @@ class ModelPersistProcTest extends ModelProcBaseTest {
             )
         );
 
-        assertThat(ModelCatalog.getUnsafe(getUsername(), modelName))
+        assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
             .isInstanceOf(PersistedModel.class)
             .hasFieldOrPropertyWithValue("name", modelName)
             .hasFieldOrPropertyWithValue("persisted", true)
@@ -105,7 +113,12 @@ class ModelPersistProcTest extends ModelProcBaseTest {
             GraphSage.MODEL_TYPE,
             GRAPH_SCHEMA,
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            TestTrainConfig.of()
+            ImmutableGraphSageTrainConfig.builder()
+                .username(getUsername())
+                .modelName(modelName)
+                .degreeAsProperty(true)
+                .build()
+
         );
 
         ModelCatalog.set(model1);
@@ -113,10 +126,10 @@ class ModelPersistProcTest extends ModelProcBaseTest {
         var query = "CALL gds.alpha.model.persist('testModel1')";
 
         runQuery(query);
-        var persistedModel = ModelCatalog.getUnsafe(getUsername(), modelName);
+        var persistedModel = ModelCatalog.getUntyped(getUsername(), modelName);
         runQuery(query);
 
-        assertThat(ModelCatalog.getUnsafe(getUsername(), modelName))
+        assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
             .isEqualTo(persistedModel)
             .hasFieldOrPropertyWithValue("name", modelName)
             .hasFieldOrPropertyWithValue("persisted", true)
