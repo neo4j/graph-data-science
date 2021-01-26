@@ -62,6 +62,12 @@ public final class ConfigSerializers {
             .addAllFeatureProperties(featurePropertiesConfig.featureProperties());
     }
 
+    static CommonConfigProto.BatchSizeConfigProto.Builder serializableBatchSizeConfig(BatchSizeConfig batchSizeConfig) {
+        return CommonConfigProto.BatchSizeConfigProto
+            .newBuilder()
+            .setBatchSize(batchSizeConfig.batchSize());
+    }
+
     static void serializableRelationshipWeightConfig(
         RelationshipWeightConfig relationshipWeightConfig,
         Consumer<CommonConfigProto.RelationshipWeightConfigProto> relationshipWeightConfigProtoConsumer

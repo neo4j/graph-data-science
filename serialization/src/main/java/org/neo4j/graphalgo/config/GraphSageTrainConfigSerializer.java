@@ -25,6 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.proto.GraphSageCommonProto;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
+import static org.neo4j.graphalgo.config.ConfigSerializers.serializableBatchSizeConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableEmbeddingDimensionsConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableIterationsConfig;
@@ -42,9 +43,12 @@ public final class GraphSageTrainConfigSerializer {
         protoConfigBuilder
             .setModelConfig(serializableModelConfig(trainConfig))
             .setEmbeddingDimensionConfig(serializableEmbeddingDimensionsConfig(trainConfig))
-            .addAllSampleSizes(trainConfig.sampleSizes())
             .setAggregator(GraphSageCommonProto.AggregatorType.valueOf(trainConfig.aggregator().name()))
-            .setActivationFunction(GraphSageCommonProto.ActivationFunction.valueOf(trainConfig.activationFunction().name()))
+            .setActivationFunction(GraphSageCommonProto.ActivationFunction.valueOf(trainConfig
+                .activationFunction()
+                .name()))
+            .addAllSampleSizes(trainConfig.sampleSizes())
+            .setBatchSizeConfig(serializableBatchSizeConfig(trainConfig))
             .setToleranceConfig(serializableToleranceConfig(trainConfig))
             .setLearningRate(trainConfig.learningRate())
             .setEpochs(trainConfig.epochs())
@@ -73,6 +77,13 @@ public final class GraphSageTrainConfigSerializer {
             .embeddingDimension(protoTrainConfig.getEmbeddingDimensionConfig().getEmbeddingDimension())
             .aggregator(Aggregator.AggregatorType.of(protoTrainConfig.getAggregator().name()))
             .activationFunction(ActivationFunction.of(protoTrainConfig.getActivationFunction().name()))
+            .sampleSizes(protoTrainConfig.getSampleSizesList())
+            .batchSize(protoTrainConfig.getBatchSizeConfig().getBatchSize())
+            .tolerance(protoTrainConfig.getToleranceConfig().getTolerance())
+            .learningRate(protoTrainConfig.getLearningRate())
+            .epochs(protoTrainConfig.getEpochs())
+            .maxIterations(protoTrainConfig.getIterationsConfig().getMaxIterations())
+            .negativeSampleWeight(protoTrainConfig.getNegativeSampleWeight())
             .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList())
             .degreeAsProperty(protoTrainConfig.getDegreeAsProperty());
 

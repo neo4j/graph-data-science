@@ -77,10 +77,61 @@ class GraphSageTrainConfigSerializerTest {
             .isEqualTo(trainConfig);
     }
 
+    @ParameterizedTest
+    @MethodSource("nonDefaultParameters")
+    void testRoundTripWithNonDefaultParameters(
+        int embeddingDimension,
+        List<Long> sampleSizes,
+        double tolerance,
+        double learningRate,
+        int epochs,
+        int maxIterations,
+        int negativeSampleWeight,
+        int batchSize
+    ) {
+        var trainConfigBuilder = ImmutableGraphSageTrainConfig.builder()
+            .modelName("MODEL_NAME")
+            .embeddingDimension(embeddingDimension)
+            .sampleSizes(sampleSizes)
+            .tolerance(tolerance)
+            .learningRate(learningRate)
+            .epochs(epochs)
+            .maxIterations(maxIterations)
+            .negativeSampleWeight(negativeSampleWeight)
+            .featureProperties(List.of("age", "birth_year", "death_year"))
+            .degreeAsProperty(true)
+            .batchSize(batchSize);
+
+        var trainConfig = trainConfigBuilder.build();
+        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
+        assertThat(proto).isNotNull();
+
+        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
+        assertThat(from)
+            .isNotNull()
+            .usingRecursiveComparison()
+            .withStrictTypeChecking()
+            .isEqualTo(trainConfig);
+    }
+
     private static Stream<Arguments> aggregatorsWithActivationFunctions() {
         return org.neo4j.graphalgo.TestSupport.crossArguments(
             () -> Stream.of(Arguments.of(Aggregator.AggregatorType.MEAN), Arguments.of(Aggregator.AggregatorType.POOL)),
             () -> Stream.of(Arguments.of(ActivationFunction.RELU), Arguments.of(ActivationFunction.RELU))
+        );
+    }
+
+    private static Stream<Arguments> nonDefaultParameters() {
+        return org.neo4j.graphalgo.TestSupport.crossArguments(
+            () -> Stream.of(Arguments.of(512)),                         // embeddingDimension
+            () -> Stream.of(Arguments.of(List.of(42L, 1337L))),         // sampleSizes
+            () -> Stream.of(Arguments.of(10.1), Arguments.of(0.8)),     // tolerance
+            () -> Stream.of(Arguments.of(100.1), Arguments.of(0.18)),   // learningRate
+            () -> Stream.of(Arguments.of(100), Arguments.of(1000)),     // epochs
+            () -> Stream.of(Arguments.of(200), Arguments.of(10)),       // maxIterations
+            () -> Stream.of(Arguments.of(250), Arguments.of(20)),       // negativeSampleWeight
+            () -> Stream.of(Arguments.of(1500), Arguments.of(40))       // batchSize
+
         );
     }
 
