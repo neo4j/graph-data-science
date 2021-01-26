@@ -85,43 +85,43 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
 
     @Test
     void trainAndPredict() {
-        var train = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
-                    "  nodeLabels: ['N']," +
-                    "  modelName: 'model'," +
-                    "  featureProperties: ['a', 'b'], " +
-                    "  targetProperty: 'class', " +
-                    "  metrics: ['F1_WEIGHTED'], " +
-                    "  holdoutFraction: 0.2, " +
-                    "  validationFolds: 5, " +
-                    "  randomSeed: 2," +
-                    "  params: [" +
-                    "    {penalty: 0.0625, maxIterations: 1000}, " +
-                    "    {penalty: 0.125, maxIterations: 1000}, " +
-                    "    {penalty: 0.25, maxIterations: 1000}, " +
-                    "    {penalty: 0.5, maxIterations: 1000}, " +
-                    "    {penalty: 1.0, maxIterations: 1000}, " +
-                    "    {penalty: 2.0, maxIterations: 1000}, " +
-                    "    {penalty: 4.0, maxIterations: 1000}" +
-                    "  ]" +
-                    "})";
-        runQuery(train);
+        var trainOnN = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                       "  nodeLabels: ['N']," +
+                       "  modelName: 'model'," +
+                       "  featureProperties: ['a', 'b'], " +
+                       "  targetProperty: 'class', " +
+                       "  metrics: ['F1_WEIGHTED'], " +
+                       "  holdoutFraction: 0.2, " +
+                       "  validationFolds: 5, " +
+                       "  randomSeed: 2," +
+                       "  params: [" +
+                       "    {penalty: 0.0625, maxIterations: 1000}, " +
+                       "    {penalty: 0.125, maxIterations: 1000}, " +
+                       "    {penalty: 0.25, maxIterations: 1000}, " +
+                       "    {penalty: 0.5, maxIterations: 1000}, " +
+                       "    {penalty: 1.0, maxIterations: 1000}, " +
+                       "    {penalty: 2.0, maxIterations: 1000}, " +
+                       "    {penalty: 4.0, maxIterations: 1000}" +
+                       "  ]" +
+                       "})";
+        runQuery(trainOnN);
 
-        var predict = "CALL gds.alpha.ml.nodeClassification.predict.mutate('g', {" +
-                      "  nodeLabels: ['N', 'Hidden']," +
-                      "  modelName: 'model'," +
-                      "  mutateProperty: 'predicted_class', " +
-                      "  predictedProbabilityProperty: 'predicted_proba'" +
-                      "})";
-        runQuery(predict);
+        var predictOnAll = "CALL gds.alpha.ml.nodeClassification.predict.mutate('g', {" +
+                           "  nodeLabels: ['N', 'Hidden']," +
+                           "  modelName: 'model'," +
+                           "  mutateProperty: 'predicted_class', " +
+                           "  predictedProbabilityProperty: 'predicted_proba'" +
+                           "})";
+        runQuery(predictOnAll);
 
-        var prediction = " CALL gds.graph.streamNodeProperties('g', ['predicted_class', 'predicted_proba'])" +
-                         " YIELD nodeId, propertyValue" +
-                         " WITH gds.util.asNode(nodeId).name AS name, propertyValue" +
-                         " WITH name, collect(propertyValue) AS values" +
-                         " RETURN name, values[0] AS predictedClass, values[1] AS probabilities" +
-                         "   ORDER BY name ASC";
+        var predictedClasses = " CALL gds.graph.streamNodeProperties('g', ['predicted_class', 'predicted_proba'])" +
+                               " YIELD nodeId, propertyValue" +
+                               " WITH gds.util.asNode(nodeId).name AS name, propertyValue" +
+                               " WITH name, collect(propertyValue) AS values" +
+                               " RETURN name, values[0] AS predictedClass, values[1] AS probabilities" +
+                               "   ORDER BY name ASC";
 
-        assertCypherResult(prediction, List.of(
+        assertCypherResult(predictedClasses, List.of(
             Map.of("name", "0_1", "predictedClass", 0L, "probabilities", hasSize(3)),
             Map.of("name", "0_2", "predictedClass", 0L, "probabilities", hasSize(3)),
             Map.of("name", "0_3", "predictedClass", 1L, "probabilities", hasSize(3)),
