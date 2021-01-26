@@ -19,28 +19,34 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.Training;
-import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.gds.ml.batch.BatchQueue;
+import org.neo4j.gds.ml.batch.HugeBatchQueue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
-public class LinkLogisticRegressionTrain extends Algorithm<LinkLogisticRegressionTrain, LinkLogisticRegressionPredictor> {
+import java.util.function.Supplier;
+
+public class LinkLogisticRegressionTrain {
+
     private final Graph graph;
+    private final HugeLongArray trainSet;
     private final LinkLogisticRegressionTrainConfig config;
     private final Log log;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
+        HugeLongArray trainSet,
         LinkLogisticRegressionTrainConfig config,
         Log log
     ) {
         this.graph = graph;
+        this.trainSet = trainSet;
         this.config = config;
         this.log = log;
     }
 
-    @Override
     public LinkLogisticRegressionPredictor compute() {
         var objective = new LinkLogisticRegressionObjective(
             config.featureProperties(),
@@ -49,21 +55,9 @@ public class LinkLogisticRegressionTrain extends Algorithm<LinkLogisticRegressio
             graph
         );
         var training = new Training(config, log, graph.nodeCount());
-        training.train(
-            objective,
-            () -> new BatchQueue(graph.nodeCount(), config.batchSize()),
-            config.concurrency()
-        );
+        Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
+        // TODO: concurrency
+        training.train(objective, queueSupplier, 1);
         return new LinkLogisticRegressionPredictor(objective.modelData);
-    }
-
-    @Override
-    public LinkLogisticRegressionTrain me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-
     }
 }

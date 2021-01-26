@@ -23,6 +23,8 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -57,12 +59,13 @@ class LinkLogisticRegressionTrainTest {
         var config =
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
-                .concurrency(1)
                 .maxIterations(100000)
                 .tolerance(1e-4)
                 .build();
 
-        var linearRegression = new LinkLogisticRegressionTrain(graph, config, new TestLog());
+        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        trainSet.setAll(i -> i);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
 
         var result = linearRegression.compute().modelData();
 
@@ -84,12 +87,13 @@ class LinkLogisticRegressionTrainTest {
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
                 .penalty(1)
-                .concurrency(1)
                 .maxIterations(100000)
                 .tolerance(1e-4)
                 .build();
 
-        var linearRegression = new LinkLogisticRegressionTrain(graph, config, new TestLog());
+        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        trainSet.setAll(i -> i);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
 
         var result = linearRegression.compute().modelData();
 

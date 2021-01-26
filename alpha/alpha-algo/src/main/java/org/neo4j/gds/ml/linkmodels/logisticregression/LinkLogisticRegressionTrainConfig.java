@@ -23,16 +23,20 @@ import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @ValueClass
 @Configuration
-public interface LinkLogisticRegressionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, TrainingConfig {
+public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
+
+    @Configuration.Parameter
+    List<String> featureProperties();
 
     @Value.Default
     default double penalty() {
@@ -44,17 +48,24 @@ public interface LinkLogisticRegressionTrainConfig extends AlgoBaseConfig, Featu
         return LinkFeatureCombiner.L2.name();
     }
 
+    @Configuration.CollectKeys
+    @Value.Auxiliary
+    @Value.Default
+    @Value.Parameter(false)
+    default Collection<String> configKeys() {
+        return Collections.emptyList();
+    }
+
     static LinkLogisticRegressionTrainConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
+        List<String> featureProperties,
+        Map<String, Object> params
     ) {
-        return new LinkLogisticRegressionTrainConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
+        var cypherMapWrapper = CypherMapWrapper.create(params);
+        var config = new LinkLogisticRegressionTrainConfigImpl(
+            featureProperties,
+            cypherMapWrapper
         );
+        cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
+        return config;
     }
 }
