@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -98,6 +99,15 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     @Override
     public GraphSchema graphSchema() {
         return SchemaDeserializer.graphSchema(metaData.getGraphSchema());
+    }
+
+    @Override
+    public List<String> sharedWith() {
+    }
+
+    @Override
+    public Model<Object, ModelConfig> publish() {
+        return null;
     }
 
     @Override

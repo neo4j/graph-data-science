@@ -9,13 +9,14 @@ option java_outer_classname = "ModelProto";
 
 message ModelMetaData {
   string username = 1;
-  string name = 2;
-  string algoType = 3;
-  GraphSchema graphSchema = 4;
-  ZonedDateTime creationTime = 5;
+  repeated string sharedWith = 2;
+  string name = 3;
+  string algoType = 4;
+  GraphSchema graphSchema = 5;
+  ZonedDateTime creationTime = 6;
 
   oneof trainConfig {
-    GraphSageTrainConfig graphSageTrainConfig = 6;
+    GraphSageTrainConfig graphSageTrainConfig = 7;
   }
 }
 

@@ -41,6 +41,7 @@ public final class ModelMetaDataSerializer {
         serializableTrainConfig(model, builder);
         return builder
             .setUsername(model.username())
+            .addAllSharedWith(model.sharedWith())
             .setName(model.name())
             .setAlgoType(model.algoType())
             .setGraphSchema(SchemaSerializer.serializableGraphSchema(model.graphSchema()))
@@ -53,6 +54,7 @@ public final class ModelMetaDataSerializer {
     ) {
         return ImmutableModel.<DATA, CONFIG>builder()
             .username(protoModelMetaData.getUsername())
+            .sharedWith(protoModelMetaData.getSharedWithList())
             .name(protoModelMetaData.getName())
             .algoType(protoModelMetaData.getAlgoType())
             .graphSchema(SchemaDeserializer.graphSchema(protoModelMetaData.getGraphSchema()))

@@ -327,26 +327,6 @@ class ModelCatalogTest {
     }
 
     @Test
-    void cantDropOtherUsersModel() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-        ModelCatalog.set(model);
-
-        var ex = assertThrows(
-            NoSuchElementException.class,
-            () -> ModelCatalog.drop("fakeUser", "testModel")
-        );
-
-        assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
-    }
-
-    @Test
     void shouldListModels() {
         var model1 = Model.of(
             USERNAME,
