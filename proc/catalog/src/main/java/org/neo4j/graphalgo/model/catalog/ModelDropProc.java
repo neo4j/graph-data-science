@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,15 +31,21 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModelDropProc extends ModelCatalogProc {
 
-    private static final String DESCRIPTION = "Drops a model from the catalog and frees up the resources it occupies.";
+    private static final String DESCRIPTION = "Drops a loaded model and frees up the resources it occupies.";
 
     @Procedure(name = "gds.beta.model.drop", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelResult> drop(@Name(value = "modelName") String modelName) {
         validateModelName(modelName);
 
-        var drop = ModelCatalog.drop(username(), modelName);
+        var model = ModelCatalog.getUntyped(username(), modelName);
 
-        return Stream.of(new ModelResult(drop));
+        if (model.stored()) {
+            ((StoredModel) model).unload();
+        } else {
+            ModelCatalog.drop(username(), modelName);
+        }
+
+        return Stream.of(new ModelResult(model));
     }
 }
