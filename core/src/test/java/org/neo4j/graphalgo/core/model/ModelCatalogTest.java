@@ -399,11 +399,11 @@ class ModelCatalogTest {
 
         assertThat(publicModel)
             .usingRecursiveComparison()
-            .ignoringFields("permissions", "name")
+            .ignoringFields("sharedWith", "name")
             .withStrictTypeChecking()
             .isEqualTo(model);
 
-        assertEquals(List.of(Model.ALL_USERS), publicModel.permissions());
+        assertEquals(List.of(Model.ALL_USERS), publicModel.sharedWith());
     }
 
     @Test

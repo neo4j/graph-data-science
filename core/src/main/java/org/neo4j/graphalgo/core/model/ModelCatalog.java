@@ -91,7 +91,7 @@ public final class ModelCatalog {
         if (exists(username, modelName)) {
             UserCatalog userCatalog = getUserCatalog(username);
             Model<?, ?> model = userCatalog.getUntyped(modelName);
-            if (!model.permissions().contains(Model.ALL_USERS)) {
+            if (!model.sharedWith().contains(Model.ALL_USERS)) {
                 Model<?, ?> publicModel = model.publish();
                 publicModels.set(publicModel);
                 userCatalog.drop(modelName);

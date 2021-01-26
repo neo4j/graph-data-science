@@ -37,7 +37,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     String username();
 
-    List<String> permissions();
+    List<String> sharedWith();
 
     String name();
 
@@ -68,7 +68,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     default Model<DATA, CONFIG> publish() {
         return ImmutableModel.<DATA, CONFIG>builder()
             .from(this)
-            .permissions(List.of(ALL_USERS))
+            .sharedWith(List.of(ALL_USERS))
             .name(name() + "_public")
             .build();
     }
