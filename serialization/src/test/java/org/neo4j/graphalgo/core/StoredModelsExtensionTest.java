@@ -23,8 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.gds.model.ModelPersistenceUtil;
-import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.gds.model.ModelStoreUtil;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -54,15 +54,15 @@ class StoredModelsExtensionTest extends BaseTest {
         builder.setConfig(ModelStoreSettings.model_store_location, tempDir);
 
         try {
-            ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
-            ModelPersistenceUtil.createAndPersistModel(tempDir, "modelBob", "bob");
+            ModelStoreUtil.createAndStoreModel(tempDir, "modelAlice", "alice");
+            ModelStoreUtil.createAndStoreModel(tempDir, "modelBob", "bob");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    void shouldLoadPersistedModels() {
+    void shouldLoadStoredModels() {
         var aliceModels = ModelCatalog.list("alice");
         var bobModels = ModelCatalog.list("bob");
 
@@ -77,34 +77,34 @@ class StoredModelsExtensionTest extends BaseTest {
     class ValidationTest {
 
         @Test
-        void shouldLogIfPersistenceDirectoryDoesNotExists() {
+        void shouldLogIfStoreDirectoryDoesNotExists() {
             var testLog = new TestLog();
             assertThat(StoredModelsExtension.validatePath(tempDir.resolve("DOES_NOT_EXIST"), testLog)).isFalse();
 
-            testLog.containsMessage(TestLog.ERROR, "does not exist. Cannot load or persist models.");
+            testLog.containsMessage(TestLog.ERROR, "does not exist. Cannot load or store models.");
         }
 
         @Test
-        void shouldLogIfPersistenceDirectoryIsNotADirectory() throws IOException {
+        void shouldLogIfStoreDirectoryIsNotADirectory() throws IOException {
             var filePath = tempDir.resolve("THIS_IS_A_FILE");
             Files.createFile(filePath);
 
             var testLog = new TestLog();
             assertThat(StoredModelsExtension.validatePath(filePath, testLog)).isFalse();
 
-            testLog.containsMessage(TestLog.ERROR, "is not a directory. Cannot load or persist models.");
+            testLog.containsMessage(TestLog.ERROR, "is not a directory. Cannot load or store models.");
         }
 
         @Test
         void shouldNotOverwriteModels() throws IOException {
-            var first = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
-            var second = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
+            var first = ModelStoreUtil.createAndStoreModel(tempDir, "modelAlice", "alice");
+            var second = ModelStoreUtil.createAndStoreModel(tempDir, "modelAlice", "alice");
 
             var testLog = new TestLog();
             StoredModelsExtension.openStoredModel(testLog, first);
             StoredModelsExtension.openStoredModel(testLog, second);
 
-            var modelInCatalog = (PersistedModel) ModelCatalog.getUntyped("alice", "modelAlice");
+            var modelInCatalog = (StoredModel) ModelCatalog.getUntyped("eve", "modelEve");
             assertThat(modelInCatalog.fileLocation()).isEqualTo(first);
 
             assertThat(testLog.containsMessage(TestLog.ERROR, "A model with the same name already exists for that user.")).isTrue();

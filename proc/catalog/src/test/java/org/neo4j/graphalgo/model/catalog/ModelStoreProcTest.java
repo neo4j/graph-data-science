@@ -28,7 +28,7 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
@@ -67,7 +67,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     }
 
     @Test
-    void persistAModel() {
+    void storeAModel() {
         var modelName = "testModel1";
         var model1 = Model.of(
             getUsername(),
@@ -85,24 +85,24 @@ class ModelStoreProcTest extends ModelProcBaseTest {
         ModelCatalog.set(model1);
 
         assertCypherResult(
-            "CALL gds.alpha.model.persist('testModel1')",
+            "CALL gds.alpha.model.store('testModel1')",
             List.of(
                 map(
                     "modelName", modelName,
-                    "persistMillis", greaterThan(0L)
+                    "storeMillis", greaterThan(0L)
                 )
             )
         );
 
         assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
-            .isInstanceOf(PersistedModel.class)
+            .isInstanceOf(StoredModel.class)
             .hasFieldOrPropertyWithValue("name", modelName)
-            .hasFieldOrPropertyWithValue("persisted", true)
+            .hasFieldOrPropertyWithValue("stored", true)
             .hasFieldOrPropertyWithValue("loaded", true);
     }
 
     @Test
-    void persistAPersistedModel() {
+    void storeAStoredModel() {
         var modelName = "testModel1";
         var model1 = Model.of(
             getUsername(),
@@ -120,17 +120,17 @@ class ModelStoreProcTest extends ModelProcBaseTest {
 
         ModelCatalog.set(model1);
 
-        var query = "CALL gds.alpha.model.persist('testModel1')";
+        var query = "CALL gds.alpha.model.store('testModel1')";
 
         runQuery(query);
-        var persistedModel = ModelCatalog.getUntyped(getUsername(), modelName);
+        var storedModel = ModelCatalog.getUntyped(getUsername(), modelName);
         runQuery(query);
 
         assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
-            .isEqualTo(persistedModel)
+            .isEqualTo(storedModel)
             .hasFieldOrPropertyWithValue("name", modelName)
-            .hasFieldOrPropertyWithValue("persisted", true)
-            .hasFieldOrPropertyWithValue("loaded", true);;
+            .hasFieldOrPropertyWithValue("stored", true)
+            .hasFieldOrPropertyWithValue("loaded", true);
     }
 
 }

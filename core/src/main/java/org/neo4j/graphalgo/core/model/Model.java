@@ -62,7 +62,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     @Value.Default
     @Value.Parameter(false)
-    default boolean persisted() {
+    default boolean stored() {
         return false;
     }
 

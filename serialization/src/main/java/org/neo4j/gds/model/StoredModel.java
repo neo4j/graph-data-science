@@ -39,7 +39,7 @@ import java.util.List;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class PersistedModel implements Model<Object, ModelConfig> {
+public class StoredModel implements Model<Object, ModelConfig> {
 
     private final ModelProto.ModelMetaData metaData;
     private final ModelFileReader modelReader;
@@ -49,21 +49,21 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private Object data;
     private boolean loaded;
 
-    public static PersistedModel withInitialData(Path persistenceDir, Object data) throws IOException {
-        var persistedModel = new PersistedModel(persistenceDir);
-        persistedModel.setData(data);
-        return persistedModel;
+    public static StoredModel withInitialData(Path storeDir, Object data) throws IOException {
+        var storedModel = new StoredModel(storeDir);
+        storedModel.setData(data);
+        return storedModel;
     }
 
-    public PersistedModel(Path persistenceDir) throws IOException {
-        this(persistenceDir, new ModelFileReader(persistenceDir).readMetaData(), false);
+    public StoredModel(Path storeDir) throws IOException {
+        this(storeDir, new ModelFileReader(storeDir).readMetaData(), false);
     }
 
-    private PersistedModel(Path persistenceDir, ModelProto.ModelMetaData metaData, boolean loaded) throws IOException {
-        this.modelReader = new ModelFileReader(persistenceDir);
+    private StoredModel(Path storeDir, ModelProto.ModelMetaData metaData, boolean loaded) throws IOException {
+        this.modelReader = new ModelFileReader(storeDir);
         this.metaData = metaData;
         this.loaded = loaded;
-        this.fileLocation = persistenceDir;
+        this.fileLocation = storeDir;
     }
 
     public void load() {
@@ -90,7 +90,7 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     }
 
     @Override
-    public boolean persisted() {
+    public boolean stored() {
         return true;
     }
 

@@ -21,7 +21,7 @@
 package org.neo4j.graphalgo.model.catalog;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
@@ -51,7 +51,7 @@ public class ModelStoreProc extends BaseProc {
     public Stream<ModelStoreResult> store(@Name(value = "modelName") String modelName) throws IOException {
         var model = ModelCatalog.getUntyped(username(), modelName);
 
-        if (model.persisted()) {
+        if (model.stored()) {
             return Stream.of(new ModelStoreResult(modelName, 0));
         }
 
@@ -64,7 +64,7 @@ public class ModelStoreProc extends BaseProc {
             model
         );
 
-        var storedModel = PersistedModel.withInitialData(modelDir, model.data());
+        var storedModel = StoredModel.withInitialData(modelDir, model.data());
         ModelCatalog.setUnsafe(storedModel);
 
         timer.stop();

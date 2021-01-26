@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -76,9 +76,9 @@ public final class StoredModelsExtension extends ExtensionFactory<StoredModelsEx
 
     static void openStoredModel(Log log, Path storedModelPath) {
         if (Files.isDirectory(storedModelPath)) {
-            PersistedModel model;
+            StoredModel model;
             try {
-                model = new PersistedModel(storedModelPath);
+                model = new StoredModel(storedModelPath);
                 if (ModelCatalog.exists(model.creator(), model.name())) {
                     log.error(
                         "Cannot open stored model %s for user %s from %s. A model with the same name already exists for that user.",
