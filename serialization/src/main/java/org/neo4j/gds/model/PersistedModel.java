@@ -50,9 +50,13 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private boolean loaded;
 
     public PersistedModel(Path persistenceDir) throws IOException {
+        this(persistenceDir, new ModelFileReader(persistenceDir).readMetaData(), false);
+    }
+
+    private PersistedModel(Path persistenceDir, ModelProto.ModelMetaData metaData, boolean loaded) throws IOException {
         this.modelReader = new ModelFileReader(persistenceDir);
-        this.metaData = modelReader.readMetaData();
-        this.loaded = false;
+        this.metaData = metaData;
+        this.loaded = loaded;
         this.fileLocation = persistenceDir;
     }
 
@@ -110,15 +114,22 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     }
 
     @Override
-    public Model<Object, ModelConfig> onPublish(Model<Object, ModelConfig> publishedModel) {
+    public Model<Object, ModelConfig> publish() {
+        ModelProto.ModelMetaData publishedMetaData = ModelProto.ModelMetaData.newBuilder(metaData)
+            .setName(name() + "_public")
+            .addAllSharedWith(List.of(Model.ALL_USERS))
+            .build();
+
         try {
             FileUtils.delete(fileLocation.resolve(META_DATA_FILE));
+
+            PersistedModel publishedModel = new PersistedModel(fileLocation, publishedMetaData, loaded);
 
             new ModelFileWriter<>(
                 fileLocation,
                 publishedModel
             ).writeMetaData();
-            return new PersistedModel(fileLocation);
+            return publishedModel;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

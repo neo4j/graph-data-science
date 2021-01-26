@@ -66,17 +66,11 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     }
 
     default Model<DATA, CONFIG> publish() {
-        Model<DATA, CONFIG> publishedModel = ImmutableModel.<DATA, CONFIG>builder()
+        return ImmutableModel.<DATA, CONFIG>builder()
             .from(this)
             .sharedWith(List.of(ALL_USERS))
             .name(name() + "_public")
             .build();
-        return onPublish(publishedModel);
-    }
-
-    @Value.Auxiliary
-    default Model<DATA, CONFIG> onPublish(Model<DATA, CONFIG> model) {
-        return null;
     }
 
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
@@ -89,7 +83,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     ) {
         return Model.of(
             creator,
-            List.of(creator),
             name,
             algoType,
             graphSchema,
@@ -101,7 +94,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(
         String creator,
-        List<String> permissions,
         String name,
         String algoType,
         GraphSchema graphSchema,
@@ -111,7 +103,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     ) {
         return ImmutableModel.of(
             creator,
-            permissions,
+            List.of(),
             name,
             algoType,
             graphSchema,

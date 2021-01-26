@@ -22,6 +22,8 @@ package org.neo4j.gds.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -35,7 +37,6 @@ import org.neo4j.graphalgo.core.model.Model;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -113,18 +114,23 @@ class PersistedModelTest {
         assertThatThrownBy(persistedModel::data).hasMessage("The model 'model' is currently not loaded.");
     }
 
-    @Test
-    void testPublishPersistedModel() throws IOException {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testPublishPersistedModel(boolean loadData) throws IOException {
         var persistedModel = new PersistedModel(tempDir);
-        persistedModel.load();
+        if (loadData) {
+            persistedModel.load();
+        }
         persistedModel.publish();
         assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
 
         PersistedModel publishedModel = new PersistedModel(tempDir);
         assertEquals(model.name() + "_public", publishedModel.name());
-        assertThat(publishedModel.sharedWith()).usingRecursiveComparison().isEqualTo(List.of(Model.ALL_USERS));
+        assertThat(publishedModel.sharedWith()).containsExactlyInAnyOrder(Model.ALL_USERS);
 
-        publishedModel.load();
+        if (loadData) {
+            publishedModel.load();
+        }
         assertThat(publishedModel)
             .usingRecursiveComparison()
             .ignoringFields("sharedWith", "name", "metaData")
