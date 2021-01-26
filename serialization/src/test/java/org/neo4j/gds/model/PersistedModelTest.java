@@ -33,10 +33,14 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 
 class PersistedModelTest {
 
@@ -106,5 +110,14 @@ class PersistedModelTest {
 
         assertThat(persistedModel.loaded()).isFalse();
         assertThatThrownBy(persistedModel::data).hasMessage("The model 'model' is currently not loaded.");
+    }
+
+    @Test
+    void testPublishPeristedModel() throws IOException {
+        var persistedModel = new PersistedModel(tempDir);
+//        persistedModel.load();
+        PersistedModel publishedModel = (PersistedModel)persistedModel.publish();
+        assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
+        assertTrue(Files.exists(tempDir.resolve(MODEL_DATA_FILE)));
     }
 }

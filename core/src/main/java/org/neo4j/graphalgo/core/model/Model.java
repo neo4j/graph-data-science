@@ -66,11 +66,17 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     }
 
     default Model<DATA, CONFIG> publish() {
-        return ImmutableModel.<DATA, CONFIG>builder()
+        Model<DATA, CONFIG> publishedModel = ImmutableModel.<DATA, CONFIG>builder()
             .from(this)
             .sharedWith(List.of(ALL_USERS))
             .name(name() + "_public")
             .build();
+        return onPublish(publishedModel);
+    }
+
+    @Value.Auxiliary
+    default Model<DATA, CONFIG> onPublish(Model<DATA, CONFIG> model) {
+        return null;
     }
 
     static <D, C extends ModelConfig & BaseConfig> Model<D, C> of(

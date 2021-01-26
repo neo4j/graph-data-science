@@ -28,8 +28,8 @@ import java.nio.file.Path;
 
 public final class ModelToFileExporter {
 
-    static final String META_DATA_FILE = "meta";
-    static final String MODEL_DATA_FILE = "data";
+    public static final String META_DATA_FILE = "meta";
+    public static final String MODEL_DATA_FILE = "data";
 
     private ModelToFileExporter() {}
 

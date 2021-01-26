@@ -21,6 +21,7 @@ package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.storage.ModelFileReader;
+import org.neo4j.gds.model.storage.ModelFileWriter;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
@@ -28,12 +29,15 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ZonedDateTimeSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.io.fs.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
+import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PersistedModel implements Model<Object, ModelConfig> {
@@ -103,11 +107,23 @@ public class PersistedModel implements Model<Object, ModelConfig> {
 
     @Override
     public List<String> sharedWith() {
+        return metaData.getSharedWithList();
     }
 
     @Override
-    public Model<Object, ModelConfig> publish() {
-        return null;
+    public Model<Object, ModelConfig> onPublish(Model<Object, ModelConfig> publishedModel) {
+        try {
+            FileUtils.delete(fileLocation.resolve(META_DATA_FILE));
+            FileUtils.delete(fileLocation.resolve(MODEL_DATA_FILE));
+
+            new ModelFileWriter<>(
+                fileLocation,
+                publishedModel
+            ).write();
+            return new PersistedModel(fileLocation);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

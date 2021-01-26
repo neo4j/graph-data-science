@@ -43,7 +43,7 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
     private final Path persistenceDir;
     private final Model<DATA, CONFIG> model;
 
-    ModelFileWriter(
+    public ModelFileWriter(
         Path persistenceDir,
         Model<DATA, CONFIG> model
     ) {
