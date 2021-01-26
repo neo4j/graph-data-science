@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.metrics;
 
+import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictConsumer;
 import org.neo4j.gds.ml.nodemodels.metrics.F1Score;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -29,6 +30,6 @@ public enum LinkMetric {
         HugeLongArray targets,
         HugeLongArray predictions
     ) {
-        return new F1Score(1L).compute(targets, predictions);
+        return new F1Score(LinkPredictionPredictConsumer.PREDICTED_LINK).compute(targets, predictions);
     }
 }
