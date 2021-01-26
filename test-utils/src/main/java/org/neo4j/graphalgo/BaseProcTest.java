@@ -82,6 +82,10 @@ public class BaseProcTest extends BaseTest {
         GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
     }
 
+    protected void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+        GraphDatabaseApiProxy.registerFunctions(db, functionClasses);
+    }
+
     protected void registerProcedures(Class<?>... procedureClasses) throws Exception {
         registerProcedures(db, procedureClasses);
     }

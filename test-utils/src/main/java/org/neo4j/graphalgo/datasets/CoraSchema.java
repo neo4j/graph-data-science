@@ -27,5 +27,9 @@ public final class CoraSchema {
     public static final String TEST_TYPE = "TEST";
     public static final Label PAPER_LABEL = Label.label("Paper");
 
+    public static final String SUBJECT_NODE_PROPERTY = "subject";
+    public static final String EXT_ID_NODE_PROPERTY = "extId";
+
+
     private CoraSchema() {}
 }

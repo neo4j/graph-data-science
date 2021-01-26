@@ -35,7 +35,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
+import static org.neo4j.graphalgo.datasets.CoraSchema.EXT_ID_NODE_PROPERTY;
 import static org.neo4j.graphalgo.datasets.CoraSchema.PAPER_LABEL;
+import static org.neo4j.graphalgo.datasets.CoraSchema.SUBJECT_NODE_PROPERTY;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TEST_TYPE;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TRAIN_TYPE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -100,8 +102,8 @@ public abstract class AbstractCora extends Dataset {
                     long nodeExtId = Long.parseLong(entries[0]);
                     String subject = entries[1];
                     Node node = tx.createNode(PAPER_LABEL);
-                    node.setProperty("extId", nodeExtId);
-                    node.setProperty("subject", subject);
+                    node.setProperty(EXT_ID_NODE_PROPERTY, nodeExtId);
+                    node.setProperty(SUBJECT_NODE_PROPERTY, subject);
                     // any remaining entries are considered word features
                     for (int i = 2; i < entries.length; i++) {
                         int value = Integer.parseInt(entries[i]);
