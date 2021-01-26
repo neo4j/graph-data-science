@@ -21,15 +21,14 @@ package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
+import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ZonedDateTimeSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.graphalgo.utils.serialization.ObjectSerializer;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -108,16 +107,13 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     @Override
     public ModelConfig trainConfig() {
         if (algoType().equals(GraphSage.MODEL_TYPE)) {
-            try {
-                return ObjectSerializer.fromByteArray(
-                    metaData.getSerializedTrainConfig().toByteArray(),
-                    GraphSageTrainConfig.class
-                );
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            return GraphSageTrainConfigSerializer.fromSerializable(metaData.getGraphSageTrainConfig());
         } else {
-            throw new RuntimeException("Could not deserialized model config");
+            throw new IllegalArgumentException(formatWithLocale(
+                "Unknown model type '%s', supported model types are: '%'",
+                algoType(),
+                GraphSage.MODEL_TYPE
+            ));
         }
     }
 
