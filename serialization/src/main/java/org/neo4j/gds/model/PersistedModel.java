@@ -37,7 +37,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
-import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PersistedModel implements Model<Object, ModelConfig> {
@@ -114,12 +113,11 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     public Model<Object, ModelConfig> onPublish(Model<Object, ModelConfig> publishedModel) {
         try {
             FileUtils.delete(fileLocation.resolve(META_DATA_FILE));
-            FileUtils.delete(fileLocation.resolve(MODEL_DATA_FILE));
 
             new ModelFileWriter<>(
                 fileLocation,
                 publishedModel
-            ).write();
+            ).writeMetaData();
             return new PersistedModel(fileLocation);
         } catch (IOException e) {
             throw new RuntimeException(e);

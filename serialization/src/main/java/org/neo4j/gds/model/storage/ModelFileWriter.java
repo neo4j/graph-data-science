@@ -52,11 +52,19 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
     }
 
     public void write() throws IOException {
-        File metaDataFile = persistenceDir.resolve(META_DATA_FILE).toFile();
-        File modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE).toFile();
-        checkFilesExist(metaDataFile, modelDataFile);
+        writeMetaData();
+        writeModelData();
+    }
 
+    public void writeMetaData() throws IOException {
+        File metaDataFile = persistenceDir.resolve(META_DATA_FILE).toFile();
+        checkFilesExist(metaDataFile);
         writeDataToFile(metaDataFile, ModelMetaDataSerializer.toSerializable(model));
+    }
+
+    public void writeModelData() throws IOException {
+        File modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE).toFile();
+        checkFilesExist(modelDataFile);
         writeDataToFile(modelDataFile, toSerializable(model.data(), model.algoType()));
     }
 

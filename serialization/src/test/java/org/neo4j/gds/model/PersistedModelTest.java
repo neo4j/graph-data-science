@@ -42,7 +42,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
-import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
 
 class PersistedModelTest {
 
@@ -120,10 +119,15 @@ class PersistedModelTest {
         persistedModel.load();
         persistedModel.publish();
         assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
-        assertTrue(Files.exists(tempDir.resolve(MODEL_DATA_FILE)));
 
         PersistedModel publishedModel = new PersistedModel(tempDir);
         assertEquals(model.name() + "_public", publishedModel.name());
         assertThat(publishedModel.sharedWith()).usingRecursiveComparison().isEqualTo(List.of(Model.ALL_USERS));
+
+        publishedModel.load();
+        assertThat(publishedModel)
+            .usingRecursiveComparison()
+            .ignoringFields("sharedWith", "name", "metaData")
+            .isEqualTo(persistedModel);
     }
 }
