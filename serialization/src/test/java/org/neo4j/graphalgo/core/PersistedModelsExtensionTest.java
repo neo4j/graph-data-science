@@ -104,7 +104,7 @@ class PersistedModelsExtensionTest extends BaseTest {
             PersistedModelsExtension.openPersistedModel(testLog, first);
             PersistedModelsExtension.openPersistedModel(testLog, second);
 
-            var modelInCatalog = (PersistedModel) ModelCatalog.getUnsafe("alice", "modelAlice");
+            var modelInCatalog = (PersistedModel) ModelCatalog.getUntyped("alice", "modelAlice");
             assertThat(modelInCatalog.fileLocation()).isEqualTo(first);
 
             assertThat(testLog.containsMessage(TestLog.ERROR, "A model with the same name already exists for that user.")).isTrue();

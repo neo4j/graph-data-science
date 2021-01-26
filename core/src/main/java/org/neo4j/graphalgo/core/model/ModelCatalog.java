@@ -54,6 +54,10 @@ public final class ModelCatalog {
         return getUserCatalog(username).get(modelName, dataClass, configClass);
     }
 
+    public static Model<?, ?> getUntyped(String username, String modelName) {
+        return getUserCatalog(username).get(modelName);
+    }
+
     public static boolean exists(String username, String modelName) {
         return getUserCatalog(username).exists(modelName);
     }
