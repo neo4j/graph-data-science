@@ -20,12 +20,15 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.features.FeatureConsumer;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 
 public class LinkLogisticRegressionBase {
@@ -68,28 +71,31 @@ public class LinkLogisticRegressionBase {
     private double[] nodeFeatures(Graph graph, long nodeId) {
         int numberOfFeatures = modelData.numberOfFeatures();
         var features = new double[numberOfFeatures];
-        var featuresProcessed = new MutableInt();
-        modelData.nodePropertyKeys().forEach(propertyKey -> {
-            var nodeProperties = graph.nodeProperties(propertyKey);
-            switch (nodeProperties.valueType()) {
-                case DOUBLE_ARRAY:
-                    var propertyArray = nodeProperties.doubleArrayValue(nodeId);
-                    System.arraycopy(propertyArray, 0, features, featuresProcessed.getValue(), propertyArray.length);
-                    featuresProcessed.add(propertyArray.length);
-                    break;
-                case DOUBLE:
-                    var propertyValue = nodeProperties.doubleValue(nodeId);
-                    features[featuresProcessed.getValue()] = propertyValue;
-                    featuresProcessed.increment();
-                    break;
-                default:
-                    throw new IllegalStateException(
-                        "Link Logistic Regression requires double or double array node properties, not "
-                        + nodeProperties.valueType()
-                    );
-            }
-        });
+
+        var consumer = featureConsumer(features);
+        FeatureExtraction.extract(
+            nodeId,
+            -1,
+            FeatureExtraction.propertyExtractors(graph, modelData.nodePropertyKeys()),
+            consumer
+        );
         return features;
+    }
+
+    @NotNull
+    private FeatureConsumer featureConsumer(double[] features) {
+        var consumer = new FeatureConsumer() {
+            @Override
+            public void acceptScalar(long nodeOffset, int offset, double value) {
+                features[offset] = value;
+            }
+
+            @Override
+            public void acceptArray(long nodeOffset, int offset, double[] values) {
+                System.arraycopy(values, 0, features, offset, values.length);
+            }
+        };
+        return consumer;
     }
 
     private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset) {
