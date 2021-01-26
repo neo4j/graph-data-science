@@ -20,8 +20,12 @@
 
 package org.neo4j.graphalgo.model.catalog;
 
+import org.apache.commons.io.FileUtils;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.core.model.ImmutableModel;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
@@ -29,42 +33,52 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelLoadProc extends BaseProc {
+public class ModelDeleteProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Load a stored model from disk";
+    private static final String DESCRIPTION = "Deletes a stored model from disk";
 
-    @Procedure(name = "gds.alpha.model.load", mode = READ)
+    @Procedure(name = "gds.alpha.model.delete", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelLoadResult> store(@Name(value = "modelName") String modelName) throws IOException {
+    public Stream<ModelDeleteResult> store(@Name(value = "modelName") String modelName) throws IOException {
         var model = ModelCatalog.getUntyped(username(), modelName);
-
-        if (model.loaded()) {
-            return Stream.of(new ModelLoadResult(modelName, 0));
-        }
 
         if (!(model instanceof StoredModel)) {
             throw new IllegalArgumentException(formatWithLocale("The model %s is not stored.", modelName));
         }
 
+        var storedModel = (StoredModel) model;
+
         var timer = ProgressTimer.start();
-        ((StoredModel) model).load();
+
+        var modelDir = storedModel.fileLocation();
+        FileUtils.deleteDirectory(modelDir.toFile());
+
+        if (storedModel.loaded()) {
+            var unstoredModel = ImmutableModel.builder().from(storedModel).build();
+            ModelCatalog.setUnsafe(unstoredModel);
+        } else {
+            ModelCatalog.drop(username(), modelName);
+        }
+
         timer.stop();
 
-        return Stream.of(new ModelLoadResult(modelName, timer.getDuration()));
+        return Stream.of(new ModelDeleteResult(modelName, timer.getDuration()));
     }
 
-    public static class ModelLoadResult {
+    public static class ModelDeleteResult {
         public final String modelName;
-        public final long loadMillis;
+        public final long deleteMillis;
 
-        ModelLoadResult(String modelName, long loadMillis) {
+        ModelDeleteResult(String modelName, long deleteMillis) {
             this.modelName = modelName;
-            this.loadMillis = loadMillis;
+            this.deleteMillis = deleteMillis;
         }
     }
 }
