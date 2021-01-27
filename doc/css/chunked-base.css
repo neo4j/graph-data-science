@@ -775,7 +775,11 @@ section.enterprise-edition > div.titlepage .title:after {
   }
 }
 
+section.alpha h1.title:after,
+section.alpha h2.title:after,
 section.alpha h3.title:after,
+section.beta h1.title:after,
+section.beta h2.title:after,
 section.beta h3.title:after {
   color       : #F58220;
   text-align: center;
@@ -792,10 +796,15 @@ section.beta h3.title:after {
   margin-right: 10px;
   bottom: 4px;
 }
+
+section.alpha h1.title:after,
+section.alpha h2.title:after,
 section.alpha h3.title:after {
   content     : "alpha";
 }
 
+section.beta h1.title:after,
+section.beta h2.title:after,
 section.beta h3.title:after {
   content     : "beta";
 }

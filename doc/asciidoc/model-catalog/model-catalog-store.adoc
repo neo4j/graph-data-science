@@ -2,6 +2,10 @@
 [.alpha]
 = Storing models on disk
 
+[.alpha-symbol]
+[.tier-note]
+The model store feature is in the alpha tier.
+
 The model catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, models are no longer available in the catalog and need to be trained again.
 This can be prevented by storing a model on disk.

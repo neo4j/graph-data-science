@@ -7,6 +7,10 @@
 This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
 --
 
+[.beta-symbol]
+[.tier-note]
+The model catalog is in the beta tier.
+
 Some graph algorithms use trained models in their computation.
 A model is generally a mathematical formula representing a real-world or fictitious entities.
 Each algorithm requiring a trained model provides the formulation and means to compute this model (see <<algorithms-embeddings-graph-sage-syntax, GraphSage train syntax>>).
