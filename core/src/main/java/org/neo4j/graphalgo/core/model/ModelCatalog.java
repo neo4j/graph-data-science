@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -129,19 +128,18 @@ public final class ModelCatalog {
         return getUntyped(username, modelName);
     }
 
-    @Nullable
     public static Model<?, ?> publish(String username, String modelName) {
-        if (exists(username, modelName)) {
-            UserCatalog userCatalog = getUserCatalog(username);
-            Model<?, ?> model = userCatalog.getUntyped(modelName);
-            if (!model.sharedWith().contains(Model.ALL_USERS)) {
-                Model<?, ?> publicModel = model.publish();
-                publicModels.set(publicModel);
-                userCatalog.drop(modelName);
-                return publicModel;
-            }
+        Model<?, ?> model = getUntyped(username, modelName);
+        // not published => publish it
+        if (!model.sharedWith().contains(Model.ALL_USERS)) {
+            Model<?, ?> publicModel = model.publish();
+            publicModels.set(publicModel);
+            drop(username, modelName);
+            return publicModel;
         }
-        return null;
+
+        // already published, return it
+        return model;
     }
 
     public static void removeAllLoadedModels() {
