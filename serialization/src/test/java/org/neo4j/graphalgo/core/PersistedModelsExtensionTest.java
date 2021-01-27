@@ -74,7 +74,7 @@ class PersistedModelsExtensionTest extends BaseTest {
     }
 
     @Nested
-    class ValidationTest extends BaseTest {
+    class ValidationTest {
 
         @Test
         void shouldLogIfPersistenceDirectoryDoesNotExists() {
@@ -97,14 +97,14 @@ class PersistedModelsExtensionTest extends BaseTest {
 
         @Test
         void shouldNotOverwriteModels() throws IOException {
-            var first = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelEve", "eve");
-            var second = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelEve", "eve");
+            var first = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
+            var second = ModelPersistenceUtil.createAndPersistModel(tempDir, "modelAlice", "alice");
 
             var testLog = new TestLog();
             PersistedModelsExtension.openPersistedModel(testLog, first);
             PersistedModelsExtension.openPersistedModel(testLog, second);
 
-            var modelInCatalog = (PersistedModel) ModelCatalog.getUntyped("eve", "modelEve");
+            var modelInCatalog = (PersistedModel) ModelCatalog.getUntyped("alice", "modelAlice");
             assertThat(modelInCatalog.fileLocation()).isEqualTo(first);
 
             assertThat(testLog.containsMessage(TestLog.ERROR, "A model with the same name already exists for that user.")).isTrue();
