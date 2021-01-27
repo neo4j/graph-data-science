@@ -56,6 +56,7 @@ The following table lists all production-quality graph operations in the GDS lib
 | Store a model              | `gds.alpha.model.store`
 | Load a stored model        | `gds.alpha.model.load`
 | Delete a stored model      | `gds.alpha.model.delete`
+| Publish a model            | `gds.alpha.model.publish`
 |===
 
 [[production-quality-tier]]
