@@ -99,7 +99,8 @@ public final class ModelCatalog {
     }
 
     public static boolean exists(String username, String modelName) {
-        return getUserCatalog(username).exists(modelName);
+        return getUserCatalog(username).exists(modelName) ||
+               publicModels.exists(modelName);
     }
 
     public static Optional<String> type(String username, String modelName) {

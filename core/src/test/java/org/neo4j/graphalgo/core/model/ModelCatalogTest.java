@@ -287,6 +287,27 @@ class ModelCatalogTest {
     }
 
     @Test
+    void checksIfPublicModelExists() {
+        var model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "modelData",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.publish(USERNAME, "testModel");
+
+        assertThat(ModelCatalog.exists(USERNAME, "testModel")).isFalse();
+        assertThat(ModelCatalog.exists(USERNAME, "testModel_public")).isTrue();
+        assertThat(ModelCatalog.exists(USERNAME, "bogusModel")).isFalse();
+        assertThat(ModelCatalog.exists("anotherUser", "testModel")).isFalse();
+        assertThat(ModelCatalog.exists("anotherUser", "testModel_public")).isTrue();
+    }
+
+    @Test
     void getModelType() {
         var model = Model.of(
             USERNAME,
