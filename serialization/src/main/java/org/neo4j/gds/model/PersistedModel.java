@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.ZonedDateTimeSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.io.fs.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -115,21 +115,27 @@ public class PersistedModel implements Model<Object, ModelConfig> {
 
     @Override
     public Model<Object, ModelConfig> publish() {
-        ModelProto.ModelMetaData publishedMetaData = ModelProto.ModelMetaData.newBuilder(metaData)
-            .setName(name() + PUBLIC_MODEL_SUFFIX)
-            .addAllSharedWith(List.of(Model.ALL_USERS))
-            .build();
-
         try {
-            FileUtils.delete(fileLocation.resolve(META_DATA_FILE));
+            var deletedMetaData = fileLocation.resolve(META_DATA_FILE).toFile().delete();
 
-            PersistedModel publishedModel = new PersistedModel(fileLocation, publishedMetaData, loaded);
+            if (deletedMetaData) {
+                ModelProto.ModelMetaData publishedMetaData = ModelMetaDataSerializer.toPublishable(
+                    metaData,
+                    name() + PUBLIC_MODEL_SUFFIX,
+                    List.of(Model.ALL_USERS)
+                );
 
-            new ModelFileWriter<>(
-                fileLocation,
-                publishedModel
-            ).writeMetaData();
-            return publishedModel;
+
+                PersistedModel publishedModel = new PersistedModel(fileLocation, publishedMetaData, loaded);
+
+                new ModelFileWriter<>(
+                    fileLocation,
+                    publishedModel
+                ).writeMetaData();
+                return publishedModel;
+            } else {
+                throw new RuntimeException(formatWithLocale("Could not publish %s.", name()));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -62,8 +62,19 @@ public final class ModelMetaDataSerializer {
             .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMetaData.getCreationTime()));
     }
 
+    public static ModelProto.ModelMetaData toPublishable(
+        ModelProto.ModelMetaData fromMetaData,
+        String publicModelName,
+        Iterable<String> sharedWith
+    ) {
+        return ModelProto.ModelMetaData.newBuilder(fromMetaData)
+            .setName(publicModelName)
+            .addAllSharedWith(sharedWith)
+            .build();
+    }
+
     private static void serializableTrainConfig(Model<?, ?> model, ModelProto.ModelMetaData.Builder builder) {
-        switch(model.algoType()) {
+        switch (model.algoType()) {
             case GraphSage.MODEL_TYPE:
                 builder.setGraphSageTrainConfig(GraphSageTrainConfigSerializer.toSerializable((GraphSageTrainConfig) model
                     .trainConfig()));
@@ -73,12 +84,15 @@ public final class ModelMetaDataSerializer {
         }
     }
 
-    private static <CONFIG extends ModelConfig & BaseConfig>  CONFIG trainConfig(ModelProto.ModelMetaData protoModelMetaData) {
-        switch(protoModelMetaData.getAlgoType()) {
+    private static <CONFIG extends ModelConfig & BaseConfig> CONFIG trainConfig(ModelProto.ModelMetaData protoModelMetaData) {
+        switch (protoModelMetaData.getAlgoType()) {
             case GraphSage.MODEL_TYPE:
                 return (CONFIG) GraphSageTrainConfigSerializer.fromSerializable(protoModelMetaData.getGraphSageTrainConfig());
             default:
-                throw new RuntimeException(formatWithLocale("Unsupported model type: %s", protoModelMetaData.getAlgoType()));
+                throw new RuntimeException(formatWithLocale(
+                    "Unsupported model type: %s",
+                    protoModelMetaData.getAlgoType()
+                ));
         }
     }
 }
