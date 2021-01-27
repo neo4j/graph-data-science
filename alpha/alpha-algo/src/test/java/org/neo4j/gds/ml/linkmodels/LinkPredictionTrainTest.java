@@ -105,5 +105,4 @@ class LinkPredictionTrainTest {
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
     }
-
 }
