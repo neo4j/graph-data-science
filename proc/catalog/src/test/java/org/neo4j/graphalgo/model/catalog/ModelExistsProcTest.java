@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.model.Model;
@@ -36,6 +37,11 @@ class ModelExistsProcTest extends ModelProcBaseTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelExistsProc.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
     }
 
     @Test
