@@ -13,11 +13,6 @@ Each algorithm requiring a trained model provides the formulation and means to c
 
 The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
 
-[NOTE]
-====
-The model catalog exists as long as the Neo4j instance is running.
-When Neo4j is restarted, models stored in the catalog are lost and need to be trained again.
-====
 
 This chapter explains the available model catalog operations.
 
@@ -25,9 +20,12 @@ This chapter explains the available model catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                             | Description
-| <<catalog-model-exists, gds.beta.model.exists>>  | Checks if a named model is stored in the catalog.
-| <<catalog-model-list, gds.beta.model.list>>      | Prints information about models that are currently stored in the catalog.
+| <<catalog-model-exists, gds.beta.model.exists>>  | Checks if a named model is available in the catalog.
+| <<catalog-model-list, gds.beta.model.list>>      | Prints information about models that are currently available in the catalog.
 | <<catalog-model-drop, gds.beta.model.drop>>      | Drops a named model from the catalog.
+| <<catalog-model-store, gds.alpha.model.store>>    | Stores a names model from the catalog on disk.
+| <<catalog-model-load, gds.alpha.model.load>>      | Loads a named and stored model from disk.
+| <<catalog-model-delete, gds.alpha.model.delete>>  | Removes a named and stored model from disk.
 |===
 
 [NOTE]
@@ -41,7 +39,7 @@ Models trained by a different Neo4j user are not accessible at any time.
 [[catalog-model-exists]]
 == Check if a model exists in the catalog
 
-We can check if a model is stored in the catalog by looking up its name.
+We can check if a model is available in the catalog by looking up its name.
 
 .Check if a model exists in the catalog:
 [source,cypher]
@@ -51,7 +49,7 @@ CALL gds.beta.model.exists('my-model') YIELD exists;
 
 
 [[catalog-model-list]]
-== List models stored in the catalog
+== List models available in the catalog
 
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
 
@@ -62,6 +60,8 @@ CALL gds.model.list()
 YIELD
   modelInfo,
   configuration,
+  stored,
+  loaded,
   creationTime
 ----
 
@@ -72,6 +72,8 @@ CALL gds.model.list('my-model')
 YIELD
   modelInfo,
   configuration,
+  stored,
+  loaded,
   creationTime
 ----
 
@@ -81,6 +83,8 @@ YIELD
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
 * `configuration`: the configuration used for training the model.
+* `stored`: whether the model is <<catalog-model-store,stored>>
+* `loaded`: whether the model is <<catalog-model-load,loaded>>
 * `creationTime`: the time at which the model was registered in the catalog.
 
 
@@ -96,6 +100,8 @@ CALL gds.beta.model.drop('my-model')
 YIELD
   modelInfo,
   configuration,
+  stored,
+  loaded,
   creationTime
 ----
 
@@ -105,6 +111,10 @@ YIELD
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
 * `configuration`: the configuration used for training the model.
+* `stored`: whether the model was <<catalog-model-store,stored>>
+* `loaded`: whether the model was <<catalog-model-load,loaded>>
 * `creationTime`: the time at which the model was registered in the catalog.
 
 NOTE: If the model name does not exist, an error will be raised.
+
+include::model-catalog-store.adoc[leveloffset=+1]
