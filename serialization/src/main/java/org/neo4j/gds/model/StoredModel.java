@@ -132,7 +132,7 @@ public class StoredModel implements Model<Object, ModelConfig> {
                 );
 
 
-                PersistedModel publishedModel = new PersistedModel(fileLocation, publishedMetaData, loaded);
+                StoredModel publishedModel = new StoredModel(fileLocation, publishedMetaData, loaded);
 
                 new ModelFileWriter<>(
                     fileLocation,

@@ -86,7 +86,7 @@ class StoredModelTest {
         assertThat(storedModel.creationTime()).isEqualTo(model.creationTime());
         assertThat(storedModel.graphSchema()).isEqualTo(model.graphSchema());
         assertThat(storedModel.algoType()).isEqualTo(model.algoType());
-        assertThat(storedModel.persisted()).isTrue();
+        assertThat(storedModel.stored()).isTrue();
         assertThat(storedModel.loaded()).isFalse();
     }
 
@@ -116,15 +116,15 @@ class StoredModelTest {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void testPublishPersistedModel(boolean loadData) throws IOException {
-        var persistedModel = new PersistedModel(tempDir);
+    void testPublishStoredModel(boolean loadData) throws IOException {
+        var persistedModel = new StoredModel(tempDir);
         if (loadData) {
             persistedModel.load();
         }
         persistedModel.publish();
         assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
 
-        PersistedModel publishedModel = new PersistedModel(tempDir);
+        StoredModel publishedModel = new StoredModel(tempDir);
         assertEquals(model.name() + "_public", publishedModel.name());
         assertThat(publishedModel.sharedWith()).containsExactlyInAnyOrder(Model.ALL_USERS);
 

@@ -52,7 +52,7 @@ public final class ModelCatalog {
     }
 
     public static void setUnsafe(Model<?, ?> model) {
-        userCatalogs.compute(model.username(), (user, userCatalog) -> {
+        userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
