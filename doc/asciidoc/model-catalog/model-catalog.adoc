@@ -30,6 +30,7 @@ This chapter explains the available model catalog operations.
 | <<catalog-model-store, gds.alpha.model.store>>    | Stores a names model from the catalog on disk.
 | <<catalog-model-load, gds.alpha.model.load>>      | Loads a named and stored model from disk.
 | <<catalog-model-delete, gds.alpha.model.delete>>  | Removes a named and stored model from disk.
+| <<catalog-model-publish, gds.alpha.model.publish>>  | Makes a model accessible to all users.
 |===
 
 [NOTE]
@@ -66,7 +67,8 @@ YIELD
   configuration,
   stored,
   loaded,
-  creationTime
+  creationTime,
+  shared
 ----
 
 .Listing detailed information about specific model:
@@ -78,7 +80,8 @@ YIELD
   configuration,
   stored,
   loaded,
-  creationTime
+  creationTime,
+  shared
 ----
 
 .Results
@@ -90,6 +93,7 @@ YIELD
 * `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
 * `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
+* `shared`: a boolean flag indicating if the model is published.
 
 
 [[catalog-model-drop]]
@@ -106,7 +110,8 @@ YIELD
   configuration,
   stored,
   loaded,
-  creationTime
+  creationTime,
+  shared
 ----
 
 .Results
@@ -118,7 +123,10 @@ YIELD
 * `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
 * `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
+* `shared`: a boolean flag indicating if the model is published.
 
 NOTE: If the model name does not exist, an error will be raised.
 
 include::model-catalog-store.adoc[leveloffset=+1]
+
+include::model-catalog-publish.adoc[leveloffset=+1]

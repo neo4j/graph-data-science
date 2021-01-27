@@ -1,0 +1,29 @@
+[[model-catalog-publish-ops]]
+[.alpha]
+= Publishing models
+
+By default, a trained model is visible to the user that created it.
+Making a model accessible to other users can be achieved by publishing it.
+
+[[catalog-model-publish]]
+== Publishing a model
+
+.Publishing trained model:
+[source,cypher]
+----
+CALL gds.alpha.model.publish('my-model')
+YIELD
+  modelInfo,
+  configuration,
+  creationTime,
+  shared
+----
+
+.Results
+* `modelInfo`: detailed information for the trained model
+** `modelName: String`: the saved model name.
+** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
+** can also contain algorithm specific model details.
+* `configuration`: the configuration used for training the model.
+* `creationTime`: the time at which the model was registered in the catalog.
+* `shared`: a boolean flag indicating if the model is published.
