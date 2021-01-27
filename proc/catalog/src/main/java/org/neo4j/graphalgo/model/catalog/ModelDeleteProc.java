@@ -22,9 +22,7 @@ package org.neo4j.graphalgo.model.catalog;
 import org.apache.commons.io.FileUtils;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.BaseProc;
-import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.ImmutableModel;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
@@ -32,8 +30,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
