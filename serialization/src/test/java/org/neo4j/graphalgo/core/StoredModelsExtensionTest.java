@@ -104,7 +104,7 @@ class StoredModelsExtensionTest extends BaseTest {
             StoredModelsExtension.openStoredModel(testLog, first);
             StoredModelsExtension.openStoredModel(testLog, second);
 
-            var modelInCatalog = (StoredModel) ModelCatalog.getUntyped("eve", "modelEve");
+            var modelInCatalog = (StoredModel) ModelCatalog.getUntyped("alice", "modelAlice");
             assertThat(modelInCatalog.fileLocation()).isEqualTo(first);
 
             assertThat(testLog.containsMessage(TestLog.ERROR, "A model with the same name already exists for that user.")).isTrue();
