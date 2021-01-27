@@ -94,8 +94,8 @@ class ModelListProcTest extends ModelProcBaseTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime " +
-                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime " +
+                "CALL %s YIELD modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
+                "RETURN modelInfo, graphSchema, trainConfig, loaded, stored, creationTime, shared " +
                 "ORDER BY modelInfo.modelName",
                 query
             ),
@@ -106,7 +106,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "trainConfig", TestTrainConfig.of().toMap(),
                     "loaded", true,
                     "stored", false,
-                    "creationTime", isA(ZonedDateTime.class)
+                    "creationTime", isA(ZonedDateTime.class),
+                    "shared", false
                 ),
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
@@ -114,7 +115,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "trainConfig", TestTrainConfig.of().toMap(),
                     "loaded", true,
                     "stored", false,
-                    "creationTime", isA(ZonedDateTime.class)
+                    "creationTime", isA(ZonedDateTime.class),
+                    "shared", false
                 )
             )
         );
@@ -160,7 +162,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                     "graphSchema", EXPECTED_SCHEMA,
                     "loaded", true,
                     "stored", false,
-                    "creationTime", isA(ZonedDateTime.class)
+                    "creationTime", isA(ZonedDateTime.class),
+                    "shared", false
                 )
             )
         );

@@ -90,7 +90,8 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     "loaded", true,
                     "stored", false,
                     "graphSchema", EXPECTED_SCHEMA,
-                    "creationTime", isA(ZonedDateTime.class)
+                    "creationTime", isA(ZonedDateTime.class),
+                    "shared", false
                 )
             )
         );

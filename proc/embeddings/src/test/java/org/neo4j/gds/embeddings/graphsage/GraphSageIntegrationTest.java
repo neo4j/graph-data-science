@@ -114,7 +114,8 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
                     ),
                     "loaded", true,
                     "stored", false,
-                    "graphSchema", isA(Map.class)
+                    "graphSchema", isA(Map.class),
+                    "shared", false
                 )
             )
         );

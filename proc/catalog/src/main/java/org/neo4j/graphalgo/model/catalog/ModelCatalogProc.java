@@ -44,8 +44,10 @@ abstract class ModelCatalogProc extends BaseProc {
         public final boolean loaded;
         public final boolean stored;
         public final ZonedDateTime creationTime;
+        public final boolean shared;
 
         public ModelResult(Model<?, ?> model) {
+            shared = !model.sharedWith().isEmpty();
             modelInfo = Stream.concat(
                 Map.of(
                     "modelName", model.name(),
