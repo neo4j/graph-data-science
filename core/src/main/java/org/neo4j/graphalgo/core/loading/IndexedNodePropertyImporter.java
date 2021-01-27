@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -153,6 +154,14 @@ public final class IndexedNodePropertyImporter extends StatementAction {
             ktx.pageCursorTracer(),
             Neo4jProxy.memoryTracker(ktx)
         )) {
+            var propertyIds = index.schema().getPropertyIds();
+            var propertyOffset = ArrayUtil.linearSearchIndex(propertyIds, propertyIds.length, propertyId);
+            // if the looked for propertyId is not there we return
+            // this is not expected to happen, but it is safe
+            if (propertyOffset < 0) {
+                return;
+            }
+
             var indexReadSession = read.indexReadSession(index);
             if (indexQuery.isPresent()) {
                 // if indexQuery is not null, we are a parallel batch
@@ -171,7 +180,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 // feature flag was off, or concurrency is 1, or the thread pool is not usable, or we couldn't find a valid range
                 Neo4jProxy.nodeIndexScan(read, indexReadSession, indexCursor, IndexOrder.NONE, true);
             }
-            importFromCursor(indexCursor);
+            importFromCursor(indexCursor, propertyOffset);
         }
     }
 
@@ -251,25 +260,19 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         return OptionalDouble.empty();
     }
 
-    private void importFromCursor(NodeValueIndexCursor indexCursor) {
-        var numberOfProperties = indexCursor.numberOfProperties();
+    private void importFromCursor(NodeValueIndexCursor indexCursor, int propertyOffset) {
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var node = indexCursor.nodeReference();
                 var nodeId = idMap.toMappedNodeId(node);
                 if (nodeId >= 0) {
-                    for (int i = 0; i < numberOfProperties; i++) {
-                        var propertyKey = indexCursor.propertyKey(i);
-                        if (propertyId == propertyKey) {
-                            var propertyValue = indexCursor.propertyValue(i);
-                            propertiesBuilder.set(nodeId, propertyValue);
-                            imported += 1;
-                            if ((imported & 0x1_FFFFL) == 0L) {
-                                progressLogger.logProgress(imported - logged);
-                                logged = imported;
-                                terminationFlag.assertRunning();
-                            }
-                        }
+                    var propertyValue = indexCursor.propertyValue(propertyOffset);
+                    propertiesBuilder.set(nodeId, propertyValue);
+                    imported += 1;
+                    if ((imported & 0x1_FFFFL) == 0L) {
+                        progressLogger.logProgress(imported - logged);
+                        logged = imported;
+                        terminationFlag.assertRunning();
                     }
                 }
             }

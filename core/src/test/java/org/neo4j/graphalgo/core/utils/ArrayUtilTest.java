@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,4 +70,19 @@ class ArrayUtilTest {
         assertArrayEquals(new double[]{}, ArrayUtil.fill(1D, 0));
         assertArrayEquals(new double[]{42D}, ArrayUtil.fill(42D, 1));
     }
+
+    @ParameterizedTest(name = "testDataSize: {0}")
+    @MethodSource("testDataSizes")
+    void testLinearSearchIndex(int size) {
+        int[] testData = setup(size);
+        for (int i = 0; i < testData.length; i++) {
+            assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i + 1) * 2))
+                .as(formatWithLocale("False negative at %d value %d%n", i, testData[i]))
+                .isEqualTo(i);
+            assertThat(ArrayUtil.linearSearchIndex(testData, testData.length, (i * 2) + 1))
+                .as(formatWithLocale("False positive at %d value %d%n", i, testData[i]))
+                .isEqualTo(-testData.length - 1);
+        }
+    }
+
 }

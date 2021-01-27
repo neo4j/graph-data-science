@@ -103,9 +103,9 @@ public final class ArrayUtil {
         int i = 0;
         for (; i < length - 4; i += 4) {
             if (arr[i] == key) return i;
-            if (arr[i + 1] == key) return i;
-            if (arr[i + 2] == key) return i;
-            if (arr[i + 3] == key) return i;
+            if (arr[i + 1] == key) return i + 1;
+            if (arr[i + 2] == key) return i + 2;
+            if (arr[i + 3] == key) return i + 3;
         }
         for (; i < length; i++) {
             if (arr[i] == key) {
