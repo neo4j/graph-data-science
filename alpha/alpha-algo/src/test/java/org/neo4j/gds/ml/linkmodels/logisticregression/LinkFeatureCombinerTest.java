@@ -36,6 +36,13 @@ class LinkFeatureCombinerTest {
         assertThat(combined).containsExactly(expectedCombined);
     }
 
+    @ParameterizedTest
+    @MethodSource("hadamardInputArrays")
+    void shouldCombineArraysUsingHADAMARD(double[] sourceArray, double[] targetArray, double[] expectedCombined) {
+        var combined = LinkFeatureCombiner.HADAMARD.combine(sourceArray, targetArray);
+        assertThat(combined).containsExactly(expectedCombined);
+    }
+
     static Stream<Arguments> l2InputArrays() {
         return Stream.of(
             Arguments.of(
@@ -47,6 +54,20 @@ class LinkFeatureCombinerTest {
                 new double[]{5.0, 0.0, -4.2},
                 new double[]{5.0, 1.0, -4.2},
                 new double[]{0.0, 1.0, 0.0}
+            )
+        );
+    }
+    static Stream<Arguments> hadamardInputArrays() {
+        return Stream.of(
+            Arguments.of(
+                new double[]{5, 3.2, -4.2},                                 // sourceArray
+                new double[]{-4.3, 7.2, 6.2},                               // targetArray
+                new double[]{-5 * 4.3, 3.2 * 7.2, -4.2 * 6.2} // expectation
+            ),
+            Arguments.of(
+                new double[]{5.0, 0.0, -4.2},
+                new double[]{5.0, 1.0, -4.2},
+                new double[]{25, 0.0, 4.2 * 4.2}
             )
         );
     }

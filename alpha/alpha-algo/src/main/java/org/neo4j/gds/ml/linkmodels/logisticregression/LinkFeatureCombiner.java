@@ -30,6 +30,17 @@ public enum LinkFeatureCombiner {
             }
             return result;
         }
+    },
+    HADAMARD {
+        @Override
+        public double[] combine(double[] sourceArray, double[] targetArray) {
+            assert sourceArray.length == targetArray.length;
+            var result = new double[sourceArray.length];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = sourceArray[i] * targetArray[i];
+            }
+            return result;
+        }
     };
 
     public abstract double[] combine(double[] sourceArray, double[] targetArray);
