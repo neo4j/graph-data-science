@@ -49,10 +49,13 @@ The following table lists all production-quality graph operations in the GDS lib
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-| Operation               | Procedure
-| Check if a model exists | `gds.beta.model.exists`
-| Remove a model          | `gds.beta.model.drop`
-| List models             | `gds.beta.model.list`
+| Operation                  | Procedure
+| Check if a model exists    | `gds.beta.model.exists`
+| Remove a model from memory | `gds.beta.model.drop`
+| List models                | `gds.beta.model.list`
+| Store a model              | `gds.alpha.model.store`
+| Load a stored model        | `gds.alpha.model.load`
+| Delete a stored model      | `gds.alpha.model.delete`
 |===
 
 [[production-quality-tier]]
