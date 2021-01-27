@@ -21,7 +21,7 @@ package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.Parser;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.model.ModelSupport;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
@@ -48,14 +48,11 @@ public class ModelFileReader {
     }
 
     public Object readData(String algoType) throws IOException {
-        switch (algoType) {
-            case GraphSage.MODEL_TYPE:
-                var parser = GraphSageProto.GraphSageModel.parser();
-                var graphSageModelProto = readModelData(persistenceDir, parser);
-                return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
-            default:
-                throw new IllegalArgumentException();
-        }
+        return ModelSupport.onValidAlgoType(algoType, () -> {
+            var parser = GraphSageProto.GraphSageModel.parser();
+            var graphSageModelProto = readModelData(persistenceDir, parser);
+            return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
+        });
     }
 
     public Model<?, ?> read() throws IOException {
@@ -64,14 +61,11 @@ public class ModelFileReader {
     }
 
     private Model<?, ?> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
-        switch (modelMetaData.getAlgoType()) {
-            case GraphSage.MODEL_TYPE:
-                var parser = GraphSageProto.GraphSageModel.parser();
-                var graphSageModelProto = readModelData(persistenceDir, parser);
-                return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
-            default:
-                throw new IllegalArgumentException();
-        }
+        return ModelSupport.onValidAlgoType(modelMetaData.getAlgoType(), () -> {
+            var parser = GraphSageProto.GraphSageModel.parser();
+            var graphSageModelProto = readModelData(persistenceDir, parser);
+            return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
+        });
     }
 
     private <T> T readModelData(Path exportDir, Parser<T> parser) throws IOException {

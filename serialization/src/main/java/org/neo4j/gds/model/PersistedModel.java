@@ -20,7 +20,6 @@
 package org.neo4j.gds.model;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
@@ -47,10 +46,8 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     private boolean loaded;
 
     public PersistedModel(Path persistenceDir) throws IOException {
-        modelReader = new ModelFileReader(persistenceDir);
-
-        metaData = modelReader.readMetaData();
-
+        this.modelReader = new ModelFileReader(persistenceDir);
+        this.metaData = modelReader.readMetaData();
         this.loaded = false;
         this.fileLocation = persistenceDir;
     }
@@ -105,15 +102,10 @@ public class PersistedModel implements Model<Object, ModelConfig> {
 
     @Override
     public ModelConfig trainConfig() {
-        if (algoType().equals(GraphSage.MODEL_TYPE)) {
-            return GraphSageTrainConfigSerializer.fromSerializable(metaData.getGraphSageTrainConfig());
-        } else {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Unknown model type '%s', supported model types are: '%'",
-                algoType(),
-                GraphSage.MODEL_TYPE
-            ));
-        }
+        return ModelSupport.onValidAlgoType(
+            algoType(),
+            () -> GraphSageTrainConfigSerializer.fromSerializable(metaData.getGraphSageTrainConfig())
+        );
     }
 
     @Override
