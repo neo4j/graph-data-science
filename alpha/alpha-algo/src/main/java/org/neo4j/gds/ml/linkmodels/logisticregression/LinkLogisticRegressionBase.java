@@ -84,7 +84,7 @@ public class LinkLogisticRegressionBase {
 
     @NotNull
     private FeatureConsumer featureConsumer(double[] features) {
-        var consumer = new FeatureConsumer() {
+        return new FeatureConsumer() {
             @Override
             public void acceptScalar(long nodeOffset, int offset, double value) {
                 features[offset] = value;
@@ -95,7 +95,6 @@ public class LinkLogisticRegressionBase {
                 System.arraycopy(values, 0, features, offset, values.length);
             }
         };
-        return consumer;
     }
 
     private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset) {
