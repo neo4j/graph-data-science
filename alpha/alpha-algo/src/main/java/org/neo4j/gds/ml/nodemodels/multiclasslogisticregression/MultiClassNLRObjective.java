@@ -36,6 +36,7 @@ import org.neo4j.gds.ml.features.BiasFeature;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -63,12 +64,12 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     }
 
     private static MultiClassNLRData makeData(
-        List<String> featureProperties,
+        Collection<String> featureProperties,
         String targetPropertyKey,
         Graph graph
     ) {
         var classIdMap = makeClassIdMap(graph, targetPropertyKey);
-        var weights = initWeights(graph, classIdMap, featureProperties);
+        var weights = initWeights(graph, classIdMap.size(), featureProperties);
         return MultiClassNLRData.builder()
             .classIdMap(classIdMap)
             .weights(weights)
@@ -86,11 +87,10 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
         return classIdMap;
     }
 
-    private static Weights<Matrix> initWeights(Graph graph, LocalIdMap classIdMap, List<String> featureProperties) {
+    private static Weights<Matrix> initWeights(Graph graph, int numberOfClasses, Collection<String> featureProperties) {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         featureExtractors.add(new BiasFeature());
         var featuresPerClass = FeatureExtraction.featureCount(featureExtractors);
-        var numberOfClasses = classIdMap.size();
         return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 
