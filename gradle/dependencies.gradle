@@ -38,6 +38,7 @@ ext {
             'jjwt':                         '0.11.0',
             'jol':                          '0.10',
             'jqwik':                        '1.2.0',
+            'junit4':                       '4.13.1',
             'junit5':                       '5.6.2',
             'junit-quickcheck-core':        '0.8.1',
             'junit-quickcheck-generators':  '0.8.1',
