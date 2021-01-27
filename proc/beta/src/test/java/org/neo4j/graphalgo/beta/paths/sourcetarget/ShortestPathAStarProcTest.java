@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.beta.paths.sourcetarget;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -222,13 +222,13 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         return createMinimalConfig(baseMap);
     }
 
-    @Ignore
+    @Disabled
     @Override
     public void testMemoryEstimateOnExplicitDimensions() {
         // test assumes one node property, we load two
     }
 
-    @Ignore
+    @Disabled
     @Override
     public void testFailOnMissingNodeLabel() {
         // test adds a node projection to the minimal config input
