@@ -64,7 +64,8 @@ class LinkLogisticRegressionBaseTest {
             .nodePropertyKeys(nodePropertyKeys)
             .numberOfFeatures(3)
             .weights(weights)
-            .build());
+            .build()
+        );
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
         MatrixConstant features = base.features(graph, allNodesBatch);

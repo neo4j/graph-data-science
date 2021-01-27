@@ -45,6 +45,7 @@ public class LinkLogisticRegressionBase {
 
     protected MatrixConstant features(Graph graph, Batch batch) {
         var graphCopy = graph.concurrentCopy();
+        // TODO: replace by MutableLong and throw an error saying reduce batchSize if larger than maxint
         var relationshipCount = new MutableInt();
         // assume batching has been done so that relationship count does not overflow int
         batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
@@ -54,9 +55,7 @@ public class LinkLogisticRegressionBase {
         var relationshipOffset = new MutableInt();
         batch.nodeIds().forEach(nodeId -> {
             graphCopy.forEachRelationship(nodeId, (src, trg) -> {
-                var sourceFeatures = nodeFeatures(graph, src);
-                var targetFeatures = nodeFeatures(graph, trg);
-                var linkFeatures = modelData.linkFeatureCombiner().combine(sourceFeatures, targetFeatures);
+                var linkFeatures = features(graph, src, trg);
                 setLinkFeatures(linkFeatures, features, relationshipOffset.getValue());
                 relationshipOffset.increment();
                 return true;
@@ -68,9 +67,16 @@ public class LinkLogisticRegressionBase {
         return new MatrixConstant(features, rows, cols);
     }
 
-    private double[] nodeFeatures(Graph graph, long nodeId) {
+    protected double[] features(Graph graph, long sourceId, long targetId) {
+        var sourceFeatures = nodeFeatures(graph, sourceId);
+        var targetFeatures = nodeFeatures(graph, targetId);
+        return modelData.linkFeatureCombiner().combine(sourceFeatures, targetFeatures);
+    }
+
+    protected double[] nodeFeatures(Graph graph, long nodeId) {
         int numberOfFeatures = modelData.numberOfFeatures();
-        var features = new double[numberOfFeatures];
+        // bias feature is handled afterwards
+        var features = new double[numberOfFeatures - 1];
 
         var consumer = featureConsumer(features);
         FeatureExtraction.extract(
@@ -98,8 +104,8 @@ public class LinkLogisticRegressionBase {
     }
 
     private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset) {
-        var numberOfFeatures = linkFeatures.length;
-        System.arraycopy(linkFeatures, 0, features, relationshipOffset * numberOfFeatures, numberOfFeatures);
+        var numberOfFeaturesWithoutBias = linkFeatures.length;
+        var numberOfFeatures = numberOfFeaturesWithoutBias + 1;
+        System.arraycopy(linkFeatures, 0, features, relationshipOffset * numberOfFeatures, numberOfFeaturesWithoutBias);
     }
-
 }
