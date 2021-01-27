@@ -46,13 +46,11 @@ class PersistedModelTest {
     @TempDir
     Path tempDir;
 
-    private GraphSageTrainConfig trainConfig;
-    private ModelData modelData;
     private Model<ModelData, GraphSageTrainConfig> model;
 
     @BeforeEach
     void persistModel() throws IOException {
-        trainConfig = ImmutableGraphSageTrainConfig.builder()
+        GraphSageTrainConfig trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL)
             .relationshipWeightProperty("weight")
             .degreeAsProperty(true)
