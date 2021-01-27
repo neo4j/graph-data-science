@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -171,7 +170,7 @@ public final class ModelCatalog {
             Class<C> configClass
         ) {
             return get(
-                () -> getUntyped(modelName),
+                getUntyped(modelName),
                 dataClass,
                 configClass
             );
@@ -183,18 +182,17 @@ public final class ModelCatalog {
             Class<C> configClass
         ) {
             return get(
-                () -> getUntypedChecked(modelName),
+                getUntypedChecked(modelName),
                 dataClass,
                 configClass
             );
         }
 
         private <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
-            Supplier<Model<?, ?>> modelSupplier,
+            Model<?, ?> model,
             Class<D> dataClass,
             Class<C> configClass
         ) {
-            var model = modelSupplier.get();
             if (model != null) {
                 var data = model.data();
                 var modelName = model.name();
