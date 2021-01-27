@@ -82,6 +82,7 @@ public final class StoredModelsExtension extends ExtensionFactory<StoredModelsEx
                 if (ModelCatalog.exists(model.creator(), model.name())) {
                     log.error(
                         "Cannot open stored model %s for user %s from %s. A model with the same name already exists for that user.",
+                        model.name(),
                         model.creator(),
                         storedModelPath
                     );
