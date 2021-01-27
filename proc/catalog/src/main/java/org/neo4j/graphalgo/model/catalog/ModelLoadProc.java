@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.model.catalog;
 
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.procedure.Description;
@@ -39,6 +40,10 @@ public class ModelLoadProc extends BaseProc {
     @Procedure(name = "gds.alpha.model.load", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelLoadResult> store(@Name(value = "modelName") String modelName) throws IOException {
+        if (!GdsEdition.instance().isOnEnterpriseEdition()) {
+            throw new RuntimeException("Loading a model is only available with the Graph Data Science library Enterprise Edition.");
+        }
+
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (model.loaded()) {

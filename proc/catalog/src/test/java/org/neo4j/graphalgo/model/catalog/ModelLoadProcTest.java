@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -113,4 +114,13 @@ class ModelLoadProcTest extends ModelProcBaseTest {
             .hasFieldOrPropertyWithValue("loaded", true);
     }
 
+    @Test
+    void doNotAllowToLoadModelsOnCE() {
+        GdsEdition.instance().setToCommunityEdition();
+
+        var query = "CALL gds.alpha.model.load('testModel1')";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
+    }
 }

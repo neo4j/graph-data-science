@@ -24,6 +24,7 @@ import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -50,6 +51,10 @@ public class ModelStoreProc extends BaseProc {
     @Procedure(name = "gds.alpha.model.store", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelStoreResult> store(@Name(value = "modelName") String modelName) throws IOException {
+        if (!GdsEdition.instance().isOnEnterpriseEdition()) {
+            throw new RuntimeException("Storing a model is only available with the Graph Data Science library Enterprise Edition.");
+        }
+
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (model.stored()) {

@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -125,6 +126,34 @@ class ModelStoreProcTest extends ModelProcBaseTest {
             .hasFieldOrPropertyWithValue("name", modelName)
             .hasFieldOrPropertyWithValue("stored", true)
             .hasFieldOrPropertyWithValue("loaded", true);
+    }
+
+    @Test
+    void doNotAllowToStoreModelsOnCE() {
+        GdsEdition.instance().setToCommunityEdition();
+
+        var modelName = "testModel1";
+        var model1 = Model.of(
+            getUsername(),
+            modelName,
+            GraphSage.MODEL_TYPE,
+            GRAPH_SCHEMA,
+            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
+            ImmutableGraphSageTrainConfig.builder()
+                .username(getUsername())
+                .modelName(modelName)
+                .degreeAsProperty(true)
+                .build()
+
+        );
+
+        ModelCatalog.set(model1);
+
+        var query = "CALL gds.alpha.model.store('testModel1')";
+
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
     }
 
 }
