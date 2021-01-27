@@ -40,7 +40,7 @@ public final class ModelMetaDataSerializer {
         var builder = ModelProto.ModelMetaData.newBuilder();
         serializableTrainConfig(model, builder);
         return builder
-            .setUsername(model.username())
+            .setCreator(model.creator())
             .addAllSharedWith(model.sharedWith())
             .setName(model.name())
             .setAlgoType(model.algoType())
@@ -53,7 +53,7 @@ public final class ModelMetaDataSerializer {
         ModelProto.ModelMetaData protoModelMetaData
     ) {
         return ImmutableModel.<DATA, CONFIG>builder()
-            .username(protoModelMetaData.getUsername())
+            .creator(protoModelMetaData.getCreator())
             .sharedWith(protoModelMetaData.getSharedWithList())
             .name(protoModelMetaData.getName())
             .algoType(protoModelMetaData.getAlgoType())

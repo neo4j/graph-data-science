@@ -89,8 +89,8 @@ public class PersistedModel implements Model<Object, ModelConfig> {
     }
 
     @Override
-    public String username() {
-        return metaData.getUsername();
+    public String creator() {
+        return metaData.getCreator();
     }
 
     @Override

@@ -36,7 +36,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
     String ALL_USERS = "";
     String PUBLIC_MODEL_SUFFIX = "_public";
 
-    String username();
+    String creator();
 
     List<String> sharedWith();
 

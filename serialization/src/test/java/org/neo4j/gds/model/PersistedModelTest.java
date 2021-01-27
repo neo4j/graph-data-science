@@ -80,7 +80,7 @@ class PersistedModelTest {
     void testLoadingMetaData() throws IOException {
         var persistedModel = new PersistedModel(tempDir);
 
-        assertThat(persistedModel.username()).isEqualTo(model.username());
+        assertThat(persistedModel.creator()).isEqualTo(model.creator());
         assertThat(persistedModel.name()).isEqualTo(model.name());
         assertThat(persistedModel.trainConfig()).isEqualTo(model.trainConfig());
         assertThat(persistedModel.creationTime()).isEqualTo(model.creationTime());

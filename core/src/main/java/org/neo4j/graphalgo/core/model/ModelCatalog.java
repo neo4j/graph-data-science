@@ -40,7 +40,7 @@ public final class ModelCatalog {
     private static final UserCatalog publicModels = UserCatalog.EMPTY;
 
     public static void set(Model<?, ?> model) {
-        userCatalogs.compute(model.username(), (user, userCatalog) -> {
+        userCatalogs.compute(model.creator(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
             }
@@ -70,7 +70,7 @@ public final class ModelCatalog {
     public static Model<?, ?> drop(String username, String modelName) {
         if (publicModels.exists(modelName)) {
             Model<?, ?> model = publicModels.getUntyped(modelName);
-            if (model.username().equals(username)) {
+            if (model.creator().equals(username)) {
                 return publicModels.drop(modelName);
             }
             throw new IllegalStateException(formatWithLocale("Only the creator of model %s can drop it.", modelName));

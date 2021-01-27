@@ -8,7 +8,7 @@ option java_outer_classname = "ModelProto";
 
 
 message ModelMetaData {
-  string username = 1;
+  string creator = 1;
   repeated string sharedWith = 2;
   string name = 3;
   string algoType = 4;
