@@ -36,7 +36,7 @@ import java.util.stream.StreamSupport;
 
 public final class DatasetManager {
 
-    private static final Map<String, Dataset> datasets = new HashMap<>() {{
+    private final Map<String, Dataset> datasets = new HashMap<>() {{
         put(EmptyDataset.NAME, EmptyDataset.INSTANCE);
         put(FakeLdbcDataset.NAME, FakeLdbcDataset.INSTANCE);
         put(Cora.ID, new Cora());
