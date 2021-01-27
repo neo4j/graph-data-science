@@ -345,14 +345,26 @@ class ModelCatalogTest {
             1337L,
             TestTrainConfig.of()
         );
+
+        var publicModel = Model.of(
+            "anotherUser",
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
+
         ModelCatalog.set(model1);
         ModelCatalog.set(model2);
+        ModelCatalog.set(publicModel);
+        var publishedModel = ModelCatalog.publish("anotherUser", "testModel2");
 
 
         var models = ModelCatalog.list(USERNAME);
-        assertEquals(2, models.size());
+        assertEquals(3, models.size());
 
-        assertThat(models).containsExactlyInAnyOrder(model1, model2);
+        assertThat(models).containsExactlyInAnyOrder(model1, model2, publishedModel);
     }
 
     @Test
@@ -367,12 +379,12 @@ class ModelCatalogTest {
         );
 
         ModelCatalog.set(model);
-        ModelCatalog.publish(USERNAME, "testModel");
+        Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");
         assertEquals(1, ModelCatalog.list(USERNAME).size());
 
         Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
             "anotherUser",
-            "testModel_public",
+            publishedModel.name(),
             String.class,
             TestTrainConfig.class
         );

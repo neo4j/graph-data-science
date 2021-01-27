@@ -19,15 +19,18 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -37,7 +40,7 @@ public final class ModelCatalog {
     private ModelCatalog() {}
 
     private static final Map<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
-    private static final UserCatalog publicModels = UserCatalog.EMPTY;
+    private static final UserCatalog publicModels = new UserCatalog();
 
     public static void set(Model<?, ?> model) {
         userCatalogs.compute(model.creator(), (user, userCatalog) -> {
@@ -52,11 +55,39 @@ public final class ModelCatalog {
     public static <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
         String username, String modelName, Class<D> dataClass, Class<C> configClass
     ) {
-        return getUserCatalog(username).get(modelName, dataClass, configClass);
+        var userCatalog = getUserCatalog(username);
+        var userModel = userCatalog.get(modelName, dataClass, configClass);
+        if (userModel != null) {
+            return userModel;
+        } else {
+            var publicModel = publicModels.get(modelName, dataClass, configClass);
+            if (publicModel != null) {
+                return publicModel;
+            }
+        }
+        throw new NoSuchElementException(prettySuggestions(
+            formatWithLocale("Model with name `%s` does not exist.", modelName),
+            modelName,
+            userCatalog.userModels.keySet()
+        ));
     }
 
     public static Model<?, ?> getUntyped(String username, String modelName) {
-        return getUserCatalog(username).getUntyped(modelName);
+        var userCatalog = getUserCatalog(username);
+        var userModel = userCatalog.getUntyped(modelName);
+        if (userModel != null) {
+            return userModel;
+        } else {
+            var publicModel = publicModels.getUntyped(modelName);
+            if (publicModel != null) {
+                return publicModel;
+            }
+        }
+        throw new NoSuchElementException(prettySuggestions(
+            formatWithLocale("Model with name `%s` does not exist.", modelName),
+            modelName,
+            userCatalog.userModels.keySet()
+        ));
     }
 
     public static boolean exists(String username, String modelName) {
@@ -80,14 +111,17 @@ public final class ModelCatalog {
     }
 
     public static Collection<Model<?, ?>> list(String username) {
-        return getUserCatalog(username).list();
+        var models = new ArrayList<>(getUserCatalog(username).list());
+        models.addAll(publicModels.list());
+        return models;
     }
 
     public static Model<?, ?> list(String username, String modelName) {
-        return getUserCatalog(username).list(modelName);
+        return getUntyped(username, modelName);
     }
 
-    public static void publish(String username, String modelName) {
+    @Nullable
+    public static Model<?, ?> publish(String username, String modelName) {
         if (exists(username, modelName)) {
             UserCatalog userCatalog = getUserCatalog(username);
             Model<?, ?> model = userCatalog.getUntyped(modelName);
@@ -95,12 +129,15 @@ public final class ModelCatalog {
                 Model<?, ?> publicModel = model.publish();
                 publicModels.set(publicModel);
                 userCatalog.drop(modelName);
+                return publicModel;
             }
         }
+        return null;
     }
 
     public static void removeAllLoadedModels() {
         userCatalogs.clear();
+        publicModels.removeAllLoadedModels();
     }
 
     public static void checkStorable(String username, String modelType) {
@@ -108,7 +145,7 @@ public final class ModelCatalog {
     }
 
     private static UserCatalog getUserCatalog(String username) {
-        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY).join(publicModels);
+        return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
     static class UserCatalog {
@@ -133,27 +170,53 @@ public final class ModelCatalog {
             Class<D> dataClass,
             Class<C> configClass
         ) {
-            Model<?, ?> model = getUntyped(modelName);
+            return get(
+                () -> getUntyped(modelName),
+                dataClass,
+                configClass
+            );
+        }
 
-            var data = model.data();
-            if (!dataClass.isInstance(data)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has data with different types than expected. " +
-                    "Expected data type: `%s`, invoked with model data type: `%s`.",
-                    modelName,
-                    data.getClass().getName(),
-                    dataClass.getName()
-                ));
-            }
-            var config = model.trainConfig();
-            if (!configClass.isInstance(config)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The model `%s` has a training config with different types than expected. " +
-                    "Expected train config type: `%s`, invoked with model config type: `%s`.",
-                    modelName,
-                    config.getClass().getName(),
-                    configClass.getName()
-                ));
+        public <D, C extends ModelConfig & BaseConfig> Model<D, C> getChecked(
+            String modelName,
+            Class<D> dataClass,
+            Class<C> configClass
+        ) {
+            return get(
+                () -> getUntypedChecked(modelName),
+                dataClass,
+                configClass
+            );
+        }
+
+        private <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
+            Supplier<Model<?, ?>> modelSupplier,
+            Class<D> dataClass,
+            Class<C> configClass
+        ) {
+            var model = modelSupplier.get();
+            if (model != null) {
+                var data = model.data();
+                var modelName = model.name();
+                if (!dataClass.isInstance(data)) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "The model `%s` has data with different types than expected. " +
+                        "Expected data type: `%s`, invoked with model data type: `%s`.",
+                        modelName,
+                        data.getClass().getName(),
+                        dataClass.getName()
+                    ));
+                }
+                var config = model.trainConfig();
+                if (!configClass.isInstance(config)) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "The model `%s` has a training config with different types than expected. " +
+                        "Expected train config type: `%s`, invoked with model config type: `%s`.",
+                        modelName,
+                        config.getClass().getName(),
+                        configClass.getName()
+                    ));
+                }
             }
 
             // We just did the check
@@ -171,7 +234,7 @@ public final class ModelCatalog {
         }
 
         public Model<?, ?> drop(String modelName) {
-            var model = getUntyped(modelName);
+            var model = getUntypedChecked(modelName);
             return userModels.remove(model.name());
         }
 
@@ -210,6 +273,10 @@ public final class ModelCatalog {
         }
 
         private Model<?, ?> getUntyped(String modelName) {
+            return userModels.get(modelName);
+        }
+
+        private Model<?, ?> getUntypedChecked(String modelName) {
             Model<?, ?> model = userModels.get(modelName);
             if (model == null) {
                 throw new NoSuchElementException(prettySuggestions(
