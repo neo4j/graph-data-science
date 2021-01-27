@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -40,7 +39,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class ModelStoreProcTest extends ModelProcBaseTest {
@@ -59,11 +58,6 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     void setUp() throws Exception {
         registerProcedures(ModelStoreProc.class);
         GdsEdition.instance().setToEnterpriseEdition();
-    }
-
-    @AfterEach
-    void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
     }
 
     @Test
@@ -89,7 +83,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
             List.of(
                 map(
                     "modelName", modelName,
-                    "storeMillis", greaterThan(0L)
+                    "storeMillis", greaterThanOrEqualTo(0L)
                 )
             )
         );

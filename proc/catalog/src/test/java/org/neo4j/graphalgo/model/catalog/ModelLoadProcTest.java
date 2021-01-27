@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -77,11 +76,6 @@ class ModelLoadProcTest extends ModelProcBaseTest {
         ModelCatalog.set(model1);
         runQuery("CALL gds.alpha.model.store('testModel1')");
         ((StoredModel) ModelCatalog.getUntyped(getUsername(), MODEL_NAME)).unload();
-    }
-
-    @AfterEach
-    void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
     }
 
     @Test

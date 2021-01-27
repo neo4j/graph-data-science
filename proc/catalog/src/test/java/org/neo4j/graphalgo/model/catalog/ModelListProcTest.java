@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -57,11 +56,6 @@ class ModelListProcTest extends ModelProcBaseTest {
     void setUp() throws Exception {
         registerProcedures(ModelListProc.class);
         GdsEdition.instance().setToEnterpriseEdition();
-    }
-
-    @AfterEach
-    void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
     }
 
     @ParameterizedTest
