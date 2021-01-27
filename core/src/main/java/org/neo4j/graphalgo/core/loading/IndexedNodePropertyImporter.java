@@ -170,7 +170,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 // we don't need to check the feature flag, as we set the concurrency to 1 in ScanningNodesImporter
                 if (concurrency > 1 && ParallelUtil.canRunInParallel(executorService)) {
                     // try to import in parallel, see if we can find a range
-                    var parallelJobs = prepareParallelScan(read, indexReadSession, indexCursor);
+                    var parallelJobs = prepareParallelScan(read, indexReadSession, indexCursor, propertyOffset);
                     if (parallelJobs != null) {
                         ParallelUtil.run(parallelJobs, executorService);
                         return;
@@ -203,16 +203,17 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private @Nullable List<IndexedNodePropertyImporter> prepareParallelScan(
         Read read,
         IndexReadSession indexReadSession,
-        NodeValueIndexCursor indexCursor
+        NodeValueIndexCursor indexCursor,
+        int propertyOffset
     ) throws Exception {
         var anyValue = IndexQuery.range(this.propertyId, ValueGroup.NUMBER);
         // find min value
         Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.ASCENDING, true, anyValue);
-        var min = findFirst(indexCursor);
+        var min = findFirst(indexCursor, propertyOffset);
         if (min.isPresent()) {
             // find max value
             Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.DESCENDING, true, anyValue);
-            var max = findFirst(indexCursor);
+            var max = findFirst(indexCursor, propertyOffset);
             if (max.isPresent()) {
                 var minValue = min.getAsDouble();
                 // nextUp to make the range exclusive
@@ -237,22 +238,16 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         return null;
     }
 
-    private OptionalDouble findFirst(NodeValueIndexCursor indexCursor) {
-        var numberOfProperties = indexCursor.numberOfProperties();
+    private OptionalDouble findFirst(NodeValueIndexCursor indexCursor, int propertyOffset) {
         while (indexCursor.next()) {
             if (indexCursor.hasValue()) {
                 var node = indexCursor.nodeReference();
                 var nodeId = idMap.toMappedNodeId(node);
                 if (nodeId >= 0) {
-                    for (int i = 0; i < numberOfProperties; i++) {
-                        var propertyKey = indexCursor.propertyKey(i);
-                        if (propertyId == propertyKey) {
-                            var propertyValue = indexCursor.propertyValue(i);
-                            var number = ((NumberValue) propertyValue).doubleValue();
-                            if (Double.isFinite(number)) {
-                                return OptionalDouble.of(number);
-                            }
-                        }
+                    var propertyValue = indexCursor.propertyValue(propertyOffset);
+                    var number = ((NumberValue) propertyValue).doubleValue();
+                    if (Double.isFinite(number)) {
+                        return OptionalDouble.of(number);
                     }
                 }
             }
