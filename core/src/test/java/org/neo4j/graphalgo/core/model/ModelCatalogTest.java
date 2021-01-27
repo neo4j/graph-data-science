@@ -54,6 +54,15 @@ class ModelCatalogTest {
     private static final String USERNAME = "testUser";
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().graphStore().schema();
 
+    private static final Model<String, TestTrainConfig> TEST_MODEL = Model.of(
+        USERNAME,
+        "testModel",
+        "testAlgo",
+        GRAPH_SCHEMA,
+        "modelData",
+        TestTrainConfig.of()
+    );
+
     @BeforeEach
     void setUp() {
         GdsEdition.instance().setToEnterpriseEdition();
@@ -92,16 +101,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowWhenTryingToGetOtherUsersModel() {
-        var model = Model.of(
-            "user1",
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testTrainData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         var ex = assertThrows(
             NoSuchElementException.class,
@@ -109,7 +109,7 @@ class ModelCatalogTest {
         );
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
-        assertNotNull(model.creationTime());
+        assertNotNull(TEST_MODEL.creationTime());
     }
 
     @Test
@@ -144,16 +144,7 @@ class ModelCatalogTest {
     void onlyAllowOneCatalogInCE() {
         GdsEdition.instance().setToCommunityEdition();
 
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testTrainData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         assertDoesNotThrow(() -> {
             ModelCatalog.set(Model.of(
@@ -219,16 +210,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelDataTypeMismatch() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testTrainData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
@@ -244,16 +226,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnModelConfigTypeMismatch() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testTrainData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
@@ -270,16 +243,7 @@ class ModelCatalogTest {
 
     @Test
     void checksIfModelExists() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
         assertFalse(ModelCatalog.exists(USERNAME, "bogusModel"));
@@ -288,16 +252,7 @@ class ModelCatalogTest {
 
     @Test
     void checksIfPublicModelExists() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
         ModelCatalog.publish(USERNAME, "testModel");
 
         assertThat(ModelCatalog.exists(USERNAME, "testModel")).isFalse();
@@ -309,15 +264,7 @@ class ModelCatalogTest {
 
     @Test
     void getModelType() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testData",
-            TestTrainConfig.of()
-        );
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         Optional<String> testModel = ModelCatalog.type(USERNAME, "testModel");
         assertFalse(testModel.isEmpty());
@@ -332,15 +279,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldDropModel() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         assertTrue(ModelCatalog.exists(USERNAME, "testModel"));
         ModelCatalog.drop(USERNAME, "testModel");
@@ -390,16 +329,7 @@ class ModelCatalogTest {
 
     @Test
     void shouldPublishModels() {
-        Model<String, TestTrainConfig> model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
         Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");
         assertEquals(1, ModelCatalog.list(USERNAME).size());
 
@@ -414,23 +344,14 @@ class ModelCatalogTest {
             .usingRecursiveComparison()
             .ignoringFields("sharedWith", "name")
             .withStrictTypeChecking()
-            .isEqualTo(model);
+            .isEqualTo(TEST_MODEL);
 
         assertEquals(List.of(Model.ALL_USERS), publicModel.sharedWith());
     }
 
     @Test
     void shouldOnlyBeDroppedByCreator() {
-        Model<String, TestTrainConfig> model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
         ModelCatalog.publish(USERNAME, "testModel");
 
         assertThatThrownBy(() -> ModelCatalog.drop("anotherUser", "testModel_public"))
@@ -448,20 +369,11 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowOnOverridingModels() {
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "modelData",
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
+        ModelCatalog.set(TEST_MODEL);
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.set(model)
+            () -> ModelCatalog.set(TEST_MODEL)
         );
 
         assertEquals("Model with name `testModel` already exists", ex.getMessage());
