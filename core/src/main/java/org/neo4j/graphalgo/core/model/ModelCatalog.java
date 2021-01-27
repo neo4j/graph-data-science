@@ -130,6 +130,10 @@ public final class ModelCatalog {
     }
 
     public static Model<?, ?> publish(String username, String modelName) {
+        if (GdsEdition.instance().isOnCommunityEdition()) {
+            throw new IllegalArgumentException("Community users can not publish models");
+        }
+
         Model<?, ?> model = getUntyped(username, modelName);
         // not published => publish it
         if (!model.sharedWith().contains(Model.ALL_USERS)) {

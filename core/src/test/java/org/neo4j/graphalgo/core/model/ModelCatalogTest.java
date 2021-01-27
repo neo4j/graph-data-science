@@ -379,6 +379,17 @@ class ModelCatalogTest {
         assertEquals("Model with name `testModel` already exists", ex.getMessage());
     }
 
+    @Test
+    void shouldThrowWhenPublishingOnCE() {
+        GdsEdition.instance().setToCommunityEdition();
+
+        ModelCatalog.set(TEST_MODEL);
+
+        assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Community users can not publish models");
+    }
+
     @ValueClass
     @Configuration("ModelCatalogTestTrainConfigImpl")
     @SuppressWarnings("immutables:subtype")
