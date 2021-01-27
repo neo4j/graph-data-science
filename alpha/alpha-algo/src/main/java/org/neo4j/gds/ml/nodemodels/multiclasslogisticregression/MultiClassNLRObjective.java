@@ -30,8 +30,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Objective;
+import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -65,14 +67,15 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
         String targetPropertyKey,
         Graph graph
     ) {
-        var classIdMap = makeClassIdMap(targetPropertyKey, graph);
+        var classIdMap = makeClassIdMap(graph, targetPropertyKey);
+        var weights = initWeights(graph, classIdMap, featureProperties);
         return MultiClassNLRData.builder()
             .classIdMap(classIdMap)
-            .weights(initWeights(featureProperties, classIdMap.originalIds().length))
+            .weights(weights)
             .build();
     }
 
-    private static LocalIdMap makeClassIdMap(String targetPropertyKey, Graph graph) {
+    private static LocalIdMap makeClassIdMap(Graph graph, String targetPropertyKey) {
         var classSet = new TreeSet<Long>();
         var classIdMap = new LocalIdMap();
         graph.forEachNode(nodeId -> {
@@ -83,8 +86,11 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
         return classIdMap;
     }
 
-    private static Weights<Matrix> initWeights(List<String> featureProperties, int numberOfClasses) {
-        var featuresPerClass = featureProperties.size() + 1;
+    private static Weights<Matrix> initWeights(Graph graph, LocalIdMap classIdMap, List<String> featureProperties) {
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+        featureExtractors.add(new BiasFeature());
+        var featuresPerClass = FeatureExtraction.featureCount(featureExtractors);
+        var numberOfClasses = classIdMap.size();
         return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 

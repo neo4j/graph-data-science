@@ -58,4 +58,9 @@ public class LocalIdMap {
         originalIds.forEach((Consumer<LongCursor>) longCursor -> list.add(longCursor.value));
         return list;
     }
+
+    public int size() {
+        assert originalIds.size() == toInternalId.size();
+        return originalIds.size();
+    }
 }
