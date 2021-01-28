@@ -114,64 +114,64 @@ class ModelCatalogTest {
 
     @Test
     void shouldStoreModelsPerType() {
-        GdsEdition.instance().setToCommunityEdition();
-
-        var model = Model.of(
-            USERNAME,
-            "testModel",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            "testTrainData",
-            TestTrainConfig.of()
-        );
-        var model2 = Model.of(
-            USERNAME,
-            "testModel2",
-            "testAlgo2",
-            GRAPH_SCHEMA,
-            1337L,
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model);
-        ModelCatalog.set(model2);
-
-        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
-        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
-    }
-
-    @Test
-    void onlyAllowOneCatalogInCE() {
-        GdsEdition.instance().setToCommunityEdition();
-
-        ModelCatalog.set(TEST_MODEL);
-
-        assertDoesNotThrow(() -> {
-            ModelCatalog.set(Model.of(
+        GdsEdition.instance().setToCommunityAndRun(() -> {
+            var model = Model.of(
+                USERNAME,
+                "testModel",
+                "testAlgo",
+                GRAPH_SCHEMA,
+                "testTrainData",
+                TestTrainConfig.of()
+            );
+            var model2 = Model.of(
                 USERNAME,
                 "testModel2",
                 "testAlgo2",
                 GRAPH_SCHEMA,
                 1337L,
                 TestTrainConfig.of()
-            ));
+            );
+
+            ModelCatalog.set(model);
+            ModelCatalog.set(model2);
+
+            assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
+            assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
         });
+    }
 
-        var model2 = Model.of(
-            USERNAME,
-            "testModel2",
-            "testAlgo",
-            GRAPH_SCHEMA,
-            1337L,
-            TestTrainConfig.of()
-        );
+    @Test
+    void onlyAllowOneCatalogInCE() {
+        GdsEdition.instance().setToCommunityAndRun(() -> {
+            ModelCatalog.set(TEST_MODEL);
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> ModelCatalog.set(model2)
-        );
+            assertDoesNotThrow(() -> {
+                ModelCatalog.set(Model.of(
+                    USERNAME,
+                    "testModel2",
+                    "testAlgo2",
+                    GRAPH_SCHEMA,
+                    1337L,
+                    TestTrainConfig.of()
+                ));
+            });
 
-        assertEquals("Community users can only store one model in the catalog", ex.getMessage());
+            var model2 = Model.of(
+                USERNAME,
+                "testModel2",
+                "testAlgo",
+                GRAPH_SCHEMA,
+                1337L,
+                TestTrainConfig.of()
+            );
+
+            IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> ModelCatalog.set(model2)
+            );
+
+            assertEquals("Community users can only store one model in the catalog", ex.getMessage());
+        });
     }
 
     private static Model<Integer, TestTrainConfig> testModel(String name) {
@@ -181,9 +181,21 @@ class ModelCatalogTest {
     static Stream<Arguments> modelInput() {
         return Stream.of(
             Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
-            Arguments.of(List.of("model0"), "model1", "Model with name `model1` does not exist. Did you mean `model0`?"),
-            Arguments.of(List.of("model0", "model1"), "model2", "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"),
-            Arguments.of(List.of("model0", "model1", "foobar"), "model2", "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?")
+            Arguments.of(
+                List.of("model0"),
+                "model1",
+                "Model with name `model1` does not exist. Did you mean `model0`?"
+            ),
+            Arguments.of(
+                List.of("model0", "model1"),
+                "model2",
+                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
+            ),
+            Arguments.of(
+                List.of("model0", "model1", "foobar"),
+                "model2",
+                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
+            )
         );
     }
 
@@ -381,13 +393,14 @@ class ModelCatalogTest {
 
     @Test
     void shouldThrowWhenPublishingOnCE() {
-        GdsEdition.instance().setToCommunityEdition();
+        GdsEdition.instance().setToCommunityAndRun(() -> {
+            ModelCatalog.set(TEST_MODEL);
 
-        ModelCatalog.set(TEST_MODEL);
-
-        assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Community users can not publish models");
+            assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining(
+                    "Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
+        });
     }
 
     @ValueClass
