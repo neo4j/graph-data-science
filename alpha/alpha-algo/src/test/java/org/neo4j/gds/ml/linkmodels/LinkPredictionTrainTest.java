@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -38,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class LinkPredictionTrainTest {
 
-    @GdlGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH =
         "(a:N {a: 0}), " +
         "(b:N {a: 0}), " +
@@ -55,14 +56,23 @@ class LinkPredictionTrainTest {
         "(m:N {a: 400}), " +
         "(n:N {a: 400}), " +
         "(o:N {a: 400}), " +
-        "(a)-[:TEST {label: 1}]->(b)-[:TEST {label: 1}]->(c)-[:IGNORE]->(a), " +
-        "(d)-[:TRAIN {label: 1}]->(e)-[:IGNORE]->(f)-[:TRAIN {label: 1}]->(d), " +
-        "(g)-[:IGNORE]->(h)-[:IGNORE]->(i)-[:IGNORE]->(g), " +
-        "(j)-[:IGNORE]->(k)-[:TEST {label: 1}]->(l)-[:IGNORE]->(j), " +
-        "(m)-[:TRAIN {label: 1}]->(n)-[:IGNORE]->(o)-[:IGNORE]->(m), " +
+        "(a)-[:TEST {label: 1}]->(b)-[:TEST {label: 1}]->(c)-[:TRAIN {label: 1}]->(a), " +
+        "(d)-[:TRAIN {label: 1}]->(e)-[:TRAIN {label: 1}]->(f)-[:TRAIN {label: 1}]->(d), " +
+        "(g)-[:TRAIN {label: 1}]->(h)-[:TRAIN {label: 1}]->(i)-[:TRAIN {label: 1}]->(g), " +
+        "(j)-[:TRAIN {label: 1}]->(k)-[:TEST {label: 1}]->(l)-[:TRAIN {label: 1}]->(j), " +
+        "(m)-[:TRAIN {label: 1}]->(n)-[:TRAIN {label: 1}]->(o)-[:TRAIN {label: 1}]->(m), " +
         "(a)-[:TRAIN {label: 0}]->(d), " +
-        "(b)-[:TRAIN {label: 0}]->(i), " +
-        "(i)-[:TRAIN {label: 0}]->(b), " +
+        "(b)-[:TRAIN {label: 0}]->(e), " +
+        "(c)-[:TRAIN {label: 0}]->(f), " +
+        "(d)-[:TRAIN {label: 0}]->(g), " +
+        "(e)-[:TRAIN {label: 0}]->(h), " +
+        "(f)-[:TRAIN {label: 0}]->(i), " +
+        "(g)-[:TRAIN {label: 0}]->(j), " +
+        "(h)-[:TRAIN {label: 0}]->(k), " +
+        "(i)-[:TRAIN {label: 0}]->(l), " +
+        "(j)-[:TRAIN {label: 0}]->(m), " +
+        "(k)-[:TRAIN {label: 0}]->(n), " +
+        "(l)-[:TRAIN {label: 0}]->(o), " +
         "(g)-[:TEST {label: 0}]->(m), " +
         "(l)-[:TEST {label: 0}]->(f), " +
         "(o)-[:TEST {label: 0}]->(a)";
@@ -103,10 +113,9 @@ class LinkPredictionTrainTest {
 
         assertThat(validationScores).hasSize(2);
         var actualWinnerParams = customInfo.bestParameters();
-        //TODO reenable after implementing AUCPR
-//        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
+        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
-//        assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
+        assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
     }
 }

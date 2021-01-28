@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.metrics;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 
 public enum LinkMetric {
@@ -28,6 +30,38 @@ public enum LinkMetric {
         SignedProbabilities signedProbabilities,
         double classRatio
     ) {
-        return 0.0;
+        if (signedProbabilities.positiveCount() == 0) return 0.0;
+        var auc = new MutableDouble(0);
+        var lastPrecision = new MutableDouble(
+            signedProbabilities.positiveCount()
+            / (signedProbabilities.positiveCount() + classRatio * signedProbabilities.negativeCount())
+        );
+        var lastRecall = new MutableDouble(1.0);
+        MutableLong positivesSeen = new MutableLong(0);
+        MutableLong negativesSeen = new MutableLong(0);
+        signedProbabilities.stream().forEach(signedProbability -> {
+            boolean isPositive = signedProbability > 0;
+            if (isPositive) {
+                positivesSeen.increment();
+            } else {
+                negativesSeen.increment();
+            }
+            var tp = signedProbabilities.positiveCount() - positivesSeen.getValue();
+            if (tp == 0) {
+                auc.add(lastPrecision.getValue() * (lastRecall.getValue()));
+                lastPrecision.setValue(0);
+                lastRecall.setValue(0);
+                return;
+            }
+            var fp = signedProbabilities.negativeCount() - negativesSeen.getValue();
+            var fn = positivesSeen.getValue();
+            //TODO: consider if BigDecimal division is needed for large graphs
+            var precision = tp/(tp + classRatio * fp);
+            var recall = tp/((double)(tp + fn));
+            auc.add(lastPrecision.getValue() * (lastRecall.getValue() - recall));
+            lastPrecision.setValue(precision);
+            lastRecall.setValue(recall);
+        });
+        return auc.getValue();
     }
 }
