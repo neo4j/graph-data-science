@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -63,15 +64,14 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         "(l:N {a: 300}), " +
         "(m:N {a: 400}), " +
         "(n:N {a: 400}), " +
-        "(o:N {a: 400}), " +
-        "(x)-[:T]->(x)";    // we need a relationship type to do an undirected projection
+        "(o:N {a: 400})";
 
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(LinkPredictionPredictMutateProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
-        runQuery(createQuery("g", UNDIRECTED));
+        runQueryWithResultConsumer(createQuery("g", UNDIRECTED), r -> System.out.println(r.resultAsString()));
     }
 
     private String createQuery(String graphName, Orientation orientation) {
@@ -79,7 +79,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             .call()
             .withNodeLabel("N")
             .withNodeProperty("a")
-            .withRelationshipType("T", orientation)
+            .withRelationshipType("IGNORED", RelationshipProjection.of("*", orientation))
             .graphCreate(graphName)
             .yields();
     }
@@ -117,29 +117,6 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         assertTrue(graphStore.hasRelationshipProperty(List.of(RelationshipType.of("PREDICTED")), "probability"));
     }
 
-    private void addModel(String modelName, GraphSchema graphSchema) {
-        ModelCatalog.set(Model.of(
-            getUsername(),
-            modelName,
-            LinkPredictionTrain.MODEL_TYPE,
-            graphSchema,
-            LinkLogisticRegressionData
-                .builder()
-                .weights(new Weights<>(new Matrix(new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)))
-                .linkFeatureCombiner(LinkFeatureCombiner.L2)
-                .nodePropertyKeys(List.of("a"))
-                .numberOfFeatures(2)
-                .build(),
-            ImmutableLinkPredictionTrainConfig.builder()
-                .modelName("model")
-                .validationFolds(1)
-                .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
-                .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
-                .featureProperties(List.of("a"))
-                .build()
-        ));
-    }
-
     @Test
     void requiresUndirectedGraph() {
         runQuery(createQuery("g2", Orientation.NATURAL));
@@ -155,5 +132,32 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             "})";
 
         assertError(trainQuery, "Procedure requires relationship projections to be UNDIRECTED.");
+    }
+
+    private void addModel(String modelName, GraphSchema graphSchema) {
+        ModelCatalog.set(Model.of(
+            getUsername(),
+            modelName,
+            LinkPredictionTrain.MODEL_TYPE,
+            graphSchema,
+            LinkLogisticRegressionData
+                .builder()
+                .weights(
+                    new Weights<>(new Matrix(
+                        new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)
+                    )
+                )
+                .linkFeatureCombiner(LinkFeatureCombiner.L2)
+                .nodePropertyKeys(List.of("a"))
+                .numberOfFeatures(2)
+                .build(),
+            ImmutableLinkPredictionTrainConfig.builder()
+                .modelName("model")
+                .validationFolds(1)
+                .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
+                .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
+                .featureProperties(List.of("a"))
+                .build()
+        ));
     }
 }
