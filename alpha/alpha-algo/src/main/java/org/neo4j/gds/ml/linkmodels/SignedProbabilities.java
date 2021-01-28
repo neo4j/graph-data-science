@@ -36,6 +36,8 @@ public class SignedProbabilities {
     private final Optional<TreeSet<Double>> tree;
     private final Optional<List<Double>> list;
     private final boolean isTree;
+    private long positiveCount;
+    private long negativeCount;
 
     private SignedProbabilities(Optional<TreeSet<Double>> tree, Optional<List<Double>> list, boolean isTree) {
         this.tree = tree;
@@ -51,6 +53,8 @@ public class SignedProbabilities {
     }
 
     public synchronized void add(double value) {
+        if (value > 0) positiveCount++;
+        else negativeCount++;
         if (isTree) {
             tree.get().add(value);
         } else {
@@ -65,5 +69,13 @@ public class SignedProbabilities {
             Collections.sort(list.get(), COMPARATOR);
             return list.get().stream().mapToDouble(d -> d);
         }
+    }
+
+    public long positiveCount() {
+        return positiveCount;
+    }
+
+    public long negativeCount() {
+        return negativeCount;
     }
 }
