@@ -178,11 +178,8 @@ public abstract class AlgoBaseProc<
         }
 
         var graph = graphAndAlgo.graph();
-        var algo = graphAndAlgo.algo();
 
-        if (graph.isEmpty()) {
-            algo.releaseAll(releaseAlgorithm);
-
+        if (graphAndAlgo.isGraphEmpty()) {
             return builder
                 .isGraphEmpty(true)
                 .graph(graph)
@@ -193,6 +190,8 @@ public abstract class AlgoBaseProc<
                 .algorithm(null)
                 .build();
         }
+
+        var algo = graphAndAlgo.algo();
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",
@@ -288,7 +287,9 @@ public abstract class AlgoBaseProc<
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         var graphAndAlgo = algorithmFactory().build(graphStore, config, tracker, log, progressTracker);
-        graphAndAlgo.algo().withTerminationFlag(terminationFlag);
+        if (graphAndAlgo.algo() != null) {
+            graphAndAlgo.algo().withTerminationFlag(terminationFlag);
+        }
         return graphAndAlgo;
     }
 

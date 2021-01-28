@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -56,6 +57,10 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
         var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
 
+        if (graph.isEmpty()) {
+            return GraphAndAlgo.of(graph, null);
+        }
+
         var algo = build(
             graph,
             configuration,
@@ -80,11 +85,16 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
     interface GraphAndAlgo<ALGORITHM extends Algorithm<ALGORITHM, ?>> {
 
         Graph graph();
-        ALGORITHM algo();
+
+        @Nullable ALGORITHM algo();
+
+        default boolean isGraphEmpty() {
+            return algo() == null;
+        }
 
         static <ALGORITHM extends Algorithm<ALGORITHM, ?>> GraphAndAlgo<ALGORITHM> of(
             Graph graph,
-            ALGORITHM algo
+            @Nullable ALGORITHM algo
         ) {
             return ImmutableGraphAndAlgo.of(graph, algo);
         }
