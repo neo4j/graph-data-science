@@ -78,11 +78,22 @@ public final class GdsEdition {
     }
 
     @TestOnly
-    public synchronized <E extends Exception> void setToEnterpriseAndRun(
+    public <E extends Exception> void setToEnterpriseAndRun(CheckedRunnable<E> code) throws E {
+        setToStateAndRun(State.ENTERPRISE, code);
+    }
+
+    @TestOnly
+    public <E extends Exception> void setToCommunityAndRun(CheckedRunnable<E> code) throws E {
+        setToStateAndRun(State.COMMUNITY, code);
+    }
+
+    @TestOnly
+    private synchronized <E extends Exception> void setToStateAndRun(
+        State state,
         CheckedRunnable<E> code
     ) throws E {
         var before = get();
-        set(State.ENTERPRISE);
+        set(state);
         try {
             code.checkedRun();
         } finally {

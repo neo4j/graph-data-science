@@ -116,11 +116,11 @@ class ModelLoadProcTest extends ModelProcBaseTest {
 
     @Test
     void doNotAllowToLoadModelsOnCE() {
-        GdsEdition.instance().setToCommunityEdition();
-
-        var query = "CALL gds.alpha.model.load('testModel1')";
-        assertThatThrownBy(() -> runQuery(query))
-            .getRootCause()
-            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
+        GdsEdition.instance().setToCommunityAndRun(() -> {
+            var query = "CALL gds.alpha.model.load('testModel1')";
+            assertThatThrownBy(() -> runQuery(query))
+                .getRootCause()
+                .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
+        });
     }
 }
