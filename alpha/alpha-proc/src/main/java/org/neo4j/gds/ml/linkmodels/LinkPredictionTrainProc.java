@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+
 public class LinkPredictionTrainProc extends
     TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig> {
 
@@ -69,6 +71,13 @@ public class LinkPredictionTrainProc extends
         CypherMapWrapper config
     ) {
         return LinkPredictionTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+    }
+
+    @Override
+    protected void validateConfigs(
+        GraphCreateConfig graphCreateConfig, LinkPredictionTrainConfig config
+    ) {
+        validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override

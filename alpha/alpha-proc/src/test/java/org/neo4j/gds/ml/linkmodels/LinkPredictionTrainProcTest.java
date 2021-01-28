@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -77,24 +78,26 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         registerProcedures(LinkPredictionTrainProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
-        var graphCreate = GdsCypher
+        runQuery(createQuery("g", UNDIRECTED));
+    }
+
+    private String createQuery(String graphName, Orientation orientation) {
+        return GdsCypher
             .call()
             .withNodeLabel("N")
             .withNodeProperty("a")
             .withRelationshipType(
                 "TRAIN",
-                RelationshipProjection.of("TRAIN", UNDIRECTED)
+                RelationshipProjection.of("TRAIN", orientation)
                     .withProperties(PropertyMappings.of(PropertyMapping.of("label")))
             )
             .withRelationshipType(
                 "TEST",
-                RelationshipProjection.of("TEST", UNDIRECTED)
+                RelationshipProjection.of("TEST", orientation)
                     .withProperties(PropertyMappings.of(PropertyMapping.of("label")))
             )
-            .graphCreate("g")
+            .graphCreate(graphName)
             .yields();
-
-        runQuery(graphCreate);
     }
 
     @AfterEach
@@ -144,6 +147,23 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         var model = ModelCatalog.list(getUsername(), "model");
         assertThat(model.algoType()).isEqualTo("Link Prediction");
         assertThat(model.customInfo().toMap()).containsKeys("metrics", "bestParameters");
+    }
+
+    @Test
+    void requiresUndirectedGraph() {
+        runQuery(createQuery("g2", Orientation.NATURAL));
+
+        var trainQuery =
+            "CALL gds.alpha.ml.linkPrediction.train('g2', { " +
+            "  trainRelationshipType: 'TRAIN', " +
+            "  testRelationshipType: 'TEST', " +
+            "  validationFolds: 2, " +
+            "  modelName: 'model', " +
+            "  featureProperties: ['a'], " +
+            "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
+            "})";
+
+        assertError(trainQuery, "Procedure requires relationship projections to be UNDIRECTED.");
     }
 
 }
