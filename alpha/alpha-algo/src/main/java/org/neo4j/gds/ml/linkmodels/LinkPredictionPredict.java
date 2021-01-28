@@ -108,15 +108,10 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         @Override
         public void accept(Batch batch) {
             for (long sourceId : batch.nodeIds()) {
-                var neighbors = new HashSet<Long>();
-                graph.forEachRelationship(
-                    sourceId, (src, trg) -> {
-                        neighbors.add(trg);
-                        return true;
-                    }
-                );
+                var neighbors = neighborSet(sourceId);
                 // since graph is undirected, only process pairs where sourceId < targetId
-                LongStream.range(sourceId + 1, graph.nodeCount()).forEach(targetId -> {
+                var smallestTarget = sourceId + 1;
+                LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (neighbors.contains(targetId)) return;
                         var probability = predictor.predictedProbability(graph, sourceId, targetId);
                         if (probability < threshold) return;
@@ -125,6 +120,17 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
                 );
             }
             progressLogger.logProgress(batch.size());
+        }
+
+        private HashSet<Long> neighborSet(long sourceId) {
+            var neighbors = new HashSet<Long>();
+            graph.forEachRelationship(
+                sourceId, (src, trg) -> {
+                    neighbors.add(trg);
+                    return true;
+                }
+            );
+            return neighbors;
         }
     }
 }

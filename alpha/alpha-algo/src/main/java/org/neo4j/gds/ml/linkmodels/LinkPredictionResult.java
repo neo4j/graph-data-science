@@ -39,7 +39,6 @@ public class LinkPredictionResult {
     private final BoundedLongLongPriorityQueue queue;
 
     public LinkPredictionResult(int top) {
-        //TODO validate
         assert top > 0;
 
         this.queue = BoundedLongLongPriorityQueue.max(top);
