@@ -41,7 +41,7 @@ public class ModelDeleteProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.model.delete", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelDeleteResult> store(@Name(value = "modelName") String modelName) throws IOException {
+    public Stream<ModelDeleteResult> delete(@Name(value = "modelName") String modelName) throws IOException {
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (!(model instanceof StoredModel)) {

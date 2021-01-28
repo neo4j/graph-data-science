@@ -39,7 +39,7 @@ public class ModelLoadProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.model.load", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<ModelLoadResult> store(@Name(value = "modelName") String modelName) throws IOException {
+    public Stream<ModelLoadResult> load(@Name(value = "modelName") String modelName) throws IOException {
         if (!GdsEdition.instance().isOnEnterpriseEdition()) {
             throw new RuntimeException("Loading a model is only available with the Graph Data Science library Enterprise Edition.");
         }
