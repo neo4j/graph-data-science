@@ -42,7 +42,7 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
         ProgressEventTracker eventTracker
     );
 
-    default GraphAndAlgo<ALGO> build(
+    default GraphAndAlgorithm<ALGO> build(
         GraphStore graphStore,
         CONFIG configuration,
         AllocationTracker tracker,
@@ -58,7 +58,7 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
 
         if (graph.isEmpty()) {
-            return GraphAndAlgo.of(graph, null);
+            return GraphAndAlgorithm.of(graph, null);
         }
 
         var algo = build(
@@ -68,7 +68,7 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
             log,
             eventTracker
         );
-        return GraphAndAlgo.of(graph, algo);
+        return GraphAndAlgorithm.of(graph, algo);
     }
 
     /**
@@ -82,21 +82,21 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
     MemoryEstimation memoryEstimation(CONFIG configuration);
 
     @ValueClass
-    interface GraphAndAlgo<ALGORITHM extends Algorithm<ALGORITHM, ?>> {
+    interface GraphAndAlgorithm<ALGORITHM extends Algorithm<ALGORITHM, ?>> {
 
         Graph graph();
 
-        @Nullable ALGORITHM algo();
+        @Nullable ALGORITHM algorithm();
 
         default boolean isGraphEmpty() {
-            return algo() == null;
+            return algorithm() == null;
         }
 
-        static <ALGORITHM extends Algorithm<ALGORITHM, ?>> GraphAndAlgo<ALGORITHM> of(
+        static <ALGORITHM extends Algorithm<ALGORITHM, ?>> GraphAndAlgorithm<ALGORITHM> of(
             Graph graph,
             @Nullable ALGORITHM algo
         ) {
-            return ImmutableGraphAndAlgo.of(graph, algo);
+            return ImmutableGraphAndAlgorithm.of(graph, algo);
         }
     }
 }

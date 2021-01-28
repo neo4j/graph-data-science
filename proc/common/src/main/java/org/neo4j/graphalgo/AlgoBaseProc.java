@@ -170,16 +170,16 @@ public abstract class AlgoBaseProc<
         validateMemoryUsageIfImplemented(config);
 
         GraphStore graphStore;
-        AlgorithmFactory.GraphAndAlgo<ALGO> graphAndAlgo;
+        AlgorithmFactory.GraphAndAlgorithm<ALGO> graphAndAlgorithm;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             graphStore = getOrCreateGraphStore(input);
-            graphAndAlgo = buildGraphAndAlgo(graphStore, config, tracker);
+            graphAndAlgorithm = buildGraphAndAlgo(graphStore, config, tracker);
         }
 
-        var graph = graphAndAlgo.graph();
+        var graph = graphAndAlgorithm.graph();
 
-        if (graphAndAlgo.isGraphEmpty()) {
+        if (graphAndAlgorithm.isGraphEmpty()) {
             return builder
                 .isGraphEmpty(true)
                 .graph(graph)
@@ -191,7 +191,7 @@ public abstract class AlgoBaseProc<
                 .build();
         }
 
-        var algo = graphAndAlgo.algo();
+        var algo = graphAndAlgorithm.algorithm();
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",
@@ -280,15 +280,15 @@ public abstract class AlgoBaseProc<
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
     }
 
-    private AlgorithmFactory.GraphAndAlgo<ALGO> buildGraphAndAlgo(
+    private AlgorithmFactory.GraphAndAlgorithm<ALGO> buildGraphAndAlgo(
         final GraphStore graphStore,
         final CONFIG config,
         final AllocationTracker tracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
         var graphAndAlgo = algorithmFactory().build(graphStore, config, tracker, log, progressTracker);
-        if (graphAndAlgo.algo() != null) {
-            graphAndAlgo.algo().withTerminationFlag(terminationFlag);
+        if (graphAndAlgo.algorithm() != null) {
+            graphAndAlgo.algorithm().withTerminationFlag(terminationFlag);
         }
         return graphAndAlgo;
     }
