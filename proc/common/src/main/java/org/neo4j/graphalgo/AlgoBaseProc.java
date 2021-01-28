@@ -23,6 +23,7 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -141,10 +142,6 @@ public abstract class AlgoBaseProc<
         return Tuples.pair(config, graphName);
     }
 
-    public Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
-        return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
-    }
-
     protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
 
     protected void validateGraphStore(GraphStore graphStore) {}
@@ -173,14 +170,19 @@ public abstract class AlgoBaseProc<
         validateMemoryUsageIfImplemented(config);
 
         GraphStore graphStore;
-        Graph graph;
+        AlgorithmFactory.GraphAndAlgo<ALGO> graphAndAlgo;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::createMillis)) {
             graphStore = getOrCreateGraphStore(input);
-            graph = createGraph(graphStore, config);
+            graphAndAlgo = buildGraphAndAlgo(graphStore, config, tracker);
         }
 
+        var graph = graphAndAlgo.graph();
+        var algo = graphAndAlgo.algo();
+
         if (graph.isEmpty()) {
+            algo.releaseAll(releaseAlgorithm);
+
             return builder
                 .isGraphEmpty(true)
                 .graph(graph)
@@ -191,8 +193,6 @@ public abstract class AlgoBaseProc<
                 .algorithm(null)
                 .build();
         }
-
-        ALGO algo = newAlgorithm(graph, config, tracker);
 
         ALGO_RESULT result = runWithExceptionLogging(
             "Computation failed",
@@ -281,26 +281,15 @@ public abstract class AlgoBaseProc<
         return new MemoryTreeWithDimensions(memoryTree, estimateDimensions);
     }
 
-    private ALGO newAlgorithm(
-        final Graph graph,
+    private AlgorithmFactory.GraphAndAlgo<ALGO> buildGraphAndAlgo(
+        final GraphStore graphStore,
         final CONFIG config,
         final AllocationTracker tracker
     ) {
         TerminationFlag terminationFlag = TerminationFlag.wrap(transaction);
-        return algorithmFactory()
-            .build(graph, config, tracker, log, progressTracker)
-            .withTerminationFlag(terminationFlag);
-    }
-
-    private Graph createGraph(GraphStore graphStore, CONFIG config) {
-        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
-            : Optional.empty();
-
-        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
-
-        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
+        var graphAndAlgo = algorithmFactory().build(graphStore, config, tracker, log, progressTracker);
+        graphAndAlgo.algo().withTerminationFlag(terminationFlag);
+        return graphAndAlgo;
     }
 
     protected GraphStore getOrCreateGraphStore(Pair<CONFIG, Optional<String>> configAndName) {
@@ -338,6 +327,20 @@ public abstract class AlgoBaseProc<
         }
 
         tryValidateMemoryUsage(config, this::memoryEstimation);
+    }
+
+    @TestOnly
+    public Graph createGraph(Pair<CONFIG, Optional<String>> configAndName) {
+        GraphStore graphStore = getOrCreateGraphStore(configAndName);
+        CONFIG config = configAndName.getOne();
+        Optional<String> weightProperty = config instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            : Optional.empty();
+
+        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
+
+        return graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
     }
 
     @ValueClass

@@ -19,12 +19,17 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
+
+import java.util.Optional;
 
 public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
 
@@ -36,6 +41,31 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
         ProgressEventTracker eventTracker
     );
 
+    default GraphAndAlgo<ALGO> build(
+        GraphStore graphStore,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
+        Optional<String> weightProperty = configuration instanceof RelationshipWeightConfig
+            ? Optional.ofNullable(((RelationshipWeightConfig) configuration).relationshipWeightProperty())
+            : Optional.empty();
+
+        var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
+        var relationshipTypes = configuration.internalRelationshipTypes(graphStore);
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
+
+        var algo = build(
+            graph,
+            configuration,
+            tracker,
+            log,
+            eventTracker
+        );
+        return GraphAndAlgo.of(graph, algo);
+    }
+
     /**
      * Returns an estimation about the memory consumption of that algorithm. The memory estimation can be used to
      * compute the actual consumption depending on {@link org.neo4j.graphalgo.core.GraphDimensions} and concurrency.
@@ -45,4 +75,18 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
      * @see MemoryEstimation#estimate(org.neo4j.graphalgo.core.GraphDimensions, int)
      */
     MemoryEstimation memoryEstimation(CONFIG configuration);
+
+    @ValueClass
+    interface GraphAndAlgo<ALGORITHM extends Algorithm<ALGORITHM, ?>> {
+
+        Graph graph();
+        ALGORITHM algo();
+
+        static <ALGORITHM extends Algorithm<ALGORITHM, ?>> GraphAndAlgo<ALGORITHM> of(
+            Graph graph,
+            ALGORITHM algo
+        ) {
+            return ImmutableGraphAndAlgo.of(graph, algo);
+        }
+    }
 }
