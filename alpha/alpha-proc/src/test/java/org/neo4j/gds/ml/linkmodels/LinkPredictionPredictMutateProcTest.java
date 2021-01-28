@@ -105,9 +105,9 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             "})";
 
         assertCypherResult(query, List.of(Map.of(
-            "createMillis", greaterThan(0L),
-            "computeMillis", greaterThan(0L),
-            "mutateMillis", greaterThan(0L),
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
             "postProcessingMillis", 0L,
             // we are writing undirected rels so we get 2x topN
             "relationshipsWritten", 18L,
