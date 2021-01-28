@@ -213,17 +213,13 @@ public class LinkPredictionTrain
     ) {
         var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
-        // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
-        // the consumer internally remaps to original nodeIds before prediction
-        var consumer = new SignedProbabilitiesCollector(
-            evaluationGraph,
+        var queue = new HugeBatchQueue(evaluationSet);
+        queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
+            evaluationGraph.concurrentCopy(),
             predictor,
             signedProbabilities,
             progressLogger
-        );
-
-        var queue = new HugeBatchQueue(evaluationSet);
-        queue.parallelConsume(consumer, config.concurrency());
+        ));
 
         return config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
