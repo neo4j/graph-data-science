@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -78,7 +79,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             .call()
             .withNodeLabel("N")
             .withNodeProperty("a")
-            .withRelationshipType("T", UNDIRECTED)
+            .withRelationshipType("T", orientation)
             .graphCreate(graphName)
             .yields();
     }
@@ -93,26 +94,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         var graphStore = GraphStoreCatalog
             .get(getUsername(), db.databaseId(), "g")
             .graphStore();
-        ModelCatalog.set(Model.of(
-            getUsername(),
-            "model",
-            LinkPredictionTrain.MODEL_TYPE,
-            graphStore.schema(),
-            LinkLogisticRegressionData
-                .builder()
-                .weights(new Weights<>(new Matrix(new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)))
-                .linkFeatureCombiner(LinkFeatureCombiner.L2)
-                .nodePropertyKeys(List.of("a"))
-                .numberOfFeatures(2)
-                .build(),
-            ImmutableLinkPredictionTrainConfig.builder()
-                .modelName("model")
-                .validationFolds(1)
-                .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
-                .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
-                .featureProperties(List.of("a"))
-                .build()
-        ));
+        addModel("model", graphStore.schema());
 
         var query =
             "CALL gds.alpha.ml.linkPrediction.predict.mutate('g', { " +
@@ -133,5 +115,45 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         )));
 
         assertTrue(graphStore.hasRelationshipProperty(List.of(RelationshipType.of("PREDICTED")), "probability"));
+    }
+
+    private void addModel(String modelName, GraphSchema graphSchema) {
+        ModelCatalog.set(Model.of(
+            getUsername(),
+            modelName,
+            LinkPredictionTrain.MODEL_TYPE,
+            graphSchema,
+            LinkLogisticRegressionData
+                .builder()
+                .weights(new Weights<>(new Matrix(new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)))
+                .linkFeatureCombiner(LinkFeatureCombiner.L2)
+                .nodePropertyKeys(List.of("a"))
+                .numberOfFeatures(2)
+                .build(),
+            ImmutableLinkPredictionTrainConfig.builder()
+                .modelName("model")
+                .validationFolds(1)
+                .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
+                .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
+                .featureProperties(List.of("a"))
+                .build()
+        ));
+    }
+
+    @Test
+    void requiresUndirectedGraph() {
+        runQuery(createQuery("g2", Orientation.NATURAL));
+
+        addModel("model", GraphSchema.empty());
+
+        var trainQuery =
+            "CALL gds.alpha.ml.linkPrediction.predict.mutate('g2', { " +
+            "  mutateRelationshipType: 'PREDICTED', " +
+            "  modelName: 'model', " +
+            "  threshold: 0.5, " +
+            "  topN: 9" +
+            "})";
+
+        assertError(trainQuery, "Procedure requires relationship projections to be UNDIRECTED.");
     }
 }
