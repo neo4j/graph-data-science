@@ -137,9 +137,6 @@ def publicModules = [
     ':doc',
 ]
 
-
-
-
 allprojects { proj ->
     plugins.withType(JavaLibraryPlugin) {
         proj.apply plugin: 'com.github.hierynomus.license'
