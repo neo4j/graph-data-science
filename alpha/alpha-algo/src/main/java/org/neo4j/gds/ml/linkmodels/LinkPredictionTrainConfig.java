@@ -56,7 +56,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     @Configuration.Ignore
     @Value.Default
     default List<LinkMetric> metrics() {
-        return List.of(LinkMetric.F1_SCORE);
+        return List.of(LinkMetric.AUCPR);
     }
 
     static LinkPredictionTrainConfig of(

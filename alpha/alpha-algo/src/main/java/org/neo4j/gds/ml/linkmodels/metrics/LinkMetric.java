@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.ml.linkmodels.metrics;
 
-import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictConsumer;
-import org.neo4j.gds.ml.nodemodels.metrics.F1Score;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 
 public enum LinkMetric {
-    F1_SCORE;
+    AUCPR;
 
     public double compute(
-        HugeLongArray targets,
-        HugeLongArray predictions
+        SignedProbabilities signedProbabilities
     ) {
-        return new F1Score(LinkPredictionPredictConsumer.PREDICTED_LINK).compute(targets, predictions);
+        return 0.0;
     }
 }

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
@@ -38,7 +37,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.logging.Log;
 
@@ -203,7 +201,7 @@ public class LinkPredictionTrain
 
     private Map<LinkMetric, List<ModelStats>> initStatsMap() {
         var statsMap = new HashMap<LinkMetric, List<ModelStats>>();
-        statsMap.put(LinkMetric.F1_SCORE, new ArrayList<>());
+        statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
     }
 
@@ -212,32 +210,23 @@ public class LinkPredictionTrain
         HugeLongArray evaluationSet,
         LinkLogisticRegressionPredictor predictor
     ) {
-        var localTargets = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
-        new HugeBatchQueue(evaluationSet).parallelConsume(new LinkPredictionTargetConsumer(
-            evaluationGraph,
-            localTargets
-        ), 1);
-
-        var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
-        var predictedProbabilities = HugeDoubleArray.newArray(evaluationSet.size(), allocationTracker);
+        var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
         // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
         // the consumer internally remaps to original nodeIds before prediction
-        var consumer = new LinkPredictionPredictConsumer(
+        var consumer = new SignedProbabilitiesCollector(
             evaluationGraph,
-            evaluationSet::get,
             predictor,
-            predictedProbabilities,
-            predictedClasses,
+            signedProbabilities,
             progressLogger
         );
 
-        var queue = new BatchQueue(evaluationSet.size());
+        var queue = new HugeBatchQueue(evaluationSet);
         queue.parallelConsume(consumer, config.concurrency());
 
         return config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(localTargets, predictedClasses)
+            metric -> metric.compute(signedProbabilities)
         ));
     }
 
