@@ -45,7 +45,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModelStoreProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Store the selected model to disk";
+    private static final String DESCRIPTION = "Store the selected model to disk.";
 
     @Procedure(name = "gds.alpha.model.store", mode = READ)
     @Description(DESCRIPTION)
@@ -95,7 +95,7 @@ public class ModelStoreProc extends BaseProc {
         try {
             Files.createDirectory(modelDir);
         } catch (IOException e) {
-            throw new RuntimeException("Could not create model store directory", e);
+            throw new RuntimeException("Could not create model store directory.", e);
         }
 
         return modelDir;

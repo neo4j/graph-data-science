@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +40,7 @@ public class ModelDropProc extends ModelCatalogProc {
         var model = ModelCatalog.getUntyped(username(), modelName);
 
         if (model.stored()) {
-            ((StoredModel) model).unload();
+            model.unload();
         } else {
             ModelCatalog.drop(username(), modelName);
         }

@@ -66,6 +66,7 @@ public class StoredModel implements Model<Object, ModelConfig> {
         this.fileLocation = storeDir;
     }
 
+    @Override
     public void load() {
         if (loaded) {
             return;
@@ -79,6 +80,7 @@ public class StoredModel implements Model<Object, ModelConfig> {
         this.loaded = true;
     }
 
+    @Override
     public void unload() {
         this.data = null;
         this.loaded = false;

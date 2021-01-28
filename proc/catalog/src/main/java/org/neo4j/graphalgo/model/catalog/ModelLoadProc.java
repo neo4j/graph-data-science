@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
-import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -35,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModelLoadProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Load a stored model from disk";
+    private static final String DESCRIPTION = "Load a stored model into main memory.";
 
     @Procedure(name = "gds.alpha.model.load", mode = READ)
     @Description(DESCRIPTION)
@@ -46,12 +45,12 @@ public class ModelLoadProc extends BaseProc {
             return Stream.of(new ModelLoadResult(modelName, 0));
         }
 
-        if (!(model instanceof StoredModel)) {
+        if (!model.stored()) {
             throw new IllegalArgumentException(formatWithLocale("The model %s is not stored.", modelName));
         }
 
         var timer = ProgressTimer.start();
-        ((StoredModel) model).load();
+        model.load();
         timer.stop();
 
         return Stream.of(new ModelLoadResult(modelName, timer.getDuration()));

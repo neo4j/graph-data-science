@@ -66,6 +66,18 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         return false;
     }
 
+    @Value.Default
+    @Value.Derived
+    default void load() {
+
+    }
+
+    @Value.Default
+    @Value.Derived
+    default void unload() {
+        throw new RuntimeException("Only stored models can be unloaded.");
+    }
+
     default Model<DATA, CONFIG> publish() {
         return ImmutableModel.<DATA, CONFIG>builder()
             .from(this)

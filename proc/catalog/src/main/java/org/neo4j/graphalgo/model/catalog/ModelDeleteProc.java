@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ModelDeleteProc extends BaseProc {
 
-    private static final String DESCRIPTION = "Deletes a stored model from disk";
+    private static final String DESCRIPTION = "Deletes a stored model from disk.";
 
     @Procedure(name = "gds.alpha.model.delete", mode = READ)
     @Description(DESCRIPTION)
