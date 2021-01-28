@@ -19,8 +19,10 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.junit.jupiter.api.AfterEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Map;
@@ -42,4 +44,9 @@ class ModelProcBaseTest extends BaseProcTest {
             )
         )
     );
+
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
+    }
 }

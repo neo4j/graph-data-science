@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 
-class PersistedModelTest {
+class StoredModelTest {
 
     private static final String MODEL = "model";
     private static final String USER = "user";
@@ -55,7 +55,7 @@ class PersistedModelTest {
     private Model<ModelData, GraphSageTrainConfig> model;
 
     @BeforeEach
-    void persistModel() throws IOException {
+    void storeModel() throws IOException {
         GraphSageTrainConfig trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL)
             .relationshipWeightProperty("weight")
@@ -78,53 +78,53 @@ class PersistedModelTest {
 
     @Test
     void testLoadingMetaData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir);
+        var storedModel = new StoredModel(tempDir);
 
-        assertThat(persistedModel.creator()).isEqualTo(model.creator());
-        assertThat(persistedModel.name()).isEqualTo(model.name());
-        assertThat(persistedModel.trainConfig()).isEqualTo(model.trainConfig());
-        assertThat(persistedModel.creationTime()).isEqualTo(model.creationTime());
-        assertThat(persistedModel.graphSchema()).isEqualTo(model.graphSchema());
-        assertThat(persistedModel.algoType()).isEqualTo(model.algoType());
-        assertThat(persistedModel.persisted()).isTrue();
-        assertThat(persistedModel.loaded()).isFalse();
+        assertThat(storedModel.creator()).isEqualTo(model.creator());
+        assertThat(storedModel.name()).isEqualTo(model.name());
+        assertThat(storedModel.trainConfig()).isEqualTo(model.trainConfig());
+        assertThat(storedModel.creationTime()).isEqualTo(model.creationTime());
+        assertThat(storedModel.graphSchema()).isEqualTo(model.graphSchema());
+        assertThat(storedModel.algoType()).isEqualTo(model.algoType());
+        assertThat(storedModel.stored()).isTrue();
+        assertThat(storedModel.loaded()).isFalse();
     }
 
     @Test
     void testLoadingData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir);
+        var storedModel = new StoredModel(tempDir);
 
-        persistedModel.load();
+        storedModel.load();
 
-        assertThat(persistedModel.loaded()).isTrue();
-        assertThat(persistedModel.data()).isInstanceOf(ModelData.class);
-        var loadedModelData = (ModelData) persistedModel.data();
+        assertThat(storedModel.loaded()).isTrue();
+        assertThat(storedModel.data()).isInstanceOf(ModelData.class);
+        var loadedModelData = (ModelData) storedModel.data();
         assertThat(loadedModelData.layers()).isEmpty();
         assertThat(loadedModelData.featureFunction()).isExactlyInstanceOf(SingleLabelFeatureFunction.class);
     }
 
     @Test
     void testUnLoadingData() throws IOException {
-        var persistedModel = new PersistedModel(tempDir);
+        var storedModel = new StoredModel(tempDir);
 
-        persistedModel.load();
-        persistedModel.unload();
+        storedModel.load();
+        storedModel.unload();
 
-        assertThat(persistedModel.loaded()).isFalse();
-        assertThatThrownBy(persistedModel::data).hasMessage("The model 'model' is currently not loaded.");
+        assertThat(storedModel.loaded()).isFalse();
+        assertThatThrownBy(storedModel::data).hasMessage("The model 'model' is currently not loaded.");
     }
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    void testPublishPersistedModel(boolean loadData) throws IOException {
-        var persistedModel = new PersistedModel(tempDir);
+    void testPublishStoredModel(boolean loadData) throws IOException {
+        var persistedModel = new StoredModel(tempDir);
         if (loadData) {
             persistedModel.load();
         }
         persistedModel.publish();
         assertTrue(Files.exists(tempDir.resolve(META_DATA_FILE)));
 
-        PersistedModel publishedModel = new PersistedModel(tempDir);
+        StoredModel publishedModel = new StoredModel(tempDir);
         assertEquals(model.name() + "_public", publishedModel.name());
         assertThat(publishedModel.sharedWith()).containsExactlyInAnyOrder(Model.ALL_USERS);
 

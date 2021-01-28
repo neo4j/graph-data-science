@@ -33,10 +33,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-public class ModelPersistenceUtil {
+public final class ModelStoreUtil {
 
-    public static Path createAndPersistModel(
-        Path persistenceDir,
+    public static Path createAndStoreModel(
+        Path storeDir,
         String modelName,
         String userName
     ) throws IOException {
@@ -58,11 +58,13 @@ public class ModelPersistenceUtil {
             trainConfig
         );
 
-        var resolvedPersistenceDir = persistenceDir.resolve(UUID.randomUUID().toString());
-        Files.createDirectory(resolvedPersistenceDir);
+        var resolvedStoreDir = storeDir.resolve(UUID.randomUUID().toString());
+        Files.createDirectory(resolvedStoreDir);
 
-        ModelToFileExporter.toFile(resolvedPersistenceDir, model);
+        ModelToFileExporter.toFile(resolvedStoreDir, model);
 
-        return resolvedPersistenceDir;
+        return resolvedStoreDir;
     }
+
+    private ModelStoreUtil() {}
 }

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.model.PersistedModel;
+import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -38,10 +38,10 @@ import java.nio.file.Path;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ServiceProvider
-public final class PersistedModelsExtension extends ExtensionFactory<PersistedModelsExtension.Dependencies> {
+public final class StoredModelsExtension extends ExtensionFactory<StoredModelsExtension.Dependencies> {
 
-    public PersistedModelsExtension() {
-        super(ExtensionType.DATABASE, "gds.enterprise");
+    public StoredModelsExtension() {
+        super(ExtensionType.DATABASE, "gds.model.store");
     }
 
     @Override
@@ -53,16 +53,16 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
                     .logService()
                     .getUserLog(getClass());
 
-                var persistencePath = dependencies.config().get(ModelPersistenceSettings.model_persistence_location);
+                var storePath = dependencies.config().get(ModelStoreSettings.model_store_location);
 
-                if (!validatePath(persistencePath, userLog)) {
+                if (!validatePath(storePath, userLog)) {
                     return;
                 }
 
                 try {
                     Files
-                        .list(persistencePath)
-                        .forEach(persistedModelPath -> openPersistedModel(userLog, persistedModelPath));
+                        .list(storePath)
+                        .forEach(persistedModelPath -> openStoredModel(userLog, persistedModelPath));
                 } catch (IOException e) {
                     userLog.error("Could not list persisted model files", e);
                 }
@@ -74,17 +74,17 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
         };
     }
 
-    static void openPersistedModel(Log log, Path persistedModelPath) {
-        if (Files.isDirectory(persistedModelPath)) {
-            PersistedModel model;
+    static void openStoredModel(Log log, Path storedModelPath) {
+        if (Files.isDirectory(storedModelPath)) {
+            StoredModel model;
             try {
-                model = new PersistedModel(persistedModelPath);
+                model = new StoredModel(storedModelPath);
                 if (ModelCatalog.exists(model.creator(), model.name())) {
                     log.error(
-                        "Cannot open persisted model %s for user %s from %s. A model with the same name already exists for that user.",
+                        "Cannot open stored model %s for user %s from %s. A model with the same name already exists for that user.",
                         model.name(),
                         model.creator(),
-                        persistedModelPath
+                        storedModelPath
                     );
                 } else {
                     ModelCatalog.set(model);
@@ -93,30 +93,30 @@ public final class PersistedModelsExtension extends ExtensionFactory<PersistedMo
                 log.error(
                     formatWithLocale(
                         "Could not load model stored at %s",
-                        persistedModelPath
+                        storedModelPath
                     ), e
                 );
             }
         }
     }
 
-    static boolean validatePath(Path persistencePath, Log log) {
-        if (persistencePath == null) {
+    static boolean validatePath(Path storePath, Log log) {
+        if (storePath == null) {
             return false;
         }
 
-        if (!Files.exists(persistencePath)) {
+        if (!Files.exists(storePath)) {
             log.error(
-                "The configured model persistence path '%s' does not exist. Cannot load or persist models.",
-                persistencePath
+                "The configured model store path '%s' does not exist. Cannot load or store models.",
+                storePath
             );
             return false;
         }
 
-        if (!Files.isDirectory(persistencePath)) {
+        if (!Files.isDirectory(storePath)) {
             log.error(
-                "The configured model persistence path '%s' is not a directory. Cannot load or persist models.",
-                persistencePath
+                "The configured model store path '%s' is not a directory. Cannot load or store models.",
+                storePath
             );
             return false;
         }

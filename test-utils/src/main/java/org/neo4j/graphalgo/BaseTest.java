@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo;
 
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
@@ -303,5 +304,10 @@ public abstract class BaseTest {
                 });
             }
         });
+    }
+
+    static {
+        // configure AssertJ to consider 'name()' as a method for the property 'name' instead of just 'getName()'
+        Assertions.setExtractBareNamePropertyMethods(true);
     }
 }

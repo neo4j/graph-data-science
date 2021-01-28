@@ -41,6 +41,8 @@ abstract class ModelCatalogProc extends BaseProc {
         public final Map<String, Object> modelInfo;
         public final Map<String, Object> trainConfig;
         public final Map<String, Object> graphSchema;
+        public final boolean loaded;
+        public final boolean stored;
         public final ZonedDateTime creationTime;
 
         public ModelResult(Model<?, ?> model) {
@@ -57,6 +59,8 @@ abstract class ModelCatalogProc extends BaseProc {
 
             trainConfig = model.trainConfig().toMap();
             graphSchema = model.graphSchema().toMap();
+            loaded = model.loaded();
+            stored = model.stored();
             creationTime = model.creationTime();
         }
     }

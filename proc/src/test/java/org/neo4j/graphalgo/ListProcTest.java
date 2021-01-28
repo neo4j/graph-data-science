@@ -67,6 +67,12 @@ import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.model.catalog.ModelDeleteProc;
+import org.neo4j.graphalgo.model.catalog.ModelDropProc;
+import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
+import org.neo4j.graphalgo.model.catalog.ModelListProc;
+import org.neo4j.graphalgo.model.catalog.ModelLoadProc;
+import org.neo4j.graphalgo.model.catalog.ModelStoreProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -103,6 +109,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ListProcTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
+        "gds.alpha.model.delete",
+        "gds.alpha.model.load",
+        "gds.alpha.model.store",
+
         "gds.beta.allShortestPaths.dijkstra.stream",
         "gds.beta.allShortestPaths.dijkstra.stream.estimate",
 
@@ -145,6 +155,10 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.knn.write.estimate",
 
         "gds.beta.listProgress",
+
+        "gds.beta.model.drop",
+        "gds.beta.model.exists",
+        "gds.beta.model.list",
 
         "gds.beta.modularityOptimization.mutate",
         "gds.beta.modularityOptimization.mutate.estimate",
@@ -326,6 +340,12 @@ class ListProcTest extends BaseProcTest {
             LouvainStreamProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
+            ModelDeleteProc.class,
+            ModelDropProc.class,
+            ModelExistsProc.class,
+            ModelListProc.class,
+            ModelLoadProc.class,
+            ModelStoreProc.class,
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationWriteProc.class,
             ModularityOptimizationStreamProc.class,
