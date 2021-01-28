@@ -25,7 +25,8 @@ public enum LinkMetric {
     AUCPR;
 
     public double compute(
-        SignedProbabilities signedProbabilities
+        SignedProbabilities signedProbabilities,
+        double classRatio
     ) {
         return 0.0;
     }

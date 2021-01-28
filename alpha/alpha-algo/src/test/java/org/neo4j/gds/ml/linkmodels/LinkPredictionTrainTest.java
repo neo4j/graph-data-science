@@ -92,6 +92,7 @@ class LinkPredictionTrainTest {
             trainGraph,
             testGraph,
             config,
+            (105.0 - 15.0)/15.0,
             TestProgressLogger.NULL_LOGGER.getLog()
         );
 

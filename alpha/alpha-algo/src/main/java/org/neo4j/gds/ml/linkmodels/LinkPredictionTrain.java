@@ -57,6 +57,7 @@ public class LinkPredictionTrain
     private final Graph trainGraph;
     private final Graph testGraph;
     private final LinkPredictionTrainConfig config;
+    private final double classRatio;
     private final Log log;
     private final AllocationTracker allocationTracker;
 
@@ -64,11 +65,13 @@ public class LinkPredictionTrain
         Graph trainGraph,
         Graph testGraph,
         LinkPredictionTrainConfig config,
+        double classRatio,
         Log log
     ) {
         this.trainGraph = trainGraph;
         this.testGraph = testGraph;
         this.config = config;
+        this.classRatio = classRatio;
         this.log = log;
         this.allocationTracker = AllocationTracker.empty();
     }
@@ -151,8 +154,6 @@ public class LinkPredictionTrain
                 var validationSet = split.testSet();
                 var predictor = trainModel(trainSet, modelParams);
 
-                var modelData = predictor.modelData();
-
                 // 4. evaluate each model candidate on the train and validation sets
                 computeMetric(trainGraph, trainSet, predictor).forEach(trainStatsBuilder::update);
                 computeMetric(trainGraph, validationSet, predictor).forEach(validationStatsBuilder::update);
@@ -226,7 +227,7 @@ public class LinkPredictionTrain
 
         return config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(signedProbabilities)
+            metric -> metric.compute(signedProbabilities, classRatio)
         ));
     }
 
