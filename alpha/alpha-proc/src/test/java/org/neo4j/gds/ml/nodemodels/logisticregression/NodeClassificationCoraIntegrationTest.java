@@ -58,9 +58,9 @@ class NodeClassificationCoraIntegrationTest {
     private static final String MODEL_NAME = "model";
 
     // Minimum score ('test') for the F1_WEIGHTED metric
-    private static final double MIN_METRIC_SCORE = 0.8;
+    private static final double MIN_F1_SCORE = 0.8;
     // The ratio of nodes being classified with the correct subject
-    private static final double MIN_CORRECTNESS_RATIO = 0.85;
+    private static final double MIN_ACCURACY = 0.85;
 
     private static final Map<String, Integer> SUBJECT_DICTIONARY = Map.of(
         "Neural_Networks", 0,
@@ -160,7 +160,7 @@ class NodeClassificationCoraIntegrationTest {
             "  modelName: 'model'," +
             "  featureProperties: ['frp'], " +
             "  targetProperty: '%s', " +
-            "  metrics: ['F1_WEIGHTED'], " +
+            "  metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
             "  holdoutFraction: 0.2, " +
             "  validationFolds: 5, " +
             "  randomSeed: 2," +
@@ -175,14 +175,6 @@ class NodeClassificationCoraIntegrationTest {
             "    {penalty: 166.81005372000587, maxIterations: 1000}," +
             "    {penalty: 1291.5496650148832, maxIterations: 1000}," +
             "    {penalty: 10000.00000000001, maxIterations: 1000}" +
-            // produced worse score for the F1 metric
-//            "    {penalty: 0.0625, maxIterations: 1000}, " +
-//            "    {penalty: 0.125, maxIterations: 1000}, " +
-//            "    {penalty: 0.25, maxIterations: 1000}, " +
-//            "    {penalty: 0.5, maxIterations: 1000}, " +
-//            "    {penalty: 1.0, maxIterations: 1000}, " +
-//            "    {penalty: 2.0, maxIterations: 1000}, " +
-//            "    {penalty: 4.0, maxIterations: 1000}" +
             "  ]" +
             "})",
             GRAPH_NAME,
@@ -208,15 +200,25 @@ class NodeClassificationCoraIntegrationTest {
     }
 
     private void assertModelScore() {
-        var modelInfoStuff = formatWithLocale(
+        var f1Score = formatWithLocale(
             " CALL gds.beta.model.list('%s') YIELD modelInfo" +
             " RETURN modelInfo.metrics.F1_WEIGHTED.test AS score ",
             MODEL_NAME
         );
 
-        assertThat(QueryRunner.<Double>runQuery(cora, modelInfoStuff, res -> (Double) res.next().get("score")))
+        assertThat(QueryRunner.<Double>runQuery(cora, f1Score, res -> (Double) res.next().get("score")))
             .as("Metric score should not get worse over time.")
-            .isGreaterThan(MIN_METRIC_SCORE);
+            .isGreaterThan(MIN_F1_SCORE);
+
+        var accuracyScore = formatWithLocale(
+            " CALL gds.beta.model.list('%s') YIELD modelInfo" +
+            " RETURN modelInfo.metrics.ACCURACY.test AS score ",
+            MODEL_NAME
+        );
+
+        assertThat(QueryRunner.<Double>runQuery(cora, accuracyScore, res -> (Double) res.next().get("score")))
+            .as("Metric score should not get worse over time.")
+            .isGreaterThan(MIN_ACCURACY);
     }
 
     private void getResults() {
@@ -229,25 +231,30 @@ class NodeClassificationCoraIntegrationTest {
             GRAPH_NAME
         );
 
-        var reverseSubjectDictionary = SUBJECT_DICTIONARY
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        var correctCounts = new HashMap<Integer, Integer>();
+        var totalCounts = new HashMap<Integer, Integer>();
 
-        // actual_subject -> (computed_subject, count)
-        var subjectClassifications = new HashMap<String, Map<String, Integer>>();
         runQueryWithRowConsumer(cora, predictedClasses, Map.of(), (transaction, row) -> {
-                var actual = row.getString("actual");
-                var predicted = reverseSubjectDictionary.get(row.getNumber("predicted").intValue());
-                var predictedMap = subjectClassifications.computeIfAbsent(actual, (ignored) -> new HashMap<>());
-                predictedMap.put(predicted, predictedMap.getOrDefault(predicted, 0) + 1);
+                var actual = SUBJECT_DICTIONARY.get(row.getString("actual"));
+                var predicted = row.getNumber("predicted").intValue();
+                if (actual == predicted) {
+                    correctCounts.compute(predicted, (key, value) -> value == null ? 1 : value + 1);
+                }
+                totalCounts.compute(predicted, (key, value) -> value == null ? 1 : value + 1);
             }
         );
 
-        subjectClassifications.forEach((subject, predictions) -> {
-            var sum = predictions.values().stream().mapToInt(i -> i).sum();
-            var sameSubjectCount = predictions.get(subject);
-            assertThat((double) sameSubjectCount / sum).isGreaterThan(MIN_CORRECTNESS_RATIO);
+        correctCounts.forEach((predictedSubject, correctCount) -> {
+            var totalCount = totalCounts.get(predictedSubject);
+            assertThat((double) correctCount / totalCount)
+                .as("Check accuracy for subject: " + SUBJECT_DICTIONARY
+                    .entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().equals(predictedSubject))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse("unknown subject"))
+                .isGreaterThan(MIN_ACCURACY);
         });
     }
 }
