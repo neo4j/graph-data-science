@@ -26,7 +26,9 @@ import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -55,5 +57,19 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     @Value.Default
     default List<LinkMetric> metrics() {
         return List.of(LinkMetric.F1_SCORE);
+    }
+
+    static LinkPredictionTrainConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        return new LinkPredictionTrainConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            config
+        );
     }
 }
