@@ -87,8 +87,8 @@ YIELD
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
 * `configuration`: the configuration used for training the model.
-* `stored`: whether the model is <<catalog-model-store,stored>>
-* `loaded`: whether the model is <<catalog-model-load,loaded>>
+* `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
+* `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
 
 
@@ -115,8 +115,8 @@ YIELD
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
 * `configuration`: the configuration used for training the model.
-* `stored`: whether the model was <<catalog-model-store,stored>>
-* `loaded`: whether the model was <<catalog-model-load,loaded>>
+* `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
+* `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
 
 NOTE: If the model name does not exist, an error will be raised.

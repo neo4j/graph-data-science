@@ -32,16 +32,16 @@ YIELD
 ----
 
 .Results
-* `modelName`: The name of the stored model
-* `storeMillis`: the number of milliseconds it took to store the model.
+* `modelName`: The name of the stored model.
+* `storeMillis`: The number of milliseconds it took to store the model.
 
 
 [[catalog-model-load]]
 == Loading models from disk
 
-GDS will discover available models from the configured store location upon startup of the database.
-Only metadata is loaded for stored models, not the actual model data.
-In order to use a stored model, it has to be loaded.
+GDS will discover available models from the configured store location upon database startup.
+During discovery, only model metadata is loaded, not the actual model data.
+In order to use a stored model, it has to be explicitly loaded.
 
 .Store a model on disk:
 [source,cypher]
@@ -53,16 +53,17 @@ YIELD
 ----
 
 .Results
-* `modelName`: The name of the stored model
-* `loadMillis`: the number of milliseconds it took to load the model.
+* `modelName`: The name of the stored model.
+* `loadMillis`: The number of milliseconds it took to load the model.
 
 If the model is already loaded, nothing happens.
-To check if a model is loaded, we can use the <<catalog-model-list,`gds.beta.model.list`>> procedure.
+To verify if a model is loaded, we can use the <<catalog-model-list,`gds.beta.model.list`>> procedure.
+The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
 
 [[catalog-model-delete]]
 == Deleting models from disk
 
-To remove a stored model from the disk, it has to be deleted.
+To remove a stored model from disk, it has to be deleted.
 This is different from dropping a model.
 Dropping a model will remove it from the in-memory model catalog, but not from disk.
 Deleting a model will remove it from disk, but keep it in the in-memory model catalog if it was already loaded.
@@ -77,5 +78,5 @@ YIELD
 ----
 
 .Results
-* `modelName`: The name of the stored model
-* `deleteMillis`: the number of milliseconds it took to delete the model.
+* `modelName`: The name of the stored model.
+* `deleteMillis`: The number of milliseconds it took to delete the model.
