@@ -45,6 +45,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrainProc extends
     TrainProc<LinkPredictionTrain, LinkLogisticRegressionData, LinkPredictionTrainConfig> {
@@ -78,6 +79,10 @@ public class LinkPredictionTrainProc extends
         GraphCreateConfig graphCreateConfig, LinkPredictionTrainConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
+
+        if (config.params().isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale("No model candidates (params) specified, we require at least one"));
+        }
     }
 
     @Override

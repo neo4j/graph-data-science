@@ -177,11 +177,27 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
             "  featureProperties: ['a'], " +
-            "  randomSeed: -1, " +
             "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
             "})";
 
         assertErrorRegex(query, ".*No relationships have been loaded for relationship type.*(NOPE|NIX).*");
+    }
+
+    @Test
+    void shouldNotAcceptEmptyModelCandidates() {
+        runQuery(createQuery("g2", Orientation.NATURAL));
+
+        var query =
+            "CALL gds.alpha.ml.linkPrediction.train('g', { " +
+            "  trainRelationshipType: 'TRAIN', " +
+            "  testRelationshipType: 'TEST', " +
+            "  validationFolds: 2, " +
+            "  modelName: 'model', " +
+            "  featureProperties: ['a'], " +
+            "  params: [] " +
+            "})";
+
+        assertError(query, "No model candidates (params) specified, we require at least one");
     }
 
 }
