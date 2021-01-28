@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.AlgorithmFactory;
@@ -30,7 +31,6 @@ import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -46,18 +46,15 @@ import org.neo4j.procedure.Procedure;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, MultiClassNLRData, NodeClassificationTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")
-    public Stream<TrainResult> train(
+    public Stream<MLTrainResult> train(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -66,7 +63,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
             configuration
         );
         ModelCatalog.set(result.result());
-        return Stream.of(new TrainResult(result.result(), result.computeMillis()));
+        return Stream.of(new MLTrainResult(result.result(), result.computeMillis()));
     }
 
     @Override
@@ -132,33 +129,4 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
             }
         };
     }
-
-    @SuppressWarnings("unused")
-    public static class TrainResult {
-
-        public final long trainMillis;
-        public final Map<String, Object> modelInfo;
-        public final Map<String, Object> configuration;
-
-        public TrainResult(
-            Model<MultiClassNLRData, NodeClassificationTrainConfig> trainedModel,
-            long trainMillis
-        ) {
-            var trainConfig = trainedModel.trainConfig();
-
-            this.modelInfo = Stream.concat(
-                Map.of(
-                    MODEL_NAME_KEY, trainedModel.name(),
-                    MODEL_TYPE_KEY, trainedModel.algoType()
-                ).entrySet().stream(),
-                trainedModel.customInfo().toMap().entrySet().stream()
-            ).collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue)
-            );
-            this.configuration = trainConfig.toMap();
-            this.trainMillis = trainMillis;
-        }
-    }
-
 }
