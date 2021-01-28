@@ -43,12 +43,12 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
 
     double holdoutFraction();
 
-    @Configuration.ConvertWith("toRelationshipType")
-    @Configuration.ToMapValue("org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig#typeToString")
+    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
     RelationshipType holdoutRelationshipType();
 
-    @Configuration.ConvertWith("toRelationshipType")
-    @Configuration.ToMapValue("org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig#typeToString")
+    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
     RelationshipType remainingRelationshipType();
 
     @Value.Default
@@ -65,14 +65,6 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
             .collect(Collectors.toList());
     }
 
-    static RelationshipType toRelationshipType(String type) {
-        return RelationshipType.of(type);
-    }
-
-    static String typeToString(RelationshipType type) {
-        return type.name();
-    }
-
     //TODO: should this actually be a non-optional field, but then can we would have to put it in the
     // config map or go outside of the default procedure syntax
     @Value.Check
@@ -80,7 +72,6 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
         if (graphName().isEmpty()) {
             throw new IllegalArgumentException("SplitRelationships only supports execution on named graph.");
         }
-
     }
 
     static SplitRelationshipsMutateConfig of(

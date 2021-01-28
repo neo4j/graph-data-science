@@ -42,6 +42,10 @@ public class RelationshipType extends ElementIdentifier {
         return new RelationshipType(name);
     }
 
+    public static String toString(RelationshipType relType) {
+        return relType.name();
+    }
+
     public static Collection<RelationshipType> listOf(@NotNull String... relationshipTypes) {
         return Arrays.stream(relationshipTypes).map(RelationshipType::of).collect(Collectors.toList());
     }

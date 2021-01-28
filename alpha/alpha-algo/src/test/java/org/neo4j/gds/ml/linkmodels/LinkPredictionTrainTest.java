@@ -77,6 +77,8 @@ class LinkPredictionTrainTest {
 
         var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
+            .trainRelationshipType(RelationshipType.of("unused"))
+            .testRelationshipType(RelationshipType.of("unused"))
             .featureProperties(List.of("a"))
             .modelName("model")
             .validationFolds(3)

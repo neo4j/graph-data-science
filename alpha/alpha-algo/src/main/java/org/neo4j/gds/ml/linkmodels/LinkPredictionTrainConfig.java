@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -41,6 +42,14 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     int validationFolds();
 
     List<Map<String, Object>> params();
+
+    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
+    RelationshipType trainRelationshipType();
+
+    @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")
+    RelationshipType testRelationshipType();
 
     @Configuration.Ignore
     @Value.Default
