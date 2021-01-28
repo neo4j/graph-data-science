@@ -166,4 +166,22 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         assertError(trainQuery, "Procedure requires relationship projections to be UNDIRECTED.");
     }
 
+    @Test
+    void validateRelTypesExist() {
+        runQuery(createQuery("g2", Orientation.NATURAL));
+
+        var query =
+            "CALL gds.alpha.ml.linkPrediction.train('g', { " +
+            "  trainRelationshipType: 'NOPE', " +
+            "  testRelationshipType: 'NIX', " +
+            "  validationFolds: 2, " +
+            "  modelName: 'model', " +
+            "  featureProperties: ['a'], " +
+            "  randomSeed: -1, " +
+            "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
+            "})";
+
+        assertErrorRegex(query, ".*No relationships have been loaded for relationship type.*(NOPE|NIX).*");
+    }
+
 }
