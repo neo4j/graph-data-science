@@ -76,7 +76,8 @@ public class LinkPredictionTrainProc extends
 
     @Override
     protected void validateConfigs(
-        GraphCreateConfig graphCreateConfig, LinkPredictionTrainConfig config
+        GraphCreateConfig graphCreateConfig,
+        LinkPredictionTrainConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
 
