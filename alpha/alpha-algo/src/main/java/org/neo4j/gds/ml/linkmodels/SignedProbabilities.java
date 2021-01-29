@@ -30,8 +30,8 @@ import java.util.stream.DoubleStream;
 /**
  * Represents a sorted set of doubles, sorted according to their absolute value in increasing order.
  */
-public class SignedProbabilities {
-    private static final Comparator<Double> COMPARATOR = Comparator.comparingDouble(Math::abs);
+public final class SignedProbabilities {
+    private static final Comparator<Double> ABSOLUTE_VALUE_COMPARATOR = Comparator.comparingDouble(Math::abs);
 
     private final Optional<TreeSet<Double>> tree;
     private final Optional<List<Double>> list;
@@ -47,7 +47,7 @@ public class SignedProbabilities {
 
     public static SignedProbabilities create(long capacity) {
         var isTree = capacity > Integer.MAX_VALUE;
-        Optional<TreeSet<Double>> tree = isTree ? Optional.of(new TreeSet<>(COMPARATOR)) : Optional.empty();
+        Optional<TreeSet<Double>> tree = isTree ? Optional.of(new TreeSet<>(ABSOLUTE_VALUE_COMPARATOR)) : Optional.empty();
         Optional<List<Double>> list = !isTree ? Optional.of(new ArrayList<>((int) capacity)) : Optional.empty();
         return new SignedProbabilities(tree, list, isTree);
     }
@@ -66,7 +66,7 @@ public class SignedProbabilities {
         if (isTree) {
             return tree.get().stream().mapToDouble(d -> d);
         } else {
-            Collections.sort(list.get(), COMPARATOR);
+            Collections.sort(list.get(), ABSOLUTE_VALUE_COMPARATOR);
             return list.get().stream().mapToDouble(d -> d);
         }
     }
