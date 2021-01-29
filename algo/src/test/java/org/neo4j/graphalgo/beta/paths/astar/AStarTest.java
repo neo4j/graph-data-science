@@ -68,7 +68,7 @@ class AStarTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            AStar::memoryEstimation,
+            () -> AStar.memoryEstimation(false),
             nodeCount,
             1,
             expectedBytes,

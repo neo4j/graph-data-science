@@ -77,7 +77,7 @@ class YensTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            Yens::memoryEstimation,
+            () -> Yens.memoryEstimation(false),
             nodeCount,
             1,
             expectedBytes,
