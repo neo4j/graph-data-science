@@ -60,13 +60,31 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         "(m:N {a: 400}), " +
         "(n:N {a: 400}), " +
         "(o:N {a: 400}), " +
+        "(c)-[:TRAIN {label: 1}]->(a), " +
         "(d)-[:TRAIN {label: 1}]->(e), " +
+        "(e)-[:TRAIN {label: 1}]->(f), " +
         "(f)-[:TRAIN {label: 1}]->(d), " +
+        "(g)-[:TRAIN {label: 1}]->(h), " +
+        "(h)-[:TRAIN {label: 1}]->(i), " +
+        "(i)-[:TRAIN {label: 1}]->(g), " +
+        "(j)-[:TRAIN {label: 1}]->(k), " +
+        "(l)-[:TRAIN {label: 1}]->(j), " +
         "(m)-[:TRAIN {label: 1}]->(n), " +
+        "(n)-[:TRAIN {label: 1}]->(o), " +
+        "(o)-[:TRAIN {label: 1}]->(m), " +
         "(a)-[:TRAIN {label: 0}]->(d), " +
-        "(b)-[:TRAIN {label: 0}]->(i), " +
-        "(i)-[:TRAIN {label: 0}]->(b), " +
-        "(a)-[:TEST {label: 1}]->(b)," +
+        "(b)-[:TRAIN {label: 0}]->(e), " +
+        "(c)-[:TRAIN {label: 0}]->(f), " +
+        "(d)-[:TRAIN {label: 0}]->(g), " +
+        "(e)-[:TRAIN {label: 0}]->(h), " +
+        "(f)-[:TRAIN {label: 0}]->(i), " +
+        "(g)-[:TRAIN {label: 0}]->(j), " +
+        "(h)-[:TRAIN {label: 0}]->(k), " +
+        "(i)-[:TRAIN {label: 0}]->(l), " +
+        "(j)-[:TRAIN {label: 0}]->(m), " +
+        "(k)-[:TRAIN {label: 0}]->(n), " +
+        "(l)-[:TRAIN {label: 0}]->(o), " +
+        "(a)-[:TEST {label: 1}]->(b), " +
         "(b)-[:TEST {label: 1}]->(c), " +
         "(k)-[:TEST {label: 1}]->(l), " +
         "(g)-[:TEST {label: 0}]->(m), " +
@@ -121,16 +139,16 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         var expectedModelInfo = Map.of(
             "bestParameters", Map.of("penalty", 0.5),
             "metrics", Map.of(
-                "F1_SCORE", Map.of(
-                    "outerTrain", 0.9999999933333332,
-                    "test", 0.9999999933333332,
+                "AUCPR", Map.of(
+                    "outerTrain", 0.9999999999999998,
+                    "test", 1.0,
                     "train", List.of(
-                        Map.of("avg", 0.49999999625, "max", 0.9999999925, "min", 0.0, "params", Map.of("penalty", 0.5)),
-                        Map.of("avg", 0.49999999625, "max", 0.9999999925, "min", 0.0, "params", Map.of("penalty", 2.0))
+                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 0.5)),
+                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 2.0))
                     ),
                     "validation", List.of(
-                        Map.of("avg", 0.49999999500000003, "max", 0.9999999900000001, "min", 0.0, "params", Map.of("penalty", 0.5)),
-                        Map.of("avg", 0.49999999500000003, "max", 0.9999999900000001, "min", 0.0, "params", Map.of("penalty", 2.0))
+                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 0.5)),
+                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 2.0))
                     )
                 )
             ),
