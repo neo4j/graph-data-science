@@ -46,7 +46,7 @@ class LinkMetricTest {
         signedProbabilities.add(1);
         var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
         double expectedAUCScore = 0.2 * 5 / 10 + 0.2 * 4 / 6 + 0.2 * 3 / 4 + 0.2 * 2 / 2 + 0.2 * 1;
-        assertThat(aucScore).isCloseTo(1+expectedAUCScore, Offset.offset(1e-6));
+        assertThat(aucScore).isCloseTo(expectedAUCScore, Offset.offset(1e-6));
     }
 
     @Test
