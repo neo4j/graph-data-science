@@ -427,4 +427,51 @@ final class DijkstraTest {
             assertEquals(expected, path);
         }
     }
+
+    @Nested
+    class Graph4 {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:A)" +
+            ", (b:B)" +
+            ", (c:C)" +
+            ", (d:D)" +
+            ", (e:E)" +
+            ", (f:F)" +
+
+            ", (a)-[:TYPE {cost: 4}]->(b)" +
+            ", (a)-[:TYPE {cost: 2}]->(c)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (b)-[:TYPE {cost: 10}]->(d)" +
+            ", (c)-[:TYPE {cost: 3}]->(e)" +
+            ", (d)-[:TYPE {cost: 11}]->(f)" +
+            ", (e)-[:TYPE {cost: 4}]->(d)";
+
+        @Inject
+        Graph graph;
+
+        @Inject
+        IdFunction idFunction;
+
+        @Test
+        void sourceTargetWithLabelFilter() {
+            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .pathExpression(Optional.of(".(C)(E)*(D)"))
+                .build();
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
+        }
+    }
 }

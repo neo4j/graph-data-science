@@ -19,16 +19,16 @@
  */
 package org.neo4j.graphalgo.beta.paths;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig, PathExpressionConfig {
+import java.util.Optional;
 
-    String SOURCE_NODE_KEY = "sourceNode";
-    String TARGET_NODE_KEY = "targetNode";
+public interface PathExpressionConfig {
 
-    long sourceNode();
-
-    long targetNode();
-
+    @Value.Default
+    @Configuration.Ignore
+    default Optional<String> pathExpression() {
+        return Optional.empty();
+    }
 }

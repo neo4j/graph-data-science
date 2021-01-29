@@ -39,6 +39,8 @@ import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
@@ -71,6 +73,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private long pathIndex;
     // returns true if the given relationship should be traversed
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
+    // used for filtering on node labels while extending the path
+    private final Matcher matcher;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -90,6 +94,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
+            config.pathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -110,6 +115,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
+            config.pathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -137,6 +143,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         long sourceNode,
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
+        Optional<String> pathPattern,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
@@ -154,6 +161,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.visited = new BitSet();
         this.pathIndex = 0L;
         this.progressLogger = progressLogger;
+        this.matcher = pathPattern.map(Pattern::compile).map(p -> p.matcher("")).orElse(null);
+
+        if (pathPattern.isPresent()) {
+            withRelationshipFilter(pathExpression());
+        }
     }
 
     public Dijkstra withSourceNode(long sourceNode) {
@@ -162,7 +174,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
-        this.relationshipFilter = relationshipFilter;
+        this.relationshipFilter = this.relationshipFilter.andThen(relationshipFilter);
         return this;
     }
 
@@ -283,6 +295,25 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .build();
     }
 
+    private RelationshipFilter pathExpression() {
+        final var sb = new StringBuilder();
+
+        return (source, target, relationshipId) -> {
+            sb.setLength(0);
+            sb.append(graph.nodeLabels(target).stream().findFirst().get().name);
+
+            var lastNode = source;
+            while (lastNode != PATH_END) {
+                var label = graph.nodeLabels(lastNode).stream().findFirst().get().name;
+                sb.append(label);
+                lastNode = this.predecessors.getOrDefault(lastNode, PATH_END);
+            }
+            matcher.reset(sb.reverse().toString());
+
+            return !matcher.matches();
+        };
+    }
+
     @Override
     public Dijkstra me() {
         return this;
@@ -309,6 +340,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     @FunctionalInterface
     public interface RelationshipFilter {
         boolean test(long source, long target, long relationshipId);
+
+        default RelationshipFilter andThen(RelationshipFilter after) {
+            return (sourceNodeId, targetNodeId, relationshipId) ->
+                this.test(sourceNodeId, targetNodeId, relationshipId) &&
+                after.test(sourceNodeId, targetNodeId, relationshipId);
+        }
     }
 
     public static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
