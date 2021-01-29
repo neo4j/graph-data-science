@@ -93,9 +93,10 @@ class ModelSerializationTest {
             .isNotNull()
             .usingRecursiveComparison()
             .ignoringFieldsOfTypes(DefaultValue.class)
+            .ignoringFields("stored")
             .isEqualTo(model);
 
-
+        assertThat(deserializedModel.stored()).isTrue();
     }
 
     @Test
