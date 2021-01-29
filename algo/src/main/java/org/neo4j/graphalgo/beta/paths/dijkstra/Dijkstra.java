@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
@@ -322,8 +324,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private String label(long nodeId) {
         var maybeCached = labelCache.get(nodeId);
         if (maybeCached == null) {
-            // TODO: what happens if the node has multiple labels?
-            maybeCached = graph.nodeLabels(nodeId).stream().findFirst().get().name;
+            maybeCached = graph.nodeLabels(nodeId)
+                .stream()
+                .map(NodeLabel::name)
+                .collect(Collectors.joining());
             labelCache.set(nodeId, maybeCached);
         }
         return maybeCached;
