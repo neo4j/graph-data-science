@@ -70,12 +70,12 @@ final class DijkstraTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, false, 32_744L),
-            Arguments.of(1_000_000, false, 32_250_488L),
-            Arguments.of(1_000_000_000, false, 32_254_883_400L),
-            Arguments.of(1_000, true, 48_960L),
-            Arguments.of(1_000_000, true, 48_250_704L),
-            Arguments.of(1_000_000_000, true, 48_257_325_072L)
+            Arguments.of(1_000, false, 32_752L),
+            Arguments.of(1_000_000, false, 32_250_496L),
+            Arguments.of(1_000_000_000, false, 32_254_883_408L),
+            Arguments.of(1_000, true, 48_968L),
+            Arguments.of(1_000_000, true, 48_250_712L),
+            Arguments.of(1_000_000_000, true, 48_257_325_080L)
         );
     }
 
@@ -99,12 +99,12 @@ final class DijkstraTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Label)" +
-            ", (b:Label)" +
-            ", (c:Label)" +
-            ", (d:Label)" +
-            ", (e:Label)" +
-            ", (f:Label)" +
+            "  (a:A)" +
+            ", (b:B)" +
+            ", (c:C)" +
+            ", (d:D)" +
+            ", (e:E)" +
+            ", (f:F)" +
 
             ", (a)-[:TYPE {cost: 4}]->(b)" +
             ", (a)-[:TYPE {cost: 2}]->(c)" +
@@ -191,6 +191,26 @@ final class DijkstraTest {
                 .sourceNode(idFunction.of("a"))
                 .targetNode(idFunction.of("f"))
                 .trackRelationships(true)
+                .build();
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
+        }
+
+        @Test
+        void sourceTargetWithPathExpression() {
+            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .pathExpression(Optional.of(".(C)(E)*(D)"))
                 .build();
 
             var path = Dijkstra
@@ -424,53 +444,6 @@ final class DijkstraTest {
                 .get();
 
             assertEquals(List.of(2L, 1L, 4L, 1L, 3L, 1L, 5L, 1L), heapComparisons);
-            assertEquals(expected, path);
-        }
-    }
-
-    @Nested
-    class Graph4 {
-        @GdlGraph
-        private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:A)" +
-            ", (b:B)" +
-            ", (c:C)" +
-            ", (d:D)" +
-            ", (e:E)" +
-            ", (f:F)" +
-
-            ", (a)-[:TYPE {cost: 4}]->(b)" +
-            ", (a)-[:TYPE {cost: 2}]->(c)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (b)-[:TYPE {cost: 10}]->(d)" +
-            ", (c)-[:TYPE {cost: 3}]->(e)" +
-            ", (d)-[:TYPE {cost: 11}]->(f)" +
-            ", (e)-[:TYPE {cost: 4}]->(d)";
-
-        @Inject
-        Graph graph;
-
-        @Inject
-        IdFunction idFunction;
-
-        @Test
-        void sourceTargetWithLabelFilter() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
-
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
-                .pathExpression(Optional.of(".(C)(E)*(D)"))
-                .build();
-
-            var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-                .compute()
-                .paths()
-                .findFirst()
-                .get();
-
             assertEquals(expected, path);
         }
     }
