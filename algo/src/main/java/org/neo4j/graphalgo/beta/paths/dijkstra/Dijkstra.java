@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
@@ -75,6 +76,8 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
     // used for filtering on node labels while extending the path
     private final Matcher matcher;
+    // a cache for node labels to avoid expensive graph.nodeLabel lookup
+    private final HugeObjectArray<String> labelCache;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -165,6 +168,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
         if (pathPattern.isPresent()) {
             withRelationshipFilter(pathExpression());
+            this.labelCache = HugeObjectArray.newArray(String.class, graph.nodeCount(), tracker);
+        } else {
+            this.labelCache = null;
         }
     }
 
@@ -300,18 +306,27 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
 
         return (source, target, relationshipId) -> {
             sb.setLength(0);
-            sb.append(graph.nodeLabels(target).stream().findFirst().get().name);
+            sb.append(label(target));
 
             var lastNode = source;
             while (lastNode != PATH_END) {
-                var label = graph.nodeLabels(lastNode).stream().findFirst().get().name;
-                sb.append(label);
-                lastNode = this.predecessors.getOrDefault(lastNode, PATH_END);
+                sb.append(label(lastNode));
+                lastNode = predecessors.getOrDefault(lastNode, PATH_END);
             }
             matcher.reset(sb.reverse().toString());
 
             return !matcher.matches();
         };
+    }
+
+    private String label(long nodeId) {
+        var maybeCached = labelCache.get(nodeId);
+        if (maybeCached == null) {
+            // TODO: what happens if the node has multiple labels?
+            maybeCached = graph.nodeLabels(nodeId).stream().findFirst().get().name;
+            labelCache.set(nodeId, maybeCached);
+        }
+        return maybeCached;
     }
 
     @Override
