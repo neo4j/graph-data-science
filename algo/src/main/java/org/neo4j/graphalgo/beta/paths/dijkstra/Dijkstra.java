@@ -187,20 +187,17 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return this;
     }
 
-    // Resets the most of the internal state of the algorithm.
-    // Predecessors are not cleared in order to allow full backtracking for the path filter
-    public void clear() {
+    // Resets the traversal state of the algorithm.
+    // The predecessor array is not cleared to allow
+    // Yen's algorithm to backtrack to the original
+    // source node.
+    public void resetTraversalState() {
         traversalState = CONTINUE;
         queue.clear();
         visited.clear();
         if (trackRelationships) {
             relationships.clear();
         }
-    }
-
-    public void clearWithPredecessors() {
-        clear();
-        predecessors.clear();
     }
 
     public DijkstraResult compute() {
@@ -287,7 +284,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         var relationshipIds = trackRelationships ? new LongArrayDeque() : null;
         var costs = new DoubleArrayDeque();
 
-        var pathEnd = sourceNode;
+        // We backtrack until we reach the source node.
+        // The source node is either given by Dijkstra
+        // or adjusted by Yen's algorithm.
+        var pathStart = this.sourceNode;
         var lastNode = target;
         var prevNode = lastNode;
 
@@ -295,15 +295,16 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             pathNodeIds.addFirst(lastNode);
             costs.addFirst(queue.cost(lastNode));
 
-            // break if we reach the end by hitting the source node
-            // This happens either by not having a predecessor
-            // or by arriving at the predecessor if we are a spur path from Yen's
-            if (lastNode == pathEnd) {
+            // Break if we reach the end by hitting the source node.
+            // This happens either by not having a predecessor or by
+            // arriving at the predecessor if we are a spur path from
+            // Yen's algorithm.
+            if (lastNode == pathStart) {
                 break;
             }
 
             prevNode = lastNode;
-            lastNode = this.predecessors.getOrDefault(lastNode, pathEnd);
+            lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
             if (trackRelationships) {
                 relationshipIds.addFirst(relationships.getOrDefault(prevNode, NO_RELATIONSHIP));
             }
@@ -321,6 +322,12 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private RelationshipFilter pathExpression() {
         final var sb = new StringBuilder();
 
+        // This method is called to check if a target node should
+        // be visited by the algorithm. To verify the given path
+        // expression, we concatenate all node labels of the current
+        // traversal from the source node up until the target node.
+        // If the concatenated string matches the given pattern,
+        // we are not allowed to traverse the path further.
         return (source, target, relationshipId) -> {
             sb.setLength(0);
             sb.append(label(target));
