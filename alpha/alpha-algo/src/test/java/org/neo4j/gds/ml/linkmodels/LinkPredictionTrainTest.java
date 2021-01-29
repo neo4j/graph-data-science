@@ -39,44 +39,63 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class LinkPredictionTrainTest {
 
+    // Five cliques of size 2, 3, or 4
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH =
-        "(a:N {a: 0}), " +
-        "(b:N {a: 0}), " +
-        "(c:N {a: 0}), " +
-        "(d:N {a: 100}), " +
-        "(e:N {a: 100}), " +
-        "(f:N {a: 100}), " +
-        "(g:N {a: 200}), " +
-        "(h:N {a: 200}), " +
-        "(i:N {a: 200}), " +
-        "(j:N {a: 300}), " +
-        "(k:N {a: 300}), " +
-        "(l:N {a: 300}), " +
-        "(m:N {a: 400}), " +
-        "(n:N {a: 400}), " +
-        "(o:N {a: 400}), " +
-        "(a)-[:TEST {label: 1}]->(b)-[:TEST {label: 1}]->(c)-[:TRAIN {label: 1}]->(a), " +
-        "(d)-[:TRAIN {label: 1}]->(e)-[:TRAIN {label: 1}]->(f)-[:TRAIN {label: 1}]->(d), " +
-        "(g)-[:TRAIN {label: 1}]->(h)-[:TRAIN {label: 1}]->(i)-[:TRAIN {label: 1}]->(g), " +
-        "(j)-[:TRAIN {label: 1}]->(k)-[:TEST {label: 1}]->(l)-[:TRAIN {label: 1}]->(j), " +
-        "(m)-[:TRAIN {label: 1}]->(n)-[:TRAIN {label: 1}]->(o)-[:TRAIN {label: 1}]->(m), " +
-        "(a)-[:TRAIN {label: 0}]->(d), " +
+        "(a:N {z: 0}), " +
+        "(b:N {z: 0}), " +
+        "(c:N {z: 0}), " +
+        "(d:N {z: 0}), " +
+        "(e:N {z: 100}), " +
+        "(f:N {z: 100}), " +
+        "(g:N {z: 100}), " +
+        "(h:N {z: 200}), " +
+        "(i:N {z: 200}), " +
+        "(j:N {z: 300}), " +
+        "(k:N {z: 300}), " +
+        "(l:N {z: 300}), " +
+        "(m:N {z: 400}), " +
+        "(n:N {z: 400}), " +
+        "(o:N {z: 400}), " +
+
+        "(a)-[:TRAIN {label: 1}]->(b), " +
+        "(a)-[:TEST {label: 1}]->(c), " +       // selected for test
+        "(a)-[:TRAIN {label: 1}]->(d), " +
+        "(b)-[:TRAIN {label: 1}]->(c), " +
+        "(b)-[:TEST {label: 1}]->(d), " +       // selected for test
+        "(c)-[:TRAIN {label: 1}]->(d), " +
+
+        "(e)-[:TEST {label: 1}]->(f), " +       // selected for test
+        "(e)-[:TRAIN {label: 1}]->(g), " +
+        "(f)-[:TRAIN {label: 1}]->(g), " +
+
+        "(h)-[:TRAIN {label: 1}]->(i), " +
+
+        "(j)-[:TRAIN {label: 1}]->(k), " +
+        "(j)-[:TRAIN {label: 1}]->(l), " +
+        "(k)-[:TRAIN {label: 1}]->(l), " +
+
+        "(m)-[:TEST {label: 1}]->(n), " +       // selected for test
+        "(m)-[:TEST {label: 1}]->(o), " +       // selected for test
+        "(n)-[:TRAIN {label: 1}]->(o), " +
+        // 11 false positive TRAIN rels
+        "(a)-[:TRAIN {label: 0}]->(e), " +
+        "(a)-[:TRAIN {label: 0}]->(o), " +
         "(b)-[:TRAIN {label: 0}]->(e), " +
-        "(c)-[:TRAIN {label: 0}]->(f), " +
-        "(d)-[:TRAIN {label: 0}]->(g), " +
-        "(e)-[:TRAIN {label: 0}]->(h), " +
-        "(f)-[:TRAIN {label: 0}]->(i), " +
-        "(g)-[:TRAIN {label: 0}]->(j), " +
+        "(e)-[:TRAIN {label: 0}]->(i), " +
+        "(e)-[:TRAIN {label: 0}]->(o), " +
+        "(e)-[:TRAIN {label: 0}]->(n), " +
         "(h)-[:TRAIN {label: 0}]->(k), " +
-        "(i)-[:TRAIN {label: 0}]->(l), " +
-        "(j)-[:TRAIN {label: 0}]->(m), " +
-        "(k)-[:TRAIN {label: 0}]->(n), " +
-        "(l)-[:TRAIN {label: 0}]->(o), " +
-        "(g)-[:TEST {label: 0}]->(m), " +
-        "(l)-[:TEST {label: 0}]->(f), " +
-        "(o)-[:TEST {label: 0}]->(a), " +
-        "(k)-[:IGNORE]->(c)";
+        "(h)-[:TRAIN {label: 0}]->(m), " +
+        "(i)-[:TRAIN {label: 0}]->(j), " +
+        "(k)-[:TRAIN {label: 0}]->(m), " +
+        "(k)-[:TRAIN {label: 0}]->(o), " +
+        // 5 false positive TEST rels
+        "(a)-[:TEST {label: 0}]->(f), " +
+        "(b)-[:TEST {label: 0}]->(f), " +
+        "(i)-[:TEST {label: 0}]->(k), " +
+        "(j)-[:TEST {label: 0}]->(o), " +
+        "(k)-[:TEST {label: 0}]->(o)";
 
     @Inject
     GraphStore graphStore;
@@ -86,29 +105,30 @@ class LinkPredictionTrainTest {
         var trainGraph = graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
         var testGraph = graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
+        var nodeCount = 15;
+        var truePositives = 16;
+        double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
+        double trueNegatives = maxNumberOfRelationships - truePositives;
+        var classRatio = trueNegatives / truePositives;
+
         var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("unused"))
             .testRelationshipType(RelationshipType.of("unused"))
-            .featureProperties(List.of("a"))
+            .featureProperties(List.of("z"))
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
+            .classRatio(classRatio)
             .params(List.of(
                 Map.of("maxIterations", 0),
                 expectedWinner
             )).build();
 
-        var numberOfNodes = 15;
-        var numberOfRelationships = 31;
-        var numberOfPossibleRelationships = numberOfNodes * (numberOfNodes - 1)/ 2;
-        var classRatio = (numberOfPossibleRelationships - numberOfRelationships) / (double) numberOfRelationships;
-
         var linkPredictionTrain = new LinkPredictionTrain(
             trainGraph,
             testGraph,
             config,
-            classRatio,
             TestProgressLogger.NULL_LOGGER.getLog()
         );
 
