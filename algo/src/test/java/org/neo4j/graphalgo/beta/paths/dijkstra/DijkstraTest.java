@@ -210,7 +210,7 @@ final class DijkstraTest {
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(idFunction.of("a"))
                 .targetNode(idFunction.of("f"))
-                .pathExpression(Optional.of(".(C)(E)*(D)"))
+                .pathExpression(Optional.of(".*(C)(E)*(D)"))
                 .build();
 
             var path = Dijkstra
@@ -276,7 +276,7 @@ final class DijkstraTest {
 
             var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
-                .pathExpression(Optional.of(".(C)(E)*(D)"))
+                .pathExpression(Optional.of(".*(C)(E)*(D)"))
                 .build();
 
             var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())

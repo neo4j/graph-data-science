@@ -157,7 +157,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
                 }
 
                 // Calculate the spur path from the spur node to the sink.
-                dijkstra.clear();
+                dijkstra.resetTraversalState();
                 dijkstra.withSourceNode(spurNode);
                 var spurPath = computeDijkstra(graph.toOriginalNodeId(spurNode));
 
