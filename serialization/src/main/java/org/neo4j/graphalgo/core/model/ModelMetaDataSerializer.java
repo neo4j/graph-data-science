@@ -59,6 +59,7 @@ public final class ModelMetaDataSerializer {
             .algoType(protoModelMetaData.getAlgoType())
             .graphSchema(SchemaDeserializer.graphSchema(protoModelMetaData.getGraphSchema()))
             .trainConfig(trainConfig(protoModelMetaData))
+            .stored(true)
             .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMetaData.getCreationTime()));
     }
 

@@ -91,7 +91,10 @@ class ModelToFileExporterTest {
             .usingRecursiveComparison()
             .withStrictTypeChecking()
             .ignoringFieldsOfTypes(DefaultValue.class)
+            .ignoringFields("stored")
             .isEqualTo(MODEL);
+
+        assertThat(deserializedModel.stored()).isTrue();
     }
 
     @Test
