@@ -108,11 +108,7 @@ public class LinkPredictionTrainProc extends
                     Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
                 );
 
-                var all = Math.pow((double) trainGraph.nodeCount(), 2);
-                var positive = (double) trainGraph.relationshipCount();
-                var classRatio = (all - positive) / positive;
-
-                var algo = new LinkPredictionTrain(trainGraph, testGraph, configuration, classRatio, log);
+                var algo = new LinkPredictionTrain(trainGraph, testGraph, configuration, log);
                 return GraphAndAlgorithm.of(trainGraph, algo);
             }
 
