@@ -46,18 +46,18 @@ public enum LinkMetric {
             } else {
                 negativesSeen.increment();
             }
-            var tp = signedProbabilities.positiveCount() - positivesSeen.getValue();
-            if (tp == 0) {
+            var truePositives = signedProbabilities.positiveCount() - positivesSeen.getValue();
+            if (truePositives == 0) {
                 auc.add(lastPrecision.getValue() * (lastRecall.getValue()));
                 lastPrecision.setValue(0);
                 lastRecall.setValue(0);
                 return;
             }
-            var fp = signedProbabilities.negativeCount() - negativesSeen.getValue();
-            var fn = positivesSeen.getValue();
+            var falsePositives = signedProbabilities.negativeCount() - negativesSeen.getValue();
+            var falseNegatives = positivesSeen.getValue();
             //TODO: consider if BigDecimal division is needed for large graphs
-            var precision = tp/(tp + classRatio * fp);
-            var recall = tp/((double)(tp + fn));
+            var precision = truePositives/(truePositives + classRatio * falsePositives);
+            var recall = truePositives/((double)(truePositives + falseNegatives));
             auc.add(lastPrecision.getValue() * (lastRecall.getValue() - recall));
             lastPrecision.setValue(precision);
             lastRecall.setValue(recall);
