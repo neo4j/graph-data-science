@@ -28,6 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LinkMetricTest {
 
+    /**
+     * Example computation lifted from https://sanchom.wordpress.com/tag/average-precision/
+     */
     @Test
     void shouldComputeAUCPR() {
         var signedProbabilities = SignedProbabilities.create(10);
@@ -42,12 +45,15 @@ class LinkMetricTest {
         signedProbabilities.add(-2);
         signedProbabilities.add(1);
         var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
-        assertThat(aucScore).isCloseTo(0.78333333333333333, Offset.offset(1e-6));
+        double expectedAUCScore = 0.2 * 5 / 10 + 0.2 * 4 / 6 + 0.2 * 3 / 4 + 0.2 * 2 / 2 + 0.2 * 1;
+        assertThat(aucScore).isCloseTo(1+expectedAUCScore, Offset.offset(1e-6));
     }
 
     @Test
     void shouldComputeAUCPRHighestPriorityElementIsNegative() {
-        var signedProbabilities = SignedProbabilities.create(10);
+        // edge case testing where we add one more negative edge
+        // get slightly lower score of 0.5585281385281384 vs 0.7833333333333332 in the original above
+        var signedProbabilities = SignedProbabilities.create(11);
         signedProbabilities.add(-11);
         signedProbabilities.add(10);
         signedProbabilities.add(9);
@@ -60,6 +66,7 @@ class LinkMetricTest {
         signedProbabilities.add(-2);
         signedProbabilities.add(1);
         var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
-        assertThat(aucScore).isCloseTo(0.2 * 5/11 + 0.2 * 4/7 + 0.2 * 3/5 + 0.2 * 2/3 + 0.2 * 1/2, Offset.offset(1e-6));
+        double expectedAUCScore = 0.2 * 5 / 11 + 0.2 * 4 / 7 + 0.2 * 3 / 5 + 0.2 * 2 / 3 + 0.2 * 1 / 2;
+        assertThat(aucScore).isCloseTo(expectedAUCScore, Offset.offset(1e-6));
     }
 }
