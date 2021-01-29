@@ -52,6 +52,7 @@ import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EM
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
+    private static final long NO_RELATIONSHIP = -1;
 
     private final Graph graph;
     // Takes a visited node as input and decides if a path should be emitted.
@@ -186,15 +187,20 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         return this;
     }
 
-    // Resets the internal state of the algorithm.
+    // Resets the most of the internal state of the algorithm.
+    // Predecessors are not cleared in order to allow full backtracking for the path filter
     public void clear() {
         traversalState = CONTINUE;
         queue.clear();
         visited.clear();
-        predecessors.clear();
         if (trackRelationships) {
             relationships.clear();
         }
+    }
+
+    public void clearWithPredecessors() {
+        clear();
+        predecessors.clear();
     }
 
     public DijkstraResult compute() {
@@ -281,16 +287,25 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         var relationshipIds = trackRelationships ? new LongArrayDeque() : null;
         var costs = new DoubleArrayDeque();
 
+        var pathEnd = sourceNode;
         var lastNode = target;
         var prevNode = lastNode;
 
-        while (lastNode != PATH_END) {
+        while (true) {
             pathNodeIds.addFirst(lastNode);
             costs.addFirst(queue.cost(lastNode));
+
+            // break if we reach the end by hitting the source node
+            // This happens either by not having a predecessor
+            // or by arriving at the predecessor if we are a spur path from Yen's
+            if (lastNode == pathEnd) {
+                break;
+            }
+
             prevNode = lastNode;
-            lastNode = this.predecessors.getOrDefault(lastNode, PATH_END);
-            if (trackRelationships && lastNode != PATH_END) {
-                relationshipIds.addFirst(relationships.getOrDefault(prevNode, PATH_END));
+            lastNode = this.predecessors.getOrDefault(lastNode, pathEnd);
+            if (trackRelationships) {
+                relationshipIds.addFirst(relationships.getOrDefault(prevNode, NO_RELATIONSHIP));
             }
         }
 
