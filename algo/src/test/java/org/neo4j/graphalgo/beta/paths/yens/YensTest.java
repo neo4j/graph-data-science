@@ -51,6 +51,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -185,8 +186,8 @@ class YensTest {
             List.of(
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
                 "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})"
+//                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
             )
             //,
 //            List.of(
@@ -222,10 +223,24 @@ class YensTest {
         );
     }
 
+    static Stream<List<String>> invalidPathInputWithPathExpression() {
+        return Stream.of(
+            List.of(
+                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})"
+            )
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("pathInputWithPathExpression")
     void computeWithPathExpression(Collection<String> expectedPaths) {
         assertResult(graph, idFunction, expectedPaths, Optional.of("^(C).*?(D)"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPathInputWithPathExpression")
+    void dropWithPathExpression(Collection<String> expectedPaths) {
+        assertResult(graph, idFunction, expectedPaths, Optional.of("^(C).*?(D)"), false);
     }
 
     @Test
@@ -267,7 +282,22 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
 
-    private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths, Optional<String> pathExpression) {
+    private static void assertResult(
+        Graph graph,
+        IdFunction idFunction,
+        Collection<String> expectedPaths,
+        Optional<String> pathExpression
+    ) {
+        assertResult(graph, idFunction, expectedPaths, pathExpression, true);
+    }
+
+    private static void assertResult(
+        Graph graph,
+        IdFunction idFunction,
+        Collection<String> expectedPaths,
+        Optional<String> pathExpression,
+        boolean positiveTest
+    ) {
         var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
 
         var firstResult = expectedPathResults
@@ -293,7 +323,12 @@ class YensTest {
             .compute()
             .pathSet();
 
-        assertEquals(expectedPathResults, actualPathResults);
+        var assertThatPaths = assertThat(actualPathResults);
+        if (positiveTest) {
+            assertThatPaths.containsExactlyInAnyOrderElementsOf(expectedPathResults);
+        } else {
+            assertThatPaths.doesNotContainAnyElementsOf(expectedPathResults);
+        }
     }
 
     @NotNull
