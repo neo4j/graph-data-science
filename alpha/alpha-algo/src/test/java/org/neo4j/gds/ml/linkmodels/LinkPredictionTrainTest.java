@@ -75,7 +75,8 @@ class LinkPredictionTrainTest {
         "(l)-[:TRAIN {label: 0}]->(o), " +
         "(g)-[:TEST {label: 0}]->(m), " +
         "(l)-[:TEST {label: 0}]->(f), " +
-        "(o)-[:TEST {label: 0}]->(a)";
+        "(o)-[:TEST {label: 0}]->(a), " +
+        "(k)-[:IGNORE]->(c)";
 
     @Inject
     GraphStore graphStore;
@@ -98,11 +99,16 @@ class LinkPredictionTrainTest {
                 expectedWinner
             )).build();
 
+        var numberOfNodes = 15;
+        var numberOfRelationships = 31;
+        var numberOfPossibleRelationships = numberOfNodes * (numberOfNodes - 1)/ 2;
+        var classRatio = (numberOfPossibleRelationships - numberOfRelationships) / (double) numberOfRelationships;
+
         var linkPredictionTrain = new LinkPredictionTrain(
             trainGraph,
             testGraph,
             config,
-            (105.0 - 15.0)/15.0,
+            classRatio,
             TestProgressLogger.NULL_LOGGER.getLog()
         );
 
