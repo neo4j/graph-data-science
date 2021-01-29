@@ -70,20 +70,30 @@ final class DijkstraTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, false, 32_752L),
-            Arguments.of(1_000_000, false, 32_250_496L),
-            Arguments.of(1_000_000_000, false, 32_254_883_408L),
-            Arguments.of(1_000, true, 48_968L),
-            Arguments.of(1_000_000, true, 48_250_712L),
-            Arguments.of(1_000_000_000, true, 48_257_325_080L)
+            // trackRelationships = false, hasPathExpression = false
+            Arguments.of(1_000, false, false, 32_752L),
+            Arguments.of(1_000_000, false, false, 32_250_496L),
+            Arguments.of(1_000_000_000, false, false, 32_254_883_408L),
+            // trackRelationships = true, hasPathExpression = false
+            Arguments.of(1_000, true, false, 48_968L),
+            Arguments.of(1_000_000, true, false, 48_250_712L),
+            Arguments.of(1_000_000_000, true, false, 48_257_325_080L),
+            // trackRelationships = false, hasPathExpression = true
+            Arguments.of(1_000, false, true, 40_792L),
+            Arguments.of(1_000_000, false, true, 40_250_536L),
+            Arguments.of(1_000_000_000, false, true, 40_256_159_472L),
+            // trackRelationships = true, hasPathExpression = true
+            Arguments.of(1_000, true, true, 57_008L),
+            Arguments.of(1_000_000, true, true, 56_250_752L),
+            Arguments.of(1_000_000_000, true, true, 56_258_601_144L)
         );
     }
 
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
+    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, boolean hasPathExpression, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            () -> Dijkstra.memoryEstimation(trackRelationships),
+            () -> Dijkstra.memoryEstimation(trackRelationships, hasPathExpression),
             nodeCount,
             1,
             expectedBytes,

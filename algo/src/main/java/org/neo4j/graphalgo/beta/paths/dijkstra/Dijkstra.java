@@ -129,15 +129,22 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public static MemoryEstimation memoryEstimation() {
-        return memoryEstimation(false);
+        return memoryEstimation(false, false);
     }
 
-    public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
+    public static MemoryEstimation memoryEstimation(boolean trackRelationships, boolean hasPathExpression) {
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
             .add("reverse path", HugeLongLongMap.memoryEstimation());
         if (trackRelationships) {
             builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
+        }
+        if (hasPathExpression) {
+            // We assume BYTES_OBJECT_REF per array entry,
+            // since we store Strings, which are shared via
+            // an interned String cache. Also, all entries
+            // set is probably not the average case.
+            builder.add("label cache", HugeObjectArray.memoryEstimation(MemoryUsage.BYTES_OBJECT_REF));
         }
         return builder
             .perNode("visited set", MemoryUsage::sizeOfBitset)
