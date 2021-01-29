@@ -53,9 +53,9 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
     @Override
     public void accept(Batch batch) {
         batch.nodeIds().forEach(sourceId -> {
-            graph.forEachRelationship(sourceId, -1, (src, trg, target) -> {
-                var predictedProbability = predictor.predictedProbability(graph, src, trg);
-                var signedProbability = sign(target, src, trg) * predictedProbability;
+            graph.forEachRelationship(sourceId, -1, (source, target, predictionTarget) -> {
+                var predictedProbability = predictor.predictedProbability(graph, source, target);
+                var signedProbability = sign(predictionTarget, source, target) * predictedProbability;
                 signedProbabilities.add(signedProbability);
                 return true;
             });
@@ -63,9 +63,8 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
         progressLogger.logProgress(batch.size());
     }
 
-    private int sign(double target, long sourceId, long targetId) {
-        int intTarget = (int)target;
-        switch (intTarget) {
+    private int sign(double predictionTarget, long sourceId, long targetId) {
+        switch ((int)predictionTarget) {
             case POSITIVE_LINK:
                 return 1;
             case NEGATIVE_LINK:
@@ -74,7 +73,7 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
                 throw new IllegalArgumentException(
                     formatWithLocale(
                         "Invalid property value %.4f on relationship (%d,%d). Valid values are 0 and 1 which represent target classes for links.",
-                        target,
+                        predictionTarget,
                         sourceId,
                         targetId
                     ));
