@@ -262,6 +262,31 @@ final class DijkstraTest {
         }
 
         @Test
+        void singleSourceWithPathExpression() {
+            var expected = Set.of(
+                expected(idFunction, 0, new double[]{0.0}, "a"),
+                expected(idFunction, 1, new double[]{0.0, 2.0}, "a", "c"),
+                expected(idFunction, 2, new double[]{0.0, 4.0}, "a", "b"),
+                expected(idFunction, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
+                expected(idFunction, 4, new double[]{0.0, 4.0, 14.0}, "a", "b", "d"),
+                expected(idFunction, 5, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f")
+            );
+
+            var sourceNode = idFunction.of("a");
+
+            var config = defaultSingleSourceConfigBuilder()
+                .sourceNode(sourceNode)
+                .pathExpression(Optional.of(".(C)(E)*(D)"))
+                .build();
+
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .pathSet();
+
+            assertEquals(expected, paths);
+        }
+
+        @Test
         void singleSourceFromDisconnectedNode() {
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "c"),
