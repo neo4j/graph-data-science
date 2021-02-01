@@ -23,9 +23,12 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+
+import java.util.Optional;
 
 /**
  * Setting the value for each node to the level/iteration the node is discovered via BFS.
@@ -61,5 +64,30 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
             }
         }
         context.voteToHalt();
+    }
+
+    @Override
+    public Optional<Reducer> reducer() {
+        return Optional.of(new Reducer() {
+            @Override
+            public double identity() {
+                return Double.NaN;
+            }
+
+            @Override
+            public double reduce(double current, double message) {
+                return message;
+            }
+
+            @Override
+            public double emptyValue() {
+                return Double.NaN;
+            }
+
+            @Override
+            public boolean isEmptyValue(double value) {
+                return Double.isNaN(value);
+            }
+        });
     }
 }
