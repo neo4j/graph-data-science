@@ -44,10 +44,6 @@
             <?dbhtml filename="model-catalog/model-catalog/index.html"?>
         </d:tocentry>
 
-        <d:tocentry linkend="model-catalog-store-ops">
-            <?dbhtml filename="model-catalog/model-store/index.html"?>
-        </d:tocentry>
-
         <d:tocentry linkend="algorithms">
             <?dbhtml filename="algorithms/index.html"?>
             <d:tocentry linkend="algorithms-syntax">
