@@ -39,7 +39,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
-        return Dijkstra.memoryEstimation(false, configuration.pathExpression().isPresent());
+        return Dijkstra.memoryEstimation(false, configuration.maybePathExpression().isPresent());
     }
 
     @NotNull

@@ -100,7 +100,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
-            config.pathExpression(),
+            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -121,7 +121,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
-            config.pathExpression(),
+            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker

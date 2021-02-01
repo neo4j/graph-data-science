@@ -300,7 +300,7 @@ class YensTest {
             .sourceNode(firstResult.sourceNode())
             .targetNode(firstResult.targetNode())
             .k(maybeK.orElse(expectedPathResults.size()))
-            .pathExpression(pathExpression)
+            .pathExpression(pathExpression.orElse(null))
             .build();
 
         var actualPathResults = Yens
