@@ -23,9 +23,12 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+
+import java.util.Optional;
 
 /**
  * Setting the value for each node to the node-id of its parent.
@@ -70,6 +73,11 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
             }
             context.voteToHalt();
         }
+    }
+
+    @Override
+    public Optional<Reducer> reducer() {
+        return Optional.of(new Reducer.Min());
     }
 }
 
