@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.paths;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 
 import java.util.Optional;
@@ -27,8 +28,13 @@ import java.util.Optional;
 public interface PathExpressionConfig {
 
     @Value.Default
+    default @Nullable String pathExpression() {
+        return null;
+    }
+
+    @Value.Default
     @Configuration.Ignore
-    default Optional<String> pathExpression() {
-        return Optional.empty();
+    default Optional<String> maybePathExpression() {
+        return Optional.ofNullable(pathExpression());
     }
 }

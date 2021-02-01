@@ -33,7 +33,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {
-        return Yens.memoryEstimation(configuration.pathExpression().isPresent());
+        return Yens.memoryEstimation(configuration.maybePathExpression().isPresent());
     }
 
     @NotNull
