@@ -26,21 +26,15 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.util.Arrays;
-import java.util.concurrent.locks.ReentrantLock;
+public class PrimitiveQueueMessenger implements Messenger<PrimitiveQueueMessenger.QueueIterator> {
 
-class PrimitiveQueueMessenger implements Messenger<PrimitiveQueueMessenger.QueueIterator> {
-
-    private final DoubleArrayQueues messageQueues;
+    private final PrimitiveDoubleQueues messageQueues;
 
     PrimitiveQueueMessenger(Graph graph, AllocationTracker tracker) {
         int averageDegree = (int) BitUtil.ceilDiv(graph.relationshipCount(), graph.nodeCount());
-        this.messageQueues = new DoubleArrayQueues(graph.nodeCount(), averageDegree, tracker);
+        this.messageQueues = new PrimitiveDoubleQueues(graph.nodeCount(), averageDegree, tracker);
     }
 
     static MemoryEstimation memoryEstimation() {
@@ -78,114 +72,6 @@ class PrimitiveQueueMessenger implements Messenger<PrimitiveQueueMessenger.Queue
     @Override
     public void release() {
         messageQueues.release();
-    }
-
-    static class DoubleArrayQueues {
-        // used to store a message in a queue
-        private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
-        // minimum capacity for the individual arrays
-        private static final int MIN_CAPACITY = 42;
-        // each queue is guarded by a lock which is used for growing the queue
-        private final HugeObjectArray<ReentrantLock> queueLocks;
-
-        // toggling in-between super steps
-        private HugeObjectArray<double[]> currentQueues;
-        private HugeAtomicLongArray currentTails;
-
-        private HugeObjectArray<double[]> prevQueues;
-        private HugeAtomicLongArray prevTails;
-
-        DoubleArrayQueues(long nodeCount, AllocationTracker tracker) {
-            this(nodeCount, MIN_CAPACITY, tracker);
-        }
-
-        DoubleArrayQueues(long nodeCount, int initialCapacity, AllocationTracker tracker) {
-            // TODO: consider partitioning node space and use 1 lock per partition
-            this.queueLocks = HugeObjectArray.newArray(ReentrantLock.class, nodeCount, tracker);
-            queueLocks.setAll(ignored -> new ReentrantLock());
-
-            this.currentTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
-            this.prevTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
-
-            this.currentQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
-            this.prevQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
-
-            var capacity = Math.max(initialCapacity, MIN_CAPACITY);
-            currentQueues.setAll(value -> new double[capacity]);
-            prevQueues.setAll(value -> new double[capacity]);
-        }
-
-        void init(int iteration) {
-            // swap tail indexes
-            var tmpTails = currentTails;
-            this.currentTails = prevTails;
-            this.prevTails = tmpTails;
-            // swap queues
-            var tmpQueues = currentQueues;
-            this.currentQueues = prevQueues;
-            this.prevQueues = tmpQueues;
-
-            if (iteration > 0) {
-                this.currentTails.setAll(0);
-            }
-        }
-
-        void initIterator(QueueIterator iterator, long nodeId) {
-            iterator.init(prevQueues.get(nodeId), (int) prevTails.get(nodeId));
-        }
-
-        void push(long nodeId, double message) {
-            // get tail index
-            long idx = currentTails.get(nodeId);
-            while (true) {
-                long nextIdx = idx + 1;
-                long currentIdx = currentTails.compareAndExchange(nodeId, idx, nextIdx);
-                if (currentIdx == idx) {
-                    // CAS successful
-                    break;
-                }
-                // CAS unsuccessful, try again
-                idx = currentIdx;
-            }
-            // grow queue if necessary
-            ensureCapacity(nodeId, (int) idx + 1);
-            // set value
-            set(currentQueues.get(nodeId), (int) idx, message);
-        }
-
-        private void ensureCapacity(long nodeId, int minCapacity) {
-            if (currentQueues.get(nodeId).length < minCapacity) {
-                grow(nodeId, minCapacity);
-            }
-        }
-
-        private void grow(long nodeId, int minCapacity) {
-            queueLocks.get(nodeId).lock();
-            try {
-                var queue = currentQueues.get(nodeId);
-                var capacity = queue.length;
-                if (capacity >= minCapacity) {
-                    // some other thread already grew the array
-                    return;
-                }
-                // grow by 50%
-                var newCapacity = capacity + (capacity >> 1);
-                currentQueues.set(nodeId, Arrays.copyOf(queue, newCapacity));
-            } finally {
-                queueLocks.get(nodeId).unlock();
-            }
-        }
-
-        private void set(double[] queue, int index, double message) {
-            ARRAY_HANDLE.setVolatile(queue, index, message);
-        }
-
-        void release() {
-            this.queueLocks.release();
-            this.currentTails.release();
-            this.prevTails.release();
-            this.currentQueues.release();
-        }
     }
 
     public static class QueueIterator implements Messages.MessageIterator {
