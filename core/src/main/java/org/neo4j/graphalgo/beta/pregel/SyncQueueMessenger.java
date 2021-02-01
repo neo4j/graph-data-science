@@ -28,18 +28,18 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-public class PrimitiveQueueMessenger implements Messenger<PrimitiveQueueMessenger.QueueIterator> {
+public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.QueueIterator> {
 
     private final PrimitiveDoubleQueues messageQueues;
 
-    PrimitiveQueueMessenger(Graph graph, AllocationTracker tracker) {
+    SyncQueueMessenger(Graph graph, AllocationTracker tracker) {
         int averageDegree = (int) BitUtil.ceilDiv(graph.relationshipCount(), graph.nodeCount());
         this.messageQueues = new PrimitiveDoubleQueues(graph.nodeCount(), averageDegree, tracker);
     }
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup("", (dimensions, concurrency) ->
-            MemoryEstimations.builder(PrimitiveQueueMessenger.class)
+            MemoryEstimations.builder(SyncQueueMessenger.class)
                 .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
                 .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
                     .fixed("messages", dimensions.averageDegree() * Double.BYTES)
@@ -60,12 +60,12 @@ public class PrimitiveQueueMessenger implements Messenger<PrimitiveQueueMessenge
     }
 
     @Override
-    public PrimitiveQueueMessenger.QueueIterator messageIterator() {
+    public SyncQueueMessenger.QueueIterator messageIterator() {
         return new QueueIterator();
     }
 
     @Override
-    public void initMessageIterator(PrimitiveQueueMessenger.QueueIterator messageIterator, long nodeId, boolean isFirstIteration) {
+    public void initMessageIterator(SyncQueueMessenger.QueueIterator messageIterator, long nodeId, boolean isFirstIteration) {
         messageQueues.initIterator(messageIterator, nodeId);
     }
 

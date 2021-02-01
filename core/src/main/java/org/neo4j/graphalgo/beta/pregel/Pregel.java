@@ -84,7 +84,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 
         if (isQueueBased) {
-            estimationBuilder.add("message queues", QueueMessenger.memoryEstimation());
+            estimationBuilder.add("message queues", AsyncQueueMessenger.memoryEstimation());
         } else {
             estimationBuilder.add("message arrays", ReducingMessenger.memoryEstimation());
         }
@@ -113,8 +113,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.messenger = reducer.isPresent()
             ? new ReducingMessenger(graph, config, reducer.get(), tracker)
             : config.isAsynchronous()
-                ? new QueueMessenger(graph, config, tracker)
-                : new PrimitiveQueueMessenger(graph, tracker);
+                ? new AsyncQueueMessenger(graph, config, tracker)
+                : new SyncQueueMessenger(graph, tracker);
     }
 
     public PregelResult run() {

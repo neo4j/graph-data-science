@@ -72,7 +72,7 @@ public class PrimitiveDoubleQueues {
         }
     }
 
-    void initIterator(PrimitiveQueueMessenger.QueueIterator iterator, long nodeId) {
+    void initIterator(SyncQueueMessenger.QueueIterator iterator, long nodeId) {
         iterator.init(prevQueues.get(nodeId), (int) prevTails.get(nodeId));
     }
 
