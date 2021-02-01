@@ -20,34 +20,20 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jctools.queues.MpscLinkedQueue;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class QueueMessengerTest {
+class AsyncQueueMessengerTest {
 
-    private static Stream<Arguments> iteratorTypes() {
-        return Stream.of(
-            Arguments.of(new QueueMessenger.QueueIterator.Async()),
-            Arguments.of(new QueueMessenger.QueueIterator.Sync())
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("iteratorTypes")
-    void allowMultipleCallsToHasNext(QueueMessenger.QueueIterator messageIterator) {
+    @Test
+    void allowMultipleCallsToHasNext() {
         var queue = new MpscLinkedQueue<Double>();
         queue.offer(42.0);
-        if (messageIterator instanceof QueueMessenger.QueueIterator.Sync) {
-            queue.offer(Double.NaN);
-        }
 
+        var messageIterator = new AsyncQueueMessenger.AsyncIterator();
         messageIterator.init(queue);
 
         assertTrue(messageIterator.hasNext());

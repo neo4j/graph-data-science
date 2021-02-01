@@ -37,10 +37,7 @@ import java.util.stream.LongStream;
  * A messenger implementation that is backed by an MPSC queue
  * for each node in the graph. The queue acts as message inbox.
  */
-class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
-
-    // Marks the end of messages from the previous iteration in synchronous mode.
-    private static final Double TERMINATION_SYMBOL = Double.NaN;
+class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator> {
 
     // Empty queue used in initial super step
     private static final Queue<Double> EMPTY_QUEUE = new LinkedList<>();
@@ -50,7 +47,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
 
-    QueueMessenger(Graph graph, PregelConfig config, AllocationTracker tracker) {
+    AsyncQueueMessenger(Graph graph, PregelConfig config, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
         this.messageQueues = initQueues(tracker);
@@ -58,7 +55,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup("", (dimensions, concurrency) ->
-            MemoryEstimations.builder(QueueMessenger.class)
+            MemoryEstimations.builder(AsyncQueueMessenger.class)
                 .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
                 .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
                     .fixed("messages", dimensions.averageDegree() * Double.BYTES)
@@ -89,23 +86,6 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
 
     @Override
     public void initIteration(int iteration) {
-        if (!config.isAsynchronous()) {
-            // Synchronization barrier:
-            // Add termination flag to message queues that
-            // received messages in the previous iteration.
-            if (iteration > 0) {
-                ParallelUtil.parallelStreamConsume(
-                    LongStream.range(0, graph.nodeCount()),
-                    config.concurrency(),
-                    nodeIds -> nodeIds.forEach(nodeId -> {
-                        var queue = messageQueues.get(nodeId);
-                        if (!queue.isEmpty()) {
-                            queue.add(TERMINATION_SYMBOL);
-                        }
-                    })
-                );
-            }
-        }
     }
 
     @Override
@@ -114,15 +94,13 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
     }
 
     @Override
-    public QueueMessenger.QueueIterator messageIterator() {
-        return config.isAsynchronous()
-            ? new QueueIterator.Async()
-            : new QueueIterator.Sync();
+    public AsyncIterator messageIterator() {
+        return new AsyncIterator();
     }
 
     @Override
     public void initMessageIterator(
-        QueueMessenger.QueueIterator messageIterator,
+        AsyncIterator messageIterator,
         long nodeId,
         boolean isFirstIteration
     ) {
@@ -134,7 +112,7 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
         messageQueues.release();
     }
 
-    public abstract static class QueueIterator implements Messages.MessageIterator {
+    public static class AsyncIterator implements Messages.MessageIterator {
 
         Queue<Double> queue;
 
@@ -143,53 +121,18 @@ class QueueMessenger implements Messenger<QueueMessenger.QueueIterator> {
         }
 
         @Override
+        public boolean hasNext() {
+            return (queue.peek()) != null;
+        }
+
+        @Override
         public Double next() {
             return queue.poll();
         }
 
-        public abstract boolean isEmpty();
-
-        static class Sync extends QueueIterator {
-            private boolean reachedEnd = false;
-
-            @Override
-            void init(@Nullable Queue<Double> queue) {
-                super.init(queue);
-                reachedEnd = false;
-            }
-
-            @Override
-            public boolean hasNext() {
-                if (reachedEnd || queue.isEmpty()) {
-                    return false;
-                }
-
-                if (Double.isNaN(queue.peek())) {
-                    queue.poll();
-                    reachedEnd = true;
-                    return false;
-                }
-
-                return true;
-            }
-
-            @Override
-            public boolean isEmpty() {
-                return queue.isEmpty() || reachedEnd || Double.isNaN(queue.peek());
-            }
-        }
-
-        static class Async extends QueueIterator {
-            @Override
-            public boolean hasNext() {
-                return (queue.peek()) != null;
-            }
-
-
-            @Override
-            public boolean isEmpty() {
-                return queue.isEmpty();
-            }
+        @Override
+        public boolean isEmpty() {
+            return queue.isEmpty();
         }
     }
 
