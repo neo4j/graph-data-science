@@ -1,3 +1,4 @@
+[.enterprise-edition]
 [[model-catalog-store-ops]]
 = Storing models on disk
 

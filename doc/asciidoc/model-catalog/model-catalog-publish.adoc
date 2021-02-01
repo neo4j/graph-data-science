@@ -1,3 +1,4 @@
+[.enterprise-edition]
 [[model-catalog-publish-ops]]
 = Publishing models
 
