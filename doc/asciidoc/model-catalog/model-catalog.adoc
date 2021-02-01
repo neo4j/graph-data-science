@@ -1,5 +1,4 @@
 [[model-catalog-ops]]
-[.beta]
 = Model Catalog
 
 [abstract]
@@ -7,9 +6,6 @@
 This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
 --
 
-[.beta-symbol]
-[.tier-note]
-The model catalog is in the beta tier.
 
 Some graph algorithms use trained models in their computation.
 A model is generally a mathematical formula representing a real-world or fictitious entities.
@@ -41,6 +37,7 @@ Models trained by a different Neo4j user are not accessible at any time.
 ====
 
 
+[.beta]
 [[catalog-model-exists]]
 == Check if a model exists in the catalog
 
@@ -53,6 +50,7 @@ CALL gds.beta.model.exists('my-model') YIELD exists;
 ----
 
 
+[.beta]
 [[catalog-model-list]]
 == List models available in the catalog
 
@@ -96,6 +94,7 @@ YIELD
 * `shared`: a boolean flag indicating if the model is published.
 
 
+[.beta]
 [[catalog-model-drop]]
 == Removing models from the catalog
 

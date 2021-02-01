@@ -1,5 +1,4 @@
 [[model-catalog-store-ops]]
-[.alpha]
 = Storing models on disk
 
 [.alpha-symbol]
@@ -19,6 +18,7 @@ The location must be a directory and writable by the Neo4j process.
 The `gds.model.store_location` parameter must be configured for this feature.
 ====
 
+[.alpha]
 [[catalog-model-store]]
 == Storing models from the catalog on disk
 
@@ -36,6 +36,7 @@ YIELD
 * `storeMillis`: The number of milliseconds it took to store the model.
 
 
+[.alpha]
 [[catalog-model-load]]
 == Loading models from disk
 
@@ -60,6 +61,7 @@ If the model is already loaded, nothing happens.
 To verify if a model is loaded, we can use the <<catalog-model-list,`gds.beta.model.list`>> procedure.
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
 
+[.alpha]
 [[catalog-model-delete]]
 == Deleting models from disk
 

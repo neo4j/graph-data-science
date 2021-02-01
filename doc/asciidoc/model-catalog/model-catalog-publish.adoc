@@ -1,10 +1,14 @@
 [[model-catalog-publish-ops]]
-[.alpha]
 = Publishing models
+
+[.alpha-symbol]
+[.tier-note]
+Publishing models feature is in the alpha tier.
 
 By default, a trained model is visible to the user that created it.
 Making a model accessible to other users can be achieved by publishing it.
 
+[.alpha]
 [[catalog-model-publish]]
 == Publishing a model
 
