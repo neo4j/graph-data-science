@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -29,7 +30,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelFileReader;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.ImmutableModel;
 import org.neo4j.graphalgo.core.model.Model;
@@ -68,19 +68,22 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
     void setUp() throws Exception {
         registerProcedures(
             ModelStoreProc.class,
-            ModelPublishProc.class
+            ModelPublishProc.class,
+            ModelDropProc.class,
+            ModelDeleteProc.class
         );
-        GdsEdition.instance().setToEnterpriseEdition();
     }
 
     @Test
     void storeAndPublishAModel() {
         var modelName = "testModel1";
+        var publishedModelName = modelName + "_public";
+
         modelToCatalog(modelName);
 
         storeModel(modelName);
 
-        modelShouldBeInCatalog(modelName);
+        modelShouldBeLoadedInCatalog(modelName);
 
         checkStoredModelFile(modelName);
 
@@ -88,9 +91,17 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
 
         modelShouldNotBeInCatalog(modelName);
 
-        modelShouldBeInCatalog(modelName + "_public");
+        modelShouldBeLoadedInCatalog(publishedModelName);
 
         checkPublishedModelFile(modelName);
+
+        dropStoredModel(publishedModelName);
+
+        modelShouldBeUnloadedInCatalog(publishedModelName);
+
+        deletedModel(publishedModelName);
+
+        checkModelFileIsDeleted();
     }
 
     private void modelToCatalog(String modelName) {
@@ -124,12 +135,20 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
         );
     }
 
-    private void modelShouldBeInCatalog(String modelName) {
+    private void modelShouldBeLoadedInCatalog(String modelName) {
         assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
             .isInstanceOf(StoredModel.class)
             .hasFieldOrPropertyWithValue("name", modelName)
             .hasFieldOrPropertyWithValue("stored", true)
             .hasFieldOrPropertyWithValue("loaded", true);
+    }
+
+    private void modelShouldBeUnloadedInCatalog(String modelName) {
+        assertThat(ModelCatalog.getUntyped(getUsername(), modelName))
+            .isInstanceOf(StoredModel.class)
+            .hasFieldOrPropertyWithValue("name", modelName)
+            .hasFieldOrPropertyWithValue("stored", true)
+            .hasFieldOrPropertyWithValue("loaded", false);
     }
 
     private void checkStoredModelFile(String modelName) {
@@ -143,7 +162,6 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
 
             assertThat(modelFromFile)
                 .isNotNull()
-                // .isInstanceOf(StoredModel.class) TODO/FIXME: this is no longer StoredModel
                 .isInstanceOf(ImmutableModel.class)
                 .hasFieldOrPropertyWithValue("name", modelName)
                 .hasFieldOrPropertyWithValue("stored", true)
@@ -179,5 +197,42 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
         checkStoredModelFile(modelName + "_public");
     }
 
+    private void dropStoredModel(String modelName) {
+        dropModel(modelName, true);
+    }
+
+    private void dropModel(String modelName, boolean stored) {
+        assertCypherResult(
+            "CALL gds.beta.model.drop($modelName)",
+            Map.of("modelName", modelName),
+            singletonList(
+                Map.of(
+                    "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
+                    "creationTime", Matchers.isA(ZonedDateTime.class),
+                    "trainConfig", Matchers.isA(Map.class),
+                    "loaded", false,
+                    "stored", stored,
+                    "graphSchema", Matchers.isA(Map.class),
+                    "shared", true
+                )
+            )
+        );    }
+
+    private void deletedModel(String modelName) {
+        assertCypherResult(
+            "CALL gds.alpha.model.delete($modelName)",
+            Map.of("modelName", modelName),
+            List.of(
+                map(
+                    "modelName", modelName,
+                    "deleteMillis", greaterThanOrEqualTo(0L)
+                )
+            )
+        );
+    }
+
+    private void checkModelFileIsDeleted() {
+        assertThat(tempDir.toFile().listFiles()).isEmpty();
+    }
 
 }
