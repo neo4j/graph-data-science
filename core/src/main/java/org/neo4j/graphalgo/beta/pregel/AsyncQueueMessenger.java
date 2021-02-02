@@ -20,37 +20,24 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jctools.queues.MpscLinkedQueue;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.stream.LongStream;
-
-/**
- * A messenger implementation that is backed by an MPSC queue
- * for each node in the graph. The queue acts as message inbox.
- */
 class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator> {
-
-    // Empty queue used in initial super step
-    private static final Queue<Double> EMPTY_QUEUE = new LinkedList<>();
 
     private final Graph graph;
     private final PregelConfig config;
 
-    private final HugeObjectArray<MpscLinkedQueue<Double>> messageQueues;
+    private final PrimitiveAsyncDoubleQueues queues;
 
     AsyncQueueMessenger(Graph graph, PregelConfig config, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
-        this.messageQueues = initQueues(tracker);
+        this.queues = new PrimitiveAsyncDoubleQueues(graph.nodeCount(), tracker);
     }
 
     static MemoryEstimation memoryEstimation() {
@@ -65,37 +52,19 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator
         );
     }
 
-    private HugeObjectArray<MpscLinkedQueue<Double>> initQueues(AllocationTracker tracker) {
-        // sad java 😞
-        Class<MpscLinkedQueue<Double>> queueClass = (Class<MpscLinkedQueue<Double>>) new MpscLinkedQueue<Double>().getClass();
-
-        HugeObjectArray<MpscLinkedQueue<Double>> messageQueues = HugeObjectArray.newArray(
-            queueClass,
-            graph.nodeCount(),
-            tracker
-        );
-
-        ParallelUtil.parallelStreamConsume(
-            LongStream.range(0, graph.nodeCount()),
-            config.concurrency(),
-            nodeIds -> nodeIds.forEach(nodeId -> messageQueues.set(nodeId, new MpscLinkedQueue<Double>()))
-        );
-
-        return messageQueues;
-    }
-
     @Override
     public void initIteration(int iteration) {
+        queues.init(iteration);
     }
 
     @Override
     public void sendTo(long targetNodeId, double message) {
-        messageQueues.get(targetNodeId).add(message);
+        queues.push(targetNodeId, message);
     }
 
     @Override
     public AsyncIterator messageIterator() {
-        return new AsyncIterator();
+        return new AsyncIterator(queues);
     }
 
     @Override
@@ -104,35 +73,38 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator
         long nodeId,
         boolean isFirstIteration
     ) {
-        messageIterator.init(isFirstIteration ? EMPTY_QUEUE : messageQueues.get(nodeId));
+        messageIterator.init(nodeId);
     }
 
     @Override
     public void release() {
-        messageQueues.release();
+        queues.release();
     }
 
     public static class AsyncIterator implements Messages.MessageIterator {
 
-        Queue<Double> queue;
+        private final PrimitiveAsyncDoubleQueues queues;
+        private long nodeId;
 
-        void init(@Nullable Queue<Double> queue) {
-            this.queue = queue;
+        public AsyncIterator(PrimitiveAsyncDoubleQueues queues) {this.queues = queues;}
+
+        void init(long nodeId) {
+            this.nodeId = nodeId;
         }
 
         @Override
         public boolean hasNext() {
-            return (queue.peek()) != null;
+            return !queues.isEmpty(nodeId);
         }
 
         @Override
         public double nextDouble() {
-            return queue.poll();
+            return queues.pop(nodeId);
         }
 
         @Override
         public boolean isEmpty() {
-            return queue.isEmpty();
+            return queues.isEmpty(nodeId);
         }
     }
 
