@@ -48,23 +48,23 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
     implements MutateRelationshipWithPropertyTest<AStar, ShortestPathAStarMutateConfig, DijkstraResult> {
 
     private static final String EXISTING_GRAPH =        "CREATE" +
-        "  (nA {latitude: 1.304444D,    longitude: 103.717373D})" +
-        ", (nB {latitude: 1.1892D,      longitude: 103.4689D})" +
-        ", (nC {latitude: 8.83055556D,  longitude: 111.8725D})" +
-        ", (nD {latitude: 10.82916667D, longitude: 113.9722222D})" +
-        ", (nE {latitude: 11.9675D,     longitude: 115.2366667D})" +
-        ", (nF {latitude: 16.0728D,     longitude: 119.6128D})" +
-        ", (nG {latitude: 20.5325D,     longitude: 121.845D})" +
-        ", (nH {latitude: 29.32611111D, longitude: 131.2988889D})" +
-        ", (nI {latitude: -2.0428D,     longitude: 108.6225D})" +
-        ", (nJ {latitude: -8.3256D,     longitude: 115.8872D})" +
-        ", (nK {latitude: -8.5945D,     longitude: 116.6867D})" +
-        ", (nL {latitude: -8.2211D,     longitude: 125.2411D})" +
-        ", (nM {latitude: -1.8558D,     longitude: 126.5572D})" +
-        ", (nN {latitude: 3.96861111D,  longitude: 128.3052778D})" +
-        ", (nO {latitude: 12.76305556D, longitude: 131.2980556D})" +
-        ", (nP {latitude: 22.32027778D, longitude: 134.700000D})" +
-        ", (nX {latitude: 35.562222D,   longitude: 140.059187D})" +
+        "  (nA:Label {latitude: 1.304444D,    longitude: 103.717373D})" +
+        ", (nB:Label {latitude: 1.1892D,      longitude: 103.4689D})" +
+        ", (nC:Label {latitude: 8.83055556D,  longitude: 111.8725D})" +
+        ", (nD:Label {latitude: 10.82916667D, longitude: 113.9722222D})" +
+        ", (nE:Label {latitude: 11.9675D,     longitude: 115.2366667D})" +
+        ", (nF:Label {latitude: 16.0728D,     longitude: 119.6128D})" +
+        ", (nG:Label {latitude: 20.5325D,     longitude: 121.845D})" +
+        ", (nH:Label {latitude: 29.32611111D, longitude: 131.2988889D})" +
+        ", (nI:Label {latitude: -2.0428D,     longitude: 108.6225D})" +
+        ", (nJ:Label {latitude: -8.3256D,     longitude: 115.8872D})" +
+        ", (nK:Label {latitude: -8.5945D,     longitude: 116.6867D})" +
+        ", (nL:Label {latitude: -8.2211D,     longitude: 125.2411D})" +
+        ", (nM:Label {latitude: -1.8558D,     longitude: 126.5572D})" +
+        ", (nN:Label {latitude: 3.96861111D,  longitude: 128.3052778D})" +
+        ", (nO:Label {latitude: 12.76305556D, longitude: 131.2980556D})" +
+        ", (nP:Label {latitude: 22.32027778D, longitude: 134.700000D})" +
+        ", (nX:Label {latitude: 35.562222D,   longitude: 140.059187D})" +
         ", (nA)-[{w: 29.0}]->(nB)" +
         ", (nB)-[{w: 694.0}]->(nC)" +
         ", (nC)-[{w: 172.0}]->(nD)" +

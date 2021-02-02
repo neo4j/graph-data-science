@@ -47,6 +47,12 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
 
     private static final String EXISTING_GRAPH =
         "CREATE" +
+        ", (c:Label)" +
+        ", (d:Label)" +
+        ", (e:Label)" +
+        ", (f:Label)" +
+        ", (g:Label)" +
+        ", (h:Label)" +
         ", (c)-[{w: 3.0}]->(d)" +
         ", (c)-[{w: 2.0}]->(e)" +
         ", (d)-[{w: 4.0}]->(f)" +

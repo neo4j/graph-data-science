@@ -47,7 +47,13 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
 
     private static final String EXISTING_GRAPH =
         "CREATE" +
-        "  (a)-[{w: 4.0D}]->(b)" +
+        "  (a:Label)" +
+        ", (b:Label)" +
+        ", (c:Label)" +
+        ", (d:Label)" +
+        ", (e:Label)" +
+        ", (f:Label)" +
+        ", (a)-[{w: 4.0D}]->(b)" +
         ", (a)-[{w: 2.0D}]->(c)" +
         ", (b)-[{w: 5.0D}]->(c)" +
         ", (b)-[{w: 10.0D}]->(d)" +
