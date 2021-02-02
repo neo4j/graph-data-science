@@ -76,9 +76,9 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         return new AStar(dijkstra);
     }
 
-    public static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation(boolean hasPathExpression) {
         return MemoryEstimations.builder(AStar.class)
-            .add("Dijkstra", Dijkstra.memoryEstimation())
+            .add("Dijkstra", Dijkstra.memoryEstimation(false, hasPathExpression))
             .add("distanceCache", HugeLongDoubleMap.memoryEstimation())
             .build();
     }
