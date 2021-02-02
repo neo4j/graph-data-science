@@ -44,6 +44,7 @@ ifeval::["{algorithm}" == "Yen's"]
 endif::[]
 | writeNodeIds      | Boolean | false   | yes      | If true, the written relationship has a nodeIds list property.
 | writeCosts        | Boolean | false   | yes      | If true, the written relationship has a costs list property.
+| pathExpression    | String  | false   | yes      | A regular expression that is applied on the concatenated node labels during traversal; excludes a path if it matches.
 |===
 
 .Results
