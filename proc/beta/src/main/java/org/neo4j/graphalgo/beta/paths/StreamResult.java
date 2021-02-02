@@ -25,6 +25,7 @@ import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -111,8 +112,8 @@ public final class StreamResult {
                 idMapping.toOriginalNodeId(pathResult.targetNode()),
                 pathResult.totalCost(),
                 // 😿
-                Arrays.stream(nodeIds).boxed().collect(Collectors.toList()),
-                Arrays.stream(costs).boxed().collect(Collectors.toList()),
+                Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
+                Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
                 path
             );
         }
