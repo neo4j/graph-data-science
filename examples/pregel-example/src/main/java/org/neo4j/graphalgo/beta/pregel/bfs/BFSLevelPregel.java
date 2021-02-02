@@ -37,7 +37,7 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
     public static final String LEVEL = "LEVEL";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(BFSPregelConfig config) {
         return new PregelSchema.Builder().add(LEVEL, ValueType.LONG).build();
     }
 

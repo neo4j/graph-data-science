@@ -208,7 +208,7 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .returns(MemoryEstimation.class)
                 .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addStatement("var computation = new $T()", computationClassName(pregelSpec, ""))
-                .addStatement("return $T.memoryEstimation(computation.schema(), computation.reducer().isPresent())", Pregel.class)
+                .addStatement("return $T.memoryEstimation(computation.schema(configuration), computation.reducer().isPresent())", Pregel.class)
                 .build()
             )
             .build();

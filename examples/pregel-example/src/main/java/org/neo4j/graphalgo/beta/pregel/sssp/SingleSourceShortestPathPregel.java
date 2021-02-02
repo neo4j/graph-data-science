@@ -43,7 +43,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     static final String DISTANCE = "DISTANCE";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(SingleSourceShortestPathPregelConfig config) {
         return new PregelSchema.Builder().add(DISTANCE, ValueType.LONG).build();
     }
 
