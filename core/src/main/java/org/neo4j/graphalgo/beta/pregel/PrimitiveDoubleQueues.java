@@ -128,6 +128,11 @@ public class PrimitiveDoubleQueues {
     }
 
     @TestOnly
+    long tail(long nodeId) {
+        return currentTails.get(nodeId);
+    }
+
+    @TestOnly
     double[] queue(long nodeId) {
         return currentQueues.get(nodeId);
     }
