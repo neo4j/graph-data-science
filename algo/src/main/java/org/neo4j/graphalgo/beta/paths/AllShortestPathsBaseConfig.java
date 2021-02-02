@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.paths;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig, PathExpressionConfig {
 
     long sourceNode();
 }

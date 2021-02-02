@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
@@ -35,10 +36,14 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
@@ -47,6 +52,7 @@ import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EM
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private static final long PATH_END = -1;
+    private static final long NO_RELATIONSHIP = -1;
 
     private final Graph graph;
     // Takes a visited node as input and decides if a path should be emitted.
@@ -71,6 +77,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private long pathIndex;
     // returns true if the given relationship should be traversed
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
+    // used for filtering on node labels while extending the path
+    private final Matcher matcher;
+    // a cache for node labels to avoid expensive graph.nodeLabel lookup
+    private final HugeObjectArray<String> labelCache;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -90,6 +100,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
+            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -110,6 +121,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
+            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -117,15 +129,22 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public static MemoryEstimation memoryEstimation() {
-        return memoryEstimation(false);
+        return memoryEstimation(false, false);
     }
 
-    public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
+    public static MemoryEstimation memoryEstimation(boolean trackRelationships, boolean hasPathExpression) {
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
             .add("reverse path", HugeLongLongMap.memoryEstimation());
         if (trackRelationships) {
             builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
+        }
+        if (hasPathExpression) {
+            // We assume BYTES_OBJECT_REF per array entry,
+            // since we store Strings, which are shared via
+            // an interned String cache. Also, all entries
+            // set is probably not the average case.
+            builder.add("label cache", HugeObjectArray.memoryEstimation(MemoryUsage.BYTES_OBJECT_REF));
         }
         return builder
             .perNode("visited set", MemoryUsage::sizeOfBitset)
@@ -137,6 +156,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         long sourceNode,
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
+        Optional<String> pathPattern,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
@@ -154,6 +174,14 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.visited = new BitSet();
         this.pathIndex = 0L;
         this.progressLogger = progressLogger;
+        this.matcher = pathPattern.map(Pattern::compile).map(p -> p.matcher("")).orElse(null);
+
+        if (pathPattern.isPresent()) {
+            withRelationshipFilter(buildPathExpression());
+            this.labelCache = HugeObjectArray.newArray(String.class, graph.nodeCount(), tracker);
+        } else {
+            this.labelCache = null;
+        }
     }
 
     public Dijkstra withSourceNode(long sourceNode) {
@@ -162,16 +190,18 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
-        this.relationshipFilter = relationshipFilter;
+        this.relationshipFilter = this.relationshipFilter.and(relationshipFilter);
         return this;
     }
 
-    // Resets the internal state of the algorithm.
-    public void clear() {
+    // Resets the traversal state of the algorithm.
+    // The predecessor array is not cleared to allow
+    // Yen's algorithm to backtrack to the original
+    // source node.
+    public void resetTraversalState() {
         traversalState = CONTINUE;
         queue.clear();
         visited.clear();
-        predecessors.clear();
         if (trackRelationships) {
             relationships.clear();
         }
@@ -261,16 +291,29 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         var relationshipIds = trackRelationships ? new LongArrayDeque() : null;
         var costs = new DoubleArrayDeque();
 
+        // We backtrack until we reach the source node.
+        // The source node is either given by Dijkstra
+        // or adjusted by Yen's algorithm.
+        var pathStart = this.sourceNode;
         var lastNode = target;
         var prevNode = lastNode;
 
-        while (lastNode != PATH_END) {
+        while (true) {
             pathNodeIds.addFirst(lastNode);
             costs.addFirst(queue.cost(lastNode));
+
+            // Break if we reach the end by hitting the source node.
+            // This happens either by not having a predecessor or by
+            // arriving at the predecessor if we are a spur path from
+            // Yen's algorithm.
+            if (lastNode == pathStart) {
+                break;
+            }
+
             prevNode = lastNode;
-            lastNode = this.predecessors.getOrDefault(lastNode, PATH_END);
-            if (trackRelationships && lastNode != PATH_END) {
-                relationshipIds.addFirst(relationships.getOrDefault(prevNode, PATH_END));
+            lastNode = this.predecessors.getOrDefault(lastNode, pathStart);
+            if (trackRelationships) {
+                relationshipIds.addFirst(relationships.getOrDefault(prevNode, NO_RELATIONSHIP));
             }
         }
 
@@ -281,6 +324,62 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .relationshipIds(trackRelationships ? relationshipIds.toArray() : EMPTY_ARRAY)
             .costs(costs.toArray())
             .build();
+    }
+
+    private RelationshipFilter buildPathExpression() {
+        // labels are appended to this one, reversed in the end
+        final var pathBuilder = new StringBuilder();
+        // used to reverse label strings
+        final var labelBuilder = new StringBuilder();
+
+        // This method is called to check if a target node should
+        // be visited by the algorithm. To verify the given path
+        // expression, we concatenate all node labels of the current
+        // traversal from the source node up until the target node.
+        // If the concatenated string matches the given pattern,
+        // we are not allowed to traverse the path further.
+        return (source, target, relationshipId) -> {
+            pathBuilder.setLength(0);
+            pathBuilder.append(label(target, labelBuilder));
+
+            var lastNode = source;
+            while (lastNode != PATH_END) {
+                pathBuilder.append(label(lastNode, labelBuilder));
+                if (matches(pathBuilder)) {
+                    return false;
+                }
+                lastNode = predecessors.getOrDefault(lastNode, PATH_END);
+            }
+            return true;
+        };
+    }
+
+    private boolean matches(StringBuilder sb) {
+        var input = sb.reverse().toString();
+        matcher.reset(input);
+        sb.reverse();
+        return matcher.matches();
+    }
+
+    private String label(long nodeId, StringBuilder sb) {
+        var maybeCached = labelCache.get(nodeId);
+        if (maybeCached == null) {
+            // Concatenate sorted node labels.
+            maybeCached = graph.nodeLabels(nodeId)
+                .stream()
+                .map(NodeLabel::name)
+                .sorted()
+                .collect(Collectors.joining());
+
+            // Store the concatenated label reversed since the
+            // whole path label will be reversed eventually.
+            sb.append(maybeCached);
+            maybeCached = sb.reverse().toString();
+            sb.setLength(0);
+
+            labelCache.set(nodeId, maybeCached);
+        }
+        return maybeCached;
     }
 
     @Override
@@ -309,9 +408,15 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     @FunctionalInterface
     public interface RelationshipFilter {
         boolean test(long source, long target, long relationshipId);
+
+        default RelationshipFilter and(RelationshipFilter after) {
+            return (sourceNodeId, targetNodeId, relationshipId) ->
+                this.test(sourceNodeId, targetNodeId, relationshipId) &&
+                after.test(sourceNodeId, targetNodeId, relationshipId);
+        }
     }
 
-    public static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
+    private static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
