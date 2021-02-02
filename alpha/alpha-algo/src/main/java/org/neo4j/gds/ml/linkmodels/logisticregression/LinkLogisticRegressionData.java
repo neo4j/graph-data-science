@@ -21,12 +21,16 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
 @ValueClass
 public interface LinkLogisticRegressionData {
+
     Weights<Matrix> weights();
 
     LinkFeatureCombiner linkFeatureCombiner();
@@ -34,6 +38,28 @@ public interface LinkLogisticRegressionData {
     List<String> featureProperties();
 
     int numberOfFeatures();
+
+    static LinkLogisticRegressionData from(
+        Graph graph,
+        List<String> featureProperties,
+        LinkFeatureCombiner linkFeatureCombiner
+    ) {
+        var numberOfFeatures = computeNumberOfFeatures(graph, featureProperties);
+        var weights = new Weights<>(new Matrix(new double[numberOfFeatures], 1, numberOfFeatures));
+
+        return builder()
+            .weights(weights)
+            .linkFeatureCombiner(linkFeatureCombiner)
+            .featureProperties(featureProperties)
+            .numberOfFeatures(numberOfFeatures)
+            .build();
+    }
+
+    private static int computeNumberOfFeatures(Graph graph, List<String> featureProperties) {
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+        featureExtractors.add(new BiasFeature());
+        return FeatureExtraction.featureCount(featureExtractors);
+    }
 
     static ImmutableLinkLogisticRegressionData.Builder builder() {
         return ImmutableLinkLogisticRegressionData.builder();

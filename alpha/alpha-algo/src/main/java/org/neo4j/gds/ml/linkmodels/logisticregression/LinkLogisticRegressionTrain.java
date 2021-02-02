@@ -48,9 +48,13 @@ public class LinkLogisticRegressionTrain {
     }
 
     public LinkLogisticRegressionPredictor compute() {
-        var objective = new LinkLogisticRegressionObjective(
+        var llrData = LinkLogisticRegressionData.from(
+            graph,
             config.featureProperties(),
-            LinkFeatureCombiner.valueOf(config.linkFeatureCombiner()),
+            LinkFeatureCombiner.valueOf(config.linkFeatureCombiner())
+        );
+        var objective = new LinkLogisticRegressionObjective(
+            llrData,
             config.penalty(),
             graph
         );

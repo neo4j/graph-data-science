@@ -32,8 +32,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.batch.Batch;
-import org.neo4j.gds.ml.features.BiasFeature;
-import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -45,39 +43,10 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
     private final Graph graph;
     private final double penalty;
 
-    public LinkLogisticRegressionObjective(
-        List<String> featureProperties,
-        LinkFeatureCombiner linkFeatureCombiner,
-        double penalty,
-        Graph graph
-    ) {
-        super(makeData(graph, featureProperties, linkFeatureCombiner));
+    public LinkLogisticRegressionObjective(LinkLogisticRegressionData llrData, double penalty, Graph graph) {
+        super(llrData);
         this.graph = graph;
         this.penalty = penalty;
-    }
-
-    private static LinkLogisticRegressionData makeData(
-        Graph graph,
-        List<String> featureProperties,
-        LinkFeatureCombiner linkFeatureCombiner
-    ) {
-        return LinkLogisticRegressionData.builder()
-            .weights(initWeights(graph, featureProperties))
-            .linkFeatureCombiner(linkFeatureCombiner)
-            .featureProperties(featureProperties)
-            .numberOfFeatures(computeNumberOfFeatures(graph, featureProperties))
-            .build();
-    }
-
-    private static int computeNumberOfFeatures(Graph graph, List<String> featureProperties) {
-        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
-        featureExtractors.add(new BiasFeature());
-        return FeatureExtraction.featureCount(featureExtractors);
-    }
-
-    private static Weights<Matrix> initWeights(Graph graph, List<String> featureProperties) {
-        double[] weights = new double[computeNumberOfFeatures(graph, featureProperties)];
-        return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 
     @Override

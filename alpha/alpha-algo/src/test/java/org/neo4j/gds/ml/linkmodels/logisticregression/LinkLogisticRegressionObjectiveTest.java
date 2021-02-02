@@ -63,7 +63,12 @@ class LinkLogisticRegressionObjectiveTest {
 
     @Test
     void shouldProduceCorrectLoss() {
-        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, 1.0, graph);
+        var data = LinkLogisticRegressionData.from(
+            graph,
+            List.of("a", "b"),
+            LinkFeatureCombiner.L2
+        );
+        var objective = new LinkLogisticRegressionObjective(data, 1.0, graph);
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
@@ -73,7 +78,12 @@ class LinkLogisticRegressionObjectiveTest {
 
     @Test
     void shouldProduceCorrectLossWithNonZeroWeights() {
-        var objective = new LinkLogisticRegressionObjective(List.of("a", "b"), LinkFeatureCombiner.L2, 1.0, graph);
+        var data = LinkLogisticRegressionData.from(
+            graph,
+            List.of("a", "b"),
+            LinkFeatureCombiner.L2
+        );
+        var objective = new LinkLogisticRegressionObjective(data, 1.0, graph);
         // we proceed to "injecting" non-zero values for the weights of the model
         var weights = objective.weights();
         var backingArray = weights.get(0).data().data();
