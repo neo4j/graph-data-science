@@ -42,21 +42,21 @@ class LinkPredictionTrainTest {
     // Five cliques of size 2, 3, or 4
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH =
-        "(a:N {z: 0}), " +
-        "(b:N {z: 0}), " +
-        "(c:N {z: 0}), " +
-        "(d:N {z: 0}), " +
-        "(e:N {z: 100}), " +
-        "(f:N {z: 100}), " +
-        "(g:N {z: 100}), " +
-        "(h:N {z: 200}), " +
-        "(i:N {z: 200}), " +
-        "(j:N {z: 300}), " +
-        "(k:N {z: 300}), " +
-        "(l:N {z: 300}), " +
-        "(m:N {z: 400}), " +
-        "(n:N {z: 400}), " +
-        "(o:N {z: 400}), " +
+        "(a:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(b:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(c:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(d:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(e:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(f:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(g:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(h:N {z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
+        "(i:N {z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
+        "(j:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(k:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(l:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(m:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(n:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(o:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
 
         "(a)-[:TRAIN {label: 1}]->(b), " +
         "(a)-[:TEST {label: 1}]->(c), " +       // selected for test
@@ -116,6 +116,51 @@ class LinkPredictionTrainTest {
             .trainRelationshipType(RelationshipType.of("unused"))
             .testRelationshipType(RelationshipType.of("unused"))
             .featureProperties(List.of("z"))
+            .modelName("model")
+            .validationFolds(3)
+            .randomSeed(-1L)
+            .classRatio(classRatio)
+            .params(List.of(
+                Map.of("maxIterations", 0),
+                expectedWinner
+            )).build();
+
+        var linkPredictionTrain = new LinkPredictionTrain(
+            trainGraph,
+            testGraph,
+            config,
+            TestProgressLogger.NULL_LOGGER.getLog()
+        );
+
+        var model = linkPredictionTrain.compute();
+
+        var customInfo = (LinkPredictionModelInfo) model.customInfo();
+        var validationScores = customInfo.metrics().get(LinkMetric.AUCPR).validation();
+
+        assertThat(validationScores).hasSize(2);
+        var actualWinnerParams = customInfo.bestParameters();
+        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
+        double model1Score = validationScores.get(0).avg();
+        double model2Score = validationScores.get(1).avg();
+        assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
+    }
+
+    @Test
+    void trainsAModelWithListFeatures() {
+        var trainGraph = graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
+        var testGraph = graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
+
+        var nodeCount = 15;
+        var truePositives = 16;
+        double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
+        double trueNegatives = maxNumberOfRelationships - truePositives;
+        var classRatio = trueNegatives / truePositives;
+
+        var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
+        var config = ImmutableLinkPredictionTrainConfig.builder()
+            .trainRelationshipType(RelationshipType.of("unused"))
+            .testRelationshipType(RelationshipType.of("unused"))
+            .featureProperties(List.of("array"))
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
