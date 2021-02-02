@@ -327,7 +327,10 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     private RelationshipFilter pathExpression() {
-        final var sb = new StringBuilder();
+        // labels are appended to this one, reversed in the end
+        final var pathBuilder = new StringBuilder();
+        // used to reverse label strings
+        final var labelBuilder = new StringBuilder();
 
         // This method is called to check if a target node should
         // be visited by the algorithm. To verify the given path
@@ -336,27 +339,44 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         // If the concatenated string matches the given pattern,
         // we are not allowed to traverse the path further.
         return (source, target, relationshipId) -> {
-            sb.setLength(0);
-            sb.append(label(target));
+            pathBuilder.setLength(0);
+            pathBuilder.append(label(target, labelBuilder));
 
             var lastNode = source;
             while (lastNode != PATH_END) {
-                sb.append(label(lastNode));
+                pathBuilder.append(label(lastNode, labelBuilder));
+                if (matches(pathBuilder)) {
+                    return false;
+                }
                 lastNode = predecessors.getOrDefault(lastNode, PATH_END);
             }
-            matcher.reset(sb.reverse().toString());
-
-            return !matcher.matches();
+            return true;
         };
     }
 
-    private String label(long nodeId) {
+    private boolean matches(StringBuilder sb) {
+        var input = sb.reverse().toString();
+        matcher.reset(input);
+        sb.reverse();
+        return matcher.matches();
+    }
+
+    private String label(long nodeId, StringBuilder sb) {
         var maybeCached = labelCache.get(nodeId);
         if (maybeCached == null) {
+            // Concatenate sorted node labels.
             maybeCached = graph.nodeLabels(nodeId)
                 .stream()
                 .map(NodeLabel::name)
+                .sorted()
                 .collect(Collectors.joining());
+
+            // Store the concatenated label reversed since the
+            // whole path label will be reversed eventually.
+            sb.append(maybeCached);
+            maybeCached = sb.reverse().toString();
+            sb.setLength(0);
+
             labelCache.set(nodeId, maybeCached);
         }
         return maybeCached;
