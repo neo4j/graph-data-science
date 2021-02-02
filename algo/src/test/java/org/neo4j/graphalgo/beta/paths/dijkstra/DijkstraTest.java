@@ -482,4 +482,54 @@ final class DijkstraTest {
             assertEquals(expected, path);
         }
     }
+
+    @Nested
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
+    class Graph4 {
+
+        // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Alpha)" +
+            ", (b:Bravo)" +
+            ", (c:Charlie:Golf)" +
+            ", (d:Delta)" +
+            ", (e:Echo)" +
+            ", (f:Foxtrot)" +
+
+            ", (a)-[:TYPE {cost: 4}]->(b)" +
+            ", (a)-[:TYPE {cost: 2}]->(c)" +
+            ", (b)-[:TYPE {cost: 5}]->(c)" +
+            ", (b)-[:TYPE {cost: 10}]->(d)" +
+            ", (c)-[:TYPE {cost: 3}]->(e)" +
+            ", (d)-[:TYPE {cost: 11}]->(f)" +
+            ", (e)-[:TYPE {cost: 4}]->(d)";
+
+        @Inject
+        private Graph graph;
+
+        @Inject
+        private IdFunction idFunction;
+
+        @Test
+        void sourceTargetWithPathExpression() {
+            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(idFunction.of("a"))
+                .targetNode(idFunction.of("f"))
+                .pathExpression(".*(Charlie.*)(Echo)*(Delta).*")
+                .build();
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .compute()
+                .paths()
+                .findFirst()
+                .get();
+
+            assertEquals(expected, path);
+        }
+    }
 }
