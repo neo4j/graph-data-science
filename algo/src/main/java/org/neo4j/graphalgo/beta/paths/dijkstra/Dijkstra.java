@@ -177,7 +177,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.matcher = pathPattern.map(Pattern::compile).map(p -> p.matcher("")).orElse(null);
 
         if (pathPattern.isPresent()) {
-            withRelationshipFilter(pathExpression());
+            withRelationshipFilter(buildPathExpression());
             this.labelCache = HugeObjectArray.newArray(String.class, graph.nodeCount(), tracker);
         } else {
             this.labelCache = null;
@@ -326,7 +326,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .build();
     }
 
-    private RelationshipFilter pathExpression() {
+    private RelationshipFilter buildPathExpression() {
         // labels are appended to this one, reversed in the end
         final var pathBuilder = new StringBuilder();
         // used to reverse label strings
@@ -416,7 +416,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         }
     }
 
-    public static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
+    private static HugeLongPriorityQueue minPriorityQueue(long capacity, HeuristicFunction heuristicFunction) {
         return new HugeLongPriorityQueue(capacity) {
             @Override
             protected boolean lessThan(long a, long b) {
