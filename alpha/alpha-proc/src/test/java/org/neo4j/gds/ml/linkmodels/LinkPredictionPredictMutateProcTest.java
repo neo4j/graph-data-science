@@ -148,7 +148,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                     )
                 )
                 .linkFeatureCombiner(LinkFeatureCombiner.L2)
-                .nodePropertyKeys(List.of("a"))
+                .featureProperties(List.of("a"))
                 .numberOfFeatures(2)
                 .build(),
             ImmutableLinkPredictionTrainConfig.builder()
