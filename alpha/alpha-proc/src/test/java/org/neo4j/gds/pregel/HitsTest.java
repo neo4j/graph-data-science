@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.pregel.Hits.AUTH_PROPERTY;
-import static org.neo4j.gds.pregel.Hits.HUB_PROPERTY;
 
 @GdlExtension
 class HitsTest {
@@ -99,8 +97,8 @@ class HitsTest {
             expectedHubScores.put(node, expectedHub);
             expectedAuthScores.put(node, expectedAuth);
 
-            var actualHub = result.nodeValues().doubleProperties(HUB_PROPERTY).get(nodeId);
-            var actualAuth = result.nodeValues().doubleProperties(AUTH_PROPERTY).get(nodeId);
+            var actualHub = result.nodeValues().doubleProperties(config.hubProperty()).get(nodeId);
+            var actualAuth = result.nodeValues().doubleProperties(config.authProperty()).get(nodeId);
             actualHubScores.put(node, actualHub);
             actualAuthScores.put(node, actualAuth);
         });
