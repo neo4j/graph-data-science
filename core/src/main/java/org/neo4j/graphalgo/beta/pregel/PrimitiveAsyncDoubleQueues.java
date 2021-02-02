@@ -36,9 +36,9 @@ public class PrimitiveAsyncDoubleQueues {
     private static final int MIN_CAPACITY = 42;
 
     // toggling in-between super steps
-    private HugeObjectArray<double[]> queues;
-    private HugeAtomicLongArray heads;
-    private HugeAtomicLongArray tails;
+    private final HugeObjectArray<double[]> queues;
+    private final HugeAtomicLongArray heads;
+    private final HugeAtomicLongArray tails;
 
     public PrimitiveAsyncDoubleQueues(long nodeCount, AllocationTracker tracker) {
         this(nodeCount, MIN_CAPACITY, tracker);
@@ -59,7 +59,9 @@ public class PrimitiveAsyncDoubleQueues {
     }
 
     void init(int iteration) {
-        compact();
+        if (iteration > 0) {
+            compact();
+        }
     }
 
     void compact() {
@@ -82,10 +84,6 @@ public class PrimitiveAsyncDoubleQueues {
                 tails.set(i, length);
             }
         }
-    }
-
-    void initIterator(SyncQueueMessenger.QueueIterator iterator, long nodeId) {
-//        iterator.init(prevQueues.get(nodeId), (int) prevTails.get(nodeId));
     }
 
     boolean isEmpty(long nodeId) {

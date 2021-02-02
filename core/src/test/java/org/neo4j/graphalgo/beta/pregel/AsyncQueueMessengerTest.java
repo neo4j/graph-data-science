@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.jctools.queues.MpscLinkedQueue;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,11 +30,11 @@ class AsyncQueueMessengerTest {
 
     @Test
     void allowMultipleCallsToHasNext() {
-        var queue = new MpscLinkedQueue<Double>();
-        queue.offer(42.0);
+        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        queues.push(0, 42.0);
 
-        var messageIterator = new AsyncQueueMessenger.AsyncIterator();
-        messageIterator.init(queue);
+        var messageIterator = new AsyncQueueMessenger.AsyncIterator(queues);
+        messageIterator.init(0);
 
         assertTrue(messageIterator.hasNext());
         assertTrue(messageIterator.hasNext());
