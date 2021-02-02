@@ -71,7 +71,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         registerProcedures(LinkPredictionPredictMutateProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
-        runQueryWithResultConsumer(createQuery("g", UNDIRECTED), r -> System.out.println(r.resultAsString()));
+        runQuery(createQuery("g", UNDIRECTED));
     }
 
     private String createQuery(String graphName, Orientation orientation) {
@@ -157,6 +157,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .featureProperties(List.of("a"))
+                .classRatio(1d)
                 .build()
         ));
     }

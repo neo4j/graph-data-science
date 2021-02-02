@@ -43,53 +43,63 @@ import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 
 class LinkPredictionTrainProcTest extends BaseProcTest {
 
+    // Five cliques of size 2, 3, or 4
     private static final String GRAPH =
         "CREATE " +
-        "(a:N {a: 0}), " +
-        "(b:N {a: 0}), " +
-        "(c:N {a: 0}), " +
-        "(d:N {a: 100}), " +
-        "(e:N {a: 100}), " +
-        "(f:N {a: 100}), " +
-        "(g:N {a: 200}), " +
-        "(h:N {a: 200}), " +
-        "(i:N {a: 200}), " +
-        "(j:N {a: 300}), " +
-        "(k:N {a: 300}), " +
-        "(l:N {a: 300}), " +
-        "(m:N {a: 400}), " +
-        "(n:N {a: 400}), " +
-        "(o:N {a: 400}), " +
-        "(c)-[:TRAIN {label: 1}]->(a), " +
-        "(d)-[:TRAIN {label: 1}]->(e), " +
-        "(e)-[:TRAIN {label: 1}]->(f), " +
-        "(f)-[:TRAIN {label: 1}]->(d), " +
-        "(g)-[:TRAIN {label: 1}]->(h), " +
+        "(a:N {z: 0}), " +
+        "(b:N {z: 0}), " +
+        "(c:N {z: 0}), " +
+        "(d:N {z: 0}), " +
+        "(e:N {z: 100}), " +
+        "(f:N {z: 100}), " +
+        "(g:N {z: 100}), " +
+        "(h:N {z: 200}), " +
+        "(i:N {z: 200}), " +
+        "(j:N {z: 300}), " +
+        "(k:N {z: 300}), " +
+        "(l:N {z: 300}), " +
+        "(m:N {z: 400}), " +
+        "(n:N {z: 400}), " +
+        "(o:N {z: 400}), " +
+
+        "(a)-[:TRAIN {label: 1}]->(b), " +
+        "(a)-[:TEST {label: 1}]->(c), " +       // selected for test
+        "(a)-[:TRAIN {label: 1}]->(d), " +
+        "(b)-[:TRAIN {label: 1}]->(c), " +
+        "(b)-[:TEST {label: 1}]->(d), " +       // selected for test
+        "(c)-[:TRAIN {label: 1}]->(d), " +
+
+        "(e)-[:TEST {label: 1}]->(f), " +       // selected for test
+        "(e)-[:TRAIN {label: 1}]->(g), " +
+        "(f)-[:TRAIN {label: 1}]->(g), " +
+
         "(h)-[:TRAIN {label: 1}]->(i), " +
-        "(i)-[:TRAIN {label: 1}]->(g), " +
+
         "(j)-[:TRAIN {label: 1}]->(k), " +
-        "(l)-[:TRAIN {label: 1}]->(j), " +
-        "(m)-[:TRAIN {label: 1}]->(n), " +
+        "(j)-[:TRAIN {label: 1}]->(l), " +
+        "(k)-[:TRAIN {label: 1}]->(l), " +
+
+        "(m)-[:TEST {label: 1}]->(n), " +       // selected for test
+        "(m)-[:TEST {label: 1}]->(o), " +       // selected for test
         "(n)-[:TRAIN {label: 1}]->(o), " +
-        "(o)-[:TRAIN {label: 1}]->(m), " +
-        "(a)-[:TRAIN {label: 0}]->(d), " +
+        // 11 false positive TRAIN rels
+        "(a)-[:TRAIN {label: 0}]->(e), " +
+        "(a)-[:TRAIN {label: 0}]->(o), " +
         "(b)-[:TRAIN {label: 0}]->(e), " +
-        "(c)-[:TRAIN {label: 0}]->(f), " +
-        "(d)-[:TRAIN {label: 0}]->(g), " +
-        "(e)-[:TRAIN {label: 0}]->(h), " +
-        "(f)-[:TRAIN {label: 0}]->(i), " +
-        "(g)-[:TRAIN {label: 0}]->(j), " +
+        "(e)-[:TRAIN {label: 0}]->(i), " +
+        "(e)-[:TRAIN {label: 0}]->(o), " +
+        "(e)-[:TRAIN {label: 0}]->(n), " +
         "(h)-[:TRAIN {label: 0}]->(k), " +
-        "(i)-[:TRAIN {label: 0}]->(l), " +
-        "(j)-[:TRAIN {label: 0}]->(m), " +
-        "(k)-[:TRAIN {label: 0}]->(n), " +
-        "(l)-[:TRAIN {label: 0}]->(o), " +
-        "(a)-[:TEST {label: 1}]->(b), " +
-        "(b)-[:TEST {label: 1}]->(c), " +
-        "(k)-[:TEST {label: 1}]->(l), " +
-        "(g)-[:TEST {label: 0}]->(m), " +
-        "(l)-[:TEST {label: 0}]->(f), " +
-        "(o)-[:TEST {label: 0}]->(a)";
+        "(h)-[:TRAIN {label: 0}]->(m), " +
+        "(i)-[:TRAIN {label: 0}]->(j), " +
+        "(k)-[:TRAIN {label: 0}]->(m), " +
+        "(k)-[:TRAIN {label: 0}]->(o), " +
+        // 5 false positive TEST rels
+        "(a)-[:TEST {label: 0}]->(f), " +
+        "(b)-[:TEST {label: 0}]->(f), " +
+        "(i)-[:TEST {label: 0}]->(k), " +
+        "(j)-[:TEST {label: 0}]->(o), " +
+        "(k)-[:TEST {label: 0}]->(o)";
 
     @BeforeEach
     void setUp() throws Exception {
@@ -103,7 +113,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
         return GdsCypher
             .call()
             .withNodeLabel("N")
-            .withNodeProperty("a")
+            .withNodeProperty("z")
             .withRelationshipType(
                 "TRAIN",
                 RelationshipProjection.of("TRAIN", orientation)
@@ -131,24 +141,45 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "  testRelationshipType: 'TEST', " +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
-            "  featureProperties: ['a'], " +
+            "  featureProperties: ['z'], " +
+            "  classRatio: 5.5625," +
             "  randomSeed: -1, " +
-            "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
+            "  params: [{penalty: 0.5, maxIterations: 1}, {penalty: 2.0, maxIterations: 100}] " +
             "})";
 
         var expectedModelInfo = Map.of(
-            "bestParameters", Map.of("penalty", 0.5),
+            "bestParameters", Map.of("penalty", 0.5, "maxIterations", 1),
             "metrics", Map.of(
                 "AUCPR", Map.of(
-                    "outerTrain", 0.9999999999999998,
-                    "test", 1.0,
+                    "outerTrain", 0.9999999999999996,
+                    "test", 0.9999999999999999,
                     "train", List.of(
-                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 0.5)),
-                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 2.0))
+                        Map.of(
+                            "avg", 1.0,
+                            "max", 1.0,
+                            "min", 0.9999999999999999,
+                            "params", Map.of("penalty", 0.5, "maxIterations", 1)
+                        ),
+                        Map.of(
+                            "avg", 1.0,
+                            "max", 1.0,
+                            "min", 0.9999999999999999,
+                            "params", Map.of("penalty", 2.0, "maxIterations", 100)
+                        )
                     ),
                     "validation", List.of(
-                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 0.5)),
-                        Map.of("avg", 0.9999999999999999, "max", 1.0, "min", 0.9999999999999998, "params", Map.of("penalty", 2.0))
+                        Map.of(
+                            "avg", 1.0,
+                            "max", 1.0,
+                            "min", 0.9999999999999999,
+                            "params", Map.of("penalty", 0.5, "maxIterations", 1)
+                        ),
+                        Map.of(
+                            "avg", 1.0,
+                            "max", 1.0,
+                            "min", 0.9999999999999999,
+                            "params", Map.of("penalty", 2.0, "maxIterations", 100)
+                        )
                     )
                 )
             ),
@@ -175,9 +206,10 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g2', { " +
             "  trainRelationshipType: 'TRAIN', " +
             "  testRelationshipType: 'TEST', " +
+            "  classRatio: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
-            "  featureProperties: ['a'], " +
+            "  featureProperties: ['z'], " +
             "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
             "})";
 
@@ -192,9 +224,10 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +
             "  trainRelationshipType: 'NOPE', " +
             "  testRelationshipType: 'NIX', " +
+            "  classRatio: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
-            "  featureProperties: ['a'], " +
+            "  featureProperties: ['z'], " +
             "  params: [{penalty: 0.5}, {penalty: 2.0}] " +
             "})";
 
@@ -209,9 +242,10 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +
             "  trainRelationshipType: 'TRAIN', " +
             "  testRelationshipType: 'TEST', " +
+            "  classRatio: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
-            "  featureProperties: ['a'], " +
+            "  featureProperties: ['z'], " +
             "  params: [] " +
             "})";
 
