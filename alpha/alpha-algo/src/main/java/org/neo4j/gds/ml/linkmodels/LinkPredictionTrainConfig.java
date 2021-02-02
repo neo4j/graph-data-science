@@ -43,6 +43,9 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     @Configuration.IntegerRange(min = 2)
     int validationFolds();
 
+    @Configuration.DoubleRange(min = 0, minInclusive = false)
+    double classRatio();
+
     List<Map<String, Object>> params();
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
