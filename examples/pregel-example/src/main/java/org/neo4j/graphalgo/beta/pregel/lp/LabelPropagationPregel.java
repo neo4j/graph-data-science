@@ -40,7 +40,7 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
     public static final String LABEL_KEY = "label";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(PregelConfig config) {
         return new PregelSchema.Builder().add(LABEL_KEY, ValueType.LONG).build();
     }
 

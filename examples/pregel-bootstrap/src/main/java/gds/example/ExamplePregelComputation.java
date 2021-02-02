@@ -41,7 +41,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     public static final String KEY = "key";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(ExampleConfig config) {
         // Declare a node schema with a single node value of type Long
         return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
     }

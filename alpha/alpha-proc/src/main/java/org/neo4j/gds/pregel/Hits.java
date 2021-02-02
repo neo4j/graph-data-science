@@ -53,7 +53,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     private HitsState state = HitsState.SEND_IDS;
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(Hits.HitsConfig config) {
         return new PregelSchema.Builder()
             .add(AUTH_PROPERTY, ValueType.DOUBLE)
             .add(HUB_PROPERTY, ValueType.DOUBLE)

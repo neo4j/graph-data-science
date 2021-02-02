@@ -40,7 +40,7 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
     public static final String TRIANGLE_COUNT = "TRIANGLES";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(TriangleCountPregelConfig config) {
         return new PregelSchema.Builder()
             .add(TRIANGLE_COUNT, ValueType.LONG)
             .build();

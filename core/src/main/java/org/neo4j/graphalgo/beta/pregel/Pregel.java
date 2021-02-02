@@ -71,7 +71,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             graph,
             config,
             computation,
-            NodeValue.of(computation.schema(), graph.nodeCount(), config.concurrency(), tracker),
+            NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), tracker),
             executor,
             tracker
         );

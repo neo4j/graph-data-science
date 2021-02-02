@@ -38,7 +38,7 @@ public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
     public static final String PARENT = "parent";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(BFSPregelConfig config) {
         return new PregelSchema.Builder().add(PARENT, ValueType.LONG).build();
     }
 

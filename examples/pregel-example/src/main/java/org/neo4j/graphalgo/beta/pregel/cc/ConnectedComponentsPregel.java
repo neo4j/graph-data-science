@@ -42,7 +42,7 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     public static final String COMPONENT = "component";
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(ConnectedComponentsConfig config) {
         return new PregelSchema.Builder().add(COMPONENT, ValueType.LONG).build();
     }
 

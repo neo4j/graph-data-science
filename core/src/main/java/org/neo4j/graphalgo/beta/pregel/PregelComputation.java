@@ -45,7 +45,7 @@ public interface PregelComputation<C extends PregelConfig> {
      * <br>
      * Example:
      * <pre>
-     * public PregelSchema schema() {
+     * public PregelSchema schema(PregelConfig config) {
      *      return new PregelSchema.Builder()
      *          .add("key", ValueType.LONG)
      *          .add("privateKey", ValueType.LONG, Visibility.PRIVATE)
@@ -55,7 +55,7 @@ public interface PregelComputation<C extends PregelConfig> {
      *
      * @see org.neo4j.graphalgo.beta.pregel.PregelSchema
      */
-    PregelSchema schema();
+    PregelSchema schema(C config);
 
     /**
      * The init method is called in the beginning of the first
