@@ -30,8 +30,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Objective;
+import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.ml.features.BiasFeature;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -49,30 +51,32 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         double penalty,
         Graph graph
     ) {
-        super(makeData(featureProperties, linkFeatureCombiner));
+        super(makeData(graph, featureProperties, linkFeatureCombiner));
         this.graph = graph;
         this.penalty = penalty;
     }
 
     private static LinkLogisticRegressionData makeData(
+        Graph graph,
         List<String> featureProperties,
         LinkFeatureCombiner linkFeatureCombiner
     ) {
         return LinkLogisticRegressionData.builder()
-            .weights(initWeights(featureProperties))
+            .weights(initWeights(graph, featureProperties))
             .linkFeatureCombiner(linkFeatureCombiner)
             .featureProperties(featureProperties)
-            .numberOfFeatures(computeNumberOfFeatures(featureProperties))
+            .numberOfFeatures(computeNumberOfFeatures(graph, featureProperties))
             .build();
     }
 
-    private static int computeNumberOfFeatures(List<String> featureProperties) {
-        //TODO: use array lengths etc
-        return featureProperties.size() + 1;
+    private static int computeNumberOfFeatures(Graph graph, List<String> featureProperties) {
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+        featureExtractors.add(new BiasFeature());
+        return FeatureExtraction.featureCount(featureExtractors);
     }
 
-    private static Weights<Matrix> initWeights(List<String> featureProperties) {
-        double[] weights = new double[computeNumberOfFeatures(featureProperties)];
+    private static Weights<Matrix> initWeights(Graph graph, List<String> featureProperties) {
+        double[] weights = new double[computeNumberOfFeatures(graph, featureProperties)];
         return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 
