@@ -190,7 +190,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public Dijkstra withRelationshipFilter(RelationshipFilter relationshipFilter) {
-        this.relationshipFilter = this.relationshipFilter.andThen(relationshipFilter);
+        this.relationshipFilter = this.relationshipFilter.and(relationshipFilter);
         return this;
     }
 
@@ -409,7 +409,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     public interface RelationshipFilter {
         boolean test(long source, long target, long relationshipId);
 
-        default RelationshipFilter andThen(RelationshipFilter after) {
+        default RelationshipFilter and(RelationshipFilter after) {
             return (sourceNodeId, targetNodeId, relationshipId) ->
                 this.test(sourceNodeId, targetNodeId, relationshipId) &&
                 after.test(sourceNodeId, targetNodeId, relationshipId);
