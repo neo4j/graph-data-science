@@ -44,35 +44,35 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
     private final double penalty;
 
     public LinkLogisticRegressionObjective(
-        List<String> nodePropertyKeys,
+        List<String> featureProperties,
         LinkFeatureCombiner linkFeatureCombiner,
         double penalty,
         Graph graph
     ) {
-        super(makeData(nodePropertyKeys, linkFeatureCombiner));
+        super(makeData(featureProperties, linkFeatureCombiner));
         this.graph = graph;
         this.penalty = penalty;
     }
 
     private static LinkLogisticRegressionData makeData(
-        List<String> nodePropertyKeys,
+        List<String> featureProperties,
         LinkFeatureCombiner linkFeatureCombiner
     ) {
         return LinkLogisticRegressionData.builder()
-            .weights(initWeights(nodePropertyKeys))
+            .weights(initWeights(featureProperties))
             .linkFeatureCombiner(linkFeatureCombiner)
-            .nodePropertyKeys(nodePropertyKeys)
-            .numberOfFeatures(computeNumberOfFeatures(nodePropertyKeys))
+            .featureProperties(featureProperties)
+            .numberOfFeatures(computeNumberOfFeatures(featureProperties))
             .build();
     }
 
-    private static int computeNumberOfFeatures(List<String> nodePropertyKeys) {
+    private static int computeNumberOfFeatures(List<String> featureProperties) {
         //TODO: use array lengths etc
-        return nodePropertyKeys.size() + 1;
+        return featureProperties.size() + 1;
     }
 
-    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys) {
-        double[] weights = new double[computeNumberOfFeatures(nodePropertyKeys)];
+    private static Weights<Matrix> initWeights(List<String> featureProperties) {
+        double[] weights = new double[computeNumberOfFeatures(featureProperties)];
         return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 

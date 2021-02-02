@@ -66,7 +66,7 @@ class LinkPredictionPredictTest {
             }, 1, numberOfFeatures)))
             .linkFeatureCombiner(LinkFeatureCombiner.L2)
             .numberOfFeatures(numberOfFeatures)
-            .nodePropertyKeys(List.of("a", "b"))
+            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new LinkPredictionPredict(

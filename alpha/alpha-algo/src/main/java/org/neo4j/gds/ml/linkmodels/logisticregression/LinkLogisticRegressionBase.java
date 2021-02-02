@@ -82,7 +82,7 @@ public class LinkLogisticRegressionBase {
         FeatureExtraction.extract(
             nodeId,
             -1,
-            FeatureExtraction.propertyExtractors(graph, modelData.nodePropertyKeys()),
+            FeatureExtraction.propertyExtractors(graph, modelData.featureProperties()),
             consumer
         );
         return features;

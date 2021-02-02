@@ -31,7 +31,7 @@ public interface LinkLogisticRegressionData {
 
     LinkFeatureCombiner linkFeatureCombiner();
 
-    List<String> nodePropertyKeys();
+    List<String> featureProperties();
 
     int numberOfFeatures();
 
