@@ -2,7 +2,7 @@
 [[algorithms-hits]]
 [.alpha]
 = HITS
-:entity: node
+:entity: pregel
 :result: authority and hub scores
 :algorithm: HITS
 
@@ -256,7 +256,10 @@ In the following examples we will demonstrate using the HITS algorithm on this g
 [[algorithms-hits-examples-stream]]
 === Stream
 
-include::../../shared/examples-stream-intro.adoc[]
+In the `stream` execution mode, the algorithm returns the {result} for each node.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the `stream` mode in general, see <<running-algos-stream>>.
 
 [role=query-example]
 --
