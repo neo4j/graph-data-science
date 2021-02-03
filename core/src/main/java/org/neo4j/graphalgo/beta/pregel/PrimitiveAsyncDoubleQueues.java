@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -30,11 +31,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static final double COMPACT_THRESHOLD = 0.25;
 
     private final HugeAtomicLongArray heads;
-
-    private PrimitiveAsyncDoubleQueues(HugeAtomicLongArray heads, HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
-        super(tails, queues);
-        this.heads = heads;
-    }
+    private final HugeCursor<double[][]> queuesCursor;
 
     public static PrimitiveAsyncDoubleQueues of(long nodeCount, AllocationTracker tracker) {
         return of(nodeCount, MIN_CAPACITY, tracker);
@@ -55,6 +52,12 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         return new PrimitiveAsyncDoubleQueues(heads, tails, queues);
     }
 
+    private PrimitiveAsyncDoubleQueues(HugeAtomicLongArray heads, HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
+        super(tails, queues);
+        this.heads = heads;
+        this.queuesCursor = queues.newCursor();
+    }
+
     void init(int iteration) {
         if (iteration > 0) {
             compact();
@@ -62,27 +65,31 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     void compact() {
-        for (long i = 0; i < queues.size(); i++) {
-            var queue = queues.get(i);
-            var tail = (int) tails.get(i);
-            var head = (int) heads.get(i);
+        queues.initCursor(queuesCursor);
 
-            if (isEmpty(i) && head(i) > 0) {
-                // The queue is empty, we can reset head and tail to index 0
-                // but we need to fill the previous entries with NaN.
-                Arrays.fill(queue, 0, (int) tails.get(i), Double.NaN);
-                heads.set(i, 0);
-                tails.set(i, 0);
-            } else if (head > queue.length * COMPACT_THRESHOLD) {
-                // The queue is not empty, we need to move the entries for
-                // the next iteration to the beginning of the queue and fill
-                // the remaining entries with NaN.
-                var length = tail - head;
-                System.arraycopy(queue, head, queue, 0, length);
-                Arrays.fill(queue, length, queue.length, Double.NaN);
+        while (queuesCursor.next()) {
+            for (int i = queuesCursor.offset; i < queuesCursor.limit; i++) {
+                var queue = queuesCursor.array[i];
+                var tail = (int) tails.get(i);
+                var head = (int) heads.get(i);
 
-                heads.set(i, 0);
-                tails.set(i, length);
+                if (isEmpty(i) && head(i) > 0) {
+                    // The queue is empty, we can reset head and tail to index 0
+                    // but we need to fill the previous entries with NaN.
+                    Arrays.fill(queue, 0, (int) tails.get(i), Double.NaN);
+                    heads.set(i, 0);
+                    tails.set(i, 0);
+                } else if (head > queue.length * COMPACT_THRESHOLD) {
+                    // The queue is not empty, we need to move the entries for
+                    // the next iteration to the beginning of the queue and fill
+                    // the remaining entries with NaN.
+                    var length = tail - head;
+                    System.arraycopy(queue, head, queue, 0, length);
+                    Arrays.fill(queue, length, queue.length, Double.NaN);
+
+                    heads.set(i, 0);
+                    tails.set(i, length);
+                }
             }
         }
     }
