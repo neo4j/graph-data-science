@@ -48,15 +48,18 @@ class PrimitiveAsyncDoubleQueuesTest {
     }
 
     @Test
-    void pop() {
+    void isEmptyFullArray() {
         var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
-        queues.push(0, 42.0D);
-        assertThat(queues.pop(0)).isEqualTo(42.0D);
 
-        queues.push(0, 42.0D);
-        queues.push(0, 84.0D);
-        assertThat(queues.pop(0)).isEqualTo(42.0D);
-        assertThat(queues.pop(0)).isEqualTo(84.0D);
+        for (int i = 0; i < 42; i++) {
+            queues.push(0, i);
+        }
+
+        for (int i = 0; i < 42; i++) {
+            queues.pop(0);
+        }
+
+        assertThat(queues.isEmpty(0)).isTrue();
     }
 
     @Test
@@ -76,6 +79,18 @@ class PrimitiveAsyncDoubleQueuesTest {
         }
 
         assertThat(popCount).isEqualTo(insertedElements);
+    }
+
+    @Test
+    void pop() {
+        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        queues.push(0, 42.0D);
+        assertThat(queues.pop(0)).isEqualTo(42.0D);
+
+        queues.push(0, 42.0D);
+        queues.push(0, 84.0D);
+        assertThat(queues.pop(0)).isEqualTo(42.0D);
+        assertThat(queues.pop(0)).isEqualTo(84.0D);
     }
 
     @Test

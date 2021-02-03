@@ -70,12 +70,16 @@ public class PrimitiveAsyncDoubleQueues {
             var tail = (int) tails.get(i);
             var head = (int) heads.get(i);
 
-
             if (isEmpty(i) && head(i) > 0) {
+                // The queue is empty, we can reset head and tail to index 0
+                // but we need to fill the previous entries with NaN.
                 Arrays.fill(queue, 0, (int) tails.get(i), Double.NaN);
                 heads.set(i, 0);
                 tails.set(i, 0);
             } else if (head > queue.length * COMPACT_THRESHOLD) {
+                // The queue is not empty, we need to move the entries for
+                // the next iteration to the beginning of the queue and fill
+                // the remaining entries with NaN.
                 var length = tail - head;
                 System.arraycopy(queue, head, queue, 0, length);
                 Arrays.fill(queue, length, queue.length, Double.NaN);
@@ -91,7 +95,7 @@ public class PrimitiveAsyncDoubleQueues {
         var tail = tails.get(nodeId);
         var queue = queues.get(nodeId);
 
-        return head > tail || Double.isNaN(queue[(int) head]);
+        return head == queue.length || head > tail || Double.isNaN(queue[(int) head]);
     }
 
     double pop(long nodeId) {
@@ -181,7 +185,7 @@ public class PrimitiveAsyncDoubleQueues {
         var newCapacity = capacity + (capacity >> 1);
 
         var resizedArray = Arrays.copyOf(queue, newCapacity);
-        Arrays.fill(resizedArray, (int) -tails.get(nodeId), newCapacity, Double.NaN);
+        Arrays.fill(resizedArray, minCapacity - 1, newCapacity, Double.NaN);
 
         this.queues.set(nodeId, resizedArray);
     }
