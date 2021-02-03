@@ -225,6 +225,9 @@
             <d:tocentry linkend="fabric">
                 <?dbhtml filename="production-deployment/fabric/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="feature-toggles">
+                <?dbhtml filename="production-deployment/feature-toggles/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="appendix-a">
