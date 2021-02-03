@@ -126,7 +126,7 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator
         }
 
         @Override
-        public Double next() {
+        public double nextDouble() {
             return queue.poll();
         }
 

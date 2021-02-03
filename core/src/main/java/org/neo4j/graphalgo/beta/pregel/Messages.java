@@ -22,10 +22,17 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.PrimitiveIterator;
 
 public final class Messages implements Iterable<Double> {
 
-    interface MessageIterator extends Iterator<Double> {
+    @NotNull
+    @Override
+    public Iterator<Double> iterator() {
+        return iterator;
+    }
+
+    interface MessageIterator extends PrimitiveIterator.OfDouble {
         boolean isEmpty();
     }
 
@@ -36,8 +43,7 @@ public final class Messages implements Iterable<Double> {
     }
 
     @NotNull
-    @Override
-    public Iterator<Double> iterator() {
+    public PrimitiveIterator.OfDouble doubleIterator() {
         return iterator;
     }
 

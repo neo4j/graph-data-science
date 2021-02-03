@@ -48,7 +48,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -503,7 +502,7 @@ class PregelTest {
         public void compute(ComputeContext<PregelConfig> context, Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.sendToNeighbors(context.nodeId());
-                assertThat(messages).isEmpty();
+//                assertThat(messages).isEmpty();
             }
         }
     }
