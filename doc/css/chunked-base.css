@@ -778,9 +778,11 @@ section.enterprise-edition > div.titlepage .title:after {
 section.alpha h1.title:after,
 section.alpha h2.title:after,
 section.alpha h3.title:after,
+section.alpha h4.title:after,
 section.beta h1.title:after,
 section.beta h2.title:after,
-section.beta h3.title:after {
+section.beta h3.title:after,
+section.beta h4.title:after {
   color       : #F58220;
   text-align: center;
   font-family: "Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue","Helvetica","Arial",sans-serif;
@@ -799,13 +801,15 @@ section.beta h3.title:after {
 
 section.alpha h1.title:after,
 section.alpha h2.title:after,
-section.alpha h3.title:after {
+section.alpha h3.title:after,
+section.alpha h4.title:after {
   content     : "alpha";
 }
 
 section.beta h1.title:after,
 section.beta h2.title:after,
-section.beta h3.title:after {
+section.beta h3.title:after,
+section.beta h4.title:after {
   content     : "beta";
 }
 

@@ -1,0 +1,51 @@
+[[miscellaneous]]
+= Miscellaneous
+
+[abstract]
+--
+This chapter contains details for functionality available in the Neo4j Graph Data Science Library that doesn't belong in any of the other categories.
+--
+
+== Utility procedures
+
+[.beta]
+=== Progress Logging Procedure
+
+This is a procedure that can show the log entries of a long-running task or algorithm.
+
+==== Syntax
+
+.Getting the proggress of tasks:
+[source,cypher]
+----
+CALL gds.beta.listProgress()
+YIELD
+  id,
+  taskName,
+  message
+----
+
+.Results
+* `id`: generated identifier of the running task.
+* `taskName`: the name of the running task, i.e. `Node2Vec`.
+* `message`: the progress log message, same as what is logged to the `debug.log` file.
+
+==== Examples
+
+Assuming we just started `gds.alpha.node2vec.stream` procedure.
+
+[source,cypher]
+----
+CALL gds.beta.listProgress()
+YIELD
+  id,
+  taskName,
+  message
+----
+
+.Results
+[opts="header"]
+|===
+| id                                     | taskName   | message
+| "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "[gds-1] Node2Vec 42%"
+|===

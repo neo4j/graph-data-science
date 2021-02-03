@@ -38,6 +38,8 @@
             </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="miscellaneous"><?dbhtml filename="management-ops/miscellaneous/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="model-catalog-ops">
