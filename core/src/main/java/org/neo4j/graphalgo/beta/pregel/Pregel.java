@@ -113,8 +113,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.messenger = reducer.isPresent()
             ? new ReducingMessenger(graph, config, reducer.get(), tracker)
             : config.isAsynchronous()
-                ? new AsyncQueueMessenger(graph, config, tracker)
-                : new SyncQueueMessenger(graph, tracker);
+                ? new AsyncQueueMessenger(graph.nodeCount(), tracker)
+                : new SyncQueueMessenger(graph.nodeCount(), tracker);
     }
 
     public PregelResult run() {

@@ -19,37 +19,21 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.jctools.queues.MpscLinkedQueue;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator> {
-
-    private final Graph graph;
-    private final PregelConfig config;
+class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.Iterator> {
 
     private final PrimitiveAsyncDoubleQueues queues;
 
-    AsyncQueueMessenger(Graph graph, PregelConfig config, AllocationTracker tracker) {
-        this.graph = graph;
-        this.config = config;
-        this.queues = new PrimitiveAsyncDoubleQueues(graph.nodeCount(), tracker);
+    AsyncQueueMessenger(long nodeCount, AllocationTracker tracker) {
+        this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount, tracker);
     }
 
+    // TODO
     static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.setup("", (dimensions, concurrency) ->
-            MemoryEstimations.builder(AsyncQueueMessenger.class)
-                .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
-                .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
-                    .fixed("messages", dimensions.averageDegree() * Double.BYTES)
-                    .build()
-                )
-                .build()
-        );
+        return MemoryEstimations.empty();
     }
 
     @Override
@@ -63,13 +47,13 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator
     }
 
     @Override
-    public AsyncIterator messageIterator() {
-        return new AsyncIterator(queues);
+    public Iterator messageIterator() {
+        return new Iterator(queues);
     }
 
     @Override
     public void initMessageIterator(
-        AsyncIterator messageIterator,
+        Iterator messageIterator,
         long nodeId,
         boolean isFirstIteration
     ) {
@@ -81,12 +65,13 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.AsyncIterator
         queues.release();
     }
 
-    public static class AsyncIterator implements Messages.MessageIterator {
+    public static class Iterator implements Messages.MessageIterator {
 
         private final PrimitiveAsyncDoubleQueues queues;
+
         private long nodeId;
 
-        public AsyncIterator(PrimitiveAsyncDoubleQueues queues) {this.queues = queues;}
+        public Iterator(PrimitiveAsyncDoubleQueues queues) {this.queues = queues;}
 
         void init(long nodeId) {
             this.nodeId = nodeId;

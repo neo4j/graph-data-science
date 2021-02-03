@@ -30,10 +30,10 @@ class AsyncQueueMessengerTest {
 
     @Test
     void allowMultipleCallsToHasNext() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
         queues.push(0, 42.0);
 
-        var messageIterator = new AsyncQueueMessenger.AsyncIterator(queues);
+        var messageIterator = new AsyncQueueMessenger.Iterator(queues);
         messageIterator.init(0);
 
         assertTrue(messageIterator.hasNext());

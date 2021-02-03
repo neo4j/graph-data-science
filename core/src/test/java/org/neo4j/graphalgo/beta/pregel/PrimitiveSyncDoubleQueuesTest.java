@@ -33,11 +33,11 @@ import java.util.stream.LongStream;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class PrimitiveDoubleQueuesTest {
+class PrimitiveSyncDoubleQueuesTest {
 
     @Test
     void growQueueArray() {
-        var queues = new PrimitiveDoubleQueues(
+        var queues = PrimitiveSyncDoubleQueues.of(
             1337,
             42,
             AllocationTracker.empty()
@@ -64,7 +64,7 @@ class PrimitiveDoubleQueuesTest {
 
     @Test
     void parallelPush() {
-        var queues = new PrimitiveDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveSyncDoubleQueues.of(1, AllocationTracker.empty());
 
         MutableBoolean start = new MutableBoolean(false);
         var tasks = IntStream.range(0, 4).mapToObj((taskOffset) -> (Runnable) () -> {
