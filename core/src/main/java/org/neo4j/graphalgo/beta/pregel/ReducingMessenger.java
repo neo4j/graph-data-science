@@ -121,7 +121,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         }
 
         @Override
-        public Double next() {
+        public double nextDouble() {
             hasNext = false;
             return message;
         }

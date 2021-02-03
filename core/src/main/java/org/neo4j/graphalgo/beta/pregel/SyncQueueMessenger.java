@@ -92,7 +92,7 @@ public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.QueueIte
         }
 
         @Override
-        public Double next() {
+        public double nextDouble() {
             return queue[pos++];
         }
 
