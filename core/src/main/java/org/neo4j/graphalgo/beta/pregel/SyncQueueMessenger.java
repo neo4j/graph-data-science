@@ -19,62 +19,49 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.jctools.queues.MpscLinkedQueue;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.QueueIterator> {
+public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.Iterator> {
 
-    private final PrimitiveDoubleQueues messageQueues;
+    private final PrimitiveSyncDoubleQueues queues;
 
-    SyncQueueMessenger(Graph graph, AllocationTracker tracker) {
-        int averageDegree = (int) BitUtil.ceilDiv(graph.relationshipCount(), graph.nodeCount());
-        this.messageQueues = new PrimitiveDoubleQueues(graph.nodeCount(), averageDegree, tracker);
+    SyncQueueMessenger(long nodeCount, AllocationTracker tracker) {
+        this.queues = PrimitiveSyncDoubleQueues.of(nodeCount, tracker);
     }
 
+    // TODO
     static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.setup("", (dimensions, concurrency) ->
-            MemoryEstimations.builder(SyncQueueMessenger.class)
-                .fixed(HugeObjectArray.class.getSimpleName(), MemoryUsage.sizeOfInstance(HugeObjectArray.class))
-                .perNode("node queue", MemoryEstimations.builder(MpscLinkedQueue.class)
-                    .fixed("messages", dimensions.averageDegree() * Double.BYTES)
-                    .build()
-                )
-                .build()
-        );
+        return MemoryEstimations.empty();
     }
 
     @Override
     public void initIteration(int iteration) {
-        messageQueues.init(iteration);
+        queues.init(iteration);
     }
 
     @Override
     public void sendTo(long targetNodeId, double message) {
-        messageQueues.push(targetNodeId, message);
+        queues.push(targetNodeId, message);
     }
 
     @Override
-    public SyncQueueMessenger.QueueIterator messageIterator() {
-        return new QueueIterator();
+    public Iterator messageIterator() {
+        return new Iterator();
     }
 
     @Override
-    public void initMessageIterator(SyncQueueMessenger.QueueIterator messageIterator, long nodeId, boolean isFirstIteration) {
-        messageQueues.initIterator(messageIterator, nodeId);
+    public void initMessageIterator(Iterator messageIterator, long nodeId, boolean isFirstIteration) {
+        queues.initIterator(messageIterator, nodeId);
     }
 
     @Override
     public void release() {
-        messageQueues.release();
+        queues.release();
     }
 
-    public static class QueueIterator implements Messages.MessageIterator {
+    public static class Iterator implements Messages.MessageIterator {
 
         double[] queue;
         private int length;

@@ -24,38 +24,35 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 
-public class PrimitiveAsyncDoubleQueues {
+public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static final double COMPACT_THRESHOLD = 0.25;
-    // used to store a message in a queue
-    private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
-    // minimum capacity for the individual arrays
-    private static final int MIN_CAPACITY = 42;
 
-    // toggling in-between super steps
-    private final HugeObjectArray<double[]> queues;
     private final HugeAtomicLongArray heads;
-    private final HugeAtomicLongArray tails;
 
-    public PrimitiveAsyncDoubleQueues(long nodeCount, AllocationTracker tracker) {
-        this(nodeCount, MIN_CAPACITY, tracker);
+    private PrimitiveAsyncDoubleQueues(HugeAtomicLongArray heads, HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
+        super(tails, queues);
+        this.heads = heads;
     }
 
-    public PrimitiveAsyncDoubleQueues(long nodeCount, int initialCapacity, AllocationTracker tracker) {
-        this.heads = HugeAtomicLongArray.newArray(nodeCount, tracker);
-        this.tails = HugeAtomicLongArray.newArray(nodeCount, tracker);
+    public static PrimitiveAsyncDoubleQueues of(long nodeCount, AllocationTracker tracker) {
+        return of(nodeCount, MIN_CAPACITY, tracker);
+    }
 
-        this.queues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+    public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialCapacity, AllocationTracker tracker) {
+        var heads = HugeAtomicLongArray.newArray(nodeCount, tracker);
+        var tails = HugeAtomicLongArray.newArray(nodeCount, tracker);
+        var queues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
 
         var capacity = Math.max(initialCapacity, MIN_CAPACITY);
         queues.setAll(value -> {
             var queue = new double[capacity];
-            Arrays.fill(queue,Double.NaN);
+            Arrays.fill(queue, Double.NaN);
             return queue;
         });
+
+        return new PrimitiveAsyncDoubleQueues(heads, tails, queues);
     }
 
     void init(int iteration) {
@@ -104,99 +101,24 @@ public class PrimitiveAsyncDoubleQueues {
         return queues.get(nodeId)[(int) currentHead];
     }
 
-    public void push(long nodeId, double message) {
-        // get tail index
-        long idx;
-
-        outer:
-        while (true) {
-            idx = tails.get(nodeId);
-            if (idx < 0) {
-                var nextId = -idx + 1;
-
-                while (true) {
-                    var currentIdx = tails.compareAndExchange(nodeId, -idx, nextId);
-                    if (currentIdx == -idx) {
-                        // queue is grown
-                        idx = -idx;
-                        break outer;
-                    }
-
-                    if (currentIdx != idx) {
-                        continue outer;
-                    }
-                }
-
-            }
-            long nextIdx = idx + 1;
-
-            if (hasSpaceLeft(nodeId, (int) nextIdx)) {
-                long currentIdx = tails.compareAndExchange(nodeId, idx, nextIdx);
-                if (currentIdx == idx) {
-                    // CAS successful
-                    break;
-                }
-            } else {
-                long currentIdx = tails.compareAndExchange(nodeId, idx, -nextIdx);
-                if (currentIdx == idx) {
-                    // one thread gets here and grows the queue
-                    grow(nodeId, (int) nextIdx);
-                    // set a positive value to signal other threads
-                    // that the queue has grown
-                    tails.compareAndExchange(nodeId, -nextIdx, nextIdx);
-                    break;
-                }
-            }
-        }
-
-        VarHandle.fullFence();
-        // set value
-        set(queues.get(nodeId), (int) idx, message);
-
+    @Override
+    void grow(long nodeId, int minCapacity) {
+        var queue = this.queues.get(nodeId);
+        var capacity = queue.length;
+        // grow by 50%
+        var newCapacity = capacity + (capacity >> 1);
+        var resizedArray = Arrays.copyOf(queue, newCapacity);
+        Arrays.fill(resizedArray, minCapacity - 1, newCapacity, Double.NaN);
+        this.queues.set(nodeId, resizedArray);
     }
 
-    @TestOnly
-    double[] queue(long nodeId) {
-        return queues.get(nodeId);
+    void release() {
+        super.release();
+        this.heads.release();
     }
 
     @TestOnly
     long head(long nodeId) {
         return heads.get(nodeId);
-    }
-
-    @TestOnly
-    long tail(long nodeId) {
-        return tails.get(nodeId);
-    }
-
-    private boolean hasSpaceLeft(long nodeId, int minCapacity) {
-        return queues.get(nodeId).length >= minCapacity;
-    }
-
-    private void grow(long nodeId, int minCapacity) {
-        var queue = this.queues.get(nodeId);
-        var capacity = queue.length;
-        if (capacity >= minCapacity) {
-            // some other thread already grew the array
-            return;
-        }
-        // grow by 50%
-        var newCapacity = capacity + (capacity >> 1);
-
-        var resizedArray = Arrays.copyOf(queue, newCapacity);
-        Arrays.fill(resizedArray, minCapacity - 1, newCapacity, Double.NaN);
-
-        this.queues.set(nodeId, resizedArray);
-    }
-
-    private void set(double[] queue, int index, double message) {
-        ARRAY_HANDLE.setVolatile(queue, index, message);
-    }
-
-    void release() {
-        this.heads.release();
-        this.tails.release();
-        this.queues.release();
     }
 }

@@ -37,7 +37,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void isEmpty() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
         assertThat(queues.isEmpty(0)).isTrue();
 
         queues.push(0, 42);
@@ -49,7 +49,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void isEmptyFullArray() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
 
         for (int i = 0; i < 42; i++) {
             queues.push(0, i);
@@ -66,7 +66,7 @@ class PrimitiveAsyncDoubleQueuesTest {
     void isEmptyWorksAfterGrowing() {
         var initialCapacity = 50;
         var insertedElements = initialCapacity + 10;
-        var queues = new PrimitiveAsyncDoubleQueues(1, initialCapacity, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, initialCapacity, AllocationTracker.empty());
 
         for (int i = 0; i < insertedElements; i++) {
             queues.push(0, 42);
@@ -83,7 +83,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void pop() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
         queues.push(0, 42.0D);
         assertThat(queues.pop(0)).isEqualTo(42.0D);
 
@@ -95,7 +95,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void compactEmptyQueue() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
 
         var minFillSize = Math.ceil(50 * COMPACT_THRESHOLD);
         for (int i = 0; i < minFillSize; i++) {
@@ -113,7 +113,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void compactNoneEmptyQueue() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
 
         var minFillSize = Math.ceil(50*COMPACT_THRESHOLD);
 
@@ -142,7 +142,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void compactOnlyIfAboveThresholdNoneEmptyQueue() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, 50, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, 50, AllocationTracker.empty());
 
         var compactThreshold = Math.round(Math.floor(50*COMPACT_THRESHOLD)) - 1;
 
@@ -171,7 +171,7 @@ class PrimitiveAsyncDoubleQueuesTest {
 
     @Test
     void parallelPush() {
-        var queues = new PrimitiveAsyncDoubleQueues(1, AllocationTracker.empty());
+        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
         MutableBoolean start = new MutableBoolean(false);
 
         var tasks = IntStream.range(0, 4).mapToObj((taskOffset) -> (Runnable) () -> {
