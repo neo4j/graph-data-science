@@ -58,13 +58,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         this.queuesCursor = queues.newCursor();
     }
 
-    void init(int iteration) {
-        if (iteration > 0) {
-            compact();
-        }
-    }
-
-    void compact() {
+    public void compact() {
         queues.initCursor(queuesCursor);
 
         while (queuesCursor.next()) {
@@ -127,5 +121,33 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     @TestOnly
     long head(long nodeId) {
         return heads.get(nodeId);
+    }
+
+    public static class Iterator implements Messages.MessageIterator {
+
+        private final PrimitiveAsyncDoubleQueues queues;
+
+        private long nodeId;
+
+        public Iterator(PrimitiveAsyncDoubleQueues queues) {this.queues = queues;}
+
+        void init(long nodeId) {
+            this.nodeId = nodeId;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !queues.isEmpty(nodeId);
+        }
+
+        @Override
+        public double nextDouble() {
+            return queues.pop(nodeId);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return queues.isEmpty(nodeId);
+        }
     }
 }

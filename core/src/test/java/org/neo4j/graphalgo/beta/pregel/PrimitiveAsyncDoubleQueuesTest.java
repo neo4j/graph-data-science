@@ -19,8 +19,11 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues.COMPACT_THRESHOLD;
@@ -28,7 +31,7 @@ import static org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues.COMPACT
 class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
     @Override
-    PrimitiveDoubleQueues getQueue(long nodeCount, int initialCapacity) {
+    PrimitiveAsyncDoubleQueues getQueue(long nodeCount, int initialCapacity) {
         return PrimitiveAsyncDoubleQueues.of(nodeCount, initialCapacity, AllocationTracker.empty());
     }
 
@@ -163,6 +166,41 @@ class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
         for (int i = 0; i < fillSize; i++) {
             assertThat(queues.pop(0)).isEqualTo(i);
+        }
+    }
+
+    @Nested
+    class IteratorTest {
+        @Test
+        void iterate() {
+            var initialCapacity = 42;
+            var queue = getQueue(1, initialCapacity);
+
+            for (int i = 0; i < 2 * initialCapacity; i++) {
+                queue.push(0, i);
+            }
+
+
+            var iterator = new PrimitiveAsyncDoubleQueues.Iterator(queue);
+            iterator.init(0);
+
+            var sum = 0D;
+            while (iterator.hasNext()) {
+                sum += iterator.nextDouble();
+            }
+
+            assertThat(sum).isEqualTo(IntStream.range(0, 2 * initialCapacity).sum());
+        }
+
+        @Test
+        void iterateEmptyQueue() {
+            var initialCapacity = 42;
+            var queue = getQueue(1, initialCapacity);
+
+            var iterator = new PrimitiveAsyncDoubleQueues.Iterator(queue);
+            iterator.init(0);
+
+            assertThat(iterator.hasNext()).isFalse();
         }
     }
 }
