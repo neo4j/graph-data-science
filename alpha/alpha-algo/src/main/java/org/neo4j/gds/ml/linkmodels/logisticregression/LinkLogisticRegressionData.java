@@ -45,7 +45,7 @@ public interface LinkLogisticRegressionData {
         List<String> featureProperties,
         DoubleArrayCombiner linkFeatureCombiner
     ) {
-        var numberOfFeatures = computeNumberOfFeatures(graph, featureProperties);
+        var numberOfFeatures = FeatureExtraction.featureCountWithBias(graph, featureProperties);
         var weights = new Weights<>(new Matrix(new double[numberOfFeatures], 1, numberOfFeatures));
 
         return builder()
@@ -54,12 +54,6 @@ public interface LinkLogisticRegressionData {
             .featureProperties(featureProperties)
             .numberOfFeatures(numberOfFeatures)
             .build();
-    }
-
-    private static int computeNumberOfFeatures(Graph graph, List<String> featureProperties) {
-        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
-        featureExtractors.add(new BiasFeature());
-        return FeatureExtraction.featureCount(featureExtractors);
     }
 
     static ImmutableLinkLogisticRegressionData.Builder builder() {

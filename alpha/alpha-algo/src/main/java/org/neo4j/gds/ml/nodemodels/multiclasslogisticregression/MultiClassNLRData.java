@@ -22,12 +22,11 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.features.BiasFeature;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 
 @ValueClass
@@ -39,33 +38,28 @@ public interface MultiClassNLRData {
 
     static MultiClassNLRData from(
         Graph graph,
-        Collection<String> featureProperties,
-        String targetPropertyKey
+        List<String> featureProperties,
+        String targetProperty
     ) {
-        var classIdMap = makeClassIdMap(graph, targetPropertyKey);
-        var weights = initWeights(graph, classIdMap.size(), featureProperties);
+        var classIdMap = makeClassIdMap(graph, targetProperty);
+        var featuresPerClass = FeatureExtraction.featureCountWithBias(graph, featureProperties);
+        var weights = new Weights<>(Matrix.fill(0.0, classIdMap.size(), featuresPerClass));
+
         return builder()
             .classIdMap(classIdMap)
             .weights(weights)
             .build();
     }
 
-    private static LocalIdMap makeClassIdMap(Graph graph, String targetPropertyKey) {
+    private static LocalIdMap makeClassIdMap(Graph graph, String targetProperty) {
         var classSet = new TreeSet<Long>();
         var classIdMap = new LocalIdMap();
         graph.forEachNode(nodeId -> {
-            classSet.add(graph.nodeProperties(targetPropertyKey).longValue(nodeId));
+            classSet.add(graph.nodeProperties(targetProperty).longValue(nodeId));
             return true;
         });
         classSet.forEach(classIdMap::toMapped);
         return classIdMap;
-    }
-
-    private static Weights<Matrix> initWeights(Graph graph, int numberOfClasses, Collection<String> featureProperties) {
-        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
-        featureExtractors.add(new BiasFeature());
-        var featuresPerClass = FeatureExtraction.featureCount(featureExtractors);
-        return new Weights<>(Matrix.fill(0.0, numberOfClasses, featuresPerClass));
     }
 
     static ImmutableMultiClassNLRData.Builder builder() {

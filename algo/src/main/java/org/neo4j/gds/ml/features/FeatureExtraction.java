@@ -37,7 +37,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  * Also contains logic for looping on graphs and batches and writing into
  * Matrices and HugeObjectArrays.
  */
-public class FeatureExtraction {
+public final class FeatureExtraction {
+
+    private FeatureExtraction() {}
 
     public static void extract(
         long nodeId,
@@ -122,6 +124,12 @@ public class FeatureExtraction {
                     throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
             }).collect(Collectors.toList());
+    }
+
+    public static int featureCountWithBias(Graph graph, List<String> featureProperties) {
+        var featureExtractors = propertyExtractors(graph, featureProperties);
+        featureExtractors.add(new BiasFeature());
+        return featureCount(featureExtractors);
     }
 }
 
