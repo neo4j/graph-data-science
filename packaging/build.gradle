@@ -61,7 +61,7 @@ task versionsJson {
         if (project.hasProperty('neo4jVersions')) {
             neo4jVersions = project.property('neo4jVersions').split(',')
         } else {
-            neo4jVersions = [ver.neo4j]
+            neo4jVersions = neos.findAll { !it.value.contains('drop') }.collect {it.value}
         }
 
         def gdsVersion = project.hasProperty('gdsVersion') ? project.property('gdsVersion') : project.version
