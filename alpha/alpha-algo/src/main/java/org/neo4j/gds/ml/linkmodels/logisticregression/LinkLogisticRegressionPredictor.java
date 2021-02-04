@@ -19,30 +19,17 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
-import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
-public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase
-    implements Predictor<double[], LinkLogisticRegressionData> {
+public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase {
 
     public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData) {
         super(modelData);
     }
 
-    @Override
     public LinkLogisticRegressionData modelData() {
         return modelData;
-    }
-
-    @Override
-    public double[] predict(Graph graph, Batch batch) {
-        ComputationContext ctx = new ComputationContext();
-        MatrixConstant features = features(graph, batch);
-        return ctx.forward(predictions(features)).data();
     }
 
     public double predictedProbability(Graph graph, long sourceId, long targetId) {
