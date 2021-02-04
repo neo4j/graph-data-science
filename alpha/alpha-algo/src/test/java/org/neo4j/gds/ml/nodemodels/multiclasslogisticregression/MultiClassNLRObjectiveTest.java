@@ -54,7 +54,7 @@ class MultiClassNLRObjectiveTest {
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
         var featureProps = List.of("a", "b");
         var predictor = new MultiClassNLRPredictor(
-            MultiClassNLRObjective.makeData(featureProps, "t", graph),
+            MultiClassNLRData.from(featureProps, "t", graph),
             featureProps
         );
         var objective = new MultiClassNLRObjective(graph, predictor, "t", 0.0);
@@ -70,7 +70,7 @@ class MultiClassNLRObjectiveTest {
     void shouldSortClasses() {
         var featureProps = List.of("a", "b");
         var predictor = new MultiClassNLRPredictor(
-            MultiClassNLRObjective.makeData(featureProps, "t", graph),
+            MultiClassNLRData.from(featureProps, "t", graph),
             featureProps
         );
         var objective = new MultiClassNLRObjective(graph, predictor, "t", 0.0);
