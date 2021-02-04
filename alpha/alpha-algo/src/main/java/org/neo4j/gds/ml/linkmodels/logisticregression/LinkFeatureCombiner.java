@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-public enum LinkFeatureCombiner {
+import org.neo4j.gds.ml.DoubleArrayCombiner;
+
+public enum LinkFeatureCombiner implements DoubleArrayCombiner {
     L2 {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
@@ -42,6 +44,4 @@ public enum LinkFeatureCombiner {
             return result;
         }
     };
-
-    public abstract double[] combine(double[] sourceArray, double[] targetArray);
 }

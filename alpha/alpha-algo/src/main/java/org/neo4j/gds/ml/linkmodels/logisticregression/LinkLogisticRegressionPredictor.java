@@ -35,10 +35,6 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
     public double predictedProbability(Graph graph, long sourceId, long targetId) {
         var weightsArray = modelData.weights().data().data();
         var features = features(graph, sourceId, targetId);
-        return computeProbability(weightsArray, features);
-    }
-
-    double computeProbability(double[] weightsArray, double[] features) {
         var affinity = 0D;
         var biasIndex = weightsArray.length - 1;
         for (int i = 0; i < biasIndex; i++) {

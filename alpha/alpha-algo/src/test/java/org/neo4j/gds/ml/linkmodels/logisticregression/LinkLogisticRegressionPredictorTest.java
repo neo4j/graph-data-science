@@ -21,21 +21,60 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.ml.DoubleArrayCombiner;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@GdlExtension
 class LinkLogisticRegressionPredictorTest {
+
+    @GdlGraph
+    static String GRAPH =
+        "(a {x: .33, y: [-1.2, 2.1, 3.0]}), " +
+        "(b {x: .66, y: [7.5, 77.1, .077]}), " +
+        "(c {x: .99, y: [66.6, 33.3, 11.1]}), " +
+        "(d {x: 2.42, y: [.808, .08, 80.808]}), ";
+
+    @Inject
+    Graph graph;
+
+    @Inject
+    IdFunction idFunction;
 
     @Test
     void computesProbability() {
-        var predictor = new LinkLogisticRegressionPredictor(null);
+        var weights = new double[]{.5, .6, .7, .8, .9};
+        var modelData = LinkLogisticRegressionData
+            .builder()
+            .from(LinkLogisticRegressionData.from(graph, List.of("x", "y"), new SumCombiner()))
+            .weights(new Weights<>(new Matrix(weights, 1, 5)))
+            .build();
+        var predictor = new LinkLogisticRegressionPredictor(modelData);
 
-        var features = new double[] {.1, .2, .3};
-        var weights = new double[] {.5, .6, .7, .8};
-        var result = predictor.computeProbability(weights, features);
+        var result = predictor.predictedProbability(graph, idFunction.of("a"), idFunction.of("b"));
 
-        var expectedResult = 1 / (1 + Math.pow(Math.E, -1 * (.1 * .5 + .2 * .6 + .3 * .7 + .8)));
+        var expectedResult = 1 / (1 + Math.pow(Math.E, -1 * (.99 * .5 + 6.3 * .6 + 79.2 * .7 + 3.077 * .8 + .9)));
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-10));
+    }
+
+    private static class SumCombiner implements DoubleArrayCombiner {
+        @Override
+        public double[] combine(double[] sourceArray, double[] targetArray) {
+            var result =  new double[sourceArray.length];
+            for (int i = 0; i < result.length; i++) {
+                result[i] = sourceArray[i] + targetArray[i];
+            }
+            return result;
+        }
     }
 }
