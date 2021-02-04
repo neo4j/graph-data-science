@@ -59,7 +59,7 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         this.prevTails = prevTails;
     }
 
-    void init(int iteration) {
+    void swapQueues() {
         // swap tail indexes
         var tmpTails = tails;
         this.tails = prevTails;
@@ -69,12 +69,10 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         this.queues = prevQueues;
         this.prevQueues = tmpQueues;
 
-        if (iteration > 0) {
-            this.tails.setAll(0);
-        }
+        this.tails.setAll(0);
     }
 
-    void initIterator(SyncQueueMessenger.Iterator iterator, long nodeId) {
+    void initIterator(Iterator iterator, long nodeId) {
         iterator.init(prevQueues.get(nodeId), (int) prevTails.get(nodeId));
     }
 
@@ -92,5 +90,33 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         super.release();
         this.prevTails.release();
         this.prevQueues.release();
+    }
+
+    static class Iterator implements Messages.MessageIterator {
+
+        double[] queue;
+        private int length;
+        private int pos;
+
+        void init(double[] queue, int length) {
+            this.queue = queue;
+            this.pos = 0;
+            this.length = length;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return pos < length;
+        }
+
+        @Override
+        public double nextDouble() {
+            return queue[pos++];
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return length == 0;
+        }
     }
 }

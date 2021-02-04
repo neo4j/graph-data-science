@@ -19,21 +19,18 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.ArrayList;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.beta.pregel.PrimitiveAsyncDoubleQueues.COMPACT_THRESHOLD;
 
-class PrimitiveAsyncDoubleQueuesTest {
+class PrimitiveAsyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
+
+    @Override
+    PrimitiveDoubleQueues getQueue(long nodeCount, int initialCapacity) {
+        return PrimitiveAsyncDoubleQueues.of(nodeCount, initialCapacity, AllocationTracker.empty());
+    }
 
     @Test
     void isEmpty() {
@@ -168,31 +165,4 @@ class PrimitiveAsyncDoubleQueuesTest {
             assertThat(queues.pop(0)).isEqualTo(i);
         }
     }
-
-    @Test
-    void parallelPush() {
-        var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
-        MutableBoolean start = new MutableBoolean(false);
-
-        var tasks = IntStream.range(0, 4).mapToObj((taskOffset) -> (Runnable) () -> {
-            while(start.isFalse()) { }
-            for (int i = 0; i < 100; i++) {
-                queues.push(0, i + taskOffset * 100);
-            }
-        }).collect(toList());
-
-        var futures = ParallelUtil.run(tasks, false, Pools.DEFAULT, null);
-
-        start.setTrue();
-
-        ParallelUtil.awaitTermination(futures);
-
-        var values = new ArrayList<Long>();
-        while (!queues.isEmpty(0)) {
-            values.add(Math.round(queues.pop(0)));
-        }
-
-        assertThat(values).containsExactlyInAnyOrder(LongStream.range(0, 400).boxed().toArray(Long[]::new));
-    }
-
 }

@@ -19,73 +19,78 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class PrimitiveSyncDoubleQueuesTest {
+class PrimitiveSyncDoubleQueuesTest extends PrimitiveDoubleQueuesTest {
 
-    @Test
-    void growQueueArray() {
-        var queues = PrimitiveSyncDoubleQueues.of(
-            1337,
-            42,
-            AllocationTracker.empty()
-        );
-
-        assertThat(queues.queue(42).length).isEqualTo(42);
-
-        for (int i = 0; i < 41; i++) {
-            queues.push(42, 23);
-        }
-
-        assertThat(queues.queue(42).length).isEqualTo(42);
-        queues.push(42, 1337);
-        assertThat(queues.queue(42).length).isEqualTo(42);
-        queues.push(42, 1337);
-
-        assertThat(queues.queue(42).length).isEqualTo(63 /* 42 * 1.5 */);
-        assertThat(queues.queue(42)[41]).isEqualTo(1337);
-        assertThat(queues.queue(42)[42]).isEqualTo(1337);
-
-        queues.push(42, 1337);
-        assertThat(queues.queue(42)[43]).isEqualTo(1337);
+    @Override
+    PrimitiveSyncDoubleQueues getQueue(long nodeCount, int initialCapacity) {
+        return PrimitiveSyncDoubleQueues.of(nodeCount, initialCapacity, AllocationTracker.empty());
     }
 
     @Test
-    void parallelPush() {
-        var queues = PrimitiveSyncDoubleQueues.of(1, AllocationTracker.empty());
+    void swapQueues() {
+        var initialCapacity = 42;
+        var queue = getQueue(1, initialCapacity);
 
-        MutableBoolean start = new MutableBoolean(false);
-        var tasks = IntStream.range(0, 4).mapToObj((taskOffset) -> (Runnable) () -> {
-            while (start.isFalse()) { }
-            for (int i = 0; i < 100; i++) {
-                queues.push(0, i + taskOffset * 100);
+        var iterations = 10;
+
+        for (int iteration = 0; iteration < iterations; iteration++) {
+            for (int i = 0; i < 2 * initialCapacity; i++) {
+                queue.push(0, i * iteration);
             }
-        }).collect(toList());
 
-        var futures = ParallelUtil.run(tasks, false, Pools.DEFAULT, null);
+            var expectedSum = IntStream.range(0, 2 * initialCapacity).sum() * iteration;
+            var actualSum = Arrays.stream(queue.queue(0)).sum();
+            assertThat(actualSum).isEqualTo(expectedSum);
 
-        start.setTrue();
+            queue.swapQueues();
+        }
+    }
 
-        ParallelUtil.awaitTermination(futures);
+    @Nested
+    class IteratorTest {
 
-        var values = new ArrayList<Long>();
-        for (long i = 0; i < queues.tail(0); i++) {
-            values.add(Math.round(queues.queue(0)[(int) i]));
+        @Test
+        void iterate() {
+            var initialCapacity = 42;
+            var queue = getQueue(1, initialCapacity);
+
+            for (int i = 0; i < 2 * initialCapacity; i++) {
+                queue.push(0, i);
+            }
+
+            queue.swapQueues();
+
+            var iterator = new PrimitiveSyncDoubleQueues.Iterator();
+            queue.initIterator(iterator, 0);
+
+            var sum = 0D;
+            while (iterator.hasNext()) {
+                sum += iterator.nextDouble();
+            }
+
+            assertThat(sum).isEqualTo(IntStream.range(0, 2 * initialCapacity).sum());
         }
 
-        System.out.println(values.size());
-        Assertions.assertThat(values).containsExactlyInAnyOrder(LongStream.range(0, 400).boxed().toArray(Long[]::new));
+        @Test
+        void iterateEmptyQueue() {
+            var initialCapacity = 42;
+            var queue = getQueue(1, initialCapacity);
+
+            queue.swapQueues();
+
+            var iterator = new PrimitiveSyncDoubleQueues.Iterator();
+            queue.initIterator(iterator, 0);
+
+            assertThat(iterator.hasNext()).isFalse();
+        }
     }
 }

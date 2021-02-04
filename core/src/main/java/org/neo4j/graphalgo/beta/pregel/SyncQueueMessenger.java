@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
-public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.Iterator> {
+public class SyncQueueMessenger implements Messenger<PrimitiveSyncDoubleQueues.Iterator> {
 
     private final PrimitiveSyncDoubleQueues queues;
 
@@ -38,7 +38,7 @@ public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.Iterator
 
     @Override
     public void initIteration(int iteration) {
-        queues.init(iteration);
+        queues.swapQueues();
     }
 
     @Override
@@ -47,45 +47,17 @@ public class SyncQueueMessenger implements Messenger<SyncQueueMessenger.Iterator
     }
 
     @Override
-    public Iterator messageIterator() {
-        return new Iterator();
+    public PrimitiveSyncDoubleQueues.Iterator messageIterator() {
+        return new PrimitiveSyncDoubleQueues.Iterator();
     }
 
     @Override
-    public void initMessageIterator(Iterator messageIterator, long nodeId, boolean isFirstIteration) {
+    public void initMessageIterator(PrimitiveSyncDoubleQueues.Iterator messageIterator, long nodeId, boolean isFirstIteration) {
         queues.initIterator(messageIterator, nodeId);
     }
 
     @Override
     public void release() {
         queues.release();
-    }
-
-    public static class Iterator implements Messages.MessageIterator {
-
-        double[] queue;
-        private int length;
-        private int pos;
-
-        void init(double[] queue, int length) {
-            this.queue = queue;
-            this.pos = 0;
-            this.length = length;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return pos < length;
-        }
-
-        @Override
-        public double nextDouble() {
-            return queue[pos++];
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return length == 0;
-        }
     }
 }
