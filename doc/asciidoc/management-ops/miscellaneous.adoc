@@ -15,7 +15,7 @@ This is a procedure that can show the log entries of a long-running task or algo
 
 ==== Syntax
 
-.Getting the proggress of tasks:
+.Return the progress of running tasks:
 [source,cypher]
 ----
 CALL gds.beta.listProgress()
