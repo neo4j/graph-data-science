@@ -42,23 +42,23 @@ import java.util.TreeSet;
 
 public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
 
-    private final String targetPropertyKey;
+    private final String targetProperty;
     private final Graph graph;
     private final double penalty;
     private final MultiClassNLRPredictor predictor;
 
     public MultiClassNLRObjective(
-        List<String> featureProperties,
-        String targetPropertyKey,
         Graph graph,
+        List<String> featureProperties,
+        String targetProperty,
         double penalty
     ) {
         this.predictor = new MultiClassNLRPredictor(makeData(
             featureProperties,
-            targetPropertyKey,
+            targetProperty,
             graph
         ), featureProperties);
-        this.targetPropertyKey = targetPropertyKey;
+        this.targetProperty = targetProperty;
         this.graph = graph;
         this.penalty = penalty;
     }
@@ -117,7 +117,7 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
         double[] targets = new double[numberOfNodes];
         int nodeOffset = 0;
         var localIdMap = modelData().classIdMap();
-        var targetNodeProperty = graph.nodeProperties(targetPropertyKey);
+        var targetNodeProperty = graph.nodeProperties(targetProperty);
         for (long nodeId : nodeIds) {
             var targetValue = targetNodeProperty.doubleValue(nodeId);
             targets[nodeOffset] = localIdMap.toMapped((long) targetValue);
