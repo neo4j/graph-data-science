@@ -44,7 +44,7 @@ public class LinkPredictionResult {
         this.queue = BoundedLongLongPriorityQueue.max(top);
     }
 
-    public void add(long node1, long node2, double probability) {
+    public synchronized void add(long node1, long node2, double probability) {
         queue.offer(node1, node2, probability);
     }
 
