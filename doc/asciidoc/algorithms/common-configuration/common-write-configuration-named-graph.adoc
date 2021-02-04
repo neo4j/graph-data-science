@@ -15,6 +15,10 @@ ifeval::["{entity}" == "source-target-pair"]
 | writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
 endif::[]
 
+ifeval::["{entity}" == "pregel"]
+| writeProperty                                                | String      | ""                      | yes      | The prefix used for all public properties in the PregelSchema.
+endif::[]
+
 | nodeLabels                                                    | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.

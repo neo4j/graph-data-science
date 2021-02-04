@@ -44,8 +44,6 @@ import java.util.stream.StreamSupport;
 )
 public class Hits implements PregelComputation<Hits.HitsConfig> {
 
-    static final String HUB_PROPERTY = "hub";
-    static final String AUTH_PROPERTY = "auth";
     private static final String NEIGHBOR_IDS = "neighborIds";
 
     // Global norm aggregator shared by all workers
@@ -53,18 +51,18 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     private HitsState state = HitsState.SEND_IDS;
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(Hits.HitsConfig config) {
         return new PregelSchema.Builder()
-            .add(AUTH_PROPERTY, ValueType.DOUBLE)
-            .add(HUB_PROPERTY, ValueType.DOUBLE)
+            .add(config.authProperty(), ValueType.DOUBLE)
+            .add(config.hubProperty(), ValueType.DOUBLE)
             .add(NEIGHBOR_IDS, ValueType.LONG_ARRAY, PregelSchema.Visibility.PRIVATE)
             .build();
     }
 
     @Override
     public void init(InitContext<HitsConfig> context) {
-        context.setNodeValue(AUTH_PROPERTY, 1D);
-        context.setNodeValue(HUB_PROPERTY, 1D);
+        context.setNodeValue(context.config().authProperty(), 1D);
+        context.setNodeValue(context.config().hubProperty(), 1D);
     }
 
     @Override
@@ -77,13 +75,13 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
                 receiveIds(context, messages);
                 break;
             case CALCULATE_AUTHS:
-                calculateValue(context, messages, AUTH_PROPERTY);
+                calculateValue(context, messages, context.config().authProperty());
                 break;
             case NORMALIZE_AUTHS:
                 normalizeAuthValue(context);
                 break;
             case CALCULATE_HUBS:
-                calculateValue(context, messages, HUB_PROPERTY);
+                calculateValue(context, messages, context.config().hubProperty());
                 break;
             case NORMALIZE_HUBS:
                 normalizeHubValue(context);
@@ -112,7 +110,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
 
         // compute auths
         var auth = neighborIds.length;
-        context.setNodeValue(AUTH_PROPERTY, (double) auth);
+        context.setNodeValue(context.config().authProperty(), (double) auth);
         updateGlobalNorm(auth);
     }
 
@@ -127,14 +125,14 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
 
     private void normalizeHubValue(ComputeContext<HitsConfig> context) {
         // normalise hub
-        var normalizedValue = normalize(context, HUB_PROPERTY);
+        var normalizedValue = normalize(context, context.config().hubProperty());
         // send normalised hubs to outgoing neighbors
         context.sendToNeighbors(normalizedValue);
     }
 
     private void normalizeAuthValue(ComputeContext<HitsConfig> context) {
         // normalise auth
-        var normalizedValue = normalize(context, AUTH_PROPERTY);
+        var normalizedValue = normalize(context, context.config().authProperty());
         // send normalised auths to incoming neighbors
         for (long neighbor : context.longArrayNodeValue(NEIGHBOR_IDS)) {
             context.sendTo(neighbor, normalizedValue);
@@ -171,6 +169,18 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
         @Value.Derived
         default boolean isAsynchronous() {
             return false;
+        }
+
+        @Value.Default
+        @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+        default String hubProperty() {
+            return "hub";
+        }
+
+        @Value.Default
+        @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+        default String authProperty() {
+            return "auth";
         }
 
         static HitsConfig of(

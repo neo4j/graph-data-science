@@ -60,7 +60,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     @Override
-    public PregelSchema schema() {
+    public PregelSchema schema(SpeakerListenerLPAConfig config) {
         return new PregelSchema.Builder()
             .add(LABELS_PROPERTY, ValueType.LONG_ARRAY)
             .build();
