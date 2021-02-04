@@ -317,7 +317,7 @@ public class PregelProcTest extends BaseProcTest {
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override
-                public PregelSchema schema() {
+                public PregelSchema schema(PregelConfig config) {
                     return new PregelSchema.Builder()
                         .add(LONG_KEY, ValueType.LONG)
                         .add(DOUBLE_KEY, ValueType.DOUBLE)

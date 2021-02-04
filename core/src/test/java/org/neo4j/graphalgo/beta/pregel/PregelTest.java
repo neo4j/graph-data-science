@@ -354,7 +354,7 @@ class PregelTest {
         static final String KEY = "value";
 
         @Override
-        public PregelSchema schema() {
+        public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder()
                 .add(KEY, ValueType.DOUBLE)
                 .build();
@@ -397,7 +397,7 @@ class PregelTest {
         static final String KEY = "value";
 
         @Override
-        public PregelSchema schema() {
+        public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().add(KEY, ValueType.DOUBLE).build();
         }
 
@@ -428,7 +428,7 @@ class PregelTest {
         static final String DOUBLE_ARRAY_KEY = "double_array";
 
         @Override
-        public PregelSchema schema() {
+        public PregelSchema schema(CompositeTestComputationConfig config) {
             return new PregelSchema.Builder()
                 .add(LONG_KEY, ValueType.LONG)
                 .add(DOUBLE_KEY, ValueType.DOUBLE)
@@ -470,7 +470,7 @@ class PregelTest {
 
     private static class TestMasterCompute implements PregelComputation<PregelConfig> {
         @Override
-        public PregelSchema schema() {
+        public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
         }
 
@@ -495,7 +495,7 @@ class PregelTest {
 
     private static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
         @Override
-        public PregelSchema schema() {
+        public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().build();
         }
 
