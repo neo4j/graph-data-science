@@ -42,7 +42,7 @@ import static org.neo4j.graphalgo.core.ExceptionMessageMatcher.containsMessage;
 @GdlExtension
 class ConnectedComponentsPregelAlgoTest {
 
-    @GdlGraph(graphNamePrefix = "directed")
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String TEST_GRAPH =
             "CREATE" +
             "  (a:Node)" +
@@ -69,53 +69,11 @@ class ConnectedComponentsPregelAlgoTest {
             ", (i)-[:TYPE]->(h)" +
             ", (h)-[:TYPE]->(i)";
 
-    @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
-    private static final String TEST_GRAPH_UNDIRECTED = TEST_GRAPH;
-
     @Inject
-    private TestGraph directedGraph;
-
-    @Inject
-    private TestGraph undirectedGraph;
+    private TestGraph graph;
 
     @Test
-    void directedSCC() {
-        int maxIterations = 10;
-
-        var config = ImmutableConnectedComponentsConfig.builder()
-            .maxIterations(maxIterations)
-            .build();
-
-        var pregelJob = Pregel.create(
-            directedGraph,
-            config,
-            new ConnectedComponentsPregel(),
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
-
-        var result = pregelJob.run();
-
-        assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(2, result.ranIterations());
-
-        var expected = new HashMap<String, Long>();
-        expected.put("a", 0L);
-        expected.put("b", 0L);
-        expected.put("c", 0L);
-        expected.put("d", 0L);
-        expected.put("e", 4L);
-        expected.put("f", 4L);
-        expected.put("g", 4L);
-        expected.put("h", 7L);
-        expected.put("i", 7L);
-        expected.put("j", 9L);
-
-        TestSupport.assertLongValues(directedGraph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
-    }
-
-    @Test
-    void undirectedWCC() {
+    void wcc() {
         int maxIterations = 10;
 
         var config = ImmutableConnectedComponentsConfig.builder()
@@ -124,7 +82,7 @@ class ConnectedComponentsPregelAlgoTest {
             .build();
 
         var pregelJob = Pregel.create(
-            undirectedGraph,
+            graph,
             config,
             new ConnectedComponentsPregel(),
             Pools.DEFAULT,
@@ -134,7 +92,7 @@ class ConnectedComponentsPregelAlgoTest {
         var result = pregelJob.run();
 
         assertTrue(result.didConverge(), "Algorithm did not converge.");
-        assertEquals(2, result.ranIterations());
+        assertEquals(1, result.ranIterations());
 
         var expected = new HashMap<String, Long>();
         expected.put("a", 0L);
@@ -148,7 +106,7 @@ class ConnectedComponentsPregelAlgoTest {
         expected.put("i", 7L);
         expected.put("j", 9L);
 
-        TestSupport.assertLongValues(undirectedGraph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
+        TestSupport.assertLongValues(graph, (nodeId) -> result.nodeValues().longValue(COMPONENT, nodeId), expected);
     }
 
     @Test
