@@ -38,9 +38,9 @@ public interface MultiClassNLRData {
     LocalIdMap classIdMap();
 
     static MultiClassNLRData from(
+        Graph graph,
         Collection<String> featureProperties,
-        String targetPropertyKey,
-        Graph graph
+        String targetPropertyKey
     ) {
         var classIdMap = makeClassIdMap(graph, targetPropertyKey);
         var weights = initWeights(graph, classIdMap.size(), featureProperties);
