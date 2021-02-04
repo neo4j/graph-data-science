@@ -33,7 +33,7 @@ class AsyncQueueMessengerTest {
         var queues = PrimitiveAsyncDoubleQueues.of(1, AllocationTracker.empty());
         queues.push(0, 42.0);
 
-        var messageIterator = new AsyncQueueMessenger.Iterator(queues);
+        var messageIterator = new PrimitiveAsyncDoubleQueues.Iterator(queues);
         messageIterator.init(0);
 
         assertTrue(messageIterator.hasNext());

@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
-class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.Iterator> {
+class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterator> {
 
     private final PrimitiveAsyncDoubleQueues queues;
 
@@ -38,7 +38,9 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.Iterator> {
 
     @Override
     public void initIteration(int iteration) {
-        queues.init(iteration);
+        if (iteration > 0) {
+            queues.compact();
+        }
     }
 
     @Override
@@ -47,13 +49,13 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.Iterator> {
     }
 
     @Override
-    public Iterator messageIterator() {
-        return new Iterator(queues);
+    public PrimitiveAsyncDoubleQueues.Iterator messageIterator() {
+        return new PrimitiveAsyncDoubleQueues.Iterator(queues);
     }
 
     @Override
     public void initMessageIterator(
-        Iterator messageIterator,
+        PrimitiveAsyncDoubleQueues.Iterator messageIterator,
         long nodeId,
         boolean isFirstIteration
     ) {
@@ -63,34 +65,6 @@ class AsyncQueueMessenger implements Messenger<AsyncQueueMessenger.Iterator> {
     @Override
     public void release() {
         queues.release();
-    }
-
-    public static class Iterator implements Messages.MessageIterator {
-
-        private final PrimitiveAsyncDoubleQueues queues;
-
-        private long nodeId;
-
-        public Iterator(PrimitiveAsyncDoubleQueues queues) {this.queues = queues;}
-
-        void init(long nodeId) {
-            this.nodeId = nodeId;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return !queues.isEmpty(nodeId);
-        }
-
-        @Override
-        public double nextDouble() {
-            return queues.pop(nodeId);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return queues.isEmpty(nodeId);
-        }
     }
 
 }
