@@ -49,7 +49,7 @@ public class MultiClassNLRTrain {
     }
 
     public MultiClassNLRData compute() {
-        var modelData = MultiClassNLRObjective.makeData(
+        var modelData = MultiClassNLRData.from(
             config.featureProperties(),
             config.targetProperty(),
             graph
