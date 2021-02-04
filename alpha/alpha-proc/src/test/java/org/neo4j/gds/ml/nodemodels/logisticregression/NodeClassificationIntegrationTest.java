@@ -37,32 +37,32 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH =
         "CREATE " +
-        "  (:N {name: '0_1', a: 1.2, b: 1.2, class: 0})" +
-        ", (:N {name: '0_2', a: 2.8, b: 2.5, class: 0})" +
-        ", (:N {name: '0_3', a: 3.3, b: 0.5, class: 0})" +
-        ", (:N {name: '0_4', a: 1.0, b: 0.1, class: 0})" +
-        ", (:N {name: '0_5', a: 1.32, b: 0.0, class: 0})" +
-        ", (:Hidden {name: '0_hidden', a: 2.32, b: 3.2, class: 0})" +
-        ", (:N {name: '1_1', a: 11.3, b: 1.5, class: 1})" +
-        ", (:N {name: '1_2', a: 34.3, b: 10.5, class: 1})" +
-        ", (:N {name: '1_3', a: 33.3, b: 2.5, class: 1})" +
-        ", (:N {name: '1_4', a: 93.0, b: 66.8, class: 1})" +
-        ", (:N {name: '1_5', a: 10.1, b: 28.0, class: 1})" +
-        ", (:N {name: '1_6', a: 11.66, b: 2.8, class: 1})" +
-        ", (:N {name: '1_7', a: 99.1, b: 2.8, class: 1})" +
-        ", (:N {name: '1_8', a: 19.66, b: 0.8, class: 1})" +
-        ", (:N {name: '1_9', a: 71.66, b: 1.8, class: 1})" +
-        ", (:N {name: '1_10', a: 11.1, b: 2.2, class: 1})" +
-        ", (:Hidden {name: '1_hidden', a: 22.32, b: 3.2, class: 1})" +
-        ", (:N {name: '2_1', a: 2.0, b: -10.0, class: 2})" +
-        ", (:N {name: '2_2', a: 2.0, b: -1.6, class: 2})" +
-        ", (:N {name: '2_3', a: 5.0, b: -7.8, class: 2})" +
-        ", (:N {name: '2_4', a: 5.0, b: -73.8, class: 2})" +
-        ", (:N {name: '2_5', a: 2.0, b: -0.8, class: 2})" +
-        ", (:N {name: '2_6', a: 5.0, b: -7.8, class: 2})" +
-        ", (:N {name: '2_7', a: 4.0, b: -5.8, class: 2})" +
-        ", (:N {name: '2_8', a: 1.0, b: -0.9, class: 2})" +
-        ", (:Hidden {name: '2_hidden', a: 3.0, b: -10.9, class: 2})";
+        "  (:N {name: '0_1', a: [1.2, 0.0], b: 1.2, class: 0})" +
+        ", (:N {name: '0_2', a: [2.8, 0.0], b: 2.5, class: 0})" +
+        ", (:N {name: '0_3', a: [3.3, 0.0], b: 0.5, class: 0})" +
+        ", (:N {name: '0_4', a: [1.0, 0.0], b: 0.1, class: 0})" +
+        ", (:N {name: '0_5', a: [1.32, 0.0], b: 0.0, class: 0})" +
+        ", (:Hidden {name: '0_hidden', a: [2.32, 0.0], b: 3.2, class: 0})" +
+        ", (:N {name: '1_1', a: [11.3, 0.0], b: 1.5, class: 1})" +
+        ", (:N {name: '1_2', a: [34.3, 0.0], b: 10.5, class: 1})" +
+        ", (:N {name: '1_3', a: [33.3, 0.0], b: 2.5, class: 1})" +
+        ", (:N {name: '1_4', a: [93.0, 0.0], b: 66.8, class: 1})" +
+        ", (:N {name: '1_5', a: [10.1, 0.0], b: 28.0, class: 1})" +
+        ", (:N {name: '1_6', a: [11.66, 0.0], b: 2.8, class: 1})" +
+        ", (:N {name: '1_7', a: [99.1, 0.0], b: 2.8, class: 1})" +
+        ", (:N {name: '1_8', a: [19.66, 0.0], b: 0.8, class: 1})" +
+        ", (:N {name: '1_9', a: [71.66, 0.0], b: 1.8, class: 1})" +
+        ", (:N {name: '1_10', a: [11.1, 0.0], b: 2.2, class: 1})" +
+        ", (:Hidden {name: '1_hidden', a: [22.32, 0.0], b: 3.2, class: 1})" +
+        ", (:N {name: '2_1', a: [2.0, 0.0], b: -10.0, class: 2})" +
+        ", (:N {name: '2_2', a: [2.0, 0.0], b: -1.6, class: 2})" +
+        ", (:N {name: '2_3', a: [5.0, 0.0], b: -7.8, class: 2})" +
+        ", (:N {name: '2_4', a: [5.0, 0.0], b: -73.8, class: 2})" +
+        ", (:N {name: '2_5', a: [2.0, 0.0], b: -0.8, class: 2})" +
+        ", (:N {name: '2_6', a: [5.0, 0.0], b: -7.8, class: 2})" +
+        ", (:N {name: '2_7', a: [4.0, 0.0], b: -5.8, class: 2})" +
+        ", (:N {name: '2_8', a: [1.0, 0.0], b: -0.9, class: 2})" +
+        ", (:Hidden {name: '2_hidden', a: [3.0, 0.0], b: -10.9, class: 2})";
 
     @BeforeEach
     void setUp() throws Exception {
