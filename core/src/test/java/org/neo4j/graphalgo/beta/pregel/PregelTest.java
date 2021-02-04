@@ -220,9 +220,9 @@ class PregelTest {
 
     static Stream<Arguments> estimations() {
         return Stream.of(
-            // queue based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_881_504L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, 4_882_152L),
+            // queue based sync
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7281616L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7282264L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -230,7 +230,8 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 true,
-                6_881_576L
+                false,
+                9281688L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -239,17 +240,44 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 true,
-                6_882_224L
+                false,
+                9282336L
             ),
-            // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 241_576L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, 242_224L),
+
+            // queue based async
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3801616L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3802264L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
                     .add("key3", ValueType.LONG_ARRAY)
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
+                true,
+                true,
+                5801688L
+            ),
+            Arguments.of(10, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                true,
+                true,
+                5802336L
+            ),
+
+            // array based
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241_576L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242_224L),
+            Arguments.of(1, new PregelSchema.Builder()
+                    .add("key1", ValueType.LONG)
+                    .add("key2", ValueType.DOUBLE)
+                    .add("key3", ValueType.LONG_ARRAY)
+                    .add("key4", ValueType.DOUBLE_ARRAY)
+                    .build(),
+                false,
                 false,
                 2_241_648L
             ),
@@ -260,6 +288,7 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 false,
+                false,
                 2_242_296L
             )
         );
@@ -267,7 +296,7 @@ class PregelTest {
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void memoryEstimation(int concurrency, PregelSchema pregelSchema, boolean isQueueBased, long expectedBytes) {
+    void memoryEstimation(int concurrency, PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
@@ -275,7 +304,7 @@ class PregelTest {
 
         assertEquals(
             MemoryRange.of(expectedBytes).max,
-            Pregel.memoryEstimation(pregelSchema, isQueueBased).estimate(dimensions, concurrency).memoryUsage().max
+            Pregel.memoryEstimation(pregelSchema, isQueueBased, isAsync).estimate(dimensions, concurrency).memoryUsage().max
         );
     }
 

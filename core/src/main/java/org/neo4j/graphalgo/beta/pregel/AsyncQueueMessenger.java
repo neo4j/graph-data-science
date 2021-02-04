@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterator> {
 
@@ -31,9 +30,8 @@ class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterat
         this.queues = PrimitiveAsyncDoubleQueues.of(nodeCount, tracker);
     }
 
-    // TODO
     static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.empty();
+        return PrimitiveAsyncDoubleQueues.memoryEstimation();
     }
 
     @Override
