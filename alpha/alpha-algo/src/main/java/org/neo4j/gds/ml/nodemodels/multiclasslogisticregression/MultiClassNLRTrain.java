@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
+import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.batch.HugeBatchQueue;
-import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -49,9 +49,15 @@ public class MultiClassNLRTrain {
     }
 
     public MultiClassNLRData compute() {
+        var modelData = MultiClassNLRObjective.makeData(
+            config.featureProperties(),
+            config.targetProperty(),
+            graph
+        );
+        var predictor = new MultiClassNLRPredictor(modelData, config.featureProperties());
         var objective = new MultiClassNLRObjective(
             graph,
-            config.featureProperties(),
+            predictor,
             config.targetProperty(),
             config.penalty()
         );

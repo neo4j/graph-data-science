@@ -49,21 +49,17 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
 
     public MultiClassNLRObjective(
         Graph graph,
-        List<String> featureProperties,
+        MultiClassNLRPredictor predictor,
         String targetProperty,
         double penalty
     ) {
-        this.predictor = new MultiClassNLRPredictor(makeData(
-            featureProperties,
-            targetProperty,
-            graph
-        ), featureProperties);
+        this.predictor = predictor;
         this.targetProperty = targetProperty;
         this.graph = graph;
         this.penalty = penalty;
     }
 
-    private static MultiClassNLRData makeData(
+    public static MultiClassNLRData makeData(
         Collection<String> featureProperties,
         String targetPropertyKey,
         Graph graph
