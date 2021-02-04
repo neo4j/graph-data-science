@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
-abstract class PrimitiveDoubleQueues {
+public abstract class PrimitiveDoubleQueues {
     // used to store a message in a queue
     private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
     // minimum capacity for the individual arrays
