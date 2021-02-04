@@ -32,6 +32,10 @@ public class Matrix extends Tensor<Matrix> {
         super(data, Dimensions.matrix(rows, cols));
     }
 
+    public Matrix(int rows, int cols) {
+        this(new double[rows * cols], rows, cols);
+    }
+
     public static Matrix fill(double v, int rows, int cols) {
         return new Matrix(ArrayUtil.fill(v, rows * cols), rows, cols);
     }

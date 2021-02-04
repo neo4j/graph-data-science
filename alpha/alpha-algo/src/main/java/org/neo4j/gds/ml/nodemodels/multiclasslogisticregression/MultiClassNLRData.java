@@ -43,7 +43,7 @@ public interface MultiClassNLRData {
     ) {
         var classIdMap = makeClassIdMap(graph, targetProperty);
         var featuresPerClass = FeatureExtraction.featureCountWithBias(graph, featureProperties);
-        var weights = new Weights<>(Matrix.fill(0.0, classIdMap.size(), featuresPerClass));
+        var weights = Weights.ofMatrix(classIdMap.size(), featuresPerClass);
 
         return builder()
             .classIdMap(classIdMap)
