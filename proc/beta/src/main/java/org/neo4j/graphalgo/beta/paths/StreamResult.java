@@ -26,7 +26,9 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.beta.paths.PathFactory.create;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -86,6 +88,11 @@ public final class StreamResult {
 
             var relationshipType = RelationshipType.withName(formatWithLocale("PATH_%d", pathIndex));
 
+            // convert internal ids to Neo ids
+            for (int i = 0; i < nodeIds.length; i++) {
+                nodeIds[i] = idMapping.toOriginalNodeId(nodeIds[i]);
+            }
+
             Path path = null;
             if (createCypherPath) {
                 path = create(
@@ -99,23 +106,14 @@ public final class StreamResult {
                 relationshipIdOffset -= path.length();
             }
 
-            // 😿
-            var nodeIdsList = new ArrayList<Long>(nodeIds.length);
-            for (long nodeId : nodeIds) {
-                nodeIdsList.add(idMapping.toOriginalNodeId(nodeId));
-            }
-            var costsList = new ArrayList<Double>(costs.length);
-            for (double cost : costs) {
-                costsList.add(cost);
-            }
-
             return new StreamResult(
                 pathIndex,
                 idMapping.toOriginalNodeId(pathResult.sourceNode()),
                 idMapping.toOriginalNodeId(pathResult.targetNode()),
                 pathResult.totalCost(),
-                nodeIdsList,
-                costsList,
+                // 😿
+                Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
+                Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
                 path
             );
         }

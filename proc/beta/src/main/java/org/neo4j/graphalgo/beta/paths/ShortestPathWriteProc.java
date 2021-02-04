@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.paths;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
@@ -60,12 +61,14 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
             boolean writeNodeIds = config.writeNodeIds();
             boolean writeCosts = config.writeCosts();
 
+            var graph = computationResult.graph();
+
             var relationshipStream = result
                 .paths()
                 .map(pathResult -> ImmutableRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
-                    createValues(pathResult, writeNodeIds, writeCosts)
+                    createValues(graph, pathResult, writeNodeIds, writeCosts)
                 ));
 
             var exporter = RelationshipStreamExporter
@@ -84,7 +87,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
         });
     }
 
-    private String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
+    private static String[] createKeys(boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
             return new String[]{TOTAL_COST_KEY, NODE_IDS_KEY, COSTS_KEY};
         }
@@ -97,18 +100,18 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
         return new String[]{TOTAL_COST_KEY};
     }
 
-    private Value[] createValues(PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
+    private static Value[] createValues(IdMapping idMapping, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {
         if (writeNodeIds && writeCosts) {
             return new Value[]{
                 Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(pathResult.nodeIds()),
+                Values.longArray(toOriginalIds(idMapping, pathResult.nodeIds())),
                 Values.doubleArray(pathResult.costs())
             };
         }
         if (writeNodeIds) {
             return new Value[]{
                 Values.doubleValue(pathResult.totalCost()),
-                Values.longArray(pathResult.nodeIds()),
+                Values.longArray(toOriginalIds(idMapping, pathResult.nodeIds())),
             };
         }
         if (writeCosts) {
@@ -120,5 +123,13 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
         return new Value[]{
             Values.doubleValue(pathResult.totalCost()),
         };
+    }
+
+    // Replaces the ids in the given array with the original ids
+    private static long[] toOriginalIds(IdMapping idMapping, long[] internalIds) {
+        for (int i = 0; i < internalIds.length; i++) {
+            internalIds[i] = idMapping.toOriginalNodeId(internalIds[i]);
+        }
+        return internalIds;
     }
 }
