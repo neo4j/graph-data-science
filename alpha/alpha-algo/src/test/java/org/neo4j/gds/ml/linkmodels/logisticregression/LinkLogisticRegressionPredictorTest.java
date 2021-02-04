@@ -20,7 +20,9 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.DoubleArrayCombiner;
@@ -31,6 +33,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,19 +53,40 @@ class LinkLogisticRegressionPredictorTest {
     @Inject
     IdFunction idFunction;
 
-    @Test
-    void computesProbability() {
-        var weights = new double[]{.5, .6, .7, .8, .9};
+    private static final double[] WEIGHTS = new double[]{.5, .6, .7, .8, .9};
+
+    private static Stream<Arguments> inputs() {
+        return Stream.of(
+            Arguments.of(
+                "a", "b", 1 / (1 + Math.pow(Math.E, -1 * (.99 * .5 + 6.3 * .6 + 79.2 * .7 + 3.077 * .8 + WEIGHTS[4])))
+            ),
+            Arguments.of(
+                "a", "c", 1 / (1 + Math.pow(Math.E, -1 * (1.32 * .5 + 65.3 * .6 + 35.4 * .7 + 14.1 * .8 + WEIGHTS[4])))
+            ),
+            Arguments.of(
+                "c",
+                "b",
+                1 / (1 + Math.pow(Math.E, -1 * (1.65 * .5 + 74.1 * .6 + 110.4 * .7 + 11.177 * .8 + WEIGHTS[4])))
+            ),
+            Arguments.of(
+                "d",
+                "a",
+                1 / (1 + Math.pow(Math.E, -1 * (2.75 * .5 + -.392 * .6 + 2.18 * .7 + 83.808 * .8 + WEIGHTS[4])))
+            )
+        );
+    }
+
+    @MethodSource("inputs")
+    @ParameterizedTest
+    void computesProbability(String sourceNode, String targetNode, double expectedResult) {
         var modelData = LinkLogisticRegressionData
             .builder()
             .from(LinkLogisticRegressionData.from(graph, List.of("x", "y"), new SumCombiner()))
-            .weights(new Weights<>(new Matrix(weights, 1, 5)))
+            .weights(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)))
             .build();
         var predictor = new LinkLogisticRegressionPredictor(modelData);
 
-        var result = predictor.predictedProbability(graph, idFunction.of("a"), idFunction.of("b"));
-
-        var expectedResult = 1 / (1 + Math.pow(Math.E, -1 * (.99 * .5 + 6.3 * .6 + 79.2 * .7 + 3.077 * .8 + .9)));
+        var result = predictor.predictedProbability(graph, idFunction.of(sourceNode), idFunction.of(targetNode));
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-10));
     }
