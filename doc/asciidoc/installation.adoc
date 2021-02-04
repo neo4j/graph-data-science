@@ -136,6 +136,24 @@ If the `gds.enterprise.license_file` setting is set to a non-empty value, the Ne
 When a valid license key is configured, all Enterprise Edition features are unlocked.
 In case of a problem, e.g, when the license key file is inaccessible, the license has expired or is invalid for any other reason, all calls to the Neo4j Graph Data Science Library will result in an error, stating the problem with the license key.
 
+[[installation-docker]]
+== Neo4j Docker
+
+The Neo4j Graph Data Science library is available as a plugin for Neo4j on Docker.
+The plugins guide for Docker is found at the https://neo4j.com/docs/operations-manual/current/docker/operations/#docker-neo4jlabs-plugins[operations manual].
+
+To run a Neo4j Container with GDS available, you can run
+
+[source,shell]
+----
+docker run -it --rm \
+  --publish=7474:7474 --publish=7687:7687 \
+  --user="$(id -u):$(id -g)" \
+  -e NEO4J_AUTH=none \
+  --env NEO4JLABS_PLUGINS='["graph-data-science"]' \
+  neo4j:4.2
+----
+
 [[installation-causal-cluster]]
 == Neo4j Causal Cluster
 
