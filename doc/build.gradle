@@ -237,6 +237,7 @@ html {
         '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/addon/runmode/runmode.min.js',
         '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/mode/cypher/cypher.min.js',
         "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/mode/clike/clike.min.js",
+        "//cdnjs.cloudflare.com/ajax/libs/codemirror/5.11.0/mode/shell/shell.min.js",
         'javascript/colorize.js',
         'javascript/tabs-for-chunked.js',
         'javascript/mp-nav.js',
