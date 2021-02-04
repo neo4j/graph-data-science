@@ -44,62 +44,86 @@ abstract class PrimitiveDoubleQueues {
     abstract void grow(long nodeId, int newCapacity);
 
     public void push(long nodeId, double message) {
-        // get tail index
+        // The index which we will eventually use to
+        // insert the message into the nodes' queue.
         long idx;
 
         outer:
         while (true) {
             idx = tails.get(nodeId);
             if (idx < 0) {
+                // A negative index indicates that another thread
+                // currently grows the queue for the given node id.
+                // When the thread is done growing, the index will
+                // turn positive again, so we go ahead and try to
+                // set the next index.
                 var nextId = -idx + 1;
 
                 while (true) {
                     var currentIdx = tails.compareAndExchange(nodeId, -idx, nextId);
                     if (currentIdx == -idx) {
-                        // queue is grown
+                        // The queue is grown and the current thread
+                        // was successful setting the next index.
+                        // We are done and can use the index to insert
+                        // our message into the queue.
                         idx = -idx;
                         break outer;
                     }
-
                     if (currentIdx != idx) {
+                        // The queue is grown but another thread beat
+                        // us in setting the next possible index.
+                        // We need to retry from the most outer loop.
                         continue outer;
                     }
+                    // The grow thread is still ongoing, we continue
+                    // trying to set the next index.
                 }
-
             }
+            // We basically perform and getAndIncrement and try
+            // to update the tail with the next index.
             long nextIdx = idx + 1;
 
             if (hasSpaceLeft(nodeId, (int) nextIdx)) {
+                // There is still room in the local queue.
+                // We try to set our next index.
                 long currentIdx = tails.compareAndExchange(nodeId, idx, nextIdx);
                 if (currentIdx == idx) {
-                    // CAS successful
+                    // CAX successful, we can go ahead and use our
+                    // index to insert the message into the local queue.
                     break;
                 }
             } else {
+                // We need to grow the local queue. To indicate this and
+                // block other insert threads, we set the negated
+                // next index. Threads seeing this negative index will
+                // spin in the upper loop.
                 long currentIdx = tails.compareAndExchange(nodeId, idx, -nextIdx);
                 if (currentIdx == idx) {
-                    // one thread gets here and grows the queue
+                    // Only a single thread gets into this block.
+                    // We grow the queue and make sure there is
+                    // enough space for the next index.
                     grow(nodeId, (int) nextIdx);
-                    // set a positive value to signal other threads
-                    // that the queue has grown
+                    // We turn the index back to the positive value
+                    // to indicate to waiting threads that we're
+                    // done growing the local queue.
                     tails.compareAndExchange(nodeId, -nextIdx, nextIdx);
+                    // Done. We can use the index to insert our message.
                     break;
                 }
             }
         }
 
+        // We place a full fence in order to make sure that writes after the
+        // fence are not re-ordered with reads before the fence. In particular,
+        // we avoid the queues.get call being moved before the grow operation
+        // in order to avoid reading from the queue before it is grown.
         VarHandle.fullFence();
-        // set value
-        set(queues.get(nodeId), (int) idx, message);
-
+        // Set the message value at the computed index.
+        ARRAY_HANDLE.setVolatile(queues.get(nodeId), (int) idx, message);
     }
 
     private boolean hasSpaceLeft(long nodeId, int minCapacity) {
         return queues.get(nodeId).length >= minCapacity;
-    }
-
-    private void set(double[] queue, int index, double message) {
-        ARRAY_HANDLE.setVolatile(queue, index, message);
     }
 
     void release() {
