@@ -54,12 +54,13 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
-           "  (c)" +
-           ", (d)" +
-           ", (e)" +
-           ", (f)" +
-           ", (g)" +
-           ", (h)" +
+           "  (:Offset)" +
+           ", (c:Label)" +
+           ", (d:Label)" +
+           ", (e:Label)" +
+           ", (f:Label)" +
+           ", (g:Label)" +
+           ", (h:Label)" +
            ", (c)-[:TYPE {cost: 3.0}]->(d)" +
            ", (c)-[:TYPE {cost: 2.0}]->(e)" +
            ", (d)-[:TYPE {cost: 4.0}]->(f)" +
@@ -93,7 +94,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
         costs2 = new double[]{0.0, 3.0, 7.0, 8.0};
 
         runQuery(GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
             .graphCreate(GRAPH_NAME)

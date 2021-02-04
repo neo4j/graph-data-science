@@ -53,7 +53,8 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
 
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE" +
-           "  (a:Label)" +
+           "  (:Offset)" +
+           ", (a:Label)" +
            ", (b:Label)" +
            ", (c:Label)" +
            ", (d:Label)" +
@@ -96,7 +97,7 @@ abstract class AllShortestPathsDijkstraProcTest<CONFIG extends AllShortestPathsB
         ids5 = new long[]{idA, idC, idE, idD, idF};
 
         runQuery(GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("Label")
             .withAnyRelationshipType()
             .withRelationshipProperty("cost")
             .graphCreate(GRAPH_NAME)

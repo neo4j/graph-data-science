@@ -74,23 +74,24 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (nA:Node {latitude: 1.304444,    longitude: 103.717373})" + // name: 'SINGAPORE'
-        ", (nB:Node {latitude: 1.1892,      longitude: 103.4689})" + // name: 'SINGAPORE STRAIT'
-        ", (nC:Node {latitude: 8.83055556,  longitude: 111.8725})" + // name: 'WAYPOINT 68'
-        ", (nD:Node {latitude: 10.82916667, longitude: 113.9722222})" + // name: 'WAYPOINT 70'
-        ", (nE:Node {latitude: 11.9675,     longitude: 115.2366667})" + // name: 'WAYPOINT 74'
-        ", (nF:Node {latitude: 16.0728,     longitude: 119.6128})" + // name: 'SOUTH CHINA SEA'
-        ", (nG:Node {latitude: 20.5325,     longitude: 121.845})" + // name: 'LUZON STRAIT'
-        ", (nH:Node {latitude: 29.32611111, longitude: 131.2988889})" + // name: 'WAYPOINT 87'
-        ", (nI:Node {latitude: -2.0428,     longitude: 108.6225})" + // name: 'KARIMATA STRAIT'
-        ", (nJ:Node {latitude: -8.3256,     longitude: 115.8872})" + // name: 'LOMBOK STRAIT'
-        ", (nK:Node {latitude: -8.5945,     longitude: 116.6867})" + // name: 'SUMBAWA STRAIT'
-        ", (nL:Node {latitude: -8.2211,     longitude: 125.2411})" + // name: 'KOLANA AREA'
-        ", (nM:Node {latitude: -1.8558,     longitude: 126.5572})" + // name: 'EAST MANGOLE'
-        ", (nN:Node {latitude: 3.96861111,  longitude: 128.3052778})" + // name: 'WAYPOINT 88'
-        ", (nO:Node {latitude: 12.76305556, longitude: 131.2980556})" + // name: 'WAYPOINT 89'
-        ", (nP:Node {latitude: 22.32027778, longitude: 134.700000})" + // name: 'WAYPOINT 90'
-        ", (nX:Node {latitude: 35.562222,   longitude: 140.059187})" + // name: 'CHIBA'
+        "  (:Offset)" +
+        ", (nA:Label {latitude: 1.304444,    longitude: 103.717373})" + // name: 'SINGAPORE'
+        ", (nB:Label {latitude: 1.1892,      longitude: 103.4689})" + // name: 'SINGAPORE STRAIT'
+        ", (nC:Label {latitude: 8.83055556,  longitude: 111.8725})" + // name: 'WAYPOINT 68'
+        ", (nD:Label {latitude: 10.82916667, longitude: 113.9722222})" + // name: 'WAYPOINT 70'
+        ", (nE:Label {latitude: 11.9675,     longitude: 115.2366667})" + // name: 'WAYPOINT 74'
+        ", (nF:Label {latitude: 16.0728,     longitude: 119.6128})" + // name: 'SOUTH CHINA SEA'
+        ", (nG:Label {latitude: 20.5325,     longitude: 121.845})" + // name: 'LUZON STRAIT'
+        ", (nH:Label {latitude: 29.32611111, longitude: 131.2988889})" + // name: 'WAYPOINT 87'
+        ", (nI:Label {latitude: -2.0428,     longitude: 108.6225})" + // name: 'KARIMATA STRAIT'
+        ", (nJ:Label {latitude: -8.3256,     longitude: 115.8872})" + // name: 'LOMBOK STRAIT'
+        ", (nK:Label {latitude: -8.5945,     longitude: 116.6867})" + // name: 'SUMBAWA STRAIT'
+        ", (nL:Label {latitude: -8.2211,     longitude: 125.2411})" + // name: 'KOLANA AREA'
+        ", (nM:Label {latitude: -1.8558,     longitude: 126.5572})" + // name: 'EAST MANGOLE'
+        ", (nN:Label {latitude: 3.96861111,  longitude: 128.3052778})" + // name: 'WAYPOINT 88'
+        ", (nO:Label {latitude: 12.76305556, longitude: 131.2980556})" + // name: 'WAYPOINT 89'
+        ", (nP:Label {latitude: 22.32027778, longitude: 134.700000})" + // name: 'WAYPOINT 90'
+        ", (nX:Label {latitude: 35.562222,   longitude: 140.059187})" + // name: 'CHIBA'
         ", (nA)-[:TYPE {cost: 29.0}]->(nB)" +
         ", (nB)-[:TYPE {cost: 694.0}]->(nC)" +
         ", (nC)-[:TYPE {cost: 172.0}]->(nD)" +
@@ -135,7 +136,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         costs0 = new double[]{0.0, 29.0, 723.0, 895.0, 996.0, 1353.0, 1652.0, 2392.0, 2979.0};
 
         runQuery(GdsCypher.call()
-            .withAnyLabel()
+            .withNodeLabel("Label")
             .withNodeProperty(LATITUDE_PROPERTY)
             .withNodeProperty(LONGITUDE_PROPERTY)
             .withAnyRelationshipType()
