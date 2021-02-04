@@ -21,8 +21,12 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -50,6 +54,14 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         });
 
         return new PrimitiveAsyncDoubleQueues(heads, tails, queues);
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(PrimitiveAsyncDoubleQueues.class)
+            .add("queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
+            .perNode("heads", HugeLongArray::memoryEstimation)
+            .perNode("tails", HugeLongArray::memoryEstimation)
+            .build();
     }
 
     private PrimitiveAsyncDoubleQueues(HugeAtomicLongArray heads, HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {

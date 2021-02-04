@@ -20,7 +20,11 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -46,6 +50,14 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         prevQueues.setAll(value -> new double[capacity]);
 
         return new PrimitiveSyncDoubleQueues(currentTails, currentQueues, prevTails, prevQueues);
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(PrimitiveSyncDoubleQueues.class)
+            .add("current queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
+            .add("previous queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
+            .perNode("tails", HugeLongArray::memoryEstimation)
+            .build();
     }
 
     private PrimitiveSyncDoubleQueues(

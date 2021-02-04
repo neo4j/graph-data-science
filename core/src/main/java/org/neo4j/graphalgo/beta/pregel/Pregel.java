@@ -77,14 +77,18 @@ public final class Pregel<CONFIG extends PregelConfig> {
         );
     }
 
-    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased) {
+    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
             .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 
         if (isQueueBased) {
-            estimationBuilder.add("message queues", AsyncQueueMessenger.memoryEstimation());
+            if (isAsync) {
+                estimationBuilder.add("message queues", AsyncQueueMessenger.memoryEstimation());
+            } else {
+                estimationBuilder.add("message queues", SyncQueueMessenger.memoryEstimation());
+            }
         } else {
             estimationBuilder.add("message arrays", ReducingMessenger.memoryEstimation());
         }

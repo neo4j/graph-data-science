@@ -92,7 +92,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
             @Override
             public MemoryEstimation memoryEstimation(PregelConfig configuration) {
                 var computation = new Computation();
-                return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isPresent());
+                return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isPresent(), configuration.isAsynchronous());
             }
         };
     }
