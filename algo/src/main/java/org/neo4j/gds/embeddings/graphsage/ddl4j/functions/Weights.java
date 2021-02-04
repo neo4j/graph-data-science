@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
@@ -51,5 +52,9 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
     @Override
     public boolean requireGradient() {
         return true;
+    }
+
+    public static Weights<Matrix> ofMatrix(int rows, int cols) {
+        return new Weights<>(new Matrix(rows, cols));
     }
 }

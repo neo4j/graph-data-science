@@ -23,11 +23,10 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LogisticLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.Objective;
+import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -70,14 +69,9 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
         List<String> nodePropertyKeys
     ) {
         return NodeLogisticRegressionData.builder()
-            .weights(initWeights(nodePropertyKeys))
+            .weights(Weights.ofMatrix(1, nodePropertyKeys.size() + 1))
             .nodePropertyKeys(nodePropertyKeys)
             .build();
-    }
-
-    private static Weights<Matrix> initWeights(List<String> nodePropertyKeys) {
-        double[] weights = new double[nodePropertyKeys.size() + 1];
-        return new Weights<>(new Matrix(weights, 1, weights.length));
     }
 
     private MatrixConstant makeTargets(Batch batch) {

@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.ml.DoubleArrayCombiner;
-import org.neo4j.gds.ml.features.BiasFeature;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -46,7 +45,7 @@ public interface LinkLogisticRegressionData {
         DoubleArrayCombiner linkFeatureCombiner
     ) {
         var numberOfFeatures = FeatureExtraction.featureCountWithBias(graph, featureProperties);
-        var weights = new Weights<>(new Matrix(new double[numberOfFeatures], 1, numberOfFeatures));
+        var weights = Weights.ofMatrix(1, numberOfFeatures);
 
         return builder()
             .weights(weights)
