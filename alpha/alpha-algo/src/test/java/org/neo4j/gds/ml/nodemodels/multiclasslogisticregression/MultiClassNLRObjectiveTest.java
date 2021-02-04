@@ -52,7 +52,7 @@ class MultiClassNLRObjectiveTest {
     @Test
     void shouldProduceCorrectLoss() {
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        var objective = new MultiClassNLRObjective(List.of("a", "b"), "t", graph, 0.0);
+        var objective = new MultiClassNLRObjective(graph, List.of("a", "b"), "t", 0.0);
         var loss = objective.loss(allNodesBatch, 4);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
@@ -63,7 +63,7 @@ class MultiClassNLRObjectiveTest {
 
     @Test
     void shouldSortClasses() {
-        var objective = new MultiClassNLRObjective(List.of("a", "b"), "t", graph, 0.0);
+        var objective = new MultiClassNLRObjective(graph, List.of("a", "b"), "t", 0.0);
         var classList = objective.modelData().classIdMap().originalIdsList();
         assertThat(classList).containsExactly(0L, 1L, 2L);
     }

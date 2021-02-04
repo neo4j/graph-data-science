@@ -50,9 +50,9 @@ public class MultiClassNLRTrain {
 
     public MultiClassNLRData compute() {
         var objective = new MultiClassNLRObjective(
+            graph,
             config.featureProperties(),
             config.targetProperty(),
-            graph,
             config.penalty()
         );
         var training = new Training(config, log, graph.nodeCount());
