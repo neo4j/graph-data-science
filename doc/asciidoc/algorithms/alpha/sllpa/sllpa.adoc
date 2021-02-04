@@ -49,7 +49,9 @@ CALL gds.alpha.sllpa.stream(
 )
 YIELD
   nodeId: Integer,
-  communityIds: Integer[]
+  values: Map {
+    communtiyIds: List of Integer
+  }
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -63,7 +65,7 @@ include::specific-configuration.adoc[]
 |===
 | Name         | Type      | Description
 | nodeId       | Integer   | Node ID.
-| communityIds | Integer[] | Community IDs.
+| values       | Map       | A map that contains the key `communityIds`.
 |===
 
 ======
