@@ -15,6 +15,7 @@ This topic includes:
 * <<algorithms-ml-linkprediction-intro, Introduction>>
 * <<algorithms-ml-linkprediction-syntax, Syntax>>
 * <<algorithms-ml-linkprediction-examples, Examples>>
+** <<algorithms-ml-linkprediction-examples-train, Train>>
 ** <<algorithms-ml-linkprediction-examples-mutate, Mutate>>
 
 
@@ -137,7 +138,144 @@ include::specific-configuration.adoc[]
 [[algorithms-ml-linkprediction-examples]]
 == Examples
 
-//TODO
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: link-prediction.png
+include::../../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice', numberOfPosts: 38}),
+  (michael:Person {name: 'Michael', numberOfPosts: 67}),
+  (karin:Person {name: 'Karin', numberOfPosts: 30}),
+  (chris:Person {name: 'Chris', numberOfPosts: 132}),
+  (will:Person {name: 'Will', numberOfPosts: 6}),
+  (mark:Person {name: 'Mark', numberOfPosts: 32}),
+  (greg:Person {name: 'Greg', numberOfPosts: 29}),
+  (veselin:Person {name: 'Veselin', numberOfPosts: 3}),
+
+  (alice)-[:KNOWS]->(michael),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(greg),
+  (will)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (greg)-[:KNOWS]->(chris),
+  (veselin)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(veselin),
+  (chris)-[:KNOWS]->(karin)
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We will also project the `numberOfPosts` property so we can use it as a model feature.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Link Prediction model is defined only for undirected graphs.
+
+include::../../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  {
+    Person: {
+      properties: ['numberOfPosts']
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+
+In the following examples we will demonstrate using the Link Prediction model on this graph.
+
+
+[[algorithms-ml-linkprediction-examples-train]]
+=== Train
+
+First, we must do the test/train splits.
+For this we will make use of the `gds.alpha.ml.splitRelationships` procedure.
+We will do one split to select relationships to be used in the test set.
+
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
+  relationshipTypes: ['KNOWS'],
+  remainingRelationshipType: 'KNOWS_REMAINING',
+  holdoutRelationshipType: 'KNOWS_TESTSET',
+  holdoutFraction: 0.2
+}) YIELD relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 24
+|===
+
+We will create copied relationships for each existing relationship, into either the `KNOWS_REMAINING` or the `KNOWS_TESTSET` relationship types.
+All relationships in `KNOWS_TESTSET` will have a `label` property.
+Additionally, a number of non-existing relationships will be created into the `KNOWS_TESTSET` relationship type to be used as negative examples, with a `label` of `0`.
+
+Next, we will create the train set.
+
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
+  relationshipTypes: ['KNOWS_REMAINING'],
+  remainingRelationshipType: 'KNOWS_IGNORED_FOR_TRAINING',
+  holdoutRelationshipType: 'KNOWS_TRAINSET',
+  holdoutFraction: 0.2
+}) YIELD relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 20
+|===
+
+With both train and test sets, we are ready to train models.
+
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.linkPrediction.train('myGraph', {
+  trainRelationshipType: 'KNOWS_TRAINSET',
+  testRelationshipType: 'KNOWS_TESTSET',
+  modelName: 'model',
+  featureProperties: ['numberOfPosts'],
+  validationFolds: 5,
+  classRatio: 0.88,
+  randomSeed: 2,
+  params: [
+    {penalty: 0.5, maxIterations: 1000},
+    {penalty: 1.0, maxIterations: 1000},
+    {penalty: 0.0, maxIterations: 1000}
+  ]
+}) YIELD modelInfo
+RETURN modelInfo.bestParameters AS winningModel
+----
+
+.Results
+[opts="header"]
+|===
+| winningModel
+| {maxIterations: 1000, penalty: 0.5}
+|===
+
 
 [[algorithms-ml-linkprediction-examples-mutate]]
 === Mutate
