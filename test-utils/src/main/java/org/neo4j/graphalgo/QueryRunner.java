@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
+import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
@@ -48,7 +49,7 @@ public final class QueryRunner {
     public static void runQueryWithRowConsumer(
         GraphDatabaseService db,
         String username,
-        String query,
+        @Language("Cypher") String query,
         Map<String, Object> params,
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
@@ -65,7 +66,7 @@ public final class QueryRunner {
 
     public static void runQueryWithRowConsumer(
         GraphDatabaseService db,
-        String query,
+        @Language("Cypher") String query,
         Map<String, Object> params,
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
@@ -81,7 +82,7 @@ public final class QueryRunner {
 
     public static void runQueryWithRowConsumer(
         GraphDatabaseService db,
-        String query,
+        @Language("Cypher") String query,
         Consumer<Result.ResultRow> rowConsumer
     ) {
         runInTransaction(db, tx -> {
@@ -94,11 +95,11 @@ public final class QueryRunner {
         });
     }
 
-    public static void runQuery(GraphDatabaseService db, String query) {
+    public static void runQuery(GraphDatabaseService db, @Language("Cypher") String query) {
         runQuery(db, query, emptyMap());
     }
 
-    public static void runQuery(GraphDatabaseService db, String query, Map<String, Object> params) {
+    public static void runQuery(GraphDatabaseService db, @Language("Cypher") String query, Map<String, Object> params) {
         runInTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(CONSUME_ROWS);
@@ -109,7 +110,7 @@ public final class QueryRunner {
     public static <T> T runQuery(
         GraphDatabaseService db,
         String username,
-        String query,
+        @Language("Cypher") String query,
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
@@ -123,7 +124,12 @@ public final class QueryRunner {
         });
     }
 
-    public static void runQuery(GraphDatabaseService db, String username, String query, Map<String, Object> params) {
+    public static void runQuery(
+        GraphDatabaseService db,
+        String username,
+        @Language("Cypher") String query,
+        Map<String, Object> params
+    ) {
         runInTransaction(db, tx -> {
             try (KernelTransaction.Revertable ignored = withUsername(tx, username);
                  Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
@@ -132,13 +138,17 @@ public final class QueryRunner {
         });
     }
 
-    public static <T> T runQuery(GraphDatabaseService db, String query, Function<Result, T> resultFunction) {
+    public static <T> T runQuery(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        Function<Result, T> resultFunction
+    ) {
         return runQuery(db, query, emptyMap(), resultFunction);
     }
 
     public static <T> T runQuery(
         GraphDatabaseService db,
-        String query,
+        @Language("Cypher") String query,
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
@@ -151,7 +161,7 @@ public final class QueryRunner {
 
     public static void runQueryWithResultConsumer(
         GraphDatabaseService db,
-        String query,
+        @Language("Cypher") String query,
         Map<String, Object> params,
         Consumer<Result> resultConsumer
     ) {
