@@ -21,6 +21,38 @@ This topic includes:
 [[algorithms-ml-linkprediction-intro]]
 == Introduction
 
+Link Prediction models are used to predict non-existing relationships between nodes in a graph based on the nodes' properties.
+The node properties are used as input features for specific machine learning model candidates.
+The model candidates are trained on parts of the input graph and evaluated using a specific metric.
+Creating these parts is a necessary pre-processing step called <<algorithms-ml-train-test-splitting>>.
+
+The part of the input graph used for training is called the _train set_.
+The part of the input graph used for evaluation is called the _test set_.
+
+The training process follows this outline:
+
+1. The train set is divided into a number of validation folds, consisting of a train part and a validation part.
+2. Each model candidate is trained on each train part and evaluated on the respective validation part.
+3. The model with the highest average score according to the metric will win the training.
+4. The winning model will then be evaluated on the whole train set as well as the test set.
+5. The winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
+
+Trained models may then be used to predict the probability of a relationship between two nodes.
+
+[[algorithms-ml-train-test-splitting]]
+=== Train/Test Splitting
+
+The Link Prediction training takes as input two relationship types that are used to construct subgraphs representing the parts of the graph used for training and testing, respectively.
+Creating these relationship types must be done before training a Link Prediction model.
+The relationship types must have a integer property called `label`, with value either `0` or `1`, which denotes a negative or a positive example relationship in the original graph, respectively.
+
+By using the `gds.alpha.ml.splitRelationships()` procedure it is possible to produce the necessary train/test splits.
+
+
+=== Metrics
+
+The Link Prediction model in the Neo4j GDS library supports only the Area Under the Precision-Recall Curve metric, abbreviated as AUCPR.
+
 
 [[algorithms-ml-linkprediction-syntax]]
 == Syntax
