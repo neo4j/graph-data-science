@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.concurrent.Phaser;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class PrimitiveDoubleQueuesTest {
 
@@ -36,23 +36,23 @@ abstract class PrimitiveDoubleQueuesTest {
     void growQueueArray() {
         var queues = getQueue(1337, 42);
 
-        AssertionsForClassTypes.assertThat(queues.queue(42).length).isEqualTo(42);
+        assertThat(queues.queue(42).length).isEqualTo(42);
 
         for (int i = 0; i < 41; i++) {
             queues.push(42, 23);
         }
 
-        AssertionsForClassTypes.assertThat(queues.queue(42).length).isEqualTo(42);
+        assertThat(queues.queue(42).length).isEqualTo(42);
         queues.push(42, 1337);
-        AssertionsForClassTypes.assertThat(queues.queue(42).length).isEqualTo(42);
+        assertThat(queues.queue(42).length).isEqualTo(42);
         queues.push(42, 1337);
 
-        AssertionsForClassTypes.assertThat(queues.queue(42).length).isEqualTo(63 /* 42 * 1.5 */);
-        AssertionsForClassTypes.assertThat(queues.queue(42)[41]).isEqualTo(1337);
-        AssertionsForClassTypes.assertThat(queues.queue(42)[42]).isEqualTo(1337);
+        assertThat(queues.queue(42).length).isEqualTo(63 /* 42 * 1.5 */);
+        assertThat(queues.queue(42)[41]).isEqualTo(1337);
+        assertThat(queues.queue(42)[42]).isEqualTo(1337);
 
         queues.push(42, 1337);
-        AssertionsForClassTypes.assertThat(queues.queue(42)[43]).isEqualTo(1337);
+        assertThat(queues.queue(42)[43]).isEqualTo(1337);
     }
 
     @Test
@@ -77,8 +77,7 @@ abstract class PrimitiveDoubleQueuesTest {
             values.add(Math.round(queues.queue(0)[(int) i]));
         }
 
-        Assertions
-            .assertThat(values)
+        assertThat(values)
             .containsExactlyInAnyOrder(LongStream.range(0, concurrency * 100).boxed().toArray(Long[]::new));
     }
 
