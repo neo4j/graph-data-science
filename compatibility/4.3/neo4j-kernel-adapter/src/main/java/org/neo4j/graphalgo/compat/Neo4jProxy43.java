@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.compat;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
+import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.graphdb.config.Setting;
@@ -409,7 +409,7 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
 
     @Override
     public Setting<String> additionalJvm() {
-        return ExternalSettings.additional_jvm;
+        return BootloaderSettings.additional_jvm;
     }
 
     @Override
