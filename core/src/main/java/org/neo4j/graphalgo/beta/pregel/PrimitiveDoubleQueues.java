@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -31,7 +32,9 @@ public abstract class PrimitiveDoubleQueues {
     private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
     // minimum capacity for the individual arrays
     static final int MIN_CAPACITY = 42;
-    
+
+    private final HugeAtomicLongArray referenceCounts;
+
     // toggling in-between super steps
     HugeObjectArray<double[]> queues;
     HugeAtomicLongArray tails;
@@ -39,6 +42,7 @@ public abstract class PrimitiveDoubleQueues {
     PrimitiveDoubleQueues(HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
         this.tails = tails;
         this.queues = queues;
+        this.referenceCounts = HugeAtomicLongArray.newArray(queues.size(), AllocationTracker.empty());
     }
 
     abstract void grow(long nodeId, int newCapacity);
@@ -102,7 +106,26 @@ public abstract class PrimitiveDoubleQueues {
                     // Only a single thread gets into this block.
                     // We grow the queue and make sure there is
                     // enough space for the next index.
+
+                    while(true) {
+                        var reference = referenceCounts.get(nodeId);
+
+                        // There is a thread trying to write into the array
+                        if (reference > 0) continue;
+
+                        // Setting the reference to a negative values signals that
+                        // the array is currently being growed.
+                        // Only a single thread can set this.
+                        if (referenceCounts.compareAndSet(nodeId, reference, -1)) {
+                            break;
+                        }
+                    }
+
                     grow(nodeId, (int) nextIdx);
+
+                    // Reset the reference count to 0, to signal the array has grown.
+                    referenceCounts.update(nodeId, ref -> 0);
+
                     // We turn the index back to the positive value
                     // to indicate to waiting threads that we're
                     // done growing the local queue.
@@ -118,8 +141,26 @@ public abstract class PrimitiveDoubleQueues {
         // we avoid the queues.get call being moved before the grow operation
         // in order to avoid reading from the queue before it is grown.
         VarHandle.fullFence();
-        // Set the message value at the computed index.
+
+        // We need to increase the reference count, to signal that a thread
+        // is currently writing a value.
+        while(true) {
+            var reference = referenceCounts.get(nodeId);
+
+            // Another thread is growing the array. We have to wait until
+            // the operation is done to avoid lost updates.
+            if (reference < 0) continue;
+
+            // Increase the reference count by one.
+            if (referenceCounts.compareAndSet(nodeId, reference, reference + 1)) {
+                break;
+            }
+        }
+
         ARRAY_HANDLE.setVolatile(queues.get(nodeId), (int) idx, message);
+
+        // We are done writing, decrease the reference count by one.
+        referenceCounts.update(nodeId, ref -> ref - 1);
     }
 
     private boolean hasSpaceLeft(long nodeId, int minCapacity) {
