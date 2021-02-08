@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ abstract class PrimitiveDoubleQueuesTest {
         assertThat(queues.queue(42)[43]).isEqualTo(1337);
     }
 
-    @Test
+    @RepeatedTest(100)
     void parallelPush() {
         var queues = getQueue(1, 42);
         var concurrency = 4;
