@@ -827,7 +827,9 @@ public final class ParallelUtil {
             while (ts.hasNext()) {
                 if (completionService.hasTasks()) {
                     try {
-                        completionService.awaitNext();
+                        if (!completionService.awaitOrFail()) {
+                            continue;
+                        }
                     } catch (ExecutionException e) {
                         error = ExceptionUtil.chain(error, e.getCause());
                     } catch (CancellationException ignore) {
@@ -853,7 +855,7 @@ public final class ParallelUtil {
             while (completionService.hasTasks()) {
                 terminationFlag.assertRunning();
                 try {
-                    completionService.awaitNext();
+                    completionService.awaitOrFail();
                 } catch (ExecutionException e) {
                     error = ExceptionUtil.chain(error, e.getCause());
                 } catch (CancellationException ignore) {
@@ -944,6 +946,7 @@ public final class ParallelUtil {
      * Does not support {@link java.util.concurrent.ForkJoinPool} as backing executor.
      */
     private static final class CompletionService {
+        public static final int AWAIT_TIMEOUT_SECONDS = 1;
         private final Executor executor;
         private final ThreadPoolExecutor pool;
         private final int availableConcurrency;
@@ -958,11 +961,11 @@ public final class ParallelUtil {
 
             @Override
             protected void done() {
-                running.remove(this);
                 if (!isCancelled()) {
                     //noinspection StatementWithEmptyBody - spin-wait on free slot
                     while (!completionQueue.offer(this)) ;
                 }
+                running.remove(this);
             }
         }
 
@@ -1010,8 +1013,14 @@ public final class ParallelUtil {
             return !(running.isEmpty() && completionQueue.isEmpty());
         }
 
-        void awaitNext() throws InterruptedException, ExecutionException {
-            completionQueue.take().get();
+        boolean awaitOrFail() throws InterruptedException, ExecutionException {
+            var task = completionQueue.poll(AWAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            if (task == null) {
+                return false;
+            } else {
+                task.get();
+                return true;
+            }
         }
 
         void cancelAll() {
