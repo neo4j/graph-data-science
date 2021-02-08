@@ -171,7 +171,7 @@ CREATE
   (greg)-[:KNOWS]->(chris),
   (veselin)-[:KNOWS]->(chris),
   (karin)-[:KNOWS]->(veselin),
-  (chris)-[:KNOWS]->(karin)
+  (chris)-[:KNOWS]->(karin);
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
@@ -270,14 +270,17 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
     {penalty: 0.0, maxIterations: 1000}
   ]
 }) YIELD modelInfo
-RETURN modelInfo.bestParameters AS winningModel
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.outerTrain AS trainGraphScore,
+  modelInfo.metrics.AUCPR.test AS testGraphScore
 ----
 
 .Results
 [opts="header"]
 |===
-| winningModel
-| {maxIterations: 1000, penalty: 0.5}
+| winningModel                        | trainGraphScore    | testGraphScore
+| {maxIterations: 1000, penalty: 0.5} | 0.7659574468085106 | 0.44711686709836573
 |===
 
 
