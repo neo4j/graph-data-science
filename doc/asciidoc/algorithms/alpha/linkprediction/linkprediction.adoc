@@ -259,6 +259,7 @@ In our graph we have 8 nodes, which gives us a maximum of `8 * 7 / 2 = 28` undir
 We have 12 actual relationships, giving us a class ratio of `(28 - 12) / 12 = 1.33`.
 
 [[algorithms-ml-linkprediction-examples-train-query]]
+.Train a Link Prediction model:
 [source, cypher, role=example-query]
 ----
 CALL gds.alpha.ml.linkPrediction.train('myGraph', {
