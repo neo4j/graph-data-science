@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.model.catalog.ModelListProc;
 import org.neo4j.graphdb.Result;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
