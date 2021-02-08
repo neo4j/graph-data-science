@@ -22,23 +22,26 @@ This topic includes:
 [[algorithms-ml-linkprediction-intro]]
 == Introduction
 
+Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
+You can think of this as building a model to predict missing relationships in your dataset or relationships that are likely to form in the future.
+Neo4j GDS trains supervised machine learning models based on the relationships and properties in your graph to predict the existence - and probability - of relationships.
+
 Link Prediction models are used to predict non-existing relationships between nodes in a graph based on the nodes' properties.
-The node properties are used as input features for specific machine learning model candidates.
-The model candidates are trained on parts of the input graph and evaluated using a specific metric.
-Creating these parts is a necessary pre-processing step called <<algorithms-ml-train-test-splitting>>.
+The specified node properties are used as input features.
+Models are trained on parts of the input graph and evaluated using a specific metric.
+The first step, before training the model, is <<algorithms-ml-train-test-splitting, splitting the graph into a train and a test graph>>, so the test graph may be used to evaluate model performance.
 
-The part of the input graph used for training is called the _train set_.
-The part of the input graph used for evaluation is called the _test set_.
+Following splitting the data, the training process follows this outline:
 
-The training process follows this outline:
-
-1. The train set is divided into a number of validation folds, consisting of a train part and a validation part.
+1. The train graph is divided into a number of validation folds, consisting of a train part and a validation part.
 2. Each model candidate is trained on each train part and evaluated on the respective validation part.
-3. The model with the highest average score according to the metric will win the training.
-4. The winning model will then be evaluated on the whole train set as well as the test set.
-5. The winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
+3. The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
+4. The model with the highest average score according to the metric will win the training.
+5. The winning model will then be evaluated on the whole train graph as well as the test graph.
+6. The winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
 
 Trained models may then be used to predict the probability of a relationship between two nodes.
+
 
 [[algorithms-ml-train-test-splitting]]
 === Train/Test Splitting
@@ -50,6 +53,7 @@ The relationship types must have a integer property called `label`, with value e
 By using the `gds.alpha.ml.splitRelationships()` procedure it is possible to produce the necessary train/test splits.
 
 
+[[algorithms-ml-metrics]]
 === Metrics
 
 The Link Prediction model in the Neo4j GDS library supports only the Area Under the Precision-Recall Curve metric, abbreviated as AUCPR.
@@ -60,7 +64,7 @@ The Link Prediction model in the Neo4j GDS library supports only the Area Under 
 
 include::../../shared/syntax-intro-named-graph.adoc[]
 
-WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Triangle Count algorithm.
+WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Link Prediction model.
 
 .Link Prediction syntax per mode
 [.tabbed-example]
@@ -206,14 +210,14 @@ In the following examples we will demonstrate using the Link Prediction model on
 
 First, we must do the test/train splits.
 For this we will make use of the `gds.alpha.ml.splitRelationships` procedure.
-We will do one split to select relationships to be used in the test set.
+We will do one split to select relationships to be used in the test graph.
 
 [source, cypher, role=example-query]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   remainingRelationshipType: 'KNOWS_REMAINING',
-  holdoutRelationshipType: 'KNOWS_TESTSET',
+  holdoutRelationshipType: 'KNOWS_TESTGRAPH',
   holdoutFraction: 0.2
 }) YIELD relationshipsWritten
 ----
@@ -225,18 +229,18 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | 24
 |===
 
-We will create copied relationships for each existing relationship, into either the `KNOWS_REMAINING` or the `KNOWS_TESTSET` relationship types.
-All relationships in `KNOWS_TESTSET` will have a `label` property.
-Additionally, a number of non-existing relationships will be created into the `KNOWS_TESTSET` relationship type to be used as negative examples, with a `label` of `0`.
+We will create copied relationships for each existing relationship, into either the `KNOWS_REMAINING` or the `KNOWS_TESTGRAPH` relationship types.
+All relationships in `KNOWS_TESTGRAPH` will have a `label` property.
+Additionally, a number of non-existing relationships will be created into the `KNOWS_TESTGRAPH` relationship type to be used as negative examples, with a `label` of `0`.
 
-Next, we will create the train set.
+Next, we will create the train graph.
 
 [source, cypher, role=example-query]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS_REMAINING'],
   remainingRelationshipType: 'KNOWS_IGNORED_FOR_TRAINING',
-  holdoutRelationshipType: 'KNOWS_TRAINSET',
+  holdoutRelationshipType: 'KNOWS_TRAINGRAPH',
   holdoutFraction: 0.2
 }) YIELD relationshipsWritten
 ----
@@ -248,13 +252,13 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | 20
 |===
 
-With both train and test sets, we are ready to train models.
+With both train and test graphs, we are ready to train models.
 
 [source, cypher, role=example-query]
 ----
 CALL gds.alpha.ml.linkPrediction.train('myGraph', {
-  trainRelationshipType: 'KNOWS_TRAINSET',
-  testRelationshipType: 'KNOWS_TESTSET',
+  trainRelationshipType: 'KNOWS_TRAINGRAPH',
+  testRelationshipType: 'KNOWS_TESTGRAPH',
   modelName: 'model',
   featureProperties: ['numberOfPosts'],
   validationFolds: 5,
