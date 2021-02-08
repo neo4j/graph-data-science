@@ -144,7 +144,7 @@ include::specific-configuration.adoc[]
 
 :algorithm-name: {algorithm}
 :graph-description: social network
-:image-file: link-prediction.png
+:image-file: link-prediction.svg
 include::../../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -258,12 +258,13 @@ We set the class ratio to 1.33, which is calculated as the number of non-existin
 In our graph we have 8 nodes, which gives us a maximum of `8 * 7 / 2 = 28` undirected relationships.
 We have 12 actual relationships, giving us a class ratio of `(28 - 12) / 12 = 1.33`.
 
+[[algorithms-ml-linkprediction-examples-train-query]]
 [source, cypher, role=example-query]
 ----
 CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   trainRelationshipType: 'KNOWS_TRAINGRAPH',
   testRelationshipType: 'KNOWS_TESTGRAPH',
-  modelName: 'model',
+  modelName: 'lp-numberOfPosts-model',
   featureProperties: ['numberOfPosts'],
   validationFolds: 5,
   classRatio: 1.33,
@@ -296,5 +297,50 @@ In order to achieve a higher test score, we may need to use better features, a l
 [[algorithms-ml-linkprediction-examples-mutate]]
 === Mutate
 
+In this example we will show how to use a trained model to predict new relationships in your in-memory graph.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<algorithms-ml-linkprediction-examples-train-query, train example>> which we gave the name `'lp-numberOfPosts-model'`.
 
+We must also make sure that we do not include any of the relationships from the train or test graphs, which we do by specifying a relationship filter for the original relationship type `'KNOWS'`.
 
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
+  relationshipTypes: ['KNOWS'],
+  modelName: 'lp-numberOfPosts-model',
+  mutateRelationshipType: 'KNOWS_PREDICTED',
+  topN: 5,
+  threshold: 0.45
+}) YIELD relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 10
+|===
+
+We specified to get the top 5 relationships for which the predicted probability was greater than 45%.
+Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
+
+In order to analyse our predicted relationships we will write them back to Neo4j:
+
+[source, cypher, role=example-query]
+----
+CALL gds.graph.writeRelationship('myGraph', 'KNOWS_PREDICTED', 'probability')
+YIELD relationshipsWritten, propertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten | propertiesWritten
+| 10                   | 10
+|===
+
+The end result looks like this:
+
+image::example-graphs/link-prediction-mutate.svg[align="center"]
+
+In yellow we highlight the predicted relationships.
