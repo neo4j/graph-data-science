@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -54,6 +55,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -388,6 +390,18 @@ final class ParallelUtilTest {
         assertEquals(0, tasks.maxRunning());
         assertEquals(1, tasks.requested());
         verify(pool, times(11)).getActiveCount();
+    }
+
+    @RepeatedTest(100)
+    void should() {
+        var tasks = List.<Runnable>of(
+            () -> {
+                throw new RuntimeException();
+            }, () -> {
+            }
+        );
+        assertThatThrownBy(() -> ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT))
+            .isInstanceOf(RuntimeException.class);
     }
 
     private static void withPool(
