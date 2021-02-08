@@ -253,6 +253,10 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 |===
 
 With both train and test graphs, we are ready to train models.
+We will use 5 validation folds, meaning we will split the train graph into 5 pairs, using one part of each pair for training and one for validation.
+We set the class ratio to 1.33, which is calculated as the number of non-existing relationships over the number of existing relationships.
+In our graph we have 8 nodes, which gives us a maximum of `8 * 7 / 2 = 28` undirected relationships.
+We have 12 actual relationships, giving us a class ratio of `(28 - 12) / 12 = 1.33`.
 
 [source, cypher, role=example-query]
 ----
@@ -262,7 +266,7 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   modelName: 'model',
   featureProperties: ['numberOfPosts'],
   validationFolds: 5,
-  classRatio: 0.88,
+  classRatio: 1.33,
   randomSeed: 2,
   params: [
     {penalty: 0.5, maxIterations: 1000},
@@ -280,11 +284,17 @@ RETURN
 [opts="header"]
 |===
 | winningModel                        | trainGraphScore    | testGraphScore
-| {maxIterations: 1000, penalty: 0.5} | 0.7659574468085106 | 0.44711686709836573
+| {maxIterations: 1000, penalty: 0.5} | 0.7145922746781116 | 0.3512042965360351
 |===
+
+Here we can observe that the model candidate with penalty 0.5 performed the best in the training phase, with a score of about 71% over the train graph.
+On the test graph, the model scored much lower at about 35%.
+This indicates that the model reacted fairly well to the train graph, but did not generalise very well to unseen data.
+In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 
 
 [[algorithms-ml-linkprediction-examples-mutate]]
 === Mutate
 
-//TODO
+
+
