@@ -393,15 +393,17 @@ final class ParallelUtilTest {
     }
 
     @RepeatedTest(100)
-    void should() {
+    void shouldKeepTrackOfAllErrors() {
         var tasks = List.<Runnable>of(
             () -> {
-                throw new RuntimeException();
-            }, () -> {
+                throw new RuntimeException("bubu");
+            },
+            () -> {
             }
         );
         assertThatThrownBy(() -> ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT))
-            .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("bubu");
     }
 
     private static void withPool(
