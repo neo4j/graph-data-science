@@ -16,8 +16,7 @@ WARNING: Feature toggles are not considered part of the public API and can be re
 GDS Enterprise Edition uses a different in-memory graph implementation that is consuming less memory compared to the GDS Community Edition.
 This in-memory graph implementation performance depends on the underlying graph size and topology.
 It can be slower for write procedures and graph creation of smaller graphs.
-As usual, this should be benchmarked using the specific graph(s).
-To switch to the more memory intensive implementation used in GDS Community Edition you can disable this feature by using a procedure call.
+To switch to the more memory intensive implementation used in GDS Community Edition you can disable this feature by using the following procedure call.
 
 [source, cypher]
 ----
