@@ -19,40 +19,28 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
-import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
-public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase
-    implements Predictor<double[], LinkLogisticRegressionData> {
+public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase {
 
     public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData) {
         super(modelData);
     }
 
-    @Override
     public LinkLogisticRegressionData modelData() {
         return modelData;
-    }
-
-    @Override
-    public double[] predict(Graph graph, Batch batch) {
-        ComputationContext ctx = new ComputationContext();
-        MatrixConstant features = features(graph, batch);
-        return ctx.forward(predictions(features)).data();
     }
 
     public double predictedProbability(Graph graph, long sourceId, long targetId) {
         var weightsArray = modelData.weights().data().data();
         var features = features(graph, sourceId, targetId);
-        var affinity = 0;
-        for (int i = 0; i < weightsArray.length - 1; i++) {
+        var affinity = 0D;
+        var biasIndex = weightsArray.length - 1;
+        for (int i = 0; i < biasIndex; i++) {
             affinity += weightsArray[i] * features[i];
         }
-        var bias = weightsArray[weightsArray.length - 1];
+        var bias = weightsArray[biasIndex];
         return Sigmoid.sigmoid(affinity + bias);
     }
 }
