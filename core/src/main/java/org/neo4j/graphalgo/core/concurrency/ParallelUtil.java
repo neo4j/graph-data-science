@@ -946,7 +946,8 @@ public final class ParallelUtil {
      * Does not support {@link java.util.concurrent.ForkJoinPool} as backing executor.
      */
     private static final class CompletionService {
-        public static final int AWAIT_TIMEOUT_SECONDS = 1;
+        private static final int AWAIT_TIMEOUT_SECONDS = 1;
+
         private final Executor executor;
         private final ThreadPoolExecutor pool;
         private final int availableConcurrency;
