@@ -6,8 +6,8 @@
 | testRelationshipType  | String    | n/a     | no       | Relationship type to use during model evaluation.
 | validationFolds       | Integer   | n/a     | no       | Number of divisions of the train set used during training.
 | classRatio            | Float     | n/a     | no       | Ratio of non-existing relationships to existing relationships in the original graph.
+| params                | List<Map> | n/a     | no       | List of model configurations to be trained. See next table for details.
 | randomSeed            | Integer   | n/a     | yes      | Seed for the random number generator used during training.
-| params                | List<Map> | n/a     | no       | List of model configurations to be trained.
 |===
 
 .Model configuration
