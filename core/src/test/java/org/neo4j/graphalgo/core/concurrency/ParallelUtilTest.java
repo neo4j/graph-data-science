@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -54,8 +56,8 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.StringContains.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -90,7 +92,7 @@ final class ParallelUtilTest {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
-            assertThat(thread.getName(), containsString("gds-forkjoin"));
+            assertThat(thread.getName()).contains("gds-forkjoin");
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
             assertEquals(concurrency, threadPool.getParallelism());
             assertNotSame(threadPool, commonPool);
@@ -294,7 +296,7 @@ final class ParallelUtilTest {
         try {
             tasks.run(t -> ParallelUtil.runWithConcurrency(4, t, 100, pool));
         } catch (Exception e) {
-            assertThat(e.getMessage(), containsString("Attempted to submit tasks"));
+            assertThat(e.getMessage()).contains("Attempted to submit tasks");
         }
         assertEquals(0, tasks.started());
         assertEquals(0, tasks.maxRunning());
@@ -382,12 +384,28 @@ final class ParallelUtilTest {
                     TimeUnit.MILLISECONDS,
                     pool));
         } catch (IllegalThreadStateException e) {
-            assertThat(e.getMessage(), containsString("Attempted to submit tasks"));
+            assertThat(e.getMessage()).contains("Attempted to submit tasks");
         }
         assertEquals(0, tasks.started());
         assertEquals(0, tasks.maxRunning());
         assertEquals(1, tasks.requested());
         verify(pool, times(11)).getActiveCount();
+    }
+
+    @RepeatedTest(100)
+    void shouldKeepTrackOfAllErrors() {
+        var counter = new MutableLong(0);
+        var tasks = List.<Runnable>of(
+            () -> {
+                counter.add(1);
+                throw new RuntimeException("bubu");
+            },
+            () -> counter.add(1)
+        );
+        assertThatThrownBy(() -> ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("bubu");
+        assertThat(counter.longValue()).isEqualTo(2);
     }
 
     private static void withPool(
