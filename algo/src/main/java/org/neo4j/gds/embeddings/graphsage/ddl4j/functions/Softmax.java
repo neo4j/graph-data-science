@@ -42,17 +42,20 @@ public class Softmax extends SingleParentVariable<Matrix> {
     public Matrix apply(ComputationContext ctx) {
         var data = (Matrix) ctx.data(parent());
         var result = data.zeros();
+        boolean rescale = false;
         for (int row = 0; row < rows; row++) {
             double rowSum = 1e-15;
             for (int col = 0; col < cols; col++) {
                 var index = row * cols + col;
                 var exp = Math.exp(data.dataAt(index));
                 if (Double.isInfinite(exp)) {
+                    rescale = true;
                     exp = Double.MAX_VALUE;
                 }
                 result.setDataAt(index, exp);
                 rowSum += exp;
                 if (Double.isInfinite(rowSum)) {
+                    rescale = true;
                     rowSum = Double.MAX_VALUE;
                 }
             }
@@ -63,7 +66,27 @@ public class Softmax extends SingleParentVariable<Matrix> {
             }
         }
 
+        if (rescale) {
+            rescale(result);
+        }
+
         return result;
+    }
+
+    private void rescale(Matrix result) {
+        for (int row = 0; row < rows; row++) {
+            double rowSum = 1e-15;
+            for (int col = 0; col < cols; col++) {
+                var index = row * cols + col;
+                var current = result.dataAt(index);
+                rowSum += current;
+            }
+            for (int col = 0; col < cols; col++) {
+                var index = row * cols + col;
+                var current = result.dataAt(index);
+                result.setDataAt(index, current / rowSum);
+            }
+        }
     }
 
     @Override
