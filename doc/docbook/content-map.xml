@@ -141,8 +141,11 @@
 
             <d:tocentry linkend="algorithms-path-finding">
                 <?dbhtml filename="algorithms/pathfinding/index.html"?>
-                <d:tocentry linkend="algorithms-dijkstra">
-                    <?dbhtml filename="algorithms/dijkstra/index.html"?>
+                <d:tocentry linkend="algorithms-dijkstra-source-target">
+                    <?dbhtml filename="algorithms/dijkstra-source-target/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-dijkstra-single-source">
+                    <?dbhtml filename="algorithms/dijkstra-single-source/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-astar">
                     <?dbhtml filename="algorithms/astar/index.html"?>
