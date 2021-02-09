@@ -157,16 +157,16 @@ CREATE
   (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
   (:House {color: 'Red', sizePerStory: [15.5, 23.6, 100.0], class: 0}),
   (:House {color: 'Blue', sizePerStory: [11.3, 35.1, 22.0], class: 0}),
-  (:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
   (:House {color: 'Green', sizePerStory: [23.2, 55.1, 0.0], class: 1}),
   (:House {color: 'Gray', sizePerStory: [34.3, 24.0, 0.0],  class: 1}),
   (:House {color: 'Black', sizePerStory: [71.66, 55.0, 0.0], class: 1}),
   (:House {color: 'White', sizePerStory: [11.1, 111.0, 0.0], class: 1}),
-  (:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
   (:House {color: 'Teal', sizePerStory: [80.8, 0.0, 0.0], class: 2}),
   (:House {color: 'Beige', sizePerStory: [106.2, 0.0, 0.0], class: 2}),
   (:House {color: 'Magenta', sizePerStory: [99.9, 0.0, 0.0], class: 2}),
   (:House {color: 'Purple', sizePerStory: [56.5, 0.0, 0.0], class: 2}),
+  (:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
+  (:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
   (:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]});
 ----
 
@@ -179,22 +179,12 @@ include::../../shared/examples-named-native-note.adoc[]
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=graph-create-query]
 ----
-
-CALL gds.graph.create(
-  'myGraph',
-  { House: { properties: ['sizePerStory', 'class'] }, UnknownHouse: { properties: 'sizePerStory' } },
-  '*'
-)
-
-
-CALL gds.graph.create(
-  'myGraph',
-  {
+CALL gds.graph.create('myGraph', {
     House: { properties: ['sizePerStory', 'class'] },
     UnknownHouse: { properties: 'sizePerStory' }
   },
   '*'
-) YIELD nodeCount
+)
 ----
 
 In the following examples we will demonstrate using the Node Classification model on this graph.
@@ -204,9 +194,12 @@ In the following examples we will demonstrate using the Node Classification mode
 === Train
 
 
+
+[role=query-example, group=mutate]
+--
 [[algorithms-ml-nodeclassification-examples-train-query]]
 .Train a Node Classification model:
-[source, cypher, role=example-query]
+[source, cypher]
 ----
 CALL gds.alpha.ml.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],
@@ -233,9 +226,10 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel	    | trainGraphScore	| testGraphScore
-| {penalty: 0.0625} | 0.999999990909091 | 0.6363636286363638
+| winningModel	   | trainGraphScore   | testGraphScore
+| {penalty=0.0625} | 0.999999990909091 | 0.6363636286363638
 |===
+--
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with a score of almost 100% over the train graph.
 On the test graph, the model a bit lower at about 64%.
@@ -251,7 +245,9 @@ In addition to the predicted class, we will also produce the probability for eac
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-nodeclassification-examples-train-query, train example>> which we gave the name `'nc-model'`.
 
-[source, cypher, role=example-query]
+[role=query-example, group=mutate]
+--
+[source, cypher]
 ----
 CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
   nodeLabels: ['House', 'UnknownHouse'],
@@ -267,29 +263,35 @@ CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
 | nodePropertiesWritten
 | 28
 |===
+--
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
+In order to analyse our predicted classes we stream the properties from the in-memory graph:
 
-
-In order to analyse our predicted classes we will write them back to Neo4j:
-
-[source, cypher, role=example-query]
+[role=query-example, group=mutate]
+--
+[source, cypher]
 ----
 CALL gds.graph.streamNodeProperties(
   'myGraph', ['predicted_probability', 'predicted_class'], ['UnknownHouse']
 ) YIELD nodeId, nodeProperty, propertyValue
 RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyValue
+  ORDER BY classifiedHouse, nodeProperty
 ----
 
 .Results
 [opts="header"]
 |===
 | classifiedHouse   | nodeProperty            | propertyValue
-| "Pink"	        | "predicted_probability" | [0.9999769150777453, 0.000022996000641421068, 8.892161327418462e-8]
 | "Pink"	        | "predicted_class"	      | 0
-| "Tan"	            | "predicted_probability" |	[0.000871766942288527, 0.9991282329206609, 1.3705053892090503e-10]
+| "Pink"	        | "predicted_probability" | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
 | "Tan"	            | "predicted_class"	      | 1
-| "Yellow"	        | "predicted_probability" | [0.0023432260604598415, 0.0642890431313016, 0.9333677308082385]
+| "Tan"	            | "predicted_probability" |	[0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
 | "Yellow"	        | "predicted_class"	      | 2
+| "Yellow"	        | "predicted_probability" | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
 |===
+--
 
+As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
+This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
+Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
