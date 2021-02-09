@@ -16,6 +16,7 @@ This topic includes:
 * <<algorithms-yens-intro, Introduction>>
 * <<algorithms-yens-syntax, Syntax>>
 * <<algorithms-yens-examples, Examples>>
+** <<algorithms-yens-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-yens-examples-stream, Stream>>
 ** <<algorithms-yens-examples-mutate, Mutate>>
 ** <<algorithms-yens-examples-write, Write>>
@@ -99,6 +100,38 @@ CALL gds.graph.create(
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-yens-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source,cypher]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.beta.shortestPath.yens.write.estimate('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    k: 3,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 9                 | 1016     | 1016     | "1016 Bytes"
+|===
+--
 
 
 [[algorithms-yens-examples-stream]]
