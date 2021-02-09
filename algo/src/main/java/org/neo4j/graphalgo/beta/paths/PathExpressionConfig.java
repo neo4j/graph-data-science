@@ -28,6 +28,7 @@ import java.util.Optional;
 public interface PathExpressionConfig {
 
     @Value.Default
+    @Configuration.Ignore
     default @Nullable String pathExpression() {
         return null;
     }

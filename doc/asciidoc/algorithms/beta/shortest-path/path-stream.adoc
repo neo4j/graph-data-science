@@ -43,7 +43,6 @@ endif::[]
 
 | relationshipWeightProperty    | String  | null     | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | path                          | Boolean | false    | yes      | Iff true, the result contains a Cypher Path object.
-| pathExpression                | String  | false    | yes      | A regular expression that is applied on the concatenated node labels during traversal; excludes a path if it matches.
 |===
 
 .Results
