@@ -30,6 +30,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SoftmaxTest implements FiniteDifferenceTest {
 
     @Test
+    void shouldNotOverflowIntoInfinity() {
+        var ctx = new ComputationContext();
+        var parent = new MatrixConstant(new double[]{-745.1, -745.15, 709.7, 709.8}, 4, 1);
+        ctx.forward(parent);
+
+        var softmax = new Softmax(parent);
+
+        var result = softmax.apply(ctx);
+
+        assertThat(result.data()).doesNotContain(Double.NaN);
+    }
+
+    @Test
     void shouldApply() {
         var ctx = new ComputationContext();
         var matrixConstant = new MatrixConstant(
