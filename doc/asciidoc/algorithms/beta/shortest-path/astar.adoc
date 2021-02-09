@@ -1,6 +1,6 @@
 [[algorithms-astar]]
 = A*
-:entity: source-target pair
+:entity: source-target-pair
 :result: shortest path
 :algorithm: A*
 :source-target: true
