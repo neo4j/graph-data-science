@@ -112,8 +112,7 @@ include::specific-train-configuration.adoc[]
 CALL gds.alpha.ml.nodeClassification.predict.mutate(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   createMillis: Integer,
   computeMillis: Integer,
   postProcessingMillis: Integer,
@@ -145,10 +144,12 @@ include::specific-configuration.adoc[]
 [[algorithms-ml-nodeclassification-examples]]
 == Examples
 
-:algorithm-name: Node Classification
-//:graph-description: <TODO>
-:image-file: <TODO>.svg
-include::../../shared/examples-intro.adoc[]
+In this section we will show examples of training a Node Classification Model on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the model in a real setting.
+We will do this on a small graph of a handful of nodes representing houses.
+The example graph looks like this:
+
+image::../../../images/example-graphs/node_classification.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
@@ -171,7 +172,7 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `Node` and `Hidden` nodes.
+We do this using a native projection targeting the `House` and `UnknownHouse` labels.
 We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
 
 include::../../shared/examples-named-native-note.adoc[]
@@ -193,7 +194,7 @@ In the following examples we will demonstrate using the Node Classification mode
 [[algorithms-ml-nodeclassification-examples-train]]
 === Train
 
-
+In this example we will train a model to predict the class in which a house belongs, based on its `sizePerStory` property.
 
 [role=query-example, group=mutate]
 --
@@ -232,8 +233,8 @@ RETURN
 --
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with a score of almost 100% over the train graph.
-On the test graph, the model a bit lower at about 64%.
-This indicates that the model reacted very well to the train graph, and was able to generalise fairly well to unseen data.
+On the test graph, the model scores a bit lower at about 64%.
+This indicates that the model reacted very well to the train graph, and was able to generalize fairly well to unseen data.
 In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 
 
