@@ -1,5 +1,8 @@
 [[algorithms-dijkstra-source-target]]
 = Dijkstra Source-Target
+:entity: source-target-pair
+:result: shortest path
+:algorithm: Dijkstra
 :source-target: true
 :procedure-name: pass:q[gds.beta.shortestPath.dijkstra]
 
@@ -10,11 +13,25 @@ This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph D
 
 This topic includes:
 
+* <<algorithms-dijkstra-source-target-intro, Introduction>>
 * <<algorithms-dijkstra-source-target-syntax, Syntax>>
 * <<algorithms-dijkstra-source-target-examples, Examples>>
 ** <<algorithms-dijkstra-source-target-examples-stream, Stream>>
 ** <<algorithms-dijkstra-source-target-examples-mutate, Mutate>>
 ** <<algorithms-dijkstra-source-target-examples-write, Write>>
+
+[[algorithms-dijkstra-source-target-intro]]
+== Introduction
+
+The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
+The algorithm supports weighted graphs with positive relationship weights.
+The Dijkstra Source-Target algorithm computes the shortest path between a source and a target node.
+To compute all paths from a source node to all reachable nodes, <<algorithms-dijkstra-single-source, Dijkstra Single-Source>> can be used.
+
+The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
+The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
+The algorithm implementation is executed using a single thread.
+Altering the concurrency configuration has no effect.
 
 
 [[algorithms-dijkstra-source-target-syntax]]
