@@ -242,11 +242,7 @@ In the example, we will use the HITS algorithm to calculate the authority and hu
 CALL gds.graph.create(
   'myGraph',
   'Website',
-  {
-    LINK: {
-      orientation: 'NATURAL'
-    }
-  }
+  'LINK'
 );
 ----
 
