@@ -2,6 +2,8 @@
 [.alpha]
 = Split Relationships
 
+:algorithm: Split Relationships
+
 [abstract]
 --
 This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
@@ -17,14 +19,17 @@ This topic includes:
 == Introduction
 
 The Split relationships algorithm is a utility algorithm that is used to pre-process a graph for model training.
-It splits the relationship set into a hold-out (test) and a remaining (train) set of relationships.
-The hold-out set is divided into two classes: positive, i.e., existing relationships, and negative, i.e., non-existing relationships.
-The class affiliation is indicated by a `label` property on the relationships.
-Both, the hold-out and the remaining relationships are added to the in-memory graph.
+It splits the relationships into a holdout set and a remaining set.
+The holdout set is divided into two classes: positive, i.e., existing relationships, and negative, i.e., non-existing relationships.
+The class is indicated by a `label` property on the relationships.
+This enables the holdout set to be used for training or testing a machine learning model.
+Both, the holdout and the remaining relationships are added to the in-memory graph.
 
 
 [[algorithms-split-relationships-syntax]]
 == Syntax
+
+include::../../shared/syntax-intro-named-graph.adoc[]
 
 .Split Relationships syntax per mode
 [.tabbed-example]
@@ -49,22 +54,15 @@ YIELD
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-.General configuration for algorithm execution on a named graph.
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name              | Type     | Default | Optional | Description
-| nodeLabels        | String[] | ['*']   | yes      | Filter the named graph using the given node labels.
-| relationshipTypes | String[] | ['*']   | yes      | Filter the named graph using the given relationship types.
-| concurrency       | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
-|===
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                          | Type          | Default         | Optional  | Description
-| holdoutFraction               | Float         | n/a             | no        | The fraction of all relationships being used as hold-out set.
-| holdoutRelationshipType       | String        | n/a             | no        | Indicates relationships that are part of the hold-out set. Each relationship has a relationship property `label` that indicates relationship existence.
-| remainingRelationshipType     | String        | n/a             | no        | Indicates relationships that have not been selected during sampling.
+| holdoutFraction               | Float         | n/a             | no        | The fraction of all relationships being used as holdout set.
+| holdoutRelationshipType       | String        | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
+| remainingRelationshipType     | String        | n/a             | no        | Relationship type used for the remaining set.
 | nonNegativeRelationshipTypes  | String[]      | n/a             | yes       | Additional relationship types that are used for negative sampling.
 | randomSeed                    | Integer       | n/a             | yes       | An optional seed value for the random selection of relationships.
 |===
@@ -85,6 +83,11 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 [[algorithms-split-relationships-examples]]
 == Examples
 
+:algorithm-name: {algorithm}
+:graph-description:
+:image-file: split-relationships.svg
+include::../../shared/examples-intro.adoc[]
+
 Consider the graph created by the following Cypher statement:
 
 [source, cypher, role=setup-query]
@@ -104,8 +107,8 @@ CREATE
     (n4)-[:TYPE]->(n5)
 ----
 
-Given the above graph, we want to use 20% of the relationships as hold-out set.
-The hold-out set will be split into two same-sized classes: positive and negative.
+Given the above graph, we want to use 20% of the relationships as holdout set.
+The holdout set will be split into two same-sized classes: positive and negative.
 Positive relationships will be randomly selected from the existing relationships and marked with a property `label: 1`.
 Negative relationships will be randomly generated, i.e., they do not exist in the input graph, and are marked with a property `label: 0`.
 
@@ -113,8 +116,8 @@ Negative relationships will be randomly generated, i.e., they do not exist in th
 ----
 CALL gds.graph.create(
     'graph',
-    '*',
-    { TYPE: {type: 'TYPE', orientation: 'UNDIRECTED'} }
+    'Label',
+    { TYPE: { orientation: 'UNDIRECTED' } }
 )
 ----
 
@@ -126,8 +129,8 @@ We use a random seed value in order to produce deterministic results.
 [source, cypher]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('graph', {
-    holdoutRelationshipType: 'TEST',
-    remainingRelationshipType: 'TRAIN',
+    holdoutRelationshipType: 'TYPE_HOLDOUT',
+    remainingRelationshipType: 'TYPE_REMAINING',
     holdoutFraction: 0.2,
     randomSeed: 1337
 }) YIELD relationshipsWritten
@@ -143,7 +146,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('graph', {
 
 The input graph consists of 5 relationships.
 Since the graph is created with orientation `UNDIRECTED`, the in-memory graph has 10 relationships.
-We use 20% of the relationship count as hold-out set.
+We use 20% of the relationships as holdout set, which now contains 2 relationships.
 50% of those (1 relationship) are selected from the existing relationships and classified as positive.
 The other 50% (1 relationship) are created and do not exist in the input graph.
 
@@ -158,15 +161,15 @@ CREATE
     (n4:Label),
     (n5:Label),
 
-    (n2)-[:TEST { label: 0 }]->(n5), // negative, non-existing
-    (n3)-[:TEST { label: 1 }]->(n2), // positive, existing
+    (n2)-[:TYPE_HOLDOUT { label: 0 }]->(n5), // negative, non-existing
+    (n3)-[:TYPE_HOLDOUT { label: 1 }]->(n2), // positive, existing
 
-    (n0)<-[:TRAIN]-(n1),
-    (n1)<-[:TRAIN]-(n2),
-    (n3)<-[:TRAIN]-(n4),
-    (n4)<-[:TRAIN]-(n5),
-    (n0)-[:TRAIN]->(n1),
-    (n1)-[:TRAIN]->(n2),
-    (n3)-[:TRAIN]->(n4),
-    (n4)-[:TRAIN]->(n5)
+    (n0)<-[:TYPE_REMAINING]-(n1),
+    (n1)<-[:TYPE_REMAINING]-(n2),
+    (n3)<-[:TYPE_REMAINING]-(n4),
+    (n4)<-[:TYPE_REMAINING]-(n5),
+    (n0)-[:TYPE_REMAINING]->(n1),
+    (n1)-[:TYPE_REMAINING]->(n2),
+    (n3)-[:TYPE_REMAINING]->(n4),
+    (n4)-[:TYPE_REMAINING]->(n5)
 ----
