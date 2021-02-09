@@ -1,0 +1,295 @@
+[[algorithms-ml-nodeclassification]]
+= Node Classification
+:entity: node
+:result: property
+:algorithm: Node Classification
+
+
+[abstract]
+--
+This section describes the Node Classification Model in the Neo4j Graph Data Science library.
+--
+
+This topic includes:
+
+* <<algorithms-ml-nodeclassification-intro, Introduction>>
+* <<algorithms-ml-nodeclassification-syntax, Syntax>>
+* <<algorithms-ml-nodeclassification-examples, Examples>>
+** <<algorithms-ml-nodeclassification-examples-train, Train>>
+** <<algorithms-ml-nodeclassification-examples-mutate, Mutate>>
+
+
+[[algorithms-ml-nodeclassification-intro]]
+== Introduction
+
+Node Classification is a common machine learning task applied to graphs: training a model to learn in which class a node belongs.
+Neo4j GDS trains supervised machine learning models based on node properties (features) in your graph to predict what class an unseen or future node would belong to.
+
+Concretely, Node Classification models are used to predict a non-existing node property based on other node properties.
+The non-existing node property represents the class, and is referred to as the target property.
+The specified node properties are used as input features.
+The Node Classification model does not rely on relationship information.
+However, a node embedding algorithm could embed the neighborhoods of nodes as a node property, to transfer this information into the Node Classification model (see <<algorithms-node-embeddings>>).
+
+Models are trained on parts of the input graph and evaluated using specified metrics.
+Splitting of the graph into a train and a test graph is performed internally by the algorithm, and the test graph is used to evaluate model performance.
+
+The training process follows this outline:
+
+. The input graph is split into two parts: the train graph and the test graph.
+. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part.
+. Each model candidate is trained on each train part and evaluated on the respective validation part.
+. The training process uses a logistic regression algorithm, and the evaluation uses the specified metrics.
+  The first metric is the primary metric.
+. The model with the highest average score according to the primary metric will win the training.
+. The winning model will then be retrained on the entire train graph.
+. The winning model is evaluated on the train graph as well as the test graph.
+. The winning model is retrained on the entire original graph.
+. Finally, the winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
+
+Trained models may then be used to predict the value of the `target` property (class) of previously unseen nodes.
+In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
+The order of the probabilities match the order of the classes registered in the model.
+
+
+[[algorithms-ml-nodeclassification-metrics]]
+=== Metrics
+
+The Node Classification model in the Neo4j GDS library supports the following evaluation metrics:
+
+* `F1_WEIGHTED`
+* `F1_MACRO`
+* `ACCURACY`
+
+More than one metric can be specified during training but only the `primary` one is used for evaluation, the results of all are present in the train results.
+
+
+[[algorithms-ml-nodeclassification-syntax]]
+== Syntax
+
+include::../../shared/syntax-intro-named-graph.adoc[]
+
+.Node Classification syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-train]
+======
+.Run Node Classification in train mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.nodeClassification.train(
+  graphName: String,
+  configuration: Map
+) YIELD
+  trainMillis: Integer,
+  modelInfo: Map,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-train-configuration-named-graph.adoc[]
+
+include::specific-train-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| trainMillis   | Integer | Milliseconds used for training.
+| modelInfo     | Map     | Information about the training and the winning model.
+| configuration | Map     | Configuration used for the train procedure.
+|===
+======
+
+
+[.include-with-mutate]
+======
+.Run Node Classification in mutate mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.nodeClassification.predict.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten | Integer | Number of relationships created.
+| configuration         | Map     | Configuration used for running the algorithm.
+|===
+======
+====
+
+[[algorithms-ml-nodeclassification-examples]]
+== Examples
+
+:algorithm-name: Node Classification
+//:graph-description: <TODO>
+:image-file: <TODO>.svg
+include::../../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=setup-query]
+----
+CREATE
+  (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
+  (:House {color: 'Red', sizePerStory: [15.5, 23.6, 100.0], class: 0}),
+  (:House {color: 'Blue', sizePerStory: [11.3, 35.1, 22.0], class: 0}),
+  (:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
+  (:House {color: 'Green', sizePerStory: [23.2, 55.1, 0.0], class: 1}),
+  (:House {color: 'Gray', sizePerStory: [34.3, 24.0, 0.0],  class: 1}),
+  (:House {color: 'Black', sizePerStory: [71.66, 55.0, 0.0], class: 1}),
+  (:House {color: 'White', sizePerStory: [11.1, 111.0, 0.0], class: 1}),
+  (:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
+  (:House {color: 'Teal', sizePerStory: [80.8, 0.0, 0.0], class: 2}),
+  (:House {color: 'Beige', sizePerStory: [106.2, 0.0, 0.0], class: 2}),
+  (:House {color: 'Magenta', sizePerStory: [99.9, 0.0, 0.0], class: 2}),
+  (:House {color: 'Purple', sizePerStory: [56.5, 0.0, 0.0], class: 2}),
+  (:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]});
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Node` and `Hidden` nodes.
+We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
+
+include::../../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=graph-create-query]
+----
+
+CALL gds.graph.create(
+  'myGraph',
+  { House: { properties: ['sizePerStory', 'class'] }, UnknownHouse: { properties: 'sizePerStory' } },
+  '*'
+)
+
+
+CALL gds.graph.create(
+  'myGraph',
+  {
+    House: { properties: ['sizePerStory', 'class'] },
+    UnknownHouse: { properties: 'sizePerStory' }
+  },
+  '*'
+) YIELD nodeCount
+----
+
+In the following examples we will demonstrate using the Node Classification model on this graph.
+
+
+[[algorithms-ml-nodeclassification-examples-train]]
+=== Train
+
+
+[[algorithms-ml-nodeclassification-examples-train-query]]
+.Train a Node Classification model:
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.nodeClassification.train('myGraph', {
+  nodeLabels: ['House'],
+  modelName: 'nc-model',
+  featureProperties: ['sizePerStory'],
+  targetProperty: 'class',
+  randomSeed: 2,
+  holdoutFraction: 0.2,
+  validationFolds: 5,
+  metrics: [ 'F1_WEIGHTED' ],
+  params: [
+    {penalty: 0.0625},
+    {penalty: 0.5},
+    {penalty: 1.0},
+    {penalty: 4.0}
+  ]
+}) YIELD modelInfo
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.F1_WEIGHTED.outerTrain AS trainGraphScore,
+  modelInfo.metrics.F1_WEIGHTED.test AS testGraphScore
+----
+
+.Results
+[opts="header"]
+|===
+| winningModel	    | trainGraphScore	| testGraphScore
+| {penalty: 0.0625} | 0.999999990909091 | 0.6363636286363638
+|===
+
+Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with a score of almost 100% over the train graph.
+On the test graph, the model a bit lower at about 64%.
+This indicates that the model reacted very well to the train graph, and was able to generalise fairly well to unseen data.
+In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
+
+
+[[algorithms-ml-nodeclassification-examples-mutate]]
+=== Mutate
+
+In this example we will show how to use a trained model to predict the class of a node in your in-memory graph.
+In addition to the predicted class, we will also produce the probability for each class in another node property.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<algorithms-ml-nodeclassification-examples-train-query, train example>> which we gave the name `'nc-model'`.
+
+[source, cypher, role=example-query]
+----
+CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
+  nodeLabels: ['House', 'UnknownHouse'],
+  modelName: 'nc-model',
+  mutateProperty: 'predicted_class',
+  predictedProbabilityProperty: 'predicted_probability'
+}) YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 28
+|===
+
+Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
+
+
+In order to analyse our predicted classes we will write them back to Neo4j:
+
+[source, cypher, role=example-query]
+----
+CALL gds.graph.streamNodeProperties(
+  'myGraph', ['predicted_probability', 'predicted_class'], ['UnknownHouse']
+) YIELD nodeId, nodeProperty, propertyValue
+RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyValue
+----
+
+.Results
+[opts="header"]
+|===
+| classifiedHouse   | nodeProperty            | propertyValue
+| "Pink"	        | "predicted_probability" | [0.9999769150777453, 0.000022996000641421068, 8.892161327418462e-8]
+| "Pink"	        | "predicted_class"	      | 0
+| "Tan"	            | "predicted_probability" |	[0.000871766942288527, 0.9991282329206609, 1.3705053892090503e-10]
+| "Tan"	            | "predicted_class"	      | 1
+| "Yellow"	        | "predicted_probability" | [0.0023432260604598415, 0.0642890431313016, 0.9333677308082385]
+| "Yellow"	        | "predicted_class"	      | 2
+|===
+
