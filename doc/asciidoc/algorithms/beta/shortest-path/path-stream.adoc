@@ -25,20 +25,25 @@ include::../../common-configuration/common-stream-stats-configuration-named-grap
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name              | Type    | Default | Optional | Description
-| sourceNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| Name                          | Type    | Default | Optional | Description
+| sourceNode                    | Integer | n/a     | no       | The Neo4j node id of the source node.
+
 ifeval::["{source-target}" == "true"]
-| targetNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode                    | Integer | n/a     | no       | The Neo4j node id of the source node.
 endif::[]
+
 ifeval::["{algorithm}" == "A*"]
-| latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
-| longitudeProperty | Float   | n/a     | no       | The node property that stores the longitude value.
+| latitudeProperty              | Float   | n/a     | no       | The node property that stores the latitude value.
+| longitudeProperty             | Float   | n/a     | no       | The node property that stores the longitude value.
 endif::[]
+
 ifeval::["{algorithm}" == "Yen's"]
-| k                 | Integer | n/a     | no       | The number of shortest paths to compute between source and target node.
+| k                             | Integer | n/a     | no       | The number of shortest paths to compute between source and target node.
 endif::[]
-| path              | Boolean | false   | yes      | Iff true, the result contains a Cypher Path object.
-| pathExpression    | String  | false   | yes      | A regular expression that is applied on the concatenated node labels during traversal; excludes a path if it matches.
+
+| relationshipWeightProperty    | String  | null     | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| path                          | Boolean | false    | yes      | Iff true, the result contains a Cypher Path object.
+| pathExpression                | String  | false    | yes      | A regular expression that is applied on the concatenated node labels during traversal; excludes a path if it matches.
 |===
 
 .Results
