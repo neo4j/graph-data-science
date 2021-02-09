@@ -42,15 +42,43 @@ class MultiClassNLRTrainTest {
     @GdlGraph
     private static final String DB_QUERY =
         "CREATE " +
-        "  (n1:N {a: 2.0, b: 1.2, t: 1})" +
-        ", (n2:N {a: 1.3, b: 0.5, t: 0})" +
-        ", (n3:N {a: 0.0, b: 2.8, t: 2})" +
-        ", (n4:N {a: 1.0, b: 0.9, t: 1})";
+        "  (n1:N {a: 2.0, b: 1.2, x: 999999999.0, t: 1})" +
+        ", (n2:N {a: 1.3, b: 0.5, x: -999999999.0, t: 0})" +
+        ", (n3:N {a: 0.0, b: 2.8, x: -999999999.0, t: 2})" +
+        ", (n4:N {a: 1.0, b: 0.9, x: 999999999.0, t: 1})";
 
     private static final double NO_PENALTY = 0.0;
 
     @Inject
     private Graph graph;
+
+    @Test
+    void shouldHandleLargeValuedFeatures() {
+        var config = ImmutableMultiClassNLRTrainConfig.builder()
+            .featureProperties(List.of("a", "x"))
+            .targetProperty("t")
+            .penalty(NO_PENALTY)
+            .build();
+
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        nodeIds.setAll(i -> i);
+        var algo = new MultiClassNLRTrain(graph, nodeIds, config, new TestLog());
+        var result = algo.compute();
+
+        var data = result.weights().data().data();
+
+        assertThat(data).containsExactly(
+            -0.0016700576697841149,
+            -9.473684191578951E-4,
+            -0.0019177809497368645,
+            0.00167005820440439,
+            0.0016700582502408535,
+            0.0016700581372659925,
+            -0.0019962722019384277,
+            -9.473684191578951E-4,
+            -0.0019177809497368645
+        );
+    }
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {

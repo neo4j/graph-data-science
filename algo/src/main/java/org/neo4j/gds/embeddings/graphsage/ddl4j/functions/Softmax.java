@@ -43,15 +43,23 @@ public class Softmax extends SingleParentVariable<Matrix> {
         var data = (Matrix) ctx.data(parent());
         var result = data.zeros();
         for (int row = 0; row < rows; row++) {
-            double rowSum = 0;
+            double rowSum = 1e-15;
             for (int col = 0; col < cols; col++) {
-                var exp = Math.exp(data.dataAt(row * cols + col));
-                result.setDataAt(row * cols + col, exp);
+                var index = row * cols + col;
+                var exp = Math.exp(data.dataAt(index));
+                if (Double.isInfinite(exp)) {
+                    exp = Double.MAX_VALUE;
+                }
+                result.setDataAt(index, exp);
                 rowSum += exp;
+                if (Double.isInfinite(rowSum)) {
+                    rowSum = Double.MAX_VALUE;
+                }
             }
             for (int col = 0; col < cols; col++) {
-                var current = result.dataAt(row * cols + col);
-                result.setDataAt(row * cols + col, current / rowSum);
+                var index = row * cols + col;
+                var current = result.dataAt(index);
+                result.setDataAt(index, current / rowSum);
             }
         }
 
