@@ -25,6 +25,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SoftmaxTest implements FiniteDifferenceTest {
@@ -32,14 +34,15 @@ class SoftmaxTest implements FiniteDifferenceTest {
     @Test
     void shouldNotOverflowIntoInfinity() {
         var ctx = new ComputationContext();
-        var parent = new MatrixConstant(new double[]{-745.1, -745.15, 709.7, 709.8}, 4, 1);
+        var parent = new MatrixConstant(new double[]{-745.1, -745.15, 709.7, 709.8}, 2, 2);
         ctx.forward(parent);
 
         var softmax = new Softmax(parent);
 
         var result = softmax.apply(ctx);
 
-        assertThat(result.data()).doesNotContain(Double.NaN);
+        assertThat(Arrays.stream(result.data())).allMatch(d -> d < 1.0);
+        assertThat(Arrays.stream(result.data()).sum()).isCloseTo(1.0, Offset.offset(1e-10));
     }
 
     @Test
