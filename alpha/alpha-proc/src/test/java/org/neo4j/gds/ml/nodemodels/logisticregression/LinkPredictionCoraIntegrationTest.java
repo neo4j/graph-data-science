@@ -70,8 +70,8 @@ class LinkPredictionCoraIntegrationTest {
     private static final String EMBEDDING_GRAPH_REL_TYPE = "CITES_EMBEDDING";
     private static final String EMBEDDING_FEATURE = "frp";
     private static final String PREDICTED_REL_TYPE = "CITES_PREDICTED";
-    private static final int NUMBER_OF_FEATURES = 1400;
-    private static final double MIN_AUCPR_TEST_SCORE = 0.65;
+    private static final int NUMBER_OF_FEATURES = 1433;
+    private static final double MIN_AUCPR_TEST_SCORE = 0.01;
 
     private DatasetManager datasetManager;
     private GdsGraphDatabaseAPI cora;
@@ -106,9 +106,9 @@ class LinkPredictionCoraIntegrationTest {
     void trainAndPredict() {
         createGraph();
 //        fastRPEmbeddings();
-        fastRPExtendedEmbeddings();
         testSplit();
         trainSplit();
+        fastRPExtendedEmbeddings();
         trainModel();
         predict();
         assertModelScore();
@@ -139,7 +139,7 @@ class LinkPredictionCoraIntegrationTest {
             "CALL gds.alpha.ml.splitRelationships.mutate($graphName, { " +
             " remainingRelationshipType: $trainGraphRelType, " +
             " holdoutRelationshipType: $testSetRelType, " +
-            " holdoutFraction: 0.2" +
+            " holdoutFraction: 0.1" +
             "})";
 
         runQuery(
@@ -159,7 +159,7 @@ class LinkPredictionCoraIntegrationTest {
             " relationshipTypes: [$trainGraphRelType], " +
             " remainingRelationshipType: $embeddingGraphRelType, " +
             " holdoutRelationshipType: $trainSetRelType, " +
-            " holdoutFraction: 0.3" +
+            " holdoutFraction: 0.2" +
             "})";
 
         runQuery(
@@ -210,7 +210,7 @@ class LinkPredictionCoraIntegrationTest {
 
         runQuery(cora, fastRpQuery, Map.of(
             "graphName", GRAPH_NAME,
-            "embeddingRelType", CITES_TYPE,
+            "embeddingRelType", EMBEDDING_GRAPH_REL_TYPE,
             "mutateProperty", EMBEDDING_FEATURE
         ));
     }
@@ -223,8 +223,7 @@ class LinkPredictionCoraIntegrationTest {
             "  modelName: $modelName," +
             "  featureProperties: [$embeddingFeature], " +
             "  validationFolds: 5, " +
-            // TODO: rethink this (not a release blocker)
-            "  classRatio: 336.3," + // (2707 * 2706 / 2 - 10858) / 10858
+            "  classRatio: 673.6," + // (2707 * 2706 - 10858) / 10858
             "  randomSeed: 2," +
             "  params: [" +
             "    {penalty: 9.999999999999991E-5, maxIterations: 1000}, " +
@@ -252,7 +251,7 @@ class LinkPredictionCoraIntegrationTest {
             "  relationshipTypes: [$citesRelType], " +
             "  modelName: $modelName," +
             "  mutateRelationshipType: $predictRelType, " +
-            "  topN: 1000, " +
+            "  topN: 10000, " +
             "  threshold: 0.4 " +
             "})";
 
