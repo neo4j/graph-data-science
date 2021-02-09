@@ -85,21 +85,4 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             assertCypherResult(query, List.of(expected));
         });
     }
-
-    @Test
-    void testStreamWithPathExpression() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-
-        var query = GdsCypher.call().explicitCreation("graph")
-            .algo("gds.beta.shortestPath.dijkstra")
-            .streamMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
-            .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("pathExpression", ".*") // disallow all paths
-            .addParameter("path", true)
-            .yields();
-
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> assertCypherResult(query, List.of()));
-    }
 }
