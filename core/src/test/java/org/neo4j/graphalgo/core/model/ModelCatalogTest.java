@@ -340,6 +340,11 @@ class ModelCatalogTest {
     }
 
     @Test
+    void shouldNotThrowWhenListingNonExistentModel() {
+        assertDoesNotThrow(() -> ModelCatalog.list(USERNAME, "nonExistentModel"));
+    }
+
+    @Test
     void shouldPublishModels() {
         ModelCatalog.set(TEST_MODEL);
         Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -80,7 +81,11 @@ public final class ModelCatalog {
         ));
     }
 
-    public static Model<?, ?> getUntyped(String username, String modelName) {
+    public static @Nullable Model<?, ?> getUntyped(String username, String modelName) {
+        return getUntyped(username, modelName, true);
+    }
+
+    public static @Nullable Model<?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
         var userCatalog = getUserCatalog(username);
         var userModel = userCatalog.getUntyped(modelName);
         if (userModel != null) {
@@ -91,11 +96,16 @@ public final class ModelCatalog {
                 return publicModel;
             }
         }
-        throw new NoSuchElementException(prettySuggestions(
-            formatWithLocale("Model with name `%s` does not exist.", modelName),
-            modelName,
-            userCatalog.userModels.keySet()
-        ));
+
+        if (failOnMissing) {
+            throw new NoSuchElementException(prettySuggestions(
+                formatWithLocale("Model with name `%s` does not exist.", modelName),
+                modelName,
+                userCatalog.userModels.keySet()
+            ));
+        }
+
+        return null;
     }
 
     public static boolean exists(String username, String modelName) {
@@ -125,8 +135,8 @@ public final class ModelCatalog {
         return models;
     }
 
-    public static Model<?, ?> list(String username, String modelName) {
-        return getUntyped(username, modelName);
+    public static @Nullable Model<?, ?> list(String username, String modelName) {
+        return getUntyped(username, modelName, false);
     }
 
     public static Model<?, ?> publish(String username, String modelName) {
