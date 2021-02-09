@@ -35,7 +35,6 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -216,13 +215,27 @@ public final class Neo4jProxy {
         IMPL.nodeIndexScan(dataRead, index, cursor, indexOrder, needsValues);
     }
 
+    public static CompatIndexQuery rangeIndexQuery(
+        int propertyKeyId,
+        double from,
+        boolean fromInclusive,
+        double to,
+        boolean toInclusive
+    ) {
+        return IMPL.rangeIndexQuery(propertyKeyId, from, fromInclusive, to, toInclusive);
+    }
+
+    public static CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
+        return IMPL.rangeAllIndexQuery(propertyKeyId);
+    }
+
     public static void nodeIndexSeek(
         Read dataRead,
         IndexReadSession index,
         NodeValueIndexCursor cursor,
         IndexOrder indexOrder,
         boolean needsValues,
-        IndexQuery query
+        CompatIndexQuery query
     ) throws Exception {
         IMPL.nodeIndexSeek(dataRead, index, cursor, indexOrder, needsValues, query);
     }

@@ -85,6 +85,7 @@ import org.neo4j.memory.MemoryPools;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.storable.ValueGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -232,19 +233,35 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
+    public CompatIndexQuery rangeIndexQuery(
+        int propertyKeyId,
+        double from,
+        boolean fromInclusive,
+        double to,
+        boolean toInclusive
+    ) {
+        return new CompatIndexQuery41(IndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
+    }
+
+    @Override
+    public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
+        return new CompatIndexQuery41(IndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+    }
+
+    @Override
     public void nodeIndexSeek(
         Read dataRead,
         IndexReadSession index,
         NodeValueIndexCursor cursor,
         IndexOrder indexOrder,
         boolean needsValues,
-        IndexQuery query
+        CompatIndexQuery query
     ) throws Exception {
         var indexQueryConstraints = indexOrder == IndexOrder.NONE
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, query);
+        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQuery41) query).indexQuery);
     }
 
     @Override

@@ -35,7 +35,6 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -158,13 +157,23 @@ public interface Neo4jProxyApi {
         boolean needsValues
     ) throws Exception;
 
+    CompatIndexQuery rangeIndexQuery(
+        int propertyKeyId,
+        double from,
+        boolean fromInclusive,
+        double to,
+        boolean toInclusive
+    );
+
+    CompatIndexQuery rangeAllIndexQuery(int propertyKeyId);
+
     void nodeIndexSeek(
         Read dataRead,
         IndexReadSession index,
         NodeValueIndexCursor cursor,
         IndexOrder indexOrder,
         boolean needsValues,
-        IndexQuery query
+        CompatIndexQuery query
     ) throws Exception;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);

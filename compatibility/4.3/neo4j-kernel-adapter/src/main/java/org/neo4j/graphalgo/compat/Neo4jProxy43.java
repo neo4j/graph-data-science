@@ -42,13 +42,13 @@ import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -88,6 +88,7 @@ import org.neo4j.memory.MemoryPools;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.storable.ValueGroup;
 
 import java.io.File;
 import java.io.IOException;
@@ -237,19 +238,35 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
+    public CompatIndexQuery rangeIndexQuery(
+        int propertyKeyId,
+        double from,
+        boolean fromInclusive,
+        double to,
+        boolean toInclusive
+    ) {
+        return new CompatIndexQuery43(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
+    }
+
+    @Override
+    public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
+        return new CompatIndexQuery43(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+    }
+
+    @Override
     public void nodeIndexSeek(
         Read dataRead,
         IndexReadSession index,
         NodeValueIndexCursor cursor,
         IndexOrder indexOrder,
         boolean needsValues,
-        IndexQuery query
+        CompatIndexQuery query
     ) throws Exception {
         var indexQueryConstraints = indexOrder == IndexOrder.NONE
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, query);
+        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQuery43) query).indexQuery);
     }
 
     @Override

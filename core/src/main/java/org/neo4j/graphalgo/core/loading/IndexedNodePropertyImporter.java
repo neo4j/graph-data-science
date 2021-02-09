@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.compat.CompatIndexQuery;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -41,7 +41,6 @@ import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.NumberValue;
-import org.neo4j.values.storable.ValueGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +53,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     private final NodeLabel nodeLabel;
     private final PropertyMapping mapping;
     private final IndexDescriptor index;
-    private final Optional<IndexQuery> indexQuery;
+    private final Optional<CompatIndexQuery> indexQuery;
     private final IdMapping idMap;
     private final ProgressLogger progressLogger;
     private final TerminationFlag terminationFlag;
@@ -96,7 +95,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         );
     }
 
-    private IndexedNodePropertyImporter(IndexedNodePropertyImporter from, IndexQuery indexQuery) {
+    private IndexedNodePropertyImporter(IndexedNodePropertyImporter from, CompatIndexQuery indexQuery) {
         this(
             from.concurrency,
             from.tx,
@@ -119,7 +118,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         NodeLabel nodeLabel,
         PropertyMapping mapping,
         IndexDescriptor index,
-        Optional<IndexQuery> indexQuery,
+        Optional<CompatIndexQuery> indexQuery,
         IdMapping idMap,
         ProgressLogger progressLogger,
         TerminationFlag terminationFlag,
@@ -206,7 +205,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         NodeValueIndexCursor indexCursor,
         int propertyOffset
     ) throws Exception {
-        var anyValue = IndexQuery.range(this.propertyId, ValueGroup.NUMBER);
+        var anyValue = Neo4jProxy.rangeAllIndexQuery(this.propertyId);
         // find min value
         Neo4jProxy.nodeIndexSeek(read, indexReadSession, indexCursor, IndexOrder.ASCENDING, true, anyValue);
         var min = findFirst(indexCursor, propertyOffset);
@@ -228,7 +227,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
                 }
                 var jobs = new ArrayList<IndexedNodePropertyImporter>(this.concurrency);
                 while (minValue < maxValue) {
-                    var query = IndexQuery.range(this.propertyId, minValue, true, minValue + batchSize, false);
+                    var query = Neo4jProxy.rangeIndexQuery(this.propertyId, minValue, true, minValue + batchSize, false);
                     jobs.add(new IndexedNodePropertyImporter(this, query));
                     minValue += batchSize;
                 }
