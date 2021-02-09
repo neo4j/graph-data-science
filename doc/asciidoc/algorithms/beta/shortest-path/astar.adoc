@@ -17,6 +17,7 @@ This topic includes:
 * <<algorithms-astar-requirements, Requirements>>
 * <<algorithms-astar-syntax, Syntax>>
 * <<algorithms-astar-examples, Examples>>
+** <<algorithms-astar-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-astar-examples-stream, Stream>>
 ** <<algorithms-astar-examples-mutate, Mutate>>
 ** <<algorithms-astar-examples-write, Write>>
@@ -115,6 +116,38 @@ CALL gds.graph.create(
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-astar-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source,cypher]
+----
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
+CALL gds.beta.shortestPath.astar.write.estimate('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    latitudeProperty: 'latitude',
+    longitudeProperty: 'longitude',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5         | 5                 | 992      | 992      | "992 Bytes"
+|===
+--
 
 
 [[algorithms-astar-examples-stream]]
