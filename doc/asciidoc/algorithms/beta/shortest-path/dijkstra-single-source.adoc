@@ -16,6 +16,7 @@ This topic includes:
 * <<algorithms-dijkstra-single-source-intro, Introduction>>
 * <<algorithms-dijkstra-single-source-syntax, Syntax>>
 * <<algorithms-dijkstra-single-source-examples, Examples>>
+** <<algorithms-dijkstra-single-source-examples-memory-estimation, Memory Estimation>>
 ** <<algorithms-dijkstra-single-source-examples-stream, Stream>>
 ** <<algorithms-dijkstra-single-source-examples-mutate, Mutate>>
 ** <<algorithms-dijkstra-single-source-examples-write, Write>>
@@ -93,6 +94,36 @@ CALL gds.graph.create(
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-dijkstra-single-source-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source,cypher]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.beta.allShortestPaths.dijkstra.write.estimate('myGraph', {
+    sourceNode: id(source),
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 9                 | 704      | 704      | "704 Bytes"
+|===
+--
 
 
 [[algorithms-dijkstra-single-source-examples-stream]]
