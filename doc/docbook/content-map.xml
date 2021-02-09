@@ -216,7 +216,11 @@
                 <d:tocentry linkend="alpha-algorithms-one-hot-encoding">
                     <?dbhtml filename="alpha-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-split-relationships">
+                    <?dbhtml filename="alpha-algorithms/split-relationships/index.html"?>
+                </d:tocentry>
             </d:tocentry>
+
             <d:tocentry linkend="algorithms-pregel-api">
                 <?dbhtml filename="algorithms/pregel-api/index.html"?>
             </d:tocentry>
