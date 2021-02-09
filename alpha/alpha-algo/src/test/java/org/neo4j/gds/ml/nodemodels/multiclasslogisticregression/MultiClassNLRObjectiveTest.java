@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.ml.batch.LazyBatch;
@@ -57,7 +58,7 @@ class MultiClassNLRObjectiveTest {
         var lossValue = ctx.forward(loss).value();
 
         // weights are zero => each class has equal probability to be correct.
-        assertThat(lossValue).isEqualTo(-log(1.0 / NUMBER_OF_CLASSES));
+        assertThat(lossValue).isCloseTo(-log(1.0 / NUMBER_OF_CLASSES), Offset.offset(1e-10));
     }
 
     @Test
