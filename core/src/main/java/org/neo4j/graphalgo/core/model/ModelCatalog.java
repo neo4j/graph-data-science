@@ -87,17 +87,12 @@ public final class ModelCatalog {
 
     public static @Nullable Model<?, ?> getUntyped(String username, String modelName, boolean failOnMissing) {
         var userCatalog = getUserCatalog(username);
-        var userModel = userCatalog.getUntyped(modelName);
-        if (userModel != null) {
-            return userModel;
-        } else {
-            var publicModel = publicModels.getUntyped(modelName);
-            if (publicModel != null) {
-                return publicModel;
-            }
+        var model = userCatalog.getUntyped(modelName);
+        if (model == null) {
+            model = publicModels.getUntyped(modelName);
         }
 
-        if (failOnMissing) {
+        if (model == null && failOnMissing) {
             throw new NoSuchElementException(prettySuggestions(
                 formatWithLocale("Model with name `%s` does not exist.", modelName),
                 modelName,
@@ -105,7 +100,7 @@ public final class ModelCatalog {
             ));
         }
 
-        return null;
+        return model;
     }
 
     public static boolean exists(String username, String modelName) {

@@ -209,11 +209,6 @@ class ModelCatalogTest {
             .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class))
             .withMessage(expectedMessage);
 
-        // test the list code path
-        assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> ModelCatalog.list(USERNAME, searchModel))
-            .withMessage(expectedMessage);
-
         // test the drop code path
         assertThatExceptionOfType(NoSuchElementException.class)
             .isThrownBy(() -> ModelCatalog.drop(USERNAME, searchModel))
