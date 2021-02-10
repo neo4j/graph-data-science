@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.concurrency;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -394,18 +393,18 @@ final class ParallelUtilTest {
 
     @RepeatedTest(100)
     void shouldKeepTrackOfAllErrors() {
-        var counter = new MutableLong(0);
+        var counter = new AtomicInteger(0);
         var tasks = List.<Runnable>of(
             () -> {
-                counter.add(1);
+                counter.incrementAndGet();
                 throw new RuntimeException("bubu");
             },
-            () -> counter.add(1)
+            counter::incrementAndGet
         );
         assertThatThrownBy(() -> ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT))
             .isInstanceOf(RuntimeException.class)
             .hasMessage("bubu");
-        assertThat(counter.longValue()).isEqualTo(2);
+        assertThat(counter.get()).isEqualTo(2);
     }
 
     private static void withPool(
