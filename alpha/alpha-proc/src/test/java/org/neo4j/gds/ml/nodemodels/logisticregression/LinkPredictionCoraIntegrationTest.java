@@ -58,8 +58,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LinkPredictionCoraIntegrationTest {
 
-    private static final String GRAPH_CREATE_QUERY =
-        "CALL gds.graph.create('g', 'Paper', {CITES: {orientation: 'UNDIRECTED'}})";
     private static final String GRAPH_NAME = "g";
     private static final String MODEL_NAME = "model";
 
@@ -105,7 +103,6 @@ class LinkPredictionCoraIntegrationTest {
     @Test
     void trainAndPredict() {
         createGraph();
-//        fastRPEmbeddings();
         testSplit();
         trainSplit();
         fastRPExtendedEmbeddings();
@@ -159,7 +156,7 @@ class LinkPredictionCoraIntegrationTest {
             " relationshipTypes: [$trainGraphRelType], " +
             " remainingRelationshipType: $embeddingGraphRelType, " +
             " holdoutRelationshipType: $trainSetRelType, " +
-            " holdoutFraction: 0.2" +
+            " holdoutFraction: 0.1" +
             "})";
 
         runQuery(
@@ -170,25 +167,6 @@ class LinkPredictionCoraIntegrationTest {
                 "trainGraphRelType", TRAIN_GRAPH_REL_TYPE,
                 "embeddingGraphRelType", EMBEDDING_GRAPH_REL_TYPE,
                 "trainSetRelType", TRAIN_SET_REL_TYPE
-            )
-        );
-    }
-
-    private void fastRPEmbeddings() {
-        var fastRpQuery =
-            "CALL gds.fastRP.mutate($graphName, { " +
-            "  relationshipTypes: [$embeddingGraphRelType], " +
-            "  mutateProperty: $embeddingFeature," +
-            "  embeddingDimension: 512" +
-            "})";
-
-        runQuery(
-            cora,
-            fastRpQuery,
-            Map.of(
-                "graphName", GRAPH_NAME,
-                "embeddingGraphRelType", CITES_TYPE,
-                "embeddingFeature", EMBEDDING_FEATURE
             )
         );
     }
