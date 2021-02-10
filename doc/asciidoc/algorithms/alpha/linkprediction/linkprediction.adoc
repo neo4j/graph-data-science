@@ -24,40 +24,75 @@ This topic includes:
 
 Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
 You can think of this as building a model to predict missing relationships in your dataset or relationships that are likely to form in the future.
-Neo4j GDS trains supervised machine learning models based on the relationships and properties in your graph to predict the existence - and probability - of relationships.
+Neo4j GDS trains supervised machine learning models based on the relationships and node properties in your graph to predict the existence - and probability - of relationships.
 
-Link Prediction models are used to predict non-existing relationships between nodes in a graph based on the nodes' properties.
-The specified node properties are used as input features.
-Models are trained on parts of the input graph and evaluated using a specific metric.
-The first step, before training the model, is <<algorithms-ml-train-test-splitting, splitting the graph into a train and a test graph>>, so the test graph may be used to evaluate model performance.
+The basic work flow of Link Prediction contains the following parts which are described below:
 
-Following splitting the data, the training process follows this outline:
+* <<algorithms-ml-train-test-splitting, Creating training and test graphs>>
+* <<algorithms-ml-linkprediction-train, Training and Evaluating model candidates>>
+* <<algorithms-link-prediction-mutate, Applying a model for prediction>>
 
-1. The train graph is divided into a number of validation folds, consisting of a train part and a validation part.
+[[algorithms-ml-linkprediction-train]]
+=== Training, Model Selection and Evaluation
+
+When building a model, it is possible to specify multiple model configurations and a model selection metric.
+The train mode, `gds.alpha.ml.linkPrediction.train`, is responsible for training and evaluating the models, selecting the best model, and storing it in the model catalog.
+
+The train mode takes as input two relationship types representing the training graph and test graph respectively.
+The relationship types must have an integer property, with values being either `0` or `1`.
+If the value is `0` the relationship represents a negative example, meaning a node pair which is not connected in the original graph.
+If the value is `1` the relationship represents a positive example, meaning a relationship which does exist in the original graph.
+
+To obtain the feature vector for an example, the algorithm first forms node feature vectors for the source and target nodes of the example in question.
+This is done by concatenating the property values of the specified feature properties in order into a node feature vector.
+Thereafter, the algorithm uses a _link feature combiner_ to combine the two node feature vectors into the feature vector for the training example.
+There are two supported link feature combiners.
+One is called `L2` and gives the feature vector [(s_0 - t_0)^2 , (s_1 - t_1)^2, ..., (s_d - t_d)^2], where [s_i] and [t_i] are the source and target node feature vectors.
+The other link feature combiner is `HADAMARD` which gives [s_0 * t_0, s_1 * t_1, ..., s_d * t_d].
+
+The precise steps of the train mode are:
+
+1. The relationships of the training graph are divided into a number of folds, consisting of a training part and a validation part.
 2. Each model candidate is trained on each train part and evaluated on the respective validation part.
-3. The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
-4. The model with the highest average score according to the metric will win the training.
-5. The winning model will then be evaluated on the whole train graph as well as the test graph.
-6. The winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
+   The training process uses a logistic regression algorithm, and the evaluation uses the <<algorithms-ml-metrics, AUCPR metric>>.
+3. The model with the highest average score according to the metric will win the training.
+4. The winning model will then be re-trained on the whole training graph and evaluated on the training graph as well as on the test graph.
+5. The winning model will be registered in the <<model-catalog-ops, Model Catalog>>.
 
 Trained models may then be used to predict the probability of a relationship between two nodes.
 
+[[algorithms-link-prediction-mutate]]
+=== Applying a Link Prediction model
+A previously trained model can be applied by invoking the `gds.alpha.ml.linkPrediction.predict.mutate` mode.
+This will retrieve the model by name from the model catalog.
+The model will thereby be used to predict the probability of relationships between all node pairs in the graph that are not connected.
+To limit the size of output, one may specify parameters `topN` that will retain the most probable predictions and/or `threshold` which will retain predictions whose probability is above the threshold.
 
 [[algorithms-ml-train-test-splitting]]
 === Train/Test Splitting
 
-The Link Prediction training takes as input two relationship types that are used to construct subgraphs representing the parts of the graph used for training and testing, respectively.
-Creating these relationship types must be done before training a Link Prediction model.
-The relationship types must have a integer property called `label`, with value either `0` or `1`, which denotes a negative or a positive example relationship in the original graph, respectively.
+In order to train a Link Prediction model, one needs training and test graphs as described <<algorithms-ml-linkprediction-train, above>>.
+The recommended way to obtain these is by using <<algorithms-split-relationships, `gds.alpha.ml.splitRelationships()`>> procedure, once to produce the test graph, and another time for the training graph.
+By invoking this procedure the first time, one obtains two new relationship types that represent the test graph and a 'remaining' graph.
+One can then, invoke the procedure again, on the just created 'remaining' graph, which then creates a training graph and an even smaller 'remaining' graph.
+<<algorithms-ml-linkprediction-examples-train, Below>>, is an example usage of how the `splitRelationships` procedure can be used to prepare the required datasets for training.
 
-By using the `gds.alpha.ml.splitRelationships()` procedure it is possible to produce the necessary train/test splits.
+The 'remaining' graph after the second split can optionally be used to create node embeddings without data leakage from test or validation sets.
 
+Note that, after the first invocation, we cannot use the 'remaining' graph as the training graph, because it not guaranteed to have `0/1` value relationship labels nor negative link examples.
 
 [[algorithms-ml-metrics]]
 === Metrics
 
 The Link Prediction model in the Neo4j GDS library supports only the Area Under the Precision-Recall Curve metric, abbreviated as AUCPR.
+However, most graphs have far more non-connected node pairs than connected ones.
+Thus, typically we have an issue with _class imbalance_.
 
+We will denote by `classRatio` the ratio of non-connected node pairs to connected node pairs.
+
+Evaluating the performance of a model candidate naively using graphs created by the `splitRelationships` procedure can give highly skewed results due to the equal sampling of positive and negative examples.
+In order to compensate for the skewed class sampling, one can provide a value for the `classRatio` parameter to the `train` mode.
+This will then weigh the models' false positives higher by a factor of `classRatio`.
 
 [[algorithms-ml-linkprediction-syntax]]
 == Syntax
@@ -176,7 +211,7 @@ CREATE
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
 We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
-We will also project the `numberOfPosts` property so we can use it as a model feature.
+We will also project the `numberOfPosts` property, so we can use it as a model feature.
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction model is defined only for undirected graphs.
 
@@ -210,7 +245,7 @@ In the following examples we will demonstrate using the Link Prediction model on
 
 First, we must do the test/train splits.
 For this we will make use of the `gds.alpha.ml.splitRelationships` procedure.
-We will do one split to select relationships to be used in the test graph.
+We will do one split to generate the test graph.
 
 [source, cypher, role=example-query]
 ----
@@ -252,7 +287,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | 20
 |===
 
-With both train and test graphs, we are ready to train models.
+With both training and test graphs, we are ready to train models.
 We will use 5 validation folds, meaning we will split the train graph into 5 pairs, using one part of each pair for training and one for validation.
 We set the class ratio to 1.33, which is calculated as the number of non-existing relationships over the number of existing relationships.
 In our graph we have 8 nodes, which gives us a maximum of `8 * 7 / 2 = 28` undirected relationships.
@@ -322,10 +357,10 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
 | 10
 |===
 
-We specified to get the top 5 relationships for which the predicted probability was greater than 45%.
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
-In order to analyse our predicted relationships we will write them back to Neo4j:
+In order to analyze our predicted relationships we will write them back to Neo4j:
 
 [source, cypher, role=example-query]
 ----

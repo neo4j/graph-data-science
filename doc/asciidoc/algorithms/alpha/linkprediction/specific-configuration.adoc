@@ -2,7 +2,6 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name      | Type    | Default | Optional | Description
-| topN      | Integer | n/a     | no       | Number of relationships to create.
-| threshold | Float   | n/a     | no       | Minimum
-| batchSize | Integer | 100     | yes      | Number of nodes per batch.
+| topN      | Integer | n/a     | no       | Limit on predicted relationships to output.
+| threshold | Float   | n/a     | no       | Minimum predicted probability on relationships to output.
 |===

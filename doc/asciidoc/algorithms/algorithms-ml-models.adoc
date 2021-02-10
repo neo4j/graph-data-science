@@ -6,12 +6,9 @@
 This chapter provides explanations and examples for the supervised machine learning models in the Neo4j Graph Data Science library.
 --
 
-The machine learning procedures in Neo4j GDS allow you to make predictions about your graph by training supervised machine learning models.
-These procedures can take node properties in your graph as inputs.
-The node properties may be pre-existing in your database, or the results of graph algorithms or embeddings.
-The process of splitting your data and building models is automated.
-Only the best performing model according to the selected metric is retained.
+The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
 Models can then be accessed via the <<model-catalog-ops, Model Catalog>> and used to make predictions about your graph.
+It is often useful to enrich the input graph with other GDS algorithms, for example node embedding algorithms.
 
 The Neo4j GDS library includes the following machine learning models, grouped by quality tier:
 

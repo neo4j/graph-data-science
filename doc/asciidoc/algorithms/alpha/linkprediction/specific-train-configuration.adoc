@@ -4,9 +4,9 @@
 | Name                  | Type      | Default | Optional | Description
 | trainRelationshipType | String    | n/a     | no       | Relationship type to use during model training.
 | testRelationshipType  | String    | n/a     | no       | Relationship type to use during model evaluation.
-| validationFolds       | Integer   | n/a     | no       | Number of divisions of the train set used during training.
-| classRatio            | Float     | n/a     | no       | Ratio of non-existing relationships to existing relationships in the original graph.
-| params                | List<Map> | n/a     | no       | List of model configurations to be trained. See next table for details.
+| validationFolds       | Integer   | n/a     | no       | Number of divisions of the training graph used during model selection.
+| classRatio            | Float     | n/a     | no       | Ratio of non-connected node pairs to connected node pairs in the original graph.
+| params                | List<Map> | n/a     | no       | List of model configurations to be trained and compared. See next table for details.
 | randomSeed            | Integer   | n/a     | yes      | Seed for the random number generator used during training.
 |===
 
@@ -15,11 +15,10 @@
 |===
 | Name           | Type    | Default | Optional | Description
 | batchSize      | Integer | 100     | yes      | Number of nodes per batch.
-| minIterations  | Integer | 1       | yes      | Minimum number of training iterations.
-| maxIterations  | Integer | 100     | yes      | Maximum number of training iterations.
-| maxStreakCount | Integer | 1       | yes      | Maximum number of iterations that do not improve the loss before stopping.
-| windowSize     | Integer | 1       | yes      | Number of the most recent iterations used for computing the loss.
-| tolerance      | Float   | 0.001   | yes      | Minimum acceptable loss before stopping.
-| sharedUpdater  | Boolean | false   | yes      | Whether to use the same instance of weight updater for all batches.
+| minIterations  | Integer | 1       | yes      | Minimum number of training epochs.
+| maxIterations  | Integer | 100     | yes      | Maximum number of training epochs.
+| maxStreakCount | Integer | 1       | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance      | Float   | 0.001   | yes      | Epochs that do not improve the loss by a factor of 1 - `tolerance` are considered unproductive.
+| sharedUpdater  | Boolean | false   | yes      | Whether to use a shared ADAM optimizer across training threads.
 |===
 
