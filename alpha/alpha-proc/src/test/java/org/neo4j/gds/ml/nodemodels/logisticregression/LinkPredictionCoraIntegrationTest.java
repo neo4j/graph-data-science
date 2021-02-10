@@ -109,7 +109,7 @@ class LinkPredictionCoraIntegrationTest {
         trainModel();
         predict();
         assertModelScore();
-        getResults();
+        //getResults();
     }
 
     private void createGraph() {
