@@ -36,10 +36,9 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.util.NoSuchElementException;
+import java.util.List;
 
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
@@ -115,12 +114,11 @@ class ModelPublishProcTest extends ModelProcBaseTest {
     }
 
     private void assertNonExistingModel(String modelName) {
-        assertThatThrownBy(() -> runQuery(
+        assertCypherResult(
             "CALL gds.beta.model.list($modelName)",
-            map("modelName", modelName)
-        )).getRootCause()
-            .isInstanceOf(NoSuchElementException.class)
-            .hasMessage("Model with name `testModel1` does not exist.");
+            map("modelName", modelName),
+            List.of()
+        );
     }
 
     private void assertExistingModel(String modelName, boolean shared) {

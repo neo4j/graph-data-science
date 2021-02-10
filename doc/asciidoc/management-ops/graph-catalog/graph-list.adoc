@@ -6,7 +6,7 @@ The procedure takes an optional parameter `graphName`:
 
 * If a graph name is given, only information for that graph will be listed.
 * If no graph name is given, information about all graphs will be listed.
-* If a graph name is given but not found in the catalog, an error will be raised.
+* If a graph name is given but not found in the catalog, an empty list will be returned.
 
 .List information about graphs in the catalog:
 [source,cypher]

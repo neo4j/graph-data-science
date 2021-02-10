@@ -122,10 +122,14 @@ class ModelListProcTest extends ModelProcBaseTest {
         );
     }
 
-    @Test
-    void emptyListOnEmptyCatalog() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "CALL gds.beta.model.list()",
+        "CALL gds.beta.model.list('someModel')"
+    })
+    void emptyResultOnListQueries(String query) {
         assertCypherResult(
-            "CALL gds.beta.model.list()",
+            query,
             List.of()
         );
     }

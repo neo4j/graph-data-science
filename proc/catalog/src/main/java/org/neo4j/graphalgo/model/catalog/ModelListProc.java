@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.model.catalog;
 
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +41,10 @@ public class ModelListProc extends ModelCatalogProc {
             return models.stream().map(ModelResult::new);
         } else {
             validateModelName(modelName);
-            return Stream.of(new ModelResult(ModelCatalog.list(username(), modelName)));
+            Model<?, ?> model = ModelCatalog.list(username(), modelName);
+            return model == null
+                ? Stream.empty()
+                : Stream.of(new ModelResult(model));
         }
     }
 }
