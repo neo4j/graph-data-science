@@ -41,22 +41,25 @@ WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for 
 CALL gds.alpha.ml.linkPrediction.train(
   graphName: String,
   configuration: Map
-)
-YIELD
-//TODO
+) YIELD
+  trainMillis: Integer,
+  modelInfo: Map,
+  configuration: Map
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../../common-configuration/common-train-configuration-named-graph.adoc[]
 
-include::specific-configuration.adoc[]
+include::specific-train-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                        | Type    | Description
-// TODO
+| Name          | Type    | Description
+| trainMillis   | Integer | Milliseconds used for training.
+| modelInfo     | Map     | Information about the training and the winning model.
+| configuration | Map     | Configuration used for the train procedure.
 |===
 ======
 
@@ -71,7 +74,12 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate(
   configuration: Map
 )
 YIELD
-// TODO
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -83,8 +91,13 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                        | Type    | Description
-// TODO
+| Name                 | Type    | Description
+| createMillis         | Integer | Milliseconds for creating the graph.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the global metrics.
+| mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten | Integer | Number of relationships created.
+| configuration        | Map     | Configuration used for running the algorithm.
 |===
 ======
 ====

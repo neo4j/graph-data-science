@@ -1,7 +1,8 @@
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                    | Type    | Default | Optional | Description
-| trainRelationshipType   | String  | n/a     | no       | Relationship type to use during model training.
-| testRelationshipType    | String  | n/a     | no       | Relationship type to use during model evaluation.
+| Name      | Type    | Default | Optional | Description
+| topN      | Integer | n/a     | no       | Number of relationships to create.
+| threshold | Float   | n/a     | no       | Minimum
+| batchSize | Integer | 100     | yes      | Number of nodes per batch.
 |===
