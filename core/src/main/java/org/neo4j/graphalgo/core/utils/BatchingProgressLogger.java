@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Supplier;
 
@@ -129,32 +130,37 @@ public class BatchingProgressLogger implements ProgressLogger {
         if (globalPercentage < nextPercentage) {
             globalPercentage = nextPercentage;
             if (message == null || message.isEmpty()) {
-                doLog("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage);
+                logProgress(nextPercentage);
             } else {
-                doLog(
-                    "[%s] %s %d%% %s",
-                    Thread.currentThread().getName(),
-                    task,
-                    nextPercentage,
-                    message
-                );
+                logProgressWithMessage(nextPercentage, message);
             }
         }
     }
 
-    private void doLog(String format, String thread, String task, int nextPercentage) {
-        log.info(format, thread, task, nextPercentage);
-        progressTracker.addLogEvent(task, formatWithLocale(format, thread, task, nextPercentage));
+    private void logProgress(int nextPercentage) {
+        logAndTrack(task, formatWithLocale("[%s] %s %d%%", Thread.currentThread().getName(), task, nextPercentage));
     }
 
-    private void doLog(String format, String thread, String task, int nextPercentage, String message) {
-        log.info(format, thread, task, nextPercentage, message);
-        progressTracker.addLogEvent(task, formatWithLocale(format, thread, task, nextPercentage, message));
+    private void logProgressWithMessage(int nextPercentage, String msg) {
+        logAndTrack(
+            task,
+            formatWithLocale("[%s] %s %d%% %s", Thread.currentThread().getName(), task, nextPercentage, msg)
+        );
+    }
+
+    @Override
+    public void logMessage(String msg) {
+        logAndTrack(task, formatWithLocale("[%s] %s %s", Thread.currentThread().getName(), task, msg));
     }
 
     @Override
     public void logMessage(Supplier<String> msg) {
-        log.info("[%s] %s %s", Thread.currentThread().getName(), task, msg.get());
+        logMessage(Objects.requireNonNull(msg.get()));
+    }
+
+    private void logAndTrack(String task, String message) {
+        progressTracker.addLogEvent(task, message);
+        log.info(message);
     }
 
     @Override
