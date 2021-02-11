@@ -84,10 +84,10 @@ public class LinkPredictionTrain
         var modelSelectResult = modelSelect(nodeIds);
         var bestParameters = modelSelectResult.bestParameters();
 
-        // train best model on the entire test set
+        // train best model on the entire training graph
         var predictor = trainModel(nodeIds, bestParameters);
 
-        // evaluate the best model on the train and test graphs
+        // evaluate the best model on the training and test graphs
         var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor);
         var testMetrics = computeMetric(testGraph, nodeIds, predictor);
 
