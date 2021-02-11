@@ -1,0 +1,19 @@
+[[algorithms-ml-models]]
+= Machine Learning Models
+
+[abstract]
+--
+This chapter provides explanations and examples for the machine learning models in the Neo4j Graph Data Science library.
+--
+
+// todo intro text here
+
+The Neo4j GDS library includes the following machine learning models, grouped by quality tier:
+
+* Alpha
+** <<algorithms-ml-nodeclassification, Node Classification>>
+** <<algorithms-ml-linkprediction, Link Prediction>>
+
+include::alpha/nodeclassification/nodeclassification.adoc[leveloffset=+1]
+
+include::alpha/linkprediction/linkprediction.adoc[leveloffset=+1]
