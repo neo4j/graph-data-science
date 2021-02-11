@@ -53,43 +53,84 @@ This sample will explain the ArticleRank algorithm, using a simple graph:
 image::articlerank.svg[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=setup-query]
 ----
-include::scripts/articlerank.cypher[tag=create-sample-graph]
+CREATE
+  (paper0:Paper {name:'Paper 0'}),
+  (paper1:Paper {name:'Paper 1'}),
+  (paper2:Paper {name:'Paper 2'}),
+  (paper3:Paper {name:'Paper 3'}),
+  (paper4:Paper {name:'Paper 4'}),
+  (paper5:Paper {name:'Paper 5'}),
+  (paper6:Paper {name:'Paper 6'}),
+
+  (paper1)-[:CITES]->(paper0),
+
+  (paper2)-[:CITES]->(paper0),
+  (paper2)-[:CITES]->(paper1),
+
+  (paper3)-[:CITES]->(paper0),
+  (paper3)-[:CITES]->(paper1),
+  (paper3)-[:CITES]->(paper2),
+
+  (paper4)-[:CITES]->(paper0),
+  (paper4)-[:CITES]->(paper1),
+  (paper4)-[:CITES]->(paper2),
+  (paper4)-[:CITES]->(paper3),
+
+  (paper5)-[:CITES]->(paper1),
+  (paper5)-[:CITES]->(paper4),
+
+  (paper6)-[:CITES]->(paper1),
+  (paper6)-[:CITES]->(paper4);
 ----
 
+[role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher]
 ----
-include::scripts/articlerank.cypher[tag=stream-sample-graph]
+CALL gds.alpha.articleRank.stream({
+  nodeProjection: 'Paper',
+  relationshipProjection: 'CITES',
+  maxIterations: 20,
+  dampingFactor: 0.85
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS Name, score as ArticleRank
+ORDER BY score DESC
 ----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name      | ArticleRank
+| "Paper 0" | 0.3462769146633946
+| "Paper 1" | 0.31950147982279303
+| "Paper 4" | 0.21375000253319743
+| "Paper 2" | 0.21092906260164457
+| "Paper 3" | 0.18028125041164458
+| "Paper 5" | 0.15000000000000002
+| "Paper 6" | 0.15000000000000002
+|===
+--
 
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
-include::scripts/articlerank.cypher[tag=write-sample-graph]
+CALL gds.alpha.articleRank.write({
+  nodeProjection: 'Paper',
+  relationshipProjection: 'CITES',
+  maxIterations:20, dampingFactor:0.85,
+  writeProperty: "pagerank"
+}) YIELD
+  nodes, maxIterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
 ----
 
-// tag::stream-sample-graph-result[]
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name    | ArticleRank
-| Paper 0 | 0.34616300000000005
-| Paper 1 | 0.319422
-| Paper 4 | 0.213733
-| Paper 2 | 0.21089400000000003
-| Paper 3 | 0.18026850000000003
-| Paper 5 | 0.15000000000000002
-| Paper 6 | 0.15000000000000002
-|===
-// end::stream-sample-graph-result[]
-
-// tag::stream-sample-graph-explanation[]
 Paper 0 is the most important paper, but it's only the 2nd most cited paper - Paper 1 has more citations.
 However, Paper 1 cites Paper 0, which lets us see that it's not only the number of incoming links that is important, but also the importance of the papers behind those links.
 Papers 5 and 6 are not cited by any other papers, so their score doesn't increase above the initial score of `1 - dampingFactor`.
-// end::stream-sample-graph-explanation[]
+
 
 [[algorithms-articlerank-syntax]]
 == Syntax
