@@ -84,7 +84,11 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HugeGraph.class);
 
         // node information
-        builder.add("nodeIdMap", IdMap.memoryEstimation());
+        if (IdMapImplementations.useBitIdMap()) {
+            builder.add("nodeIdMap", BitIdMap.memoryEstimation());
+        } else {
+            builder.add("nodeIdMap", IdMap.memoryEstimation());
+        }
 
         // nodeProperties
         nodeProjections.allProperties()

@@ -20,35 +20,51 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.utils.CheckedRunnable;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NativeFactoryTest {
 
-    @Test
-    void memoryEstimation() {
+    @ParameterizedTest
+    @CsvSource({"false,3405981464,4606168256", "true,1818450752,3018637544"})
+    void memoryEstimation(boolean useBitIdMap, long expectedMinUsage, long expectedMaxUsage) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)
             .build();
 
-        MemoryEstimation memoryEstimation = NativeFactory.getMemoryEstimation(
-            NodeProjections.all(),
-            RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
-        );
+        var memoryEstimation = new AtomicReference<MemoryEstimation>();
+        var runnable = (CheckedRunnable<RuntimeException>) () ->
+            memoryEstimation.set(NativeFactory.getMemoryEstimation(
+                NodeProjections.all(),
+                RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
+            ));
 
-        MemoryTree estimate = memoryEstimation.estimate(dimensions, 1);
-        assertEquals(3_405_981_464L, estimate.memoryUsage().min);
-        assertEquals(4_606_168_256L, estimate.memoryUsage().max);
+        if (useBitIdMap) {
+            GdsEdition.instance().setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(runnable));
+        } else {
+            runnable.run();
+        }
+
+        var estimate = memoryEstimation.get().estimate(dimensions, 1);
+        assertEquals(expectedMinUsage, estimate.memoryUsage().min);
+        assertEquals(expectedMaxUsage, estimate.memoryUsage().max);
     }
 
     @Test
