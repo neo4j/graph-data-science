@@ -269,7 +269,7 @@ CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
 In order to analyse our predicted classes we stream the properties from the in-memory graph:
 
-[role=query-example, group=mutate]
+[role=query-example, no-result=true, group=mutate]
 --
 [source, cypher]
 ----
