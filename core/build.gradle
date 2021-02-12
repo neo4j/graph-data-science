@@ -12,7 +12,215 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
-    compileOnly         group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j'
+    compileOnly         (group: 'org.neo4j',                name: 'neo4j',              version: ver.'neo4j') {
+        transitive = false
+    }
+
+compileOnly( group: 'org.neo4j', name: 'annotations', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'cypher-ast-factory', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-ast', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-batch-insert', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-bolt', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-codegen', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-collections', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-command-line', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-common', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-concurrent', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-configuration', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-consistency-check', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-csv', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-ast-factory', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-expression-evaluator', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-interpreted-runtime', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-ir', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-javacc-parser', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-logical-plans', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-macros', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-planner-spi', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-planner', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher-runtime-util', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-cypher', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-data-collector', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-dbms', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-diagnostics', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-exceptions', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-expressions', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-fabric', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-front-end', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-fulltext-index', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-graph-algo', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-graphdb-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-id-generator', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-import-tool', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-import-util', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-index', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-io', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-kernel-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-kernel', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-label-index', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-layout', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-lock', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-logging', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-lucene-index', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-monitoring', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-native', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-parser', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-procedure-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-procedure', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-resource', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-rewriting', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-schema', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-security', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-spatial-index', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-ssl', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-storage-engine-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-token-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-unsafe', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-util', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-values', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j-wal', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'neo4j', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j', name: 'server-api', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j.app', name: 'neo4j-server', version: '4.2.3' ) {
+    transitive = false
+}
+compileOnly( group: 'org.neo4j.licensing-proxy', name: 'zstd-proxy', version: '4.2.3' ) {
+    transitive = false
+}
+
 
     api(
             project(':annotations'),
@@ -25,13 +233,18 @@ dependencies {
             [group: 'org.ejml',         name: 'ejml-core',                  version: ver.'ejml'],
             [group: 'org.ejml',         name: 'ejml-ddense',                version: ver.'ejml'],
             [group: 'de.siegmar',       name: 'fastcsv',                    version: ver.'fastcsv'],
-            [group: 'org.opencypher',   name: 'cypher-javacc-parser-9.0',   version: ver.'opencypher-front-end']
+            [group: 'org.opencypher',   name: 'cypher-javacc-parser-9.0',   version: ver.'opencypher-front-end'],
 
+            'org.apache.commons:commons-text:1.9',
+            'org.apache.lucene:lucene-core:8.8.0',
+            'org.eclipse.collections:eclipse-collections-api:10.4.0',
+            'org.eclipse.collections:eclipse-collections:10.4.0',
+            'org.bouncycastle:bcpkix-jdk15on:1.68',
+            'info.picocli:picocli:4.6.1',
     )
 
     implementation(
             [group: 'io.jsonwebtoken', name: 'jjwt-impl', version: ver.'jjwt'],
-//            [group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt'],
     )
 
     // Set hardcoded version of jackson-databind until there is a new version of jjwt-jackson

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.commons.compress.utils.Sets;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphdb.Result;
@@ -39,8 +38,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String ID_COLUMN = "id";
     static final String LABELS_COLUMN = "labels";
-    static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(ID_COLUMN, LABELS_COLUMN);
-    static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(ID_COLUMN);
+    static final Set<String> RESERVED_COLUMNS = Set.of(ID_COLUMN, LABELS_COLUMN);
+    static final Set<String> REQUIRED_COLUMNS = Set.of(ID_COLUMN);
 
     private long rows;
     private long maxNeoId = 0;

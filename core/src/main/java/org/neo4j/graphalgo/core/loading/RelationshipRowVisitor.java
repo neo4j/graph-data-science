@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.commons.compress.utils.Sets;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectDoubleHashMap;
 import org.eclipse.collections.impl.map.mutable.primitive.ObjectIntHashMap;
 import org.neo4j.graphalgo.RelationshipType;
@@ -41,8 +40,8 @@ class RelationshipRowVisitor implements Result.ResultVisitor<RuntimeException> {
     private static final String SOURCE_COLUMN = "source";
     private static final String TARGET_COLUMN = "target";
     static final String TYPE_COLUMN = "type";
-    static final Set<String> REQUIRED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN);
-    static final Set<String> RESERVED_COLUMNS = Sets.newHashSet(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
+    static final Set<String> REQUIRED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN);
+    static final Set<String> RESERVED_COLUMNS = Set.of(SOURCE_COLUMN, TARGET_COLUMN, TYPE_COLUMN);
 
     private final NodeMapping nodeMapping;
     private final ObjectIntHashMap<String> propertyKeyIdsByName;

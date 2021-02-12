@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -152,8 +152,8 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             .build()
             .graphStore();
 
-        assertEquals(Sets.newHashSet("prop1", "prop2"), graphStore.nodePropertyKeys(allIdentifier));
-        assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(node2Identifier));
+        assertEquals(Set.of("prop1", "prop2"), graphStore.nodePropertyKeys(allIdentifier));
+        assertEquals(Set.of("prop2"), graphStore.nodePropertyKeys(node2Identifier));
 
         NodeProperties allProp1 = graphStore.nodePropertyValues(allIdentifier, "prop1");
         NodeProperties allProp2 = graphStore.nodePropertyValues(allIdentifier, "prop2");

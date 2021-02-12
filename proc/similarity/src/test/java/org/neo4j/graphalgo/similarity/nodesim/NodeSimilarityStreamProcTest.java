@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.similarity.nodesim;
 
-import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -37,6 +36,7 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -219,7 +219,7 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
                 .get(getUsername(), db.databaseId(), "myGraphNATURAL")
                 .graphStore();
 
-            HashSet<String> expected = Sets.newHashSet(
+            Set<String> expected = Set.of(
                 resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 1, 2 / 3.0),
                 resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 2, 1 / 3.0),
                 resultString(idOffset + deletedNodes + 1, idOffset + deletedNodes + 2, 0.0),

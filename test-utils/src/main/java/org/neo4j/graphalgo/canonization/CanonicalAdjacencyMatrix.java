@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.canonization;
 
-import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -142,7 +142,7 @@ public final class CanonicalAdjacencyMatrix {
         String pattern) {
         return (unused, list) -> {
             if (list == null) {
-                list = Lists.newArrayList();
+                list = new ArrayList<>();
             }
             list.add(formatWithLocale(pattern, relationshipProperty, canonicalNodeLabel));
             return list;

@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.gdl;
 
-import org.apache.commons.compress.utils.Lists;
-import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -32,6 +30,9 @@ import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -153,7 +154,7 @@ class GdlFactoryTest {
     @Test
     void testForAllNodes() {
         var graph = fromGdl("({w:1}),({w:2}),({w:3})");
-        List<Double> nodeProps = Lists.newArrayList();
+        List<Double> nodeProps = new ArrayList<>();
         graph.forEachNode(nodeId -> nodeProps.add(graph.nodeProperties("w").doubleValue(nodeId)));
         assertThat(nodeProps.size()).isEqualTo(3);
         assertThat(nodeProps).isEqualTo(List.of(1D, 2D, 3D));
@@ -162,7 +163,7 @@ class GdlFactoryTest {
     @Test
     void testForAllRelationships() {
         var graph = fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
-        Set<Double> relProps = Sets.newHashSet();
+        Set<Double> relProps = new HashSet<>();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                 relProps.add(w);

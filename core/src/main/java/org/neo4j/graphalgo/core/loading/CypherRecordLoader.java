@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.commons.compress.utils.Lists;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -30,6 +29,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -109,7 +109,7 @@ abstract class CypherRecordLoader<R> {
 
     Result runLoadingQuery(Transaction tx) {
         Result result = runQueryWithoutClosingTheResult(tx, loadQuery, cypherConfig.parameters());
-        validateMandatoryColumns(Lists.newArrayList(result.columns().iterator()));
+        validateMandatoryColumns(List.copyOf(result.columns()));
         return result;
     }
 
