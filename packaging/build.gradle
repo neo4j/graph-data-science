@@ -28,6 +28,16 @@ task checkLicensesFile {
 shadowJar {
     dependsOn checkLicensesFile
 
+    relocate('com', 'org.neo4j.gds.shaded.com') {
+        exclude 'com/neo4j/**'
+    }
+    relocate('org', 'org.neo4j.gds.shaded.org') {
+        exclude 'org/neo4j/**'
+    }
+    relocate('de', 'org.neo4j.gds.shaded.de')
+    relocate('io', 'org.neo4j.gds.shaded.io')
+    relocate('pabeles', 'org.neo4j.gds.shaded.pabeles')
+
     if (project.hasProperty("gdsDropVersion")) {
         version project.property("gdsDropVersion")
     }
