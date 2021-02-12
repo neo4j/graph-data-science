@@ -84,7 +84,7 @@ public final class SparseLongArray {
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup("sparse long array", (dimensions, concurrency) -> {
             var capacity = dimensions.highestNeoId() + 1;
-            var arraySize = (int) BitUtil.ceilDiv(capacity, BLOCK_SIZE);
+            var arraySize = BitUtil.ceilDiv(capacity, BLOCK_SIZE);
             var offsetSize = (arraySize >>> BLOCK_SHIFT) + 1;
 
             return MemoryEstimations

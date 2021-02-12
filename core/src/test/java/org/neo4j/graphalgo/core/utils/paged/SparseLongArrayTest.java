@@ -284,6 +284,7 @@ class SparseLongArrayTest {
         "10000,1424",
         "100000,13112",
         "1000000,130016",
+        "1000000000000,129882812632"
     })
     void memoryEstimation(long highestNeoId, long expectedBytes) {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(0).highestNeoId(highestNeoId).build();
