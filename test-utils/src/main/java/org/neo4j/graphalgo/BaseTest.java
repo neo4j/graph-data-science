@@ -27,7 +27,6 @@ import org.assertj.core.api.ObjectAssert;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTrackerExtensionFactory;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
@@ -228,20 +227,6 @@ public abstract class BaseTest {
             emptyMap(),
             check
         );
-    }
-
-    protected void runWithEnterpriseLicense(Runnable r) {
-        var isOnEnterprise = GdsEdition.instance().isOnEnterpriseEdition();
-        try {
-            if (!isOnEnterprise) {
-                GdsEdition.instance().setToEnterpriseEdition();
-            }
-            r.run();
-        } finally {
-            if (!isOnEnterprise) {
-                GdsEdition.instance().setToCommunityEdition();
-            }
-        }
     }
 
     private static BiConsumer<Transaction, Result.ResultRow> discardTx(Consumer<Result.ResultRow> check) {

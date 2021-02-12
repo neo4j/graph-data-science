@@ -21,6 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -142,26 +143,24 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
+    @GdsEnterpriseEdition
     void toggleUseBitIdMap() {
-        runWithEnterpriseLicense(() -> {
-            var useBitIdMap = USE_BIT_ID_MAP.isEnabled();
-            runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", !useBitIdMap));
-            assertEquals(!useBitIdMap, USE_BIT_ID_MAP.isEnabled());
-            runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", useBitIdMap));
-            assertEquals(useBitIdMap, USE_BIT_ID_MAP.isEnabled());
-        });
+        var useBitIdMap = USE_BIT_ID_MAP.isEnabled();
+        runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", !useBitIdMap));
+        assertEquals(!useBitIdMap, USE_BIT_ID_MAP.isEnabled());
+        runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", useBitIdMap));
+        assertEquals(useBitIdMap, USE_BIT_ID_MAP.isEnabled());
     }
 
     @Test
+    @GdsEnterpriseEdition
     void resetUseBitIdMap() {
-        runWithEnterpriseLicense(() -> {
-            USE_BIT_ID_MAP.reset();
-            assertCypherResult(
-                "CALL gds.features.useBitIdMap.reset()",
-                List.of(Map.of("enabled", true))
-            );
-            assertEquals(true, USE_BIT_ID_MAP.isEnabled());
-        });
+        USE_BIT_ID_MAP.reset();
+        assertCypherResult(
+            "CALL gds.features.useBitIdMap.reset()",
+            List.of(Map.of("enabled", true))
+        );
+        assertEquals(true, USE_BIT_ID_MAP.isEnabled());
     }
 
     @Test
