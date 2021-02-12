@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.RenamesCurrentThread;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
@@ -153,36 +154,40 @@ public class ListProgressProcTest extends BaseTest {
 
     @Test
     void progressLoggerShouldEmitProgressEvents() {
-        runQuery("CALL gds.test.logging_algo('foo', 'pagerank')");
-        runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
+            runQuery("CALL gds.test.logging_algo('foo', 'pagerank')");
+            runQuery("CALL gds.test.logging_algo('bar', 'wcc')");
+            scheduler.forward(100, TimeUnit.MILLISECONDS);
 
-        var result = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
-            r -> r.stream().collect(Collectors.toList())
-        );
+            var result = runQuery(
+                "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+                r -> r.stream().collect(Collectors.toList())
+            );
 
-        assertThat(result).hasSize(2);
+            assertThat(result).hasSize(2);
 
-        assertThat(result).contains(Map.of("taskName", "pagerank", "message", "[Test worker] pagerank 100% hello foo"));
-        assertThat(result).contains(Map.of("taskName", "wcc", "message", "[Test worker] wcc 100% hello bar"));
+            assertThat(result).contains(Map.of("taskName", "pagerank", "message", "[Test worker] pagerank 100% hello foo"));
+            assertThat(result).contains(Map.of("taskName", "wcc", "message", "[Test worker] wcc 100% hello bar"));
+        }
     }
 
     @Test
     void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
-        runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
-        runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
-        scheduler.forward(100, TimeUnit.MILLISECONDS);
+        try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
+            runQuery("CALL gds.beta.graph.generate('foo', 100, 5)");
+            runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
+            scheduler.forward(100, TimeUnit.MILLISECONDS);
 
-        List<Map<String, Object>> result = runQuery(
-            "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
-            r -> r.stream().collect(Collectors.toList())
-        );
+            List<Map<String, Object>> result = runQuery(
+                "CALL gds.beta.listProgress() YIELD taskName, message RETURN taskName, message",
+                r -> r.stream().collect(Collectors.toList())
+            );
 
-        assertThat(result).hasSize(1)
-            .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-            .hasEntrySatisfying("message", v -> assertThat(v).contains("100%"))
-            .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
+            assertThat(result).hasSize(1)
+                .element(0, InstanceOfAssertFactories.map(String.class, String.class))
+                .hasEntrySatisfying("message", v -> assertThat(v).isEqualTo("[Test worker] FastRP :: Finished"))
+                .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
+        }
     }
 
     @Test
