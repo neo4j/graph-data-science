@@ -58,9 +58,9 @@ class AStarTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 48_992L),
-            Arguments.of(1_000_000, 48_250_736L),
-            Arguments.of(1_000_000_000, 48_257_325_104L)
+            Arguments.of(1_000, 48_984L),
+            Arguments.of(1_000_000, 48_250_728L),
+            Arguments.of(1_000_000_000, 48_257_325_096L)
         );
     }
 
@@ -68,7 +68,7 @@ class AStarTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            () -> AStar.memoryEstimation(false),
+            AStar::memoryEstimation,
             nodeCount,
             1,
             expectedBytes,

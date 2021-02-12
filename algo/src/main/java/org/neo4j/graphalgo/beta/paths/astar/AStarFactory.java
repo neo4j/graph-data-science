@@ -33,7 +33,7 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return AStar.memoryEstimation(configuration.maybePathExpression().isPresent());
+        return AStar.memoryEstimation();
     }
 
     @NotNull

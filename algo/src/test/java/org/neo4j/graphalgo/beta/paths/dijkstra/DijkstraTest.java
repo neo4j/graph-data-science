@@ -70,30 +70,22 @@ final class DijkstraTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            // trackRelationships = false, hasPathExpression = false
-            Arguments.of(1_000, false, false, 32_752L),
-            Arguments.of(1_000_000, false, false, 32_250_496L),
-            Arguments.of(1_000_000_000, false, false, 32_254_883_408L),
-            // trackRelationships = true, hasPathExpression = false
-            Arguments.of(1_000, true, false, 48_968L),
-            Arguments.of(1_000_000, true, false, 48_250_712L),
-            Arguments.of(1_000_000_000, true, false, 48_257_325_080L),
-            // trackRelationships = false, hasPathExpression = true
-            Arguments.of(1_000, false, true, 40_792L),
-            Arguments.of(1_000_000, false, true, 40_250_536L),
-            Arguments.of(1_000_000_000, false, true, 40_256_159_472L),
-            // trackRelationships = true, hasPathExpression = true
-            Arguments.of(1_000, true, true, 57_008L),
-            Arguments.of(1_000_000, true, true, 56_250_752L),
-            Arguments.of(1_000_000_000, true, true, 56_258_601_144L)
+            // trackRelationships = false
+            Arguments.of(1_000, false, 32_744L),
+            Arguments.of(1_000_000, false, 32_250_488L),
+            Arguments.of(1_000_000_000, false, 32_254_883_400L),
+            // trackRelationships = true
+            Arguments.of(1_000, true, 48_960L),
+            Arguments.of(1_000_000, true, 48_250_704L),
+            Arguments.of(1_000_000_000, true, 48_257_325_072L)
         );
     }
 
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, boolean hasPathExpression, long expectedBytes) {
+    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            () -> Dijkstra.memoryEstimation(trackRelationships, hasPathExpression),
+            () -> Dijkstra.memoryEstimation(trackRelationships),
             nodeCount,
             1,
             expectedBytes,
@@ -213,26 +205,6 @@ final class DijkstraTest {
             assertEquals(expected, path);
         }
 
-        @Test
-        void sourceTargetWithPathExpression() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
-
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
-                .pathExpression(".*(C)(E)*(D)")
-                .build();
-
-            var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-                .compute()
-                .paths()
-                .findFirst()
-                .get();
-
-            assertEquals(expected, path);
-        }
-
         Stream<Arguments> predicatesAndPaths() {
             return Stream.of(
                 Arguments.of((Dijkstra.RelationshipFilter) (source, target, relationshipId) ->
@@ -262,31 +234,6 @@ final class DijkstraTest {
 
             var config = defaultSingleSourceConfigBuilder()
                 .sourceNode(sourceNode)
-                .build();
-
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-                .compute()
-                .pathSet();
-
-            assertEquals(expected, paths);
-        }
-
-        @Test
-        void singleSourceWithPathExpression() {
-            var expected = Set.of(
-                expected(idFunction, 0, new double[]{0.0}, "a"),
-                expected(idFunction, 1, new double[]{0.0, 2.0}, "a", "c"),
-                expected(idFunction, 2, new double[]{0.0, 4.0}, "a", "b"),
-                expected(idFunction, 3, new double[]{0.0, 2.0, 5.0}, "a", "c", "e"),
-                expected(idFunction, 4, new double[]{0.0, 4.0, 14.0}, "a", "b", "d"),
-                expected(idFunction, 5, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f")
-            );
-
-            var sourceNode = idFunction.of("a");
-
-            var config = defaultSingleSourceConfigBuilder()
-                .sourceNode(sourceNode)
-                .pathExpression(".*(C)(E)*(D)")
                 .build();
 
             var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
@@ -479,56 +426,6 @@ final class DijkstraTest {
                 .get();
 
             assertEquals(List.of(2L, 1L, 4L, 1L, 3L, 1L, 5L, 1L), heapComparisons);
-            assertEquals(expected, path);
-        }
-    }
-
-    @Nested
-    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
-    class Graph4 {
-
-        // https://en.wikipedia.org/wiki/Shortest_path_problem#/media/File:Shortest_path_with_direct_weights.svg
-        @GdlGraph
-        private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Alpha)" +
-            ", (b:Bravo)" +
-            ", (c:Charlie:Golf)" +
-            ", (d:Delta)" +
-            ", (e:Echo)" +
-            ", (f:Foxtrot)" +
-
-            ", (a)-[:TYPE {cost: 4}]->(b)" +
-            ", (a)-[:TYPE {cost: 2}]->(c)" +
-            ", (b)-[:TYPE {cost: 5}]->(c)" +
-            ", (b)-[:TYPE {cost: 10}]->(d)" +
-            ", (c)-[:TYPE {cost: 3}]->(e)" +
-            ", (d)-[:TYPE {cost: 11}]->(f)" +
-            ", (e)-[:TYPE {cost: 4}]->(d)";
-
-        @Inject
-        private Graph graph;
-
-        @Inject
-        private IdFunction idFunction;
-
-        @Test
-        void sourceTargetWithPathExpression() {
-            var expected = expected(idFunction, 0, new double[]{0.0, 4.0, 14.0, 25.0}, "a", "b", "d", "f");
-
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(idFunction.of("a"))
-                .targetNode(idFunction.of("f"))
-                .pathExpression(".*(Charlie.*)(Echo)*(Delta).*")
-                .build();
-
-            var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-                .compute()
-                .paths()
-                .findFirst()
-                .get();
-
             assertEquals(expected, path);
         }
     }

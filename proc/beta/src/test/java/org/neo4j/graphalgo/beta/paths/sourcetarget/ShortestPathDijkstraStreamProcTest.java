@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.beta.paths.StreamResult.COST_PROPERTY_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -85,25 +84,5 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
 
             assertCypherResult(query, List.of(expected));
         });
-    }
-
-    @Test
-    void usingPathExpressionShouldFail() {
-        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
-
-        var query = GdsCypher.call().explicitCreation("graph")
-            .algo("gds.beta.shortestPath.dijkstra")
-            .streamMode()
-            .addParameter("sourceNode", config.sourceNode())
-            .addParameter("targetNode", config.targetNode())
-            .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("pathExpression", ".*") // should fail
-            .addParameter("path", true)
-            .yields();
-
-        assertThatThrownBy(() -> GraphDatabaseApiProxy.runInTransaction(db, tx -> assertCypherResult(query, List.of())))
-            .getRootCause()
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Unexpected configuration key: pathExpression");
     }
 }
