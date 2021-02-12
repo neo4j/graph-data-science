@@ -46,7 +46,6 @@ import org.s1ck.gdl.model.Vertex;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,9 +66,9 @@ class YensTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 33_064L),
-            Arguments.of(1_000_000, 32_250_808L),
-            Arguments.of(1_000_000_000, 32_254_883_720L)
+            Arguments.of(1_000, 33_056L),
+            Arguments.of(1_000_000, 32_250_800L),
+            Arguments.of(1_000_000_000, 32_254_883_712L)
         );
     }
 
@@ -77,7 +76,7 @@ class YensTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
         TestSupport.assertMemoryEstimation(
-            () -> Yens.memoryEstimation(false),
+            Yens::memoryEstimation,
             nodeCount,
             1,
             expectedBytes,
@@ -166,65 +165,7 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-        assertResult(graph, idFunction, expectedPaths, Optional.empty());
-    }
-
-    static Stream<List<String>> pathInputWithPathExpression() {
-        return Stream.of(
-            List.of(
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})"
-            ),
-            List.of(
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})"
-            ),
-            List.of(
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 1}]->(h {cost: 5.0})",
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
-                "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})"
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("pathInputWithPathExpression")
-    void computeWithPathExpression(Collection<String> expectedPaths) {
-        assertResult(graph, idFunction, expectedPaths, Optional.of("^(C).*?(D)"));
-    }
-
-    static Stream<Arguments> unexpectedPathsForPathExpression() {
-        return Stream.of(
-            Arguments.of(
-                "^(C).*?(D)",
-                List.of(
-                    "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 1}]->(h {cost: 8.0})",
-                    "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})",
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
-                )
-            ),
-            Arguments.of(
-                ".*(E)(F)(G)",
-                List.of(
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})"
-                )
-            ),
-            Arguments.of(
-                "^(C).*?(G)",
-                List.of(
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 2}]->(g {cost: 5.0})-[{id: 0}]->(h {cost: 7.0})",
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 1}]->(f {cost: 4.0})-[{id: 0}]->(g {cost: 6.0})-[{id: 0}]->(h {cost: 8.0})",
-                    "(c {cost: 0.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})",
-                    "(c {cost: 0.0})-[{id: 1}]->(e {cost: 2.0})-[{id: 0}]->(d {cost: 3.0})-[{id: 0}]->(f {cost: 7.0})-[{id: 0}]->(g {cost: 9.0})-[{id: 0}]->(h {cost: 11.0})"
-                )
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("unexpectedPathsForPathExpression")
-    void negativeWithPathExpression(String pathExpression, Collection<String> unexpectedPaths) {
-        assertResult(graph, idFunction, unexpectedPaths, Optional.of(pathExpression), Optional.of(42), false);
+        assertResult(graph, idFunction, expectedPaths);
     }
 
     @Test
@@ -266,23 +207,7 @@ class YensTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
     }
 
-    private static void assertResult(
-        Graph graph,
-        IdFunction idFunction,
-        Collection<String> expectedPaths,
-        Optional<String> pathExpression
-    ) {
-        assertResult(graph, idFunction, expectedPaths, pathExpression, Optional.empty(), true);
-    }
-
-    private static void assertResult(
-        Graph graph,
-        IdFunction idFunction,
-        Collection<String> expectedPaths,
-        Optional<String> pathExpression,
-        Optional<Integer> maybeK,
-        boolean positiveTest
-    ) {
+    private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {
         var expectedPathResults = expectedPathResults(idFunction, expectedPaths);
 
         var firstResult = expectedPathResults
@@ -299,8 +224,7 @@ class YensTest {
         var config = defaultSourceTargetConfigBuilder()
             .sourceNode(firstResult.sourceNode())
             .targetNode(firstResult.targetNode())
-            .k(maybeK.orElse(expectedPathResults.size()))
-            .pathExpression(pathExpression.orElse(null))
+            .k(expectedPathResults.size())
             .build();
 
         var actualPathResults = Yens
@@ -308,12 +232,7 @@ class YensTest {
             .compute()
             .pathSet();
 
-        var assertThatPaths = assertThat(actualPathResults);
-        if (positiveTest) {
-            assertThatPaths.containsExactlyInAnyOrderElementsOf(expectedPathResults);
-        } else {
-            assertThatPaths.doesNotContainAnyElementsOf(expectedPathResults);
-        }
+        assertThat(actualPathResults).containsExactlyInAnyOrderElementsOf(expectedPathResults);
     }
 
     @NotNull
@@ -425,7 +344,7 @@ class YensTest {
         @ParameterizedTest
         @MethodSource("pathInput")
         void compute(Collection<String> expectedPaths) {
-            assertResult(graph, idFunction, expectedPaths, Optional.empty());
+            assertResult(graph, idFunction, expectedPaths);
         }
     }
 }

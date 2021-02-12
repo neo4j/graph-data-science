@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
-import org.neo4j.graphalgo.beta.paths.PathExpressionConfig;
 import org.neo4j.graphalgo.beta.paths.ShortestPathBaseConfig;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
@@ -35,11 +34,11 @@ import org.neo4j.logging.Log;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig & PathExpressionConfig> implements AlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> implements AlgorithmFactory<Dijkstra, T> {
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
-        return Dijkstra.memoryEstimation(false, configuration.maybePathExpression().isPresent());
+        return Dijkstra.memoryEstimation(false);
     }
 
     @NotNull

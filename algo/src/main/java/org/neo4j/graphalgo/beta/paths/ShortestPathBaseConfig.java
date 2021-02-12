@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.paths;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig, PathExpressionConfig {
+public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
 
     String SOURCE_NODE_KEY = "sourceNode";
     String TARGET_NODE_KEY = "targetNode";

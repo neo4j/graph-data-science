@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.DoubleArrayDeque;
 import com.carrotsearch.hppc.LongArrayDeque;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.paths.AllShortestPathsBaseConfig;
 import org.neo4j.graphalgo.beta.paths.ImmutablePathResult;
@@ -36,14 +35,10 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
@@ -51,7 +46,6 @@ import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EM
 import static org.neo4j.graphalgo.beta.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
 
 public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
-    private static final long PATH_END = -1;
     private static final long NO_RELATIONSHIP = -1;
 
     private final Graph graph;
@@ -77,10 +71,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     private long pathIndex;
     // returns true if the given relationship should be traversed
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
-    // used for filtering on node labels while extending the path
-    private final Matcher matcher;
-    // a cache for node labels to avoid expensive graph.nodeLabel lookup
-    private final HugeObjectArray<String> labelCache;
 
     /**
      * Configure Dijkstra to compute at most one source-target shortest path.
@@ -100,7 +90,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
-            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -121,7 +110,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
-            config.maybePathExpression(),
             heuristicFunction,
             progressLogger,
             tracker
@@ -129,22 +117,15 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public static MemoryEstimation memoryEstimation() {
-        return memoryEstimation(false, false);
+        return memoryEstimation(false);
     }
 
-    public static MemoryEstimation memoryEstimation(boolean trackRelationships, boolean hasPathExpression) {
+    public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
             .add("reverse path", HugeLongLongMap.memoryEstimation());
         if (trackRelationships) {
             builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
-        }
-        if (hasPathExpression) {
-            // We assume BYTES_OBJECT_REF per array entry,
-            // since we store Strings, which are shared via
-            // an interned String cache. Also, all entries
-            // set is probably not the average case.
-            builder.add("label cache", HugeObjectArray.memoryEstimation(MemoryUsage.BYTES_OBJECT_REF));
         }
         return builder
             .perNode("visited set", MemoryUsage::sizeOfBitset)
@@ -156,7 +137,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         long sourceNode,
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
-        Optional<String> pathPattern,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressLogger progressLogger,
         AllocationTracker tracker
@@ -174,14 +154,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.visited = new BitSet();
         this.pathIndex = 0L;
         this.progressLogger = progressLogger;
-        this.matcher = pathPattern.map(Pattern::compile).map(p -> p.matcher("")).orElse(null);
-
-        if (pathPattern.isPresent()) {
-            withRelationshipFilter(buildPathExpression());
-            this.labelCache = HugeObjectArray.newArray(String.class, graph.nodeCount(), tracker);
-        } else {
-            this.labelCache = null;
-        }
     }
 
     public Dijkstra withSourceNode(long sourceNode) {
@@ -324,62 +296,6 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .relationshipIds(trackRelationships ? relationshipIds.toArray() : EMPTY_ARRAY)
             .costs(costs.toArray())
             .build();
-    }
-
-    private RelationshipFilter buildPathExpression() {
-        // labels are appended to this one, reversed in the end
-        final var pathBuilder = new StringBuilder();
-        // used to reverse label strings
-        final var labelBuilder = new StringBuilder();
-
-        // This method is called to check if a target node should
-        // be visited by the algorithm. To verify the given path
-        // expression, we concatenate all node labels of the current
-        // traversal from the source node up until the target node.
-        // If the concatenated string matches the given pattern,
-        // we are not allowed to traverse the path further.
-        return (source, target, relationshipId) -> {
-            pathBuilder.setLength(0);
-            pathBuilder.append(label(target, labelBuilder));
-
-            var lastNode = source;
-            while (lastNode != PATH_END) {
-                pathBuilder.append(label(lastNode, labelBuilder));
-                if (matches(pathBuilder)) {
-                    return false;
-                }
-                lastNode = predecessors.getOrDefault(lastNode, PATH_END);
-            }
-            return true;
-        };
-    }
-
-    private boolean matches(StringBuilder sb) {
-        var input = sb.reverse().toString();
-        matcher.reset(input);
-        sb.reverse();
-        return matcher.matches();
-    }
-
-    private String label(long nodeId, StringBuilder sb) {
-        var maybeCached = labelCache.get(nodeId);
-        if (maybeCached == null) {
-            // Concatenate sorted node labels.
-            maybeCached = graph.nodeLabels(nodeId)
-                .stream()
-                .map(NodeLabel::name)
-                .sorted()
-                .collect(Collectors.joining());
-
-            // Store the concatenated label reversed since the
-            // whole path label will be reversed eventually.
-            sb.append(maybeCached);
-            maybeCached = sb.reverse().toString();
-            sb.setLength(0);
-
-            labelCache.set(nodeId, maybeCached);
-        }
-        return maybeCached;
     }
 
     @Override

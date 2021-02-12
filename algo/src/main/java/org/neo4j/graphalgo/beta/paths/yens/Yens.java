@@ -84,9 +84,9 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     // of the found paths.
     private static final long AVERAGE_BLACKLIST_SIZE = 10L;
 
-    public static MemoryEstimation memoryEstimation(boolean hasPathExpression) {
+    public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(Yens.class)
-            .add("Dijkstra", Dijkstra.memoryEstimation(false, hasPathExpression))
+            .add("Dijkstra", Dijkstra.memoryEstimation(false))
             .fixed("nodeBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE))
             .fixed("relationshipBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE * 2))
             .build();
