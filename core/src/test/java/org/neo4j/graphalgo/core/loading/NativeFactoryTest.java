@@ -50,11 +50,11 @@ class NativeFactoryTest {
             .build();
 
         var memoryEstimation = new AtomicReference<MemoryEstimation>();
-        var runnable = (CheckedRunnable<RuntimeException>) () ->
+        var runnable = CheckedRunnable.runnable(() ->
             memoryEstimation.set(NativeFactory.getMemoryEstimation(
                 NodeProjections.all(),
                 RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
-            ));
+            )));
 
         if (useBitIdMap) {
             GdsEdition.instance().setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(runnable));
