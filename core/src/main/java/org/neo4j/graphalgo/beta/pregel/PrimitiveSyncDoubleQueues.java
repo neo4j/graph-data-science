@@ -56,7 +56,9 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         return MemoryEstimations.builder(PrimitiveSyncDoubleQueues.class)
             .add("current queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
             .add("previous queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
-            .perNode("tails", HugeLongArray::memoryEstimation)
+            .perNode("current tails", HugeAtomicLongArray::memoryEstimation)
+            .perNode("previous tails", HugeAtomicLongArray::memoryEstimation)
+            .perNode("reference counts", HugeAtomicLongArray::memoryEstimation)
             .build();
     }
 

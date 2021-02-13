@@ -59,8 +59,9 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(PrimitiveAsyncDoubleQueues.class)
             .add("queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
-            .perNode("heads", HugeLongArray::memoryEstimation)
-            .perNode("tails", HugeLongArray::memoryEstimation)
+            .perNode("heads", HugeAtomicLongArray::memoryEstimation)
+            .perNode("tails", HugeAtomicLongArray::memoryEstimation)
+            .perNode("reference counts", HugeAtomicLongArray::memoryEstimation)
             .build();
     }
 
