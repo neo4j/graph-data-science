@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static final double COMPACT_THRESHOLD = 0.25;
     private static final double EMPTY_MESSAGE = Double.NaN;
 
-    private final HugeAtomicLongArray heads;
+    private final HugeIntArray heads;
     private final HugeCursor<double[][]> queuesCursor;
 
     public static PrimitiveAsyncDoubleQueues of(long nodeCount, AllocationTracker tracker) {
@@ -42,7 +43,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker tracker) {
-        var heads = HugeAtomicLongArray.newArray(nodeCount, tracker);
+        var heads = HugeIntArray.newArray(nodeCount, tracker);
         var tails = HugeAtomicLongArray.newArray(nodeCount, tracker);
         var queues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
         var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, tracker);
@@ -60,14 +61,14 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(PrimitiveAsyncDoubleQueues.class)
             .add("queues", HugeObjectArray.memoryEstimation(MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY)))
-            .perNode("heads", HugeAtomicLongArray::memoryEstimation)
+            .perNode("heads", HugeIntArray::memoryEstimation)
             .perNode("tails", HugeAtomicLongArray::memoryEstimation)
             .perNode("reference counts", HugeAtomicLongArray::memoryEstimation)
             .build();
     }
 
     private PrimitiveAsyncDoubleQueues(
-        HugeAtomicLongArray heads,
+        HugeIntArray heads,
         HugeAtomicLongArray tails,
         HugeObjectArray<double[]> queues,
         HugeAtomicLongArray referenceCounts
@@ -84,7 +85,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
             for (int i = queuesCursor.offset; i < queuesCursor.limit; i++) {
                 var queue = queuesCursor.array[i];
                 var tail = (int) tails.get(i);
-                var head = (int) heads.get(i);
+                var head = heads.get(i);
 
                 if (isEmpty(queue, head, tail) && head > 0) {
                     // The queue is empty, we can reset head and tail to index 0
@@ -108,7 +109,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     boolean isEmpty(long nodeId) {
-        var head = (int) heads.get(nodeId);
+        var head = heads.get(nodeId);
         var tail = (int) tails.get(nodeId);
         var queue = queues.get(nodeId);
         return isEmpty(queue, head, tail);
@@ -120,7 +121,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
 
     double pop(long nodeId) {
         var currentHead = heads.getAndAdd(nodeId, 1);
-        return queues.get(nodeId)[(int) currentHead];
+        return queues.get(nodeId)[currentHead];
     }
 
     @Override
