@@ -43,6 +43,7 @@ class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterat
 
     @Override
     public void sendTo(long targetNodeId, double message) {
+        assert !Double.isNaN(message);
         queues.push(targetNodeId, message);
     }
 
