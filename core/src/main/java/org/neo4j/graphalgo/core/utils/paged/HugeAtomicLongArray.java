@@ -74,6 +74,15 @@ public abstract class HugeAtomicLongArray {
     public abstract long get(long index);
 
     /**
+     * Atomically adds the given delta to the value at the given index.
+     *
+     * @param index the index
+     * @param delta the value to add
+     * @return the previous value at index
+     */
+    public abstract long getAndAdd(long index, long delta);
+
+    /**
      * Sets the long value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
@@ -273,6 +282,16 @@ public abstract class HugeAtomicLongArray {
         }
 
         @Override
+        public long getAndAdd(long index, long delta) {
+            long prev, next;
+            do {
+                prev = (long) ARRAY_HANDLE.getVolatile(page, (int) index);
+                next = prev + delta;
+            } while (!ARRAY_HANDLE.compareAndSet(page, (int) index, prev, next));
+            return prev;
+        }
+
+        @Override
         public void set(long index, long value) {
             ARRAY_HANDLE.setVolatile(page, (int) index, value);
         }
@@ -365,6 +384,19 @@ public abstract class HugeAtomicLongArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             return (long) ARRAY_HANDLE.getVolatile(pages[pageIndex], indexInPage);
+        }
+
+        @Override
+        public long getAndAdd(long index, long delta) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            long[] page = pages[pageIndex];
+            long prev, next;
+            do {
+                prev = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
+                next = prev + delta;
+            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
+            return prev;
         }
 
         @Override
