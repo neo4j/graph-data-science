@@ -44,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Many of the following tests were taken from the AtomicLongArray test from the OpenJDK sources.
@@ -266,6 +265,20 @@ final class HugeAtomicLongArrayTest {
 
             array.set(index, value);
             assertEquals(value, array.get(index));
+        });
+    }
+
+    @Test
+    void shouldAddAndGet() {
+        testArray(10, array -> {
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
+            int delta = integer(0, 42);
+
+            array.set(index, value);
+            array.getAndAdd(index, delta);
+
+            assertEquals(value + delta, array.get(index));
         });
     }
 
