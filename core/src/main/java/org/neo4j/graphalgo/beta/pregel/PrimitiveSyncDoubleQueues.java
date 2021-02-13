@@ -24,13 +24,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 
 public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
-    // toggling in-between super steps
+    // Represents the queues of the previous iteration.
+    // super.queues and prevQueues are being toggled after each iteration.
     private HugeObjectArray<double[]> prevQueues;
     private HugeAtomicLongArray prevTails;
 
@@ -38,18 +38,20 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         return of(nodeCount, MIN_CAPACITY, tracker);
     }
 
-    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialCapacity, AllocationTracker tracker) {
+    public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker tracker) {
         var currentTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
         var prevTails = HugeAtomicLongArray.newArray(nodeCount, tracker);
 
         var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
         var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
 
-        var capacity = Math.max(initialCapacity, MIN_CAPACITY);
+        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, tracker);
+
+        var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         currentQueues.setAll(value -> new double[capacity]);
         prevQueues.setAll(value -> new double[capacity]);
 
-        return new PrimitiveSyncDoubleQueues(currentTails, currentQueues, prevTails, prevQueues);
+        return new PrimitiveSyncDoubleQueues(currentQueues, currentTails, prevQueues, prevTails, referenceCounts);
     }
 
     public static MemoryEstimation memoryEstimation() {
@@ -63,12 +65,11 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     private PrimitiveSyncDoubleQueues(
-        HugeAtomicLongArray currentTails,
-        HugeObjectArray<double[]> currentQueues,
-        HugeAtomicLongArray prevTails,
-        HugeObjectArray<double[]> prevQueues
+        HugeObjectArray<double[]> currentQueues, HugeAtomicLongArray currentTails,
+        HugeObjectArray<double[]> prevQueues, HugeAtomicLongArray prevTails,
+        HugeAtomicLongArray referenceCounts
     ) {
-        super(currentTails, currentQueues);
+        super(currentQueues, currentTails, referenceCounts);
         this.prevQueues = prevQueues;
         this.prevTails = prevTails;
     }
@@ -78,12 +79,11 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
         var tmpTails = tails;
         this.tails = prevTails;
         this.prevTails = tmpTails;
+        this.tails.setAll(0);
         // swap queues
         var tmpQueues = queues;
         this.queues = prevQueues;
         this.prevQueues = tmpQueues;
-
-        this.tails.setAll(0);
     }
 
     void initIterator(Iterator iterator, long nodeId) {

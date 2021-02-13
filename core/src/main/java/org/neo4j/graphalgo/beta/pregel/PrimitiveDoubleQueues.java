@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -28,21 +27,30 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 public abstract class PrimitiveDoubleQueues {
-    // used to store a message in a queue
+    // Used to insert into a single message queue array.
     private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(double[].class);
-    // minimum capacity for the individual arrays
+    // Minimum capacity for the individual queue arrays.
     static final int MIN_CAPACITY = 42;
-
+    // 🦀
+    // Used to allow either a single thread exclusive access to a queue
+    // in order to grow and replace it or multiple threads shared access
+    // to the queue in order to insert a new message.
     private final HugeAtomicLongArray referenceCounts;
 
-    // toggling in-between super steps
+    // Manages a queue (double array) for each node.
     HugeObjectArray<double[]> queues;
+    // Stores the tail indexes for each queue. The tail
+    // index is used to insert a new message during push.
     HugeAtomicLongArray tails;
 
-    PrimitiveDoubleQueues(HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
+    PrimitiveDoubleQueues(
+        HugeObjectArray<double[]> queues,
+        HugeAtomicLongArray tails,
+        HugeAtomicLongArray referenceCounts
+    ) {
         this.tails = tails;
         this.queues = queues;
-        this.referenceCounts = HugeAtomicLongArray.newArray(queues.size(), AllocationTracker.empty());
+        this.referenceCounts = referenceCounts;
     }
 
     abstract void grow(long nodeId, int newCapacity);
@@ -98,37 +106,24 @@ public abstract class PrimitiveDoubleQueues {
                 }
             } else {
                 // We need to grow the local queue. To indicate this and
-                // block other insert threads, we set the negated
-                // next index. Threads seeing this negative index will
-                // spin in the upper loop.
+                // block other threads, we set the negated next index.
+                // Threads seeing this negative index will spin in the upper loop.
                 long currentIdx = tails.compareAndExchange(nodeId, idx, -nextIdx);
                 if (currentIdx == idx) {
                     // Only a single thread gets into this block.
                     // We grow the queue and make sure there is
                     // enough space for the next index.
 
-                    while(true) {
-                        var reference = referenceCounts.get(nodeId);
-
-                        // There is a thread trying to write into the array
-                        if (reference > 0) continue;
-
-                        // Setting the reference to a negative values signals that
-                        // the array is currently being growed.
-                        // Only a single thread can set this.
-                        if (referenceCounts.compareAndSet(nodeId, reference, -1)) {
-                            break;
-                        }
-                    }
-
+                    // We need to get exclusive access to the queue
+                    // since we will grow and replace it. We have to
+                    // make sure that no other thread is currently
+                    // inserting into the queue.
+                    getExclusiveReference(nodeId);
                     grow(nodeId, (int) nextIdx);
+                    dropExclusiveReference(nodeId);
 
-                    // Reset the reference count to 0, to signal the array has grown.
-                    referenceCounts.update(nodeId, ref -> 0);
-
-                    // We turn the index back to the positive value
-                    // to indicate to waiting threads that we're
-                    // done growing the local queue.
+                    // We turn the index back to the positive value to notify
+                    // waiting threads that we're done growing the local queue.
                     tails.compareAndExchange(nodeId, -nextIdx, nextIdx);
                     // Done. We can use the index to insert our message.
                     break;
@@ -142,25 +137,59 @@ public abstract class PrimitiveDoubleQueues {
         // in order to avoid reading from the queue before it is grown.
         VarHandle.fullFence();
 
-        // We need to increase the reference count, to signal that a thread
-        // is currently writing a value.
-        while(true) {
-            var reference = referenceCounts.get(nodeId);
+        // Multiple threads can concurrently update the queue, we need
+        // to signal this with a shared reference to the array.
+        getSharedReference(nodeId);
+        ARRAY_HANDLE.setVolatile(queues.get(nodeId), (int) idx, message);
+        dropSharedReference(nodeId);
+    }
 
-            // Another thread is growing the array. We have to wait until
-            // the operation is done to avoid lost updates.
-            if (reference < 0) continue;
+    private void getSharedReference(long nodeId) {
+        while (true) {
+            // If another thread is currently growing the queue, the
+            // reference count will be negative. We need to wait until
+            // this thread is finished and drops the exclusive reference.
+            var refCount = referenceCounts.get(nodeId);
+            if (refCount < 0) continue;
 
-            // Increase the reference count by one.
-            if (referenceCounts.compareAndSet(nodeId, reference, reference + 1)) {
+            // We increment the reference count by 1 to indicate that we
+            // want to a shared reference to the queue in order to insert
+            // our message.
+            if (referenceCounts.compareAndSet(nodeId, refCount, refCount + 1)) {
                 break;
             }
         }
+    }
 
-        ARRAY_HANDLE.setVolatile(queues.get(nodeId), (int) idx, message);
+    private void dropSharedReference(long nodeId) {
+        // We decrement the reference count by 1 to indicate
+        // that we finished updating the queue.
+        referenceCounts.getAndAdd(nodeId, -1);
+    }
 
-        // We are done writing, decrease the reference count by one.
-        referenceCounts.update(nodeId, ref -> ref - 1);
+    private void getExclusiveReference(long nodeId) {
+        while (true) {
+            // If other threads concurrently insert into the queue,
+            // the reference count will be positive. We need to wait
+            // until those threads finished before we can continue.
+            var refCount = referenceCounts.get(nodeId);
+            if (refCount > 0) {
+                continue;
+            }
+            // Setting the reference to a negative value signals that
+            // the queue is currently growing and must not be accessed.
+            if (referenceCounts.compareAndSet(nodeId, refCount, -1)) {
+                break;
+            }
+        }
+    }
+
+    private void dropExclusiveReference(long nodeId) {
+        // We reset the reference count to 0
+        // to signal other threads that the queue
+        // is grown and can be used for inserting new
+        // messages.
+        referenceCounts.set(nodeId, 0);
     }
 
     private boolean hasSpaceLeft(long nodeId, int minCapacity) {
@@ -170,6 +199,7 @@ public abstract class PrimitiveDoubleQueues {
     void release() {
         this.queues.release();
         this.tails.release();
+        this.referenceCounts.release();
     }
 
     @TestOnly
