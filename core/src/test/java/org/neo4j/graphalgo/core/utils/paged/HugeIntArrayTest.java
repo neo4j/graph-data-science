@@ -53,6 +53,19 @@ final class HugeIntArrayTest extends HugeArrayTestBase<int[], Integer, HugeIntAr
     }
 
     @Test
+    void shouldGetAndAddValues() {
+        testArray(10, array -> {
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
+            int delta = integer(0, 42);
+            array.set(index, value);
+            var oldValue = array.getAndAdd(index, delta);
+            assertEquals(oldValue, value);
+            assertEquals(value + delta, array.get(index));
+        });
+    }
+
+    @Test
     void shouldAddToValues() {
         testArray(10, array -> {
             int index = integer(2, 8);

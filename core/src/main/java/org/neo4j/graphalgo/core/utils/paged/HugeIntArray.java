@@ -69,6 +69,8 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
      */
     abstract public int get(long index);
 
+    abstract public int getAndAdd(long index, int delta);
+
     /**
      * Sets the int value at the given index to the given value.
      *
@@ -279,6 +281,15 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
         }
 
         @Override
+        public int getAndAdd(long index, int delta) {
+            assert index < size;
+            var idx = (int) index;
+            var value = page[idx];
+            page[idx] += delta;
+            return value;
+        }
+
+        @Override
         public void set(long index, int value) {
             assert index < size;
             page[(int) index] = value;
@@ -415,6 +426,16 @@ public abstract class HugeIntArray extends HugeArray<int[], Integer, HugeIntArra
             final int pageIndex = pageIndex(index);
             final int indexInPage = indexInPage(index);
             return pages[pageIndex][indexInPage];
+        }
+
+        @Override
+        public int getAndAdd(long index, int delta) {
+            assert index < size;
+            final int pageIndex = pageIndex(index);
+            final int indexInPage = indexInPage(index);
+            var value = pages[pageIndex][indexInPage];
+            pages[pageIndex][indexInPage] += delta;
+            return value;
         }
 
         @Override
