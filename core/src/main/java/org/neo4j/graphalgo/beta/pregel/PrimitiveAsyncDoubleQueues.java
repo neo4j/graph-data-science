@@ -26,13 +26,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 
 public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     public static final double COMPACT_THRESHOLD = 0.25;
+    private static final double EMPTY_MESSAGE = Double.NaN;
 
     private final HugeAtomicLongArray heads;
     private final HugeCursor<double[][]> queuesCursor;
@@ -41,19 +41,20 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         return of(nodeCount, MIN_CAPACITY, tracker);
     }
 
-    public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialCapacity, AllocationTracker tracker) {
+    public static PrimitiveAsyncDoubleQueues of(long nodeCount, int initialQueueCapacity, AllocationTracker tracker) {
         var heads = HugeAtomicLongArray.newArray(nodeCount, tracker);
         var tails = HugeAtomicLongArray.newArray(nodeCount, tracker);
         var queues = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
+        var referenceCounts = HugeAtomicLongArray.newArray(nodeCount, tracker);
 
-        var capacity = Math.max(initialCapacity, MIN_CAPACITY);
+        var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         queues.setAll(value -> {
             var queue = new double[capacity];
-            Arrays.fill(queue, Double.NaN);
+            Arrays.fill(queue, EMPTY_MESSAGE);
             return queue;
         });
 
-        return new PrimitiveAsyncDoubleQueues(heads, tails, queues);
+        return new PrimitiveAsyncDoubleQueues(heads, tails, queues, referenceCounts);
     }
 
     public static MemoryEstimation memoryEstimation() {
@@ -65,8 +66,13 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
             .build();
     }
 
-    private PrimitiveAsyncDoubleQueues(HugeAtomicLongArray heads, HugeAtomicLongArray tails, HugeObjectArray<double[]> queues) {
-        super(tails, queues);
+    private PrimitiveAsyncDoubleQueues(
+        HugeAtomicLongArray heads,
+        HugeAtomicLongArray tails,
+        HugeObjectArray<double[]> queues,
+        HugeAtomicLongArray referenceCounts
+    ) {
+        super(queues, tails, referenceCounts);
         this.heads = heads;
         this.queuesCursor = queues.newCursor();
     }
@@ -80,10 +86,10 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
                 var tail = (int) tails.get(i);
                 var head = (int) heads.get(i);
 
-                if (isEmpty(i) && head(i) > 0) {
+                if (isEmpty(queue, head, tail) && head > 0) {
                     // The queue is empty, we can reset head and tail to index 0
                     // but we need to fill the previous entries with NaN.
-                    Arrays.fill(queue, 0, (int) tails.get(i), Double.NaN);
+                    Arrays.fill(queue, 0, tail, EMPTY_MESSAGE);
                     heads.set(i, 0);
                     tails.set(i, 0);
                 } else if (head > queue.length * COMPACT_THRESHOLD) {
@@ -92,7 +98,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
                     // the remaining entries with NaN.
                     var length = tail - head;
                     System.arraycopy(queue, head, queue, 0, length);
-                    Arrays.fill(queue, length, queue.length, Double.NaN);
+                    Arrays.fill(queue, length, queue.length, EMPTY_MESSAGE);
 
                     heads.set(i, 0);
                     tails.set(i, length);
@@ -102,16 +108,18 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     boolean isEmpty(long nodeId) {
-        var head = heads.get(nodeId);
-        var tail = tails.get(nodeId);
+        var head = (int) heads.get(nodeId);
+        var tail = (int) tails.get(nodeId);
         var queue = queues.get(nodeId);
+        return isEmpty(queue, head, tail);
+    }
 
-        return head == queue.length || head > tail || Double.isNaN(queue[(int) head]);
+    private boolean isEmpty(double[] queue, int head, int tail) {
+        return head == queue.length || head > tail || Double.isNaN(queue[head]);
     }
 
     double pop(long nodeId) {
-        var currentHead = heads.get(nodeId);
-        heads.set(nodeId, currentHead + 1);
+        var currentHead = heads.getAndAdd(nodeId, 1);
         return queues.get(nodeId)[(int) currentHead];
     }
 
@@ -122,7 +130,8 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         // grow by 50%
         var newCapacity = capacity + (capacity >> 1);
         var resizedArray = Arrays.copyOf(queue, newCapacity);
-        Arrays.fill(resizedArray, minCapacity - 1, newCapacity, Double.NaN);
+        // Fill with NaN to indicate empty slots.
+        Arrays.fill(resizedArray, minCapacity - 1, newCapacity, EMPTY_MESSAGE);
         this.queues.set(nodeId, resizedArray);
     }
 
