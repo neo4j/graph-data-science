@@ -19,8 +19,11 @@
  */
 package org.neo4j.graphalgo.utils;
 
+import org.apache.commons.lang3.NotImplementedException;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -136,6 +139,20 @@ public final class ExceptionUtil {
 
     public static void validateSourceNodeIsLoaded(long mappedId, long neoId) {
         validateNodeIsLoaded(mappedId, neoId, "source");
+    }
+
+    public static <T> T throwTestSafeNotImplemented(String message) {
+        throw testSafeNotImplemented(message);
+    }
+
+    public static RuntimeException testSafeNotImplemented(String message) {
+        try {
+            var assumptionViolationClass  = Class.forName("org.junit.AssumptionViolatedException");
+            var ctor = assumptionViolationClass.getDeclaredConstructor(String.class);
+            return ((RuntimeException) ctor.newInstance(message));
+        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
+            return new NotImplementedException(message);
+        }
     }
 
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {

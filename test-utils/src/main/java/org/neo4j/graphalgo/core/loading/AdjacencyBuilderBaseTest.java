@@ -41,20 +41,23 @@ public abstract class AdjacencyBuilderBaseTest {
         AdjacencyListBuilderFactory listBuilderFactory,
         AdjacencyOffsetsFactory offsetsFactory
     ) {
-        RelationshipsBuilder globalBuilder = new RelationshipsBuilder(
+        RelationshipsBuilder globalBuilder = RelationshipsBuilder.create(
+            6,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             listBuilderFactory,
-            offsetsFactory
+            offsetsFactory,
+            new Aggregation[]{Aggregation.NONE},
+            new int[0],
+            new double[0],
+            AllocationTracker.empty()
         );
+
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
             globalBuilder,
             1,
             8,
             AllocationTracker.empty(),
             new LongAdder(),
-            new int[0],
-            new double[0],
-            new Aggregation[]{Aggregation.NONE},
             false
         );
         long nodeCount = 6;
@@ -73,21 +76,21 @@ public abstract class AdjacencyBuilderBaseTest {
 
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
-        try (
-            var adjacencyOffsets = globalBuilder.globalAdjacencyOffsets();
-            var adjacencyList = globalBuilder.adjacencyList()
-        ) {
+        var adjacencyList = globalBuilder.build();
+
+        try (var adjacency = adjacencyList.adjacency().adjacencyList()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                long offset = adjacencyOffsets.get(nodeId);
-                try (var cursor = adjacencyList.decompressingCursor(offset)) {
+                var offset = adjacencyList.adjacency().adjacencyOffsets().get(nodeId);
+                try (var cursor = adjacency.decompressingCursor(offset)) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
                         assertEquals(relationships.remove(nodeId), target);
                     }
                 }
             }
-            assertTrue(relationships.isEmpty());
         }
+
+        assertTrue(relationships.isEmpty());
     }
 
     @Test

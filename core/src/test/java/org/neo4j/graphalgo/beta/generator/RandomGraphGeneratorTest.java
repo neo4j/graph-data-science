@@ -82,7 +82,7 @@ class RandomGraphGeneratorTest {
         for (var start = 0L; start < nbrNodes; start += bucketSize) {
             var end = Math.min(start + bucketSize, nbrNodes);
             var avgDegreeInBucket = LongStream
-                    .rangeClosed(start, end)
+                    .range(start, end)
                     .mapToInt(graph::degree)
                     .average()
                     .orElse(0.0);

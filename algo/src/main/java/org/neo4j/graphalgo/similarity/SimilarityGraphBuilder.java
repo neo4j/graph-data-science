@@ -103,7 +103,7 @@ public class SimilarityGraphBuilder {
             .tracker(tracker)
             .build();
 
-        ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
+        ParallelUtil.parallelStreamConsume(stream, 1, relationshipsBuilder::addFromInternal);
 
         return GraphFactory.create(
             baseIdMap,

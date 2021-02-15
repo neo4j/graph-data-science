@@ -97,6 +97,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
 
         graph = new StoreLoaderBuilder()
             .api(db)
+            .concurrency(1)
             .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()

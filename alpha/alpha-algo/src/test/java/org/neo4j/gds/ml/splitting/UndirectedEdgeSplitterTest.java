@@ -88,7 +88,7 @@ class UndirectedEdgeSplitterTest {
             assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
             var cursor2 = p.list().cursor(p.offsets().get(2L));
             // 2,5 is negative
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor2.nextLong()));
         });
     }
 

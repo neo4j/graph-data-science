@@ -19,38 +19,153 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
+import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
+import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
-
-public class RelationshipsBuilder {
+public final class RelationshipsBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
     private final RelationshipProjection projection;
-    private final AdjacencyListBuilder adjacencyListBuilder;
-    private final AdjacencyOffsetsFactory offsetsFactory;
-    private final AdjacencyListBuilder[] propertyBuilders;
-    private long[][] globalAdjacencyOffsetsPages;
-    private AdjacencyOffsets globalAdjacencyOffsets;
-    private long[][][] globalPropertyOffsetsPages;
-    private AdjacencyOffsets[] globalPropertyOffsets;
 
-    public RelationshipsBuilder(
+    private final AdjacencyListBuilder adjacencyListBuilder;
+    private final AdjacencyCompressor adjacencyCompressor;
+
+    private final AdjacencyListBuilder[] propertyBuilders;
+    private final Aggregation[] aggregations;
+    private final int[] propertyKeyIds;
+    private final double[] defaultValues;
+
+    public static RelationshipsBuilder create(
+        long nodeCount,
+        RelationshipProjection projection,
+        Map<String, Integer> relationshipPropertyTokens,
+        AdjacencyListBuilderFactory listBuilderFactory,
+        AdjacencyOffsetsFactory offsetsFactory,
+        AllocationTracker tracker
+    ) {
+        var aggregations = aggregations(projection);
+        var propertyKeyIds = propertyKeyIds(projection, relationshipPropertyTokens);
+        double[] defaultValues = defaultValues(projection);
+
+        return create(
+            nodeCount,
+            projection,
+            listBuilderFactory,
+            offsetsFactory,
+            aggregations,
+            propertyKeyIds,
+            defaultValues,
+            tracker
+        );
+    }
+
+    public static RelationshipsBuilder create(
+        long nodeCount,
         RelationshipProjection projection,
         AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyOffsetsFactory offsetsFactory
+        AdjacencyOffsetsFactory offsetsFactory,
+        Aggregation[] aggregations,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        AllocationTracker tracker
+    ) {
+        return new RelationshipsBuilder(
+            nodeCount,
+            projection,
+            listBuilderFactory,
+            offsetsFactory,
+            aggregations,
+            propertyKeyIds,
+            defaultValues,
+            tracker
+        );
+    }
+
+    // TODO
+    static AdjacencyCompressorFactory adjacencyCompressorFactory(AdjacencyOffsetsFactory offsetsFactory) {
+        return new DeltaVarLongCompressor.Factory(offsetsFactory);
+    }
+
+    private static double[] defaultValues(RelationshipProjection projection) {
+        return projection
+            .properties()
+            .mappings()
+            .stream()
+            .mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue())
+            .toArray();
+    }
+
+    private static int[] propertyKeyIds(
+        RelationshipProjection projection,
+        Map<String, Integer> relationshipPropertyTokens
+    ) {
+        return projection.properties().mappings()
+            .stream()
+            .mapToInt(mapping -> relationshipPropertyTokens.get(mapping.neoPropertyKey())).toArray();
+    }
+
+    private static Aggregation[] aggregations(RelationshipProjection projection) {
+        var propertyMappings = projection.properties().mappings();
+
+        Aggregation[] aggregations = propertyMappings.stream()
+            .map(PropertyMapping::aggregation)
+            .map(Aggregation::resolve)
+            .toArray(Aggregation[]::new);
+
+        if (propertyMappings.isEmpty()) {
+            aggregations = new Aggregation[]{Aggregation.resolve(projection.aggregation())};
+        }
+
+        return aggregations;
+    }
+
+    private RelationshipsBuilder(
+        long nodeCount,
+        RelationshipProjection projection,
+        AdjacencyListBuilderFactory listBuilderFactory,
+        AdjacencyOffsetsFactory offsetsFactory,
+        Aggregation[] aggregations,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        AllocationTracker tracker
+    ) {
+        this(
+            nodeCount,
+            projection,
+            adjacencyCompressorFactory(offsetsFactory),
+            listBuilderFactory,
+            aggregations,
+            propertyKeyIds,
+            defaultValues,
+            tracker
+        );
+    }
+
+    private RelationshipsBuilder(
+        long nodeCount,
+        RelationshipProjection projection,
+        AdjacencyCompressorFactory adjacencyCompressorFactory,
+        AdjacencyListBuilderFactory listBuilderFactory,
+        Aggregation[] aggregations,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        AllocationTracker tracker
     ) {
         this.projection = projection;
         this.adjacencyListBuilder = listBuilderFactory.newAdjacencyListBuilder();
-        this.offsetsFactory = offsetsFactory;
+        this.aggregations = aggregations;
+        this.propertyKeyIds = propertyKeyIds;
+        this.defaultValues = defaultValues;
 
         if (projection.properties().isEmpty()) {
             this.propertyBuilders = EMPTY_PROPERTY_BUILDERS;
@@ -58,34 +173,19 @@ public class RelationshipsBuilder {
             this.propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
             Arrays.setAll(propertyBuilders, i -> listBuilderFactory.newAdjacencyListBuilder());
         }
-    }
 
-    final ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder(
-        long[] adjacencyOffsets,
-        long[][] propertyOffsets,
-        Aggregation[] aggregations
-    ) {
-        return new ThreadLocalRelationshipsBuilder(
-            adjacencyListBuilder.newAllocator(),
-            Arrays.stream(propertyBuilders)
-                .map(AdjacencyListBuilder::newAllocator)
-                .toArray(AdjacencyListAllocator[]::new),
-            adjacencyOffsets,
-            propertyOffsets,
-            aggregations
+        // TODO move to factory methods?
+        adjacencyCompressor = adjacencyCompressorFactory.create(
+            nodeCount,
+            adjacencyListBuilder,
+            propertyBuilders,
+            aggregations,
+            tracker
         );
     }
 
-    final void setGlobalAdjacencyOffsets(long[][] pages) {
-        this.globalAdjacencyOffsetsPages = pages;
-    }
-
-    final void setGlobalPropertyOffsets(long[][][] allPages) {
-        globalPropertyOffsetsPages = allPages;
-    }
-
-    private boolean containsNonNull(long[][] pages) {
-        return Arrays.stream(pages).noneMatch(Predicate.isEqual(null));
+    ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
+        return new ThreadLocalRelationshipsBuilder(adjacencyCompressor.concurrentCopy());
     }
 
     boolean supportsProperties() {
@@ -93,15 +193,12 @@ public class RelationshipsBuilder {
         return adjacencyListBuilder instanceof TransientAdjacencyListBuilder;
     }
 
-    public AdjacencyList adjacencyList() {
-        return adjacencyListBuilder.build();
+    public AdjacencyListsWithProperties build() {
+        return adjacencyCompressor.build();
     }
 
-    public AdjacencyOffsets globalAdjacencyOffsets() {
-        if (globalAdjacencyOffsets == null) {
-            globalAdjacencyOffsets = offsetsFactory.newOffsets(requireNonNull(globalAdjacencyOffsetsPages));
-        }
-        return globalAdjacencyOffsets;
+    public AdjacencyList adjacencyList() {
+        return adjacencyListBuilder.build();
     }
 
     // TODO: This returns only the first of possibly multiple properties
@@ -113,25 +210,21 @@ public class RelationshipsBuilder {
         return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
     }
 
+    // TODO: maybe remove
     public RelationshipProjection projection() {
         return this.projection;
     }
 
-    // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyOffsets globalPropertyOffsets() {
-        return globalPropertyOffsets(0);
+    Aggregation[] aggregations() {
+        return aggregations;
     }
 
-    public AdjacencyOffsets globalPropertyOffsets(int propertyIndex) {
-        if (globalPropertyOffsets == null) {
-            globalPropertyOffsets = new AdjacencyOffsets[requireNonNull(globalPropertyOffsetsPages).length];
-            Arrays.setAll(globalPropertyOffsets, i -> {
-                var pages = globalPropertyOffsetsPages[i];
-                // TODO: the nested null check is for graphs that don't support properties (i.e. Geri)
-                return pages != null && containsNonNull(pages) ? offsetsFactory.newOffsets(pages) : null;
-            });
-        }
-        return globalPropertyOffsets[propertyIndex];
+    int[] propertyKeyIds() {
+        return propertyKeyIds;
+    }
+
+    double[] defaultValues() {
+        return defaultValues;
     }
 
     void flush() {

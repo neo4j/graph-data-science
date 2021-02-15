@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.apache.lucene.util.LongsRef;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
@@ -48,40 +49,67 @@ public final class AdjacencyCompression {
         into.length = array.uncompress(into.longs);
     }
 
+    public static void copyFrom(LongArrayBuffer into, CompressedLongArray array) {
+        into.buffer = growWithDestroy(into.buffer, array.length());
+        into.length = array.uncompress(into.buffer);
+    }
+
     public static int applyDeltaEncoding(LongsRef data, Aggregation aggregation) {
-        Arrays.sort(data.longs, 0, data.length);
-        return data.length = applyDelta(data.longs, data.length, aggregation);
+        return data.length = applyDeltaEncoding(data.longs, data.length, aggregation);
+    }
+
+    public static int applyDeltaEncoding(LongArrayBuffer data, Aggregation aggregation) {
+        return data.length = applyDeltaEncoding(data.buffer, data.length, aggregation);
+    }
+
+    public static int applyDeltaEncoding(long[] data, int length, Aggregation aggregation) {
+        Arrays.sort(data, 0, length);
+        return applyDelta(data, length, aggregation);
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
     static int applyDeltaEncoding(LongsRef data, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
-        int[] order = IndirectSort.mergesort(0, data.length, new AscendingLongComparator(data.longs));
+        return data.length = applyDeltaEncoding(data.longs, data.length, weights, aggregations, noAggregation);
+    }
 
-        long[] sortedValues = new long[data.length];
-        long[][] sortedWeights = new long[weights.length][data.length];
+    // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
+    static int applyDeltaEncoding(LongArrayBuffer data, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
+        return data.length = applyDeltaEncoding(data.buffer, data.length, weights, aggregations, noAggregation);
+    }
 
-        data.length = applyDelta(
+    // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
+    static int applyDeltaEncoding(long[] data, int length, long[][] weights, Aggregation[] aggregations, boolean noAggregation) {
+        int[] order = IndirectSort.mergesort(0, length, new AscendingLongComparator(data));
+
+        long[] sortedValues = new long[length];
+        long[][] sortedWeights = new long[weights.length][length];
+
+        length = applyDelta(
                 order,
-                data.longs,
+                data,
                 sortedValues,
                 weights,
                 sortedWeights,
-                data.length,
+                length,
                 aggregations,
                 noAggregation
         );
 
-        System.arraycopy(sortedValues, 0, data.longs, 0, data.length);
+        System.arraycopy(sortedValues, 0, data, 0, length);
         for (int i = 0; i < sortedWeights.length; i++) {
             long[] sortedWeight = sortedWeights[i];
-            System.arraycopy(sortedWeight, 0, weights[i], 0, data.length);
+            System.arraycopy(sortedWeight, 0, weights[i], 0, length);
         }
 
-        return data.length;
+        return length;
     }
 
     public static int compress(LongsRef data, byte[] out) {
         return compress(data.longs, out, data.length);
+    }
+
+    public static int compress(LongArrayBuffer data, byte[] out) {
+        return compress(data.buffer, out, data.length);
     }
 
     private static int compress(long[] data, byte[] out, int length) {

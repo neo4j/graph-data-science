@@ -259,10 +259,20 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .properties(propertyMappings)
                 .build();
 
-            RelationshipsBuilder builder = new RelationshipsBuilder(
+            Aggregation[] aggregationsWithDefault = Arrays.stream(aggregations)
+                .map(Aggregation::resolve)
+                .toArray(Aggregation[]::new);
+
+            RelationshipsBuilder builder = RelationshipsBuilder.create(
+                nodeMapping.nodeCount(),
                 projection,
                 TransientAdjacencyListBuilder.builderFactory(loadingContext.tracker()),
-                TransientAdjacencyOffsets.forPageSize(pageSize)
+                TransientAdjacencyOffsets.forPageSize(pageSize),
+                aggregationsWithDefault,
+                propertyKeyIds,
+                propertyDefaultValues,
+                // TODO 👀
+                AllocationTracker.empty()
             );
 
             allBuilders.put(relationshipType, builder);
@@ -289,10 +299,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             RelationshipsBuilder relationshipsBuilder,
             AllocationTracker tracker
         ) {
-            Aggregation[] aggregationsWithDefault = Arrays.stream(aggregations)
-                .map(Aggregation::resolve)
-                .toArray(Aggregation[]::new);
-
             LongAdder relationshipCounter = new LongAdder();
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
                 relationshipsBuilder,
@@ -300,9 +306,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 pageSize,
                 tracker,
                 relationshipCounter,
-                propertyKeyIds,
-                propertyDefaultValues,
-                aggregationsWithDefault,
                 USE_PRE_AGGREGATION.isEnabled()
             );
 

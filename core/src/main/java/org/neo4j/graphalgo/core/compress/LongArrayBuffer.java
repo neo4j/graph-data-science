@@ -17,34 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.core.compress;
 
-import java.util.function.DoubleSupplier;
+public final class LongArrayBuffer {
 
-public interface PropertyCursor extends AutoCloseable, DoubleSupplier {
-    /**
-     * Initialize this cursor to point to the given {@code index}.
-     */
-    PropertyCursor init(long index);
+    private static final long[] EMPTY_BUFFER = new long[0];
 
-    /**
-     * Return true iff there is at least one more target to decode.
-     */
-    boolean hasNextLong();
+    public long[] buffer;
+    public int length;
 
-    /**
-     * Read the next target id.
-     *
-     * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
-     */
-    long nextLong();
+    public LongArrayBuffer() {
+        this.buffer = EMPTY_BUFFER;
+        this.length = 0;
+    }
 
-    @Override
-    void close();
-
-    @Override
-    default double getAsDouble() {
-        long propertyBits = nextLong();
-        return Double.longBitsToDouble(propertyBits);
+    LongArrayBuffer(int capacity) {
+        this.buffer = new long[capacity];
+        this.length = capacity;
     }
 }

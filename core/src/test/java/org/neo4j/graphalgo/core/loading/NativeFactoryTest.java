@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class NativeFactoryTest {
 
     @ParameterizedTest
-    @CsvSource({"false,3405981464,4606168256", "true,1818450752,3018637544"})
+    @CsvSource({"false,3405981440,4606168232", "true,1818450728,3018637520"})
     void memoryEstimation(boolean useBitIdMap, long expectedMinUsage, long expectedMaxUsage) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
@@ -84,9 +84,9 @@ class NativeFactoryTest {
 
         MemoryTree estimate = NativeFactory.getMemoryEstimation(nodeProjections, relationshipProjections).estimate(dimensions, 1);
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
-        int instanceSize = 72;
+        int instanceSize = 96;
 
         assertEquals(3_205_950_324L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
-        assertEquals(6_011_568_224L, estimate.memoryUsage().max);
+        assertEquals(6_011_568_200L, estimate.memoryUsage().max);
     }
 }

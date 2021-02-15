@@ -53,7 +53,6 @@ public class RelationshipsBuilder {
     private final RelationshipImporter.Imports imports;
     private final IdMapping idMapping;
     private final Orientation orientation;
-    private final boolean loadRelationshipProperty;
     private final int concurrency;
     private final ExecutorService executorService;
     private final Aggregation aggregation;
@@ -72,7 +71,6 @@ public class RelationshipsBuilder {
     ) {
         this.idMapping = idMapping;
         this.orientation = orientation;
-        this.loadRelationshipProperty = loadRelationshipProperty;
         this.aggregation = aggregation;
         this.concurrency = concurrency;
         this.executorService = executorService;
@@ -95,10 +93,15 @@ public class RelationshipsBuilder {
             projectionBuilder.addProperty(GraphFactory.DUMMY_PROPERTY, GraphFactory.DUMMY_PROPERTY, DefaultValue.DEFAULT, aggregation);
         }
 
-        this.relationshipsBuilder = new org.neo4j.graphalgo.core.loading.RelationshipsBuilder(
+        this.relationshipsBuilder = org.neo4j.graphalgo.core.loading.RelationshipsBuilder.create(
+            idMapping.rootNodeCount(),
             projectionBuilder.build(),
             TransientAdjacencyListBuilder.builderFactory(tracker),
-            TransientAdjacencyOffsets.forPageSize(pageSize)
+            TransientAdjacencyOffsets.forPageSize(pageSize),
+            new Aggregation[]{aggregation},
+            propertyKeyIds,
+            defaultValues,
+            tracker
         );
 
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
@@ -107,9 +110,6 @@ public class RelationshipsBuilder {
             pageSize,
             tracker,
             relationshipCounter,
-            propertyKeyIds,
-            defaultValues,
-            new Aggregation[]{aggregation},
             preAggregate
         );
 
@@ -167,14 +167,19 @@ public class RelationshipsBuilder {
         threadLocalBuilders.close();
 
         ParallelUtil.runWithConcurrency(concurrency, relationshipImporter.flushTasks(), executorService);
+
+        var build = relationshipsBuilder.build();
+        var topology2 = build.adjacency();
+        var properties2 = build.properties().values().stream().findFirst().orElse(null);
+
         return Relationships.of(
             relationshipCounter.longValue(),
             orientation,
             Aggregation.equivalentToNone(aggregation),
-            relationshipsBuilder.adjacencyList(),
-            relationshipsBuilder.globalAdjacencyOffsets(),
-            loadRelationshipProperty ? relationshipsBuilder.properties() : null,
-            loadRelationshipProperty ? relationshipsBuilder.globalPropertyOffsets() : null,
+            topology2.adjacencyList(),
+            topology2.adjacencyOffsets(),
+            properties2 != null ? properties2.adjacencyList() : null,
+            properties2 != null ? properties2.adjacencyOffsets() : null,
             DOUBLE_DEFAULT_FALLBACK
         );
     }

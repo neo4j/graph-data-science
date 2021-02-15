@@ -17,34 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.core.compress;
 
-import java.util.function.DoubleSupplier;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public interface PropertyCursor extends AutoCloseable, DoubleSupplier {
-    /**
-     * Initialize this cursor to point to the given {@code index}.
-     */
-    PropertyCursor init(long index);
+public interface CompressedProperties {
 
-    /**
-     * Return true iff there is at least one more target to decode.
-     */
-    boolean hasNextLong();
+    AdjacencyOffsets adjacencyOffsets();
 
-    /**
-     * Read the next target id.
-     *
-     * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
-     */
-    long nextLong();
-
-    @Override
-    void close();
-
-    @Override
-    default double getAsDouble() {
-        long propertyBits = nextLong();
-        return Double.longBitsToDouble(propertyBits);
-    }
+    AdjacencyList adjacencyList();
 }

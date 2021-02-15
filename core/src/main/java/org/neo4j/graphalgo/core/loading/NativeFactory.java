@@ -203,10 +203,13 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             .stream()
             .collect(toMap(
                 Map.Entry::getKey,
-                projectionEntry -> new RelationshipsBuilder(
+                projectionEntry -> RelationshipsBuilder.create(
+                    dimensions.nodeCount(),
                     projectionEntry.getValue(),
+                    dimensions.relationshipPropertyTokens(),
                     TransientAdjacencyListBuilder.builderFactory(tracker),
-                    TransientAdjacencyOffsets.forPageSize(pageSize)
+                    TransientAdjacencyOffsets.forPageSize(pageSize),
+                    tracker
                 )
             ));
 

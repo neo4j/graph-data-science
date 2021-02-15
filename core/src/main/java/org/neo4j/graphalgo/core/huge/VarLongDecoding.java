@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
-final class VarLongDecoding {
+import java.util.function.IntConsumer;
+import java.util.function.LongConsumer;
 
-    static int decodeDeltaVLongs(
+public final class VarLongDecoding {
+
+    public static int decodeDeltaVLongs(
         long startValue,
         byte[] adjacencyPage,
         int offset,
@@ -44,6 +47,49 @@ final class VarLongDecoding {
         }
 
         return offset;
+    }
+
+    public static int decodeManyDeltas(
+        byte[] adjacencyPage,
+        int offset,
+        long amount,
+        LongConsumer action
+    ) {
+        long input, value = 0L, decoded = 0L;
+        int shift = 0;
+        while (decoded < amount) {
+            input = adjacencyPage[offset++];
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                action.accept(value);
+                decoded++;
+                value = 0L;
+                shift = 0;
+            } else {
+                shift += 7;
+            }
+        }
+
+        return offset;
+    }
+
+    public static long decodeOneDelta(
+        byte[] adjacencyPage,
+        int offset,
+        IntConsumer nextOffset
+    ) {
+        long input, value = 0L;
+        int shift = 0;
+        while (true) {
+            input = adjacencyPage[offset++];
+            value += (input & 127L) << shift;
+            if ((input & 128L) == 128L) {
+                nextOffset.accept(offset);
+                return value;
+            } else {
+                shift += 7;
+            }
+        }
     }
 
     private VarLongDecoding() {

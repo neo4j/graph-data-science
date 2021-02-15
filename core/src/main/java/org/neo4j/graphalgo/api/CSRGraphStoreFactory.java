@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -59,8 +59,10 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores = new HashMap<>(relTypeCount);
 
         relationshipImportResult.builders().forEach((relationshipType, relationshipsBuilder) -> {
-            AdjacencyList adjacencyList = relationshipsBuilder.adjacencyList();
-            AdjacencyOffsets adjacencyOffsets = relationshipsBuilder.globalAdjacencyOffsets();
+            var adjacencyListsWithProperties = relationshipsBuilder.build();
+
+            var adjacency = adjacencyListsWithProperties.adjacency();
+            var properties = adjacencyListsWithProperties.properties();
             long relationshipCount = relationshipImportResult.counts().getOrDefault(relationshipType, 0L);
 
             RelationshipProjection projection = relationshipsBuilder.projection();
@@ -68,8 +70,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             relationships.put(
                 relationshipType,
                 ImmutableTopology.of(
-                    adjacencyList,
-                    adjacencyOffsets,
+                    adjacency.adjacencyList(),
+                    adjacency.adjacencyOffsets(),
                     relationshipCount,
                     projection.orientation(),
                     projection.isMultiGraph()
@@ -81,7 +83,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     relationshipType,
                     constructRelationshipPropertyStore(
                         projection,
-                        relationshipsBuilder,
+                        properties,
                         relationshipCount
                     )
                 );
@@ -101,15 +103,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
-        org.neo4j.graphalgo.core.loading.RelationshipsBuilder relationshipsBuilder,
+        Map<Integer, CompressedProperties> properties,
         long relationshipCount
     ) {
         PropertyMappings propertyMappings = projection.properties();
         RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
 
-        propertyMappings.enumerate().forEach(propertyIndexAnMapping -> {
-            int propertyIndex = propertyIndexAnMapping.getOne();
-            PropertyMapping propertyMapping = propertyIndexAnMapping.getTwo();
+        propertyMappings.enumerate().forEach(propertyIndexAndMapping -> {
+            int propertyIndex = propertyIndexAndMapping.getOne();
+            var compressedProperties = properties.get(propertyIndex);
+            var propertyMapping = propertyIndexAndMapping.getTwo();
             propertyStoreBuilder.putIfAbsent(
                 propertyMapping.propertyKey(),
                 RelationshipProperty.of(
@@ -117,8 +120,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     NumberType.FLOATING_POINT,
                     GraphStore.PropertyState.PERSISTENT,
                     ImmutableProperties.of(
-                        relationshipsBuilder.properties(propertyIndex),
-                        relationshipsBuilder.globalPropertyOffsets(propertyIndex),
+                        compressedProperties.adjacencyList(),
+                        compressedProperties.adjacencyOffsets(),
                         relationshipCount,
                         projection.orientation(),
                         projection.isMultiGraph(),

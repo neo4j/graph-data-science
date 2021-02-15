@@ -22,13 +22,11 @@ package org.neo4j.graphalgo.core.loading;
 import com.carrotsearch.hppc.ObjectLongHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
@@ -121,20 +119,20 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             RelationshipProjection projection,
             @NotNull RelationshipsBuilder relationshipsBuilder
     ) {
-        List<PropertyMapping> propertyMappings = projection.properties().mappings();
-        int[] propertyKeyIds = propertyMappings
-            .stream()
-            .mapToInt(mapping -> dimensions.relationshipPropertyTokens().get(mapping.neoPropertyKey())).toArray();
-
-        double[] defaultValues = propertyMappings.stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue()).toArray();
-        Aggregation[] aggregations = propertyMappings.stream()
-            .map(PropertyMapping::aggregation)
-            .map(Aggregation::resolve)
-            .toArray(Aggregation[]::new);
-
-        if (propertyMappings.isEmpty()) {
-            aggregations = new Aggregation[]{ Aggregation.resolve(projection.aggregation()) };
-        }
+//        List<PropertyMapping> propertyMappings = projection.properties().mappings();
+//        int[] propertyKeyIds = propertyMappings
+//            .stream()
+//            .mapToInt(mapping -> dimensions.relationshipPropertyTokens().get(mapping.neoPropertyKey())).toArray();
+//
+//        double[] defaultValues = propertyMappings.stream().mapToDouble(propertyMapping -> propertyMapping.defaultValue().doubleValue()).toArray();
+//        Aggregation[] aggregations = propertyMappings.stream()
+//            .map(PropertyMapping::aggregation)
+//            .map(Aggregation::resolve)
+//            .toArray(Aggregation[]::new);
+//
+//        if (propertyMappings.isEmpty()) {
+//            aggregations = new Aggregation[]{ Aggregation.resolve(projection.aggregation()) };
+//        }
 
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
@@ -143,9 +141,9 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             pageSize,
             tracker,
             relationshipCounter,
-            propertyKeyIds,
-            defaultValues,
-            aggregations,
+//            propertyKeyIds,
+//            defaultValues,
+//            aggregations,
             USE_PRE_AGGREGATION.isEnabled()
         );
 

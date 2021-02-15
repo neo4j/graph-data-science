@@ -17,34 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo.core.compress;
 
-import java.util.function.DoubleSupplier;
+import org.neo4j.graphalgo.core.loading.CompressedLongArray;
 
-public interface PropertyCursor extends AutoCloseable, DoubleSupplier {
-    /**
-     * Initialize this cursor to point to the given {@code index}.
-     */
-    PropertyCursor init(long index);
+public interface AdjacencyCompressor extends AutoCloseable {
 
     /**
-     * Return true iff there is at least one more target to decode.
+     * @return the degree of the compressed adjacency list
      */
-    boolean hasNextLong();
+    int compress(
+        long nodeId,
+        CompressedLongArray values,
+        LongArrayBuffer buffer
+    );
 
-    /**
-     * Read the next target id.
-     *
-     * It is undefined behavior if this is called after {@link #hasNextLong()} returns {@code false}.
-     */
-    long nextLong();
+    AdjacencyCompressor concurrentCopy();
+
+    AdjacencyListsWithProperties build();
 
     @Override
     void close();
-
-    @Override
-    default double getAsDouble() {
-        long propertyBits = nextLong();
-        return Double.longBitsToDouble(propertyBits);
-    }
 }
