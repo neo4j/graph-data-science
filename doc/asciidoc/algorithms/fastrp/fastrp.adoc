@@ -389,12 +389,17 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 :stream-details: For example, we can collect the results and pass them into a similarity algorithm.
 include::../shared/examples-stream-intro.adoc[]
 
-[role=query-example, no-result=true]
+[role=query-example]
 --
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.fastRP.stream('persons', { embeddingDimension: 4 })
+CALL gds.fastRP.stream('persons',
+  {
+    embeddingDimension: 4,
+    randomSeed: 42
+  }
+)
 YIELD nodeId, embedding
 ----
 
@@ -402,13 +407,13 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-0.03523557, 0.8080418, -1.6324315, -0.82438976]
-| 1      | [7.3822774E-4, 0.9315331, -1.5840955, -0.73341024]
-| 2      | [-0.047208663, 0.80095035, -1.5542624, -0.8575211]
-| 3      | [0.06738296, 0.7497308, -1.4601052, -0.8149969]
-| 4      | [-0.0044725314, 1.0199871, -1.441534, -0.72904325]
-| 5      | [-0.15570015, 0.9881253, -1.4144595, -0.73383045]
-| 6      | [0.24555062, 0.7544494, -1.4108207, -0.65637124]
+| 0      | [0.47740015, -0.66024077, -0.36686954, -1.7089111]
+| 1      | [0.798936, -0.49187183, -0.41281945, -1.6314402]
+| 2      | [0.47275326, -0.4958715, -0.33404678, -1.7141895]
+| 3      | [0.8290714, -0.32604763, -0.3317275, -1.437053]
+| 4      | [0.7749264, -0.47732472, 0.067513466, -1.5248264]
+| 5      | [0.8408374, -0.37151477, 0.12121138, -1.5309601]
+| 6      | [1.0, -0.11054421, -0.36979336, -0.92251444]
 |===
 --
 
@@ -522,7 +527,7 @@ By default, the algorithm is considering the relationships of the graph to be un
 To change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
 Below is an example of running the weighted variant of algorithm.
 
-[role=query-example, no-result=true]
+[role=query-example]
 --
 .The following will run the algorithm, and stream results:
 [source, cypher]
@@ -531,6 +536,7 @@ CALL gds.fastRP.stream(
   'persons',
   {
     embeddingDimension: 4,
+    randomSeed: 42,
     relationshipWeightProperty: 'weight'
   }
 )
@@ -541,13 +547,13 @@ YIELD nodeId, embedding
 .Results
 |===
 | nodeId | embedding
-| 0      | [-0.55106115, 1.6823332, -0.66182184, -0.57873607]
-| 1      | [-0.38195288, 1.7911794, -0.54085857, -0.5870274]
-| 2      | [-0.4431507, 1.7395904, -0.4842358, -0.6109262]
-| 3      | [0.0018629134, 1.8233799, -0.3473827, -0.56145287]
-| 4      | [-0.2862969, 1.8058168, -0.4418158, -0.51601917]
-| 5      | [-0.26784867, 1.8103647, -0.28934777, -0.5363705]
-| 6      | [0.14821936, 1.8630133, -0.13068157, -0.46493164]
+| 0      | [0.10945529, -0.5032674, 0.46467367, -1.7539861]
+| 1      | [0.3639601, -0.39210302, 0.4627158, -1.8294234]
+| 2      | [0.123140976, -0.3213111, 0.40100977, -1.4710553]
+| 3      | [0.30704635, -0.24944797, 0.39478925, -1.34637]
+| 4      | [0.23112302, -0.30148715, 0.5848317, -1.2822187]
+| 5      | [0.14497177, -0.23121375, 0.5552002, -1.2605634]
+| 6      | [0.51391846, -0.079543315, 0.3690345, -0.91763735]
 |===
 --
 
