@@ -316,7 +316,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         @Override
         public void run() {
-            var random = new HighQualityRandom(0);
+            // this value currently doesnt matter because of reseeding below
+            var random = new HighQualityRandom(randomSeed);
             for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
                 int degree = graph.degree(nodeId);
                 float scaling = degree == 0

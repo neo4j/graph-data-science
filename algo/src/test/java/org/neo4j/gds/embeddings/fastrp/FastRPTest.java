@@ -157,39 +157,37 @@ class FastRPTest extends AlgoTestBase {
 
         Graph graph = graphLoader.graph();
 
-        FastRP fastRP = new FastRP(
-            graph,
-            DEFAULT_CONFIG,
-            defaultFeatureExtractors(graph),
-            progressLogger,
-            AllocationTracker.empty()
-        );
-
-        fastRP.compute();
-        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
-
-        var sequentialConfig = FastRPBaseConfig.builder()
+        var configBuilder = FastRPBaseConfig.builder()
             .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
             .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
             .featureProperties(List.of("f1", "f2"))
             .addIterationWeight(1.0D)
-            .concurrency(1)
-            .randomSeed(42L)
-            .build();
+            .randomSeed(42L);
 
-        FastRP fastRPSeq = new FastRP(
+        FastRP concurrentFastRP = new FastRP(
             graph,
-            sequentialConfig,
+            configBuilder.concurrency(4).build(),
             defaultFeatureExtractors(graph),
             progressLogger,
             AllocationTracker.empty()
         );
 
-        fastRPSeq.compute();
-        HugeObjectArray<float[]> embeddingsSequential = fastRPSeq.embeddings();
+        concurrentFastRP.compute();
+        HugeObjectArray<float[]> concurrentEmbeddings = concurrentFastRP.embeddings();
+
+        FastRP sequentialFastRP = new FastRP(
+            graph,
+            configBuilder.concurrency(1).build(),
+            defaultFeatureExtractors(graph),
+            progressLogger,
+            AllocationTracker.empty()
+        );
+
+        sequentialFastRP.compute();
+        HugeObjectArray<float[]> sequentialEmbeddings = sequentialFastRP.embeddings();
 
         for (int i = 0; i < graph.nodeCount(); i++) {
-            assertArrayEquals(embeddingsSequential.get(i), embeddings.get(i));
+            assertArrayEquals(sequentialEmbeddings.get(i), concurrentEmbeddings.get(i));
         }
     }
 
