@@ -69,7 +69,7 @@ class LinkPredictionCoraIntegrationTest {
     private static final String EMBEDDING_FEATURE = "frp";
     private static final String PREDICTED_REL_TYPE = "CITES_PREDICTED";
     private static final int NUMBER_OF_FEATURES = 1433;
-    private static final double MIN_AUCPR_TEST_SCORE = 0.01;
+    private static final double MIN_AUCPR_TEST_SCORE = 0.25;
 
     private DatasetManager datasetManager;
     private GdsGraphDatabaseAPI cora;
@@ -136,7 +136,8 @@ class LinkPredictionCoraIntegrationTest {
             "CALL gds.alpha.ml.splitRelationships.mutate($graphName, { " +
             " remainingRelationshipType: $trainGraphRelType, " +
             " holdoutRelationshipType: $testSetRelType, " +
-            " holdoutFraction: 0.1" +
+            " holdoutFraction: 0.1," +
+            " randomSeed: 42" +
             "})";
 
         runQuery(
@@ -156,7 +157,8 @@ class LinkPredictionCoraIntegrationTest {
             " relationshipTypes: [$trainGraphRelType], " +
             " remainingRelationshipType: $embeddingGraphRelType, " +
             " holdoutRelationshipType: $trainSetRelType, " +
-            " holdoutFraction: 0.1" +
+            " holdoutFraction: 0.1," +
+            " randomSeed: 42" +
             "})";
 
         runQuery(
@@ -183,6 +185,7 @@ class LinkPredictionCoraIntegrationTest {
                           "  mutateProperty: $mutateProperty, " +
                           "  embeddingDimension: 512, " +
                           "  propertyDimension: 256, " +
+                          "  randomSeed: 42, " +
                           "  featureProperties: [" +featureProperties+ "]" +
                           "})";
 
